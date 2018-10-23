@@ -103,21 +103,50 @@
     RED.nodes.registerType('sun-position', {
         category: 'function',
         defaults: {
-            region: {
-                value:"",
+            longitude: {
+                value: "",
+                required: true
+            },
+            latitude: {
+                value: "",
                 required: true
             },
         },
-        inputs:1,               // set the number of inputs - only 0 or 1
-        outputs:1,              // set the number of outputs - 0 to n
-        icon: "default.png",     // saved in  icons/myicon.png - myicon.png
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1, // set the number of outputs - 0 to n
+        icon: "default.png", // saved in  icons/myicon.png - myicon.png
         color: "#FFFF00",
-        label: function() {
-            return this.name || "Holidays";
+        label: function () {
+            return this.name || "sun-position";
         },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
         },
-        paletteLabel: "Holidays"
+        paletteLabel: "sun-position"
+    });
+
+    RED.nodes.registerType('moon-position', {
+        category: 'function',
+        defaults: {
+            longitude: {
+                value: "",
+                required: true
+            },
+            latitude: {
+                value: "",
+                required: true
+            },
+        },
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1, // set the number of outputs - 0 to n
+        icon: "default.png", // saved in  icons/myicon.png - myicon.png
+        color: "#FFFF00",
+        label: function () {
+            return this.name || "moon-position";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        paletteLabel: "moon-position"
     });
 </script>
