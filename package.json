@@ -13,30 +13,34 @@
     "email": "hypnos3@online.de",
     "url": "https://github.com/hypnos3"
   },
-  "contributors": [
-    {
-      "name": "Hypnos3",
-      "url": "https://github.com/hypnos3"
-    }
-  ],
+  "contributors": [{
+    "name": "Hypnos3",
+    "url": "https://github.com/hypnos3"
+  }],
   "keywords": [
     "node-red",
     "sun-position",
-    "moon-position"
+    "moon-position",
+    "heavenly body",
+    "sun",
+    "moon",
+    "position",
+    "luminary"
   ],
-  "homepage":"https://github.com/Hypnos3/node-red-contrib-sun-position",
+  "homepage": "https://github.com/Hypnos3/node-red-contrib-sun-position",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Hypnos3/node-red-contrib-sun-position"
   },
-  "bugs":{
-    "url" : "https://github.com/Hypnos3/node-red-contrib-sun-position/issues"
+  "bugs": {
+    "url": "https://github.com/Hypnos3/node-red-contrib-sun-position/issues"
   },
   "dependencies": {},
   "node-red": {
     "nodes": {
-      "sun-position": "sun-position.js"
+      "sun-position": "sun-moon-position.js",
+      "moon-position": "sun-moon-position.js"
     }
   }
 }

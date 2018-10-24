@@ -156,17 +156,17 @@ function getConfiguration(node, msg, config) {
 
     for (let attr of attrs) {
         if (config[attr]) {
-            data[attr] = config[attr];
+            outMsg.data[attr] = config[attr];
         }
         if (msg[attr]) {
-            data[attr] = msg[attr];
+            outMsg.data[attr] = msg[attr];
         }
     }
 
     if (typeof msg.payload === 'object') {
         for (let attr of attrs) {
             if (msg.payload[attr]) {
-                data[attr] = msg.payload[attr];
+                outMsg.data[attr] = msg.payload[attr];
             }
         }
     }
@@ -191,10 +191,25 @@ function getConfiguration(node, msg, config) {
         return null;
     }
 
-    if ((typeof outMsg.data.ts === 'undefined') || (outMsg.data.ts instanceof Date)) {
+    if ((typeof outMsg.data.ts === 'undefined') || !(outMsg.data.ts instanceof Date)) {
         outMsg.data.ts = new Date();
     }
     return outMsg;
+}
+
+function compareAzimuth(obj, name, azimuth, low, high, old) {
+    if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
+        if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
+            obj[name] = (azimuth > low) && (azimuth < high);
+        } else {
+            obj[name] = (azimuth > low);
+        }
+        return obj[name] != old[name];
+    } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
+        obj[name] = (azimuth < high);
+        return obj[name] != old[name];
+    }
+    return false;
 }
 
 module.exports = function (RED) {
@@ -210,7 +225,8 @@ module.exports = function (RED) {
                 var outMsg = getConfiguration(this, msg, config);
                 //-------------------------------------------------------------------
                 if (typeof outMsg === 'undefined' || outMsg === null) {
-                    return null;
+                    this.debug('configuration is wrong!?!');
+                    return;
                 }
 
                 // calculates sun position for a given date and latitude/longitude
@@ -221,57 +237,45 @@ module.exports = function (RED) {
                 let sunH = siderealTime(days, lw) - sunC.ra;
                 let sdist = 149598000; // distance from Earth to Sun in km
 
+                this.debug('sunH=' + sunH + ' phi=' + phi + ' sunC.dec=' + sunC.dec + ' sunC.ra=' + sunC.ra);
+                this.debug('sdist=' + sdist + ' days=' + days);
+
                 //node.warn("sunCoords = " + JSON.stringify(sunC)+ " siderealTime="  + sunH + " lw=" + lw +" phi=" + phi );
 
                 outMsg.payload.azimuth = azimuth(sunH, phi, sunC.dec) * 180 / PI + 180;
-                outMsg.payload.elevation = altitude(sunH, phi, sunC.dec) * 180 / PI, //elevation = altitude;
-                    outMsg.payload.distance = sdist;
+                outMsg.payload.elevation = altitude(sunH, phi, sunC.dec) * 180 / PI; //elevation = altitude;
+                outMsg.payload.distance = sdist;
 
-                if (!outMsg.payload.elevation || !outMsg.payload.azimuth) {
-                    return null;
+                if (!outMsg.payload.azimuth) {
+                    this.error('Azimuth could not calculated!');
+                    this.send(outMsg);
+                    return;
                 }
 
                 //https://www.sonnenverlauf.de/
-                if (typeof outMsg.data.azimuthWestLow !== 'undefined' && outMsg.data.azimuthWestLow !== '' && !isNaN(outMsg.data.azimuthWestLow)) {
-                    outMsg.payload.west = (outMsg.payload.azimuth > azimuthWestLow);
+                let oldvalue = this.context().get("sunpos");
+                if (compareAzimuth(outMsg.payload, 'west', outMsg.payload.azimuth, outMsg.data.azimuthWestLow, outMsg.data.azimuthWestHigh, oldvalue) ||
+                    compareAzimuth(outMsg.payload, 'south', outMsg.payload.azimuth, outMsg.data.azimuthSouthLow, outMsg.data.azimuthSouthHigh, oldvalue) ||
+                    compareAzimuth(outMsg.payload, 'east', outMsg.payload.azimuth, outMsg.data.azimuthEastLow, outMsg.data.azimuthEastHigh, oldvalue) ||
+                    compareAzimuth(outMsg.payload, 'north', outMsg.payload.azimuth, outMsg.data.azimuthNorthLow, outMsg.data.azimuthNorthHigh, oldvalue)) {
+                    outMsg.payload.exposureChanged = true;
                 }
-                if (typeof outMsg.data.azimuthWestHigh !== 'undefined' && outMsg.data.azimuthWestHigh !== '' && !isNaN(outMsg.data.azimuthWestHigh)) {
-                    outMsg.payload.west = outMsg.payload.west && (outMsg.payload.azimuth < azimuthWestHigh);
-                }
-                if (typeof outMsg.data.azimuthSouthLow !== 'undefined' && outMsg.data.azimuthSouthLow !== '' && !isNaN(outMsg.data.azimuthSouthLow)) {
-                    outMsg.payload.south = (outMsg.payload.azimuth > azimuthSouthLow);
-                }
-                if (typeof outMsg.data.azimuthSouthHigh !== 'undefined' && outMsg.data.azimuthSouthHigh !== '' && !isNaN(outMsg.data.azimuthSouthHigh)) {
-                    outMsg.payload.south = outMsg.payload.south && (outMsg.payload.azimuth < azimuthSouthHigh);
-                }
-                if (typeof outMsg.data.azimuthEastLow !== 'undefined' && outMsg.data.azimuthEastLow !== '' && !isNaN(outMsg.data.azimuthEastLow)) {
-                    outMsg.payload.east = (outMsg.payload.azimuth > azimuthEastLow);
-                }
-                if (typeof outMsg.data.azimuthEastHigh !== 'undefined' && outMsg.data.azimuthEastHigh !== '' && !isNaN(outMsg.data.azimuthEastHigh)) {
-                    outMsg.payload.east = outMsg.payload.east && (outMsg.payload.azimuth < azimuthEastHigh);
-                }
-                if (typeof outMsg.data.azimuthNorthLow !== 'undefined' && outMsg.data.azimuthNorthLow !== '' && !isNaN(outMsg.data.azimuthNorthLow)) {
-                    outMsg.payload.north = (outMsg.payload.azimuth > azimuthNorthLow);
-                }
-                if (typeof outMsg.data.azimuthNorthHigh !== 'undefined' && outMsg.data.azimuthNorthHigh !== '' && !isNaN(outMsg.data.azimuthNorthHigh)) {
-                    outMsg.payload.north = outMsg.payload.north && (outMsg.payload.azimuth < azimuthNorthHigh);
-                }
-
-                return outMsg;
-
+                this.context().set("sunpos", msg.payload);
+                this.send(outMsg);
             } catch (err) {
                 errorHandler(this, err, 'Exception occured on get german holidays', 'internal error');
             }
             //this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
             //this.status({fill:"red",shape:"dot",text:"error - input parameter"});
-            return null;
         });
     }
 
-    function moonPositionNode(config) {
-        RED.nodes.createNode(node, config);
+    RED.nodes.registerType('sun-position', sunPositionNode);
 
-        node.on('input', function (msg) {
+    function moonPositionNode(config) {
+        RED.nodes.createNode(this, config);
+
+        this.on('input', function (msg) {
             try {
                 /********************************************
                  * versenden:
@@ -280,7 +284,8 @@ module.exports = function (RED) {
                 var outMsg = getConfiguration(this, msg, config);
                 //-------------------------------------------------------------------
                 if (typeof outMsg === 'undefined' || outMsg === null) {
-                    return null;
+                    this.debug('configuration is wrong!?!');
+                    return;
                 }
 
                 // calculates sun position for a given date and latitude/longitude
@@ -290,6 +295,9 @@ module.exports = function (RED) {
                 let sunC = sunCoords(days);
                 //let sunH = siderealTime(days, lw) - sunC.ra;
                 let sdist = 149598000; // distance from Earth to Sun in km
+
+                this.debug('lw=' + lw + ' phi=' + phi + ' sunC.dec=' + sunC.dec + ' sunC.ra=' + sunC.ra);
+                this.debug('sdist=' + sdist + ' days=' + days);
 
                 let moonC = moonCoords(days),
                     moonH = siderealTime(days, lw) - moonC.ra;
@@ -304,8 +312,8 @@ module.exports = function (RED) {
                 let moon_ele = altitude(moonH, phi, moonC.dec) //elevation = altitude
                 moon_ele = moon_ele + astroRefraction(moon_ele); // elevation correction for refraction
 
-                outMsg.payload.elevation = moon_ele * 180 / PI,
-                    outMsg.payload.azimuth = azimuth(moonH, phi, moonC.dec) * 180 / PI + 180;
+                outMsg.payload.elevation = moon_ele * 180 / PI;
+                outMsg.payload.azimuth = azimuth(moonH, phi, moonC.dec) * 180 / PI + 180;
                 outMsg.payload.distance = moonC.dist;
                 outMsg.payload.parallacticAngle = moon_pa;
 
@@ -313,19 +321,15 @@ module.exports = function (RED) {
                 outMsg.payload.fraction = (1 + cos(moon_inc)) / 2;
                 outMsg.payload.phase = 0.5 + 0.5 * moon_inc * (moon_angle < 0 ? -1 : 1) / PI;
 
-                return outMsg;
+                this.send(outMsg);
 
             } catch (err) {
                 errorHandler(this, err, 'Exception occured on get german holidays', 'internal error');
             }
             //this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
             //this.status({fill:"red",shape:"dot",text:"error - input parameter"});
-            return null;
         });
     }
 
-
-    RED.nodes.registerType('sun-position', sunPositionNode);
     RED.nodes.registerType('moon-position', moonPositionNode);
-
 };
