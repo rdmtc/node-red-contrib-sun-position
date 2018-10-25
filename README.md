@@ -7,6 +7,7 @@
 [![Dependencies Status](https://david-dm.org/hypnos3/node-red-contrib-sun-position/status.svg)](https://david-dm.org/hypnos3/node-red-contrib-sun-position)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Issues](https://img.shields.io/github/issues/hypnos3/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/hypnos3/node-red-contrib-sun-position/issues)
+
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
 This node are for getting sun and moon position. This can be used for smart home.
@@ -25,12 +26,16 @@ tbd
 
 ## Implemented Nodes
 
- * sun-position Node -get german holidays on any input
+- sun-position Node -get german holidays on any input
 
 ## Bugs and Feedback
 
 For bugs, questions and discussions please use the
 [GitHub Issues](https://github.com/Hypnos3/node-red-contrib-sun-position/issues).
+
+### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
+
+Even for those that don't have the technical knowhow to help developing on there are ways to support development. So if you want to donate some money please feel free to send money via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN).
 
 ## LICENSE
 
