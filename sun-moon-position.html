@@ -1,5 +1,19 @@
 <script type="text/x-red" data-template-name="sun-position">
-    <!--
+    <!-- script>
+        var x = document.getElementById("demo");
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+        function showPosition(position) {
+            x.innerHTML = "Latitude: " + position.coords.latitude + 
+            "<br>Longitude: " + position.coords.longitude; 
+        }
+        </script -->
+   <!--
         <div class="form-row">
             <label for="node-input-creds">Credentials</label>
             <input type="text" id="node-input-creds">
@@ -243,8 +257,8 @@
         },
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1, // set the number of outputs - 0 to n
-        icon: "default.png", // saved in  icons/myicon.png - myicon.png
-        color: "#FFFF00",
+        icon: "sun.png", // saved in  icons/myicon.png - myicon.png
+        color: "#ff6600",
         label: function () {
             return this.name || "sun-position";
         },
@@ -272,8 +286,8 @@
         },
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1, // set the number of outputs - 0 to n
-        icon: "default.png", // saved in  icons/myicon.png - myicon.png
-        color: "#FFFF00",
+        icon: "moon.png", // saved in  icons/myicon.png - myicon.png
+        color: "#999999",
         label: function () {
             return this.name || "moon-position";
         },
