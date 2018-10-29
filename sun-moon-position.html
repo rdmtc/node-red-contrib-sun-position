@@ -1,5 +1,4 @@
-<script type="text/x-red" data-template-name="sun-position">
-    <!-- script>
+<!-- script>
         var x = document.getElementById("demo");
         function getLocation() {
             if (navigator.geolocation) {
@@ -13,15 +12,8 @@
             "<br>Longitude: " + position.coords.longitude; 
         }
         </script -->
-   <!--
-        <div class="form-row">
-            <label for="node-input-creds">Credentials</label>
-            <input type="text" id="node-input-creds">
-        </div>
-    -->
 
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
+<script type="text/x-red" data-template-name="sun-position">
     <div class="form-row">
         <label for="node-region"><i class="fa fa-globe"></i> longitude</label>
         <input type="text" id="node-input-longitude" placeholder="longitude">
@@ -30,6 +22,14 @@
     <div class="form-row">
         <label for="node-region"><i class="fa fa-globe"></i> latitude</label>
         <input type="text" id="node-input-latitude" placeholder="latitude">
+    </div>
+
+    <div class="form-row">
+        <label for="node-region"><i class="fa fa-globe"></i> angle type</label>
+        <select type="text" id="node-input-angleType" style="width:70%;">
+            <option value="rad" >radians</option>
+            <option value="deg" >degrees</option>
+        </select>
     </div>
 
     <!-- By convention, most nodes have a 'name' property. The following div -->
@@ -45,15 +45,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="moon-position">
-    <!--
-        <div class="form-row">
-            <label for="node-input-creds">Credentials</label>
-            <input type="text" id="node-input-creds">
-        </div>
-    -->
-
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
         <label for="node-region"><i class="fa fa-globe"></i> longitude</label>
         <input type="text" id="node-input-longitude" placeholder="longitude">
@@ -62,6 +53,14 @@
     <div class="form-row">
         <label for="node-region"><i class="fa fa-globe"></i> latitude</label>
         <input type="text" id="node-input-latitude" placeholder="latitude">
+    </div>
+
+    <div class="form-row">
+        <label for="node-region"><i class="fa fa-globe"></i> angle type</label>
+        <select type="text" id="node-input-angleType" style="width:70%;">
+            <option value="rad" >radians</option>
+            <option value="deg" >degrees</option>
+        </select>
     </div>
 
     <!-- By convention, most nodes have a 'name' property. The following div -->
@@ -254,6 +253,10 @@
                 value: "",
                 required: true
             },
+            angleType: {
+                value: "rad",
+                required: true
+            },
         },
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1, // set the number of outputs - 0 to n
@@ -281,6 +284,10 @@
             },
             latitude: {
                 value: "",
+                required: true
+            },
+            angleType: {
+                value: "rad",
                 required: true
             },
         },

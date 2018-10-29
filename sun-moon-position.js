@@ -1,6 +1,7 @@
 /********************************************
  * sun-position:
  *********************************************/
+const sunCalc = require('suncalc');
 
 /*******************************************************************************************************/
 const errorHandler = function (node, err, messageText, stateText) {
@@ -30,123 +31,58 @@ const errorHandler = function (node, err, messageText, stateText) {
 }
 /*******************************************************************************************************/
 
-// shortcuts for easier to read formulas
-
-const PI = Math.PI,
-    sin = Math.sin,
-    cos = Math.cos,
-    tan = Math.tan,
-    asin = Math.asin,
-    atan = Math.atan2,
-    acos = Math.acos,
-    rad = PI / 180;
-
-const dayMs = 1000 * 60 * 60 * 24,
-    J1970 = 2440588,
-    J2000 = 2451545;
-
-const e = rad * 23.4397; // obliquity of the Earth
-
-/*
-(c) 2011-2015, Vladimir Agafonkin
-SunCalc is a JavaScript library for calculating sun/moon position and light phases.
-https://github.com/mourner/suncalc
-*/
-
-// sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
-
-
-// date/time constants and conversions
-function toJulian(date) {
-    return date.valueOf() / dayMs - 0.5 + J1970;
-}
-
-function fromJulian(j) {
-    return new Date((j + 0.5 - J1970) * dayMs);
-}
-
-function toDays(date) {
-    return toJulian(date) - J2000;
-}
-
-
-// general calculations for position
-
-function rightAscension(l, b) {
-    return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
-}
-
-function declination(l, b) {
-    return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
-}
-
-function azimuth(H, phi, dec) {
-    return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
-}
-
-function altitude(H, phi, dec) {
-    return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
-}
-
-function siderealTime(d, lw) {
-    return rad * (280.16 + 360.9856235 * d) - lw;
-}
-
-function astroRefraction(h) {
-    if (h < 0) // the following formula works for positive altitudes only.
-        h = 0; // if h = -0.08901179 a div/0 would occur.
-
-    // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-    // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
-    return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
-}
-
-// general sun calculations
-
-function solarMeanAnomaly(d) {
-    return rad * (357.5291 + 0.98560028 * d);
-}
-
-function eclipticLongitude(M) {
-
-    var C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
-        P = rad * 102.9372; // perihelion of the Earth
-
-    return M + C + P + PI;
-}
-
-function sunCoords(d) {
-
-    var M = solarMeanAnomaly(d),
-        L = eclipticLongitude(M);
-
-    return {
-        dec: declination(L, 0),
-        ra: rightAscension(L, 0)
-    };
-}
-
-// moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
-
-function moonCoords(d) { // geocentric ecliptic coordinates of the moon
-
-    var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
-        M = rad * (134.963 + 13.064993 * d), // mean anomaly
-        F = rad * (93.272 + 13.229350 * d), // mean distance
-
-        l = L + rad * 6.289 * sin(M), // longitude
-        b = rad * 5.128 * sin(F), // latitude
-        dt = 385001 - 20905 * cos(M); // distance to the moon in km
-
-    return {
-        ra: rightAscension(l, b),
-        dec: declination(l, b),
-        dist: dt
-    };
-}
+const moonPhases = [{
+        emoji: '🌚',
+        code: ':new_moon_with_face:',
+        name: 'New Moon',
+        weight: 1
+    },
+    {
+        emoji: '🌒',
+        code: ':waxing_crescent_moon:',
+        name: 'Waxing Crescent',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌓',
+        code: ':first_quarter_moon:',
+        name: 'First Quarter',
+        weight: 1
+    },
+    {
+        emoji: '🌔',
+        code: ':waxing_gibbous_moon:',
+        name: 'Waxing Gibbous',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌝',
+        code: ':full_moon_with_face:',
+        name: 'Full Moon',
+        weight: 1
+    },
+    {
+        emoji: '🌖',
+        code: ':waning_gibbous_moon:',
+        name: 'Waning Gibbous',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌗',
+        code: ':last_quarter_moon:',
+        name: 'Last Quarter',
+        weight: 1
+    },
+    {
+        emoji: '🌘',
+        code: ':waning_crescent_moon:',
+        name: 'Waning Crescent',
+        weight: 6.3825
+    }
+];
 
 function getConfiguration(node, msg, config) {
-    let attrs = ['longitude', 'latitude', 'ts', 'azimuthWestLow', 'azimuthWestHigh', 'azimuthSouthLow', 'azimuthSouthHigh', 'azimuthEastLow', 'azimuthEastHigh', 'azimuthNorthLow', 'azimuthNorthHigh'];
+    let attrs = ['longitude', 'latitude', 'ts', 'angleType', 'azimuthWestLow', 'azimuthWestHigh', 'azimuthSouthLow', 'azimuthSouthHigh', 'azimuthEastLow', 'azimuthEastHigh', 'azimuthNorthLow', 'azimuthNorthHigh'];
 
     var outMsg = {
         payload: {},
@@ -169,6 +105,11 @@ function getConfiguration(node, msg, config) {
                 outMsg.data[attr] = msg.payload[attr];
             }
         }
+    } else if ((typeof outMsg.data.ts === 'undefined') && ((typeof msg.payload === 'string') || (msg.payload instanceof Date))) {
+        let dto = new Date(msg.payload);
+        if (dto !== "Invalid Date" && !isNaN(dto)) {
+            outMsg.data.ts = dto;
+        }
     }
     //-------------------------------------------------------------------
     if (typeof outMsg.data.latitude === 'undefined' || outMsg.data.latitude === '' || isNaN(outMsg.data.latitude)) {
@@ -190,11 +131,38 @@ function getConfiguration(node, msg, config) {
         });
         return null;
     }
+    if (typeof outMsg.data.ts === 'string') {
+        let dto = new Date(outMsg.data.ts);
+        if (dto !== "Invalid Date" && !isNaN(dto)) {
+            outMsg.data.ts = dto;
+        }
+    }
 
     if ((typeof outMsg.data.ts === 'undefined') || !(outMsg.data.ts instanceof Date)) {
         outMsg.data.ts = new Date();
     }
+
+    if (outMsg.data.angleType === 'deg') {
+        outMsg.data.angleType = 'deg';
+    } else {
+        outMsg.data.angleType = 'rad';
+    }
+
     return outMsg;
+}
+
+function getAngle(type, angle) {
+    if (type === 'deg') {
+        return angle * 57.2957795130823209 //angle(rad) * (180° / Pi) =angle(deg)
+    }
+    return angle;
+}
+
+function getAngleRad(type, angle) {
+    if (type === 'deg') {
+        return angle;
+    }
+    return angle / 57.2957795130823209 //angle(rad) * (180° / Pi) =angle(deg)
 }
 
 function compareAzimuth(obj, name, azimuth, low, high, old) {
@@ -218,6 +186,15 @@ module.exports = function (RED) {
 
         this.on('input', function (msg) {
             try {
+                if (!sunCalc) {
+                    this.error('sunCalc not defined!! - Installation Problem, Please reinstall!');
+                    this.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'installation error'
+                    });
+                    return;
+                }
                 /********************************************
                  * versenden:
                  *********************************************/
@@ -228,23 +205,12 @@ module.exports = function (RED) {
                     this.debug('configuration is wrong!?!');
                     return;
                 }
+                var sunPos = sunCalc.getPosition(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
 
-                // calculates sun position for a given date and latitude/longitude
-                let lw = rad * -outMsg.data.longitude;
-                let phi = rad * outMsg.data.latitude;
-                let days = toDays(outMsg.data.ts);
-                let sunC = sunCoords(days);
-                let sunH = siderealTime(days, lw) - sunC.ra;
-                let sdist = 149598000; // distance from Earth to Sun in km
+                outMsg.payload.azimuth = getAngle(outMsg.data.angleType, sunPos.azimuth);
+                outMsg.payload.elevation = getAngle(outMsg.data.angleType, sunPos.altitude); //elevation = altitude;
 
-                this.debug('sunH=' + sunH + ' phi=' + phi + ' sunC.dec=' + sunC.dec + ' sunC.ra=' + sunC.ra);
-                this.debug('sdist=' + sdist + ' days=' + days);
-
-                //node.warn("sunCoords = " + JSON.stringify(sunC)+ " siderealTime="  + sunH + " lw=" + lw +" phi=" + phi );
-
-                outMsg.payload.azimuth = azimuth(sunH, phi, sunC.dec) * 180 / PI + 180;
-                outMsg.payload.elevation = altitude(sunH, phi, sunC.dec) * 180 / PI; //elevation = altitude;
-                outMsg.payload.distance = sdist;
+                outMsg.payload.times = sunCalc.getTimes(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
 
                 if (!outMsg.payload.azimuth) {
                     this.error('Azimuth could not calculated!');
@@ -277,6 +243,15 @@ module.exports = function (RED) {
 
         this.on('input', function (msg) {
             try {
+                if (!sunCalc) {
+                    this.error('sunCalc not defined!! - Installation Problem, Please reinstall!');
+                    this.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'installation error'
+                    });
+                    return;
+                }
                 /********************************************
                  * versenden:
                  *********************************************/
@@ -288,38 +263,57 @@ module.exports = function (RED) {
                     return;
                 }
 
-                // calculates sun position for a given date and latitude/longitude
-                let lw = rad * -outMsg.data.longitude;
-                let phi = rad * outMsg.data.latitude;
-                let days = toDays(outMsg.data.ts);
-                let sunC = sunCoords(days);
-                //let sunH = siderealTime(days, lw) - sunC.ra;
-                let sdist = 149598000; // distance from Earth to Sun in km
+                var moonPos = sunCalc.getMoonPosition(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
+                outMsg.payload.altitude = getAngle(outMsg.data.angleType, moonPos.altitude);
+                outMsg.payload.azimuth = getAngle(outMsg.data.angleType, moonPos.azimuth);
+                outMsg.payload.distance = moonPos.distance;
+                outMsg.payload.parallacticAngle = getAngle(outMsg.data.angleType, moonPos.parallacticAngle);
 
-                this.debug('lw=' + lw + ' phi=' + phi + ' sunC.dec=' + sunC.dec + ' sunC.ra=' + sunC.ra);
-                this.debug('sdist=' + sdist + ' days=' + days);
+                var moonIllum = sunCalc.getMoonIllumination(outMsg.data.ts);
+                outMsg.payload.illumination = {
+                    angle: getAngle(outMsg.data.angleType, moonIllum.angle),
+                    fraction: moonIllum.fraction,
+                    phase: moonIllum.phase,
+                    phaseAngle: getAngleRad(outMsg.data.angleType, moonIllum.phase * 360),
+                    zenithAngle: getAngle(outMsg.data.angleType, moonIllum.angle - moonPos.parallacticAngle),
+                }
 
-                let moonC = moonCoords(days),
-                    moonH = siderealTime(days, lw) - moonC.ra;
+                if (moonIllum.phase < 0.01) {
+                    // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[0];
+                } else if (moonIllum.phase < 0.25) {
+                    // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw.zunehmende Sichel(0° < Phasenwinkel < 90°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[1];
+                } else if (moonIllum.phase < 0.26) {
+                    // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[2];
+                } else if (moonIllum.phase < 0.50) {
+                    // 0.25 - 0.5   Waxing Gibbous      -   zweites Viertel(90° < Phasenwinkel < 180°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[3];
+                } else if (moonIllum.phase < 0.51) {
+                    // 0.5	        Full Moon           -   Vollmond(Phasenwinkel = 180°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[4];
+                } else if (moonIllum.phase <= 0.75) {
+                    // 0.5 - 0.75    Waning Gibbous     -   drittes Viertel (180° < Phasenwinkel < 270°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[5];
+                } else if (moonIllum.phase < 0.76) {
+                    // 0.75	        Last Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[6];
+                } else {
+                    // Waning Crescent                  -   letztes Viertel bzw.abnehmende Sichel(Phasenwinkel > 270°).
+                    outMsg.payload.illumination.phaseEmoji = moonPhases[7];
+                }
 
-                // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-                let moon_pa = atan(sin(moonH), tan(phi) * cos(moonC.dec) - sin(moonC.dec) * cos(moonH)),
-                    moon_phi = acos(sin(sunC.dec) * sin(moonC.dec) + cos(sunC.dec) * cos(moonC.dec) * cos(sunC.ra - moonC.ra)),
-                    moon_inc = atan(sdist * sin(phi), moonC.dist - sdist * cos(phi)),
-                    moon_angle = atan(cos(sunC.dec) * sin(sunC.ra - moonC.ra), sin(sunC.dec) * cos(moonC.dec) -
-                        cos(sunC.dec) * sin(moonC.dec) * cos(sunC.ra - moonC.ra));
-
-                let moon_ele = altitude(moonH, phi, moonC.dec) //elevation = altitude
-                moon_ele = moon_ele + astroRefraction(moon_ele); // elevation correction for refraction
-
-                outMsg.payload.elevation = moon_ele * 180 / PI;
-                outMsg.payload.azimuth = azimuth(moonH, phi, moonC.dec) * 180 / PI + 180;
-                outMsg.payload.distance = moonC.dist;
-                outMsg.payload.parallacticAngle = moon_pa;
-
-                outMsg.payload.angle = moon_angle;
-                outMsg.payload.fraction = (1 + cos(moon_inc)) / 2;
-                outMsg.payload.phase = 0.5 + 0.5 * moon_inc * (moon_angle < 0 ? -1 : 1) / PI;
+                var moonTimes = sunCalc.getMoonTimes(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude, true);
+                outMsg.payload.times = moonTimes;
+                if (!outMsg.payload.times.alwaysUp) {
+                    //true if the moon never rises/sets and is always above the horizon during the day
+                    outMsg.payload.times.alwaysUp = false;
+                }
+                if (!outMsg.payload.times.alwaysDown) {
+                    //true if the moon is always below the horizon
+                    outMsg.payload.times.alwaysDown = false;
+                }
 
                 this.send(outMsg);
 
