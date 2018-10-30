@@ -33,7 +33,7 @@ tbd
 For bugs, questions and discussions please use the
 [GitHub Issues](https://github.com/Hypnos3/node-red-contrib-sun-position/issues).
 
-### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
+### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN) [![Greenkeeper badge](https://badges.greenkeeper.io/Hypnos3/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
 
 Even for those that don't have the technical knowhow to help developing on there are ways to support development. So if you want to donate some money please feel free to send money via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN).
 
