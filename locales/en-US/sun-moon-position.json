@@ -1,0 +1,15 @@
+{
+    "sun-position": {
+        "label": {
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "angleType": "angle type",
+            "name": "Name"
+        },
+        "placeholder": {
+            "latitude": "51.025",
+            "longitude": "-1.4",
+            "name": "Name"
+        }
+    },
+}

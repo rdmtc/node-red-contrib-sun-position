@@ -81,9 +81,7 @@ const moonPhases = [{
     }
 ];
 
-function getConfiguration(node, msg, config) {
-    let attrs = ['longitude', 'latitude', 'ts', 'angleType', 'azimuthWestLow', 'azimuthWestHigh', 'azimuthSouthLow', 'azimuthSouthHigh', 'azimuthEastLow', 'azimuthEastHigh', 'azimuthNorthLow', 'azimuthNorthHigh'];
-
+function getConfiguration(node, msg, config, attrs) {
     var outMsg = {
         payload: {},
         topic: msg.topic,
@@ -153,16 +151,9 @@ function getConfiguration(node, msg, config) {
 
 function getAngle(type, angle) {
     if (type === 'deg') {
-        return angle * 57.2957795130823209 //angle(rad) * (180° / Pi) =angle(deg)
+        return angle * (180 / Math.PI) //angle(rad) * (180° / Pi) =angle(deg)
     }
     return angle;
-}
-
-function getAngleRad(type, angle) {
-    if (type === 'deg') {
-        return angle;
-    }
-    return angle / 57.2957795130823209 //angle(rad) * (180° / Pi) =angle(deg)
 }
 
 function compareAzimuth(obj, name, azimuth, low, high, old) {
@@ -199,7 +190,8 @@ module.exports = function (RED) {
                  * versenden:
                  *********************************************/
                 //var creds = RED.nodes.getNode(config.creds); - not used
-                var outMsg = getConfiguration(this, msg, config);
+                let attrs = ['longitude', 'latitude', 'ts', 'angleType', 'azimuthWestLow', 'azimuthWestHigh', 'azimuthSouthLow', 'azimuthSouthHigh', 'azimuthEastLow', 'azimuthEastHigh', 'azimuthNorthLow', 'azimuthNorthHigh'];
+                var outMsg = getConfiguration(this, msg, config, attrs);
                 //-------------------------------------------------------------------
                 if (typeof outMsg === 'undefined' || outMsg === null) {
                     this.debug('configuration is wrong!?!');
@@ -207,8 +199,8 @@ module.exports = function (RED) {
                 }
                 var sunPos = sunCalc.getPosition(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
 
-                outMsg.payload.azimuth = getAngle(outMsg.data.angleType, sunPos.azimuth);
-                outMsg.payload.elevation = getAngle(outMsg.data.angleType, sunPos.altitude); //elevation = altitude;
+                outMsg.payload.azimuth = (outMsg.data.angleType === 'deg') ? 180 + 180 / Math.PI * sunPos.azimuth : sunPos.azimuth;
+                outMsg.payload.altitude = (outMsg.data.angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude;; //elevation = altitude;
 
                 outMsg.payload.times = sunCalc.getTimes(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
 
@@ -256,16 +248,21 @@ module.exports = function (RED) {
                  * versenden:
                  *********************************************/
                 //var creds = RED.nodes.getNode(config.creds); - not used
-                var outMsg = getConfiguration(this, msg, config);
+                let attrs = ['longitude', 'latitude', 'ts', 'angleType'];
+                var outMsg = getConfiguration(this, msg, config, attrs);
                 //-------------------------------------------------------------------
                 if (typeof outMsg === 'undefined' || outMsg === null) {
-                    this.debug('configuration is wrong!?!');
+                    this.warn('configuration is wrong!?!');
                     return;
                 }
 
                 var moonPos = sunCalc.getMoonPosition(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
-                outMsg.payload.altitude = getAngle(outMsg.data.angleType, moonPos.altitude);
-                outMsg.payload.azimuth = getAngle(outMsg.data.angleType, moonPos.azimuth);
+
+                outMsg.payload.azimuth = (outMsg.data.angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth;
+                outMsg.payload.altitude = (outMsg.data.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude;; //elevation = altitude;
+                //outMsg.payload.altitude = getAngle(outMsg.data.angleType, moonPos.altitude);
+                //outMsg.payload.azimuth = getAngle(outMsg.data.angleType, moonPos.azimuth);
+
                 outMsg.payload.distance = moonPos.distance;
                 outMsg.payload.parallacticAngle = getAngle(outMsg.data.angleType, moonPos.parallacticAngle);
 
@@ -274,9 +271,11 @@ module.exports = function (RED) {
                     angle: getAngle(outMsg.data.angleType, moonIllum.angle),
                     fraction: moonIllum.fraction,
                     phase: moonIllum.phase,
-                    phaseAngle: getAngleRad(outMsg.data.angleType, moonIllum.phase * 360),
+                    phaseAngle: (outMsg.data.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360,
                     zenithAngle: getAngle(outMsg.data.angleType, moonIllum.angle - moonPos.parallacticAngle),
                 }
+
+                //getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
 
                 if (moonIllum.phase < 0.01) {
                     // 0            New Moon            -   Neumond(Phasenwinkel = 0°)

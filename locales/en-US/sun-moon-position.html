@@ -1,0 +1,159 @@
+<!-- Next, some simple help text is provided for the node.                   -->
+<script type="text/x-red" data-help-name="sun-position">
+    <h3>About</h3>
+    <p>Gets the porition of the sun</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">object</span>
+        </dt>
+        <dd> payload is not used.  </dd>
+
+        <dt>longitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the east-west position of a point on the Earth's surface for calculating the sun position.</dd>
+
+        <dt>latitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the north–south position of a point on the Earth's surface for calculating the sun position.</dd>
+
+        <dt class="optional">ts <span class="property-type">number</span></dt>
+        <dd> defines a timestamp for calculating the position of the sun. if not defined, current timestamp will be used.</dd>
+
+        <dt class="optional">azimuthWestLow <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `west` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is higher than `azimuthWestLow`.</dd>
+
+        <dt class="optional">azimuthWestHigh <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `west` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is between `azimuthWestLow` and `azimuthWestHigh`.</dd>
+
+        <dt class="optional">azimuthSouthLow <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `south` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is higher than `azimuthSouthLow`.</dd>
+
+        <dt class="optional">azimuthSouthHigh <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `south` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is between `azimuthSouthLow` and `azimuthSouthHigh`.</dd>
+
+        <dt class="optional">azimuthEastLow <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `east` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is higher than `azimuthEastLow`.</dd>
+
+        <dt class="optional">azimuthEastHigh <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `east` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is between `azimuthEastLow` and `azimuthEastHigh`.</dd>
+
+        <dt class="optional">azimuthNorthLow <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `west` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is higher than `azimuthNorthLow`.</dd>
+
+        <dt class="optional">azimuthNorthHigh <span class="property-type">number</span></dt>
+        <dd> if defined additional in the output a property `west` of type boolean will be includet,
+             which is true if the azimuth of the calculated sun-position is between `azimuthNorthLow` and `azimuthNorthHigh`.</dd>
+    </dl>
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">object</span></dt>
+                 <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+     </ol>
+     <h3>payload output properties</h3>
+     <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the sun position relative to the given coordinates.</dd>
+
+            <dt>elevation <span class="property-type">number</span></dt>
+            <dd> the elevation of the sun position relative to the given coordinates.</dd>
+
+            <dt>distance <span class="property-type">number</span></dt>
+            <dd> the current distance of the sun to the given coordinates.</dd>
+
+            <dt class="optional">west <span class="property-type">boolean</span></dt>
+            <dd> is only includet if  `azimuthWestLow` or `azimuthWestHigh` is defined and
+                is true if the azimuth of the calculated sun-position is higher than `azimuthWestLow` and lower than `azimuthWestHigh`.</dd>
+
+            <dt class="optional">south <span class="property-type">boolean</span></dt>
+            <dd> is only includet if  `azimuthSouthLow` or `azimuthSouthHigh` is defined and
+                 is true if the azimuth of the calculated sun-position is higher than `azimuthSouthLow` and lower than `azimuthSouthHigh`.</dd>
+
+            <dt class="optional">east <span class="property-type">boolean</span></dt>
+            <dd> is only includet if  `azimuthEastLow` or `azimuthEastHigh` is defined and
+                 is true if the azimuth of the calculated sun-position is higher than `azimuthEastLow` and lower than `azimuthEastHigh`.</dd>
+
+            <dt class="optional">north <span class="property-type">boolean</span></dt>
+            <dd> is only includet if  `azimuthNorthLow` or `azimuthNorthHigh` is defined and
+                 is true if the azimuth of the calculated sun-position is higher than `azimuthNorthLow` and lower than `azimuthNorthHigh`.</dd>
+
+            <dt class="optional">exposureChanged <span class="property-type">boolean</span></dt>
+            <dd> is only includet and `true` if  any of the `west`, `south`,`east` or `north` properties is includet and if any of these values has changed compared to the last calculation.</dd>
+        </dl>
+     <h3>Tips</h3>
+     <p>For home automation it can be useful to define the lower and higher position by setting `azimuthWestLow` and `azimuthWestHigh` for example of the sun for the west side of a house. If this is done, the output of the `west` property, for example, can be used to control the blinds. Same for south, east and north.</p>
+     <h3>References</h3>
+    <ul>
+		<li><a href="https://github.com/Hypnos3/node-red-contrib-cast">GitHub</a> - the nodes github repository</li>
+    </ul>
+</script>
+
+<script type="text/x-red" data-help-name="moon-position">
+    <h3>About</h3>
+    <p>Gets the porition of the moon</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">object</span>
+        </dt>
+        <dd> payload is not used.  </dd>
+
+        <dt>longitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the east-west position of a point on the Earth's surface for calculating the moon position.</dd>
+
+        <dt>latitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the north–south position of a point on the Earth's surface for calculating the moon position.</dd>
+
+        <dt class="optional">ts <span class="property-type">number</span></dt>
+        <dd> defines a timestamp for calculating the position of the moon. if not defined, current timestamp will be used.</dd>
+    </dl>
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+     </ol>
+    <h3>payload output properties</h3>
+    <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the moon position relative to the given coordinates.</dd>
+
+            <dt>elevation <span class="property-type">number</span></dt>
+            <dd> the elevation of the moon position relative to the given coordinates.</dd>
+
+            <dt>distance <span class="property-type">number</span></dt>
+            <dd> the current distance of the moon to the given coordinates.</dd>
+
+            <dt>parallacticAngle <span class="property-type">number</span></dt>
+            <dd> the current parallacticAngle of the moon to the given coordinates.</dd>
+
+            <dt>angle <span class="property-type">number</span></dt>
+            <dd> the current angle of the moon to the given coordinates.</dd>
+
+            <dt>fraction <span class="property-type">number</span></dt>
+            <dd> the current fraction of the moon to the given coordinates.</dd>
+
+            <dt>phase <span class="property-type">number</span></dt>
+            <dd> the current phase of the moon to the given coordinates.</dd>
+        </dl>
+     <h3>References</h3>
+    <ul>
+		<li><a href="https://github.com/Hypnos3/node-red-contrib-cast">GitHub</a> - the nodes github repository</li>
+    </ul>
+</script>

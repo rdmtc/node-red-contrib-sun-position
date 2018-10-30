@@ -25,7 +25,9 @@
     "sun",
     "moon",
     "position",
-    "luminary"
+    "luminary",
+    "suncalc",
+    "mooncalc"
   ],
   "homepage": "https://github.com/Hypnos3/node-red-contrib-sun-position",
   "license": "Apache-2.0",
