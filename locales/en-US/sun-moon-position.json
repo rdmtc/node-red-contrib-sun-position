@@ -1,15 +1,38 @@
 {
-    "sun-position": {
+    "sun-moon-position": {
         "label": {
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "angle type",
+            "west" : "West side azimuth limit",
+            "westLow" : "low",
+            "westHigh" : "high",
+            "south" : "South side azimuth limit",
+            "southLow" : "low",
+            "southHigh" : "high",
+            "east" : "East side azimuth limit",
+            "eastLow" : "low",
+            "eastHigh" : "high",
+            "north" : "North side azimuth limit",
+            "northLow" : "low",
+            "northHigh" : "high",
             "name": "Name"
         },
         "placeholder": {
             "latitude": "51.025",
             "longitude": "-1.4",
+            "westLow" : "20",
+            "westHigh" : "160",
+            "southLow" : "100",
+            "southHigh" : "260",
+            "eastLow" : "190",
+            "eastHigh" : "350",
+            "northLow" : "280",
+            "northHigh" : "360",
             "name": "Name"
+        },
+        "tips": {
+            "sunPosControl" : "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         }
-    },
+    }
 }

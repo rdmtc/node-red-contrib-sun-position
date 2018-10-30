@@ -1,43 +1,89 @@
 <script type="text/x-red" data-template-name="sun-position">
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.longitude"></span></label>
-        <input type="text" id="node-input-longitude" data-i18n="[placeholder]sunpos.placeholder.longitude">
+        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-moon-position.label.longitude"></span></label>
+        <input type="text" id="node-input-longitude" data-i18n="[placeholder]sun-moon-position.placeholder.longitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.latitude"></span></label>
-        <input type="text" id="node-input-latitude" data-i18n="[placeholder]sunpos.placeholder.latitude">
+        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-moon-position.label.latitude"></span></label>
+        <input type="text" id="node-input-latitude" data-i18n="[placeholder]sun-moon-position.placeholder.latitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.angleType"></span></label>
+        <label for="node-region"><i class="fa fa-angle-left"></i> <span data-i18n="sun-moon-position.label.angleType"></span></label>
         <select type="text" id="node-input-angleType" style="width:70%;">
             <option value="rad" >radians</option>
             <option value="deg" >degrees</option>
         </select>
     </div>
 
+    <div style="border-style: outset none outset none;">
+        <div class="form-tips">
+            <span data-i18n="sun-moon-position.tips.sunPosControl"></span>
+        </div>
+        <div class="form-row"><i class="fa fa-arrow-right"></i> <span data-i18n="sun-moon-position.label.west"></span></div>
+            <div class="form-row"><span data-i18n="sun-moon-position.label.west"></span></div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="sun-moon-position.label.westLow"></span></label>
+            <input type="text" id="node-input-azimuthWestLow" data-i18n="[placeholder]sun-moon-position.placeholder.westLow">
+        </div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="sun-moon-position.label.westHigh"></span></label>
+            <input type="text" id="node-input-azimuthWestHigh" data-i18n="[placeholder]sun-moon-position.placeholder.westHigh">
+        </div>
+
+        <div class="form-row"><i class="fa fa-arrow-down"></i> <span data-i18n="sun-moon-position.label.south"></span></div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="sun-moon-position.label.southLow"></span></label>
+            <input type="text" id="node-input-azimuthSouthLow" data-i18n="[placeholder]sun-moon-position.placeholder.southLow">
+        </div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="sun-moon-position.label.southHigh"></span></label>
+            <input type="text" id="node-input-azimuthSouthHigh" data-i18n="[placeholder]sun-moon-position.placeholder.southHigh">
+        </div>
+
+        <div class="form-row"><i class="fa fa-arrow-left"></i> <span data-i18n="sun-moon-position.label.east"></span></div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="sun-moon-position.label.eastLow"></span></label>
+            <input type="text" id="node-input-azimuthEastLow" data-i18n="[placeholder]sun-moon-position.placeholder.eastLow">
+        </div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="sun-moon-position.label.eastHigh"></span></label>
+            <input type="text" id="node-input-azimuthEastHigh" data-i18n="[placeholder]sun-moon-position.placeholder.eastHigh">
+        </div>
+
+        <div class="form-row"><i class="fa fa-arrow-up"></i> <span data-i18n="sun-moon-position.label.north"></span></div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="sun-moon-position.label.northLow"></span></label>
+            <input type="text" id="node-input-azimuthNorthLow" data-i18n="[placeholder]sun-moon-position.placeholder.northLow">
+        </div>
+        <div class="form-row">
+            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="sun-moon-position.label.northHigh"></span></label>
+            <input type="text" id="node-input-azimuthNorthHigh" data-i18n="[placeholder]sun-moon-position.placeholder.northHigh">
+        </div>
+    </div>
+    <div class="form-row"></div>
     <!-- By convention, most nodes have a 'name' property. The following div -->
     <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-moon-position.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-moon-position.placeholder.name">
     </div>
 </script>
 
 <script type="text/x-red" data-template-name="moon-position">
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i>  <span data-i18n="sun-position.label.longitude"></label>
-        <input type="text" id="node-input-longitude" data-i18n="[placeholder]sunpos.placeholder.longitude">
+        <label for="node-region"><i class="fa fa-globe"></i>  <span data-i18n="sun-moon-position.label.longitude"></label>
+        <input type="text" id="node-input-longitude" data-i18n="[placeholder]sun-moon-position.placeholder.longitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.latitude"></span></label>
-        <input type="text" id="node-input-latitude" data-i18n="[placeholder]sunpos.placeholder.latitude">
+        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-moon-position.label.latitude"></span></label>
+        <input type="text" id="node-input-latitude" data-i18n="[placeholder]sun-moon-position.placeholder.latitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.angleType"></span></label>
+        <label for="node-region"><i class="fa fa-angle-left"></i> <span data-i18n="sun-moon-position.label.angleType"></span></label>
         <select type="text" id="node-input-angleType" style="width:70%;">
             <option value="rad" >radians</option>
             <option value="deg" >degrees</option>
@@ -47,8 +93,8 @@
     <!-- By convention, most nodes have a 'name' property. The following div -->
     <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-moon-position.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-moon-position.placeholder.name">
     </div>
 </script>
 
@@ -153,7 +199,7 @@
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1, // set the number of outputs - 0 to n
         icon: "sun.png", // saved in  icons/myicon.png - myicon.png
-        color: "#ff6600",
+        color: "#F3B567",
         label: function () {
             return this.name || "sun-position";
         },
@@ -196,7 +242,7 @@
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1, // set the number of outputs - 0 to n
         icon: "moon.png", // saved in  icons/myicon.png - myicon.png
-        color: "#999999",
+        color: "#C0C0C0",
         label: function () {
             return this.name || "moon-position";
         },

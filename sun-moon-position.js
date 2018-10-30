@@ -159,7 +159,11 @@ function getAngle(type, angle) {
 function compareAzimuth(obj, name, azimuth, low, high, old) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
         if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
-            obj[name] = (azimuth > low) && (azimuth < high);
+            if (high > low) {
+                obj[name] = (azimuth > low) && (azimuth < high);
+            } else {
+                obj[name] = (azimuth > low) || (azimuth < high);
+            }
         } else {
             obj[name] = (azimuth > low);
         }
