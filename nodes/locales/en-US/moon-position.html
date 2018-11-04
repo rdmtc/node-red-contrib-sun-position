@@ -1,0 +1,58 @@
+<script type="text/x-red" data-help-name="moon-position">
+    <h3>About</h3>
+    <p>Gets the porition of the moon</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">object</span>
+        </dt>
+        <dd> payload is not used.  </dd>
+
+        <dt>longitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the east-west position of a point on the Earth's surface for calculating the moon position.</dd>
+
+        <dt>latitude <span class="property-type">number</span></dt>
+        <dd> geographic coordinate that specifies the north–south position of a point on the Earth's surface for calculating the moon position.</dd>
+
+        <dt class="optional">ts <span class="property-type">number</span></dt>
+        <dd> defines a timestamp for calculating the position of the moon. if not defined, current timestamp will be used.</dd>
+    </dl>
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+     </ol>
+    <h3>payload output properties</h3>
+    <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the moon position relative to the given coordinates.</dd>
+
+            <dt>elevation <span class="property-type">number</span></dt>
+            <dd> the elevation of the moon position relative to the given coordinates.</dd>
+
+            <dt>distance <span class="property-type">number</span></dt>
+            <dd> the current distance of the moon to the given coordinates.</dd>
+
+            <dt>parallacticAngle <span class="property-type">number</span></dt>
+            <dd> the current parallacticAngle of the moon to the given coordinates.</dd>
+
+            <dt>angle <span class="property-type">number</span></dt>
+            <dd> the current angle of the moon to the given coordinates.</dd>
+
+            <dt>fraction <span class="property-type">number</span></dt>
+            <dd> the current fraction of the moon to the given coordinates.</dd>
+
+            <dt>phase <span class="property-type">number</span></dt>
+            <dd> the current phase of the moon to the given coordinates.</dd>
+        </dl>
+     <h3>References</h3>
+    <ul>
+		<li><a href="https://github.com/Hypnos3/node-red-contrib-cast">GitHub</a> - the nodes github repository</li>
+    </ul>
+</script>

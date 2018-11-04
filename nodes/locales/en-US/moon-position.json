@@ -1,0 +1,15 @@
+{
+    "moon-position": {
+        "label": {
+            "position" : "Position",
+            "name": "Name"
+        },
+        "placeholder": {
+            "position" : "Position",
+            "name": "Name"
+        },
+        "tips": {
+            "sunPosControl" : "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+        }
+    }
+}

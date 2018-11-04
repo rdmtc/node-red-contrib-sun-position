@@ -1,6 +1,7 @@
 {
-    "sun-moon-position": {
+    "position-config": {
         "label": {
+            "position" : "Position",
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "angle type",
@@ -16,11 +17,13 @@
             "north" : "North side azimuth limit",
             "northLow" : "low",
             "northHigh" : "high",
-            "name": "Name"
+            "name": "Name",
+            "property": "Property"
         },
         "placeholder": {
             "latitude": "51.025",
             "longitude": "-1.4",
+            "angleType": "deg",
             "westLow" : "20",
             "westHigh" : "160",
             "southLow" : "100",

@@ -1,0 +1,188 @@
+<script type="text/x-red" data-template-name="within-time-switch">
+
+    <div class="form-row">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="within-time-switch.label.position"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <div class="form-row">
+            <label for="node-input-startTime1"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime1"></span></label>
+            <input type="time" id="node-input-startTime1" style="width: 70%"/>
+            <input type="hidden" id="node-input-outputs"/>
+        </div>    
+        <div class="form-row">
+                <label for="node-input-startOffset1"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset1"></span></label>
+                <input type="text" id="node-input-startOffset1" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+        </div>        
+        <div class="form-row">
+                <label for="node-input-endTime1"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime1"></span></label>
+                <input type="time" id="node-input-endTime1" style="width: 70%"/>
+                <input type="hidden" id="node-input-outputs"/>
+        </div>
+        <div class="form-row">
+                <label for="node-input-endOffset1"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset1"></span></label>
+                <input type="text" id="node-input-endOffset1" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
+        </div>
+    <hr>
+    If the following property is true and the following alternate times are defined, they will be used instead the normal ones. This chán be used to have differend start/end times for holidays or other special days.
+    <div class="form-row">
+        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width: 70%"/>
+        <input type="hidden" id="node-input-outputs"/>
+    </div>
+    <hr>
+    <!-- By convention, most nodes have a 'name' property. The following div -->
+    <!-- provides the necessary field. Should always be the last option      -->
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="within-time-switch.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]within-time-switch.placeholder.name">
+    </div>
+</script>
+
+<!-- Finally, the node type is registered along with all of its properties   -->
+<!-- The example below shows a small subset of the properties that can be set-->
+<script type="text/javascript">
+    RED.nodes.registerType('within-time-switch', {
+        category: 'function',
+        defaults: {
+            name: {
+                value: "",
+                required: false
+            },
+            positionConfig: {
+                value: "",
+                type: "position-config",
+                required: true
+            },
+            startTime1: {
+                value: '',
+                required: true,
+                validate: RED.validators.typedInput("startTime1Type")
+            },
+            startTime1Type: {
+                value: "str"
+            },
+            startTime2: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput("startTime2Type")
+            },
+            startTime2Type: {
+                value: "str"
+            },
+            endTime1: {
+                value: '',
+                required: true,
+                validate: RED.validators.typedInput("endTime1Type")
+            },
+            endTime1Type: {
+                value: "str"
+            },
+            endTime2: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput("endTime2Type")
+            },
+            endTime2Type: {
+                value: "date"
+            },
+            startOffset1: {
+                value: 0,
+                required: true
+            },
+            startOffset2: {
+                value: 0,
+                required: true
+            },
+            endOffset1: {
+                value: 0,
+                required: true
+            },
+            endOffset2: {
+                value: 0,
+                required: true
+            },
+            property: {
+                value: "",
+                required: false,
+                validate: RED.validators.typedInput("propertyType")
+            },
+            propertyType: {
+                value: "global"
+            },
+        },
+        inputs: 1,
+        outputs: 2,
+        color: '#f37a33',
+        icon: 'switch.png',
+        label: function () {
+            return this.name || this.startTime1 + (this.startTime2) ? '/' + this.startTime2 : '' + ' - ' +
+                this.endTime1 + (this.endTime2) ? '/' + this.endTime2 : '';
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        paletteLabel: 'within time',
+        align: 'left',
+        oneditprepare: function () {
+            $("#node-input-property").typedInput({
+                default: this.propertyType || 'global',
+                types: ['msg', 'flow', 'global']
+            });
+            $("#node-input-startTime1").typedInput({
+                default: this.startTime1Type || 'str',
+                types: [{
+                        value: "str",
+                        label: "timestamp",
+                        hasValue: false,
+                        validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
+                    },
+                    {
+                        value: "pdsTime",
+                        label: "sun-time",
+                        options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
+                            'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
+                            'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
+                        ]
+                    },
+                    {
+                        value: "pdmTime",
+                        label: "moon-time",
+                        options: ['moonRise', 'moonSet']
+                    },
+                ]
+            });
+            $("#node-input-endTime1").typedInput({
+                default: this.endTime1Type || 'str',
+                types: [{
+                        value: "str",
+                        label: "timestamp",
+                        hasValue: false,
+                        validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
+                    },
+                    {
+                        value: "pdsTime",
+                        label: "sun-time",
+                        options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
+                            'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
+                            'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
+                        ]
+                    },
+                    {
+                        value: "pdmTime",
+                        label: "moon-time",
+                        options: ['moonRise', 'moonSet']
+                    },
+                ]
+            });
+
+        },
+        oneditsave: function () {
+            this.propertyType = $("#node-input-property").typedInput('type');
+            this.startTime1Type = $("#node-input-startTime1").typedInput('type');
+            this.startTime2Type = $("#node-input-startTime2").typedInput('type');
+            this.endTime1Type = $("#node-input-endTime1").typedInput('type');
+            this.endTime2Type = $("#node-input-endTime2").typedInput('type');
+        },
+    });
+</script>

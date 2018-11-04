@@ -2,7 +2,7 @@
   "name": "node-red-contrib-sun-position",
   "version": "0.0.1",
   "description": "NodeRED nodes to get sun and moon position",
-  "main": "sun-moon-position.js",
+  "main": "none",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "predev": "npm i -g",
@@ -43,8 +43,14 @@
   },
   "node-red": {
     "nodes": {
-      "sun-position": "sun-moon-position.js",
-      "moon-position": "sun-moon-position.js"
+      "position-config": "nodes/position-config.js",
+      "sun-position": "nodes/sun-position.js",
+      "moon-position": "nodes/moon-position.js",
+      "within-time-switch": "nodes/within-time-switch.js"
     }
-  }
+  },
+  "extensions": [
+    "js",
+    "html"
+  ]
 }

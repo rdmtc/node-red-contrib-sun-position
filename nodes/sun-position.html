@@ -1,0 +1,36 @@
+<script type="text/x-red" data-template-name="sun-position">
+    <div class="form-row">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.position"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <!-- By convention, most nodes have a 'name' property. The following div -->
+    <!-- provides the necessary field. Should always be the last option      -->
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+    </div>
+</script>
+
+<!-- Finally, the node type is registered along with all of its properties   -->
+<!-- The example below shows a small subset of the properties that can be set-->
+<script type="text/javascript">
+    RED.nodes.registerType('sun-position', {
+        category: 'function',
+        defaults: {
+            name: { value: "", required: false },
+            positionConfig: { value:"", type:"position-config", required: true }
+        },
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1, // set the number of outputs - 0 to n
+        icon: "sun.png", // saved in  icons/myicon.png - myicon.png
+        color: "#F3B567",
+        label: function () {
+            return this.name || "sun-position";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        paletteLabel: "sun-position"
+    });
+</script>
