@@ -319,3 +319,64 @@ module.exports.getMoonCalc = (date, latitude, longitude, angleType) => {
 
     return result;
 }
+
+module.exports.getTimeOfText = (t, offset) => {
+    let d = new Date();
+    if (t) {
+        let matches = t.match(/(0[0-9]|[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+        console.log(matches);
+        d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
+        d.setMinutes(parseInt(matches[2]) || 0);
+        d.setSeconds(parseInt(matches[3]) || 0);
+        if (offset && !isNaN(offset) && offset !== 0) {
+            d = new Date(d.getTime() + offset * 60000);
+        }
+    }
+    return d;
+}
+
+module.exports.getSunTime = (config, d, t, offset) => {
+    if (!config) {
+        return d;
+    }
+    let chachedSunCalc = this.context().global.get(config.cachProp + 'sun');
+    let needRefresh = (!chachedSunCalc || !chachedSunCalc.times);
+    if (!needRefresh) {
+        let oldd = new Date(chachedSunCalc.lastUpdate);
+        needRefresh = (oldd.getDay != d.getDay);
+    }
+
+    if (needRefresh) {
+        chachedSunCalc = hlp.getSunCalc(d, config.latitude, config.longitude, config.angleType);
+        this.context().global.set(config.cachProp + 'sun', chachedSunCalc);
+    }
+
+    const date = new Date(chachedSunCalc.times[t]);
+    if (offset && !isNaN(offset) && offset !== 0) {
+        return new Date(date.getTime() + offset * 60000);
+    }
+    return date;
+}
+
+module.exports.getMoonTime = (config, d, t, offset) => {
+    if (!config) {
+        return d;
+    }
+    let chachedMoonCalc = this.context().global.get(config.cachProp + 'moon');
+    let needRefresh = (!chachedMoonCalc || !chachedMoonCalc.times);
+    if (!needRefresh) {
+        let oldd = new Date(chachedMoonCalc.lastUpdate);
+        needRefresh = (oldd.getDay != d.getDay);
+    }
+
+    if (needRefresh) {
+        chachedMoonCalc = hlp.getMoonCalc(d, config.latitude, config.longitude, config.angleType);
+        this.context().global.set(config.cachProp + 'moon', chachedMoonCalc);
+    }
+
+    const date = new Date(chachedMoonCalc.times[t]);
+    if (offset && !isNaN(offset) && offset !== 0) {
+        return new Date(date.getTime() + offset * 60000);
+    }
+    return date;
+}
