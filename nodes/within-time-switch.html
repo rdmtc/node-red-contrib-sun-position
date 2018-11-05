@@ -60,7 +60,7 @@
                 validate: RED.validators.typedInput("startTime1Type")
             },
             startTime1Type: {
-                value: "str"
+                value: "entered"
             },
             startTime2: {
                 value: '',
@@ -68,7 +68,7 @@
                 validate: RED.validators.typedInput("startTime2Type")
             },
             startTime2Type: {
-                value: "str"
+                value: "entered"
             },
             endTime1: {
                 value: '',
@@ -76,7 +76,7 @@
                 validate: RED.validators.typedInput("endTime1Type")
             },
             endTime1Type: {
-                value: "str"
+                value: "entered"
             },
             endTime2: {
                 value: '',
@@ -84,7 +84,7 @@
                 validate: RED.validators.typedInput("endTime2Type")
             },
             endTime2Type: {
-                value: "date"
+                value: "entered"
             },
             startOffset1: {
                 value: 0,
@@ -130,12 +130,12 @@
                 types: ['msg', 'flow', 'global']
             });
             $("#node-input-startTime1").typedInput({
-                default: this.startTime1Type || 'str',
+                default: this.startTime1Type || 'entered',
                 types: [{
-                        value: "str",
+                        value: "entered",
                         label: "timestamp",
-                        hasValue: false,
-                        validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
+                        hasValue: true,
+                        validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
                     },
                     {
                         value: "pdsTime",
@@ -153,12 +153,12 @@
                 ]
             });
             $("#node-input-endTime1").typedInput({
-                default: this.endTime1Type || 'str',
+                default: this.endTime1Type || 'entered',
                 types: [{
-                        value: "str",
+                        value: "entered",
                         label: "timestamp",
-                        hasValue: false,
-                        validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
+                        hasValue: true,
+                        validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
                     },
                     {
                         value: "pdsTime",
