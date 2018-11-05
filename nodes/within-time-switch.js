@@ -11,7 +11,7 @@ const getTimeOfText = (t, offset) => {
     let d = new Date();
     d = d.getMinutes() + d.getHours() * 60;
     if (t) {
-        let matches = t.match(/(\d+)(?::(\d\d))?\s*(p?)/);
+        let matches = t.match(/(\d+)(?::(\d\d))?\s*(pm?)/);
         d.setHours(parseInt(matches[1]) + (matches[3] ? 12 : 0));
         d.setMinutes(parseInt(matches[2]) || 0);
         if (offset && !isNaN(offset) && offset !== 0) {
