@@ -1,34 +1,28 @@
 {
     "within-time-switch": {
         "label": {
-            "position": "Position",
+            "position" : "Position",
             "name": "Name",
-            "addTimes": "alternate start or end time",
             "property": "Property",
-            "startTime": "Start time",
-            "startTimeAlt": "Start time",
-            "endTime": "End time",
-            "endTimeAlt": "End time",
-            "startOffset": "Offset",
-            "startOffsetAlt": "Offset",
-            "endOffset": "Offset",
-            "endOffsetAlt": "Offset"
+            "startTime1":"Start time",
+            "startTime2":"Start time",
+            "endTime1":"End time",
+            "endTime2":"End time",
+            "startOffset1":"Start time offset",
+            "startOffset2":"Start time offset",
+            "endOffset1":"End time offset",
+            "endOffset2":"End time offset"
         },
         "placeholder": {
-            "position": "Position",
+            "position" : "Position",
             "name": "Name",
             "property": "Property",
-            "startTime": "7:40",
-            "startOffset": "0",
-            "endTime": "18:15",
-            "endOffset": "0",
-            "startTimeAlt": "7:40",
-            "startOffsetAlt": "0",
-            "endTimeAlt": "18:15",
-            "endOffsetAlt": "0"
+            "startTime":"7:40",
+            "endTime":"18:15",
+            "endOffset":"0"
         },
         "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true they will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
+            "sunPosControl" : "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         }
     }
 }
