@@ -207,14 +207,44 @@
         paletteLabel: 'time inject',
         align: 'left',
         oneditprepare: function () {
-            if (($("#node-input-lat").val() === "") && ($("#node-input-lon").val() === "")) {
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
-                        $("#node-input-lat").val(Number(position.coords.latitude.toFixed(5)));
-                        $("#node-input-lon").val(Number(position.coords.longitude.toFixed(5)));
-                    });
+            if (this.payloadStartType == null) {
+                if (this.payloadStart == "") {
+                    this.payloadStartType = "date";
+                } else {
+                    this.payloadStartType = "str";
                 }
+            } else if (this.payloadStartType === 'string' || this.payloadStartType === 'none') {
+                this.payloadStartType = "str";
             }
+            if (this.payloadEndType == null) {
+                if (this.payloadEnd == "") {
+                    this.payloadEndType = "date";
+                } else {
+                    this.payloadEndType = "str";
+                }
+            } else if (this.payloadEndType === 'string' || this.payloadEndType === 'none') {
+                this.payloadEndType = "str";
+            }
+            $("#node-input-payloadStartType").val(this.payloadStartType);
+            $("#node-input-payloadStart").typedInput({
+                default: 'str',
+                typeField: $("#node-input-payloadStartType"),
+                types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
+                    'jsonata'
+                ]
+            });
+            $("#node-input-payloadEndType").val(this.payloadEndType);
+            $("#node-input-payloadEnd").typedInput({
+                default: 'str',
+                typeField: $("#node-input-payloadEndType"),
+                types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
+                    'jsonata'
+                ]
+            });
+            $(".wt-offset-time").spinner({
+                max: 1439,
+                min: -1439
+            });
         },
         button: {
             enabled: function () {
