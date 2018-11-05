@@ -20,19 +20,12 @@ const getTimeOfText = (t, offset) => {
     }
     return d;
 }
+
 const getSunTime = (config, d, t, offset) => {
     if (!config) {
         return d;
     }
-    let type = 'sun';
-    if (t === 'moonRise') {
-        type = 'moon';
-        t = 'rise';
-    } else if (t === 'moonSet') {
-        type = 'moon';
-        t = 'set';
-    }
-    let chachedSunCalc = this.context().global.get(config.cachProp + type);
+    let chachedSunCalc = this.context().global.get(config.cachProp + 'sun');
     let needRefresh = (!chachedSunCalc || !chachedSunCalc.times);
     if (!needRefresh) {
         let oldd = new Date(chachedSunCalc.lastUpdate);
@@ -41,7 +34,7 @@ const getSunTime = (config, d, t, offset) => {
 
     if (needRefresh) {
         chachedSunCalc = hlp.getSunCalc(d, config.latitude, config.longitude, config.angleType);
-        this.context().global.set(config.cachProp + type, chachedSunCalc);
+        this.context().global.set(config.cachProp + 'sun', chachedSunCalc);
     }
 
     const date = new Date(chachedSunCalc.times[t]);
@@ -49,6 +42,53 @@ const getSunTime = (config, d, t, offset) => {
         return new Date(date.getTime() + offset * 60000);
     }
     return date;
+}
+
+const getMoonTime = (config, d, t, offset) => {
+    if (!config) {
+        return d;
+    }
+    let chachedMoonCalc = this.context().global.get(config.cachProp + 'moon');
+    let needRefresh = (!chachedMoonCalc || !chachedMoonCalc.times);
+    if (!needRefresh) {
+        let oldd = new Date(chachedMoonCalc.lastUpdate);
+        needRefresh = (oldd.getDay != d.getDay);
+    }
+
+    if (needRefresh) {
+        chachedMoonCalc = hlp.getMoonCalc(d, config.latitude, config.longitude, config.angleType);
+        this.context().global.set(config.cachProp + 'moon', chachedMoonCalc);
+    }
+
+    const date = new Date(chachedMoonCalc.times[t]);
+    if (offset && !isNaN(offset) && offset !== 0) {
+        return new Date(date.getTime() + offset * 60000);
+    }
+    return date;
+}
+
+const getTime = (node, now, vType, value, offset) => {
+    if (vType === 'entered' || vType === '') {
+        return getTimeOfText(value, offset);
+    } else if (vType === 'pdsTime') {
+        //sun
+        return getSunTime(node.positionConfig, now, value, offset)
+    } else if (vType === 'pdmTime') {
+        //moon
+        return getMoonTime(node.positionConfig, now, value, offset)
+    } else if (vType === 'msg') {
+        return getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset);
+    } else if (vType === 'flow' || vType === 'global') {
+        var contextKey = RED.util.parseContextStore(value);
+        return getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset);
+    }
+    node.error("Not suported time definition! " + vType + '=' + value);
+    node.status({
+        fill: "red",
+        shape: "dot",
+        text: "error - time definition"
+    });
+    return now;
 }
 
 module.exports = function (RED) {
@@ -65,49 +105,38 @@ module.exports = function (RED) {
             this.propertyType === 'flow' ||
             this.propertyType === 'global'
         );
+        this.startTimeAlt = config.startTimeAlt;
+        this.startTimeAltType = config.startTimeAltType || "entered";
+        this.endTimeAlt = config.endTimeAlt;
+        this.endTimeAltType = config.endTimeAltType || "entered";
 
         this.on('input', msg => {
             try {
                 const now = new Date();
-
-                let alternateTimes = false;
-                if (this.propertyType === 'msg' && (this.property != '')) {
-                    alternateTimes = (RED.util.getMessageProperty(outMsg, this.property, true) == true);
-                } else if (this.propertyType === 'flow' || this.propertyType === 'global' && (this.property != '')) {
-                    var contextKey = RED.util.parseContextStore(this.property);
-                    alternateTimes = (this.context()[this.propertyType].get(contextKey.key, contextKey.store) == true);
-                }
-
                 let start;
                 let end;
-                if (config.startTime2 && alternateTimes) {
-                    if (config.startTime2Type == 'entered') {
-                        start = getTimeOfText(config.startTime2, config.startOffset2);
-                    } else {
-                        start = getSunTime(node.positionConfig, now, config.startTime2Type, config.startOffset2)
-                    }
-                } else {
-                    if (config.startTime1Type == 'entered') {
-                        start = getTimeOfText(config.startTime1, config.startOffset1);
-                    } else {
-                        start = getSunTime(node.positionConfig, now, config.startTime1Type, config.startOffset1)
-                    }
-                }
-                if (config.endTime2 && alternateTimes) {
-                    if (config.endTime2Type == 'entered') {
-                        end = getTimeOfText(config.endTime2, config.startOffset2);
-                    } else {
-                        end = getSunTime(node.positionConfig, now, config.endTime2Type, config.endOffset2)
-                    }
-                } else {
-                    if (config.endTime1Type == 'entered') {
-                        end = getTimeOfText(config.endTime1, config.startOffset1);
-                    } else {
-                        end = getSunTime(node.positionConfig, now, config.endTime1Type, config.endOffset1)
+                let alternateTimes = config.addTimes;
+                if (alternateTimes) {
+                    if (this.propertyType === 'msg') {
+                        alternateTimes = (RED.util.getMessageProperty(msg, this.property, true) == true);
+                    } else if (this.propertyType === 'flow' || this.propertyType === 'global') {
+                        var contextKey = RED.util.parseContextStore(this.property);
+                        alternateTimes = (this.context()[this.propertyType].get(contextKey.key, contextKey.store) == true);
                     }
                 }
 
-                node.warn(start + ' - ' + now + ' - ' + end);
+                if (alternateTimes && this.startTimeAlt) {
+                    start = getTime(this, now, this.startTimeAltType, this.startTimeAlt, config.startOffsetAlt);
+                } else {
+                    start = getTime(this, now, this.startTimeType, this.startTime, config.startOffset);
+                }
+                if (alternateTimes && config.endTimeAlt) {
+                    end = getTime(this, now, this.endTimeAltType, this.endTimeAlt, config.endOffsetAlt);
+                } else {
+                    end = getTime(this, now, this.endTimeType, this.endTime, config.startOffset);
+                }
+
+                this.warn(start + ' - ' + now + ' - ' + end);
                 if (start < end) {
                     if (now >= start && now <= end) {
                         this.send(msg, null);

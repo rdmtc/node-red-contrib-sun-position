@@ -1,0 +1,284 @@
+<script type="text/x-red" data-template-name="time-inject">
+    <div class="form-row">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-inject.label.position"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <div class="form-row">
+            <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
+            <input type="text" id="node-input-topic">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
+        <input type="text" id="node-input-startTime" style="width: 70%"/>
+    </div>
+    <div class="form-row">
+            <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
+            <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
+            <input type="text" id="node-input-endTime" style="width: 70%"/>
+    </div>
+    <div class="form-row">
+            <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
+            <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
+    </div>
+    <hr>
+
+
+    <hr>
+    <div class="form-row">
+      <label for="node-input-start"><i class="fa fa-clock-o"></i> Start</label>
+      <select id="node-input-start" style='width:70%'>
+        <option value="sunrise">Sunrise</option>
+        <option value="sunriseEnd">Sunrise end</option>
+        <option value="dawn">Dawn, morning civil twilight starts</option>
+        <option value="goldenHourEnd">End of morning golden hour</option>
+        <option value="nauticalDawn">Morning nautical twilight starts</option>
+        <option value="nightEnd">Morning astronomical twilight starts</option>
+      </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-payloadStart"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadStart"></span></label>
+        <input type="text" id="node-input-payloadStart" style="width:70%">
+        <input type="hidden" id="node-input-payloadStartType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
+        <input type="text" id="node-input-topicStart">
+    </div>
+    <hr>
+    <div class="form-row">
+      <label for="node-input-end"><i class="fa fa-clock-o"></i> End</label>
+      <select id="node-input-end" style='width:70%'>
+        <option value="sunset">Sunset, civil twilight starts</option>
+        <option value="sunsetStart">Sunset start</option>
+        <option value="goldenHour">Start of evening golden hour</option>
+        <option value="dusk">Dusk, Evening astronomical twilight starts</option>
+        <option value="nauticalDusk">Evening nautical twilight starts</option>
+        <option value="night">Dark enough for astronomy</option>
+      </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-payloadStart"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadStart"></span></label>
+        <input type="text" id="node-input-payloadStart" style="width:70%">
+        <input type="hidden" id="node-input-payloadStartType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
+        <input type="text" id="node-input-topicStart">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
+    </div>
+  </script>
+
+<script type="text/x-red" data-help-name="time-inject">
+    <p>Uses the suncalc module to generate an output at sunrise and sunset based on a specified location.</p>
+      <p>Several choices of definition of sunrise and sunset are available, see the <i><a href = "https://github.com/mourner/suncalc" target="_new">suncalc</a></i> module for details.</p>
+      <p>The first output emits a <code>msg.payload</code> of <i>1</i> or <i>0</i> every minute depending if in between selected times or not.
+      The second output emits only on the transition between night to day (<i>-> 1</i>) or day to night (<i>-> 0</i>).</p>
+      <p>Also sets <code>msg.topic</code> to <i>sun</i> and <code>msg.moon</code> to the fraction of the moon between 0 and 1.</p>
+  </script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('time-inject', {
+        category: 'input',
+        color: "#a6bbcf",
+        defaults: {
+            name: {
+                value: "",
+                required: false
+            },
+            topic: {
+                value: ""
+            },
+            positionConfig: {
+                value: "",
+                type: "position-config",
+                required: true
+            },
+            payloadStart: {
+                value: "",
+                validate: RED.validators.typedInput("payloadType")
+            },
+            payloadStartType: {
+                value: "date"
+            },
+            startTime: {
+                value: "",
+                required: true,
+                validate: RED.validators.typedInput("startTimeType")
+            },
+            startTimeType: {
+                value: "entered"
+            },
+            startOffset: {
+                value: 0,
+                required: true,
+                validate: RED.validators.number()
+            },
+            payloadEnd: {
+                value: "",
+                validate: RED.validators.typedInput("payloadType")
+            },
+            payloadEndType: {
+                value: "date"
+            },
+            endTime: {
+                value: "",
+                required: true,
+                validate: RED.validators.typedInput("endTimeType")
+            },
+            endTimeType: {
+                value: "entered"
+            },
+            endOffset: {
+                value: 0,
+                required: true,
+                validate: RED.validators.number()
+            }
+        },
+        icon: "injectSun.png",
+        inputs: 0,
+        outputs: 1,
+        outputLabels: ["once per minute", "only on change"],
+        label: function () {
+            if (this.name) {
+                return this.name;
+            }
+            var result = "";
+            const getId = (type, value) => {
+                if (type === "string" ||
+                    type === "str" ||
+                    type === "num" ||
+                    type === "bool" ||
+                    type === "json") {
+                    return value;
+                } else if (this.payloadType === 'date') {
+                    return "timestamp";
+                } else if (type === 'flow' || type === 'global') {
+                    return type + '.' + value;
+                } else if (type == 'pdmTime') {
+                    return 'moon ' + value;
+                }
+                return value;
+            }
+            if (this.startTime) {
+                let part1 = getId(this.startTimeType, this.startTime);
+                if (part1.length > 24) {
+                    result += part1 + '=...';
+                } else {
+                    result += part1 + '=' + getId(this.payloadStartType, this.payloadStart);
+                }
+            }
+            if (this.endTime) {
+                let part1 = getId(this.endTimeType, this.endTime);
+                let part2 = getId(this.payloadEndType, this.payloadEnd);
+                if (result.length > 0) {
+                    result += ' / ';
+                }
+
+                if (result.length > 24) {
+                    result += '...';
+                } else if (result.length + part1.length > 24) {
+                    result += part1 + '=...';
+                } else if (result.length > 0) {
+                    result += part1 + '=...';
+                } else {
+                    result += part1 + '=' + part2;
+                }
+            }
+            if (result.length = 0) {
+                return 'time inject';
+            }
+            if (this.topic && (this.topic.length + result.length <= 32)) {
+                return this.topic + ":" + result;
+            }
+            return result;
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        paletteLabel: 'time inject',
+        align: 'left',
+        oneditprepare: function () {
+            if (($("#node-input-lat").val() === "") && ($("#node-input-lon").val() === "")) {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        $("#node-input-lat").val(Number(position.coords.latitude.toFixed(5)));
+                        $("#node-input-lon").val(Number(position.coords.longitude.toFixed(5)));
+                    });
+                }
+            }
+        },
+        button: {
+            enabled: function () {
+                return !this.changed
+            },
+            onclick: function () {
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {
+                        message: RED._("notification.warnings.undeployedChanges")
+                    }), "warning");
+                }
+                var payload = this.payloadStart;
+                if ((this.payloadStartType === 'flow') ||
+                    (this.payloadStartType === 'global')) {
+                    var key = RED.utils.parseContextKey(payload);
+                    payload = this.payloadStartType + "." + key.key;
+                }
+                var label = (this.name || payload);
+                if (label.length > 30) {
+                    label = label.substring(0, 50) + "...";
+                }
+                label = label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                if (this.payloadStartType === "date") {
+                    label = this._("inject.timestamp");
+                }
+                if (this.payloadStartType === "none") {
+                    label = this._("inject.blank");
+                }
+                var node = this;
+                $.ajax({
+                    url: "inject/" + this.id,
+                    type: "POST",
+                    success: function (resp) {
+                        RED.notify(node._("inject.success", {
+                            label: label
+                        }), "success");
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error", {
+                                message: node._(
+                                    "common.notification.errors.not-deployed")
+                            }), "error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error", {
+                                message: node._("inject.errors.failed")
+                            }), "error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error", {
+                                message: node._(
+                                    "common.notification.errors.no-response")
+                            }), "error");
+                        } else {
+                            RED.notify(node._("common.notification.error", {
+                                message: node._(
+                                    "common.notification.errors.unexpected", {
+                                        status: jqXHR.status,
+                                        message: textStatus
+                                    })
+                            }), "error");
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>

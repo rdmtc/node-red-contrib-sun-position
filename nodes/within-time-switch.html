@@ -6,33 +6,52 @@
     </div>
     <hr>
     <div class="form-row">
-            <label for="node-input-startTime1"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime1"></span></label>
-            <input type="time" id="node-input-startTime1" style="width: 70%"/>
-            <input type="hidden" id="node-input-outputs"/>
-        </div>    
-        <div class="form-row">
-                <label for="node-input-startOffset1"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset1"></span></label>
-                <input type="text" id="node-input-startOffset1" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
-        </div>        
-        <div class="form-row">
-                <label for="node-input-endTime1"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime1"></span></label>
-                <input type="time" id="node-input-endTime1" style="width: 70%"/>
-                <input type="hidden" id="node-input-outputs"/>
-        </div>
-        <div class="form-row">
-                <label for="node-input-endOffset1"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset1"></span></label>
-                <input type="text" id="node-input-endOffset1" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
-        </div>
-    <hr>
-    If the following property is true and the following alternate times are defined, they will be used instead the normal ones. This chán be used to have differend start/end times for holidays or other special days.
+        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
+        <input type="text" id="node-input-startTime" style="width: 70%"/>
+    </div>
     <div class="form-row">
-        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.property"></span></label>
-        <input type="text" id="node-input-property" style="width: 70%"/>
-        <input type="hidden" id="node-input-outputs"/>
+            <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
+            <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+    </div>
+    <div class="form-row">
+            <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
+            <input type="text" id="node-input-endTime" style="width: 70%"/>
+    </div>
+    <div class="form-row">
+            <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
+            <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
     </div>
     <hr>
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
+    <div class="form-row">
+        <label for="node-input-addTimes"><i class="fa fa-share-alt"></i> &nbsp;</label>
+        <input type="checkbox" id="node-input-addTimes" style="display:inline-block; width:15px; vertical-align:baseline;" />
+        <span data-i18n="within-time-switch.label.addTimes"></span>
+    </div>
+    <div class="form-tips add-times-row hidden">
+        <span data-i18n="within-time-switch.tips.addTimes"></span>&nbsp;
+    </div>
+    <div class="form-tips add-times-row hidden"/>
+    <div class="form-row add-times-row hidden">
+        <label ><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width: 70%"/>
+    </div>
+    <div class="form-row add-times-row hidden">
+        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
+        <input type="text" id="node-input-startTimeAlt" style="width: 70%"/>
+    </div>
+    <div class="form-row add-times-row hidden">
+            <label for="node-input-startOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
+            <input id="node-input-startOffsetAlt"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+    </div>
+    <div class="form-row add-times-row hidden">
+            <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
+            <input type="text" id="node-input-endTimeAlt" style="width: 70%"/>
+    </div>
+    <div class="form-row add-times-row hidden">
+            <label for="node-input-endOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
+            <input id="node-input-endOffsetAlt"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
+    </div>
+    <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="within-time-switch.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]within-time-switch.placeholder.name">
@@ -44,6 +63,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('within-time-switch', {
         category: 'function',
+        color: '#f37a33',
         defaults: {
             name: {
                 value: "",
@@ -54,70 +74,113 @@
                 type: "position-config",
                 required: true
             },
-            startTime1: {
-                value: '',
+            startTime: {
+                value: "",
                 required: true,
-                validate: RED.validators.typedInput("startTime1Type")
+                validate: RED.validators.typedInput("startTimeType")
             },
-            startTime1Type: {
+            startTimeType: {
                 value: "entered"
             },
-            startTime2: {
-                value: '',
-                required: false,
-                validate: RED.validators.typedInput("startTime2Type")
-            },
-            startTime2Type: {
-                value: "entered"
-            },
-            endTime1: {
-                value: '',
+            startOffset: {
+                value: 0,
                 required: true,
-                validate: RED.validators.typedInput("endTime1Type")
+                validate: RED.validators.number()
             },
-            endTime1Type: {
+            endTime: {
+                value: "",
+                required: true,
+                validate: RED.validators.typedInput("endTimeType")
+            },
+            endTimeType: {
                 value: "entered"
             },
-            endTime2: {
-                value: '',
-                required: false,
-                validate: RED.validators.typedInput("endTime2Type")
-            },
-            endTime2Type: {
-                value: "entered"
-            },
-            startOffset1: {
+            endOffset: {
                 value: 0,
-                required: true
+                required: true,
+                validate: RED.validators.number()
             },
-            startOffset2: {
-                value: 0,
-                required: true
-            },
-            endOffset1: {
-                value: 0,
-                required: true
-            },
-            endOffset2: {
-                value: 0,
-                required: true
+            addTimes: {
+                value: false,
+                required: true,
+                validate: function (v) {
+                    return (v === true || v === false)
+                }
             },
             property: {
                 value: "",
                 required: false,
-                validate: RED.validators.typedInput("propertyType")
+                validate: function (v) {
+                    return RED.validators.typedInput("propertyType")(v) || !$("#node-input-addTimes").is(
+                        ':checked');
+                }
             },
             propertyType: {
                 value: "global"
             },
+            startTimeAlt: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return RED.validators.typedInput("startTimeAltType")(v) || !$("#node-input-addTimes").is(
+                        ':checked');
+                }
+            },
+            startTimeAltType: {
+                value: "entered"
+            },
+            startOffsetAlt: {
+                value: 0,
+                required: true,
+                validate: function (v) {
+                    return RED.validators.number()(v) || !$("#node-input-addTimes").is(':checked');
+                }
+            },
+            endTimeAlt: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return RED.validators.typedInput("endTimeAltType")(v) || !$("#node-input-addTimes").is(
+                        ':checked');
+                }
+            },
+            endTimeAltType: {
+                value: "entered"
+            },
+            endOffsetAlt: {
+                value: 0,
+                required: true,
+                validate: function (v) {
+                    return RED.validators.number()(v) || !$("#node-input-addTimes").is(':checked');
+                }
+            }
         },
+        icon: 'switch.png',
         inputs: 1,
         outputs: 2,
-        color: '#f37a33',
-        icon: 'switch.png',
+        outputLabels: ["within time", "outside time"],
         label: function () {
-            return this.name || this.startTime1 + (this.startTime2) ? '/' + this.startTime2 : '' + ' - ' +
-                this.endTime1 + (this.endTime2) ? '/' + this.endTime2 : '';
+            const getId = (type, value) => {
+                if (type === 'msg' || type === 'flow' || type === 'global') {
+                    return type + '.' + value;
+                } else if (type === 'pdmTime') {
+                    return 'moon ' + value;
+                }
+                return value;
+            }
+            const getConcatId = (type1, value1, type2, value2) => {
+                if (value2) {
+                    return getId(type1, value1) + '/' + getId(type2, value2);
+                }
+                return getId(type1, value1);
+            }
+
+            return this.name || ((this.startTime && this.endTime) ? (
+                    getConcatId(this.startTimeType, this.startTime, this.startTimeAltType, this.startTimeAlt) +
+                    ' - ' +
+                    getConcatId(this.endTimeType, this.endTime, this.endTimeAltType, this.endTimeAlt)
+                ) :
+                'within-time');
         },
         labelStyle: function () {
             return this.name ? "node_label_italic" : "";
@@ -125,64 +188,74 @@
         paletteLabel: 'within time',
         align: 'left',
         oneditprepare: function () {
+            $("#node-input-addTimes").change(function () {
+                if ($(this).is(':checked')) {
+                    $(".add-times-row").show();
+                } else {
+                    $(".add-times-row").hide();
+                }
+            });
+            $(".wt-offset-time").spinner({
+                max: 1439,
+                min: -1439
+            });
             $("#node-input-property").typedInput({
                 default: this.propertyType || 'global',
                 types: ['msg', 'flow', 'global']
             });
-            $("#node-input-startTime1").typedInput({
-                default: this.startTime1Type || 'entered',
-                types: [{
-                        value: "entered",
-                        label: "timestamp",
-                        hasValue: true,
-                        validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
-                    },
-                    {
-                        value: "pdsTime",
-                        label: "sun-time",
-                        options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
-                            'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
-                            'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
-                        ]
-                    },
-                    {
-                        value: "pdmTime",
-                        label: "moon-time",
-                        options: ['moonRise', 'moonSet']
-                    },
+            let typeTimeReq = {
+                value: "entered",
+                label: "timestamp",
+                icon: "icons/node-red-contrib-sun-position/inputTypeTime.png",
+                hasValue: true,
+                validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
+            };
+            let typeTimeOpt = {
+                value: "entered",
+                label: "timestamp",
+                icon: "icons/node-red-contrib-sun-position/inputTypeTime.png",
+                hasValue: true,
+                validate: /^$|^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
+            };
+            let typeTimeSun = {
+                value: "pdsTime",
+                label: "sun ",
+                icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
+                options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
+                    'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
+                    'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
                 ]
+            };
+            let typeTimeMoon = {
+                value: "pdmTime",
+                label: "moon ",
+                icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
+                options: ['rise', 'set']
+            };
+            $("#node-input-startTime").typedInput({
+                default: this.startTimeType || 'entered',
+                types: [typeTimeReq, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
             });
-            $("#node-input-endTime1").typedInput({
-                default: this.endTime1Type || 'entered',
-                types: [{
-                        value: "entered",
-                        label: "timestamp",
-                        hasValue: true,
-                        validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]))?\s*(pm?)?$/
-                    },
-                    {
-                        value: "pdsTime",
-                        label: "sun-time",
-                        options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
-                            'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
-                            'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
-                        ]
-                    },
-                    {
-                        value: "pdmTime",
-                        label: "moon-time",
-                        options: ['moonRise', 'moonSet']
-                    },
-                ]
+            $("#node-input-endTime").typedInput({
+                default: this.endTimeType || 'entered',
+                types: [typeTimeReq, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
             });
-
+            $("#node-input-startTimeAlt").typedInput({
+                default: this.startTimeAltType || 'entered',
+                types: [typeTimeOpt, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+            });
+            $("#node-input-endTimeAlt").typedInput({
+                default: this.endTimeAltType || 'entered',
+                types: [typeTimeOpt, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+            });
+            $("#node-input-addTimes").change();
         },
         oneditsave: function () {
             this.propertyType = $("#node-input-property").typedInput('type');
-            this.startTime1Type = $("#node-input-startTime1").typedInput('type');
-            this.startTime2Type = $("#node-input-startTime2").typedInput('type');
-            this.endTime1Type = $("#node-input-endTime1").typedInput('type');
-            this.endTime2Type = $("#node-input-endTime2").typedInput('type');
+            this.startTimeType = $("#node-input-startTime").typedInput('type');
+            this.endTimeType = $("#node-input-endTime").typedInput('type');
+            this.startTimeAltType = $("#node-input-startTimeAlt").typedInput('type');
+            this.endTimeAltType = $("#node-input-endTimeAlt").typedInput('type');
         },
     });
 </script>
