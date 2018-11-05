@@ -5,50 +5,6 @@ const path = require('path');
 var hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const hlp = '/lib/sunPosHelper.js';
 
-<<<<<<< HEAD
-const getMoment = (time) => {}
-
-const getTimeOfText = (t, offset) => {
-    let d = new Date();
-    d = d.getMinutes() + d.getHours() * 60;
-    if (t) {
-        let matches = t.match(/(\d+)(?::(\d\d))?\s*(pm?)/);
-        d.setHours(parseInt(matches[1]) + (matches[3] ? 12 : 0));
-        d.setMinutes(parseInt(matches[2]) || 0);
-        if (offset && !isNaN(offset) && offset !== 0) {
-            d = new Date(d.getTime() + offset * 60000);
-        }
-    }
-    return d;
-}
-const getSunTime = (config, d, t, offset) => {
-    if (!config) {
-        return d;
-    }
-    let type = 'sun';
-    if (t === 'moonRise') {
-        type = 'moon';
-        t = 'rise';
-    } else if (t === 'moonSet') {
-        type = 'moon';
-        t = 'set';
-    }
-    let chachedSunCalc = this.context().global.get(config.cachProp + type);
-    let needRefresh = (!chachedSunCalc || !chachedSunCalc.times);
-    if (!needRefresh) {
-        let oldd = new Date(chachedSunCalc.lastUpdate);
-        needRefresh = (oldd.getDay != d.getDay);
-    }
-
-    if (needRefresh) {
-        chachedSunCalc = hlp.getSunCalc(d, config.latitude, config.longitude, config.angleType);
-        this.context().global.set(config.cachProp + type, chachedSunCalc);
-    }
-
-    const date = new Date(chachedSunCalc.times[t]);
-    if (offset && !isNaN(offset) && offset !== 0) {
-        return new Date(date.getTime() + offset * 60000);
-=======
 const getTime = (node, now, vType, value, offset) => {
     node.debug('vType=' + vType + ' value=' + value + ' offset=' + offset);
     if (vType === 'entered' || vType === '') {
@@ -64,7 +20,6 @@ const getTime = (node, now, vType, value, offset) => {
     } else if (vType === 'flow' || vType === 'global') {
         var contextKey = RED.util.parseContextStore(value);
         return hlp.getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
->>>>>>> 9d18d7a98a4cb7f1bf536baaad7a00794f5c0e7e
     }
     node.error("Not suported time definition! " + vType + '=' + value);
     node.status({
