@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('position-config', {
+    RED.nodes.registerType('position-config',{
         category: 'config',
         defaults: {
             name: {
@@ -100,16 +100,13 @@
         },
         label: function () {
             return this.name || "default-position";
-        },
+        },        
         oneditprepare: function () {
-            if (($("#node-config-input-latitude").val() === "") && ($("#node-config-input-longitude").val() ===
-                    "")) {
+            if (($("#node-config-input-latitude").val() === "") && ($("#node-config-input-longitude").val() === "")) {
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(function (position) {
-                        $("#node-config-input-latitude").val(Number(position.coords.latitude.toFixed(
-                            5)));
-                        $("#node-config-input-longitude").val(Number(position.coords.longitude.toFixed(
-                            5)));
+                        $("#node-config-input-latitude").val(Number(position.coords.latitude.toFixed(5)));
+                        $("#node-config-input-longitude").val(Number(position.coords.longitude.toFixed(5)));
                     });
                 }
             }
@@ -179,11 +176,6 @@
         <div class="form-row">
             <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="position-config.label.northHigh"></span></label>
             <input type="text" id="node-config-input-azimuthNorthHigh" data-i18n="[placeholder]position-config.placeholder.northHigh">
-        </div>
-        <hr>
-        <div class="form-row">
-            <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="position-config.label.name"></span></label>
-            <input type="text" id="node-config-input-name" data-i18n="[placeholder]position-config.placeholder.name">
         </div>
     </div>
 </script>

@@ -13,12 +13,10 @@
     "email": "hypnos3@online.de",
     "url": "https://github.com/hypnos3"
   },
-  "contributors": [
-    {
-      "name": "Hypnos3",
-      "url": "https://github.com/hypnos3"
-    }
-  ],
+  "contributors": [{
+    "name": "Hypnos3",
+    "url": "https://github.com/hypnos3"
+  }],
   "keywords": [
     "node-red",
     "sun-position",
