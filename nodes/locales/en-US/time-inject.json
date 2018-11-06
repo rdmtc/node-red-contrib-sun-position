@@ -1,17 +1,37 @@
 {
     "time-inject": {
         "label": {
+            "time-inject": "time-inject",
+            "inject": "inject",
             "position": "Position",
             "name": "Name",
-            "startTime": "Start time",
-            "startOffset": "Offset",
-            "payloadStart": "Payload",
-            "topicStart": "Topic",
-            "endTime": "End time",
-            "endOffset": "Offset",
-            "payloadEnd": "Payload",
-            "topicEnd": "Topic"
+            "property": "Property",
+            "time": "Time",
+            "offset": "Offset",
+            "payload": "Payload",
+            "topic": "Topic",
+            "seconds" :"seconds",
+            "minutes" :"minutes",
+            "hours" :"hours",
+            "on":"on",
+            "none": "none",
+            "stopped": "stopped",
+            "timestamp": "timestamp",
+            "binary" : "binary",
+            "json" : "json",
+            "jsonata" : "json expr.",
+            "blank" : "\"\"",
+            "success": "Successfully injected: __label__"
         },
+        "days": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
         "placeholder": {
             "position": "Position",
             "name": "Name",
@@ -26,12 +46,31 @@
         "tips": {
             "addTimes": "Here can be defined alternate times for start/end. If the given property is true they will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
         },
+        "status": {
+            "connected": "connected",
+            "not-connected": "not connected",
+            "disconnected": "disconnected",
+            "connecting": "connecting",
+            "error": "error",
+            "ok": "OK"
+        },
+        "notification": {
+            "error": "<strong>Error</strong>: __message__",
+            "errors": {
+                "not-deployed": "node not deployed",
+                "no-response": "no response from server",
+                "unexpected": "unexpected error (__status__) __message__"
+            }
+        },
         "errors": {
             "exception-gen-text": "Exception occured on withinTimeSwitch",
             "exception-gen-title": "internal error",
             "invalid-property-type": "Invalid Property Type: __type__",
             "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__"
+            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
+            "failed": "inject failed, see log for details",
+            "failed2": "Inject failed: __error__",
+            "toolong": "Interval too large"
         }
     }
 }

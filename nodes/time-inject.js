@@ -16,24 +16,20 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.debug('timeInjectNode ' + JSON.stringify(config));
 
-        this.startTime = config.startTime;
-        this.startTimeType = config.startTimeType;
-        this.startOffset = config.startOffset;
-        this.payloadStart = config.payloadStart;
-        this.payloadStartType = config.payloadStartType;
-        this.topicStart = config.topicStart;
-
-        this.endTime = config.endTime;
-        this.endTimeType = config.endTimeType;
-        this.endOffset = config.endOffset;
-        this.payloadEnd = config.payloadEnd;
-        this.payloadEndType = config.payloadEndType;
-        this.topicEnd = config.topicEnd;
+        this.time = config.time;
+        this.timeType = config.timeType;
+        this.timeDays = config.timeDays;
+        this.offset = config.offset;
+        this.offsetMultiplier = config.offsetMultiplier;
+        this.payload = config.payload;
+        this.payloadType = config.payloadType;
+        this.topic = config.topic;
 
         this.lastSendType = 'none';
         this.lastInputType = 'none';
-        this.startTimeoutObj = null;
+        this.timeOutObj = null;
         this.endTimeoutObj = null;
+        this.nextTime = null;
         var node = this;
 
         this.getScheduleTime = (time) => {
@@ -46,84 +42,45 @@ module.exports = function (RED) {
         }
 
         this.setStatus = () => {
-            let formatT = (t) => {
-                return (t) ? (t.getHours() + ':' + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes()) : '';
-            }
-
-            if (node.nextStartTime && node.nextEndTime) {
+            if (node.nextTime) {
                 this.status({
                     fill: "green",
                     shape: "dot",
-                    text: formatT(node.nextStartTime) + ' - ' + formatT(node.nextEndTime)
-                });
-            } else if (node.nextStartTime) {
-                this.status({
-                    fill: "green",
-                    shape: "ring",
-                    text: formatT(node.nextStartTime)
-                });
-            } else if (node.nextEndTime) {
-                this.status({
-                    fill: "green",
-                    shape: "ring",
-                    text: formatT(node.nextEndTime)
+                    text: node.nextTime.toLocaleDateString() + " " + node.nextTime.toLocaleTimeString()
                 });
             } else {
                 this.status({});
             }
         }
 
-        function setStartTimeout(node) {
-            if (node.startTimeoutObj) {
-                clearTimeout(node.startTimeoutObj);
+        function doCreateTimeout(node) {
+            if (node.timeOutObj) {
+                clearTimeout(node.timeOutObj);
             }
-            if (node.startTimeType !== 'none') {
-                node.nextStartTime = hlp.getTimeProp(node, node.startTimeType, node.startTime, node.startOffset, 1);
+            if (node.timeType !== 'none' && node.positionConfig) {
+                //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
+                node.nextTime = node.positionConfig.getTimeProp(node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
             } else {
-                node.nextStartTime = null;
+                node.nextTime = null;
             }
-            if (node.nextStartTime) {
-                let millis = node.getScheduleTime(node.nextStartTime);
-                node.debug('setStartTimeout ' + node.nextStartTime + ' in ' + millis + 'ms');
-                node.startTimeoutObj = setTimeout(() => {
+            if (node.nextTime) {
+                let millis = node.getScheduleTime(node.nextTime);
+                node.debug('doCreateTimeout ' + node.nextTime + ' in ' + millis + 'ms');
+                node.timeOutObj = setTimeout(() => {
                     node.emit("input", {
                         type: 'start'
                     });
-                    node.startTimeoutObj = null;
-                    node.debug('redo setStartTimeout');
-                    setStartTimeout(node);
-                }, millis);
-            }
-            node.setStatus();
-        }
-
-        function setEndTimeout(node) {
-            if (node.endTimeoutObj) {
-                clearTimeout(node.endTimeoutObj);
-            }
-            if (config.endTimeType !== 'none') {
-                node.nextEndTime = hlp.getTimeProp(node, node.endTimeType, node.endTime, node.endOffset, 1);
-            } else {
-                node.nextEndTime = null;
-            }
-            if (node.nextEndTime) {
-                let millis = node.getScheduleTime(node.nextEndTime);
-                node.debug('setEndTimeout ' + node.nextEndTime + ' in ' + millis + 'ms');
-                node.startTimeoutObj = setTimeout(() => {
-                    node.emit("input", {
-                        type: 'end'
-                    });
-                    node.endTimeoutObj = null;
-                    node.debug('redo setEndTimeout');
-                    setEndTimeout(node);
+                    node.timeOutObj = null;
+                    node.debug('redo doCreateTimeout');
+                    doCreateTimeout(node);
                 }, millis);
             }
             node.setStatus();
         }
 
         this.on('close', function () {
-            if (this.startTimeoutObj) {
-                clearTimeout(this.startTimeoutObj);
+            if (this.timeOutObj) {
+                clearTimeout(this.timeOutObj);
             }
             if (this.endTimeoutObj) {
                 clearTimeout(this.endTimeoutObj);
@@ -138,21 +95,12 @@ module.exports = function (RED) {
                 let plType = 'date';
                 let plValue = '';
 
-                if (msg.type === 'start' || (msg.type !== 'end' && this.lastSendType !== 'start')) {
-                    if (this.startTimeType !== 'none') {
-                        plType = this.payloadStartType;
-                        plValue = this.payloadStart;
-                    }
-                    msg.topic = this.topicStart;
-                    this.lastSendType = 'start';
-                } else {
-                    if (this.payloadEndType !== 'none') {
-                        plType = this.payloadEndType;
-                        plValue = this.payloadEnd;
-                    }
-                    msg.topic = this.topicEnd;
-                    this.lastSendType = 'end';
+                if (this.timeType !== 'none') {
+                    plType = this.payloadType;
+                    plValue = this.payload;
                 }
+                msg.topic = this.topic;
+                this.lastSendType = 'start';
 
                 if (plType !== 'flow' && plType !== 'global') {
                     try {
@@ -196,13 +144,7 @@ module.exports = function (RED) {
                 hlp.errorHandler(this, err, 'Exception occured on withinTimeSwitch', 'internal error');
             }
         });
-        setStartTimeout(node);
-        setEndTimeout(node);
-        /* if (!node.nextStartTime && !node.nextEndTime) {
-            node.emit("input", {
-                type: 'intermediate',
-            });
-        } */
+        doCreateTimeout(node);
     }
     RED.nodes.registerType('time-inject', timeInjectNode);
 };

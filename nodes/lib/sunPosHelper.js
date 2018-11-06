@@ -325,7 +325,7 @@ function getMoonCalc(date, latitude, longitude, angleType) {
     return result;
 };
 /*******************************************************************************************************/
-function getTimeOfText(t) {
+function getTimeOfText(t, offset, next) {
     let d = new Date();
     if (t) {
         let matches = t.match(/(0[0-9]|[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
@@ -333,6 +333,17 @@ function getTimeOfText(t) {
         d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
         d.setMinutes(parseInt(matches[2]) || 0);
         d.setSeconds(parseInt(matches[3]) || 0);
+        d.setMilliseconds(0);
+    }
+    if (offset && !isNaN(offset) && offset !== 0) {
+        result = new Date(result.getTime() + offset * 1000);
+    }
+    if (next && !isNaN(next)) {
+        let now = new Date();
+        now.setMilliseconds(0);
+        if (d.getTime() <= (now.getTime())) {
+            d.setDate(now.getDate() + Number(next));
+        }
     }
     return d;
 };
@@ -344,18 +355,24 @@ function getTimeProp(node, vType, value, offset, next) {
     if (vType === '' || vType === 'none') {
         result = now;
     } else if (vType === 'entered') {
-        result = getTimeOfText(value, offset) || now;
+        result = getTimeOfText(value, offset, next) || now;
     } else if (vType === 'pdsTime') {
         //sun
         result = node.positionConfig.getSunTime(now, value);
+        if (result.getTime() <= (now.getTime())) {
+            result = node.positionConfig.getSunTimeTomorow(now, value);
+        }
     } else if (vType === 'pdmTime') {
         //moon
         result = node.positionConfig.getMoonTime(now, value);
+        if (result.getTime() <= (now.getTime())) {
+            result = node.positionConfig.getMoonTimeTomorow(now, value);
+        }        
     } else if (vType === 'msg') {
-        result = getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset) || now;
+        result = getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset, next) || now;
     } else if (vType === 'flow' || vType === 'global') {
         var contextKey = RED.util.parseContextStore(value);
-        result = getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
+        result = getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset, next) || now;
     } else {
         node.error("Not suported time definition! " + vType + '=' + value);
         node.status({
@@ -364,12 +381,6 @@ function getTimeProp(node, vType, value, offset, next) {
             text: "error - time definition"
         });
         result = now;
-    }
-    if (offset && !isNaN(offset) && offset !== 0) {
-        result = new Date(result.getTime() + offset * 60000);
-    }
-    if (next && (result.getTime() <= now.getTime())) {
-        result.setDate(now.getDate() + next);
     }
     return result;
 };

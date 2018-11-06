@@ -39,11 +39,9 @@ module.exports = function (RED) {
                 sunTimesCheck(node, now);
                 return new Date(node.sunTimesToday[value]);
             }
-            this.getMoonTimes = () => {
-                let res = moonTimesCheck(node);
-                res.today = node.moonTimesToday;
-                res.tomorrow = node.moonTimesTomorow;
-                return res;
+            this.getSunTimeTomorow = (now, value) => {
+                sunTimesCheck(node, now);
+                return new Date(node.sunTimesTomorow[value]);
             }
             this.getMoonTimes = () => {
                 let res = moonTimesCheck(node);
@@ -55,6 +53,50 @@ module.exports = function (RED) {
                 moonTimesCheck(node, now);
                 return new Date(node.moonTimesToday[value]);
             }
+            this.getMoonTimeTomorow = (now, value) => {
+                moonTimesCheck(node, now);
+                return new Date(node.moonTimesTomorow[value]);
+            }
+            this.getTimeProp = (msg, vType, value, offset, next, days) => {
+                node.debug('getTimeProp ' + node.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
+                let now = new Date();
+                let result;
+                if (vType === '' || vType === 'none') {
+                    result = now;
+                } else if (vType === 'entered') {
+                    result = hlp.getTimeOfText(value, offset, next);
+                } else if (vType === 'pdsTime') {
+                    //sun
+                    result = node.getSunTime(now, value);
+                    if (result.getTime() <= (now.getTime())) {
+                        result = node.getSunTimeTomorow(now, value);
+                    }
+                } else if (vType === 'pdmTime') {
+                    //moon
+                    result = node.getMoonTime(now, value);
+                    if (result.getTime() <= (now.getTime())) {
+                        result = node.getMoonTimeTomorow(now, value);
+                    }        
+                } else if (vType === 'msg') {
+                    let value = RED.util.getMessageProperty(msg, value, true);
+                    result = hlp.getTimeOfText(value, offset, next);
+                } else if (vType === 'flow' ||  vType === 'global') {
+                    var contextKey = RED.util.parseContextStore(value);
+                    if (!contextKey) {
+                        node.error("Context key " + vType + '' + value + " not found!");
+                    } else {
+                        let value = node.context()[vType].get(contextKey.key, contextKey.store);
+                        result = hlp.getTimeOfText(value, offset, next);
+                    }
+                } else {
+                    node.error("Not suported time definition! " + vType + '=' + value);
+                }
+
+                if (!result) {
+                    node.error("Can not get time for " + vType + '=' + value);
+                }
+                return result;
+            };
             initTimes(this);
         } catch (err) {
             hlp.errorHandler(this, err, 'Exception occured on position-config', 'internal error');

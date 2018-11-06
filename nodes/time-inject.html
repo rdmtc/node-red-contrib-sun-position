@@ -5,39 +5,44 @@
     </div>
     <hr>
     <div class="form-row">
-        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.startTime"></span></label>
-        <input type="text" id="node-input-startTime" style="width: 70%"/>
-        <input type="hidden" id="node-input-startTimeType">
+        <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
+        <input type="text" id="node-input-time" style="width: 70%"/>
+        <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-start-row time-start-offset hidden">
-        <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.startOffset"></span></label>
-        <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.startOffset">
+    <div class="form-row time-row time-offset hidden">
+        <label for="node-input-offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
+        <input id="node-input-offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+        <select style="width:100px" id="node-input-offsetMultiplier">
+            <option value="1" data-i18n="time-inject.label.seconds"></option>
+            <option value="60" data-i18n="time-inject.label.minutes"></option>
+            <option value="3600" data-i18n="time-inject.label.hours"></option>
+        </select><br/>
+        <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-row time-start-row time-start-payload hidden">
-        <label for="node-input-payloadStart"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadStart"></span></label>
-        <input type="text" id="node-input-payloadStart" style="width:70%">
-        <input type="hidden" id="node-input-payloadStartType">
+
+    <div class="form-row time-row time-payload hidden">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
+        <input type="text" id="node-input-payload" style="width:70%">
+        <input type="hidden" id="node-input-payloadType">
     </div>
-    <div class="form-row time-start-row time-start-topic hidden">
-        <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
-        <input type="text" id="node-input-topicStart">
-    </div>
-    <hr>
-    <div class="form-row">
-        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" style="width: 70%"/>
-        <input type="hidden" id="node-input-endTimeType">
-    </div>
-    <div class="form-row time-end-row time-end-offset hidden">
-        <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.endOffset"></span></label>
-        <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.endOffset">
-    </div>
-    <div class="form-row time-end-row time-end-payload hidden">
-        <label for="node-input-payloadEnd"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadEnd"></span></label>
-        <input type="text" id="node-input-payloadEnd" style="width:70%">
-        <input type="hidden" id="node-input-payloadEndType">
-    </div>
-    <div class="form-row time-end-row time-end-topic hidden">
+    <div class="form-row time-row time-topic hidden">
         <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
         <input type="text" id="node-input-topicStart">
     </div>
@@ -46,7 +51,41 @@
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
     </div>
+
+    <div class="form-tips" data-i18n="[html]time-inject.tip"></div>
   </script>
+  <style>
+    .time-inject-row {
+        padding-left: 110px;
+    }
+    .time-inject-row select {
+        margin: 3px 0;
+    }
+    .time-inject-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 100px;
+    }
+    .time-inject-days input {
+        width: auto;
+        vertical-align: baseline;
+    }
+    .time-inject-times {
+        width: 90px;
+    }
+    #time-inject-time {
+        width: 75px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+    }
+    .time-inject-count {
+        width: 40px !important;
+    }
+</style>
 
 <script type="text/x-red" data-help-name="time-inject">
     <p>Uses the suncalc module to generate an output at sunrise and sunset based on a specified location.</p>
@@ -70,62 +109,44 @@
                 type: "position-config",
                 required: true
             },
-            startTime: {
+            time: {
                 value: "",
                 required: false,
-                validate: RED.validators.typedInput("startTimeType")
+                validate: RED.validators.typedInput("timeType")
             },
-            startTimeType: {
+            timeType: {
                 value: "none"
             },
-            startOffset: {
+            timeDays: {
+                value: "*"
+            },
+            offset: {
                 value: 0,
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-startTime").typedInput('type') === 'none');
+                        ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
-            payloadStart: {
-                value: "",
-                validate: function (v) {
-                    return RED.validators.typedInput("payloadStartType")(v) ||
-                        ($("#node-input-startTime").typedInput('type') === 'none');
-                }
-            },
-            payloadStartType: {
-                value: "date"
-            },
-            topicStart: {
-                value: ""
-            },
-            endTime: {
-                value: "",
-                required: false,
-                validate: RED.validators.typedInput("endTimeType")
-            },
-            endTimeType: {
-                value: "none"
-            },
-            endOffset: {
-                value: 0,
+            offsetMultiplier: {
+                value: 60,
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-endTime").typedInput('type') === 'none');
+                        ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
-            payloadEnd: {
+            payload: {
                 value: "",
                 validate: function (v) {
-                    return RED.validators.typedInput("payloadEndType")(v) ||
-                        ($("#node-input-endTime").typedInput('type') === 'none');
+                    return RED.validators.typedInput("payloadType")(v) ||
+                        ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
-            payloadEndType: {
+            payloadType: {
                 value: "date"
             },
-            topicEnd: {
+            topic: {
                 value: ""
             }
         },
@@ -137,28 +158,30 @@
             if (this.name) {
                 return this.name;
             }
-            if ((this.startTimeType === 'none' || this.startTimeType === '') &&
-                (this.endTimeType === 'none' || this.endTimeType === '')) {
-                return 'inject';
-            }
-            if (this.name) {
-                return this.name;
-            }
             var result = "";
             const getId = (type, value) => {
                 if (type === "string" ||
                     type === "str" ||
                     type === "num" ||
                     type === "bool") {
+                    if (value=='') {
+                        return this._("time-inject.label.blank");
+                    }
                     return value;
                 } else if (type === 'jsonata') {
-                    return "json expr.";
+                    if (value.length < 15) {
+                        return value;
+                    }
+                    return this._("time-inject.label.jsonata");;
                 } else if (type === 'json') {
-                    return "json";
+                    if (value.length < 15) {
+                        return value;
+                    }
+                    return this._("time-inject.label.json");
                 } else if (type === 'bin') {
-                    return "binary";
+                    return this._("time-inject.label.binary");
                 } else if (type === 'date') {
-                    return "timestamp";
+                    return this._("time-inject.label.timestamp");
                 } else if (type === 'flow' || type === 'global') {
                     return type + '.' + value;
                 } else if (type == 'pdmTime') {
@@ -166,29 +189,14 @@
                 }
                 return value;
             }
-            if (this.startTimeType !== 'none' && this.startTimeType !== '') {
-                let part1 = getId(this.startTimeType, this.startTime);
+            if (this.timeType === 'none' || this.timeType === '') {
+                return this._("time-inject.label.inject");
+            } else {
+                let part1 = getId(this.timeType, this.time);
                 if (part1.length > 24) {
                     result += part1 + '=...';
                 } else {
-                    result += part1 + '=' + getId(this.payloadStartType, this.payloadStart);
-                }
-            }
-            if (this.endTimeType !== 'none' && this.endTimeType !== '') {
-                let part1 = getId(this.endTimeType, this.endTime);
-                let part2 = getId(this.payloadEndType, this.payloadEnd);
-                if (result.length > 0) {
-                    result += ' / ';
-                }
-
-                if (result.length > 24) {
-                    result += '...';
-                } else if (result.length + part1.length > 24) {
-                    result += part1 + '=...';
-                } else if (result.length > 0) {
-                    result += part1 + '=...';
-                } else {
-                    result += part1 + '=' + part2;
+                    result += part1 + '=' + getId(this.payloadType, this.payload);
                 }
             }
             if (this.topic && (this.topic.length + result.length <= 32)) {
@@ -202,23 +210,14 @@
         paletteLabel: 'time inject',
         align: 'left',
         oneditprepare: function () {
-            if (this.payloadStartType == null) {
-                if (this.payloadStart == "") {
-                    this.payloadStartType = "date";
+            if (this.payloadType == null) {
+                if (this.payload == "") {
+                    this.payloadType = "date";
                 } else {
-                    this.payloadStartType = "str";
+                    this.payloadType = "str";
                 }
-            } else if (this.payloadStartType === 'string' || this.payloadStartType === 'none') {
-                this.payloadStartType = "str";
-            }
-            if (this.payloadEndType == null) {
-                if (this.payloadEnd == "") {
-                    this.payloadEndType = "date";
-                } else {
-                    this.payloadEndType = "str";
-                }
-            } else if (this.payloadEndType === 'string' || this.payloadEndType === 'none') {
-                this.payloadEndType = "str";
+            } else if (this.payloadType === 'string' || this.payloadType === 'none') {
+                this.payloadType = "str";
             }
             let typeTimeNone = {
                 value: "none",
@@ -248,44 +247,23 @@
                 icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
                 options: ['rise', 'set']
             };
-            $("#node-input-startTimeType").val(this.startTimeType);
-            $("#node-input-startTime").typedInput({
-                default: this.startTimeType || 'none',
-                typeField: $("#node-input-startTimeType"),
+            $("#node-input-timeType").val(this.timeType);
+            $("#node-input-time").typedInput({
+                default: this.timeType || 'none',
+                typeField: $("#node-input-timeType"),
                 types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
             });
-            $("#node-input-startTime").on('change', function (type, value) {
-                if ($("#node-input-startTime").typedInput('type') === 'none') {
-                    $(".time-start-row").hide();
+            $("#node-input-time").on('change', function (type, value) {
+                if ($("#node-input-time").typedInput('type') === 'none') {
+                    $(".time-row").hide();
                 } else {
-                    $(".time-start-row").show();
+                    $(".time-row").show();
                 }
             });
-            $("#node-input-payloadStartType").val(this.payloadStartType);
-            $("#node-input-payloadStart").typedInput({
-                default: this.payloadStartType || 'date',
-                typeField: $("#node-input-payloadStartType"),
-                types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
-                    'jsonata'
-                ]
-            });
-            $("#node-input-endTimeType").val(this.endTimeType);
-            $("#node-input-endTime").typedInput({
-                default: this.endTimeType || 'none',
-                typeField: $("#node-input-endTimeType"),
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
-            });
-            $("#node-input-endTime").on('change', function (type, value) {
-                if ($("#node-input-endTime").typedInput('type') === 'none') {
-                    $(".time-end-row").hide();
-                } else {
-                    $(".time-end-row").show();
-                }
-            });
-            $("#node-input-payloadEndType").val(this.payloadEndType);
-            $("#node-input-payloadEnd").typedInput({
-                default: this.endTimeType || 'date',
-                typeField: $("#node-input-payloadEndType"),
+            $("#node-input-payloadType").val(this.payloadType);
+            $("#node-input-payload").typedInput({
+                default: this.payloadType || 'date',
+                typeField: $("#node-input-payloadType"),
                 types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
                     'jsonata'
                 ]
@@ -294,14 +272,33 @@
                 max: 1439,
                 min: -1439
             });
-            $("#node-input-startTime").change();
-            $("#node-input-endTime").change();
+            if (this.timeDays == "*") {
+                $("#time-inject-timeDays input[type=checkbox]").prop("checked",true);
+            } else {
+                $("#time-inject-timeDays input[type=checkbox]").removeAttr("checked");
+                this.timeDays.split(",").forEach(function(v) {
+                    $("#time-inject-timeDays [value=" + v + "]").prop("checked", true);
+                });
+            }
+
+            $("#node-input-time").change();
         },
         oneditsave: function () {
-            this.startTimeType = $("#node-input-startTime").typedInput('type');
-            this.payloadStartType = $("#node-input-payloadStart").typedInput('type');
-            this.endTimeType = $("#node-input-endTime").typedInput('type');
-            this.payloadEndType = $("#node-input-payloadEnd").typedInput('type');
+            this.timeType = $("#node-input-time").typedInput('type');
+            this.payloadType = $("#node-input-payload").typedInput('type');
+            var days = $('#time-inject-timeDays input[type=checkbox]:checked').map(function(_, el) {
+                return $(el).val()
+            }).get();
+
+            if (days.length == 0) {
+                this.timeDays = "";
+            } else {
+                if (days.length == 7) {
+                    this.timeDays="*";
+                } else {
+                    this.timeDays = days.join(",");
+                }
+            }
         },
         button: {
             enabled: function () {
@@ -313,51 +310,51 @@
                         message: RED._("notification.warnings.undeployedChanges")
                     }), "warning");
                 }
-                var payload = this.payloadStart;
-                if ((this.payloadStartType === 'flow') ||
-                    (this.payloadStartType === 'global')) {
+                var payload = this.payload;
+                if ((this.payloadType === 'flow') ||
+                    (this.payloadType === 'global')) {
                     var key = RED.utils.parseContextKey(payload);
-                    payload = this.payloadStartType + "." + key.key;
+                    payload = this.payloadType + "." + key.key;
                 }
                 var label = (this.name || payload);
                 if (label.length > 30) {
                     label = label.substring(0, 50) + "...";
                 }
                 label = label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                if (this.payloadStartType === "date") {
-                    label = this._("inject.timestamp");
+                if (this.payloadType === "date") {
+                    label = this._("time-inject.label.timestamp");
                 }
-                if (this.payloadStartType === "none") {
-                    label = this._("inject.blank");
+                if (this.payloadType === "none") {
+                    label = this._("time-inject.label.blank");
                 }
                 var node = this;
                 $.ajax({
                     url: "inject/" + this.id,
                     type: "POST",
                     success: function (resp) {
-                        RED.notify(node._("inject.success", {
+                        RED.notify(node._("time-inject.label.success", {
                             label: label
                         }), "success");
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify(node._("common.notification.error", {
+                            RED.notify(node._("time-inject.notification.error", {
                                 message: node._(
-                                    "common.notification.errors.not-deployed")
+                                    "time-inject.notification.errors.not-deployed")
                             }), "error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify(node._("common.notification.error", {
-                                message: node._("inject.errors.failed")
+                            RED.notify(node._("time-inject.notification.error", {
+                                message: node._("time-inject.errors.failed")
                             }), "error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify(node._("common.notification.error", {
+                            RED.notify(node._("time-inject.notification.error", {
                                 message: node._(
-                                    "common.notification.errors.no-response")
+                                    "time-inject.notification.errors.no-response")
                             }), "error");
                         } else {
-                            RED.notify(node._("common.notification.error", {
+                            RED.notify(node._("time-inject.notification.error", {
                                 message: node._(
-                                    "common.notification.errors.unexpected", {
+                                    "time-inject.notification.errors.unexpected", {
                                         status: jqXHR.status,
                                         message: textStatus
                                     })
