@@ -3,43 +3,41 @@
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-inject.label.position"></span></label>
         <input type="text" id="node-input-positionConfig">
     </div>
-    <div class="form-row">
-            <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
-            <input type="text" id="node-input-topic">
-    </div>
     <hr>
     <div class="form-row">
         <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.startTime"></span></label>
         <input type="text" id="node-input-startTime" style="width: 70%"/>
+        <input type="hidden" id="node-input-startTimeType">
     </div>
-    <div class="form-row">
-            <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.startOffset"></span></label>
-            <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.startOffset">
+    <div class="form-row time-start-row time-start-offset hidden">
+        <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.startOffset"></span></label>
+        <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.startOffset">
     </div>
-    <div class="form-row">
+    <div class="form-row time-start-row time-start-payload hidden">
         <label for="node-input-payloadStart"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadStart"></span></label>
         <input type="text" id="node-input-payloadStart" style="width:70%">
         <input type="hidden" id="node-input-payloadStartType">
     </div>
-    <div class="form-row">
+    <div class="form-row time-start-row time-start-topic hidden">
         <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
         <input type="text" id="node-input-topicStart">
     </div>
     <hr>
     <div class="form-row">
-            <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.endTime"></span></label>
-            <input type="text" id="node-input-endTime" style="width: 70%"/>
+        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.endTime"></span></label>
+        <input type="text" id="node-input-endTime" style="width: 70%"/>
+        <input type="hidden" id="node-input-endTimeType">
     </div>
-    <div class="form-row">
-            <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.endOffset"></span></label>
-            <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.endOffset">
+    <div class="form-row time-end-row time-end-offset hidden">
+        <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.endOffset"></span></label>
+        <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.endOffset">
     </div>
-    <div class="form-row">
-        <label for="node-input-payloadStart"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadStart"></span></label>
-        <input type="text" id="node-input-payloadStart" style="width:70%">
-        <input type="hidden" id="node-input-payloadStartType">
+    <div class="form-row time-end-row time-end-payload hidden">
+        <label for="node-input-payloadEnd"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payloadEnd"></span></label>
+        <input type="text" id="node-input-payloadEnd" style="width:70%">
+        <input type="hidden" id="node-input-payloadEndType">
     </div>
-    <div class="form-row">
+    <div class="form-row time-end-row time-end-topic hidden">
         <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
         <input type="text" id="node-input-topicStart">
     </div>
@@ -67,53 +65,68 @@
                 value: "",
                 required: false
             },
-            topic: {
-                value: ""
-            },
             positionConfig: {
                 value: "",
                 type: "position-config",
                 required: true
             },
-            payloadStart: {
-                value: "",
-                validate: RED.validators.typedInput("payloadType")
-            },
-            payloadStartType: {
-                value: "date"
-            },
             startTime: {
                 value: "",
-                required: true,
+                required: false,
                 validate: RED.validators.typedInput("startTimeType")
             },
             startTimeType: {
-                value: "entered"
+                value: "none"
             },
             startOffset: {
                 value: 0,
                 required: true,
-                validate: RED.validators.number()
+                validate: function (v) {
+                    return RED.validators.number()(v) ||
+                        ($("#node-input-startTime").typedInput('type') === 'none');
+                }
             },
-            payloadEnd: {
+            payloadStart: {
                 value: "",
-                validate: RED.validators.typedInput("payloadType")
+                validate: function (v) {
+                    return RED.validators.typedInput("payloadStartType")(v) ||
+                        ($("#node-input-startTime").typedInput('type') === 'none');
+                }
             },
-            payloadEndType: {
+            payloadStartType: {
                 value: "date"
+            },
+            topicStart: {
+                value: ""
             },
             endTime: {
                 value: "",
-                required: true,
+                required: false,
                 validate: RED.validators.typedInput("endTimeType")
             },
             endTimeType: {
-                value: "entered"
+                value: "none"
             },
             endOffset: {
                 value: 0,
                 required: true,
-                validate: RED.validators.number()
+                validate: function (v) {
+                    return RED.validators.number()(v) ||
+                        ($("#node-input-endTime").typedInput('type') === 'none');
+                }
+            },
+            payloadEnd: {
+                value: "",
+                validate: function (v) {
+                    return RED.validators.typedInput("payloadEndType")(v) ||
+                        ($("#node-input-endTime").typedInput('type') === 'none');
+                }
+            },
+            payloadEndType: {
+                value: "date"
+            },
+            topicEnd: {
+                value: ""
             }
         },
         icon: "injectSun.png",
@@ -124,15 +137,27 @@
             if (this.name) {
                 return this.name;
             }
+            if ((this.startTimeType === 'none' || this.startTimeType === '') &&
+                (this.endTimeType === 'none' || this.endTimeType === '')) {
+                return 'inject';
+            }
+            if (this.name) {
+                return this.name;
+            }
             var result = "";
             const getId = (type, value) => {
                 if (type === "string" ||
                     type === "str" ||
                     type === "num" ||
-                    type === "bool" ||
-                    type === "json") {
+                    type === "bool") {
                     return value;
-                } else if (this.payloadType === 'date') {
+                } else if (type === 'jsonata') {
+                    return "json expr.";
+                } else if (type === 'json') {
+                    return "json";
+                } else if (type === 'bin') {
+                    return "binary";
+                } else if (type === 'date') {
                     return "timestamp";
                 } else if (type === 'flow' || type === 'global') {
                     return type + '.' + value;
@@ -141,7 +166,7 @@
                 }
                 return value;
             }
-            if (this.startTime) {
+            if (this.startTimeType !== 'none' && this.startTimeType !== '') {
                 let part1 = getId(this.startTimeType, this.startTime);
                 if (part1.length > 24) {
                     result += part1 + '=...';
@@ -149,7 +174,7 @@
                     result += part1 + '=' + getId(this.payloadStartType, this.payloadStart);
                 }
             }
-            if (this.endTime) {
+            if (this.endTimeType !== 'none' && this.endTimeType !== '') {
                 let part1 = getId(this.endTimeType, this.endTime);
                 let part2 = getId(this.payloadEndType, this.payloadEnd);
                 if (result.length > 0) {
@@ -165,9 +190,6 @@
                 } else {
                     result += part1 + '=' + part2;
                 }
-            }
-            if (result.length = 0) {
-                return 'time inject';
             }
             if (this.topic && (this.topic.length + result.length <= 32)) {
                 return this.topic + ":" + result;
@@ -198,17 +220,71 @@
             } else if (this.payloadEndType === 'string' || this.payloadEndType === 'none') {
                 this.payloadEndType = "str";
             }
+            let typeTimeNone = {
+                value: "none",
+                label: "not used",
+                icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+                hasValue: false
+            };
+            let typeTime = {
+                value: "entered",
+                label: "timestamp",
+                icon: "icons/node-red-contrib-sun-position/inputTypeTime.png",
+                hasValue: true,
+                validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/
+            };
+            let typeTimeSun = {
+                value: "pdsTime",
+                label: "sun ",
+                icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
+                options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
+                    'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
+                    'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
+                ]
+            };
+            let typeTimeMoon = {
+                value: "pdmTime",
+                label: "moon ",
+                icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
+                options: ['rise', 'set']
+            };
+            $("#node-input-startTimeType").val(this.startTimeType);
+            $("#node-input-startTime").typedInput({
+                default: this.startTimeType || 'none',
+                typeField: $("#node-input-startTimeType"),
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
+            });
+            $("#node-input-startTime").on('change', function (type, value) {
+                if ($("#node-input-startTime").typedInput('type') === 'none') {
+                    $(".time-start-row").hide();
+                } else {
+                    $(".time-start-row").show();
+                }
+            });
             $("#node-input-payloadStartType").val(this.payloadStartType);
             $("#node-input-payloadStart").typedInput({
-                default: 'str',
+                default: this.payloadStartType || 'date',
                 typeField: $("#node-input-payloadStartType"),
                 types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
                     'jsonata'
                 ]
             });
+            $("#node-input-endTimeType").val(this.endTimeType);
+            $("#node-input-endTime").typedInput({
+                default: this.endTimeType || 'none',
+                typeField: $("#node-input-endTimeType"),
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
+            });
+            $("#node-input-endTime").on('change', function (type, value) {
+                if ($("#node-input-endTime").typedInput('type') === 'none') {
+                    $(".time-end-row").hide();
+                } else {
+                    $(".time-end-row").show();
+                }
+            });
             $("#node-input-payloadEndType").val(this.payloadEndType);
             $("#node-input-payloadEnd").typedInput({
-                default: 'str',
+                default: this.endTimeType || 'date',
                 typeField: $("#node-input-payloadEndType"),
                 types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
                     'jsonata'
@@ -218,6 +294,14 @@
                 max: 1439,
                 min: -1439
             });
+            $("#node-input-startTime").change();
+            $("#node-input-endTime").change();
+        },
+        oneditsave: function () {
+            this.startTimeType = $("#node-input-startTime").typedInput('type');
+            this.payloadStartType = $("#node-input-payloadStart").typedInput('type');
+            this.endTimeType = $("#node-input-endTime").typedInput('type');
+            this.payloadEndType = $("#node-input-payloadEnd").typedInput('type');
         },
         button: {
             enabled: function () {

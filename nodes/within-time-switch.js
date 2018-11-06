@@ -25,13 +25,6 @@ module.exports = function (RED) {
                 this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
                 this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
 
-                let now = new Date();
-                if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
-                    let dto = new Date(msg.ts);
-                    if (dto !== "Invalid Date" && !isNaN(dto)) {
-                        now = dto;
-                    }
-                }
                 let start;
                 let end;
                 let alternateTimes = this.propertyType !== 'none';
@@ -44,37 +37,48 @@ module.exports = function (RED) {
                         alternateTimes = (this.context()[this.propertyType].get(contextKey.key, contextKey.store) == true);
                     } else if (this.propertyType === 'jsonata') {
                         try {
-                            alternateTimes = RED.util.evaluateJSONataExpression(node.property,msg);
-                        } catch(err) {
-                            this.error(RED._("within-time-switch.errors.invalid-jsonata-expr",{error:err.message}));
+                            alternateTimes = RED.util.evaluateJSONataExpression(node.property, msg);
+                        } catch (err) {
+                            this.error(RED._("within-time-switch.errors.invalid-jsonata-expr", {
+                                error: err.message
+                            }));
                             alternateTimes = false;
                         }
                     } else {
                         alternateTimes = false;
-                        this.error(RED._("within-time-switch.errors.invalid-property-type",{type:this.propertyType, value:this.property}));
+                        this.error(RED._("within-time-switch.errors.invalid-property-type", {
+                            type: this.propertyType,
+                            value: this.property
+                        }));
                     }
                 }
 
                 if (alternateTimes && config.startTimeAltType !== 'none') {
                     this.debug('using alternate start time');
-                    start = hlp.getTime(this, now, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
+                    start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
                 } else {
-                    start = hlp.getTime(this, now, config.startTimeType, config.startTime, config.startOffset);
+                    start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
                 }
                 if (alternateTimes && config.endTimeAltType !== 'none') {
                     this.debug('using alternate end time');
-                    end = hlp.getTime(this, now, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
+                    end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
                 } else {
-                    end = hlp.getTime(this, now, config.endTimeType, config.endTime, config.startOffset);
+                    end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.startOffset);
                 }
 
+                let now = new Date();
+                if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
+                    let dto = new Date(msg.ts);
+                    if (dto !== "Invalid Date" && !isNaN(dto)) {
+                        now = dto;
+                    }
+                }
                 this.debug(start + ' - ' + now + ' - ' + end);
+                start = start.getSeconds() + start.getMinutes() * 60 + start.getHours() * 3600;
+                end = end.getSeconds() + end.getMinutes() * 60 + end.getHours() * 3600;
+                let cmpNow = now.getSeconds() + now.getMinutes() * 60 + now.getHours() * 3600;
+                this.debug(start + ' - ' + cmpNow + ' - ' + end);
 
-                start = start.getMinutes() + start.getHours() * 60;
-                end = end.getMinutes() + end.getHours() * 60;
-                let cmpNow = now.getMinutes() + now.getHours() * 60;
-
-                this.debug(start + ' - ' + now + ' - ' + end);
                 if (start < end) {
                     if (cmpNow >= start && cmpNow <= end) {
                         this.send([msg, null]);

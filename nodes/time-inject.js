@@ -14,122 +14,195 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        this.debug('timeInjectNode ' + JSON.stringify(config));
 
-        this.topic = config.topic;
-        this.payloadStart = config.payloadStart;
-        this.payloadStartType = config.payloadStartType;
         this.startTime = config.startTime;
         this.startTimeType = config.startTimeType;
         this.startOffset = config.startOffset;
+        this.payloadStart = config.payloadStart;
+        this.payloadStartType = config.payloadStartType;
+        this.topicStart = config.topicStart;
 
-        this.payloadEnd = config.payloadEnd;
-        this.payloadEndType = config.payloadEndType;
         this.endTime = config.endTime;
         this.endTimeType = config.endTimeType;
         this.endOffset = config.endOffset;
-        this.startTimeout = null;
-        this.endTimeout = null;
+        this.payloadEnd = config.payloadEnd;
+        this.payloadEndType = config.payloadEndType;
+        this.topicEnd = config.topicEnd;
+
+        this.lastSendType = 'none';
+        this.lastInputType = 'none';
+        this.startTimeoutObj = null;
+        this.endTimeoutObj = null;
         var node = this;
 
-        var node = this;
-
-        node.scheduleTime = function (time, val) {
+        this.getScheduleTime = (time) => {
             var now = new Date();
-            var millis = time - now;
-            if (millis < 0) {
+            var millis = time.getTime() - now.getTime();
+            while (millis < 10) {
                 millis += 86400000; //24h
             }
-            return setTimeout(() => {
-                node.emit("input", {type : val});
-            }, millis);
-        };
+            return millis;
+        }
 
-        this.on('close', function() {
-            if (this.startTimeout) {
+        this.setStatus = () => {
+            let formatT = (t) => {
+                return (t) ? (t.getHours() + ':' + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes()) : '';
+            }
 
+            if (node.nextStartTime && node.nextEndTime) {
+                this.status({
+                    fill: "green",
+                    shape: "dot",
+                    text: formatT(node.nextStartTime) + ' - ' + formatT(node.nextEndTime)
+                });
+            } else if (node.nextStartTime) {
+                this.status({
+                    fill: "green",
+                    shape: "ring",
+                    text: formatT(node.nextStartTime)
+                });
+            } else if (node.nextEndTime) {
+                this.status({
+                    fill: "green",
+                    shape: "ring",
+                    text: formatT(node.nextEndTime)
+                });
+            } else {
+                this.status({});
+            }
+        }
+
+        function setStartTimeout(node) {
+            if (node.startTimeoutObj) {
+                clearTimeout(node.startTimeoutObj);
+            }
+            if (node.startTimeType !== 'none') {
+                node.nextStartTime = hlp.getTimeProp(node, node.startTimeType, node.startTime, node.startOffset, 1);
+            } else {
+                node.nextStartTime = null;
+            }
+            if (node.nextStartTime) {
+                let millis = node.getScheduleTime(node.nextStartTime);
+                node.debug('setStartTimeout ' + node.nextStartTime + ' in ' + millis + 'ms');
+                node.startTimeoutObj = setTimeout(() => {
+                    node.emit("input", {
+                        type: 'start'
+                    });
+                    node.startTimeoutObj = null;
+                    node.debug('redo setStartTimeout');
+                    setStartTimeout(node);
+                }, millis);
+            }
+            node.setStatus();
+        }
+
+        function setEndTimeout(node) {
+            if (node.endTimeoutObj) {
+                clearTimeout(node.endTimeoutObj);
+            }
+            if (config.endTimeType !== 'none') {
+                node.nextEndTime = hlp.getTimeProp(node, node.endTimeType, node.endTime, node.endOffset, 1);
+            } else {
+                node.nextEndTime = null;
+            }
+            if (node.nextEndTime) {
+                let millis = node.getScheduleTime(node.nextEndTime);
+                node.debug('setEndTimeout ' + node.nextEndTime + ' in ' + millis + 'ms');
+                node.startTimeoutObj = setTimeout(() => {
+                    node.emit("input", {
+                        type: 'end'
+                    });
+                    node.endTimeoutObj = null;
+                    node.debug('redo setEndTimeout');
+                    setEndTimeout(node);
+                }, millis);
+            }
+            node.setStatus();
+        }
+
+        this.on('close', function () {
+            if (this.startTimeoutObj) {
+                clearTimeout(this.startTimeoutObj);
+            }
+            if (this.endTimeoutObj) {
+                clearTimeout(this.endTimeoutObj);
             }
             // tidy up any state
         });
 
         this.on('input', msg => {
             try {
-                msg.topic = this.topic;
+                this.debug('input ' + JSON.stringify(msg));
+                this.lastInputType = msg.type;
+                let plType = 'date';
+                let plValue = '';
 
-                this.debug('starting ' + JSON.stringify(msg, Object.getOwnPropertyNames(msg)));
-                this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
-                this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
-
-                let now = new Date();
-                if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
-                    let dto = new Date(msg.ts);
-                    if (dto !== "Invalid Date" && !isNaN(dto)) {
-                        now = dto;
+                if (msg.type === 'start' || (msg.type !== 'end' && this.lastSendType !== 'start')) {
+                    if (this.startTimeType !== 'none') {
+                        plType = this.payloadStartType;
+                        plValue = this.payloadStart;
                     }
-                }
-                let start;
-                let end;
-                let alternateTimes = config.addTimes;
-                if (alternateTimes) {
-                    this.debug('alternate times enabled');
-                    if (this.propertyType === 'msg') {
-                        alternateTimes = (RED.util.getMessageProperty(msg, this.property, true) == true);
-                    } else if (this.propertyType === 'flow' || this.propertyType === 'global') {
-                        var contextKey = RED.util.parseContextStore(this.property);
-                        alternateTimes = (this.context()[this.propertyType].get(contextKey.key, contextKey.store) == true);
+                    msg.topic = this.topicStart;
+                    this.lastSendType = 'start';
+                } else {
+                    if (this.payloadEndType !== 'none') {
+                        plType = this.payloadEndType;
+                        plValue = this.payloadEnd;
                     }
+                    msg.topic = this.topicEnd;
+                    this.lastSendType = 'end';
                 }
 
-                if (alternateTimes && config.startTimeAlt) {
-                    this.debug('using alternate start time');
-                    start = getTime(this, now, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
-                } else {
-                    start = getTime(this, now, config.startTimeType, config.startTime, config.startOffset);
-                }
-                if (alternateTimes && config.endTimeAlt) {
-                    this.debug('using alternate end time');
-                    end = getTime(this, now, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
-                } else {
-                    end = getTime(this, now, config.endTimeType, config.endTime, config.startOffset);
-                }
-
-                this.debug(start + ' - ' + now + ' - ' + end);
-
-                start = start.getMinutes() + start.getHours() * 60;
-                end = end.getMinutes() + end.getHours() * 60;
-                let cmpNow = now.getMinutes() + now.getHours() * 60;
-
-                this.debug(start + ' - ' + now + ' - ' + end);
-                if (start < end) {
-                    if (cmpNow >= start && cmpNow <= end) {
-                        this.send([msg, null]);
-                        this.status({
-                            fill: "green",
-                            shape: "dot",
-                            text: now.getHours() + ':' + now.getMinutes()
-                        });
-                        return;
+                if (plType !== 'flow' && plType !== 'global') {
+                    try {
+                        if (plType == null || plType === "date" || plType === "none" || plType === "") {
+                            if (plValue === "") {
+                                msg.payload = Date.now();
+                            } else {
+                                msg.payload = plValue;
+                            }
+                        } else if (plType === 'none') {
+                            msg.payload = "";
+                        } else if (msg.propertyType === 'jsonata') {
+                            try {
+                                msg.payload = RED.util.evaluateJSONataExpression(plValue, msg);
+                            } catch (err) {
+                                this.error(RED._("time-inject.errors.invalid-jsonata-expr", {
+                                    error: err.message
+                                }));
+                                msg.payload = plValue;
+                            }
+                        } else {
+                            msg.payload = RED.util.evaluateNodeProperty(plValue, plType, this, msg);
+                        }
+                        this.send(msg);
+                        msg = null;
+                    } catch (err) {
+                        this.error(err, msg);
                     }
                 } else {
-                    if (!(cmpNow > end && cmpNow < start)) {
-                        this.send([msg, null]);
-                        this.status({
-                            fill: "green",
-                            shape: "ring",
-                            text: now.getHours() + ':' + now.getMinutes()
-                        });
-                        return;
-                    }
+                    RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
+                        if (err) {
+                            node.error(err, msg);
+                        } else {
+                            msg.payload = res;
+                            node.send(msg);
+                        }
+                    });
                 }
-                this.status({
-                    fill: "yellow",
-                    shape: "dot",
-                    text: now.getHours() + ':' + now.getMinutes()
-                });
                 this.send([null, msg]);
             } catch (err) {
                 hlp.errorHandler(this, err, 'Exception occured on withinTimeSwitch', 'internal error');
             }
         });
+        setStartTimeout(node);
+        setEndTimeout(node);
+        /* if (!node.nextStartTime && !node.nextEndTime) {
+            node.emit("input", {
+                type: 'intermediate',
+            });
+        } */
     }
     RED.nodes.registerType('time-inject', timeInjectNode);
 };

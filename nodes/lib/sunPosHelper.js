@@ -13,8 +13,7 @@ module.exports = {
     getSunCalc,
     getMoonCalc,
     getTimeOfText,
-    getTime,
-    getCacheTimes
+    getTimeProp
 };
 
 /*******************************************************************************************************/
@@ -326,87 +325,52 @@ function getMoonCalc(date, latitude, longitude, angleType) {
     return result;
 };
 /*******************************************************************************************************/
-function getTimeOfText(t, offset) {
+function getTimeOfText(t) {
     let d = new Date();
     if (t) {
         let matches = t.match(/(0[0-9]|[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
-        console.log(matches);
+        //console.log(matches);
         d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
         d.setMinutes(parseInt(matches[2]) || 0);
         d.setSeconds(parseInt(matches[3]) || 0);
-        if (offset && !isNaN(offset) && offset !== 0) {
-            d = new Date(d.getTime() + offset * 60000);
-        }
     }
     return d;
 };
 /*******************************************************************************************************/
-function getTime(node, now, vType, value, offset) {
-    node.debug('vType=' + vType + ' value=' + value + ' offset=' + offset);
-    if (vType === 'entered' || vType === '') {
-        return getTimeOfText(value, offset) || now;
+function getTimeProp(node, vType, value, offset, next) {
+    //node.debug('getTimeProp ' + node.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
+    let now = new Date();
+    let result;
+    if (vType === '' || vType === 'none') {
+        result = now;
+    } else if (vType === 'entered') {
+        result = getTimeOfText(value, offset) || now;
     } else if (vType === 'pdsTime') {
         //sun
-        const date = new Date(getCacheTimes(node,node.positionConfig).today.sunTimes[value]);
-        if (offset && !isNaN(offset) && offset !== 0) {
-            return new Date(date.getTime() + offset * 60000);
-        }
-        return date;
+        result = node.positionConfig.getSunTime(now, value);
     } else if (vType === 'pdmTime') {
         //moon
-        const date = new Date(getCacheTimes(node,node.positionConfig).today.moonTimes[value]);
-        if (offset && !isNaN(offset) && offset !== 0) {
-            return new Date(date.getTime() + offset * 60000);
-        }
-        return date;
+        result = node.positionConfig.getMoonTime(now, value);
     } else if (vType === 'msg') {
-        return getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset) || now;
+        result = getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset) || now;
     } else if (vType === 'flow' || vType === 'global') {
         var contextKey = RED.util.parseContextStore(value);
-        return getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
+        result = getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
+    } else {
+        node.error("Not suported time definition! " + vType + '=' + value);
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: "error - time definition"
+        });
+        result = now;
     }
-    node.error("Not suported time definition! " + vType + '=' + value);
-    node.status({
-        fill: "red",
-        shape: "dot",
-        text: "error - time definition"
-    });
-    return now;
+    if (offset && !isNaN(offset) && offset !== 0) {
+        result = new Date(result.getTime() + offset * 60000);
+    }
+    if (next && (result.getTime() <= now.getTime())) {
+        result.setDate(now.getDate() + next);
+    }
+    return result;
 };
-/*******************************************************************************************************/
-function cacheTimeRefresh(node, config) {
-    var today = new Date();
-    var tomorrow = new Date();
-    tomorrow.setDate(today.getDate()+1);
-    var obj = {
-        date : today,
-        dayid : today.getDay + today.getMonth * 100 + today.getFullYear * 10000000,
-        latitude : config.latitude,
-        longitude : config.longitude,
-        today: {
-            sunTimes : sunCalc.getTimes(today, config.latitude, config.longitude),
-            moonTimes : sunCalc.getMoonTimes(today, config.latitude, config.longitude, true),
-        },
-        tomorow: {
-            sunTimes : sunCalc.getTimes(tomorrow, config.latitude, config.longitude),
-            moonTimes : sunCalc.getMoonTimes(tomorrow, config.latitude, config.longitude, true),
-        }
-    }
-    node.context().global.set(config.cachProp, obj);
-    return obj;
-}
-
-function getCacheTimes(node, config) {
-    let chachedSunCalc = this.context().global.get(config.cachProp);    
-    let needRefresh = (!chachedSunCalc || !chachedSunCalc.date);
-    if (needRefresh) {
-        return cacheTimeRefresh(node.config);
-    }
-    let today = new Date();
-    let dayid = today.getDay + today.getMonth * 100 + today.getFullYear * 10000000;
-    if (chachedSunCalc.dayid != dayid) {
-        return cacheTimeRefresh(node.config);
-    }
-    return chachedSunCalc;
-}
 /*******************************************************************************************************/
