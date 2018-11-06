@@ -1,34 +1,10 @@
 /********************************************
  * within-time-switch:
  *********************************************/
-const path = require('path');
-var hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
-//const hlp = '/lib/sunPosHelper.js';
+"use strict";
 
-const getTime = (node, now, vType, value, offset) => {
-    node.debug('vType=' + vType + ' value=' + value + ' offset=' + offset);
-    if (vType === 'entered' || vType === '') {
-        return hlp.getTimeOfText(value, offset) || now;
-    } else if (vType === 'pdsTime') {
-        //sun
-        return hlp.getSunTime(node.positionConfig, now, value, offset)
-    } else if (vType === 'pdmTime') {
-        //moon
-        return hlp.getMoonTime(node.positionConfig, now, value, offset)
-    } else if (vType === 'msg') {
-        return hlp.getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset) || now;
-    } else if (vType === 'flow' || vType === 'global') {
-        var contextKey = RED.util.parseContextStore(value);
-        return hlp.getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
-    }
-    node.error("Not suported time definition! " + vType + '=' + value);
-    node.status({
-        fill: "red",
-        shape: "dot",
-        text: "error - time definition"
-    });
-    return now;
-}
+const path = require('path');
+const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
 module.exports = function (RED) {
     "use strict";
@@ -41,6 +17,7 @@ module.exports = function (RED) {
         this.property = config.property;
         this.propertyType = config.propertyType || "global";
         var node = this;
+        this.debug('initialize node');
 
         this.on('input', msg => {
             try {
@@ -57,7 +34,7 @@ module.exports = function (RED) {
                 }
                 let start;
                 let end;
-                let alternateTimes = config.addTimes;
+                let alternateTimes = this.propertyType !== 'none';
                 if (alternateTimes) {
                     this.debug('alternate times enabled');
                     if (this.propertyType === 'msg') {
@@ -65,20 +42,30 @@ module.exports = function (RED) {
                     } else if (this.propertyType === 'flow' || this.propertyType === 'global') {
                         var contextKey = RED.util.parseContextStore(this.property);
                         alternateTimes = (this.context()[this.propertyType].get(contextKey.key, contextKey.store) == true);
+                    } else if (this.propertyType === 'jsonata') {
+                        try {
+                            alternateTimes = RED.util.evaluateJSONataExpression(node.property,msg);
+                        } catch(err) {
+                            this.error(RED._("within-time-switch.errors.invalid-jsonata-expr",{error:err.message}));
+                            alternateTimes = false;
+                        }
+                    } else {
+                        alternateTimes = false;
+                        this.error(RED._("within-time-switch.errors.invalid-property-type",{type:this.propertyType, value:this.property}));
                     }
                 }
 
-                if (alternateTimes && config.startTimeAlt) {
+                if (alternateTimes && config.startTimeAltType !== 'none') {
                     this.debug('using alternate start time');
-                    start = getTime(this, now, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
+                    start = hlp.getTime(this, now, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
                 } else {
-                    start = getTime(this, now, config.startTimeType, config.startTime, config.startOffset);
+                    start = hlp.getTime(this, now, config.startTimeType, config.startTime, config.startOffset);
                 }
-                if (alternateTimes && config.endTimeAlt) {
+                if (alternateTimes && config.endTimeAltType !== 'none') {
                     this.debug('using alternate end time');
-                    end = getTime(this, now, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
+                    end = hlp.getTime(this, now, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
                 } else {
-                    end = getTime(this, now, config.endTimeType, config.endTime, config.startOffset);
+                    end = hlp.getTime(this, now, config.endTimeType, config.endTime, config.startOffset);
                 }
 
                 this.debug(start + ' - ' + now + ' - ' + end);
@@ -116,13 +103,9 @@ module.exports = function (RED) {
                 });
                 this.send([null, msg]);
             } catch (err) {
-                hlp.errorHandler(this, err, 'Exception occured on withinTimeSwitch', 'internal error');
+                hlp.errorHandler(this, err, RED._("within-time-switch.errors.exception-gen-text"), RED._("within-time-switch.errors.exception-gen-title"));
             }
         });
-
-        this.now = function () {
-            return moment();
-        };
     }
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);
 };

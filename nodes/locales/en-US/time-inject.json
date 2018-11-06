@@ -3,14 +3,14 @@
         "label": {
             "position": "Position",
             "name": "Name",
-            "topic": "Topic",
-            "addTimes": "alternate start or end time",
-            "payloadStart": "Payload on start",
-            "payloadEnd": "Payload on end",
             "startTime": "Start time",
-            "endTime": "End time",
             "startOffset": "Offset",
-            "endOffset": "Offset"
+            "payloadStart": "Payload",
+            "topicStart": "Topic",
+            "endTime": "End time",
+            "endOffset": "Offset",
+            "payloadEnd": "Payload",
+            "topicEnd": "Topic"
         },
         "placeholder": {
             "position": "Position",

@@ -28,7 +28,14 @@
             "endOffsetAlt": "0"
         },
         "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true they will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
+            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
+        },
+        "errors" : {
+            "exception-gen-text" : "Exception occured on withinTimeSwitch",
+            "exception-gen-title" : "internal error",
+            "invalid-property-type": "Invalid Property Type: __type__",
+            "invalid-json": "Invalid 'to' JSON property",
+            "invalid-jsonata-expr": "Invalid JSONata expression: __error__"
         }
     }
 }

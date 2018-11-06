@@ -48,7 +48,8 @@
       "position-config": "nodes/position-config.js",
       "sun-position": "nodes/sun-position.js",
       "moon-position": "nodes/moon-position.js",
-      "within-time-switch": "nodes/within-time-switch.js"
+      "within-time-switch": "nodes/within-time-switch.js",
+      "time-inject": "nodes/time-inject.js"
     }
   },
   "extensions": [

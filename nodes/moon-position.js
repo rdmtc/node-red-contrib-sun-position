@@ -2,7 +2,7 @@
  * moon-position:
  *********************************************/
 const path = require('path');
-var hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const hlp = '/lib/sunPosHelper.js';
 
 module.exports = function (RED) {

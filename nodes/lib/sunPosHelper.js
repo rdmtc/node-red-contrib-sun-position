@@ -1,10 +1,23 @@
 /********************************************
  * sun-position:
  *********************************************/
+"use strict";
+
 const sunCalc = require('suncalc');
-//const moment = require('moment');
 
+module.exports = {
+    errorHandler,
+    getConfiguration,
+    getAngle,
+    compareAzimuth,
+    getSunCalc,
+    getMoonCalc,
+    getTimeOfText,
+    getTime,
+    getCacheTimes
+};
 
+/*******************************************************************************************************/
 const moonPhases = [{
         emoji: '🌚',
         code: ':new_moon_with_face:',
@@ -56,8 +69,9 @@ const moonPhases = [{
 ];
 
 /*******************************************************************************************************/
-//const errorHandler = function (node, err, messageText, stateText) {
-module.exports.errorHandler = (node, err, messageText, stateText) => {
+/* exported functions                                                                                  */
+/*******************************************************************************************************/
+function errorHandler(node, err, messageText, stateText) {
     if (!err) {
         return true;
     }
@@ -81,10 +95,9 @@ module.exports.errorHandler = (node, err, messageText, stateText) => {
         console.error(JSON.stringify(err, Object.getOwnPropertyNames(err)));
     }
     return false;
-}
+};
 /*******************************************************************************************************/
-//function getConfiguration(node, msg, config, attrs) {
-module.exports.getConfiguration = (node, msg, config, attrs) => {
+function getConfiguration(node, msg, config, attrs) {
     var outMsg = {
         payload: {},
         topic: msg.topic,
@@ -93,8 +106,8 @@ module.exports.getConfiguration = (node, msg, config, attrs) => {
     }
 
     if (!sunCalc) {
-        this.error('sunCalc module not defined!! - Installation Problem, Please reinstall!');
-        this.status({
+        node.error('sunCalc module not defined!! - Installation Problem, Please reinstall!');
+        node.status({
             fill: 'red',
             shape: 'dot',
             text: 'installation error'
@@ -104,8 +117,8 @@ module.exports.getConfiguration = (node, msg, config, attrs) => {
 
     /*
     if (!moment) {
-        this.error('moment module not defined!! - Installation Problem, Please reinstall!');
-        this.status({
+        node.error('moment module not defined!! - Installation Problem, Please reinstall!');
+        node.status({
             fill: 'red',
             shape: 'dot',
             text: 'installation error'
@@ -115,8 +128,6 @@ module.exports.getConfiguration = (node, msg, config, attrs) => {
 
     if (node.positionConfig) {
         // Do something with:
-        //  this.server.host
-        //  this.server.port
         outMsg.data.name = node.positionConfig.name;
         outMsg.data.longitude = node.positionConfig.longitude;
         outMsg.data.latitude = node.positionConfig.latitude;
@@ -196,18 +207,16 @@ module.exports.getConfiguration = (node, msg, config, attrs) => {
     }
 
     return outMsg;
-}
-
-//function getAngle(type, angle) {
-module.exports.getAngle = (type, angle) => {
+};
+/*******************************************************************************************************/
+function getAngle(type, angle) {
     if (type === 'deg') {
         return angle * (180 / Math.PI) //angle(rad) * (180° / Pi) =angle(deg)
     }
     return angle;
-}
-
-//function compareAzimuth(obj, name, azimuth, low, high, old) {
-module.exports.compareAzimuth = (obj, name, azimuth, low, high, old) => {
+};
+/*******************************************************************************************************/
+function compareAzimuth(obj, name, azimuth, low, high, old) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
         if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
             if (high > low) {
@@ -224,27 +233,9 @@ module.exports.compareAzimuth = (obj, name, azimuth, low, high, old) => {
         return obj[name] != old[name];
     }
     return false;
-}
-/*
-
-{"solarNoon":"2018-11-01T10:49:56.550Z",
-"nadir":"2018-10-31T22:49:56.550Z",
-"sunrise":"2018-11-01T05:58:13.904Z",
-"sunset":"2018-11-01T15:41:39.196Z",
-"sunriseEnd":"2018-11-01T06:01:54.246Z",
-"sunsetStart":"2018-11-01T15:37:58.854Z",
-"dawn":"2018-11-01T05:23:28.111Z",
-"dusk":"2018-11-01T16:16:24.989Z",
-"nauticalDawn":"2018-11-01T04:44:25.813Z",
-"nauticalDusk":"2018-11-01T16:55:27.288Z",
-"nightEnd":"2018-11-01T04:06:06.184Z",
-"night":"2018-11-01T17:33:46.916Z",
-"goldenHourEnd":"2018-11-01T06:47:04.923Z",
-"goldenHour":"2018-11-01T14:52:48.178Z"}
-*/
-
-//const getSunCalc = (date, latitude, longitude, angleType) => {
-module.exports.getSunCalc = (date, latitude, longitude, angleType) => {
+};
+/*******************************************************************************************************/
+function getSunCalc(date, latitude, longitude, angleType) {
     var sunPos = sunCalc.getPosition(date, latitude, longitude);
     return {
         lastUpdate: date,
@@ -254,31 +245,46 @@ module.exports.getSunCalc = (date, latitude, longitude, angleType) => {
         azimuth: (angleType === 'deg') ? 180 + 180 / Math.PI * sunPos.azimuth : sunPos.azimuth,
         altitude: (angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude, //elevation = altitude
         times: sunCalc.getTimes(date, latitude, longitude)
+        /*
+        {"solarNoon":"2018-11-01T10:49:56.550Z",
+        "nadir":"2018-10-31T22:49:56.550Z",
+        "sunrise":"2018-11-01T05:58:13.904Z",
+        "sunset":"2018-11-01T15:41:39.196Z",
+        "sunriseEnd":"2018-11-01T06:01:54.246Z",
+        "sunsetStart":"2018-11-01T15:37:58.854Z",
+        "dawn":"2018-11-01T05:23:28.111Z",
+        "dusk":"2018-11-01T16:16:24.989Z",
+        "nauticalDawn":"2018-11-01T04:44:25.813Z",
+        "nauticalDusk":"2018-11-01T16:55:27.288Z",
+        "nightEnd":"2018-11-01T04:06:06.184Z",
+        "night":"2018-11-01T17:33:46.916Z",
+        "goldenHourEnd":"2018-11-01T06:47:04.923Z",
+        "goldenHour":"2018-11-01T14:52:48.178Z"}
+        */
     }
-}
-
-//const getMoonCalc = (date, latitude, longitude, angleType) => {
-module.exports.getMoonCalc = (date, latitude, longitude, angleType) => {
-    var moonPos = sunCalc.getMoonPosition(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude);
-    var moonIllum = sunCalc.getMoonIllumination(outMsg.data.ts);
+};
+/*******************************************************************************************************/
+function getMoonCalc(date, latitude, longitude, angleType) {
+    var moonPos = sunCalc.getMoonPosition(date, latitude, longitude);
+    var moonIllum = sunCalc.getMoonIllumination(date);
 
     var result = {
         lastUpdate: date,
         latitude: latitude,
         longitude: longitude,
         angleType: angleType,
-        azimuth: (outMsg.data.angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth,
-        altitude: (outMsg.data.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, //elevation = altitude
+        azimuth: (angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth,
+        altitude: (angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, //elevation = altitude
         distance: moonPos.distance,
-        parallacticAngle: getAngle(outMsg.data.angleType, moonPos.parallacticAngle),
+        parallacticAngle: getAngle(angleType, moonPos.parallacticAngle),
         illumination: {
-            angle: getAngle(outMsg.data.angleType, moonIllum.angle),
+            angle: getAngle(angleType, moonIllum.angle),
             fraction: moonIllum.fraction,
             phase: moonIllum.phase,
-            phaseAngle: (outMsg.data.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360,
-            zenithAngle: getAngle(outMsg.data.angleType, moonIllum.angle - moonPos.parallacticAngle),
+            phaseAngle: (angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360,
+            zenithAngle: getAngle(angleType, moonIllum.angle - moonPos.parallacticAngle),
         },
-        times: sunCalc.getMoonTimes(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude, true)
+        times: sunCalc.getMoonTimes(date, latitude, longitude, true)
     }
     //getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
 
@@ -318,9 +324,9 @@ module.exports.getMoonCalc = (date, latitude, longitude, angleType) => {
     }
 
     return result;
-}
-
-module.exports.getTimeOfText = (t, offset) => {
+};
+/*******************************************************************************************************/
+function getTimeOfText(t, offset) {
     let d = new Date();
     if (t) {
         let matches = t.match(/(0[0-9]|[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
@@ -333,50 +339,74 @@ module.exports.getTimeOfText = (t, offset) => {
         }
     }
     return d;
+};
+/*******************************************************************************************************/
+function getTime(node, now, vType, value, offset) {
+    node.debug('vType=' + vType + ' value=' + value + ' offset=' + offset);
+    if (vType === 'entered' || vType === '') {
+        return getTimeOfText(value, offset) || now;
+    } else if (vType === 'pdsTime') {
+        //sun
+        const date = new Date(getCacheTimes(node,node.positionConfig).today.sunTimes[value]);
+        if (offset && !isNaN(offset) && offset !== 0) {
+            return new Date(date.getTime() + offset * 60000);
+        }
+        return date;
+    } else if (vType === 'pdmTime') {
+        //moon
+        const date = new Date(getCacheTimes(node,node.positionConfig).today.moonTimes[value]);
+        if (offset && !isNaN(offset) && offset !== 0) {
+            return new Date(date.getTime() + offset * 60000);
+        }
+        return date;
+    } else if (vType === 'msg') {
+        return getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset) || now;
+    } else if (vType === 'flow' || vType === 'global') {
+        var contextKey = RED.util.parseContextStore(value);
+        return getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset) || now;
+    }
+    node.error("Not suported time definition! " + vType + '=' + value);
+    node.status({
+        fill: "red",
+        shape: "dot",
+        text: "error - time definition"
+    });
+    return now;
+};
+/*******************************************************************************************************/
+function cacheTimeRefresh(node, config) {
+    var today = new Date();
+    var tomorrow = new Date();
+    tomorrow.setDate(today.getDate()+1);
+    var obj = {
+        date : today,
+        dayid : today.getDay + today.getMonth * 100 + today.getFullYear * 10000000,
+        latitude : config.latitude,
+        longitude : config.longitude,
+        today: {
+            sunTimes : sunCalc.getTimes(today, config.latitude, config.longitude),
+            moonTimes : sunCalc.getMoonTimes(today, config.latitude, config.longitude, true),
+        },
+        tomorow: {
+            sunTimes : sunCalc.getTimes(tomorrow, config.latitude, config.longitude),
+            moonTimes : sunCalc.getMoonTimes(tomorrow, config.latitude, config.longitude, true),
+        }
+    }
+    node.context().global.set(config.cachProp, obj);
+    return obj;
 }
 
-module.exports.getSunTime = (config, d, t, offset) => {
-    if (!config) {
-        return d;
-    }
-    let chachedSunCalc = this.context().global.get(config.cachProp + 'sun');
-    let needRefresh = (!chachedSunCalc || !chachedSunCalc.times);
-    if (!needRefresh) {
-        let oldd = new Date(chachedSunCalc.lastUpdate);
-        needRefresh = (oldd.getDay != d.getDay);
-    }
-
+function getCacheTimes(node, config) {
+    let chachedSunCalc = this.context().global.get(config.cachProp);    
+    let needRefresh = (!chachedSunCalc || !chachedSunCalc.date);
     if (needRefresh) {
-        chachedSunCalc = hlp.getSunCalc(d, config.latitude, config.longitude, config.angleType);
-        this.context().global.set(config.cachProp + 'sun', chachedSunCalc);
+        return cacheTimeRefresh(node.config);
     }
-
-    const date = new Date(chachedSunCalc.times[t]);
-    if (offset && !isNaN(offset) && offset !== 0) {
-        return new Date(date.getTime() + offset * 60000);
+    let today = new Date();
+    let dayid = today.getDay + today.getMonth * 100 + today.getFullYear * 10000000;
+    if (chachedSunCalc.dayid != dayid) {
+        return cacheTimeRefresh(node.config);
     }
-    return date;
+    return chachedSunCalc;
 }
-
-module.exports.getMoonTime = (config, d, t, offset) => {
-    if (!config) {
-        return d;
-    }
-    let chachedMoonCalc = this.context().global.get(config.cachProp + 'moon');
-    let needRefresh = (!chachedMoonCalc || !chachedMoonCalc.times);
-    if (!needRefresh) {
-        let oldd = new Date(chachedMoonCalc.lastUpdate);
-        needRefresh = (oldd.getDay != d.getDay);
-    }
-
-    if (needRefresh) {
-        chachedMoonCalc = hlp.getMoonCalc(d, config.latitude, config.longitude, config.angleType);
-        this.context().global.set(config.cachProp + 'moon', chachedMoonCalc);
-    }
-
-    const date = new Date(chachedMoonCalc.times[t]);
-    if (offset && !isNaN(offset) && offset !== 0) {
-        return new Date(date.getTime() + offset * 60000);
-    }
-    return date;
-}
+/*******************************************************************************************************/
