@@ -7,6 +7,12 @@ const sunCalc = require('suncalc');
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
 module.exports = function (RED) {
     "use strict";
 
@@ -30,82 +36,163 @@ module.exports = function (RED) {
             var node = this;
 
             this.getSunTimes = () => {
+                node.debug('getSunTimes');
                 let res = sunTimesCheck(node);
                 res.today = node.sunTimesToday;
                 res.tomorrow = node.sunTimesTomorow;
                 return res;
             }
-            this.getSunTime = (now, value) => {
-                sunTimesCheck(node, now);
-                return new Date(node.sunTimesToday[value]);
-            }
-            this.getSunTimeTomorow = (now, value) => {
-                sunTimesCheck(node, now);
-                return new Date(node.sunTimesTomorow[value]);
+            this.getSunTime = (now, value, next, days) => {
+                node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
+                let result = sunTimesCheck(node, now);
+                result.value = new Date(node.sunTimesToday[value]);
+                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                    if (next === 1) {
+                        result.value = new Date(node.sunTimesTomorow[value]);
+                    } else if (next > 1) {
+                        let date = (new Date()).addDays(next);
+                        let times = sunCalc.getTimes(date, node.latitude, node.longitude);
+                        result.value = times[value];
+                    }
+                }
+                if (days && (days !== '*') && (days !== '')) {
+                    let daystart = result.value.getDay();
+                    let dayx = 0;
+                    let daypos = daystart;
+                    while (days.indexOf(daypos) === -1) {
+                        dayx += 1;
+                        if ((daystart + dayx) > 6) {
+                            daypos = (daystart * -1) + dayx - 1;
+                        } else {
+                            daypos = daystart + dayx;
+                        }
+                        if (dayx > 6) {
+                            dayx = -1;
+                            break;
+                        }
+                    }
+                    node.debug('move day ' + dayx);
+                    if (dayx > 0) {
+                        let date = result.value.addDays(dayx);
+                        let times = sunCalc.getTimes(date, node.latitude, node.longitude);
+                        result.value = times[value];
+                    } else if (dayx < 0) {
+                        result.error = 'No valid day of week found!';
+                    }
+                }
+                return result;
             }
             this.getMoonTimes = () => {
+                node.debug('getMoonTimes');
                 let res = moonTimesCheck(node);
                 res.today = node.moonTimesToday;
                 res.tomorrow = node.moonTimesTomorow;
                 return res;
             }
-            this.getMoonTime = (now, value) => {
-                moonTimesCheck(node, now);
-                return new Date(node.moonTimesToday[value]);
+            this.getMoonTime = (now, value, next, days) => {
+                node.debug('getMoonTime ' + value + ' - ' + next + ' - ' + days);
+                let result = moonTimesCheck(node, now);
+                result.value = new Date(node.moonTimesToday[value]);
+                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                    if (next === 1) {
+                        result.value = new Date(node.moonTimesTomorow[value]);
+                    } else if (next > 1) {
+                        let date = (new Date()).addDays(next);
+                        let times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
+                        result.value = times[value];
+                    }
+                }
+                if (days && (days !== '*') && (days !== '')) {
+                    let daystart = now.getDay();
+                    let dayx = 0;
+                    let daypos = daystart;
+                    while (days.indexOf(daypos) === -1) {
+                        dayx += 1;
+                        if ((daystart + dayx) > 6) {
+                            daypos = (daystart * -1) + dayx - 1;
+                        } else {
+                            daypos = daystart + dayx;
+                        }
+                        if (dayx > 6) {
+                            dayx = -1;
+                            break;
+                        }
+                    }
+                    if (dayx === 1) {
+                        result.value = new Date(node.moonTimesTomorow[value]);
+                    } else if (dayx > 1) {
+                        let date = (new Date()).addDays(dayx);
+                        let times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
+                        result.value = times[value];
+                    } else if (dayx < 0) {
+                        result.error = 'no valid week day found!';
+                    }
+                }
+                return result;
             }
-            this.getMoonTimeTomorow = (now, value) => {
-                moonTimesCheck(node, now);
-                return new Date(node.moonTimesTomorow[value]);
-            }
-            this.getTimeProp = (msg, vType, value, offset, next, days) => {
-                node.debug('getTimeProp ' + node.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
+            this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
+                node.debug('getTimeProp ' + srcNode.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
                 let now = new Date();
-                let result;
-                if (vType === '' || vType === 'none') {
-                    result = now;
-                } else if (vType === 'entered') {
-                    result = hlp.getTimeOfText(value, offset, next);
+                let result = {
+                    value: null,
+                    error: null
+                };
+                if (vType === '' || vType === 'none' || days === '') {
+                    //nix
+                } else if (vType === 'date') {
+                    result.value = now;
+                } else if (vType === 'entered' ||
+                    vType === "string" ||
+                    vType === "str" ||
+                    vType === "num") {
+                    result.value = hlp.getTimeOfText(String(value), offset, next, days);
                 } else if (vType === 'pdsTime') {
                     //sun
-                    result = node.getSunTime(now, value);
-                    if (result.getTime() <= (now.getTime())) {
-                        result = node.getSunTimeTomorow(now, value);
-                    }
+                    result = node.getSunTime(now, value, next, days);
                 } else if (vType === 'pdmTime') {
                     //moon
-                    result = node.getMoonTime(now, value);
-                    if (result.getTime() <= (now.getTime())) {
-                        result = node.getMoonTimeTomorow(now, value);
-                    }        
-                } else if (vType === 'msg') {
+                    result = node.getMoonTime(now, value, next, days);
+                } else if (vType === 'jsonata') {
+                    try {
+                        result.value = hlp.getTimeOfText(RED.util.evaluateJSONataExpression(value, msg), offset, next, days);
+                    } catch (err) {
+                        result.error = "Invalid JSONata expression: " + value;
+                    }
+                } else if (vType === 'msg' && msg) {
                     let value = RED.util.getMessageProperty(msg, value, true);
-                    result = hlp.getTimeOfText(value, offset, next);
-                } else if (vType === 'flow' ||  vType === 'global') {
+                    result.value = hlp.getTimeOfText(value, offset, next, days);
+                } else if (vType === 'flow' || vType === 'global') {
                     var contextKey = RED.util.parseContextStore(value);
                     if (!contextKey) {
-                        node.error("Context key " + vType + '' + value + " not found!");
+                        result.error = "Context key " + vType + '.' + value + " not found!";
                     } else {
-                        let value = node.context()[vType].get(contextKey.key, contextKey.store);
-                        result = hlp.getTimeOfText(value, offset, next);
+                        let ctx = node.context()[vType];
+                        if (ctx) {
+                            let value = ctx.get(contextKey.key, contextKey.store);
+                            result.value = hlp.getTimeOfText(value, offset, next, days);
+                        } else {
+                            result.error = "Context " + vType + '.' + value + " not found!";
+                        }
                     }
                 } else {
-                    node.error("Not suported time definition! " + vType + '=' + value);
+                    result.error = "Not suported time definition! " + vType + '=' + value;
                 }
-
-                if (!result) {
-                    node.error("Can not get time for " + vType + '=' + value);
+                if (!result.value) {
+                    if (!result.error) {
+                        result.error = "Can not get time for " + vType + '=' + value;
+                    }
+                    result.value = now;
                 }
                 return result;
             };
             initTimes(this);
         } catch (err) {
-            hlp.errorHandler(this, err, 'Exception occured on position-config', 'internal error');
+            hlp.errorHandler(this, err, RED._("position-config.errors.error-text"), RED._("position-config.errors.error-title"));
         }
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
             node.debug('sunTimesRefresh');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
-            node.sunTimesToday
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
         }
@@ -115,8 +202,7 @@ module.exports = function (RED) {
             let dateb = today || new Date();
             let day_id = dayId || getDayId(dateb);
             if (node.sunDayId != day_id) {
-                let tomorrow = new Date();
-                tomorrow.setDate(dateb.getDate() + 1);
+                let tomorrow = (new Date()).addDays(1);
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
             }
             return {
@@ -153,8 +239,7 @@ module.exports = function (RED) {
             let dateb = today || new Date();
             let day_id = dayId || getDayId(dateb);
             if (node.moonDayId != day_id) {
-                let tomorrow = new Date();
-                tomorrow.setDate(dateb.getDate() + 1);
+                let tomorrow = (new Date()).addDays(1);
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
             }
             return {
@@ -167,8 +252,7 @@ module.exports = function (RED) {
             node.debug('initTimes');
             let today = new Date();
             let dayId = getDayId(today);
-            let tomorrow = new Date();
-            tomorrow.setDate(today.getDate() + 1);
+            let tomorrow = today.addDays(1);
             sunTimesRefresh(node, today, tomorrow, dayId);
             moonTimesRefresh(node, today, tomorrow, dayId);
         }

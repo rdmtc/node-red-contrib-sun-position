@@ -55,15 +55,26 @@ module.exports = function (RED) {
 
                 if (alternateTimes && config.startTimeAltType !== 'none') {
                     this.debug('using alternate start time');
-                    start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
+                    //start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
+                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt * config.startOffsetAltMultiplier);
                 } else {
-                    start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
+                    //start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
+                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, config.startOffset * config.startOffsetMultiplier);
                 }
                 if (alternateTimes && config.endTimeAltType !== 'none') {
                     this.debug('using alternate end time');
-                    end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
+                    //end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
+                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt * config.endOffsetAltMultiplier);
                 } else {
-                    end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.startOffset);
+                    //end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.startOffset);
+                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, config.startOffset * config.startOffsetMultiplier);
+                }
+
+                if (start.error) {
+                    throw new Error('Error get start time:' + start.error);
+                }
+                if (end.error) {
+                    throw new Error('Error get end time:' + start.error);
                 }
 
                 let now = new Date();
@@ -73,14 +84,14 @@ module.exports = function (RED) {
                         now = dto;
                     }
                 }
-                this.debug(start + ' - ' + now + ' - ' + end);
-                start = start.getSeconds() + start.getMinutes() * 60 + start.getHours() * 3600;
-                end = end.getSeconds() + end.getMinutes() * 60 + end.getHours() * 3600;
+                this.debug(start.value + ' - ' + now + ' - ' + end.value);
+                let startNr = start.value.getSeconds() + start.value.getMinutes() * 60 + start.value.getHours() * 3600;
+                let endNr = end.value.getSeconds() + end.value.getMinutes() * 60 + end.value.getHours() * 3600;
                 let cmpNow = now.getSeconds() + now.getMinutes() * 60 + now.getHours() * 3600;
                 this.debug(start + ' - ' + cmpNow + ' - ' + end);
 
-                if (start < end) {
-                    if (cmpNow >= start && cmpNow <= end) {
+                if (startNr < endNr) {
+                    if (cmpNow >= startNr && cmpNow <= endNr) {
                         this.send([msg, null]);
                         this.status({
                             fill: "green",
@@ -90,7 +101,7 @@ module.exports = function (RED) {
                         return;
                     }
                 } else {
-                    if (!(cmpNow > end && cmpNow < start)) {
+                    if (!(cmpNow > endNr && cmpNow < startNr)) {
                         this.send([msg, null]);
                         this.status({
                             fill: "green",
@@ -107,7 +118,7 @@ module.exports = function (RED) {
                 });
                 this.send([null, msg]);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._("within-time-switch.errors.exception-gen-text"), RED._("within-time-switch.errors.exception-gen-title"));
+                hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
             }
         });
     }

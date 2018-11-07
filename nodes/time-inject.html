@@ -9,15 +9,17 @@
         <input type="text" id="node-input-time" style="width: 70%"/>
         <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-row time-offset hidden">
+    <div class="form-row time-inject-row-offset time-offset hidden">
         <label for="node-input-offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
         <input id="node-input-offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
         <select style="width:100px" id="node-input-offsetMultiplier">
             <option value="1" data-i18n="time-inject.label.seconds"></option>
             <option value="60" data-i18n="time-inject.label.minutes"></option>
             <option value="3600" data-i18n="time-inject.label.hours"></option>
-        </select><br/>
-        <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
+        </select>
+    </div>
+    <div class="form-row time-inject-row-days time-offset hidden">
+            <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
             <div style="display:inline-block;">
                 <div>
@@ -37,12 +39,12 @@
         </div>
     </div>
 
-    <div class="form-row time-row time-payload hidden">
+    <div class="form-row time-payload hidden">
         <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
         <input type="text" id="node-input-payload" style="width:70%">
         <input type="hidden" id="node-input-payloadType">
     </div>
-    <div class="form-row time-row time-topic hidden">
+    <div class="form-row time-topic hidden">
         <label for="node-input-topicStart"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topicStart"></span></label>
         <input type="text" id="node-input-topicStart">
     </div>
@@ -52,13 +54,13 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
     </div>
 
-    <div class="form-tips" data-i18n="[html]time-inject.tip"></div>
+    <div class="form-tips" data-i18n="[html]time-inject.tips.config"></div>
   </script>
-  <style>
-    .time-inject-row {
+<style>
+    .time-inject-row-days {
         padding-left: 110px;
     }
-    .time-inject-row select {
+    .time-inject-row-days select {
         margin: 3px 0;
     }
     .time-inject-days label {
@@ -88,11 +90,11 @@
 </style>
 
 <script type="text/x-red" data-help-name="time-inject">
-    <p>Uses the suncalc module to generate an output at sunrise and sunset based on a specified location.</p>
-      <p>Several choices of definition of sunrise and sunset are available, see the <i><a href = "https://github.com/mourner/suncalc" target="_new">suncalc</a></i> module for details.</p>
-      <p>The first output emits a <code>msg.payload</code> of <i>1</i> or <i>0</i> every minute depending if in between selected times or not.
-      The second output emits only on the transition between night to day (<i>-> 1</i>) or day to night (<i>-> 0</i>).</p>
-      <p>Also sets <code>msg.topic</code> to <i>sun</i> and <code>msg.moon</code> to the fraction of the moon between 0 and 1.</p>
+    <p>Generate an output on different time stamps. The time stamps can be set directly or by using the suncalc module to generate an output at sunrise and sunset based on a specified location.</p>
+    <p>Several choices of definition of sunrise and sunset are available.</p>
+    <p>The output emits a <code>msg.payload</code> as defined if the time stamp is reached.</p>
+    <p>The next timestamp will be calculated every 2 hours, if a timestamp is reached, settings are changed or the inject node is manual triggered.
+        If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done!</p>
   </script>
 
 <script type="text/javascript">
@@ -107,7 +109,11 @@
             positionConfig: {
                 value: "",
                 type: "position-config",
-                required: true
+                required: false,
+                validate: function (v) {
+                    return (v) ||
+                        ($("#node-input-time").typedInput('type') === 'none');
+                }
             },
             time: {
                 value: "",
@@ -164,7 +170,7 @@
                     type === "str" ||
                     type === "num" ||
                     type === "bool") {
-                    if (value=='') {
+                    if (value == '') {
                         return this._("time-inject.label.blank");
                     }
                     return value;
@@ -255,9 +261,11 @@
             });
             $("#node-input-time").on('change', function (type, value) {
                 if ($("#node-input-time").typedInput('type') === 'none') {
-                    $(".time-row").hide();
+                    $(".time-inject-row-offset").hide();
+                    $(".time-inject-row-days").hide();
                 } else {
-                    $(".time-row").show();
+                    $(".time-inject-row-offset").show();
+                    $(".time-inject-row-days").show();
                 }
             });
             $("#node-input-payloadType").val(this.payloadType);
@@ -273,10 +281,10 @@
                 min: -1439
             });
             if (this.timeDays == "*") {
-                $("#time-inject-timeDays input[type=checkbox]").prop("checked",true);
+                $("#time-inject-timeDays input[type=checkbox]").prop("checked", true);
             } else {
                 $("#time-inject-timeDays input[type=checkbox]").removeAttr("checked");
-                this.timeDays.split(",").forEach(function(v) {
+                this.timeDays.split(",").forEach(function (v) {
                     $("#time-inject-timeDays [value=" + v + "]").prop("checked", true);
                 });
             }
@@ -286,7 +294,7 @@
         oneditsave: function () {
             this.timeType = $("#node-input-time").typedInput('type');
             this.payloadType = $("#node-input-payload").typedInput('type');
-            var days = $('#time-inject-timeDays input[type=checkbox]:checked').map(function(_, el) {
+            var days = $('#time-inject-timeDays input[type=checkbox]:checked').map(function (_, el) {
                 return $(el).val()
             }).get();
 
@@ -294,7 +302,7 @@
                 this.timeDays = "";
             } else {
                 if (days.length == 7) {
-                    this.timeDays="*";
+                    this.timeDays = "*";
                 } else {
                     this.timeDays = days.join(",");
                 }
@@ -338,23 +346,25 @@
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify(node._("time-inject.notification.error", {
-                                message: node._(
-                                    "time-inject.notification.errors.not-deployed")
+                            RED.notify(RED._("common.notification.error", {
+                                message: RED._(
+                                    "common.notification.errors.not-deployed"
+                                )
                             }), "error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify(node._("time-inject.notification.error", {
-                                message: node._("time-inject.errors.failed")
+                            RED.notify(RED._("common.notification.error", {
+                                message: RED._("common.errors.failed")
                             }), "error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify(node._("time-inject.notification.error", {
-                                message: node._(
-                                    "time-inject.notification.errors.no-response")
+                            RED.notify(RED._("common.notification.error", {
+                                message: RED._(
+                                    "common.notification.errors.no-response"
+                                )
                             }), "error");
                         } else {
-                            RED.notify(node._("time-inject.notification.error", {
-                                message: node._(
-                                    "time-inject.notification.errors.unexpected", {
+                            RED.notify(RED._("common.notification.error", {
+                                message: RED._(
+                                    "common.notification.errors.unexpected", {
                                         status: jqXHR.status,
                                         message: textStatus
                                     })

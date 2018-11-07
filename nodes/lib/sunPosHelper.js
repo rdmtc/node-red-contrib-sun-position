@@ -12,8 +12,7 @@ module.exports = {
     compareAzimuth,
     getSunCalc,
     getMoonCalc,
-    getTimeOfText,
-    getTimeProp
+    getTimeOfText
 };
 
 /*******************************************************************************************************/
@@ -66,6 +65,12 @@ const moonPhases = [{
         weight: 6.3825
     }
 ];
+
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
 
 /*******************************************************************************************************/
 /* exported functions                                                                                  */
@@ -325,10 +330,10 @@ function getMoonCalc(date, latitude, longitude, angleType) {
     return result;
 };
 /*******************************************************************************************************/
-function getTimeOfText(t, offset, next) {
+function getTimeOfText(t, offset, next, days) {
     let d = new Date();
     if (t) {
-        let matches = t.match(/(0[0-9]|[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         //console.log(matches);
         d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
         d.setMinutes(parseInt(matches[2]) || 0);
@@ -340,48 +345,33 @@ function getTimeOfText(t, offset, next) {
     }
     if (next && !isNaN(next)) {
         let now = new Date();
+        d.setMilliseconds(0);
         now.setMilliseconds(0);
         if (d.getTime() <= (now.getTime())) {
-            d.setDate(now.getDate() + Number(next));
+            d = d.addDays(Number(next));
+        }
+    }
+    if (days && (days !== '*') && (days !== '')) {
+        let daystart = d.getDay();
+        let dayx = 0;
+        let daypos = daystart;
+        while (days.indexOf(daypos) === -1) {
+            dayx += 1;
+            if ((daystart + dayx) > 6) {
+                daypos = (daystart * -1) + dayx - 1;
+            } else {
+                daypos = daystart + dayx;
+            }
+            if (dayx > 6) {
+                dayx = -1;
+                break;
+            }
+        }
+        if (dayx > 0) {
+            d = d.addDays(dayx);
         }
     }
     return d;
 };
-/*******************************************************************************************************/
-function getTimeProp(node, vType, value, offset, next) {
-    //node.debug('getTimeProp ' + node.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
-    let now = new Date();
-    let result;
-    if (vType === '' || vType === 'none') {
-        result = now;
-    } else if (vType === 'entered') {
-        result = getTimeOfText(value, offset, next) || now;
-    } else if (vType === 'pdsTime') {
-        //sun
-        result = node.positionConfig.getSunTime(now, value);
-        if (result.getTime() <= (now.getTime())) {
-            result = node.positionConfig.getSunTimeTomorow(now, value);
-        }
-    } else if (vType === 'pdmTime') {
-        //moon
-        result = node.positionConfig.getMoonTime(now, value);
-        if (result.getTime() <= (now.getTime())) {
-            result = node.positionConfig.getMoonTimeTomorow(now, value);
-        }        
-    } else if (vType === 'msg') {
-        result = getTimeOfText(RED.util.getMessageProperty(msg, value, true), offset, next) || now;
-    } else if (vType === 'flow' || vType === 'global') {
-        var contextKey = RED.util.parseContextStore(value);
-        result = getTimeOfText(node.context()[vType].get(contextKey.key, contextKey.store), offset, next) || now;
-    } else {
-        node.error("Not suported time definition! " + vType + '=' + value);
-        node.status({
-            fill: "red",
-            shape: "dot",
-            text: "error - time definition"
-        });
-        result = now;
-    }
-    return result;
-};
+
 /*******************************************************************************************************/
