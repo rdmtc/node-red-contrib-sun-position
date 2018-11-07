@@ -196,7 +196,11 @@
         outputs: 2,
         outputLabels: ["within time", "outside time"],
         label: function () {
-            const getId = (type, value) => {
+            const getId = (type, value, offset) => {
+                let suffix = '';
+                if (offset>0) {
+                    suffix = '↷';
+                }
                 if (type === 'msg' || type === 'flow' || type === 'global') {
                     return type + '.' + value;
                 } else if (type === 'pdmTime') {
@@ -204,15 +208,15 @@
                 }
                 return value;
             }
-            const getConcatId = (type1, value1, type2, value2) => {
-                if (value2) {
-                    return getId(type1, value1) + '/' + getId(type2, value2);
+            const getConcatId = (type1, value1, offset1, type2, value2, offset2) => {
+                if (propertyType !== 'none' && value2) {
+                    return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
                 }
                 return getId(type1, value1);
             }
 
             return this.name || ((this.startTime && this.endTime) ? (
-                    getConcatId(this.startTimeType, this.startTime, this.startTimeAltType, this.startTimeAlt) +
+                    getConcatId(this.startTimeType, this.startTime, this.startOffset, this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
                     ' - ' +
                     getConcatId(this.endTimeType, this.endTime, this.endTimeAltType, this.endTimeAlt)
                 ) :
