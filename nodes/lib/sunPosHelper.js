@@ -12,7 +12,10 @@ module.exports = {
     compareAzimuth,
     getSunCalc,
     getMoonCalc,
-    getTimeOfText
+    calcTimeValue,
+    getTimeOfText,
+    getOnlyTime,
+    getNodeId
 };
 
 /*******************************************************************************************************/
@@ -75,6 +78,11 @@ Date.prototype.addDays = function (days) {
 /*******************************************************************************************************/
 /* exported functions                                                                                  */
 /*******************************************************************************************************/
+function getNodeId(node) {
+    //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
+    return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
+}
+/*******************************************************************************************************/
 function errorHandler(node, err, messageText, stateText) {
     if (!err) {
         return true;
@@ -100,6 +108,10 @@ function errorHandler(node, err, messageText, stateText) {
     }
     return false;
 };
+/*******************************************************************************************************/
+function getOnlyTime(date) {
+    return date.getSeconds() + date.getMinutes() * 60 + date.getHours() * 3600;
+}
 /*******************************************************************************************************/
 function getConfiguration(node, msg, config, attrs) {
     var outMsg = {
@@ -144,7 +156,6 @@ function getConfiguration(node, msg, config, attrs) {
         outMsg.data.azimuthEastHigh = node.positionConfig.azimuthEastHigh;
         outMsg.data.azimuthNorthLow = node.positionConfig.azimuthNorthLow;
         outMsg.data.azimuthNorthHigh = node.positionConfig.azimuthNorthHigh;
-        outMsg.data.cachProp = node.positionConfig.cachProp;
     }
 
     if (!attrs) {
@@ -330,16 +341,7 @@ function getMoonCalc(date, latitude, longitude, angleType) {
     return result;
 };
 /*******************************************************************************************************/
-function getTimeOfText(t, offset, next, days) {
-    let d = new Date();
-    if (t) {
-        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
-        //console.log(matches);
-        d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
-        d.setMinutes(parseInt(matches[2]) || 0);
-        d.setSeconds(parseInt(matches[3]) || 0);
-        d.setMilliseconds(0);
-    }
+function calcTimeValue(d, offset, next, days) {
     if (offset && !isNaN(offset) && offset !== 0) {
         result = new Date(result.getTime() + offset * 1000);
     }
@@ -372,6 +374,20 @@ function getTimeOfText(t, offset, next, days) {
         }
     }
     return d;
+}
+/*******************************************************************************************************/
+function getTimeOfText(t, offset, next, days) {
+    let d = new Date();
+    if (t) {
+        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+        if (matches) {
+            d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
+            d.setMinutes(parseInt(matches[2]) || 0);
+            d.setSeconds(parseInt(matches[3]) || 0);
+            d.setMilliseconds(0);
+        }
+    }
+    calcTimeValue(d, offset, next, days)
+    return d;
 };
-
 /*******************************************************************************************************/

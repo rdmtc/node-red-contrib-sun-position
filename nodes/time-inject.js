@@ -14,7 +14,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        //this.debug('timeInjectNode ' + JSON.stringify(config));
+        //this.debug('initialize timeInjectNode ' + JSON.stringify(config));
 
         this.time = config.time;
         this.timeType = config.timeType;
@@ -46,7 +46,7 @@ module.exports = function (RED) {
                 this.status({
                     fill: "green",
                     shape: "dot",
-                    text: node.nextTime.toLocaleDateString() + " " + node.nextTime.toLocaleTimeString()
+                    text: node.nextTime.toLocaleString()
                 });
             } else if (error) {
                 this.status({
@@ -60,7 +60,7 @@ module.exports = function (RED) {
         }
 
         function doCreateTimeout(node) {
-            let error = '';
+            let errorStatus = '';
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -68,7 +68,7 @@ module.exports = function (RED) {
                 //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
                 node.nextTime = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTime.error) {
-                    error = node.nextTime.error;
+                    errorStatus = "could not evaluate time";
                     node.error(node.nextTime.error);
                     node.nextTime = null;
                 } else {
@@ -100,7 +100,7 @@ module.exports = function (RED) {
                     doCreateTimeout(node);
                 }, 7200000);
             }
-            node.setStatus(error);
+            node.setStatus(errorStatus);
         }
 
         this.on('close', function () {
@@ -128,44 +128,24 @@ module.exports = function (RED) {
                 msg.topic = this.topic;
                 this.lastSendType = 'start';
 
-                if (plType !== 'flow' && plType !== 'global') {
-                    try {
-                        if (plType == null || plType === "date" || plType === "none" || plType === "") {
-                            if (plValue === "") {
-                                msg.payload = Date.now();
-                            } else {
-                                msg.payload = plValue;
-                            }
-                        } else if (plType === 'none') {
-                            msg.payload = "";
-                        } else if (msg.propertyType === 'jsonata') {
-                            try {
-                                msg.payload = RED.util.evaluateJSONataExpression(plValue, msg);
-                            } catch (err) {
-                                this.error(RED._("time-inject.errors.invalid-jsonata-expr", {
-                                    error: err.message
-                                }));
-                                msg.payload = plValue;
-                            }
-                        } else {
-                            msg.payload = RED.util.evaluateNodeProperty(plValue, plType, this, msg);
-                        }
-                        this.send(msg);
-                        msg = null;
-                    } catch (err) {
-                        this.error(err, msg);
+                if (plType == null || plType === "date" || plType === "none" || plType === "") {
+                    if (plValue === "") {
+                        msg.payload = Date.now();
+                    } else {
+                        msg.payload = plValue;
                     }
+                    node.send(msg);
                 } else {
                     RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
                         if (err) {
-                            node.error(err, msg);
+                            hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
                         } else {
                             msg.payload = res;
                             node.send(msg);
                         }
                     });
                 }
-                this.send([null, msg]);
+                msg = null;
             } catch (err) {
                 hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
             }

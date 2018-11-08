@@ -19,7 +19,7 @@ module.exports = function (RED) {
     function positionConfigurationNode(n) {
         RED.nodes.createNode(this, n);
         try {
-            this.debug('load position-config ' + n.name);
+            //this.debug('load position-config ' + n.name);
             this.name = n.name;
             this.longitude = n.longitude;
             this.latitude = n.latitude;
@@ -33,17 +33,24 @@ module.exports = function (RED) {
             this.azimuthNorthLow = n.azimuthNorthLow;
             this.azimuthNorthHigh = n.azimuthNorthHigh;
             this.cachProp = (n.name) ? n.name + '-' : 'position-';
+            let data = this.context().global.get(node.cachProp);
+            if (data) {
+
+            } else {
+                this.oldsunpos = null;
+                this.oldmoonpos = null;
+            }
             var node = this;
 
             this.getSunTimes = () => {
-                node.debug('getSunTimes');
+                //node.debug('getSunTimes');
                 let res = sunTimesCheck(node);
                 res.today = node.sunTimesToday;
                 res.tomorrow = node.sunTimesTomorow;
                 return res;
             }
             this.getSunTime = (now, value, next, days) => {
-                node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
+                //node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
                 let result = sunTimesCheck(node, now);
                 result.value = new Date(node.sunTimesToday[value]);
                 if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
@@ -71,7 +78,7 @@ module.exports = function (RED) {
                             break;
                         }
                     }
-                    node.debug('move day ' + dayx);
+                    //node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         let date = result.value.addDays(dayx);
                         let times = sunCalc.getTimes(date, node.latitude, node.longitude);
@@ -83,14 +90,14 @@ module.exports = function (RED) {
                 return result;
             }
             this.getMoonTimes = () => {
-                node.debug('getMoonTimes');
+                //node.debug('getMoonTimes');
                 let res = moonTimesCheck(node);
                 res.today = node.moonTimesToday;
                 res.tomorrow = node.moonTimesTomorow;
                 return res;
             }
             this.getMoonTime = (now, value, next, days) => {
-                node.debug('getMoonTime ' + value + ' - ' + next + ' - ' + days);
+                //node.debug('getMoonTime ' + value + ' - ' + next + ' - ' + days);
                 let result = moonTimesCheck(node, now);
                 result.value = new Date(node.moonTimesToday[value]);
                 if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
@@ -131,7 +138,8 @@ module.exports = function (RED) {
                 return result;
             }
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
-                node.debug('getTimeProp ' + srcNode.name + ' vType=' + vType + ' value=' + value + ' offset=' + offset);
+                //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
+                node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 let now = new Date();
                 let result = {
                     value: null,
@@ -141,10 +149,7 @@ module.exports = function (RED) {
                     //nix
                 } else if (vType === 'date') {
                     result.value = now;
-                } else if (vType === 'entered' ||
-                    vType === "string" ||
-                    vType === "str" ||
-                    vType === "num") {
+                } else if (vType === 'entered') {
                     result.value = hlp.getTimeOfText(String(value), offset, next, days);
                 } else if (vType === 'pdsTime') {
                     //sun
@@ -152,31 +157,32 @@ module.exports = function (RED) {
                 } else if (vType === 'pdmTime') {
                     //moon
                     result = node.getMoonTime(now, value, next, days);
-                } else if (vType === 'jsonata') {
-                    try {
-                        result.value = hlp.getTimeOfText(RED.util.evaluateJSONataExpression(value, msg), offset, next, days);
-                    } catch (err) {
-                        result.error = "Invalid JSONata expression: " + value;
-                    }
-                } else if (vType === 'msg' && msg) {
-                    let value = RED.util.getMessageProperty(msg, value, true);
-                    result.value = hlp.getTimeOfText(value, offset, next, days);
-                } else if (vType === 'flow' || vType === 'global') {
-                    var contextKey = RED.util.parseContextStore(value);
-                    if (!contextKey) {
-                        result.error = "Context key " + vType + '.' + value + " not found!";
-                    } else {
-                        let ctx = node.context()[vType];
-                        if (ctx) {
-                            let value = ctx.get(contextKey.key, contextKey.store);
-                            result.value = hlp.getTimeOfText(value, offset, next, days);
-                        } else {
-                            result.error = "Context " + vType + '.' + value + " not found!";
-                        }
-                    }
+                } else if (vType === 'json') {
+                    result.value = new Date(JSON.parse(value));
                 } else {
-                    result.error = "Not suported time definition! " + vType + '=' + value;
+                    try {
+                        //evaluateNodeProperty(value, type, node, msg, callback)
+                        let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+                        if (res) {
+                            if (res.match(/^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/)) {
+                                result.value = hlp.getTimeOfText("" + res, offset, next, days);
+                            } else {
+                                let dto = new Date(res);
+                                if (dto !== "Invalid Date" && !isNaN(dto)) {
+                                    result.value = hlp.calcTimeValue(dto, offset, next, days);
+                                } else {
+                                    result.error = "could not evaluate " + vType + '.' + value + ' = ' + res;
+                                }
+                            }
+                        } else {
+                            result.error = "could not evaluate " + vType + '.' + value;
+                        }
+                    } catch (err) {
+                        result.error = "could not evaluate " + vType + '=' + value + ': ' + err.message;
+                        node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    }
                 }
+
                 if (!result.value) {
                     if (!result.error) {
                         result.error = "Can not get time for " + vType + '=' + value;
@@ -190,11 +196,67 @@ module.exports = function (RED) {
             hlp.errorHandler(this, err, RED._("position-config.errors.error-text"), RED._("position-config.errors.error-title"));
         }
         /**************************************************************************************************************/
+        this.getSunCalc = (srcNode, msg) => {
+            let date = new Date();
+
+            var sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
+            let result = {
+                lastUpdate: date,
+                latitude: node.latitude,
+                longitude: node.longitude,
+                angleType: node.angleType,
+                azimuth: (node.angleType === 'deg') ? 180 + 180 / Math.PI * sunPos.azimuth : sunPos.azimuth,
+                altitude: (node.angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude, //elevation = altitude
+            }
+            sunTimesCheck(node);
+            result.times = node.sunTimesToday;
+            if (!node.oldsunpos) {
+                node.oldsunpos = this.context().global.get(node.cachProp);
+            }
+            //this.oldsunpos = null;
+            //this.oldmoonpos = null;
+
+            let oldvalue = this.context().global.get(node.cachProp);
+            if (!oldvalue) {
+                oldvalue = {
+                    sunpos: {},
+                    moonpos: {},
+                }
+            }
+            if (hlp.compareAzimuth(result, 'west', outMsg.payload.azimuth, outMsg.data.azimuthWestLow, outMsg.data.azimuthWestHigh, node.oldsunpos) ||
+                hlp.compareAzimuth(result, 'south', outMsg.payload.azimuth, outMsg.data.azimuthSouthLow, outMsg.data.azimuthSouthHigh, node.oldsunpos) ||
+                hlp.compareAzimuth(result, 'east', outMsg.payload.azimuth, outMsg.data.azimuthEastLow, outMsg.data.azimuthEastHigh, node.oldsunpos) ||
+                hlp.compareAzimuth(result, 'north', outMsg.payload.azimuth, outMsg.data.azimuthNorthLow, outMsg.data.azimuthNorthHigh, oldvanode.oldsunposlue)) {
+                outMsg.payload.exposureChanged = true;
+                this.context().global.set('sunpos', outMsg.payload);
+            }
+            node.oldsunpos = result;
+            //this.context().global.set(node.cachProp, node.oldsunpos);
+
+            return result;
+        }
+        /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
             node.debug('sunTimesRefresh');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
+            /*
+                {"solarNoon":"2018-11-01T10:49:56.550Z",
+                "nadir":"2018-10-31T22:49:56.550Z",
+                "sunrise":"2018-11-01T05:58:13.904Z",
+                "sunset":"2018-11-01T15:41:39.196Z",
+                "sunriseEnd":"2018-11-01T06:01:54.246Z",
+                "sunsetStart":"2018-11-01T15:37:58.854Z",
+                "dawn":"2018-11-01T05:23:28.111Z",
+                "dusk":"2018-11-01T16:16:24.989Z",
+                "nauticalDawn":"2018-11-01T04:44:25.813Z",
+                "nauticalDusk":"2018-11-01T16:55:27.288Z",
+                "nightEnd":"2018-11-01T04:06:06.184Z",
+                "night":"2018-11-01T17:33:46.916Z",
+                "goldenHourEnd":"2018-11-01T06:47:04.923Z",
+                "goldenHour":"2018-11-01T14:52:48.178Z"}
+            */
         }
 
         function sunTimesCheck(node, today, dayId) {

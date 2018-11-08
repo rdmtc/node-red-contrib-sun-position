@@ -198,34 +198,39 @@
         label: function () {
             const getId = (type, value, offset) => {
                 let suffix = '';
-                if (offset>0) {
+                if (offset > 0) {
                     suffix = '↷';
                 }
                 if (type === 'msg' || type === 'flow' || type === 'global') {
-                    return type + '.' + value;
+                    return type + '.' + value + suffix;
                 } else if (type === 'pdmTime') {
-                    return 'moon ' + value;
+                    return 'moon ' + value + suffix;
                 }
-                return value;
+                return value + suffix;
             }
             const getConcatId = (type1, value1, offset1, type2, value2, offset2) => {
-                if (propertyType !== 'none' && value2) {
+                if (this.propertyType !== 'none' && this.propertyType !== '' && value2) {
                     return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
                 }
                 return getId(type1, value1);
             }
 
-            return this.name || ((this.startTime && this.endTime) ? (
-                    getConcatId(this.startTimeType, this.startTime, this.startOffset, this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
+            if (this.name) {
+                return this.name;
+            } else if (this.startTime && this.endTime) {
+
+                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.startTimeAltType,
+                        this.startTimeAlt, this.startOffsetAlt) +
                     ' - ' +
-                    getConcatId(this.endTimeType, this.endTime, this.endTimeAltType, this.endTimeAlt)
-                ) :
-                'within-time');
+                    getConcatId(this.endTimeType, this.endTime, this.endOffset, this.endTimeAltType,
+                        this.endTimeAlt, this.endTimeAltOffset);
+            }
+            return 'within-time';
         },
         labelStyle: function () {
             return this.name ? "node_label_italic" : "";
         },
-        paletteLabel: 'within time',
+        paletteLabel: 'within-time',
         align: 'left',
         oneditprepare: function () {
             $(".wt-offset-time").spinner({

@@ -27,6 +27,11 @@ module.exports = function (RED) {
                 outMsg.data.cachProp += 'moon';
 
                 outMsg.payload = hlp.getMoonCalc(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude, outMsg.data.angleType);
+                if (!outMsg.payload.azimuth) {
+                    this.error('Azimuth could not calculated!');
+                    this.send(outMsg);
+                    return;
+                }
 
                 if (outMsg.tsToday && (this.propertyType != 'none') && (this.property != '')) { //https://www.sonnenverlauf.de/
                     let oldvalue = this.context().global.get('sunpos');

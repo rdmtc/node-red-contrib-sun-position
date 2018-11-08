@@ -14,6 +14,37 @@ module.exports = function (RED) {
 
         this.on('input', function (msg) {
             try {
+                var outMsg = {
+                    payload: {},
+                    topic: msg.topic,
+                    data: {},
+                    tsToday: false
+                }
+                outMsg.payload = this.positionConfig.getSunCalc(this, msg);
+                if (!outMsg.payload.azimuth) {
+                    this.error('Azimuth could not calculated!');
+                    this.send(outMsg);
+                    return;
+                }
+                if (outMsg.tsToday && (this.propertyType != 'none') && (this.property != '')) { //https://www.sonnenverlauf.de/
+                    let oldvalue = this.context().global.get('sunpos');
+                    if (hlp.compareAzimuth(outMsg.payload, 'west', outMsg.payload.azimuth, outMsg.data.azimuthWestLow, outMsg.data.azimuthWestHigh, oldvalue) ||
+                        hlp.compareAzimuth(outMsg.payload, 'south', outMsg.payload.azimuth, outMsg.data.azimuthSouthLow, outMsg.data.azimuthSouthHigh, oldvalue) ||
+                        hlp.compareAzimuth(outMsg.payload, 'east', outMsg.payload.azimuth, outMsg.data.azimuthEastLow, outMsg.data.azimuthEastHigh, oldvalue) ||
+                        hlp.compareAzimuth(outMsg.payload, 'north', outMsg.payload.azimuth, outMsg.data.azimuthNorthLow, outMsg.data.azimuthNorthHigh, oldvalue)) {
+                        outMsg.payload.exposureChanged = true;
+                        this.context().global.set('sunpos', outMsg.payload);
+                    }
+                } else {
+                    hlp.compareAzimuth(outMsg.payload, 'west', outMsg.payload.azimuth, outMsg.data.azimuthWestLow, outMsg.data.azimuthWestHigh, oldvalue);
+                    hlp.compareAzimuth(outMsg.payload, 'south', outMsg.payload.azimuth, outMsg.data.azimuthSouthLow, outMsg.data.azimuthSouthHigh, oldvalue);
+                    hlp.compareAzimuth(outMsg.payload, 'east', outMsg.payload.azimuth, outMsg.data.azimuthEastLow, outMsg.data.azimuthEastHigh, oldvalue);
+                    hlp.compareAzimuth(outMsg.payload, 'north', outMsg.payload.azimuth, outMsg.data.azimuthNorthLow, outMsg.data.azimuthNorthHigh, oldvalue);
+                    outMsg.payload.exposureChanged = true;
+                }
+                this.context().global.set(outMsg.data.cachProp, outMsg.payload);
+
+                this.send(outMsg);
                 /********************************************
                  * versenden:
                  *********************************************/
@@ -25,6 +56,7 @@ module.exports = function (RED) {
                 }
                 outMsg.data.cachProp += 'sun';
 
+                outMsg.payload = positionConfig
                 outMsg.payload = hlp.getSunCalc(outMsg.data.ts, outMsg.data.latitude, outMsg.data.longitude, outMsg.data.angleType);
                 if (!outMsg.payload.azimuth) {
                     this.error('Azimuth could not calculated!');
