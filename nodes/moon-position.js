@@ -21,11 +21,9 @@ module.exports = function (RED) {
             try {
                 var ports = new Array(this.rules.length);
                 ports[0] = {
-                    payload: {},
+                    payload: this.positionConfig.getMoonCalc(msg.ts),
                     topic: this.topic,
-                    tsToday: false
                 }
-                ports[0].payload = this.positionConfig.getMoonCalc(this, msg);
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');
                     this.send(ports);
@@ -46,7 +44,12 @@ module.exports = function (RED) {
                 }
                 node.azimuthPos = ports[0].payload.pos;
                 this.send(ports);
-                    return null;
+                this.status({
+                    fill: "grey",
+                    shape: "dot",
+                    text: ports[0].payload.azimuth.toFixed(2) + '/' + ports[0].payload.altitude.toFixed(2) + ' - ' + ports[0].payload.lastUpdate.toLocaleString()
+                });
+                return null;
             } catch (err) {
                 hlp.errorHandler(this, err, 'Exception occured on moon-position', 'internal error');
             }
@@ -54,7 +57,7 @@ module.exports = function (RED) {
             //this.status({fill:"red",shape:"dot",text:"error - input parameter"});
         });
         function getNumProp(node, msg, vType, value) {
-            node.debug('getNumProp vType=' + vType + ' value=' + value);
+            //node.debug('getNumProp vType=' + vType + ' value=' + value);
             let now = new Date();
             let result = -1;
             if (vType === '' || vType === 'none') {

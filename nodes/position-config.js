@@ -93,7 +93,8 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
-            this.cachProp = (n.name) ? n.name + '-' : 'position-';
+            this.lastSunCalc = { ts : 0};
+            this.lastMoonCalc = { ts : 0};
 
             var node = this;
 
@@ -225,11 +226,26 @@ module.exports = function (RED) {
             hlp.errorHandler(this, err, RED._("position-config.errors.error-text"), RED._("position-config.errors.error-title"));
         }
         /**************************************************************************************************************/
-        this.getSunCalc = (srcNode, msg) => {
-            let date = new Date();
+        this.getSunCalc = (date) => {
+            if (typeof date === 'string') {
+                node.debug('date ' + date);
+                let dto = new Date(date);
+                if (dto !== "Invalid Date" && !isNaN(dto)) {
+                    node.debug('date ' + dto);
+                    date = dto;
+                }
+            }
+            if ((typeof date === 'undefined') || !(date instanceof Date)) {
+                node.debug('no date' + date);
+                date = new Date();
+                if (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000) {
+                    return this.lastSunCalc;
+                }
+            }
 
             var sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             let result = {
+                ts : date.getTime(),
                 lastUpdate: date,
                 latitude: node.latitude,
                 longitude: node.longitude,
@@ -239,16 +255,30 @@ module.exports = function (RED) {
             }
             sunTimesCheck(node);
             result.times = node.sunTimesToday;
+            this.lastSunCalc = result;
 
             return result;
         }
         /**************************************************************************************************************/
-        this.getMoonCalc = (srcNode, msg) => {
-            let date = new Date();
+        this.getMoonCalc = (date) => {
+            if (typeof date === 'string') {
+                let dto = new Date(date);
+                if (dto !== "Invalid Date" && !isNaN(dto)) {
+                    date = dto;
+                }
+            }
+            if ((typeof date === 'undefined') || !(date instanceof Date)) {
+                date = new Date();
+                if (Math.abs(date.getTime() - this.lastMoonCalc.ts) < 3000) {
+                    return this.lastMoonCalc;
+                }
+            }
+
             let moonPos = sunCalc.getMoonPosition(date, node.latitude, node.longitude);
             let moonIllum = sunCalc.getMoonIllumination(date);
 
             var result = {
+                ts : date.getTime(),
                 lastUpdate: date,
                 latitude: node.latitude,
                 longitude: node.longitude,
@@ -303,7 +333,8 @@ module.exports = function (RED) {
                 //true if the moon is always below the horizon
                 result.times.alwaysDown = false;
             }
-        
+            this.lastMoonCalc = result;
+
             return result;
         }
         /**************************************************************************************************************/
