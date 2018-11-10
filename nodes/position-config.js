@@ -7,10 +7,79 @@ const sunCalc = require('suncalc');
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
+/*******************************************************************************************************/
+const moonPhases = [{
+    emoji: '🌚',
+    code: ':new_moon_with_face:',
+    name: 'New Moon',
+    weight: 1
+},
+{
+    emoji: '🌒',
+    code: ':waxing_crescent_moon:',
+    name: 'Waxing Crescent',
+    weight: 6.3825
+},
+{
+    emoji: '🌓',
+    code: ':first_quarter_moon:',
+    name: 'First Quarter',
+    weight: 1
+},
+{
+    emoji: '🌔',
+    code: ':waxing_gibbous_moon:',
+    name: 'Waxing Gibbous',
+    weight: 6.3825
+},
+{
+    emoji: '🌝',
+    code: ':full_moon_with_face:',
+    name: 'Full Moon',
+    weight: 1
+},
+{
+    emoji: '🌖',
+    code: ':waning_gibbous_moon:',
+    name: 'Waning Gibbous',
+    weight: 6.3825
+},
+{
+    emoji: '🌗',
+    code: ':last_quarter_moon:',
+    name: 'Last Quarter',
+    weight: 1
+},
+{
+    emoji: '🌘',
+    code: ':waning_crescent_moon:',
+    name: 'Waning Crescent',
+    weight: 6.3825
+}
+];
+
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
     return date;
+}
+
+function nextday(days, daystart) {
+    let dayx = 0;
+    let daypos = daystart;
+    while (days.indexOf(daypos) === -1) {
+        dayx += 1;
+        if ((daystart + dayx) > 6) {
+            daypos =dayx - (7-daystart);
+        } else {
+            daypos = daystart + dayx;
+        }
+        if (dayx > 6) {
+            dayx = -1;
+            break;
+        }
+    }
+    return dayx;
 }
 
 module.exports = function (RED) {
@@ -24,22 +93,8 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
-            this.azimuthWestLow = n.azimuthWestLow;
-            this.azimuthWestHigh = n.azimuthWestHigh;
-            this.azimuthSouthLow = n.azimuthSouthLow;
-            this.azimuthSouthHigh = n.azimuthSouthHigh;
-            this.azimuthEastLow = n.azimuthEastLow;
-            this.azimuthEastHigh = n.azimuthEastHigh;
-            this.azimuthNorthLow = n.azimuthNorthLow;
-            this.azimuthNorthHigh = n.azimuthNorthHigh;
             this.cachProp = (n.name) ? n.name + '-' : 'position-';
-            let data = this.context().global.get(node.cachProp);
-            if (data) {
 
-            } else {
-                this.oldsunpos = null;
-                this.oldmoonpos = null;
-            }
             var node = this;
 
             this.getSunTimes = () => {
@@ -63,27 +118,14 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let daystart = result.value.getDay();
-                    let dayx = 0;
-                    let daypos = daystart;
-                    while (days.indexOf(daypos) === -1) {
-                        dayx += 1;
-                        if ((daystart + dayx) > 6) {
-                            daypos = (daystart * -1) + dayx - 1;
-                        } else {
-                            daypos = daystart + dayx;
-                        }
-                        if (dayx > 6) {
-                            dayx = -1;
-                            break;
-                        }
-                    }
+                    let dayx = nextday(days, result.value.getDay());
                     //node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         let date = result.value.addDays(dayx);
                         let times = sunCalc.getTimes(date, node.latitude, node.longitude);
-                        result.value = times[value];
+                        result.value = new Date(times[value]);
                     } else if (dayx < 0) {
+                        node.debug('getSunTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                         result.error = 'No valid day of week found!';
                     }
                 }
@@ -110,29 +152,16 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let daystart = now.getDay();
-                    let dayx = 0;
-                    let daypos = daystart;
-                    while (days.indexOf(daypos) === -1) {
-                        dayx += 1;
-                        if ((daystart + dayx) > 6) {
-                            daypos = (daystart * -1) + dayx - 1;
-                        } else {
-                            daypos = daystart + dayx;
-                        }
-                        if (dayx > 6) {
-                            dayx = -1;
-                            break;
-                        }
-                    }
+                    let dayx = nextday(days, result.value.getDay());
                     if (dayx === 1) {
                         result.value = new Date(node.moonTimesTomorow[value]);
                     } else if (dayx > 1) {
                         let date = (new Date()).addDays(dayx);
                         let times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
-                        result.value = times[value];
+                        result.value = new Date(times[value]);
                     } else if (dayx < 0) {
                         result.error = 'no valid week day found!';
+                        node.debug('getMoonTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                     }
                 }
                 return result;
@@ -210,29 +239,71 @@ module.exports = function (RED) {
             }
             sunTimesCheck(node);
             result.times = node.sunTimesToday;
-            if (!node.oldsunpos) {
-                node.oldsunpos = this.context().global.get(node.cachProp);
-            }
-            //this.oldsunpos = null;
-            //this.oldmoonpos = null;
 
-            let oldvalue = this.context().global.get(node.cachProp);
-            if (!oldvalue) {
-                oldvalue = {
-                    sunpos: {},
-                    moonpos: {},
-                }
-            }
-            if (hlp.compareAzimuth(result, 'west', outMsg.payload.azimuth, outMsg.data.azimuthWestLow, outMsg.data.azimuthWestHigh, node.oldsunpos) ||
-                hlp.compareAzimuth(result, 'south', outMsg.payload.azimuth, outMsg.data.azimuthSouthLow, outMsg.data.azimuthSouthHigh, node.oldsunpos) ||
-                hlp.compareAzimuth(result, 'east', outMsg.payload.azimuth, outMsg.data.azimuthEastLow, outMsg.data.azimuthEastHigh, node.oldsunpos) ||
-                hlp.compareAzimuth(result, 'north', outMsg.payload.azimuth, outMsg.data.azimuthNorthLow, outMsg.data.azimuthNorthHigh, oldvanode.oldsunposlue)) {
-                outMsg.payload.exposureChanged = true;
-                this.context().global.set('sunpos', outMsg.payload);
-            }
-            node.oldsunpos = result;
-            //this.context().global.set(node.cachProp, node.oldsunpos);
+            return result;
+        }
+        /**************************************************************************************************************/
+        this.getMoonCalc = (srcNode, msg) => {
+            let date = new Date();
+            let moonPos = sunCalc.getMoonPosition(date, node.latitude, node.longitude);
+            let moonIllum = sunCalc.getMoonIllumination(date);
 
+            var result = {
+                lastUpdate: date,
+                latitude: node.latitude,
+                longitude: node.longitude,
+                angleType: node.angleType,
+                azimuth: (node.angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth,
+                altitude: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, //elevation = altitude
+                distance: moonPos.distance,
+                parallacticAngle: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.parallacticAngle : moonPos.parallacticAngle,
+                illumination: {
+                    angle: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.angle : moonIllum.angle,
+                    fraction: moonIllum.fraction,
+                    phase: moonIllum.phase,
+                    phaseAngle: (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360,
+                    zenithAngle: (node.angleType === 'deg') ? 180 / Math.PI * (moonIllum.angle - moonPos.parallacticAngle) : moonIllum.angle - moonPos.parallacticAngle,
+                },
+            }
+            sunTimesCheck(node);
+            result.times = node.moonTimesToday;
+            //getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
+        
+            if (moonIllum.phase < 0.01) {
+                // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
+                result.illumination.phaseEmoji = moonPhases[0];
+            } else if (moonIllum.phase < 0.25) {
+                // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw.zunehmende Sichel(0° < Phasenwinkel < 90°),
+                result.illumination.phaseEmoji = moonPhases[1];
+            } else if (moonIllum.phase < 0.26) {
+                // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
+                result.illumination.phaseEmoji = moonPhases[2];
+            } else if (moonIllum.phase < 0.50) {
+                // 0.25 - 0.5   Waxing Gibbous      -   zweites Viertel(90° < Phasenwinkel < 180°),
+                result.illumination.phaseEmoji = moonPhases[3];
+            } else if (moonIllum.phase < 0.51) {
+                // 0.5	        Full Moon           -   Vollmond(Phasenwinkel = 180°),
+                result.illumination.phaseEmoji = moonPhases[4];
+            } else if (moonIllum.phase <= 0.75) {
+                // 0.5 - 0.75    Waning Gibbous     -   drittes Viertel (180° < Phasenwinkel < 270°),
+                result.illumination.phaseEmoji = moonPhases[5];
+            } else if (moonIllum.phase < 0.76) {
+                // 0.75	        Last Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
+                result.illumination.phaseEmoji = moonPhases[6];
+            } else {
+                // Waning Crescent                  -   letztes Viertel bzw.abnehmende Sichel(Phasenwinkel > 270°).
+                result.illumination.phaseEmoji = moonPhases[7];
+            }
+        
+            if (!result.times.alwaysUp) {
+                //true if the moon never rises/sets and is always above the horizon during the day
+                result.times.alwaysUp = false;
+            }
+            if (!result.times.alwaysDown) {
+                //true if the moon is always below the horizon
+                result.times.alwaysDown = false;
+            }
+        
             return result;
         }
         /**************************************************************************************************************/

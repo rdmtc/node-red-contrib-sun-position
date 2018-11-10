@@ -10,11 +10,12 @@
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
-This node are for getting sun and moon position. This can be used for smart home.
+This node are for getting sun and moon position or to control a flow by sun or moon position. This can be used for smart home.
 
 ![nodes](images/appearance1.png?raw=true)
 
 > This is still in development!
+> This is not fully tested and documentation are missing!
 
 ## Installation
 
@@ -26,7 +27,27 @@ tbd
 
 ## Implemented Nodes
 
-- sun-position Node -get german holidays on any input
+- within-time         a switch node, which forwards a message only within a certain period of time.The beginning and the end can also be sunset, sunrise, moonset, moonrise or any other sun times.
+- time-inject         a inject node, which can send a message on a specified time, which can also be a sun or moon time.
+- sun-position        a node which calculates sun position. Can be used as a switch node for specific azimuth of the sun.
+- moon-position       a node which calculates moon position and phases. Can be used as a switch node for specific azimuth of the sun.
+
+### sun-position
+
+![sun-position](images/sun-position-settings.png?raw=true)
+
+### moon-position
+
+![moon-position](images/sun-position-settings.png?raw=true)
+
+### time-inject
+
+![time-inject](images/time-inject-settings.png?raw=true)
+
+### within-time
+
+![within-time](images/within-time-settings.png?raw=true)
+
 
 ## Bugs and Feedback
 

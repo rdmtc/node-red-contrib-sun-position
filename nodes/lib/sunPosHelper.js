@@ -231,7 +231,7 @@ function getAngle(type, angle) {
     return angle;
 };
 /*******************************************************************************************************/
-function compareAzimuth(obj, name, azimuth, low, high, old) {
+/*function compareAzimuth(obj, name, azimuth, low, high, old) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
         if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
             if (high > low) {
@@ -246,6 +246,22 @@ function compareAzimuth(obj, name, azimuth, low, high, old) {
     } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
         obj[name] = (azimuth < high);
         return obj[name] != old[name];
+    }
+    return false;
+}; */
+function compareAzimuth(azimuth, low, high) {
+    if (typeof low !== 'undefined' && low !== '' && !isNaN(low) && low >= 0) {
+        if (typeof high !== 'undefined' && high !== '' && !isNaN(high) && high >= 0) {
+            if (high > low) {
+                return (azimuth > low) && (azimuth < high);
+            } else {
+                return (azimuth > low) || (azimuth < high);
+            }
+        } else {
+            return (azimuth > low);
+        }
+    } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
+        return  (azimuth < high);
     }
     return false;
 };

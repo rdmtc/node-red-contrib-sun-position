@@ -32,70 +32,6 @@
                 validate: function (v) {
                     return (v === 'rad' || v === 'deg')
                 }
-            },
-            azimuthWestLow: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthWestHigh: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthSouthLow: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthSouthHigh: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthEastLow: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthEastHigh: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthNorthLow: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
-            },
-            azimuthNorthHigh: {
-                value: "",
-                required: false,
-                validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }
             }
         },
         label: function () {
@@ -141,44 +77,7 @@
             <span data-i18n="position-config.tips.sunPosControl"></span>
         </div>
         <div class="form-row"><i class="fa fa-arrow-right"></i> <span data-i18n="position-config.label.west"></span></div>
-            <div class="form-row"><span data-i18n="position-config.label.west"></span></div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="position-config.label.westLow"></span></label>
-            <input type="text" id="node-config-input-azimuthWestLow" data-i18n="[placeholder]position-config.placeholder.westLow">
-        </div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="position-config.label.westHigh"></span></label>
-            <input type="text" id="node-config-input-azimuthWestHigh" data-i18n="[placeholder]position-config.placeholder.westHigh">
-        </div>
-
-        <div class="form-row"><i class="fa fa-arrow-down"></i> <span data-i18n="position-config.label.south"></span></div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="position-config.label.southLow"></span></label>
-            <input type="text" id="node-config-input-azimuthSouthLow" data-i18n="[placeholder]position-config.placeholder.southLow">
-        </div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="position-config.label.southHigh"></span></label>
-            <input type="text" id="node-config-input-azimuthSouthHigh" data-i18n="[placeholder]position-config.placeholder.southHigh">
-        </div>
-
-        <div class="form-row"><i class="fa fa-arrow-left"></i> <span data-i18n="position-config.label.east"></span></div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="position-config.label.eastLow"></span></label>
-            <input type="text" id="node-config-input-azimuthEastLow" data-i18n="[placeholder]position-config.placeholder.eastLow">
-        </div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="position-config.label.eastHigh"></span></label>
-            <input type="text" id="node-config-input-azimuthEastHigh" data-i18n="[placeholder]position-config.placeholder.eastHigh">
-        </div>
-
-        <div class="form-row"><i class="fa fa-arrow-up"></i> <span data-i18n="position-config.label.north"></span></div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-down"></i> <span data-i18n="position-config.label.northLow"></span></label>
-            <input type="text" id="node-config-input-azimuthNorthLow" data-i18n="[placeholder]position-config.placeholder.northLow">
-        </div>
-        <div class="form-row">
-            <label for="node-region"><i class="fa fa-level-up"></i> <span data-i18n="position-config.label.northHigh"></span></label>
-            <input type="text" id="node-config-input-azimuthNorthHigh" data-i18n="[placeholder]position-config.placeholder.northHigh">
+            <div class="form-row"><span data-i18n="position-config.label.west"></span>
         </div>
         <hr>
         <div class="form-row">
