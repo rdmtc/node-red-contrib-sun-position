@@ -9,7 +9,7 @@
             longitude: {
                 value: "",
                 required: true,
-                validate: function (v) {
+                validate: function(v) {
                     var n = Number(v);
                     return ((n >= -180) && (n <= 180));
                 }
@@ -17,7 +17,7 @@
             latitude: {
                 value: "",
                 required: true,
-                validate: function (v) {
+                validate: function(v) {
                     var n = Number(v);
                     return ((n >= -90) && (n <= 90));
                 }
@@ -25,19 +25,19 @@
             angleType: {
                 value: "rad",
                 required: true,
-                validate: function (v) {
+                validate: function(v) {
                     return (v === 'rad' || v === 'deg')
                 }
             }
         },
-        label: function () {
+        label: function() {
             return this.name || "default-position";
         },
-        oneditprepare: function () {
+        oneditprepare: function() {
             if (($("#node-config-input-latitude").val() === "") && ($("#node-config-input-longitude").val() ===
                     "")) {
                 if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
                         $("#node-config-input-latitude").val(Number(position.coords.latitude.toFixed(
                             5)));
                         $("#node-config-input-longitude").val(Number(position.coords.longitude.toFixed(

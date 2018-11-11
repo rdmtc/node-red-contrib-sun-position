@@ -116,7 +116,7 @@ module.exports = function (RED) {
         this.on('input', msg => {
             try {
                 doCreateTimeout(node);
-                this.debug('input ' + JSON.stringify(msg));
+                //this.debug('input ' + JSON.stringify(msg));
                 this.lastInputType = msg.type;
                 let plType = 'date';
                 let plValue = '';
@@ -135,6 +135,10 @@ module.exports = function (RED) {
                         msg.payload = plValue;
                     }
                     node.send(msg);
+                } else if (plType === "typeSunCalc") {
+                    msg.payload = this.positionConfig.getSunCalc(msg.ts);
+                } else if (plType === "typeMoonCalc") {
+                    msg.payload = this.positionConfig.getMoonCalc(msg.ts);
                 } else {
                     RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
                         if (err) {

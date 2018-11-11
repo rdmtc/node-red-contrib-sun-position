@@ -6,7 +6,7 @@
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
-module.exports = function (RED) {
+module.exports = function(RED) {
     "use strict";
 
     function withinTimeSwitchNode(config) {
@@ -21,19 +21,19 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                this.debug('starting ' + JSON.stringify(msg, Object.getOwnPropertyNames(msg)));
-                this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
-                this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
+                //this.debug('starting ' + JSON.stringify(msg, Object.getOwnPropertyNames(msg)));
+                //this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
+                //this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
 
                 let now = new Date();
                 let start;
                 let end;
                 let alternateTimes = this.propertyType !== 'none';
                 if (alternateTimes) {
-                    this.debug('alternate times enabled');
+                    //this.debug('alternate times enabled ' + this.propertyType + '.' + this.property);
                     try {
-                        //evaluateNodeProperty(value, type, node, msg, callback)
-                        let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+                        //evaluateNodeProperty(this.property, type, node, msg, callback)
+                        let res = RED.util.evaluateNodeProperty(this.property, this.propertyType, node, msg);
                         alternateTimes = ((res == true) || (res == 'true'));
                     } catch (err) {
                         alternateTimes = false;
@@ -47,22 +47,24 @@ module.exports = function (RED) {
 
                 let startSuffix = '';
                 if (alternateTimes && config.startTimeAltType !== 'none') {
-                    this.debug('using alternate start time');
+                    //this.debug('using alternate start time');
                     //start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
                     start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt * config.startOffsetAltMultiplier);
-                    startSuffix = '⏴⎇';
+                    startSuffix = '⎇⏴ ';
                 } else {
+                    //this.debug('using standard start time ' + alternateTimes + ' - ' + config.startTimeAltType);
                     //start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
                     start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, config.startOffset * config.startOffsetMultiplier);
                 }
 
                 let endSuffix = '';
                 if (alternateTimes && config.endTimeAltType !== 'none') {
-                    this.debug('using alternate end time');
+                    //this.debug('using alternate end time');
                     //end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
                     end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt * config.endOffsetAltMultiplier);
-                    endSuffix = '⏵⎇';
+                    endSuffix = ' ⏵⎇';
                 } else {
+                    //this.debug('using standard end time ' + alternateTimes + ' - ' + config.startTimeAltType);
                     //end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.endOffset);
                     end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, config.endOffset * config.endOffsetMultiplier);
                 }
@@ -90,11 +92,11 @@ module.exports = function (RED) {
                         now = dto;
                     }
                 }
-                this.debug(start.value + ' - ' + now + ' - ' + end.value);
+                //this.debug(start.value + ' - ' + now + ' - ' + end.value);
                 let startNr = hlp.getOnlyTime(start.value);
                 let endNr = hlp.getOnlyTime(end.value);
                 let cmpNow = hlp.getOnlyTime(now);
-                this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
+                //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
 
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow <= endNr) {

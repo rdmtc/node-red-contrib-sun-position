@@ -4,6 +4,16 @@
         <input type="text" id="node-input-positionConfig">
     </div>
     <hr>
+    <div class="form-row time-payload">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
+        <input type="text" id="node-input-payload" style="width:70%">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
+    <div class="form-row time-topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
+        <input type="text" id="node-input-topic">
+    </div>
+    <hr>
     <div class="form-row">
         <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
         <input type="text" id="node-input-time" style="width: 70%"/>
@@ -39,15 +49,6 @@
         </div>
     </div>
 
-    <div class="form-row time-payload">
-        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
-        <input type="text" id="node-input-payload" style="width:70%">
-        <input type="hidden" id="node-input-payloadType">
-    </div>
-    <div class="form-row time-topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
-        <input type="text" id="node-input-topic">
-    </div>
     <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
@@ -90,12 +91,31 @@
 </style>
 
 <script type="text/x-red" data-help-name="time-inject">
-    <p>Generate an output on different time stamps. The time stamps can be set directly or by using the suncalc module to generate an output at sunrise and sunset based on a specified location.</p>
-    <p>Several choices of definition of sunrise and sunset are available.</p>
-    <p>The output emits a <code>msg.payload</code> as defined if the time stamp is reached.</p>
-    <p>The next timestamp will be calculated every 2 hours, if a timestamp is reached, settings are changed or the inject node is manual triggered.
+    <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
+    payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property that can be configured in the node.</dd>
+        <dt class="optional">time <span class="property-type">time</span></dt>
+        <dd>An optional property that can be configured when the inject node should emit a message on that timestamp.</dd>
+        <dt class="optional">offset <span class="property-type">number</span></dt>
+        <dd>An optional property which is only available if an time is choosen. The offset can be a positive or negative and defines a time offset to the choosen time.</dd>
+        <dt class="optional">day select <span class="property-type">number</span></dt>
+        <dd>An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The Time-Inject node can initiate a flow with a specific payload value.
+    The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
+    <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
+    <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
+    inject at specified time stamp in a daily interval which can be set directly or by using the suncalc module to generate an output at various sunrise, sunset, moonrise or moonset times based on a specified location.</p>
+    <p><b>Note</b>: The next timestamp will be calculated every 2 hours, if a timestamp is reached, settings are changed or the inject node is manual triggered.
         If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done!</p>
-  </script>
+    <p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
+</script>
 
 <script type="text/javascript">
     RED.nodes.registerType('time-inject', {
@@ -253,6 +273,18 @@
                 icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
                 options: ['rise', 'set']
             };
+            let typeSunCalc = {
+                value: "pdsCalc",
+                label: "sun caclucaltion",
+                icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
+                hasValue: false
+            };
+            let typeMoonCalc = {
+                value: "pdmCalc",
+                label: "moon caclucaltion",
+                icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
+                hasValue: false
+            };
             $("#node-input-timeType").val(this.timeType);
             $("#node-input-time").typedInput({
                 default: this.timeType || 'none',
@@ -273,7 +305,7 @@
                 default: this.payloadType || 'date',
                 typeField: $("#node-input-payloadType"),
                 types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
-                    'jsonata'
+                    'jsonata', typeSunCalc, typeMoonCalc
                 ]
             });
             $(".wt-offset-time").spinner({
@@ -300,12 +332,10 @@
 
             if (days.length == 0) {
                 this.timeDays = "";
-            } else {
-                if (days.length == 7) {
+            } else if (days.length == 7) {
                     this.timeDays = "*";
-                } else {
-                    this.timeDays = days.join(",");
-                }
+            } else {
+                this.timeDays = days.join(",");
             }
         },
         button: {

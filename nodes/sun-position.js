@@ -20,10 +20,9 @@ module.exports = function (RED) {
             try {
                 var ports = new Array(this.rules.length);
                 ports[0] = {
-                    payload: {},
+                    payload: this.positionConfig.getSunCalc(msg.ts),
                     topic: this.topic,
                 }
-                ports[0].payload = this.positionConfig.getSunCalc(msg.ts);
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');
                     this.send(ports);
@@ -36,10 +35,12 @@ module.exports = function (RED) {
                     let low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     let high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
                     let chk = hlp.compareAzimuth(ports[0].payload.azimuth, low, high);
+                    let chg =  (node.azimuthPos[i] !== chk);
                     ports[0].payload.pos.push(chk);
-                    ports[0].payload.posChanged = ports[0].payload.posChanged && (node.azimuthPos[i] !== chk);
+                    ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
-                        ports[i + 1] = msg;
+                        ports[i + 1] = RED.util.cloneMessage(msg);
+                        ports[i + 1].posChanged = chg;
                     }
                 }
                 node.azimuthPos = ports[0].payload.pos;

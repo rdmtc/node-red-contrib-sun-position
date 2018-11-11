@@ -24,26 +24,123 @@
     </div>
 </script>
 
+<script type="text/x-red" data-help-name="sun-position">
+    <h3>About</h3>
+    <p>Gets the position of the sun</p>
+
+    <h3>Inputs</h3>
+
+    The message is only for trigger the calculation. If limits are defined the input message will send to the output associated to the limit.
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>first output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">object</span></dt>
+                 <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+         <li>second and following outputs
+                <dl class="message-properties">
+                    <dt>payload </dt>
+                    <dd>same as the incomming message, which will send to this output.</dd>
+                    <dt>posChanged <span class="property-type">boolean</span></dt>
+                    <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
+                </dl>
+            </li>
+     </ol>
+     <h3>payload output properties</h3>
+     <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the sun position relative to the given coordinates.</dd>
+
+            <dt>altitude <span class="property-type">number</span></dt>
+            <dd> the altitude (elevation) of the sun position relative to the given coordinates.</dd>
+
+            <dt>times <span class="property-type">object</span></dt>
+            <dd>
+                the sun times as object
+                <dt>times.sunrise <span class="property-type">Date</span></dt>
+                <dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
+                <dt>times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
+                <dt>times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
+                <dt>times.goldenHour <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
+                <dt>times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
+                <dt>times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
+                <dt>times.dusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
+                <dt>times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
+                <dt>times.night <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
+                <dt>times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
+                <dt>times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+                <dt>times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
+                <dt>times.dawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+            </dd>
+            <dt>pos <span class="property-type">array of boolean</span></dt>
+            <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
+            <dt>posChanged <span class="property-type">boolean</span></dt>
+            <dd> boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.</dd>
+        </dl>
+        Example of the first output
+        <pre>
+            	{
+                    "lastUpdate": "2018-11-11T11:11:11.111Z",
+                    "latitude": "18.473782",
+                    "longitude": "-34.357051",
+                    "angleType": "deg",
+                    "azimuth": 117.72942647370792,
+                    "altitude": 20.984193272523992,
+                    "times": {
+                        "solarNoon": "2018-11-11T14:02:48.928Z",
+                        "nadir": "2018-11-11T02:02:48.928Z",
+                        "sunrise": "2018-11-11T08:23:11.190Z",
+                        "sunset": "2018-11-11T19:42:26.666Z",
+                        "sunriseEnd": "2018-11-11T08:25:33.165Z",
+                        "sunsetStart": "2018-11-11T19:40:04.691Z",
+                        "dawn": "2018-11-11T08:00:22.165Z",
+                        "dusk": "2018-11-11T20:05:15.692Z",
+                        "nauticalDawn": "2018-11-11T07:34:06.749Z",
+                        "nauticalDusk": "2018-11-11T20:31:31.107Z",
+                        "nightEnd": "2018-11-11T07:08:03.781Z",
+                        "night": "2018-11-11T20:57:34.075Z",
+                        "goldenHourEnd": "2018-11-11T08:53:43.879Z",
+                        "goldenHour": "2018-11-11T19:11:53.977Z"
+                    },
+                    "pos": [],
+                    "posChanged": false
+                }
+        </pre>
+     <h3>Tips</h3>
+     <p>For home automation it can be useful to define the lower and higher position for example of the sun for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
+     <h3>References</h3>
+    <ul>
+		<li><a href="https://github.com/Hypnos3/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+    </ul>
+    With friendly support by <b>agag</b>.
+</script>
+
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
     function clipValueLength(v) {
         if (v.length > 15) {
-            return v.substring(0,15)+"...";
+            return v.substring(0, 15) + "...";
         }
         return v;
     }
+
     function prop2name(key) {
         var result = RED.utils.parseContextKey(key);
         return result.key;
     }
-    function getValueLabel(t,v) {
+
+    function getValueLabel(t, v) {
         if (t === 'str') {
-            return '"'+clipValueLength(v)+'"';
+            return '"' + clipValueLength(v) + '"';
         } else if (t === 'msg') {
-            return t+"."+clipValueLength(v);
+            return t + "." + clipValueLength(v);
         } else if (t === 'flow' || t === 'global') {
-            return t+"."+clipValueLength(prop2name(v));
+            return t + "." + clipValueLength(prop2name(v));
         }
         return clipValueLength(v);
     }
@@ -51,13 +148,27 @@
     RED.nodes.registerType('sun-position', {
         category: 'function',
         defaults: {
-            name: { value: "", required: false },
-            positionConfig: { value:"", type:"position-config", required: true },
-            rules: {value:[]},
-            onlyOnChange: {value:"true", required:true},
-            outputs: {value:1},
+            name: {
+                value: "",
+                required: false
+            },
+            positionConfig: {
+                value: "",
+                type: "position-config",
+                required: true
+            },
+            rules: {
+                value: []
+            },
+            onlyOnChange: {
+                value: "true",
+                required: true
+            },
             topic: {
                 value: ""
+            },
+            outputs: {
+                value: 1
             }
         },
         inputs: 1, // set the number of inputs - only 0 or 1
@@ -66,14 +177,14 @@
             if (index == 0) {
                 return ((this.topic) ? this.topic + ":" : "") + "sun-position";
             }
-            var rule = this.rules[index -1];
+            var rule = this.rules[index - 1];
             if (rule) {
-                return getValueLabel(rule.valueLowType,rule.valueLow)+" & "+getValueLabel(rule.valueHighType,rule.valueHigh);
+                return getValueLabel(rule.valueLowType, rule.valueLow) + " & " + getValueLabel(rule.valueHighType, rule.valueHigh);
             }
         },
         icon: "sun.png", // saved in  icons/myicon.png - myicon.png
         color: "#F3B567",
-        label: function () {
+        label: function() {
             if (this.name) {
                 return this.name;
             }
@@ -84,13 +195,13 @@
 
             return "sun-position";
         },
-        labelStyle: function () {
+        labelStyle: function() {
             return this.name ? "node_label_italic" : "";
         },
         paletteLabel: "sun-position",
         oneditprepare: function() {
             var node = this;
-            
+
             var outputCount = $("#node-input-outputs").val("{}");
 
             var btwnLabel = this._("sun-position.label.between");
@@ -102,12 +213,12 @@
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
                 var editwidth = (newWidth / 2)
-                btwnField1.typedInput("width",(editwidth-70));
-                btwnField2.typedInput("width",(editwidth-70));
+                btwnField1.typedInput("width", (editwidth - 70));
+                btwnField2.typedInput("width", (editwidth - 70));
             }
 
-            $("#node-input-rule-container").css('min-height','100px').css('min-width','200px').editableList({
-                addItem: function(container,i,opt) {
+            $("#node-input-rule-container").css('min-height', '100px').css('min-width', '200px').editableList({
+                addItem: function(container, i, opt) {
                     container.css({
                         overflow: 'hidden',
                         whiteSpace: 'nowrap'
@@ -116,40 +227,63 @@
                         opt.r = {};
                     }
                     if (!opt.hasOwnProperty('i')) {
-                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString();
+                        opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
                     }
                     var rule = opt.r;
                     var row = $('<div/>').appendTo(container);
-                    var row3 = $('<div/>',{style:"padding-top: 5px;"}).appendTo(container);
+                    var row3 = $('<div/>', {
+                        style: "padding-top: 5px;"
+                    }).appendTo(container);
 
-                /*validate: function (v) {
-                    var n = Number(v);
-                    return ((n >= 0) && (n <= 360));
-                }*/
+                    /*validate: function (v) {
+                        var n = Number(v);
+                        return ((n >= 0) && (n <= 360));
+                    }*/
 
-                    var btwnMainLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+btwnLabel+" ").appendTo(row);
-                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','num','env']});
-                    var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row);
-                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','num','env']});
+                    var btwnMainLabel = $('<span/>', {
+                        class: "node-input-rule-btwn-label"
+                    }).text(" " + btwnLabel + " ").appendTo(row);
+                    var btwnValueField = $('<input/>', {
+                        class: "node-input-rule-btwn-value",
+                        type: "text",
+                        style: "margin-left: 5px;"
+                    }).appendTo(row).typedInput({
+                        default: 'num',
+                        types: ['msg', 'flow', 'global', 'num', 'env']
+                    });
+                    var btwnAndLabel = $('<span/>', {
+                        class: "node-input-rule-btwn-label"
+                    }).text(" " + andLabel + " ").appendTo(row);
+                    var btwnValue2Field = $('<input/>', {
+                        class: "node-input-rule-btwn-value2",
+                        type: "text",
+                        style: "margin-left:2px;"
+                    }).appendTo(row).typedInput({
+                        default: 'num',
+                        types: ['msg', 'flow', 'global', 'num', 'env']
+                    });
 
-                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-rule-index">'+(i+2)+'</span> ');
+                    var finalspan = $('<span/>', {
+                        style: "float: right;margin-top: 6px;"
+                    }).appendTo(row);
+                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
 
                     resizeRule(container);
-                    btwnValueField.typedInput('value',rule.valueLow);
-                    btwnValueField.typedInput('type',rule.valueLowType||'num');
-                    btwnValue2Field.typedInput('value',rule.valueHigh);
-                    btwnValue2Field.typedInput('type',rule.valueHighType||'num');
+                    btwnValueField.typedInput('value', rule.valueLow);
+                    btwnValueField.typedInput('type', rule.valueLowType || 'num');
+                    btwnValue2Field.typedInput('value', rule.valueHigh);
+                    btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
 
                     //{"0":0,"1":-1,"2":-1,"3":-1}
                     //{"0":0}
-                    var currentOutputs = JSON.parse(outputCount.val()||'{}');
-                    currentOutputs[opt.hasOwnProperty('i')?opt.i:opt._i] = i;
-                    currentOutputs['m'] = i+1;
+                    var currentOutputs = JSON.parse(outputCount.val() || '{}');
+                    currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
+                    currentOutputs['m'] = i + 1;
+                    //console.log(currentOutputs);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 removeItem: function(opt) {
-                    var currentOutputs = JSON.parse(outputCount.val()||'{"-1":-1}');
+                    var currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
                     if (opt.hasOwnProperty('i')) {
                         currentOutputs[opt.i] = -1;
                     } else {
@@ -157,32 +291,40 @@
                     }
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) {
-                        $(this).find(".node-input-rule-index").html(i+2);
+                        $(this).find(".node-input-rule-index").html(i + 2);
                         var data = $(this).data('data');
-                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                        currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                     });
                     currentOutputs['m'] = rules.length;
+                    //console.log(currentOutputs);
+                    //console.log(rules);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 resizeItem: resizeRule,
                 sortItems: function(rules) {
-                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
+                    var currentOutputs = JSON.parse(outputCount.val() || "{}");
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) {
-                        $(this).find(".node-input-rule-index").html(i+2);
+                        $(this).find(".node-input-rule-index").html(i + 2);
                         var data = $(this).data('data');
-                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                        currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                     });
                     currentOutputs['m'] = rules.length;
+                    //console.log(currentOutputs);
+                    //console.log(rules);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 sortable: true,
                 removable: true
             });
 
-            for (var i=0;i<this.rules.length;i++) {
+            for (var i = 0; i < this.rules.length; i++) {
                 var rule = this.rules[i];
-                $("#node-input-rule-container").editableList('addItem',{r:rule,i:i,l:this.rules.length});
+                $("#node-input-rule-container").editableList('addItem', {
+                    r: rule,
+                    i: i,
+                    l: this.rules.length
+                });
             }
         },
         oneditsave: function() {
@@ -202,21 +344,25 @@
                 node.rules.push(r);
             });
             this.propertyType = $("#node-input-property").typedInput('type');
-            var outputCount = $("#node-input-outputs").val("{}");
-            var currentOutputs = JSON.parse($("#node-input-outputs").val()||'{"m":0}');
+            //var outputCount = $("#node-input-outputs").val(); //"{}"
+
+            var currentOutputs = JSON.parse($("#node-input-outputs").val() || '{"m":0}');
             currentOutputs['m'] = rules.length;
-            outputCount.val(JSON.stringify(currentOutputs));
+            //console.log(currentOutputs);
+            //console.log(rules);
+            $("#node-input-outputs").val(JSON.stringify(currentOutputs));
+            //outputCount.val(JSON.stringify(currentOutputs));
         },
         oneditresize: function(size) {
             var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
             var height = size.height;
-            for (var i=0;i<rows.size();i++) {
+            for (var i = 0; i < rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
             var editorRow = $("#dialog-form>div.node-input-rule-container-row");
-            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
             height -= 50;
-            $("#node-input-rule-container").editableList('height',height);
+            $("#node-input-rule-container").editableList('height', height);
         }
     });
 </script>

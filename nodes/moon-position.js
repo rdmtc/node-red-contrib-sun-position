@@ -36,10 +36,12 @@ module.exports = function (RED) {
                     let low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     let high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
                     let chk = hlp.compareAzimuth(ports[0].payload.azimuth, low, high);
+                    let chg =  (node.azimuthPos[i] !== chk);
                     ports[0].payload.pos.push(chk);
-                    ports[0].payload.posChanged = ports[0].payload.posChanged && (node.azimuthPos[i] !== chk);
+                    ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
-                        ports[i + 1] = msg;
+                        ports[i + 1] = RED.util.cloneMessage(msg);
+                        ports[i + 1].posChanged = chg;
                     }
                 }
                 node.azimuthPos = ports[0].payload.pos;

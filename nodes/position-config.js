@@ -288,43 +288,44 @@ module.exports = function (RED) {
                 distance: moonPos.distance,
                 parallacticAngle: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.parallacticAngle : moonPos.parallacticAngle,
                 illumination: {
-                    angle: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.angle : moonIllum.angle,
+                    angle: (node.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
                     fraction: moonIllum.fraction,
-                    phase: moonIllum.phase,
-                    phaseAngle: (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360,
+                    phase: {},
                     zenithAngle: (node.angleType === 'deg') ? 180 / Math.PI * (moonIllum.angle - moonPos.parallacticAngle) : moonIllum.angle - moonPos.parallacticAngle,
                 },
             }
             sunTimesCheck(node);
             result.times = node.moonTimesToday;
             //getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
-        
+
             if (moonIllum.phase < 0.01) {
                 // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
-                result.illumination.phaseEmoji = moonPhases[0];
+                result.illumination.phase = moonPhases[0];
             } else if (moonIllum.phase < 0.25) {
                 // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw.zunehmende Sichel(0° < Phasenwinkel < 90°),
-                result.illumination.phaseEmoji = moonPhases[1];
+                result.illumination.phase = moonPhases[1];
             } else if (moonIllum.phase < 0.26) {
                 // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
-                result.illumination.phaseEmoji = moonPhases[2];
+                result.illumination.phase = moonPhases[2];
             } else if (moonIllum.phase < 0.50) {
                 // 0.25 - 0.5   Waxing Gibbous      -   zweites Viertel(90° < Phasenwinkel < 180°),
-                result.illumination.phaseEmoji = moonPhases[3];
+                result.illumination.phase = moonPhases[3];
             } else if (moonIllum.phase < 0.51) {
                 // 0.5	        Full Moon           -   Vollmond(Phasenwinkel = 180°),
-                result.illumination.phaseEmoji = moonPhases[4];
+                result.illumination.phase = moonPhases[4];
             } else if (moonIllum.phase <= 0.75) {
                 // 0.5 - 0.75    Waning Gibbous     -   drittes Viertel (180° < Phasenwinkel < 270°),
-                result.illumination.phaseEmoji = moonPhases[5];
+                result.illumination.phase = moonPhases[5];
             } else if (moonIllum.phase < 0.76) {
                 // 0.75	        Last Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
-                result.illumination.phaseEmoji = moonPhases[6];
+                result.illumination.phase = moonPhases[6];
             } else {
                 // Waning Crescent                  -   letztes Viertel bzw.abnehmende Sichel(Phasenwinkel > 270°).
-                result.illumination.phaseEmoji = moonPhases[7];
+                result.illumination.phase = moonPhases[7];
             }
-        
+            result.illumination.phase.value = moonIllum.phase;
+            result.illumination.phase.angle = (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360;
+
             if (!result.times.alwaysUp) {
                 //true if the moon never rises/sets and is always above the horizon during the day
                 result.times.alwaysUp = false;
