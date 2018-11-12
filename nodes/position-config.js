@@ -9,53 +9,53 @@ const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
 /*******************************************************************************************************/
 const moonPhases = [{
-    emoji: '🌚',
-    code: ':new_moon_with_face:',
-    name: 'New Moon',
-    weight: 1
-},
-{
-    emoji: '🌒',
-    code: ':waxing_crescent_moon:',
-    name: 'Waxing Crescent',
-    weight: 6.3825
-},
-{
-    emoji: '🌓',
-    code: ':first_quarter_moon:',
-    name: 'First Quarter',
-    weight: 1
-},
-{
-    emoji: '🌔',
-    code: ':waxing_gibbous_moon:',
-    name: 'Waxing Gibbous',
-    weight: 6.3825
-},
-{
-    emoji: '🌝',
-    code: ':full_moon_with_face:',
-    name: 'Full Moon',
-    weight: 1
-},
-{
-    emoji: '🌖',
-    code: ':waning_gibbous_moon:',
-    name: 'Waning Gibbous',
-    weight: 6.3825
-},
-{
-    emoji: '🌗',
-    code: ':last_quarter_moon:',
-    name: 'Last Quarter',
-    weight: 1
-},
-{
-    emoji: '🌘',
-    code: ':waning_crescent_moon:',
-    name: 'Waning Crescent',
-    weight: 6.3825
-}
+        emoji: '🌚',
+        code: ':new_moon_with_face:',
+        name: 'New Moon',
+        weight: 1
+    },
+    {
+        emoji: '🌒',
+        code: ':waxing_crescent_moon:',
+        name: 'Waxing Crescent',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌓',
+        code: ':first_quarter_moon:',
+        name: 'First Quarter',
+        weight: 1
+    },
+    {
+        emoji: '🌔',
+        code: ':waxing_gibbous_moon:',
+        name: 'Waxing Gibbous',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌝',
+        code: ':full_moon_with_face:',
+        name: 'Full Moon',
+        weight: 1
+    },
+    {
+        emoji: '🌖',
+        code: ':waning_gibbous_moon:',
+        name: 'Waning Gibbous',
+        weight: 6.3825
+    },
+    {
+        emoji: '🌗',
+        code: ':last_quarter_moon:',
+        name: 'Last Quarter',
+        weight: 1
+    },
+    {
+        emoji: '🌘',
+        code: ':waning_crescent_moon:',
+        name: 'Waning Crescent',
+        weight: 6.3825
+    }
 ];
 
 Date.prototype.addDays = function (days) {
@@ -70,7 +70,7 @@ function nextday(days, daystart) {
     while (days.indexOf(daypos) === -1) {
         dayx += 1;
         if ((daystart + dayx) > 6) {
-            daypos =dayx - (7-daystart);
+            daypos = dayx - (7 - daystart);
         } else {
             daypos = daystart + dayx;
         }
@@ -93,8 +93,12 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
-            this.lastSunCalc = { ts : 0};
-            this.lastMoonCalc = { ts : 0};
+            this.lastSunCalc = {
+                ts: 0
+            };
+            this.lastMoonCalc = {
+                ts: 0
+            };
 
             var node = this;
 
@@ -173,44 +177,44 @@ module.exports = function (RED) {
                 let now = new Date();
                 let result = {
                     value: null,
-                    error: null
+                    error: null,
+                    fix: true
                 };
-                if (vType === '' || vType === 'none' || days === '') {
-                    //nix
-                } else if (vType === 'date') {
-                    result.value = now;
-                } else if (vType === 'entered') {
-                    result.value = hlp.getTimeOfText(String(value), offset, next, days);
-                } else if (vType === 'pdsTime') {
-                    //sun
-                    result = node.getSunTime(now, value, next, days);
-                } else if (vType === 'pdmTime') {
-                    //moon
-                    result = node.getMoonTime(now, value, next, days);
-                } else if (vType === 'json') {
-                    result.value = new Date(JSON.parse(value));
-                } else {
-                    try {
+                try {
+                    if (vType === '' || vType === 'none' || days === '') {
+                        //nix
+                    } else if (vType === 'date') {
+                        result.value = now;
+                        result.fix = true;
+                    } else if (vType === 'entered') {
+                        result.value = hlp.getTimeOfText(String(value), offset, next, days);
+                        result.fix = true;
+                    } else if (vType === 'pdsTime') {
+                        //sun
+                        result = node.getSunTime(now, value, next, days);
+                        result.fix = true;
+                    } else if (vType === 'pdmTime') {
+                        //moon
+                        result = node.getMoonTime(now, value, next, days);
+                        result.fix = true;
+                    } else if (vType === 'json') {
+                        let val = JSON.parse(value);
+                        let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
+                        result.value = hlp.getDateOfText(date, offset, next, days);
+                        result.fix = true;
+                    } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            if (res.match(/^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/)) {
-                                result.value = hlp.getTimeOfText("" + res, offset, next, days);
-                            } else {
-                                let dto = new Date(res);
-                                if (dto !== "Invalid Date" && !isNaN(dto)) {
-                                    result.value = hlp.calcTimeValue(dto, offset, next, days);
-                                } else {
-                                    result.error = "could not evaluate " + vType + '.' + value + ' = ' + res;
-                                }
-                            }
+                            result.value = hlp.getDateOfText("" + res, offset, next, days);
+                            result.fix = false; // not a fixed time, because can be changed
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;
                         }
-                    } catch (err) {
-                        result.error = "could not evaluate " + vType + '=' + value + ': ' + err.message;
-                        node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
                     }
+                } catch (err) {
+                    result.error = "could not evaluate " + vType + '=' + value + ': ' + err.message;
+                    node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
                 }
 
                 if (!result.value) {
@@ -245,7 +249,7 @@ module.exports = function (RED) {
 
             var sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             let result = {
-                ts : date.getTime(),
+                ts: date.getTime(),
                 lastUpdate: date,
                 latitude: node.latitude,
                 longitude: node.longitude,
@@ -278,7 +282,7 @@ module.exports = function (RED) {
             let moonIllum = sunCalc.getMoonIllumination(date);
 
             var result = {
-                ts : date.getTime(),
+                ts: date.getTime(),
                 lastUpdate: date,
                 latitude: node.latitude,
                 longitude: node.longitude,

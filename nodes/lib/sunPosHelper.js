@@ -10,6 +10,7 @@ module.exports = {
     compareAzimuth,
     calcTimeValue,
     getTimeOfText,
+    getDateOfText,
     getOnlyTime,
     getNodeId
 };
@@ -89,14 +90,14 @@ function compareAzimuth(azimuth, low, high) {
             return (azimuth > low);
         }
     } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
-        return  (azimuth < high);
+        return (azimuth < high);
     }
     return false;
 };
 /*******************************************************************************************************/
 function calcTimeValue(d, offset, next, days) {
     if (offset && !isNaN(offset) && offset !== 0) {
-        result = new Date(result.getTime() + offset * 1000);
+        d = new Date(d.getTime() + offset * 1000);
     }
     if (next && !isNaN(next)) {
         let now = new Date();
@@ -131,16 +132,33 @@ function calcTimeValue(d, offset, next, days) {
 /*******************************************************************************************************/
 function getTimeOfText(t, offset, next, days) {
     let d = new Date();
-    if (t) {
-        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+    if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         if (matches) {
             d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
             d.setMinutes(parseInt(matches[2]) || 0);
             d.setSeconds(parseInt(matches[3]) || 0);
             d.setMilliseconds(0);
+        } else {
+            return null;
         }
+        return calcTimeValue(d, offset, next, days)
     }
-    calcTimeValue(d, offset, next, days)
-    return d;
+    return null;
 };
 /*******************************************************************************************************/
+function getDateOfText(date, offset, next, days) {
+    if (!isNaN(date)) {
+        date = Number(date);
+    }
+    let dto = new Date(date);
+    if (dto !== "Invalid Date" && !isNaN(dto)) {
+        return calcTimeValue(dto, offset, next, days);
+    } else {
+        let result = getTimeOfText(String(date), offset, next, days);
+        if (result != null) {
+            return result;
+        }
+    }
+    throw new Error("could not evaluate " + String(date) + ' as a valid Date or time.');
+};

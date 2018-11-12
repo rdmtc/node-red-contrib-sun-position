@@ -8,6 +8,9 @@
             "property": "Property",
             "time": "Time",
             "offset": "Offset",
+            "timeAlt": "Alternate time",
+            "timeAltoffset": "Offset",
+            "recalcTime": "Time reclaculation",
             "payload": "Payload",
             "topic": "Topic",
             "seconds": "seconds",
@@ -20,7 +23,17 @@
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",
-            "blank": "\"\""
+            "blank": "\"\"",
+            "5minutes": "every 5 minutes",
+            "10minutes": "every 10 minutes",
+            "15minutes": "every 15 minutes",
+            "30minutes": "every 30 minutes",
+            "1hour": "every hour",
+            "2hours": "every 2 hour",
+            "4hours": "every 4 hour",
+            "6hours": "every 6 hour",
+            "12hours": "every 12 hour",
+            "24hours": "every 24 hour"
         },
         "days": [
             "Monday",
@@ -35,15 +48,19 @@
             "position": "Position",
             "name": "Name",
             "topic": "Name",
+            "property": "Property",
             "payloadStart": "",
             "payloadEnd": "",
             "startTime": "7:40",
             "startOffset": "0",
-            "endTime": "18:15",
-            "endOffset": "0"
+            "time": "18:15",
+            "Offset": "0",
+            "timeAlt": "18:15",
+            "timeAltOffset": "0"
         },
         "tips": {
-            "config": "If time is set to 'not used' the inject node can only used manually! If days are not checked on these days, the node would not generate an output on these days."
+            "config": "If time is set to 'not used' the inject node can only used manually! If days are not checked on these days, the node would not generate an output on these days.",
+            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days."
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",

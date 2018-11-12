@@ -50,6 +50,43 @@
     </div>
 
     <hr>
+    <div class="form-tips time-inject-row-alt hidden">
+        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
+    </div>
+    <div class="form-row time-inject-row-alt hidden"/>
+    <div class="form-row time-inject-row-alt hidden">
+        <label ><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width: 70%"/>
+    </div>
+    <div class="form-row alternate-time hidden">
+        <label for="node-input-timeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeAlt"></span></label>
+        <input type="text" id="node-input-timeAlt" style="width: 70%"/>
+    </div>
+    <div class="form-row alternate-time alternate-time-offset hidden">
+        <label for="node-input-timeAltOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
+        <input id="node-input-timeAltOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset">
+        <select style="width:100px" id="node-input-timeAltOffsetMultiplier">
+            <option value="1" data-i18n="time-inject.label.seconds"></option>
+            <option value="60" data-i18n="time-inject.label.minutes"></option>
+            <option value="3600" data-i18n="time-inject.label.hours"></option>
+        </select>
+    </div>
+    <!-- hr>
+    <div class="form-row time-inject-recalc hidden">
+        <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.recalcTime"></span></label>
+        <select style="width:100px" id="node-input-recalcTime">
+            <option value="0" data-i18n="time-inject.label.none"></option>
+            <option value="10" data-i18n="time-inject.label.10minutes"></option>
+            <option value="15" data-i18n="time-inject.label.15minutes"></option>
+            <option value="30" data-i18n="time-inject.label.30minutes"></option>
+            <option value="60" data-i18n="time-inject.label.1hour"></option>
+            <option value="120" data-i18n="time-inject.label.2hours"></option>
+            <option value="240" data-i18n="time-inject.label.4hours"></option>
+            <option value="360" data-i18n="time-inject.label.6hours"></option>
+            <option value="720" data-i18n="time-inject.label.12hours"></option>
+        </select>
+    </div -->
+    <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
@@ -135,6 +172,19 @@
                         ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
+            payload: {
+                value: "",
+                validate: function (v) {
+                    return RED.validators.typedInput("payloadType")(v) ||
+                        ($("#node-input-time").typedInput('type') === 'none');
+                }
+            },
+            payloadType: {
+                value: "date"
+            },
+            topic: {
+                value: ""
+            },
             time: {
                 value: "",
                 required: false,
@@ -162,18 +212,49 @@
                         ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
-            payload: {
+            property: {
                 value: "",
+                required: false,
                 validate: function (v) {
-                    return RED.validators.typedInput("payloadType")(v) ||
+                    return RED.validators.typedInput("propertyType")(v) ||
                         ($("#node-input-time").typedInput('type') === 'none');
                 }
             },
-            payloadType: {
-                value: "date"
+            propertyType: {
+                value: "none"
             },
-            topic: {
-                value: ""
+            timeAlt: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return RED.validators.typedInput("timeAltType")(v) ||
+                        ($("#node-input-time").typedInput('type') === 'none') ||
+                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        (this.propertyType === undefined);
+                }
+            },
+            timeAltType: {
+                value: "entered"
+            },
+            timeAltOffset: {
+                value: 0,
+                required: true,
+                validate: function (v) {
+                    return RED.validators.number()(v) ||
+                        ($("#node-input-time").typedInput('type') === 'none') ||
+                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        (this.propertyType === undefined);
+                }
+            },
+            timeAltOffsetMultiplier: {
+                value: 60,
+                required: true,
+                validate: function (v) {
+                    return RED.validators.number()(v) ||
+                        ($("#node-input-time").typedInput('type') === 'none') ||
+                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        (this.propertyType === undefined);
+                }
             }
         },
         icon: "injectSun.png",
@@ -185,7 +266,11 @@
                 return this.name;
             }
             var result = "";
-            const getId = (type, value) => {
+            const getId = (type, value, offset) => {
+                let suffix = '';
+                if (offset > 0) {
+                    suffix = '↷';
+                }
                 if (type === "string" ||
                     type === "str" ||
                     type === "num" ||
@@ -196,12 +281,12 @@
                     return value;
                 } else if (type === 'jsonata') {
                     if (value.length < 15) {
-                        return value;
+                        return value + suffix;
                     }
                     return this._("time-inject.label.jsonata");;
                 } else if (type === 'json') {
                     if (value.length < 15) {
-                        return value;
+                        return value + suffix;
                     }
                     return this._("time-inject.label.json");
                 } else if (type === 'bin') {
@@ -209,11 +294,17 @@
                 } else if (type === 'date') {
                     return this._("time-inject.label.timestamp");
                 } else if (type === 'flow' || type === 'global') {
-                    return type + '.' + value;
+                    return type + '.' + value + suffix;
                 } else if (type == 'pdmTime') {
-                    return 'moon ' + value;
+                    return 'moon ' + value + suffix;
                 }
-                return value;
+                return value + suffix;
+            }
+            const getConcatId = (type1, value1, offset1, type2, value2, offset2) => {
+                if (this.propertyType !== 'none' && this.propertyType !== '' && value2) {
+                    return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
+                }
+                return getId(type1, value1);
             }
             if (this.timeType === 'none' || this.timeType === '') {
                 return this._("time-inject.label.inject");
@@ -236,6 +327,39 @@
         paletteLabel: 'time inject',
         align: 'left',
         oneditprepare: function () {
+            if (this.offset == '' || this.offset == undefined) {
+                this.offset = 0;
+                $("#node-input-offset").val(this.offset);
+            }
+            if (this.offsetMultiplier == '' || this.offsetMultiplier == undefined) {
+                this.offsetMultiplier = 60;
+                $("#node-input-offsetMultiplier").val(this.offsetMultiplier);
+            }
+            if (this.property == undefined) {
+                this.property = '';
+                $("#node-input-property").val(this.property);
+            }
+            if (this.propertyType == '' || this.propertyType == undefined) {
+                this.propertyType = 'none';
+                $("#node-input-propertyType").val(this.propertyType);
+            }
+            if (this.timeAlt == undefined) {
+                this.timeAlt = '';
+                $("#node-input-timeAlt").val(this.timeAlt);
+            }
+            if (this.timeAltType == undefined) {
+                this.timeAltType = 'entered';
+                $("#node-input-timeAltType").val(this.timeAltType);
+            }
+            if (this.timeAltOffset == '' || this.timeAltOffset == undefined) {
+                this.timeAltOffset = 0;
+                $("#node-input-timeAltOffset").val(this.timeAltOffset);
+            }
+            if (this.timeAltOffsetMultiplier == '' || this.timeAltOffsetMultiplier == undefined) {
+                this.timeAltOffsetMultiplier = 60;
+                $("#node-input-timeAltOffsetMultiplier").val(this.timeAltOffsetMultiplier);
+            }
+
             if (this.payloadType == null) {
                 if (this.payload == "") {
                     this.payloadType = "date";
@@ -295,10 +419,13 @@
                 if ($("#node-input-time").typedInput('type') === 'none') {
                     $(".time-inject-row-offset").hide();
                     $(".time-inject-row-days").hide();
+                    $(".time-inject-row-alt").hide();
                 } else {
                     $(".time-inject-row-offset").show();
                     $(".time-inject-row-days").show();
+                    $(".time-inject-row-alt").show();
                 }
+                $("#node-input-property").change();
             });
             $("#node-input-payloadType").val(this.payloadType);
             $("#node-input-payload").typedInput({
@@ -307,6 +434,24 @@
                 types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'bin', 'date', 'env',
                     'jsonata', typeSunCalc, typeMoonCalc
                 ]
+            });
+            $("#node-input-property").typedInput({
+                default: this.propertyType || 'none',
+                types: [typeTimeNone, 'flow', 'global', 'jsonata']
+            });
+            $("#node-input-property").on('change', function (type, value) {
+                if ($("#node-input-time").typedInput('type') === 'none' || $("#node-input-property")
+                    .typedInput('type') === 'none') {
+                    $(".alternate-time").hide();
+                    $(".alternate-time-offset").hide();
+                } else {
+                    $(".alternate-time").show();
+                    $(".alternate-time-offset").show();
+                }
+            });
+            $("#node-input-timeAlt").typedInput({
+                default: this.timeAltType || 'entered',
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
             });
             $(".wt-offset-time").spinner({
                 max: 1439,
@@ -326,6 +471,8 @@
         oneditsave: function () {
             this.timeType = $("#node-input-time").typedInput('type');
             this.payloadType = $("#node-input-payload").typedInput('type');
+            this.propertyType = $("#node-input-property").typedInput('type');
+            this.timeAltType = $("#node-input-timeAlt").typedInput('type');
             var days = $('#time-inject-timeDays input[type=checkbox]:checked').map(function (_, el) {
                 return $(el).val()
             }).get();
@@ -333,7 +480,7 @@
             if (days.length == 0) {
                 this.timeDays = "";
             } else if (days.length == 7) {
-                    this.timeDays = "*";
+                this.timeDays = "*";
             } else {
                 this.timeDays = days.join(",");
             }
