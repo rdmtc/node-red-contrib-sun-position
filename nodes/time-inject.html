@@ -152,6 +152,80 @@
     <p><b>Note</b>: The next timestamp will be calculated every 2 hours, if a timestamp is reached, settings are changed or the inject node is manual triggered.
         If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done!</p>
     <p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
+
+    <h3>Sun times:</h3>
+    <p>
+    <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td><code>00:00 ... 23:59</code></td>
+        <td>24hr time</td>
+        </tr>
+        <tr>
+        <td><code>sunrise</code></td>
+        <td>sunrise (top edge of the sun appears on the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunriseEnd</code></td>
+        <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHourEnd</code></td>
+        <td>morning golden hour (soft light, best time for photography) ends</td>
+        </tr>
+        <tr>
+        <td><code>solarNoon</code></td>
+        <td>solar noon (sun is in the highest position)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHour</code></td>
+        <td>evening golden hour starts</td>
+        </tr>
+        <tr>
+        <td><code>sunsetStart</code></td>
+        <td>sunset starts (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunset</code></td>
+        <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>dusk</code></td>
+        <td>dusk (evening nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDusk</code></td>
+        <td>nautical dusk (evening astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>night</code></td>
+        <td>night starts (dark enough for astronomical observations)</td>
+        </tr>
+        <tr>
+        <td><code>nadir</code></td>
+        <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
+        </tr>
+        <tr>
+        <td><code>nightEnd</code></td>
+        <td>night ends (morning astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDawn</code></td>
+        <td>nautical dawn (morning nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>dawn</code></td>
+        <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
+        </tr>
+        </tbody>
+        </table>
+    </p>
 </script>
 
 <script type="text/javascript">
@@ -268,7 +342,7 @@
             var result = "";
             const getId = (type, value, offset) => {
                 let suffix = '';
-                if (offset > 0) {
+                if (offset && offset > 0) {
                     suffix = '↷';
                 }
                 if (type === "string" ||
@@ -278,7 +352,7 @@
                     if (value == '') {
                         return this._("time-inject.label.blank");
                     }
-                    return value;
+                    return value + suffix;
                 } else if (type === 'jsonata') {
                     if (value.length < 15) {
                         return value + suffix;
@@ -288,11 +362,11 @@
                     if (value.length < 15) {
                         return value + suffix;
                     }
-                    return this._("time-inject.label.json");
+                    return this._("time-inject.label.json") + suffix;
                 } else if (type === 'bin') {
-                    return this._("time-inject.label.binary");
+                    return this._("time-inject.label.binary") + suffix;
                 } else if (type === 'date') {
-                    return this._("time-inject.label.timestamp");
+                    return this._("time-inject.label.timestamp") + suffix;
                 } else if (type === 'flow' || type === 'global') {
                     return type + '.' + value + suffix;
                 } else if (type == 'pdmTime') {
@@ -311,9 +385,9 @@
             } else {
                 let part1 = getId(this.timeType, this.time);
                 if (part1.length > 24) {
-                    result += part1 + '=...';
+                    result += part1 + ' =...';
                 } else {
-                    result += part1 + '=' + getId(this.payloadType, this.payload);
+                    result += part1 + ' = ' + getId(this.payloadType, this.payload);
                 }
             }
             if (this.topic && (this.topic.length + result.length <= 32)) {

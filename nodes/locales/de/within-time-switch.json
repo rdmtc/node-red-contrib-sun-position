@@ -1,0 +1,68 @@
+{
+    "within-time-switch": {
+        "label": {
+            "position": "Position",
+            "name": "Name",
+            "topic": "Topic",
+            "addTimes": "alternate start or end time",
+            "property": "Property",
+            "startTime": "Start time",
+            "startTimeAlt": "Start time",
+            "endTime": "End time",
+            "endTimeAlt": "End time",
+            "startOffset": "Offset",
+            "startOffsetAlt": "Offset",
+            "endOffset": "Offset",
+            "endOffsetAlt": "Offset",
+            "seconds": "seconds",
+            "minutes": "minutes",
+            "hours": "hours",
+            "on": "on",
+            "none": "none",
+            "timestamp": "timestamp",
+            "binary": "binary",
+            "json": "json",
+            "jsonata": "json expr.",
+            "blank": "\"\""
+        },
+        "placeholder": {
+            "position": "Position",
+            "name": "Name",
+            "property": "Property",
+            "startTime": "7:40",
+            "startOffset": "0",
+            "endTime": "18:15",
+            "endOffset": "0",
+            "startTimeAlt": "7:40",
+            "startOffsetAlt": "0",
+            "endTimeAlt": "18:15",
+            "endOffsetAlt": "0"
+        },
+        "days": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "tips": {
+            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
+        },
+        "notification": {
+            "success": "Successfully injected: __label__"
+        },
+        "errors": {
+            "error": "<strong>Error</strong>: __message__",
+            "error-text": "Exception occured on withinTimeSwitch",
+            "error-title": "internal error",
+            "invalid-property-type": "Invalid Property Type: __type__",
+            "invalid-json": "Invalid 'to' JSON property",
+            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
+            "not-deployed": "node not deployed",
+            "no-response": "no response from server",
+            "unexpected": "unexpected error (__status__) __message__"
+        }
+    }
+}

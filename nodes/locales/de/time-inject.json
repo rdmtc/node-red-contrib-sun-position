@@ -1,0 +1,80 @@
+{
+    "time-inject": {
+        "label": {
+            "time-inject": "time-inject",
+            "inject": "inject",
+            "position": "Position",
+            "name": "Name",
+            "property": "Property",
+            "time": "Time",
+            "offset": "Offset",
+            "timeAlt": "Alternate time",
+            "timeAltoffset": "Offset",
+            "recalcTime": "Time reclaculation",
+            "payload": "Payload",
+            "topic": "Topic",
+            "seconds": "seconds",
+            "minutes": "minutes",
+            "hours": "hours",
+            "on": "on",
+            "none": "none",
+            "stopped": "stopped",
+            "timestamp": "timestamp",
+            "binary": "binary",
+            "json": "json",
+            "jsonata": "json expr.",
+            "blank": "\"\"",
+            "5minutes": "every 5 minutes",
+            "10minutes": "every 10 minutes",
+            "15minutes": "every 15 minutes",
+            "30minutes": "every 30 minutes",
+            "1hour": "every hour",
+            "2hours": "every 2 hour",
+            "4hours": "every 4 hour",
+            "6hours": "every 6 hour",
+            "12hours": "every 12 hour",
+            "24hours": "every 24 hour"
+        },
+        "days": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "placeholder": {
+            "position": "Position",
+            "name": "Name",
+            "topic": "Name",
+            "property": "Property",
+            "payloadStart": "",
+            "payloadEnd": "",
+            "startTime": "7:40",
+            "startOffset": "0",
+            "time": "18:15",
+            "Offset": "0",
+            "timeAlt": "18:15",
+            "timeAltOffset": "0"
+        },
+        "tips": {
+            "config": "If time is set to 'not used' the inject node can only used manually! If days are not checked on these days, the node would not generate an output on these days.",
+            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days."
+        },
+        "errors": {
+            "error": "<strong>Error</strong>: __message__",
+            "error-text": "Exception occured on time-inject",
+            "error-title": "internal error",
+            "unexpected": "unexpected error (__status__) __message__",
+            "invalid-property-type": "Invalid Property Type: __type__",
+            "invalid-json": "Invalid 'to' JSON property",
+            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
+            "not-deployed": "node not deployed",
+            "no-response": "no response from server",
+            "failed": "inject failed, see log for details",
+            "failed2": "Inject failed: __error__",
+            "toolong": "Interval too large"
+        }
+    }
+}

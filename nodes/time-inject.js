@@ -53,19 +53,19 @@ module.exports = function (RED) {
 
         this.setStatus = (error) => {
             if (node.nextTime) {
-                this.status({
+                node.status({
                     fill: "green",
                     shape: "dot",
                     text: node.nextTime.toLocaleString()
                 });
             } else if (error) {
-                this.status({
+                node.status({
                     fill: "red",
                     shape: "dot",
                     text: error
                 });
             } else {
-                this.status({});
+                node.status({});
             }
         }
 
@@ -131,8 +131,8 @@ module.exports = function (RED) {
                         } catch (err) {
                             needsRecalc = isAltFirst;
                             hlp.errorHandler(node, err, RED._("time-inject.errors.invalid-property-type", {
-                                type: this.propertyType,
-                                value: this.property
+                                type: node.propertyType,
+                                value: node.property
                             }));
                             node.debug(JSON.stringify(err));
                         }
@@ -160,18 +160,18 @@ module.exports = function (RED) {
                     doCreateTimeout(node);
                 }, 7200000);
             } else if (fixTimeStamp && node.intervalObj) {
-                clearInterval(this.intervalObj);
+                clearInterval(node.intervalObj);
                 node.intervalObj = null;
             }
             node.setStatus(errorStatus);
         }
 
         this.on('close', function () {
-            if (this.timeOutObj) {
-                clearTimeout(this.timeOutObj);
+            if (node.timeOutObj) {
+                clearTimeout(node.timeOutObj);
             }
-            if (this.intervalObj) {
-                clearInterval(this.intervalObj);
+            if (node.intervalObj) {
+                clearInterval(node.intervalObj);
             }
             // tidy up any state
         });
@@ -179,7 +179,7 @@ module.exports = function (RED) {
         this.on('input', msg => {
             try {
                 doCreateTimeout(node);
-                //this.debug('input ' + JSON.stringify(msg));
+                //node.debug('input ' + JSON.stringify(msg));
                 this.lastInputType = msg.type;
                 let plType = 'date';
                 let plValue = '';
