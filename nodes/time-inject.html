@@ -50,10 +50,6 @@
     </div>
 
     <hr>
-    <div class="form-tips time-inject-row-alt hidden">
-        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
-    </div>
-    <div class="form-row time-inject-row-alt hidden"/>
     <div class="form-row time-inject-row-alt hidden">
         <label ><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
         <input type="text" id="node-input-property" style="width: 70%"/>
@@ -71,21 +67,24 @@
             <option value="3600" data-i18n="time-inject.label.hours"></option>
         </select>
     </div>
-    <!-- hr>
+    <div class="form-tips time-inject-row-alt hidden">
+        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
+    </div>
+    <hr>
+    <div class="form-row" id="node-once">
+        <label for="node-input-once"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.once"></span></label>
+        <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="time-inject.label.onstart"></span>&nbsp;
+        <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
+        <span data-i18n="time-inject.label.onceDelay"></span>
+    </div>
+    <hr class="time-inject-recalc hidden">
     <div class="form-row time-inject-recalc hidden">
         <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.recalcTime"></span></label>
-        <select style="width:100px" id="node-input-recalcTime">
-            <option value="0" data-i18n="time-inject.label.none"></option>
-            <option value="10" data-i18n="time-inject.label.10minutes"></option>
-            <option value="15" data-i18n="time-inject.label.15minutes"></option>
-            <option value="30" data-i18n="time-inject.label.30minutes"></option>
-            <option value="60" data-i18n="time-inject.label.1hour"></option>
-            <option value="120" data-i18n="time-inject.label.2hours"></option>
-            <option value="240" data-i18n="time-inject.label.4hours"></option>
-            <option value="360" data-i18n="time-inject.label.6hours"></option>
-            <option value="720" data-i18n="time-inject.label.12hours"></option>
-        </select>
-    </div -->
+        <input type="text" id="node-input-recalcTime" placeholder="2" style="width:65px; height:28px;">&nbsp;
+        <span data-i18n="time-inject.label.hours"></span>
+    </div>
+    <div class="form-tips time-inject-recalc hidden" data-i18n="[html]time-inject.tips.recalc"></div>
     <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
@@ -149,8 +148,7 @@
     <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
     <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
     inject at specified time stamp in a daily interval which can be set directly or by using the suncalc module to generate an output at various sunrise, sunset, moonrise or moonset times based on a specified location.</p>
-    <p><b>Note</b>: The next timestamp will be calculated every 2 hours, if a timestamp is reached, settings are changed or the inject node is manual triggered.
-        If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done!</p>
+    <p><b>Note</b>: The next timestamp will be calculated if a timestamp is reached, settings are changed or the inject node is manual triggered. For a given timestamp (or an alternate timestamp) through a flow or global context a recalculation time could be defined. Then planned emit time then is recalculated every end of this interval. Changes to the contexts then only lead to a change of the planned emit time if a recalculation is done!</p>
     <p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
 
     <h3>Sun times:</h3>
@@ -226,6 +224,7 @@
         </tbody>
         </table>
     </p>
+    <p>It can also be configured to inject once each time the flows are started.</p>
 </script>
 
 <script type="text/javascript">
@@ -329,6 +328,21 @@
                         ($("#node-input-property").typedInput('type') === 'none') ||
                         (this.propertyType === undefined);
                 }
+            },
+            once: {
+                value: false
+            },
+            onceDelay: {
+                value: 0.1,
+                validate: function (v) {
+                    return RED.validators.number()(v) || v === '' || v == null;
+                }
+            },
+            recalcTime: {
+                value: 2,
+                validate: function (v) {
+                    return RED.validators.number()(v) || v === '' || v == null;
+                }
             }
         },
         icon: "injectSun.png",
@@ -340,13 +354,49 @@
                 return this.name;
             }
             var result = "";
-            const getId = (type, value, offset, days) => {
+            let prefix = '';
+            if (this.once) {
+                prefix += " ¹";
+            }
+            const getId = (type, value, offset) => {
                 let suffix = '';
                 if (offset && offset > 0) {
                     suffix = '↷';
                 } else if (offset && offset < 0) {
                     suffix = '↶';
                 }
+                if (type === "string" ||
+                    type === "str" ||
+                    type === "num" ||
+                    type === "bool") {
+                    if (value == '') {
+                        return this._("time-inject.label.blank");
+                    }
+                    return value + suffix;
+                } else if (type === 'jsonata') {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
+                    return this._("time-inject.label.jsonata");;
+                } else if (type === 'json') {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
+                    return this._("time-inject.label.json") + suffix;
+                } else if (type === 'bin') {
+                    return this._("time-inject.label.binary") + suffix;
+                } else if (type === 'date') {
+                    return this._("time-inject.label.timestamp") + suffix;
+                } else if (type === 'msg' || type === 'flow' || type === 'global') {
+                    return type + '.' + value + suffix;
+                } else if (type == 'pdmTime') {
+                    return 'moon ' + value + suffix;
+                }
+                return value + suffix;
+            }
+            const getTimeId = () => {
+                let suffix = '';
+                let days = this.timeDays;
                 if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
                     if (days === '1,2,3,4,5') {
                         suffix += ' [Mo-Fr]'; //'👷'
@@ -381,55 +431,27 @@
                     }
                     //...
                 }
-                if (type === "string" ||
-                    type === "str" ||
-                    type === "num" ||
-                    type === "bool") {
-                    if (value == '') {
-                        return this._("time-inject.label.blank");
-                    }
-                    return value + suffix;
-                } else if (type === 'jsonata') {
-                    if (value.length < 15) {
-                        return value + suffix;
-                    }
-                    return this._("time-inject.label.jsonata");;
-                } else if (type === 'json') {
-                    if (value.length < 15) {
-                        return value + suffix;
-                    }
-                    return this._("time-inject.label.json") + suffix;
-                } else if (type === 'bin') {
-                    return this._("time-inject.label.binary") + suffix;
-                } else if (type === 'date') {
-                    return this._("time-inject.label.timestamp") + suffix;
-                } else if (type === 'flow' || type === 'global') {
-                    return type + '.' + value + suffix;
-                } else if (type == 'pdmTime') {
-                    return 'moon ' + value + suffix;
+                let part1 = getId(this.timeType, this.time, this.offset);
+                if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
+                    return part1 + '/' + getId(this.timeAltType, this.timeAlt, this.timeAltOffset) +
+                        suffix;
                 }
-                return value + suffix;
-            }
-            const getConcatId = (type1, value1, offset1, type2, value2, offset2) => {
-                if (this.propertyType !== 'none' && this.propertyType !== '' && value2) {
-                    return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
-                }
-                return getId(type1, value1);
+                return part1 + suffix;
             }
             if (this.timeType === 'none' || this.timeType === '') {
                 return this._("time-inject.label.inject");
             } else {
-                let part1 = getId(this.timeType, this.time, this.offset, this.timeDays);
-                if (part1.length > 24) {
-                    result += part1 + ' =...';
+                let timeTxt = getTimeId();
+                if (timeTxt.length > 24) {
+                    result += timeTxt + ' =...';
                 } else {
-                    result += part1 + ' = ' + getId(this.payloadType, this.payload);
+                    result += timeTxt + ' = ' + getId(this.payloadType, this.payload);
                 }
             }
             if (this.topic && (this.topic.length + result.length <= 32)) {
-                return this.topic + ":" + result;
+                return this.topic + ":" + prefix + result;
             }
-            return result;
+            return prefix + result;
         },
         labelStyle: function () {
             return this.name ? "node_label_italic" : "";
@@ -537,6 +559,7 @@
                 }
                 $("#node-input-property").change();
             });
+
             $("#node-input-payloadType").val(this.payloadType);
             $("#node-input-payload").typedInput({
                 default: this.payloadType || 'date',
@@ -550,22 +573,37 @@
                 types: [typeTimeNone, 'flow', 'global', 'jsonata']
             });
             $("#node-input-property").on('change', function (type, value) {
-                if ($("#node-input-time").typedInput('type') === 'none' || $("#node-input-property")
-                    .typedInput('type') === 'none') {
+                let timeType = $("#node-input-time").typedInput('type');
+                let propType = $("#node-input-property").typedInput('type');
+                if (timeType === 'none' || propType === 'none') {
                     $(".alternate-time").hide();
                     $(".alternate-time-offset").hide();
                 } else {
                     $(".alternate-time").show();
                     $(".alternate-time-offset").show();
                 }
+                if (timeType === 'flow' || timeType === 'global' || propType !== 'none') {
+                    $(".time-inject-recalc").show();
+                } else {
+                    $(".time-inject-recalc").hide();
+                    $("#time-inject-recalcTime").val('');
+                }
             });
             $("#node-input-timeAlt").typedInput({
                 default: this.timeAltType || 'entered',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
+                types: [typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global']
             });
             $(".wt-offset-time").spinner({
                 max: 1439,
                 min: -1439
+            });
+            $("#node-input-onceDelay").spinner({
+                step: 0.1,
+                numberFormat: "n"
+            });
+            $("#node-input-recalcTime").spinner({
+                step: 0.1,
+                numberFormat: "n"
             });
             if (this.timeDays == "*") {
                 $("#time-inject-timeDays input[type=checkbox]").prop("checked", true);
@@ -575,6 +613,9 @@
                     $("#time-inject-timeDays [value=" + v + "]").prop("checked", true);
                 });
             }
+            $("#node-input-once").change(function () {
+                $("#node-input-onceDelay").attr('disabled', !$("#node-input-once").prop('checked'));
+            })
 
             $("#node-input-time").change();
         },

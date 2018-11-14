@@ -10,7 +10,7 @@
             "offset": "Offset",
             "timeAlt": "Alternate time",
             "timeAltoffset": "Offset",
-            "recalcTime": "Time reclaculation",
+            "recalcTime": "Reclac.",
             "payload": "Payload",
             "topic": "Topic",
             "seconds": "seconds",
@@ -33,7 +33,10 @@
             "4hours": "every 4 hour",
             "6hours": "every 6 hour",
             "12hours": "every 12 hour",
-            "24hours": "every 24 hour"
+            "24hours": "every 24 hour",
+            "once": "additional",
+            "onstart": "Inject on start ",
+            "onceDelay": "seconds"
         },
         "days": [
             "Monday",
@@ -59,8 +62,9 @@
             "timeAltOffset": "0"
         },
         "tips": {
-            "config": "If time is set to 'not used' the inject node can only used manually! If days are not checked on these days, the node would not generate an output on these days.",
-            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days."
+            "config": "If time is set to 'not used' the inject node can only used manually or once!",
+            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
+            "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done."
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",

@@ -278,8 +278,10 @@
         label: function () {
             const getId = (type, value, offset) => {
                 let suffix = '';
-                if (offset > 0) {
+                if (offset && offset > 0) {
                     suffix = '↷';
+                } else if (offset && offset < 0) {
+                    suffix = '↶';
                 }
                 if (type === 'msg' || type === 'flow' || type === 'global') {
                     return type + '.' + value + suffix;

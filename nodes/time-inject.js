@@ -33,6 +33,10 @@ module.exports = function (RED) {
         this.timeAltOffset = config.timeAltOffset || 0;
         this.timeAltOffsetMultiplier = config.timeAltOffsetMultiplier || 60;
 
+        this.recalcTime = (config.recalcTime || 2) * 3600000;
+
+        this.once = config.once;
+        this.onceDelay = (config.onceDelay || 0.1) * 1000;
 
         this.lastSendType = 'none';
         this.lastInputType = 'none';
@@ -152,13 +156,10 @@ module.exports = function (RED) {
                 }, millis, isAlt, isAltFirst);
             }
             if (!fixTimeStamp && !node.intervalObj) {
-                //2h = 7200000
-                //4h = 14400000
-                //6h = 21600000
                 node.intervalObj = setInterval(() => {
                     node.debug('retrigger timecalc');
                     doCreateTimeout(node);
-                }, 7200000);
+                }, node.recalcTime);
             } else if (fixTimeStamp && node.intervalObj) {
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
@@ -219,7 +220,16 @@ module.exports = function (RED) {
         });
 
         try {
-            doCreateTimeout(node);
+            if (this.once) {
+                this.onceTimeout = setTimeout(function () {
+                    node.emit("input", {
+                        type: 'once'
+                    });
+                    doCreateTimeout(node);
+                }, this.onceDelay);
+            } else {
+                doCreateTimeout(node);
+            }
         } catch (err) {
             hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
         }
