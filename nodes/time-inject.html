@@ -343,7 +343,8 @@
                 validate: function (v) {
                     return RED.validators.number()(v) || v === '' || v == null;
                 }
-            }
+            },
+            timezoneOffset: { value: 0 }
         },
         icon: "injectSun.png",
         inputs: 0,
@@ -620,6 +621,7 @@
             $("#node-input-time").change();
         },
         oneditsave: function () {
+            this.timezoneOffset = new Date().getTimezoneOffset();
             this.timeType = $("#node-input-time").typedInput('type');
             this.payloadType = $("#node-input-payload").typedInput('type');
             this.propertyType = $("#node-input-property").typedInput('type');
