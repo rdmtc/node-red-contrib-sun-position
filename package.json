@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "NodeRED nodes to get sun and moon position",
   "main": "none",
   "scripts": {
@@ -13,12 +13,10 @@
     "email": "hypnos3@online.de",
     "url": "https://github.com/hypnos3"
   },
-  "contributors": [
-    {
-      "name": "Hypnos3",
-      "url": "https://github.com/hypnos3"
-    }
-  ],
+  "contributors": [{
+    "name": "Hypnos3",
+    "url": "https://github.com/hypnos3"
+  }],
   "keywords": [
     "node-red",
     "sun-position",

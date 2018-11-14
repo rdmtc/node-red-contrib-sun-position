@@ -340,10 +340,46 @@
                 return this.name;
             }
             var result = "";
-            const getId = (type, value, offset) => {
+            const getId = (type, value, offset, days) => {
                 let suffix = '';
                 if (offset && offset > 0) {
                     suffix = '↷';
+                } else if (offset && offset < 0) {
+                    suffix = '↶';
+                }
+                if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
+                    if (days === '1,2,3,4,5') {
+                        suffix += ' [Mo-Fr]'; //'👷'
+                    } else if (days === '1,2,3,4') {
+                        suffix += ' [Mo-Th]';
+                    } else if (days === '6,0') {
+                        suffix += ' [WE]';
+                    } else {
+                        let dayarr = [];
+                        if (days.indexOf('1') >= 0) {
+                            dayarr.push('Mo');
+                        }
+                        if (days.indexOf('2') >= 0) {
+                            dayarr.push('Tu');
+                        }
+                        if (days.indexOf('3') >= 0) {
+                            dayarr.push('We');
+                        }
+                        if (days.indexOf('4') >= 0) {
+                            dayarr.push('Th');
+                        }
+                        if (days.indexOf('5') >= 0) {
+                            dayarr.push('Fr');
+                        }
+                        if (days.indexOf('6') >= 0) {
+                            dayarr.push('Sa');
+                        }
+                        if (days.indexOf('0') >= 0) {
+                            dayarr.push('Su');
+                        }
+                        suffix += ' [' + dayarr.join(',') + ']';
+                    }
+                    //...
                 }
                 if (type === "string" ||
                     type === "str" ||
@@ -383,7 +419,7 @@
             if (this.timeType === 'none' || this.timeType === '') {
                 return this._("time-inject.label.inject");
             } else {
-                let part1 = getId(this.timeType, this.time);
+                let part1 = getId(this.timeType, this.time, this.offset, this.timeDays);
                 if (part1.length > 24) {
                     result += part1 + ' =...';
                 } else {
