@@ -16,7 +16,7 @@ module.exports = {
 };
 
 /*******************************************************************************************************/
-Date.prototype.addDays = function (days) {
+Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
@@ -103,8 +103,9 @@ function calcTimeValue(d, offset, next, days) {
     if (next && !isNaN(next)) {
         let now = new Date();
         d.setUTCMilliseconds(0);
-        now.setUTCMilliseconds(0);
-        if (d.getTime() <= now.getTime()) {
+        now.setUTCMilliseconds(600); //security
+        let cmp = now.getTime();
+        if (d.getTime() <= cmp) {
             d = d.addDays(Number(next));
         }
     }

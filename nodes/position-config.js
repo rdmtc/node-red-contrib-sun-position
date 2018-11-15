@@ -58,7 +58,7 @@ const moonPhases = [{
     }
 ];
 
-Date.prototype.addDays = function (days) {
+Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
@@ -82,7 +82,7 @@ function nextday(days, daystart) {
     return dayx;
 }
 
-module.exports = function (RED) {
+module.exports = function(RED) {
     "use strict";
 
     function positionConfigurationNode(n) {
