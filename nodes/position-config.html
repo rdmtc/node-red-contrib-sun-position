@@ -28,6 +28,9 @@
                 validate: function (v) {
                     return (v === 'rad' || v === 'deg')
                 }
+            },
+            timezoneOffset: {
+                value: 0
             }
         },
         label: function () {
@@ -53,6 +56,9 @@
                     });
                 }
             }
+        },
+        oneditsave: function () {
+            this.timezoneOffset = new Date().getTimezoneOffset();
         }
     });
 </script>

@@ -36,7 +36,8 @@
             "24hours": "every 24 hour",
             "once": "additional",
             "onstart": "Inject on start ",
-            "onceDelay": "seconds"
+            "onceDelay": "seconds",
+            "success": "Successfully injected: __label__"
         },
         "days": [
             "Monday",

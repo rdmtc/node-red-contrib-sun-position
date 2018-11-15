@@ -48,24 +48,20 @@ module.exports = function (RED) {
                 let startSuffix = '';
                 if (alternateTimes && config.startTimeAltType !== 'none') {
                     //this.debug('using alternate start time');
-                    //start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
                     start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt * config.startOffsetAltMultiplier);
                     startSuffix = '⎇⏴ ';
                 } else {
                     //this.debug('using standard start time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    //start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
                     start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, config.startOffset * config.startOffsetMultiplier);
                 }
 
                 let endSuffix = '';
                 if (alternateTimes && config.endTimeAltType !== 'none') {
                     //this.debug('using alternate end time');
-                    //end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
                     end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt * config.endOffsetAltMultiplier);
                     endSuffix = ' ⏵⎇';
                 } else {
                     //this.debug('using standard end time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    //end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.endOffset);
                     end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, config.endOffset * config.endOffsetMultiplier);
                 }
 

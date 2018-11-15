@@ -20,7 +20,6 @@ module.exports = function (RED) {
         this.payloadType = config.payloadType || 'none';
         this.topic = config.topic;
 
-        this.timezoneOffset = config.timezoneOffset || 0;
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
@@ -137,7 +136,7 @@ module.exports = function (RED) {
                         type: 'start'
                     });
                 }, millis, isAlt, isAltFirst);
-                
+
                 node.status({
                     fill: "green",
                     shape: "dot",

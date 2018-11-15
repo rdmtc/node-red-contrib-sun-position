@@ -93,6 +93,8 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
+            this.timezoneOffset = n.timezoneOffset || 0;
+
             this.lastSunCalc = {
                 ts: 0
             };
@@ -171,6 +173,9 @@ module.exports = function (RED) {
                 }
                 return result;
             }
+
+            //15 Nov 12:06:32 - [error] [time-inject:7e325169.87e6e] Exception occured on time-inject:node.positionConfig.getTimeProp is not a function
+            //15 Nov 12:06:32 - [debug] [time-inject:7e325169.87e6e] {"stack":"TypeError: node.positionConfig.getTimeProp is not a function\n    at doCreateTimeout (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:66:53)\n    at new timeInjectNode (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:227:17)\n    at createNode (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:305:18)\n    at Flow.start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:89:35)\n    at start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\index.js:328:29)\n    at tryCatchReject (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:845:30)\n    at runContinuation1 (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:804:4)\n    at Fulfilled.when (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:592:4)\n    at Pending.run (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:483:13)\n    at Scheduler._drain (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\Scheduler.js:62:19)","message":"node.positionConfig.getTimeProp is not a function"}
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
                 //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
                 node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
@@ -187,7 +192,7 @@ module.exports = function (RED) {
                         result.value = now;
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), offset, next, days);
+                        result.value = hlp.getTimeOfText(String(value), node.timezoneOffset, offset, next, days);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         //sun
@@ -200,13 +205,13 @@ module.exports = function (RED) {
                     } else if (vType === 'json') {
                         let val = JSON.parse(value);
                         let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
-                        result.value = hlp.getDateOfText(date, offset, next, days);
+                        result.value = hlp.getDateOfText(date, node.timezoneOffset, offset, next, days);
                         result.fix = true;
                     } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText("" + res, offset, next, days);
+                            result.value = hlp.getDateOfText("" + res, node.timezoneOffset, offset, next, days);
                             result.fix = false; // not a fixed time, because can be changed
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;

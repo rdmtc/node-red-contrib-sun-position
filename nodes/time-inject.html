@@ -343,8 +343,7 @@
                 validate: function (v) {
                     return RED.validators.number()(v) || v === '' || v == null;
                 }
-            },
-            timezoneOffset: { value: 0 }
+            }
         },
         icon: "injectSun.png",
         inputs: 0,
@@ -621,7 +620,6 @@
             $("#node-input-time").change();
         },
         oneditsave: function () {
-            this.timezoneOffset = new Date().getTimezoneOffset();
             this.timeType = $("#node-input-time").typedInput('type');
             this.payloadType = $("#node-input-payload").typedInput('type');
             this.propertyType = $("#node-input-property").typedInput('type');
@@ -676,25 +674,25 @@
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify(RED._("common.notification.error", {
+                            RED.notify(RED._("time-inject.errors.error", {
                                 message: RED._(
-                                    "common.notification.errors.not-deployed"
+                                    "time-inject.errors.not-deployed"
                                 )
                             }), "error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify(RED._("common.notification.error", {
-                                message: RED._("common.errors.failed")
+                            RED.notify(RED._("time-inject.errors.error", {
+                                message: RED._("time-inject.errors.failed")
                             }), "error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify(RED._("common.notification.error", {
+                            RED.notify(RED._("time-inject.errors.error", {
                                 message: RED._(
-                                    "common.notification.errors.no-response"
+                                    "time-inject.errors.no-response"
                                 )
                             }), "error");
                         } else {
-                            RED.notify(RED._("common.notification.error", {
+                            RED.notify(RED._("time-inject.errors.error", {
                                 message: RED._(
-                                    "common.notification.errors.unexpected", {
+                                    "time-inject.errors.unexpected", {
                                         status: jqXHR.status,
                                         message: textStatus
                                     })
