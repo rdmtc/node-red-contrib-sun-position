@@ -101,7 +101,7 @@ module.exports = function(RED) {
                     return;
                 }
                 let millis = node.getScheduleTime(node.nextTime);
-                if (millis > 1000) {
+                if (millis > 500) {
                     node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                     let isAlt = (node.nextTimeAlt);
                     let isAltFirst = false;
@@ -143,6 +143,8 @@ module.exports = function(RED) {
                         });
                     }, millis, isAlt, isAltFirst);
                 } else {
+                    errorStatus = "invalid calculated time";
+                    node.nextTime = null;
                     fixTimeStamp = false;
                 }
             } else {
