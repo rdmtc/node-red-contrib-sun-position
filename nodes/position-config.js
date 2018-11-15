@@ -115,7 +115,7 @@ module.exports = function (RED) {
                 //node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
                 let result = sunTimesCheck(node, now);
                 result.value = new Date(node.sunTimesToday[value]);
-                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = new Date(node.sunTimesTomorow[value]);
                     } else if (next > 1) {
@@ -149,7 +149,7 @@ module.exports = function (RED) {
                 //node.debug('getMoonTime ' + value + ' - ' + next + ' - ' + days);
                 let result = moonTimesCheck(node, now);
                 result.value = new Date(node.moonTimesToday[value]);
-                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = new Date(node.moonTimesTomorow[value]);
                     } else if (next > 1) {
@@ -349,7 +349,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('sunTimesRefresh');
+            node.debug('sunTimesRefresh - calculate sun times');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
@@ -372,7 +372,7 @@ module.exports = function (RED) {
         }
 
         function sunTimesCheck(node, today, dayId) {
-            node.debug('sunTimesCheck');
+            //node.debug('sunTimesCheck');
             let dateb = today || new Date();
             let day_id = dayId || getUTCDayId(dateb);
             if (node.sunDayId != day_id) {
@@ -386,7 +386,7 @@ module.exports = function (RED) {
         }
 
         function moonTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('moonTimesRefresh');
+            node.debug('moonTimesRefresh - calculate moon times');
             node.moonTimesToday = sunCalc.getMoonTimes(today, node.latitude, node.longitude, true);
             if (!node.moonTimesToday.alwaysUp) {
                 //true if the moon never rises/sets and is always above the horizon during the day
@@ -409,7 +409,7 @@ module.exports = function (RED) {
         }
 
         function moonTimesCheck(node, today, dayId) {
-            node.debug('moonTimesCheck');
+            //node.debug('moonTimesCheck');
             let dateb = today || new Date();
             let day_id = dayId || getUTCDayId(dateb);
             if (node.moonDayId != day_id) {

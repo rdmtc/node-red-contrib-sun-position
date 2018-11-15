@@ -96,14 +96,15 @@ function compareAzimuth(azimuth, low, high) {
 };
 /*******************************************************************************************************/
 function calcTimeValue(d, offset, next, days) {
+    //console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
     if (offset && !isNaN(offset) && offset !== 0) {
-        d = new Date(d.getTime() + offset * 1000);
+        d = new Date(d.getTime() + offset * 1000); //- does not work
     }
     if (next && !isNaN(next)) {
         let now = new Date();
         d.setUTCMilliseconds(0);
         now.setUTCMilliseconds(0);
-        if (d.getTime() <= (now.getTime())) {
+        if (d.getTime() <= now.getTime()) {
             d = d.addDays(Number(next));
         }
     }
@@ -131,12 +132,13 @@ function calcTimeValue(d, offset, next, days) {
 }
 /*******************************************************************************************************/
 function getTimeOfText(t, tzOffset, offset, next, days) {
+    //console.debug('getTimeOfText t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
     let d = new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         if (matches) {
-            d.setUTCHours(parseInt(matches[1]) + (matches[4] ? 12 : 0) + tzOffset);
-            d.setUTCMinutes(parseInt(matches[2]) || 0);
+            d.setUTCHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
+            d.setUTCMinutes((parseInt(matches[2]) || 0) + tzOffset);
             d.setUTCSeconds(parseInt(matches[3]) || 0);
             d.setUTCMilliseconds(0);
         } else {

@@ -23,7 +23,7 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
-        this.offset = config.offset || 60;
+        this.offset = config.offset || 0;
         this.offsetMultiplier = config.offsetMultiplier || 60;
 
         this.property = config.property || '';
@@ -62,6 +62,7 @@ module.exports = function (RED) {
                 clearTimeout(node.timeOutObj);
             }
             if (node.timeType !== 'none' && node.positionConfig) {
+                //(srcNode, msg, vType, value, offset, next, days)
                 //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
                 node.nextTime = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTime.error) {

@@ -366,8 +366,12 @@
                     suffix = '↶';
                 }
                 if (type === "string" ||
-                    type === "str" ||
-                    type === "num" ||
+                    type === "str") {
+                    if (value == '') {
+                        return this._("time-inject.label.blank");
+                    }
+                    return '"' + value + '"' + suffix;
+                } else if (type === "num" ||
                     type === "bool") {
                     if (value == '') {
                         return this._("time-inject.label.blank");
@@ -647,6 +651,10 @@
                     }), "warning");
                 }
                 var payload = this.payload;
+                if ((this.payloadType === 'str') ||
+                    (this.payloadType === 'string')) {
+                    payload = '"' + this.payload + '"';
+                }
                 if ((this.payloadType === 'flow') ||
                     (this.payloadType === 'global')) {
                     var key = RED.utils.parseContextKey(payload);
