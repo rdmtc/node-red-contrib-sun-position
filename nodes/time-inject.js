@@ -20,6 +20,7 @@ module.exports = function (RED) {
         this.payloadType = config.payloadType || 'none';
         this.topic = config.topic;
 
+        this.timezoneOffset = config.timezoneOffset || 0;
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
@@ -53,24 +54,6 @@ module.exports = function (RED) {
                 millis += 86400000; //24h
             }
             return millis;
-        }
-
-        this.setStatus = (error) => {
-            if (node.nextTime) {
-                node.status({
-                    fill: "green",
-                    shape: "dot",
-                    text: node.nextTime.toLocaleString()
-                });
-            } else if (error) {
-                node.status({
-                    fill: "red",
-                    shape: "dot",
-                    text: error
-                });
-            } else {
-                node.status({});
-            }
         }
 
         function doCreateTimeout(node) {
@@ -112,7 +95,7 @@ module.exports = function (RED) {
             } else {
                 node.nextTimeAlt = null;
             }
-            if (node.nextTime && !node.nextTime.error) {
+            if (node.nextTime) {
                 let millis = node.getScheduleTime(node.nextTime);
                 node.debug('doCreateTimeout ' + node.nextTime + ' in ' + millis + 'ms');
                 let isAlt = (node.nextTimeAlt);
@@ -154,7 +137,22 @@ module.exports = function (RED) {
                         type: 'start'
                     });
                 }, millis, isAlt, isAltFirst);
+                
+                node.status({
+                    fill: "green",
+                    shape: "dot",
+                    text: node.nextTime.toLocaleString()
+                });
+            } else if (errorStatus) {
+                node.status({
+                    fill: "red",
+                    shape: "dot",
+                    text: errorStatus
+                });
+            } else {
+                node.status({});
             }
+
             if (!fixTimeStamp && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
                     node.debug('retrigger timecalc');
@@ -164,7 +162,6 @@ module.exports = function (RED) {
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
             }
-            node.setStatus(errorStatus);
         }
 
         this.on('close', function () {
