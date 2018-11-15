@@ -93,7 +93,8 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
-            this.timezoneOffset = n.timezoneOffset || 0;
+            this.tzOffset = (n.timezoneOffset * -60) || 0;
+            this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
 
             this.lastSunCalc = {
                 ts: 0
@@ -192,7 +193,7 @@ module.exports = function (RED) {
                         result.value = now;
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), node.timezoneOffset, offset, next, days);
+                        result.value = hlp.getTimeOfText(String(value), node.tzOffset, offset, next, days);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         //sun
@@ -205,13 +206,13 @@ module.exports = function (RED) {
                     } else if (vType === 'json') {
                         let val = JSON.parse(value);
                         let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
-                        result.value = hlp.getDateOfText(date, node.timezoneOffset, offset, next, days);
+                        result.value = hlp.getDateOfText(date, node.tzOffset, offset, next, days);
                         result.fix = true;
                     } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText("" + res, node.timezoneOffset, offset, next, days);
+                            result.value = hlp.getDateOfText("" + res, node.tzOffset, offset, next, days);
                             result.fix = false; // not a fixed time, because can be changed
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;
