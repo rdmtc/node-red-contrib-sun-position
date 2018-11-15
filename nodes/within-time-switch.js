@@ -6,7 +6,7 @@
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function withinTimeSwitchNode(config) {
@@ -93,9 +93,9 @@ module.exports = function(RED) {
                     }
                 }
                 //this.debug(start.value + ' - ' + now + ' - ' + end.value);
-                let startNr = hlp.getOnlyTime(start.value);
-                let endNr = hlp.getOnlyTime(end.value);
-                let cmpNow = hlp.getOnlyTime(now);
+                let startNr = hlp.getTimeNumber(start.value);
+                let endNr = hlp.getTimeNumber(end.value);
+                let cmpNow = hlp.getTimeNumber(now);
                 //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
 
                 if (startNr < endNr) {

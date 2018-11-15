@@ -60,7 +60,7 @@ const moonPhases = [{
 
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
+    date.setUTCDate(date.getUTCDate() + days);
     return date;
 }
 
@@ -123,7 +123,7 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let dayx = nextday(days, result.value.getDay());
+                    let dayx = nextday(days, result.value.getUTCDay());
                     //node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         let date = result.value.addDays(dayx);
@@ -157,7 +157,7 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let dayx = nextday(days, result.value.getDay());
+                    let dayx = nextday(days, result.value.getUTCDay());
                     if (dayx === 1) {
                         result.value = new Date(node.moonTimesTomorow[value]);
                     } else if (dayx > 1) {
@@ -369,7 +369,7 @@ module.exports = function (RED) {
         function sunTimesCheck(node, today, dayId) {
             node.debug('sunTimesCheck');
             let dateb = today || new Date();
-            let day_id = dayId || getDayId(dateb);
+            let day_id = dayId || getUTCDayId(dateb);
             if (node.sunDayId != day_id) {
                 let tomorrow = (new Date()).addDays(1);
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
@@ -406,7 +406,7 @@ module.exports = function (RED) {
         function moonTimesCheck(node, today, dayId) {
             node.debug('moonTimesCheck');
             let dateb = today || new Date();
-            let day_id = dayId || getDayId(dateb);
+            let day_id = dayId || getUTCDayId(dateb);
             if (node.moonDayId != day_id) {
                 let tomorrow = (new Date()).addDays(1);
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
@@ -420,14 +420,14 @@ module.exports = function (RED) {
         function initTimes(node) {
             node.debug('initTimes');
             let today = new Date();
-            let dayId = getDayId(today);
+            let dayId = getUTCDayId(today);
             let tomorrow = today.addDays(1);
             sunTimesRefresh(node, today, tomorrow, dayId);
             moonTimesRefresh(node, today, tomorrow, dayId);
         }
 
-        function getDayId(d) {
-            return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
+        function getUTCDayId(d) {
+            return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
         }
         /**************************************************************************************************************/
     }
