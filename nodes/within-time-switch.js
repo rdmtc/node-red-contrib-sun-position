@@ -6,7 +6,7 @@
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function withinTimeSwitchNode(config) {
@@ -48,25 +48,21 @@ module.exports = function(RED) {
                 let startSuffix = '';
                 if (alternateTimes && config.startTimeAltType !== 'none') {
                     //this.debug('using alternate start time');
-                    //start = hlp.getTimeProp(this, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt);
-                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt * config.startOffsetAltMultiplier);
+                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, (config.startOffsetAlt || 0) * (config.startOffsetAltMultiplier || 60));
                     startSuffix = '⎇⏴ ';
                 } else {
                     //this.debug('using standard start time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    //start = hlp.getTimeProp(this, config.startTimeType, config.startTime, config.startOffset);
-                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, config.startOffset * config.startOffsetMultiplier);
+                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, (config.startOffset || 0) * (config.startOffsetMultiplier || 60));
                 }
 
                 let endSuffix = '';
                 if (alternateTimes && config.endTimeAltType !== 'none') {
                     //this.debug('using alternate end time');
-                    //end = hlp.getTimeProp(this, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt);
-                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt * config.endOffsetAltMultiplier);
+                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, (config.endOffsetAlt || 0) * (config.endOffsetAltMultiplier || 60));
                     endSuffix = ' ⏵⎇';
                 } else {
                     //this.debug('using standard end time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    //end = hlp.getTimeProp(this, config.endTimeType, config.endTime, config.endOffset);
-                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, config.endOffset * config.endOffsetMultiplier);
+                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
                 }
 
                 if (start.error) {
@@ -93,9 +89,9 @@ module.exports = function(RED) {
                     }
                 }
                 //this.debug(start.value + ' - ' + now + ' - ' + end.value);
-                let startNr = hlp.getOnlyTime(start.value);
-                let endNr = hlp.getOnlyTime(end.value);
-                let cmpNow = hlp.getOnlyTime(now);
+                let startNr = hlp.getTimeNumber(start.value);
+                let endNr = hlp.getTimeNumber(end.value);
+                let cmpNow = hlp.getTimeNumber(now);
                 //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
 
                 if (startNr < endNr) {

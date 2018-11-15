@@ -60,7 +60,7 @@ const moonPhases = [{
 
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
+    date.setUTCDate(date.getUTCDate() + days);
     return date;
 }
 
@@ -93,6 +93,8 @@ module.exports = function (RED) {
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
+            this.timezoneOffset = n.timezoneOffset || 0;
+
             this.lastSunCalc = {
                 ts: 0
             };
@@ -113,7 +115,7 @@ module.exports = function (RED) {
                 //node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
                 let result = sunTimesCheck(node, now);
                 result.value = new Date(node.sunTimesToday[value]);
-                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = new Date(node.sunTimesTomorow[value]);
                     } else if (next > 1) {
@@ -123,7 +125,7 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let dayx = nextday(days, result.value.getDay());
+                    let dayx = nextday(days, result.value.getUTCDay());
                     //node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         let date = result.value.addDays(dayx);
@@ -147,7 +149,7 @@ module.exports = function (RED) {
                 //node.debug('getMoonTime ' + value + ' - ' + next + ' - ' + days);
                 let result = moonTimesCheck(node, now);
                 result.value = new Date(node.moonTimesToday[value]);
-                if (next && !isNaN(next) && result.value.getTime() <= (now.getTime())) {
+                if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = new Date(node.moonTimesTomorow[value]);
                     } else if (next > 1) {
@@ -157,7 +159,7 @@ module.exports = function (RED) {
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
-                    let dayx = nextday(days, result.value.getDay());
+                    let dayx = nextday(days, result.value.getUTCDay());
                     if (dayx === 1) {
                         result.value = new Date(node.moonTimesTomorow[value]);
                     } else if (dayx > 1) {
@@ -171,6 +173,9 @@ module.exports = function (RED) {
                 }
                 return result;
             }
+
+            //15 Nov 12:06:32 - [error] [time-inject:7e325169.87e6e] Exception occured on time-inject:node.positionConfig.getTimeProp is not a function
+            //15 Nov 12:06:32 - [debug] [time-inject:7e325169.87e6e] {"stack":"TypeError: node.positionConfig.getTimeProp is not a function\n    at doCreateTimeout (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:66:53)\n    at new timeInjectNode (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:227:17)\n    at createNode (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:305:18)\n    at Flow.start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:89:35)\n    at start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\index.js:328:29)\n    at tryCatchReject (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:845:30)\n    at runContinuation1 (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:804:4)\n    at Fulfilled.when (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:592:4)\n    at Pending.run (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:483:13)\n    at Scheduler._drain (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\Scheduler.js:62:19)","message":"node.positionConfig.getTimeProp is not a function"}
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
                 //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
                 node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
@@ -187,7 +192,7 @@ module.exports = function (RED) {
                         result.value = now;
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), offset, next, days);
+                        result.value = hlp.getTimeOfText(String(value), node.timezoneOffset, offset, next, days);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         //sun
@@ -200,13 +205,13 @@ module.exports = function (RED) {
                     } else if (vType === 'json') {
                         let val = JSON.parse(value);
                         let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
-                        result.value = hlp.getDateOfText(date, offset, next, days);
+                        result.value = hlp.getDateOfText(date, node.timezoneOffset, offset, next, days);
                         result.fix = true;
                     } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText("" + res, offset, next, days);
+                            result.value = hlp.getDateOfText("" + res, node.timezoneOffset, offset, next, days);
                             result.fix = false; // not a fixed time, because can be changed
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;
@@ -344,7 +349,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('sunTimesRefresh');
+            node.debug('sunTimesRefresh - calculate sun times');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
@@ -367,9 +372,9 @@ module.exports = function (RED) {
         }
 
         function sunTimesCheck(node, today, dayId) {
-            node.debug('sunTimesCheck');
+            //node.debug('sunTimesCheck');
             let dateb = today || new Date();
-            let day_id = dayId || getDayId(dateb);
+            let day_id = dayId || getUTCDayId(dateb);
             if (node.sunDayId != day_id) {
                 let tomorrow = (new Date()).addDays(1);
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
@@ -381,7 +386,7 @@ module.exports = function (RED) {
         }
 
         function moonTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('moonTimesRefresh');
+            node.debug('moonTimesRefresh - calculate moon times');
             node.moonTimesToday = sunCalc.getMoonTimes(today, node.latitude, node.longitude, true);
             if (!node.moonTimesToday.alwaysUp) {
                 //true if the moon never rises/sets and is always above the horizon during the day
@@ -404,9 +409,9 @@ module.exports = function (RED) {
         }
 
         function moonTimesCheck(node, today, dayId) {
-            node.debug('moonTimesCheck');
+            //node.debug('moonTimesCheck');
             let dateb = today || new Date();
-            let day_id = dayId || getDayId(dateb);
+            let day_id = dayId || getUTCDayId(dateb);
             if (node.moonDayId != day_id) {
                 let tomorrow = (new Date()).addDays(1);
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
@@ -420,14 +425,14 @@ module.exports = function (RED) {
         function initTimes(node) {
             node.debug('initTimes');
             let today = new Date();
-            let dayId = getDayId(today);
+            let dayId = getUTCDayId(today);
             let tomorrow = today.addDays(1);
             sunTimesRefresh(node, today, tomorrow, dayId);
             moonTimesRefresh(node, today, tomorrow, dayId);
         }
 
-        function getDayId(d) {
-            return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
+        function getUTCDayId(d) {
+            return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
         }
         /**************************************************************************************************************/
     }

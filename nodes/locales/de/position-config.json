@@ -5,6 +5,7 @@
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "angle type",
+            "timezoneOffset": "TZ Offset",
             "west": "West side azimuth limit",
             "westLow": "low",
             "westHigh": "high",
@@ -18,7 +19,8 @@
             "northLow": "low",
             "northHigh": "high",
             "name": "Name",
-            "property": "Property"
+            "property": "Property",
+            "minutes": "minutes"
         },
         "placeholder": {
             "latitude": "51.025",

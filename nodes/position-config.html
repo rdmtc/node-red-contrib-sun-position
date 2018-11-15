@@ -28,12 +28,18 @@
                 validate: function (v) {
                     return (v === 'rad' || v === 'deg')
                 }
+            },
+            timezoneOffset: {
+                value: 0
             }
         },
         label: function () {
             return this.name || "default-position";
         },
         oneditprepare: function () {
+            if (this.timezoneOffset == null || typeof this.timezoneOffset === undefined) {
+                this.timezoneOffset = new Date().getTimezoneOffset();
+            }
             $("#node-config-input-latitude").spinner({
                 step: .00001,
                 numberFormat: "n"
@@ -53,40 +59,40 @@
                     });
                 }
             }
+        },
+        oneditsave: function () {
+            this.timezoneOffset = new Date().getTimezoneOffset();
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="position-config">
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
+        <label for="node-config-input-longitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
         <input type="text" id="node-config-input-longitude" data-i18n="[placeholder]position-config.placeholder.longitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
+        <label for="node-config-input-latitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
         <input type="text" id="node-config-input-latitude" data-i18n="[placeholder]position-config.placeholder.latitude">
     </div>
 
     <div class="form-row">
-        <label for="node-region"><i class="fa fa-angle-left"></i> <span data-i18n="position-config.label.angleType"></span></label>
+        <label for="node-config-input-angleType"><i class="fa fa-angle-left"></i> <span data-i18n="position-config.label.angleType"></span></label>
         <select type="text" id="node-config-input-angleType" style="width:70%;">
             <option value="rad" >radians</option>
             <option value="deg" >degrees</option>
         </select>
     </div>
+
+    <div class="form-row">
+        <label for="node-config-input-timezoneOffset"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.timezoneOffset"></span></label>
+        <input type="text" id="node-config-input-timezoneOffset"  data-i18n="[placeholder]position-config.placeholder.timezoneOffset" readonly style="width:65px;">&nbsp;
+        <span data-i18n="position-config.label.minutes"></span>
+    </div>
     <hr>
-    <div style="border-style: outset none outset none;">
-        <div class="form-tips">
-            <span data-i18n="position-config.tips.sunPosControl"></span>
-        </div>
-        <div class="form-row"><i class="fa fa-arrow-right"></i> <span data-i18n="position-config.label.west"></span></div>
-            <div class="form-row"><span data-i18n="position-config.label.west"></span>
-        </div>
-        <hr>
-        <div class="form-row">
-            <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="position-config.label.name"></span></label>
-            <input type="text" id="node-config-input-name" data-i18n="[placeholder]position-config.placeholder.name">
-        </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="position-config.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]position-config.placeholder.name">
     </div>
 </script>

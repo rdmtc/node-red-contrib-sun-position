@@ -23,7 +23,7 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
-        this.offset = config.offset || 60;
+        this.offset = config.offset || 0;
         this.offsetMultiplier = config.offsetMultiplier || 60;
 
         this.property = config.property || '';
@@ -55,24 +55,6 @@ module.exports = function (RED) {
             return millis;
         }
 
-        this.setStatus = (error) => {
-            if (node.nextTime) {
-                node.status({
-                    fill: "green",
-                    shape: "dot",
-                    text: node.nextTime.toLocaleString()
-                });
-            } else if (error) {
-                node.status({
-                    fill: "red",
-                    shape: "dot",
-                    text: error
-                });
-            } else {
-                node.status({});
-            }
-        }
-
         function doCreateTimeout(node) {
             let errorStatus = '';
             let fixTimeStamp = false;
@@ -80,6 +62,7 @@ module.exports = function (RED) {
                 clearTimeout(node.timeOutObj);
             }
             if (node.timeType !== 'none' && node.positionConfig) {
+                //(srcNode, msg, vType, value, offset, next, days)
                 //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
                 node.nextTime = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTime.error) {
@@ -112,7 +95,7 @@ module.exports = function (RED) {
             } else {
                 node.nextTimeAlt = null;
             }
-            if (node.nextTime && !node.nextTime.error) {
+            if (node.nextTime) {
                 let millis = node.getScheduleTime(node.nextTime);
                 node.debug('doCreateTimeout ' + node.nextTime + ' in ' + millis + 'ms');
                 let isAlt = (node.nextTimeAlt);
@@ -154,7 +137,22 @@ module.exports = function (RED) {
                         type: 'start'
                     });
                 }, millis, isAlt, isAltFirst);
+
+                node.status({
+                    fill: "green",
+                    shape: "dot",
+                    text: node.nextTime.toLocaleString()
+                });
+            } else if (errorStatus) {
+                node.status({
+                    fill: "red",
+                    shape: "dot",
+                    text: errorStatus
+                });
+            } else {
+                node.status({});
             }
+
             if (!fixTimeStamp && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
                     node.debug('retrigger timecalc');
@@ -164,7 +162,6 @@ module.exports = function (RED) {
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
             }
-            node.setStatus(errorStatus);
         }
 
         this.on('close', function () {

@@ -36,7 +36,8 @@
             "24hours": "aller 24 Stunden",
             "once": "zusätzlich",
             "onstart": "Inject bei start ",
-            "onceDelay": "Sekunden"
+            "onceDelay": "Sekunden",
+            "success": "Flow erfolgreich gestartet: __label__"
         },
         "days": [
             "Montag",

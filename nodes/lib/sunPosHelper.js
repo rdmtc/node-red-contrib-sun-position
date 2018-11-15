@@ -11,14 +11,14 @@ module.exports = {
     calcTimeValue,
     getTimeOfText,
     getDateOfText,
-    getOnlyTime,
+    getTimeNumber,
     getNodeId
 };
 
 /*******************************************************************************************************/
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
+    date.setUTCDate(date.getUTCDate() + days);
     return date;
 }
 
@@ -56,8 +56,8 @@ function errorHandler(node, err, messageText, stateText) {
     return false;
 };
 /*******************************************************************************************************/
-function getOnlyTime(date) {
-    return date.getSeconds() + date.getMinutes() * 60 + date.getHours() * 3600;
+function getTimeNumber(date) {
+    return date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
 }
 /*******************************************************************************************************/
 /*function compareAzimuth(obj, name, azimuth, low, high, old) {
@@ -96,19 +96,20 @@ function compareAzimuth(azimuth, low, high) {
 };
 /*******************************************************************************************************/
 function calcTimeValue(d, offset, next, days) {
+    //console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
     if (offset && !isNaN(offset) && offset !== 0) {
-        d = new Date(d.getTime() + offset * 1000);
+        d = new Date(d.getTime() + offset * 1000); //- does not work
     }
     if (next && !isNaN(next)) {
         let now = new Date();
-        d.setMilliseconds(0);
-        now.setMilliseconds(0);
-        if (d.getTime() <= (now.getTime())) {
+        d.setUTCMilliseconds(0);
+        now.setUTCMilliseconds(0);
+        if (d.getTime() <= now.getTime()) {
             d = d.addDays(Number(next));
         }
     }
     if (days && (days !== '*') && (days !== '')) {
-        let daystart = d.getDay();
+        let daystart = d.getUTCDay();
         let dayx = 0;
         let daypos = daystart;
         while (days.indexOf(daypos) === -1) {
@@ -130,15 +131,16 @@ function calcTimeValue(d, offset, next, days) {
     return d;
 }
 /*******************************************************************************************************/
-function getTimeOfText(t, offset, next, days) {
+function getTimeOfText(t, tzOffset, offset, next, days) {
+    //console.debug('getTimeOfText t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
     let d = new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         if (matches) {
-            d.setHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
-            d.setMinutes(parseInt(matches[2]) || 0);
-            d.setSeconds(parseInt(matches[3]) || 0);
-            d.setMilliseconds(0);
+            d.setUTCHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
+            d.setUTCMinutes((parseInt(matches[2]) || 0) + tzOffset);
+            d.setUTCSeconds(parseInt(matches[3]) || 0);
+            d.setUTCMilliseconds(0);
         } else {
             return null;
         }
@@ -147,7 +149,7 @@ function getTimeOfText(t, offset, next, days) {
     return null;
 };
 /*******************************************************************************************************/
-function getDateOfText(date, offset, next, days) {
+function getDateOfText(date, tzOffset, offset, next, days) {
     if (!isNaN(date)) {
         date = Number(date);
     }
@@ -155,7 +157,7 @@ function getDateOfText(date, offset, next, days) {
     if (dto !== "Invalid Date" && !isNaN(dto)) {
         return calcTimeValue(dto, offset, next, days);
     } else {
-        let result = getTimeOfText(String(date), offset, next, days);
+        let result = getTimeOfText(String(date), tzOffset, offset, next, days);
         if (result != null) {
             return result;
         }
