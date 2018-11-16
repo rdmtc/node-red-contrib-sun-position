@@ -10,7 +10,9 @@ module.exports = {
     compareAzimuth,
     calcTimeValue,
     getTimeOfText,
+    getTimeOfTextUTC,
     getDateOfText,
+    getDateOfTextUTC,
     getTimeNumber,
     getNodeId
 };
@@ -132,16 +134,16 @@ function calcTimeValue(d, offset, next, days) {
     return d;
 }
 /*******************************************************************************************************/
-function getTimeOfText(t, tzOffset, offset, next, days) {
-    //console.debug('getTimeOfText t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    let d = new Date();
+function getTimeOfText(t, offset, next, days, date) {
+    //console.debug('getTimeOfText t=' + t + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    let d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         if (matches) {
-            d.setUTCHours(parseInt(matches[1]) + (matches[4] ? 12 : 0));
-            d.setUTCMinutes((parseInt(matches[2]) || 0) + tzOffset);
-            d.setUTCSeconds(parseInt(matches[3]) || 0);
-            d.setUTCMilliseconds(0);
+            d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
+                (parseInt(matches[2]) || 0),
+                (parseInt(matches[3]) || 0), 0);
+                console.log(d);
         } else {
             return null;
         }
@@ -150,7 +152,7 @@ function getTimeOfText(t, tzOffset, offset, next, days) {
     return null;
 };
 /*******************************************************************************************************/
-function getDateOfText(date, tzOffset, offset, next, days) {
+function getDateOfText(date, offset, next, days) {
     if (!isNaN(date)) {
         date = Number(date);
     }
@@ -158,7 +160,41 @@ function getDateOfText(date, tzOffset, offset, next, days) {
     if (dto !== "Invalid Date" && !isNaN(dto)) {
         return calcTimeValue(dto, offset, next, days);
     } else {
-        let result = getTimeOfText(String(date), tzOffset, offset, next, days);
+        let result = getTimeOfText(String(date), offset, next, days);
+        if (result != null) {
+            return result;
+        }
+    }
+    throw new Error("could not evaluate " + String(date) + ' as a valid Date or time.');
+};
+/*******************************************************************************************************/
+function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
+    console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    let d = date || new Date();
+    if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+        if (matches) {
+            d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
+                (parseInt(matches[2]) || 0)  + (tzOffset || 0),
+                (parseInt(matches[3]) || 0), 0);
+                console.log(d);
+        } else {
+            return null;
+        }
+        return calcTimeValue(d, offset, next, days)
+    }
+    return null;
+};
+/*******************************************************************************************************/
+function getDateOfTextUTC(date, tzOffset, offset, next, days) {
+    if (!isNaN(date)) {
+        date = Number(date);
+    }
+    let dto = new Date(date);
+    if (dto !== "Invalid Date" && !isNaN(dto)) {
+        return calcTimeValue(dto, offset, next, days);
+    } else {
+        let result = getTimeOfTextUTC(String(date), tzOffset, offset, next, days);
         if (result != null) {
             return result;
         }

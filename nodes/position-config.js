@@ -193,7 +193,8 @@ module.exports = function(RED) {
                         result.value = now;
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), node.tzOffset, offset, next, days);
+                        result.value = hlp.getTimeOfText(String(value), offset, next, days, now);
+                        node.debug(String(value) + '  --  ' + result.value);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         //sun
@@ -206,14 +207,16 @@ module.exports = function(RED) {
                     } else if (vType === 'json') {
                         let val = JSON.parse(value);
                         let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
-                        result.value = hlp.getDateOfText(date, node.tzOffset, offset, next, days);
+                        result.value = hlp.hlp.getDateOfText(date, offset, next, days);
+                        node.debug(date + '  --  ' + result.value);
                         result.fix = true;
                     } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText("" + res, node.tzOffset, offset, next, days);
+                            result.value = hlp.getDateOfText(String(res), offset, next, days);
                             result.fix = false; // not a fixed time, because can be changed
+                            node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;
                         }
