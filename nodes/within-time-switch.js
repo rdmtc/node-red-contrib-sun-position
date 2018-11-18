@@ -6,7 +6,81 @@
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
-module.exports = function (RED) {
+function calcWithinTimes(node, msg, config, state) {
+    let result = {
+        start: {},
+        end: {},
+        startSuffix: '',
+        endSuffix: ''
+    }
+
+    let alternateTimes = node.propertyType !== 'none';
+    if (alternateTimes && msg) {
+        //node.debug('alternate times enabled ' + node.propertyType + '.' + node.property);
+        try {
+            //evaluateNodeProperty(node.property, type, node, msg, callback)
+            let res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
+            alternateTimes = ((res == true) || (res == 'true'));
+        } catch (err) {
+            alternateTimes = false;
+            hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-property-type", {
+                type: node.propertyType,
+                value: node.property
+            }));
+            node.debug(JSON.stringify(err));
+        }
+    }
+
+    if (alternateTimes && config.startTimeAltType !== 'none') {
+        //node.debug('using alternate start time');
+        result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, (config.startOffsetAlt || 0) * (config.startOffsetAltMultiplier || 60));
+        result.startSuffix = '⎇ ';
+    } else {
+        //node.debug('using standard start time ' + alternateTimes + ' - ' + config.startTimeAltType);
+        result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, (config.startOffset || 0) * (config.startOffsetMultiplier || 60));
+    }
+
+    if (alternateTimes && config.endTimeAltType !== 'none') {
+        //node.debug('using alternate end time');
+        result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, (config.endOffsetAlt || 0) * (config.endOffsetAltMultiplier || 60));
+        result.endSuffix = ' ⎇';
+    } else {
+        //node.debug('using standard end time ' + alternateTimes + ' - ' + config.startTimeAltType);
+        result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
+    }
+
+    node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
+    if (result.start.error) {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: result.start.error
+        });
+        throw new Error('Error get start time:' + result.start.error);
+    } else if (result.end.error) {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: result.end.error
+        });
+        throw new Error('Error get end time:' + result.end.error);
+    } else if (state && result.start.value && result.end.value) {
+        node.status({
+            fill: "yellow",
+            shape: "dot",
+            text: '⏲ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
+        });
+    } else {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: 'status not available'
+        });
+    }
+    return result;
+}
+
+module.exports = function(RED) {
     "use strict";
 
     function withinTimeSwitchNode(config) {
@@ -25,62 +99,8 @@ module.exports = function (RED) {
                 //this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
                 //this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
 
+                let result = calcWithinTimes(this, msg, config, false);
                 let now = new Date();
-                let start;
-                let end;
-                let alternateTimes = this.propertyType !== 'none';
-                if (alternateTimes) {
-                    //this.debug('alternate times enabled ' + this.propertyType + '.' + this.property);
-                    try {
-                        //evaluateNodeProperty(this.property, type, node, msg, callback)
-                        let res = RED.util.evaluateNodeProperty(this.property, this.propertyType, node, msg);
-                        alternateTimes = ((res == true) || (res == 'true'));
-                    } catch (err) {
-                        alternateTimes = false;
-                        hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-property-type", {
-                            type: this.propertyType,
-                            value: this.property
-                        }));
-                        node.debug(JSON.stringify(err));
-                    }
-                }
-
-                let startSuffix = '';
-                if (alternateTimes && config.startTimeAltType !== 'none') {
-                    //this.debug('using alternate start time');
-                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeAltType, config.startTimeAlt, (config.startOffsetAlt || 0) * (config.startOffsetAltMultiplier || 60));
-                    startSuffix = '⎇⏴ ';
-                } else {
-                    //this.debug('using standard start time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    start = node.positionConfig.getTimeProp(this, msg, config.startTimeType, config.startTime, (config.startOffset || 0) * (config.startOffsetMultiplier || 60));
-                }
-
-                let endSuffix = '';
-                if (alternateTimes && config.endTimeAltType !== 'none') {
-                    //this.debug('using alternate end time');
-                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeAltType, config.endTimeAlt, (config.endOffsetAlt || 0) * (config.endOffsetAltMultiplier || 60));
-                    endSuffix = ' ⏵⎇';
-                } else {
-                    //this.debug('using standard end time ' + alternateTimes + ' - ' + config.startTimeAltType);
-                    end = node.positionConfig.getTimeProp(this, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
-                }
-
-                if (start.error) {
-                    this.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: start.error
-                    });
-                    throw new Error('Error get start time:' + start.error);
-                }
-                if (end.error) {
-                    this.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: start.error
-                    });
-                    throw new Error('Error get end time:' + start.error);
-                }
 
                 if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
                     let dto = new Date(msg.ts);
@@ -88,9 +108,14 @@ module.exports = function (RED) {
                         now = dto;
                     }
                 }
-                //this.debug(start.value + ' - ' + now + ' - ' + end.value);
-                let startNr = hlp.getTimeNumber(start.value);
-                let endNr = hlp.getTimeNumber(end.value);
+
+                if (!result.start.value || !result.end.value) {
+                    throw new Error('Error can not calc time!');
+                }
+
+                //this.debug(result.start.value + ' - ' + now + ' - ' + result.end.value);
+                let startNr = hlp.getTimeNumber(result.start.value);
+                let endNr = hlp.getTimeNumber(result.end.value);
                 let cmpNow = hlp.getTimeNumber(now);
                 //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
 
@@ -100,7 +125,7 @@ module.exports = function (RED) {
                         this.status({
                             fill: "green",
                             shape: "dot",
-                            text: startSuffix + now.toLocaleString() + endSuffix
+                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
                         });
                         return null;
                     }
@@ -110,21 +135,27 @@ module.exports = function (RED) {
                         this.status({
                             fill: "green",
                             shape: "ring",
-                            text: startSuffix + now.toLocaleString() + endSuffix
+                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
                         });
                         return null;
                     }
                 }
-                this.status({
+                node.status({
                     fill: "yellow",
                     shape: "dot",
-                    text: now.toLocaleString() + startSuffix + endSuffix
+                    text: '⛔ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
                 });
                 this.send([null, msg]);
             } catch (err) {
                 hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
             }
         });
+
+        try {
+            let result = calcWithinTimes(this, null, config);
+        } catch (err) {
+            hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
+        }
     }
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);
 };
