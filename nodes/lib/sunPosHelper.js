@@ -18,7 +18,7 @@ module.exports = {
 };
 
 /*******************************************************************************************************/
-Date.prototype.addDays = function(days) {
+Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
@@ -143,7 +143,7 @@ function getTimeOfText(t, offset, next, days, date) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
                 (parseInt(matches[2]) || 0),
                 (parseInt(matches[3]) || 0), 0);
-                console.log(d);
+            //console.log(d);
         } else {
             return null;
         }
@@ -169,15 +169,15 @@ function getDateOfText(date, offset, next, days) {
 };
 /*******************************************************************************************************/
 function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
-    console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    //console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
     let d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
         if (matches) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
-                (parseInt(matches[2]) || 0)  + (tzOffset || 0),
+                (parseInt(matches[2]) || 0) + (tzOffset || 0),
                 (parseInt(matches[3]) || 0), 0);
-                console.log(d);
+            //console.log(d);
         } else {
             return null;
         }

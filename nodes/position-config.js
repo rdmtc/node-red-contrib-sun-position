@@ -58,7 +58,7 @@ const moonPhases = [{
     }
 ];
 
-Date.prototype.addDays = function(days) {
+Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
@@ -82,7 +82,7 @@ function nextday(days, daystart) {
     return dayx;
 }
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function positionConfigurationNode(n) {
@@ -351,6 +351,18 @@ module.exports = function(RED) {
 
             return result;
         }
+        /**************************************************************************************************************/
+        //sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
+        //{id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path}
+        /*
+        function sendDebug(msg) {
+            // don't put blank errors in sidebar (but do add to logs)
+            //if ((msg.msg === "") && (msg.hasOwnProperty("level")) && (msg.level === 20)) { return; }
+            msg = RED.util.encodeObject(msg, {
+                maxLength: debuglength
+            });
+            RED.comms.publish("debug", msg);
+        } /* */
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
             node.debug('sunTimesRefresh - calculate sun times');

@@ -6,7 +6,43 @@
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
-function calcWithinTimes(node, msg, config, state) {
+function setstate(node, result, status, statusObj) {
+    if (status > 255) {
+        return result;
+    }
+    if (result.start.error) {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: result.start.error
+        });
+        throw new Error('Error get start time:' + result.start.error);
+    } else if (result.end.error) {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: result.end.error
+        });
+        throw new Error('Error get end time:' + result.end.error);
+    } else if ((status & 2) && statusObj) {
+        node.status(statusObj);
+    } else if ((status & 1) && result.start.value && result.end.value) {
+        node.status({
+            fill: "yellow",
+            shape: "dot",
+            text: '⏲ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
+        });
+    } else {
+        node.status({});
+        /*node.status({
+            fill: "red",
+            shape: "dot",
+            text: 'status not available'
+        });*/
+    }
+}
+
+function calcWithinTimes(node, msg, config, noState) {
     let result = {
         start: {},
         end: {},
@@ -50,37 +86,10 @@ function calcWithinTimes(node, msg, config, state) {
     }
 
     node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
-    if (result.start.error) {
-        node.status({
-            fill: "red",
-            shape: "dot",
-            text: result.start.error
-        });
-        throw new Error('Error get start time:' + result.start.error);
-    } else if (result.end.error) {
-        node.status({
-            fill: "red",
-            shape: "dot",
-            text: result.end.error
-        });
-        throw new Error('Error get end time:' + result.end.error);
-    } else if (state && result.start.value && result.end.value) {
-        node.status({
-            fill: "yellow",
-            shape: "dot",
-            text: '⏲ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
-        });
-    } else {
-        node.status({
-            fill: "red",
-            shape: "dot",
-            text: 'status not available'
-        });
-    }
     return result;
 }
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function withinTimeSwitchNode(config) {
@@ -99,7 +108,7 @@ module.exports = function(RED) {
                 //this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
                 //this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
 
-                let result = calcWithinTimes(this, msg, config, false);
+                let result = calcWithinTimes(this, msg, config, true);
                 let now = new Date();
 
                 if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
@@ -118,11 +127,11 @@ module.exports = function(RED) {
                 let endNr = hlp.getTimeNumber(result.end.value);
                 let cmpNow = hlp.getTimeNumber(now);
                 //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
-
+                let status = (config.statusOut || 3);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow <= endNr) {
                         this.send([msg, null]);
-                        this.status({
+                        setstate(this, result, status, {
                             fill: "green",
                             shape: "dot",
                             text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
@@ -132,7 +141,7 @@ module.exports = function(RED) {
                 } else {
                     if (!(cmpNow > endNr && cmpNow < startNr)) {
                         this.send([msg, null]);
-                        this.status({
+                        setstate(this, result, status, {
                             fill: "green",
                             shape: "ring",
                             text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
@@ -140,7 +149,7 @@ module.exports = function(RED) {
                         return null;
                     }
                 }
-                node.status({
+                setstate(this, result, status, {
                     fill: "yellow",
                     shape: "dot",
                     text: '⛔ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
@@ -152,7 +161,9 @@ module.exports = function(RED) {
         });
 
         try {
-            let result = calcWithinTimes(this, null, config);
+            node.status({});
+            let result = calcWithinTimes(this, null, config, true);
+            setstate(this, result, (config.statusOut || 3));
         } catch (err) {
             hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
         }

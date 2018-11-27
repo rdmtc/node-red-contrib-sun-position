@@ -7,7 +7,7 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function timeInjectNode(config) {
@@ -177,7 +177,7 @@ module.exports = function(RED) {
             }
         }
 
-        this.on('close', function() {
+        this.on('close', function () {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -209,12 +209,12 @@ module.exports = function(RED) {
                         msg.payload = plValue;
                     }
                     node.send(msg);
-                } else if (plType === "typeSunCalc") {
+                } else if (plType === "pdsCalcData") {
                     msg.payload = this.positionConfig.getSunCalc(msg.ts);
-                } else if (plType === "typeMoonCalc") {
+                } else if (plType === "pdmCalcData") {
                     msg.payload = this.positionConfig.getMoonCalc(msg.ts);
                 } else {
-                    RED.util.evaluateNodeProperty(plValue, plType, this, msg, function(err, res) {
+                    RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
                         if (err) {
                             hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
                         } else {
@@ -231,7 +231,7 @@ module.exports = function(RED) {
 
         try {
             if (this.once) {
-                this.onceTimeout = setTimeout(function() {
+                this.onceTimeout = setTimeout(function () {
                     node.emit("input", {
                         type: 'once'
                     });

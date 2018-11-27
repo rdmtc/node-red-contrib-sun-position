@@ -58,11 +58,22 @@
     </div>
     <div class="form-row alternate-time alternate-time-end-offset hidden">
         <label for="node-input-endOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
-        <input id="node-input-endOffsetAlt"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
+        <input id="node-input-endOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
         <select style="width:100px" id="node-input-endOffsetAltMultiplier">
             <option value="1" data-i18n="within-time-switch.label.seconds"></option>
             <option value="60" data-i18n="within-time-switch.label.minutes"></option>
             <option value="3600" data-i18n="within-time-switch.label.hours"></option>
+        </select>
+    </div>
+    <hr>
+    <div class="form-row time-row">
+        <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
+        <select id="node-input-statusOut"  style="width:70%;" >
+            <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
+            <option value="1" data-i18n="within-time-switch.label.statusTime"></option>
+            <option value="2" data-i18n="within-time-switch.label.statusSend"></option>
+            <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
+            <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
         </select>
     </div>
     <hr>
@@ -270,6 +281,10 @@
                         ($("#node-input-endTimeAlt").typedInput('type') === 'none');
                 }
             },
+            statusOut: {
+                value: 3,
+                required: false
+            },
         },
         icon: 'switch.png',
         inputs: 1,
@@ -315,6 +330,11 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare: function () {
+            if (this.statusOut == "" || this.statusOut == undefined) {
+                this.statusOut = 3;
+                $("#node-input-statusOut").val(this.statusOut);
+            }
+
             $(".wt-offset-time").spinner({
                 max: 1439,
                 min: -1439
