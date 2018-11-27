@@ -1,12 +1,12 @@
 # node-red-contrib-sun-position for NodeRED
 
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/hypnos3/node-red-contrib-sun-position/graphs/commit-activity)
-[![GitHub version](https://badge.fury.io/gh/Hypnos3%2Fnode-red-contrib-sun-position.svg)](https://github.com/hypnos3/node-red-contrib-sun-position)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/graphs/commit-activity)
+[![GitHub version](https://badge.fury.io/gh/Hypnos3%2Fnode-red-contrib-sun-position.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-sun-position.svg)](http://badge.fury.io/js/node-red-contrib-sun-position)
-[![HitCount](http://hits.dwyl.io/hypnos3/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/hypnos3/node-red-contrib-sun-position)
-[![Dependencies Status](https://david-dm.org/hypnos3/node-red-contrib-sun-position/status.svg)](https://david-dm.org/hypnos3/node-red-contrib-sun-position)
+[![HitCount](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position)
+[![Dependencies Status](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position/status.svg)](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Issues](https://img.shields.io/github/issues/hypnos3/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/hypnos3/node-red-contrib-sun-position/issues)
+[![Issues](https://img.shields.io/github/issues/HM-RedMatic/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues)
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
@@ -353,7 +353,7 @@ The start and end time can have an offset. This is specified in seconds,minutes 
 ## Bugs and Feedback
 
 For bugs, questions and discussions please use the
-[GitHub Issues](https://github.com/Hypnos3/node-red-contrib-sun-position/issues).
+[GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
 
 ### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
@@ -374,4 +374,4 @@ specific language governing permissions and limitations under the License.
 
 ## Other
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/Hypnos3/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/HM-RedMatic/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
