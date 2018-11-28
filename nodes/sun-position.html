@@ -111,9 +111,11 @@
 }</pre>
      <h3>Tips</h3>
      <p>For home automation it can be useful to define the lower and higher position for example of the sun for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
-     <h3>References</h3>
+    <h3>References</h3>
     <ul>
-		<li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
     </ul>
     With friendly support by <b>agag</b>.
 </script>
@@ -172,18 +174,19 @@
         },
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1,
-        outputLabels: function(index) {
+        outputLabels: function (index) {
             if (index == 0) {
                 return ((this.topic) ? this.topic + ":" : "") + "sun-position";
             }
             var rule = this.rules[index - 1];
             if (rule) {
-                return getValueLabel(rule.valueLowType, rule.valueLow) + " & " + getValueLabel(rule.valueHighType, rule.valueHigh);
+                return getValueLabel(rule.valueLowType, rule.valueLow) + " & " + getValueLabel(rule.valueHighType,
+                    rule.valueHigh);
             }
         },
         icon: "sun.png", // saved in  icons/myicon.png - myicon.png
         color: "#F3B567",
-        label: function() {
+        label: function () {
             if (this.name) {
                 return this.name;
             }
@@ -194,11 +197,11 @@
 
             return "sun-position";
         },
-        labelStyle: function() {
+        labelStyle: function () {
             return this.name ? "node_label_italic" : "";
         },
         paletteLabel: "sun-position",
-        oneditprepare: function() {
+        oneditprepare: function () {
             var node = this;
 
             var outputCount = $("#node-input-outputs").val("{}");
@@ -217,7 +220,7 @@
             }
 
             $("#node-input-rule-container").css('min-height', '100px').css('min-width', '200px').editableList({
-                addItem: function(container, i, opt) {
+                addItem: function (container, i, opt) {
                     container.css({
                         overflow: 'hidden',
                         whiteSpace: 'nowrap'
@@ -265,7 +268,8 @@
                     var finalspan = $('<span/>', {
                         style: "float: right;margin-top: 6px;"
                     }).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
+                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
+                        '</span> ');
 
                     resizeRule(container);
                     btwnValueField.typedInput('value', rule.valueLow);
@@ -281,7 +285,7 @@
                     //console.log(currentOutputs);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
-                removeItem: function(opt) {
+                removeItem: function (opt) {
                     var currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
                     if (opt.hasOwnProperty('i')) {
                         currentOutputs[opt.i] = -1;
@@ -289,7 +293,7 @@
                         delete currentOutputs[opt._i];
                     }
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) {
+                    rules.each(function (i) {
                         $(this).find(".node-input-rule-index").html(i + 2);
                         var data = $(this).data('data');
                         currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
@@ -300,10 +304,10 @@
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 resizeItem: resizeRule,
-                sortItems: function(rules) {
+                sortItems: function (rules) {
                     var currentOutputs = JSON.parse(outputCount.val() || "{}");
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) {
+                    rules.each(function (i) {
                         $(this).find(".node-input-rule-index").html(i + 2);
                         var data = $(this).data('data');
                         currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
@@ -326,13 +330,13 @@
                 });
             }
         },
-        oneditsave: function() {
+        oneditsave: function () {
             var rules = $("#node-input-rule-container").editableList('items');
             var ruleset;
             var node = this;
 
             node.rules = [];
-            rules.each(function(i) {
+            rules.each(function (i) {
                 var ruleData = $(this).data('data');
                 var rule = $(this);
                 var r = {};
@@ -352,7 +356,7 @@
             $("#node-input-outputs").val(JSON.stringify(currentOutputs));
             //outputCount.val(JSON.stringify(currentOutputs));
         },
-        oneditresize: function(size) {
+        oneditresize: function (size) {
             var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
             var height = size.height;
             for (var i = 0; i < rows.size(); i++) {

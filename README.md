@@ -1,10 +1,15 @@
 # node-red-contrib-sun-position for NodeRED
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/graphs/commit-activity)
+
 [![npm version](https://img.shields.io/npm/v/node-red-contrib-sun-position.svg)](https://www.npmjs.com/package/node-red-contrib-sun-position)
+
 [![HitCount](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position)
+
 [![Dependencies Status](https://img.shields.io/david/HM-RedMatic/node-red-contrib-sun-position.svg)](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position)
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 [![Issues](https://img.shields.io/github/issues/HM-RedMatic/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues)
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
@@ -275,6 +280,11 @@ Injects a message into a flow either manually or at timestamps which can also de
 - **Offset** An optional property which is only available if an time is choosen. The offset can be a positive or negative and defines a time offset to the choosen time.
 - **Days** An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.
 
+- **Property** _optional_ here can be defined a context property which must be of tyxpe boolean. If this property is true alternate time will be used.
+- **Alternate time** _optional_ defines an alternate start time which will be used if the property is true. This can be used for different times for example of holidays/weekend.
+
+- **Additional Inject on Start** If this checkbox is set the inject node dcan emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be usefull for initializing any flow.
+
 #### Node Input
 
 It has only a button as input, where the massage could injected into a flow manually.
@@ -301,6 +311,15 @@ A simple node that routes messages depending on the time. If the current time fa
 - **Property** _optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.
 - **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
 - **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
+
+- **Status** here can be adjusted which status should be displayed under the node.
+  - this has the following posibilities:
+    - **none** - no status will be displayed - **only errors** - if an error occures it will be displayed
+      ![within-time-status-error](images/within-time-status-error.png?raw=true) - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
+      ![within-time-status-time](images/within-time-status-time.png?raw=true) - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
+      ![within-time-status-error](images/within-time-status-message-block.png?raw=true)
+      if the message was pass throught the timestamp of this message will be shown.
+      ![within-time-status-send](images/within-time-status-message-send.png?raw=true) - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
 
 ### Times definitions
 
