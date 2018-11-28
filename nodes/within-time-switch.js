@@ -15,19 +15,9 @@ module.exports = function (RED) {
             return result;
         }
         if (result.start.error) {
-            node.status({
-                fill: "red",
-                shape: "dot",
-                text: result.start.error
-            });
-            throw new Error('Error get start time:' + result.start.error);
+            hlp.errorHandler(node, new Error('Error get start time:' + result.start.error), RED._("within-time-switch.errors.error-text"), result.start.error);
         } else if (result.end.error) {
-            node.status({
-                fill: "red",
-                shape: "dot",
-                text: result.end.error
-            });
-            throw new Error('Error get end time:' + result.end.error);
+            hlp.errorHandler(node, new Error('Error get end time:' + result.end.error), RED._("within-time-switch.errors.error-text"), result.end.error);
         } else if ((status & 2) && statusObj) {
             node.status(statusObj);
         } else if ((status & 1) && result.start.value && result.end.value) {
