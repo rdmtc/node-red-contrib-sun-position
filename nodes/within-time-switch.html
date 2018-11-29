@@ -36,14 +36,14 @@
     </div>
     <div class="form-row"/>
     <div class="form-row">
-        <label ><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.property"></span></label>
-        <input type="text" id="node-input-property" style="width: 70%"/>
+        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
+        <input type="text" id="node-input-propertyStart" style="width: 70%"/>
     </div>
-    <div class="form-row alternate-time alternate-time-start hidden">
+    <div class="form-row alternate-time-start hidden">
         <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
         <input type="text" id="node-input-startTimeAlt" style="width: 70%"/>
     </div>
-    <div class="form-row alternate-time alternate-time-start-offset hidden">
+    <div class="form-row alternate-time-start-offset hidden">
         <label for="node-input-startOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
         <input id="node-input-startOffsetAlt"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
         <select style="width:100px" id="node-input-startOffsetAltMultiplier">
@@ -52,11 +52,15 @@
             <option value="3600" data-i18n="within-time-switch.label.hours"></option>
         </select>
     </div>
-    <div class="form-row alternate-time alternate-time-end hidden">
+    <div class="form-row">
+        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
+        <input type="text" id="node-input-propertyEnd" style="width: 70%"/>
+    </div>
+    <div class="form-row alternate-time-end hidden">
         <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
         <input type="text" id="node-input-endTimeAlt" style="width: 70%"/>
     </div>
-    <div class="form-row alternate-time alternate-time-end-offset hidden">
+    <div class="form-row alternate-time-end-offset hidden">
         <label for="node-input-endOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
         <input id="node-input-endOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
         <select style="width:100px" id="node-input-endOffsetAltMultiplier">
@@ -216,19 +220,19 @@
                 required: true,
                 validate: RED.validators.number()
             },
-            property: {
+            propertyStart: {
                 value: "",
                 required: false,
-                validate: RED.validators.typedInput("propertyType")
+                validate: RED.validators.typedInput("propertyStartType")
             },
-            propertyType: {
+            propertyStartType: {
                 value: "none"
             },
             startTimeAlt: {
                 value: '',
                 required: false,
                 validate: function (v) {
-                    return RED.validators.typedInput("startTimeAltType")(v) || ($("#node-input-property").typedInput(
+                    return RED.validators.typedInput("startTimeAltType")(v) || ($("#node-input-propertyStart").typedInput(
                         'type') === 'none');
                 }
             },
@@ -240,7 +244,7 @@
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        ($("#node-input-propertyStart").typedInput('type') === 'none') ||
                         ($("#node-input-startTimeAlt").typedInput('type') === 'none');
                 }
             },
@@ -249,15 +253,23 @@
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        ($("#node-input-propertyStart").typedInput('type') === 'none') ||
                         ($("#node-input-startTimeAlt").typedInput('type') === 'none');
                 }
+            },
+            propertyEnd: {
+                value: "",
+                required: false,
+                validate: RED.validators.typedInput("propertyEndType")
+            },
+            propertyEndType: {
+                value: "none"
             },
             endTimeAlt: {
                 value: '',
                 required: false,
                 validate: function (v) {
-                    return RED.validators.typedInput("endTimeAltType")(v) || ($("#node-input-property").typedInput(
+                    return RED.validators.typedInput("endTimeAltType")(v) || ($("#node-input-propertyEnd").typedInput(
                         'type') === 'none');
                 }
             },
@@ -269,7 +281,7 @@
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        ($("#node-input-propertyEnd").typedInput('type') === 'none') ||
                         ($("#node-input-endTimeAlt").typedInput('type') === 'none');
                 }
             },
@@ -278,7 +290,7 @@
                 required: true,
                 validate: function (v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-property").typedInput('type') === 'none') ||
+                        ($("#node-input-propertyEnd").typedInput('type') === 'none') ||
                         ($("#node-input-endTimeAlt").typedInput('type') === 'none');
                 }
             },
@@ -306,8 +318,8 @@
                 }
                 return value + suffix;
             }
-            const getConcatId = (type1, value1, offset1, type2, value2, offset2) => {
-                if (this.propertyType !== 'none' && this.propertyType !== '' && value2) {
+            const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
+                if (property !== 'none' && property !== '' && value2) {
                     return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
                 }
                 return getId(type1, value1);
@@ -317,11 +329,11 @@
                 return this.name;
             } else if (this.startTime && this.endTime) {
 
-                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.startTimeAltType,
-                        this.startTimeAlt, this.startOffsetAlt) +
+                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
+                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
                     ' - ' +
-                    getConcatId(this.endTimeType, this.endTime, this.endOffset, this.endTimeAltType,
-                        this.endTimeAlt, this.endTimeAltOffset);
+                    getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
+                        this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset);
             }
             return 'within-time';
         },
@@ -369,17 +381,30 @@
                 icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
                 options: ['rise', 'set']
             };
-            $("#node-input-property").typedInput({
-                default: this.propertyType || 'global',
+            $("#node-input-propertyStart").typedInput({
+                default: this.propertyStartType || 'none',
                 types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata']
             });
-            $("#node-input-property").on('change', function (type, value) {
-                if ($("#node-input-property").typedInput('type') === 'none') {
-                    $(".alternate-time").hide();
+            $("#node-input-propertyEnd").typedInput({
+                default: this.propertyEndType || 'none',
+                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata']
+            });
+            $("#node-input-propertyStart").on('change', function (type, value) {
+                if ($("#node-input-propertyStart").typedInput('type') === 'none') {
+                    $(".alternate-time-start").hide();
+                    $(".alternate-time-start-offset").hide();
                 } else {
-                    $(".alternate-time").show();
+                    $(".alternate-time-start").show();
                 }
                 $("#node-input-startTimeAlt").change();
+            });
+            $("#node-input-propertyEnd").on('change', function (type, value) {
+                if ($("#node-input-propertyEnd").typedInput('type') === 'none') {
+                    $(".alternate-time-end").hide();
+                    $(".alternate-time-end-offset").hide();
+                } else {
+                    $(".alternate-time-end").show();
+                }
                 $("#node-input-endTimeAlt").change();
             });
             $("#node-input-startTime").typedInput({
@@ -396,7 +421,7 @@
             });
             $("#node-input-startTimeAlt").on('change', function (type, value) {
                 if (($("#node-input-startTimeAlt").typedInput('type') === 'none') ||
-                    ($("#node-input-property").typedInput('type') === 'none')) {
+                    ($("#node-input-propertyStart").typedInput('type') === 'none')) {
                     $(".alternate-time-start-offset").hide();
                 } else {
                     $(".alternate-time-start-offset").show();
@@ -408,7 +433,7 @@
             });
             $("#node-input-endTimeAlt").on('change', function (type, value) {
                 if (($("#node-input-endTimeAlt").typedInput('type') === 'none') ||
-                    ($("#node-input-property").typedInput('type') === 'none')) {
+                    ($("#node-input-propertyEnd").typedInput('type') === 'none')) {
                     $(".alternate-time-end-offset").hide();
                 } else {
                     $(".alternate-time-end-offset").show();
@@ -416,10 +441,12 @@
             });
             //$("#node-input-startTimeAlt").change();
             //$("#node-input-endTimeAlt").change();
-            $("#node-input-property").change();
+            $("#node-input-propertyStart").change();
+            $("#node-input-propertyEnd").change();
         },
         oneditsave: function () {
-            this.propertyType = $("#node-input-property").typedInput('type');
+            this.propertyStartType = $("#node-input-propertyStart").typedInput('type');
+            this.propertyEndType = $("#node-input-propertyEnd").typedInput('type');
             this.startTimeType = $("#node-input-startTime").typedInput('type');
             this.endTimeType = $("#node-input-endTime").typedInput('type');
             this.startTimeAltType = $("#node-input-startTimeAlt").typedInput('type');
