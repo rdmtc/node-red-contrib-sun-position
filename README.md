@@ -389,3 +389,9 @@ specific language governing permissions and limitations under the License.
 ## Other
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/HM-RedMatic/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
+
+this node is published also here:
+Npm pakage:
+https://www.npmjs.com/package/node-red-contrib-sun-position
+Node-Red:
+https://flows.nodered.org/node/node-red-contrib-sun-position
