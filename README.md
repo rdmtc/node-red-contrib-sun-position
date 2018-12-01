@@ -21,11 +21,17 @@ This node are for getting sun and moon position or to control a flow by sun or m
 - [Quick Start](#quick-start)
 - [Implemented Nodes](#implemented-nodes)
   - [sun-position](#sun-position)
-    - [Node settings](#node-settings) + [Node Input](#node-input) + [Node Output](#node-output)
+    - [Node settings](#node-settings)
+    - [Node Input](#node-input)
+    - [Node Output](#node-output)
   - [moon-position](#moon-position)
-    - [Node settings](#node-settings-1) + [Node Input](#node-input-1) + [Node Output](#node-output-1)
+    - [Node settings](#node-settings-1)
+    - [Node Input](#node-input-1)
+    - [Node Output](#node-output-1)
   - [time-inject](#time-inject)
-    - [Node settings](#node-settings-2) + [Node Input](#node-input-2) + [Node Output](#node-output-2)
+    - [Node settings](#node-settings-2)
+    - [Node Input](#node-input-2)
+    - [Node Output](#node-output-2)
   - [within-time](#within-time)
     - [Node settings](#node-settings-3)
   - [times definitions](#times-definitions)
@@ -93,57 +99,31 @@ The Input is for triggering the calculation. If limits are defined the input mes
 
 ```
 	{
-
 		"lastUpdate": "2018-11-11T11:11:11.111Z",
-
 		"latitude": "18.473782",
-
 		"longitude": "-34.357051",
-
 		"angleType": "deg",
-
 		"azimuth": 117.72942647370792,
-
 		"altitude": 20.984193272523992,
-
 		"times": {
-
 			"solarNoon": "2018-11-11T14:02:48.928Z",
-
 			"nadir": "2018-11-11T02:02:48.928Z",
-
 			"sunrise": "2018-11-11T08:23:11.190Z",
-
 			"sunset": "2018-11-11T19:42:26.666Z",
-
 			"sunriseEnd": "2018-11-11T08:25:33.165Z",
-
 			"sunsetStart": "2018-11-11T19:40:04.691Z",
-
 			"dawn": "2018-11-11T08:00:22.165Z",
-
 			"dusk": "2018-11-11T20:05:15.692Z",
-
 			"nauticalDawn": "2018-11-11T07:34:06.749Z",
-
 			"nauticalDusk": "2018-11-11T20:31:31.107Z",
-
 			"nightEnd": "2018-11-11T07:08:03.781Z",
-
 			"night": "2018-11-11T20:57:34.075Z",
-
 			"goldenHourEnd": "2018-11-11T08:53:43.879Z",
-
 			"goldenHour": "2018-11-11T19:11:53.977Z"
-
 		},
-
 		"pos": [],
-
 		"posChanged": false
-
 	}
-
 ```
 
 - **second output** to **... output** if limits for azimuth are defined the incomming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
@@ -192,67 +172,36 @@ The node calculates the current sun position on any input message.
 
 ```
 	{
-
 		"lastUpdate": "2018-11-11T11:11:11.111Z",
-
 		"latitude": "18.473782",
-
 		"longitude": "-34.357051",
-
 		"angleType": "deg",
-
 		"azimuth": 108.71205459404247,
-
 		"altitude": -9.578482237780767,
-
 		"distance": 400811.8001636167,
-
 		"parallacticAngle": -73.92702172116152,
-
 		"illumination": {
-
 			"angle": -94.27663428960696,
-
 			"fraction": 0.14981886026806135,
-
 			"phase": {
-
 				"emoji": "🌒",
-
 				"code": ":waxing_crescent_moon:",
-
 				"name": "Waxing Crescent",
-
 				"weight": 6.3825,
-
 				"value": 0.12651089732280724,
-
 				"angle": 45.54392303621061
-
 			},
-
 			"zenithAngle": -20.349612568445437
-
 		},
-
 		"times": {
-
 			"rise": "2018-11-11T11:44:22.877Z",
-
 			"set": "2018-11-11T23:10:07.389Z",
-
 			"alwaysUp": false,
-
 			"alwaysDown": false
-
 		},
-
 		"pos": [],
-
 		"posChanged": false
-
 	}
-
 ```
 
 - **second output** to **... output** if limits for azimuth are defined the incomming message will send to this output. It adds a `msg.payload.posChanged` property of type _boolean_ which is true if the limit has changed since the last azimuth calculation.
