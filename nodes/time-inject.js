@@ -7,7 +7,7 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function (RED) {
+module.exports = function(RED) {
     "use strict";
 
     function timeInjectNode(config) {
@@ -55,9 +55,10 @@ module.exports = function (RED) {
             return millis;
         }
 
-        function doCreateTimeout(node) {
+        function doCreateTimeout(node, msg) {
             let errorStatus = '';
             let fixTimeStamp = false;
+            let isAltFirst = false;
             node.nextTime = null;
             node.nextTimeAlt = null;
 
@@ -104,7 +105,6 @@ module.exports = function (RED) {
                 if (millis > 500) {
                     node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                     let isAlt = (node.nextTimeAlt);
-                    let isAltFirst = false;
                     if (isAlt) {
                         let millisAlt = node.getScheduleTime(node.nextTimeAlt);
                         if (millisAlt < millis) {
@@ -118,8 +118,8 @@ module.exports = function (RED) {
                             let needsRecalc = false;
                             try {
                                 let res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                                let alternateTimes = ((res == true) || (res == 'true'));
-                                needsRecalc = (isAltFirst && !alternateTimes) || (!isAltFirst && alternateTimes);
+                                let useAlternateTime = ((res == true) || (res == 'true'));
+                                needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                             } catch (err) {
                                 needsRecalc = isAltFirst;
                                 hlp.errorHandler(node, err, RED._("time-inject.errors.invalid-property-type", {
@@ -130,7 +130,7 @@ module.exports = function (RED) {
                             }
                             if (needsRecalc) {
                                 try {
-                                    doCreateTimeout(node);
+                                    doCreateTimeout(node, msg);
                                 } catch (err) {
                                     hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
                                 }
@@ -156,6 +156,20 @@ module.exports = function (RED) {
                     shape: "dot",
                     text: errorStatus
                 });
+            } else if (node.nextTimeAlt && node.timeOutObj) {
+                if (isAltFirst) {
+                    node.status({
+                        fill: "green",
+                        shape: "ring",
+                        text: node.nextTimeAlt.toLocaleString() + ' / ' + node.nextTime.toLocaleTimeString()
+                    });
+                } else {
+                    node.status({
+                        fill: "green",
+                        shape: "dot",
+                        text: node.nextTime.toLocaleString() + ' / ' + node.nextTimeAlt.toLocaleTimeString()
+                    });
+                }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
                     fill: "green",
@@ -169,7 +183,7 @@ module.exports = function (RED) {
             if (!fixTimeStamp && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
                     node.debug('retrigger timecalc');
-                    doCreateTimeout(node);
+                    doCreateTimeout(node, msg);
                 }, node.recalcTime);
             } else if (fixTimeStamp && node.intervalObj) {
                 clearInterval(node.intervalObj);
@@ -177,7 +191,7 @@ module.exports = function (RED) {
             }
         }
 
-        this.on('close', function () {
+        this.on('close', function() {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -189,7 +203,7 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                doCreateTimeout(node);
+                doCreateTimeout(node, msg);
                 //node.debug('input ' + JSON.stringify(msg));
                 this.lastInputType = msg.type;
                 let plType = 'date';
@@ -214,7 +228,7 @@ module.exports = function (RED) {
                 } else if (plType === "pdmCalcData") {
                     msg.payload = this.positionConfig.getMoonCalc(msg.ts);
                 } else {
-                    RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
+                    RED.util.evaluateNodeProperty(plValue, plType, this, msg, function(err, res) {
                         if (err) {
                             hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
                         } else {
@@ -231,14 +245,14 @@ module.exports = function (RED) {
 
         try {
             if (this.once) {
-                this.onceTimeout = setTimeout(function () {
+                this.onceTimeout = setTimeout(function() {
                     node.emit("input", {
                         type: 'once'
                     });
-                    doCreateTimeout(node);
+                    doCreateTimeout(node, undefined);
                 }, this.onceDelay);
             } else {
-                doCreateTimeout(node);
+                doCreateTimeout(node, undefined);
             }
         } catch (err) {
             hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
