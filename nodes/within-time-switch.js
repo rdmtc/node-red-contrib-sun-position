@@ -37,66 +37,67 @@ module.exports = function (RED) {
     }
 
     function calcWithinTimes(node, msg, config, noState) {
+        //node.debug('calcWithinTimes');
         let result = {
             start: {},
             end: {},
             startSuffix: '',
-            endSuffix: ''
+            endSuffix: '',
+            altStartTime : (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
+            altEndTime : (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'))
         }
 
-        let alternateStartTime = (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg'));
-        if (alternateStartTime) {
-            node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.property);
+        if (result.altStartTime) {
+            //node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
             try {
                 //evaluateNodeProperty(node.property, type, node, msg, callback)
-                let res = RED.util.evaluateNodeProperty(node.property, node.propertyStartType, node, msg);
-                alternateStartTime = ((res == true) || (res == 'true'));
+                let res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
+                result.altStartTime = ((res == true) || (res == 'true'));
             } catch (err) {
-                alternateStartTime = false;
+                result.altStartTime = false;
                 hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-propertyStart-type", {
                     type: node.propertyStartType,
-                    value: node.property
+                    value: node.propertyStart
                 }));
                 node.debug(JSON.stringify(err));
             }
         }
 
-        let alternateEndTime = (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'));
-        if (alternateEndTime) {
-            node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.property);
+        if (result.altEndTime) {
+            //node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.propertyEnd);
             try {
                 //evaluateNodeProperty(node.property, type, node, msg, callback)
-                let res = RED.util.evaluateNodeProperty(node.property, node.propertyEndType, node, msg);
-                alternateEndTime = ((res == true) || (res == 'true'));
+                let res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
+                result.altEndTime = ((res == true) || (res == 'true'));
             } catch (err) {
-                alternateEndTime = false;
+                result.altEndTime = false;
                 hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-propertyEnd-type", {
                     type: node.propertyEndType,
-                    value: node.property
+                    value: node.propertyEnd
                 }));
                 node.debug(JSON.stringify(err));
             }
         }
 
-        if (alternateStartTime && config.startTimeAltType !== 'none') {
-            node.debug('using alternate start time ' + alternateStartTime + ' - ' + config.startTimeAltType);
+        if (result.altStartTime && config.startTimeAltType !== 'none') {
+            //node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
             result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, (config.startOffsetAlt || 0) * (config.startOffsetAltMultiplier || 60));
             result.startSuffix = '⎇ ';
         } else {
-            node.debug('using standard start time ' + alternateStartTime + ' - ' + config.startTimeAltType);
+            //node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
             result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, (config.startOffset || 0) * (config.startOffsetMultiplier || 60));
         }
 
-        if (alternateEndTime && config.endTimeAltType !== 'none') {
-            node.debug('using alternate end time ' + alternateEndTime + ' - ' + config.startTimeAltType);
+        if (result.altEndTime && config.endTimeAltType !== 'none') {
+            //node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
             result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, (config.endOffsetAlt || 0) * (config.endOffsetAltMultiplier || 60));
             result.endSuffix = ' ⎇';
         } else {
-            node.debug('using standard end time ' + alternateEndTime + ' - ' + config.startTimeAltType);
+            //node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
             result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
         }
 
-        node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
+        //node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
         return result;
     }
 
@@ -106,7 +107,8 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         //this.debug('initialize withinTimeSwitchNode ' + JSON.stringify(config));
 
-        this.property = config.property;
+        this.propertyStart = config.propertyStart || "";
+        this.propertyEnd = config.propertyEnd || "";
         this.propertyStartType = config.propertyStartType || "none";
         this.propertyEndType = config.propertyEndType || "none";
         var node = this;

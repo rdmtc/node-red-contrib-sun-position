@@ -97,7 +97,7 @@ module.exports = function (RED) {
             if (node.nextTime && !errorStatus) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
                     node.debug(node.nextTime);
-                    hlp.errorHandler(this, err, 'Invalid time format', 'internal error!');
+                    hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
                     return;
                 }
                 let millis = node.getScheduleTime(node.nextTime);
