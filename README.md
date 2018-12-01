@@ -268,11 +268,14 @@ A simple node that routes messages depending on the time. If the current time fa
 - **Status** here can be adjusted which status should be displayed under the node.
   - this has the following posibilities:
     - **none** - no status will be displayed - **only errors** - if an error occures it will be displayed
-      ![within-time-status-error](images/within-time-status-error.png?raw=true) - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
-      ![within-time-status-time](images/within-time-status-time.png?raw=true) - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
+      ![within-time-status-error](images/within-time-status-error.png?raw=true)
+    - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
+      ![within-time-status-time](images/within-time-status-time.png?raw=true)
+    - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
       ![within-time-status-error](images/within-time-status-message-block.png?raw=true)
       if the message was pass throught the timestamp of this message will be shown.
-      ![within-time-status-send](images/within-time-status-message-send.png?raw=true) - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
+      ![within-time-status-send](images/within-time-status-message-send.png?raw=true)
+    - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
 
 ### Times definitions
 
