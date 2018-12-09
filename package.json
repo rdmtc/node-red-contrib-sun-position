@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-sun-position",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "NodeRED nodes to get sun and moon position",
     "main": "none",
     "scripts": {
@@ -46,7 +46,7 @@
         "url": "https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues"
     },
     "dependencies": {
-        "suncalc": "^1.8.0"
+        "suncalc2": "^1.8.1"
     },
     "node-red": {
         "nodes": {
