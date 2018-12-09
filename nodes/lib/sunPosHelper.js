@@ -9,6 +9,7 @@ module.exports = {
     errorHandler,
     compareAzimuth,
     calcTimeValue,
+    calcTimeValueUTC,
     getTimeOfText,
     getTimeOfTextUTC,
     getDateOfText,
@@ -104,6 +105,43 @@ function calcTimeValue(d, offset, next, days) {
     }
     if (next && !isNaN(next)) {
         let now = new Date();
+        d.setMilliseconds(0);
+        now.setMilliseconds(600); //security
+        let cmp = now.getTime();
+        if (d.getTime() <= cmp) {
+            d = d.addDays(Number(next));
+        }
+    }
+    if (days && (days !== '*') && (days !== '')) {
+        let daystart = d.getDay();
+        let dayx = 0;
+        let daypos = daystart;
+        while (days.indexOf(daypos) === -1) {
+            dayx += 1;
+            if ((daystart + dayx) > 6) {
+                daypos = (daystart * -1) + dayx - 1;
+            } else {
+                daypos = daystart + dayx;
+            }
+            if (dayx > 6) {
+                dayx = -1;
+                break;
+            }
+        }
+        if (dayx > 0) {
+            d = d.addDays(dayx);
+        }
+    }
+    return d;
+}
+/*******************************************************************************************************/
+function calcTimeValueUTC(d, offset, next, days) {
+    //console.debug('calcTimeValueUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    if (offset && !isNaN(offset) && offset !== 0) {
+        d = new Date(d.getTime() + offset * 1000); //- does not work
+    }
+    if (next && !isNaN(next)) {
+        let now = new Date();
         d.setUTCMilliseconds(0);
         now.setUTCMilliseconds(600); //security
         let cmp = now.getTime();
@@ -181,7 +219,7 @@ function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
         } else {
             return null;
         }
-        return calcTimeValue(d, offset, next, days)
+        return calcTimeValueUTC(d, offset, next, days)
     }
     return null;
 };
@@ -192,7 +230,7 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
     }
     let dto = new Date(date);
     if (dto !== "Invalid Date" && !isNaN(dto)) {
-        return calcTimeValue(dto, offset, next, days);
+        return calcTimeValueUTC(dto, offset, next, days);
     } else {
         let result = getTimeOfTextUTC(String(date), tzOffset, offset, next, days);
         if (result != null) {

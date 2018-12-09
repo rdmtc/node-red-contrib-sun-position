@@ -428,8 +428,10 @@
                         suffix += " [Mo-Fr]"; //'👷'
                     } else if (days === "1,2,3,4") {
                         suffix += " [Mo-Th]";
+                    } else if (days === "5,6,0") {
+                        suffix += " [Fr-Su]";
                     } else if (days === "6,0") {
-                        suffix += " [WE]";
+                        suffix += " [Sa+Su]";
                     } else {
                         let dayarr = [];
                         if (days.indexOf("1") >= 0) {
