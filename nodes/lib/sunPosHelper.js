@@ -3,7 +3,7 @@
  *********************************************/
 "use strict";
 
-const sunCalc = require('suncalc2');
+//const sunCalc = require('suncalc2');
 
 module.exports = {
     errorHandler,

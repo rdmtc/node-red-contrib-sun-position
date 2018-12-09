@@ -3,7 +3,7 @@
  *********************************************/
 "use strict";
 
-const sunCalc = require('suncalc');
+const sunCalc = require('suncalc2');
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
