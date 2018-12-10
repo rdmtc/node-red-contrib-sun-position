@@ -153,76 +153,88 @@
 
   <h3>Sun times:</h3>
   <p>
-  <table>
-      <thead>
-      <tr>
-      <th>Time</th>
-      <th>Description</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr>
-      <td><code>00:00 ... 23:59</code></td>
-      <td>24hr time</td>
-      </tr>
-      <tr>
-      <td><code>sunrise</code></td>
-      <td>sunrise (top edge of the sun appears on the horizon)</td>
-      </tr>
-      <tr>
-      <td><code>sunriseEnd</code></td>
-      <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
-      </tr>
-      <tr>
-      <td><code>goldenHourEnd</code></td>
-      <td>morning golden hour (soft light, best time for photography) ends</td>
-      </tr>
-      <tr>
-      <td><code>solarNoon</code></td>
-      <td>solar noon (sun is in the highest position)</td>
-      </tr>
-      <tr>
-      <td><code>goldenHour</code></td>
-      <td>evening golden hour starts</td>
-      </tr>
-      <tr>
-      <td><code>sunsetStart</code></td>
-      <td>sunset starts (bottom edge of the sun touches the horizon)</td>
-      </tr>
-      <tr>
-      <td><code>sunset</code></td>
-      <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
-      </tr>
-      <tr>
-      <td><code>dusk</code></td>
-      <td>dusk (evening nautical twilight starts)</td>
-      </tr>
-      <tr>
-      <td><code>nauticalDusk</code></td>
-      <td>nautical dusk (evening astronomical twilight starts)</td>
-      </tr>
-      <tr>
-      <td><code>night</code></td>
-      <td>night starts (dark enough for astronomical observations)</td>
-      </tr>
-      <tr>
-      <td><code>nadir</code></td>
-      <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
-      </tr>
-      <tr>
-      <td><code>nightEnd</code></td>
-      <td>night ends (morning astronomical twilight starts)</td>
-      </tr>
-      <tr>
-      <td><code>nauticalDawn</code></td>
-      <td>nautical dawn (morning nautical twilight starts)</td>
-      </tr>
-      <tr>
-      <td><code>dawn</code></td>
-      <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
-      </tr>
-      </tbody>
-      </table>
+    <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td><code>nightEnd</code></td>
+        <td>night ends (morning astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>amateurDawn</code></td>
+        <td>amateur astronomical dawn (sun at 12° before sunrise)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDawn</code></td>
+        <td>nautical dawn (morning nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>dawn</code></td>
+        <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourRise</code></td>
+        <td>blue Hour start (time for special photography photos starts)</td>
+        </tr>
+        <tr>
+        <td><code>sunrise</code></td>
+        <td>sunrise (top edge of the sun appears on the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunriseEnd</code></td>
+        <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHourEnd</code></td>
+        <td>morning golden hour (soft light, best time for photography) ends</td>
+        </tr>
+        <tr>
+        <td><code>solarNoon</code></td>
+        <td>solar noon (sun is in the highest position)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHour</code></td>
+        <td>evening golden hour starts</td>
+        </tr>
+        <tr>
+        <td><code>sunsetStart</code></td>
+        <td>sunset starts (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunset</code></td>
+        <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourSet</code></td>
+        <td>blue Hour start (time for special photography photos ends)</td>
+        </tr>
+        <tr>
+        <td><code>dusk</code></td>
+        <td>dusk (evening nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDusk</code></td>
+        <td>nautical dusk (evening astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>amateurDusk</code></td>
+        <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
+        </tr>
+        <tr>
+        <td><code>night</code></td>
+        <td>night starts (dark enough for astronomical observations)</td>
+        </tr>
+        <tr>
+        <td><code>nadir</code></td>
+        <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
+        </tr>
+        </tbody>
+        </table>
   </p>
   <p>It can also be configured to inject once each time the flows are started.</p>
   <h3>References</h3>

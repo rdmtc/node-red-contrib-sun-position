@@ -62,22 +62,24 @@
                 the sun times as object
                 <dt>times.sunrise <span class="property-type">Date</span></dt>
                 <dd>sunrise (top edge of the sun appears on the horizon)</dd>
-                <dt>times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
-
-                <dt>times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
-                <dt>times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
-                <dt>times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
-                <dt>times.goldenHour <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
-                <dt>times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
-                <dt>times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
-                <dt>times.dusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
-                <dt>times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
-                <dt>times.night <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
-                <dt>times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
-                <dt>times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
-                <dt>times.dawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
-
-
+                <dt>msg.payload.times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
+                <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
+                <dt>msg.payload.times.dawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourRise <span class="property-type">Date</span></dt><dd>blue Hour start (time for special photography photos starts)</dd>
+                <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
+                <dt>msg.payload.times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
+                <dt>msg.payload.times.goldenHour <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
+                <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourSet <span class="property-type">Date</span></dt><dd>blue Hour start (time for special photography photos ends)</dd>
+                <dt>msg.payload.times.dusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
+                <dt>msg.payload.times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDusk <span class="property-type">Date</span></dt><dd>amateur astronomical dusk (sun at 12° after sunrise)</dd>
+                <dt>msg.payload.times.night <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
+                <dt>msg.payload.times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
             </dd>
             <dt>pos <span class="property-type">array of boolean</span></dt>
             <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
