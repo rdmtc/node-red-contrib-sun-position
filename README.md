@@ -86,11 +86,11 @@ The Input is for triggering the calculation. If limits are defined the input mes
   - `msg.payload.azimuth` the azimuth of the sun position relative to the given coordinates.
   - `msg.payload.altitude` the altitude/elevation of the sun position relative to the given coordinates.
   - `msg.payload.times` the sun times as object.
-    - `msg.payload.times.nightEnd` night ends (morning astronomical twilight starts)
+    - `msg.payload.times.astronomicalDawn` night ends (morning astronomical twilight starts)
     - `msg.payload.times.amateurDawn` amateur astronomical dawn (sun at 12° before sunrise)
     - `msg.payload.times.nauticalDawn` nautical dawn (morning nautical twilight starts)
     - `msg.payload.times.dawn` dawn (morning nautical twilight ends, morning civil twilight starts)
-    - `msg.payload.times.blueHourRise` blue Hour start (time for special photography photos starts)
+    - `msg.payload.times.blueHourDawn` blue Hour start (time for special photography photos starts)
     - `msg.payload.times.sunrise` sunrise (top edge of the sun appears on the horizon)
     - `msg.payload.times.sunriseEnd` sunrise ends (bottom edge of the sun touches the horizon)
     - `msg.payload.times.goldenHourEnd` morning golden hour (soft light, best time for photography) ends
@@ -100,9 +100,9 @@ The Input is for triggering the calculation. If limits are defined the input mes
     - `msg.payload.times.sunset` sunset (sun disappears below the horizon, evening civil twilight starts)
     - `msg.payload.times.blueHourSet` blue Hour start (time for special photography photos ends)
     - `msg.payload.times.dusk` dusk (evening nautical twilight starts)
-    - `msg.payload.times.nauticalDusk` nautical dusk (evening astronomical twilight starts)
+    - `msg.payload.times.blueHourDusk` nautical dusk (evening astronomical twilight starts)
     - `msg.payload.times.amateurDusk` amateur astronomical dusk (sun at 12° after sunrise)
-    - `msg.payload.times.night` night starts (dark enough for astronomical observations)
+    - `msg.payload.times.astronomicalDusk` night starts (dark enough for astronomical observations)
     - `msg.payload.times.nadir` nadir (darkest moment of the night, sun is in the lowest position)
   - `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
   - `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
@@ -122,16 +122,16 @@ The Input is for triggering the calculation. If limits are defined the input mes
         "sunset": "2018-12-10T14:59:34.044Z",
         "sunriseEnd": "2018-12-10T07:03:12.232Z",
         "sunsetStart": "2018-12-10T14:55:17.395Z",
-        "blueHourRise": "2018-12-10T06:34:22.885Z",
+        "blueHourDawn": "2018-12-10T06:34:22.885Z",
         "blueHourSet": "2018-12-10T15:24:06.743Z",
-        "dawn": "2018-12-10T06:19:31.249Z",
-        "dusk": "2018-12-10T15:38:58.379Z",
+        "civilDawn": "2018-12-10T06:19:31.249Z",
+        "civilDusk": "2018-12-10T15:38:58.379Z",
         "nauticalDawn": "2018-12-10T05:37:04.859Z",
-        "nauticalDusk": "2018-12-10T16:21:24.768Z",
+        "blueHourDusk": "2018-12-10T16:21:24.768Z",
         "amateurDawn": "2018-12-10T05:16:44.832Z",
         "amateurDusk": "2018-12-10T16:41:44.795Z",
-        "nightEnd": "2018-12-10T04:56:49.931Z",
-        "night": "2018-12-10T17:01:39.696Z",
+        "astronomicalDawn": "2018-12-10T04:56:49.931Z",
+        "astronomicalDusk": "2018-12-10T17:01:39.696Z",
         "goldenHourEnd": "2018-12-10T07:58:28.541Z",
         "goldenHour": "2018-12-10T14:00:01.086Z"
 		},
@@ -304,26 +304,26 @@ manual timestamps can be entered as one of the following formats:
 
 following Sun times can be choosen:
 
-| Time            | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| `nightEnd`      | night ends (morning astronomical twilight starts)                        |
-| `amateurDawn`   | amateur astronomical dawn (sun at 12° before sunrise)                    |
-| `nauticalDawn`  | nautical dawn (morning nautical twilight starts)                         |
-| `dawn`          | dawn (morning nautical twilight ends, morning civil twilight starts)     |
-| `blueHourRise`  | blue Hour start (time for special photography photos starts)             |
-| `sunrise`       | sunrise (top edge of the sun appears on the horizon)                     |
-| `sunriseEnd`    | sunrise ends (bottom edge of the sun touches the horizon)                |
-| `goldenHourEnd` | morning golden hour (soft light, best time for photography) ends         |
-| `solarNoon`     | solar noon (sun is in the highest position)                              |
-| `goldenHour`    | evening golden hour starts                                               |
-| `sunsetStart`   | sunset starts (bottom edge of the sun touches the horizon)               |
-| `sunset`        | sunset (sun disappears below the horizon, evening civil twilight starts) |
-| `blueHourSet`   | blue Hour start (time for special photography photos ends)               |
-| `dusk`          | dusk (evening nautical twilight starts)                                  |
-| `nauticalDusk`  | nautical dusk (evening astronomical twilight starts)                     |
-| `amateurDusk`   | amateur astronomical dusk (sun at 12° after sunrise)                     |
-| `night`         | night starts (dark enough for astronomical observations)                 |
-| `nadir`         | nadir (darkest moment of the night, sun is in the lowest position)       |
+| Time               | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `astronomicalDawn` | night ends (morning astronomical twilight starts)                        |
+| `amateurDawn`      | amateur astronomical dawn (sun at 12° before sunrise)                    |
+| `nauticalDawn`     | nautical dawn (morning nautical twilight starts)                         |
+| `civilDawn`        | dawn (morning nautical twilight ends, morning civil twilight starts)     |
+| `blueHourDawn`     | blue Hour start (time for special photography photos starts)             |
+| `sunrise`          | sunrise (top edge of the sun appears on the horizon)                     |
+| `sunriseEnd`       | sunrise ends (bottom edge of the sun touches the horizon)                |
+| `goldenHourEnd`    | morning golden hour (soft light, best time for photography) ends         |
+| `solarNoon`        | solar noon (sun is in the highest position)                              |
+| `goldenHour`       | evening golden hour starts                                               |
+| `sunsetStart`      | sunset starts (bottom edge of the sun touches the horizon)               |
+| `sunset`           | sunset (sun disappears below the horizon, evening civil twilight starts) |
+| `blueHourSet`      | blue Hour start (time for special photography photos ends)               |
+| `civilDusk`        | dusk (evening nautical twilight starts)                                  |
+| `blueHourDusk`     | nautical dusk (evening astronomical twilight starts)                     |
+| `amateurDusk`      | amateur astronomical dusk (sun at 12° after sunrise)                     |
+| `astronomicalDusk` | night starts (dark enough for astronomical observations)                 |
+| `nadir`            | nadir (darkest moment of the night, sun is in the lowest position)       |
 
 moon rise and moon set can be used
 

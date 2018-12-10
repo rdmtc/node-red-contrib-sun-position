@@ -162,7 +162,7 @@
         </thead>
         <tbody>
         <tr>
-        <td><code>nightEnd</code></td>
+        <td><code>astronomicalDawn</code></td>
         <td>night ends (morning astronomical twilight starts)</td>
         </tr>
         <tr>
@@ -174,11 +174,11 @@
         <td>nautical dawn (morning nautical twilight starts)</td>
         </tr>
         <tr>
-        <td><code>dawn</code></td>
+        <td><code>civilDawn</code></td>
         <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
         </tr>
         <tr>
-        <td><code>blueHourRise</code></td>
+        <td><code>blueHourDawn</code></td>
         <td>blue Hour start (time for special photography photos starts)</td>
         </tr>
         <tr>
@@ -214,11 +214,11 @@
         <td>blue Hour start (time for special photography photos ends)</td>
         </tr>
         <tr>
-        <td><code>dusk</code></td>
+        <td><code>civilDusk</code></td>
         <td>dusk (evening nautical twilight starts)</td>
         </tr>
         <tr>
-        <td><code>nauticalDusk</code></td>
+        <td><code>blueHourDusk</code></td>
         <td>nautical dusk (evening astronomical twilight starts)</td>
         </tr>
         <tr>
@@ -226,7 +226,7 @@
         <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
         </tr>
         <tr>
-        <td><code>night</code></td>
+        <td><code>astronomicalDusk</code></td>
         <td>night starts (dark enough for astronomical observations)</td>
         </tr>
         <tr>
@@ -573,10 +573,11 @@
                 icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
                 options: [
                     "nightEnd",
+                    "astronomicalDawn",
                     "amateurDawn",
                     "nauticalDawn",
-                    "dawn",
-                    "blueHourRise",
+                    "civilDawn",
+                    "blueHourDawn",
                     "sunrise",
                     "sunriseEnd",
                     "goldenHourEnd",
@@ -585,10 +586,11 @@
                     "sunsetStart",
                     "sunset",
                     "blueHourSet",
-                    "dusk",
-                    "nauticalDusk",
+                    "civilDusk",
+                    "blueHourDusk",
                     "amateurDusk",
-                    "night",
+                    "astronomicalDusk",
+                    "nightStart",
                     "nadir"
                 ]
             };

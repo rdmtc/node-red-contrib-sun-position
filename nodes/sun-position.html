@@ -62,11 +62,11 @@
                 the sun times as object
                 <dt>times.sunrise <span class="property-type">Date</span></dt>
                 <dd>sunrise (top edge of the sun appears on the horizon)</dd>
-                <dt>msg.payload.times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+                <dt>msg.payload.times.astronomicalDawn <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
                 <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
                 <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
-                <dt>msg.payload.times.dawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
-                <dt>msg.payload.times.blueHourRise <span class="property-type">Date</span></dt><dd>blue Hour start (time for special photography photos starts)</dd>
+                <dt>msg.payload.times.civilDawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDawn <span class="property-type">Date</span></dt><dd>blue Hour start (time for special photography photos starts)</dd>
                 <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
                 <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
                 <dt>msg.payload.times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
@@ -75,10 +75,10 @@
                 <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
                 <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
                 <dt>msg.payload.times.blueHourSet <span class="property-type">Date</span></dt><dd>blue Hour start (time for special photography photos ends)</dd>
-                <dt>msg.payload.times.dusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
-                <dt>msg.payload.times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
+                <dt>msg.payload.times.civilDusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
                 <dt>msg.payload.times.amateurDusk <span class="property-type">Date</span></dt><dd>amateur astronomical dusk (sun at 12° after sunrise)</dd>
-                <dt>msg.payload.times.night <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
+                <dt>msg.payload.times.astronomicalDusk <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
                 <dt>msg.payload.times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
             </dd>
             <dt>pos <span class="property-type">array of boolean</span></dt>
@@ -102,16 +102,16 @@
         "sunset": "2018-12-10T14:59:34.044Z",
         "sunriseEnd": "2018-12-10T07:03:12.232Z",
         "sunsetStart": "2018-12-10T14:55:17.395Z",
-        "blueHourRise": "2018-12-10T06:34:22.885Z",
+        "blueHourDawn": "2018-12-10T06:34:22.885Z",
         "blueHourSet": "2018-12-10T15:24:06.743Z",
         "dawn": "2018-12-10T06:19:31.249Z",
         "dusk": "2018-12-10T15:38:58.379Z",
         "nauticalDawn": "2018-12-10T05:37:04.859Z",
-        "nauticalDusk": "2018-12-10T16:21:24.768Z",
+        "blueHourDusk": "2018-12-10T16:21:24.768Z",
         "amateurDawn": "2018-12-10T05:16:44.832Z",
         "amateurDusk": "2018-12-10T16:41:44.795Z",
-        "nightEnd": "2018-12-10T04:56:49.931Z",
-        "night": "2018-12-10T17:01:39.696Z",
+        "astronomicalDawn": "2018-12-10T04:56:49.931Z",
+        "astronomicalDusk": "2018-12-10T17:01:39.696Z",
         "goldenHourEnd": "2018-12-10T07:58:28.541Z",
         "goldenHour": "2018-12-10T14:00:01.086Z"
     },
