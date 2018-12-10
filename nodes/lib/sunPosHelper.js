@@ -19,11 +19,11 @@ module.exports = {
 };
 
 /*******************************************************************************************************/
-Date.prototype.addDays = function (days) {
+/* Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
-}
+} */
 
 /*******************************************************************************************************/
 /* exported functions                                                                                  */
@@ -109,7 +109,8 @@ function calcTimeValue(d, offset, next, days) {
         now.setMilliseconds(600); //security
         let cmp = now.getTime();
         if (d.getTime() <= cmp) {
-            d = d.addDays(Number(next));
+            d.setDate(d.getDate() + Number(next));
+            //d = d.addDays(Number(next));
         }
     }
     if (days && (days !== '*') && (days !== '')) {
@@ -119,17 +120,18 @@ function calcTimeValue(d, offset, next, days) {
         while (days.indexOf(daypos) === -1) {
             dayx += 1;
             if ((daystart + dayx) > 6) {
-                daypos = (daystart * -1) + dayx - 1;
-            } else {
-                daypos = daystart + dayx;
+                daystart = (dayx * -1);
             }
-            if (dayx > 6) {
+            daypos = daystart + dayx;
+
+            if (dayx > 7) {
                 dayx = -1;
                 break;
             }
         }
         if (dayx > 0) {
-            d = d.addDays(dayx);
+            d.setDate(d.getDate() + dayx);
+            //d = d.addDays(dayx);
         }
     }
     return d;
@@ -146,7 +148,8 @@ function calcTimeValueUTC(d, offset, next, days) {
         now.setUTCMilliseconds(600); //security
         let cmp = now.getTime();
         if (d.getTime() <= cmp) {
-            d = d.addDays(Number(next));
+            d.setUTCDate(d.getUTCDate() + Number(next));
+            //d = d.addDays(Number(next));
         }
     }
     if (days && (days !== '*') && (days !== '')) {
@@ -156,17 +159,18 @@ function calcTimeValueUTC(d, offset, next, days) {
         while (days.indexOf(daypos) === -1) {
             dayx += 1;
             if ((daystart + dayx) > 6) {
-                daypos = (daystart * -1) + dayx - 1;
-            } else {
-                daypos = daystart + dayx;
+                daystart = (dayx * -1);
             }
-            if (dayx > 6) {
+            daypos = daystart + dayx;
+
+            if (dayx > 7) {
                 dayx = -1;
                 break;
             }
         }
         if (dayx > 0) {
-            d = d.addDays(dayx);
+            d.setUTCDate(d.getUTCDate() + dayx);
+            //d = d.addDays(dayx);
         }
     }
     return d;
