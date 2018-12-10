@@ -125,10 +125,10 @@
     var times = SunCalc.times = [
         [-0.833, 'sunrise', 'sunset'], // SUNRISE
         [-0.3, 'sunriseEnd', 'sunsetStart'], // SUNRISE_END
-        [-4, 'blueHourDawn', 'blueHourDusk'], // BLUE_HOUR
+        [-4, 'blueHourDawnEnd', 'blueHourDuskStart'], // BLUE_HOUR
         [-6, 'civilDawn', 'civilDusk'], // DAWN
-        [-8, 'blueHourDawnEnd', 'blueHourDuskEnd'], // BLUE_HOUR
-        [-12, 'nauticalDawn', 'blueHourDusk'], // NAUTIC_DAWN
+        [-8, 'blueHourDawnStart', 'blueHourDuskEnd'], // BLUE_HOUR
+        [-12, 'nauticalDawn', 'nauticalDusk'], // NAUTIC_DAWN
         [-15, 'amateurDawn', 'amateurDusk'],
         [-18, 'astronomicalDawn', 'astronomicalDusk'], // ASTRO_DAWN
         [6, 'goldenHourEnd', 'goldenHour'] // GOLDEN_HOUR_AM
@@ -203,8 +203,6 @@
             result[time[1]] = fromJulian(Jrise);
             result[time[2]] = fromJulian(Jset);
         }
-        result['nightStart'] = new Date(result[astronomicalDusk])
-
         // for backward compatibilit
         result['dawn'] = result['civilDawn'];
         result['dusk'] = result['civilDusk'];
