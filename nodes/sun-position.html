@@ -62,6 +62,8 @@
                 the sun times as object
                 <dt>times.sunrise <span class="property-type">Date</span></dt>
                 <dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+
                 <dt>times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
                 <dt>times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
                 <dt>times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
@@ -72,9 +74,10 @@
                 <dt>times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk (evening astronomical twilight starts)</dd>
                 <dt>times.night <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
                 <dt>times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
-                <dt>times.nightEnd <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
                 <dt>times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
                 <dt>times.dawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+
+
             </dd>
             <dt>pos <span class="property-type">array of boolean</span></dt>
             <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
@@ -91,20 +94,24 @@
     "azimuth": 117.72942647370792,
     "altitude": 20.984193272523992,
     "times": {
-        "solarNoon": "2018-11-11T14:02:48.928Z",
-        "nadir": "2018-11-11T02:02:48.928Z",
-        "sunrise": "2018-11-11T08:23:11.190Z",
-        "sunset": "2018-11-11T19:42:26.666Z",
-        "sunriseEnd": "2018-11-11T08:25:33.165Z",
-        "sunsetStart": "2018-11-11T19:40:04.691Z",
-        "dawn": "2018-11-11T08:00:22.165Z",
-        "dusk": "2018-11-11T20:05:15.692Z",
-        "nauticalDawn": "2018-11-11T07:34:06.749Z",
-        "nauticalDusk": "2018-11-11T20:31:31.107Z",
-        "nightEnd": "2018-11-11T07:08:03.781Z",
-        "night": "2018-11-11T20:57:34.075Z",
-        "goldenHourEnd": "2018-11-11T08:53:43.879Z",
-        "goldenHour": "2018-11-11T19:11:53.977Z"
+        "solarNoon": "2018-12-10T10:59:14.814Z",
+        "nadir": "2018-12-10T22:59:14.814Z",
+        "sunrise": "2018-12-10T06:58:55.584Z",
+        "sunset": "2018-12-10T14:59:34.044Z",
+        "sunriseEnd": "2018-12-10T07:03:12.232Z",
+        "sunsetStart": "2018-12-10T14:55:17.395Z",
+        "blueHourRise": "2018-12-10T06:34:22.885Z",
+        "blueHourSet": "2018-12-10T15:24:06.743Z",
+        "dawn": "2018-12-10T06:19:31.249Z",
+        "dusk": "2018-12-10T15:38:58.379Z",
+        "nauticalDawn": "2018-12-10T05:37:04.859Z",
+        "nauticalDusk": "2018-12-10T16:21:24.768Z",
+        "amateurDawn": "2018-12-10T05:16:44.832Z",
+        "amateurDusk": "2018-12-10T16:41:44.795Z",
+        "nightEnd": "2018-12-10T04:56:49.931Z",
+        "night": "2018-12-10T17:01:39.696Z",
+        "goldenHourEnd": "2018-12-10T07:58:28.541Z",
+        "goldenHour": "2018-12-10T14:00:01.086Z"
     },
     "pos": [],
     "posChanged": false

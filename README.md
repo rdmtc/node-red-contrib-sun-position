@@ -1,9 +1,13 @@
 ﻿# node-red-contrib-sun-position for NodeRED
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/graphs/commit-activity)
+
 [![HitCount](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position)
+
 [![Dependencies Status](https://img.shields.io/david/HM-RedMatic/node-red-contrib-sun-position.svg)](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position)
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 [![Issues](https://img.shields.io/github/issues/HM-RedMatic/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues)
 
 [![NPM](https://nodei.co/npm/node-red-contrib-sun-position.png)](https://nodei.co/npm/node-red-contrib-sun-position/)
@@ -108,20 +112,24 @@ The Input is for triggering the calculation. If limits are defined the input mes
 		"azimuth": 117.72942647370792,
 		"altitude": 20.984193272523992,
 		"times": {
-			"solarNoon": "2018-11-11T14:02:48.928Z",
-			"nadir": "2018-11-11T02:02:48.928Z",
-			"sunrise": "2018-11-11T08:23:11.190Z",
-			"sunset": "2018-11-11T19:42:26.666Z",
-			"sunriseEnd": "2018-11-11T08:25:33.165Z",
-			"sunsetStart": "2018-11-11T19:40:04.691Z",
-			"dawn": "2018-11-11T08:00:22.165Z",
-			"dusk": "2018-11-11T20:05:15.692Z",
-			"nauticalDawn": "2018-11-11T07:34:06.749Z",
-			"nauticalDusk": "2018-11-11T20:31:31.107Z",
-			"nightEnd": "2018-11-11T07:08:03.781Z",
-			"night": "2018-11-11T20:57:34.075Z",
-			"goldenHourEnd": "2018-11-11T08:53:43.879Z",
-			"goldenHour": "2018-11-11T19:11:53.977Z"
+        "solarNoon": "2018-12-10T10:59:14.814Z",
+        "nadir": "2018-12-10T22:59:14.814Z",
+        "sunrise": "2018-12-10T06:58:55.584Z",
+        "sunset": "2018-12-10T14:59:34.044Z",
+        "sunriseEnd": "2018-12-10T07:03:12.232Z",
+        "sunsetStart": "2018-12-10T14:55:17.395Z",
+        "blueHourRise": "2018-12-10T06:34:22.885Z",
+        "blueHourSet": "2018-12-10T15:24:06.743Z",
+        "dawn": "2018-12-10T06:19:31.249Z",
+        "dusk": "2018-12-10T15:38:58.379Z",
+        "nauticalDawn": "2018-12-10T05:37:04.859Z",
+        "nauticalDusk": "2018-12-10T16:21:24.768Z",
+        "amateurDawn": "2018-12-10T05:16:44.832Z",
+        "amateurDusk": "2018-12-10T16:41:44.795Z",
+        "nightEnd": "2018-12-10T04:56:49.931Z",
+        "night": "2018-12-10T17:01:39.696Z",
+        "goldenHourEnd": "2018-12-10T07:58:28.541Z",
+        "goldenHour": "2018-12-10T14:00:01.086Z"
 		},
 		"pos": [],
 		"posChanged": false
@@ -292,22 +300,28 @@ manual timestamps can be entered as one of the following formats:
 
 following Sun times can be choosen:
 
-| Time            | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| `sunrise`       | sunrise (top edge of the sun appears on the horizon)                     |
-| `sunriseEnd`    | sunrise ends (bottom edge of the sun touches the horizon)                |
-| `goldenHourEnd` | morning golden hour (soft light, best time for photography) ends         |
-| `solarNoon`     | solar noon (sun is in the highest position)                              |
-| `goldenHour`    | evening golden hour starts                                               |
-| `sunsetStart`   | sunset starts (bottom edge of the sun touches the horizon)               |
-| `sunset`        | sunset (sun disappears below the horizon, evening civil twilight starts) |
-| `dusk`          | dusk (evening nautical twilight starts)                                  |
-| `nauticalDusk`  | nautical dusk (evening astronomical twilight starts)                     |
-| `night`         | night starts (dark enough for astronomical observations)                 |
-| `nadir`         | nadir (darkest moment of the night, sun is in the lowest position)       |
-| `nightEnd`      | night ends (morning astronomical twilight starts)                        |
-| `nauticalDawn`  | nautical dawn (morning nautical twilight starts)                         |
-| `dawn`          | dawn (morning nautical twilight ends, morning civil twilight starts)     |
+| Time               | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `nightEnd`         | night ends (morning astronomical twilight starts)                        |
+| `amateurDawn`      | amateur astronomical dawn                                                |
+| `nauticalDawn`     | nautical dawn (morning nautical twilight starts)                         |
+| `dawn`             | dawn (morning nautical twilight ends, morning civil twilight starts)     |
+| `blueHourRise`     | blue Hour start (best time for photography starts)                       |
+| `sunrise`          | sunrise (top edge of the sun appears on the horizon)                     |
+| `sunriseEnd`       | sunrise ends (bottom edge of the sun touches the horizon)                |
+| `goldenHourEnd`    | morning golden hour (soft light, best time for photography) ends         |
+| `solarNoon`        | solar noon (sun is in the highest position)                              |
+| `goldenHour`       | evening golden hour starts                                               |
+| `sunsetStart`      | sunset starts (bottom edge of the sun touches the horizon)               |
+| `sunset`           | sunset (sun disappears below the horizon, evening civil twilight starts) |
+| `blueHourSet`      | blue Hour start (best time for photography ends)                         |
+| `dusk`             | dusk (evening nautical twilight starts)                                  |
+| `nauticalDusk`     | nautical dusk (evening astronomical twilight starts)                     |
+| `amateurDusk`      | amateur astronomical dusk                                                |
+| `night`            | night starts (dark enough for astronomical observations)                 |
+| `nadir`            | nadir (darkest moment of the night, sun is in the lowest position)       |
+
+
 
 moon rise and moon set can be used
 
@@ -351,5 +365,6 @@ specific language governing permissions and limitations under the License.
 [![Greenkeeper badge](https://badges.greenkeeper.io/HM-RedMatic/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
 
 this node is published also here:
-  - [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
-  - [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)
+
+- [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
+- [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)

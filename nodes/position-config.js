@@ -3,9 +3,9 @@
  *********************************************/
 "use strict";
 
-const sunCalc = require('suncalc2');
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 
 /*******************************************************************************************************/
 const moonPhases = [{
@@ -369,22 +369,6 @@ module.exports = function (RED) {
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
-            /*
-                {"solarNoon":"2018-11-01T10:49:56.550Z",
-                "nadir":"2018-10-31T22:49:56.550Z",
-                "sunrise":"2018-11-01T05:58:13.904Z",
-                "sunset":"2018-11-01T15:41:39.196Z",
-                "sunriseEnd":"2018-11-01T06:01:54.246Z",
-                "sunsetStart":"2018-11-01T15:37:58.854Z",
-                "dawn":"2018-11-01T05:23:28.111Z",
-                "dusk":"2018-11-01T16:16:24.989Z",
-                "nauticalDawn":"2018-11-01T04:44:25.813Z",
-                "nauticalDusk":"2018-11-01T16:55:27.288Z",
-                "nightEnd":"2018-11-01T04:06:06.184Z",
-                "night":"2018-11-01T17:33:46.916Z",
-                "goldenHourEnd":"2018-11-01T06:47:04.923Z",
-                "goldenHour":"2018-11-01T14:52:48.178Z"}
-            */
         }
 
         function sunTimesCheck(node, today, dayId) {

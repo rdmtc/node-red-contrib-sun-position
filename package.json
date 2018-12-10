@@ -45,9 +45,6 @@
     "bugs": {
         "url": "https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues"
     },
-    "dependencies": {
-        "suncalc2": "^1.8.1"
-    },
     "node-red": {
         "nodes": {
             "position-config": "nodes/position-config.js",

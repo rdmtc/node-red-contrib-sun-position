@@ -232,7 +232,8 @@
                 value: '',
                 required: false,
                 validate: function (v) {
-                    return RED.validators.typedInput("startTimeAltType")(v) || ($("#node-input-propertyStart").typedInput(
+                    return RED.validators.typedInput("startTimeAltType")(v) || ($(
+                        "#node-input-propertyStart").typedInput(
                         'type') === 'none');
                 }
             },
@@ -370,9 +371,25 @@
                 value: "pdsTime",
                 label: "sun ",
                 icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
-                options: ['solarNoon', 'nadir', 'sunrise', 'sunset', 'sunriseEnd',
-                    'sunsetStart', 'dawn', 'dusk', 'nauticalDawn', 'nauticalDusk',
-                    'nightEnd', 'night', 'goldenHourEnd', 'goldenHour'
+                options: [
+                    "nightEnd",
+                    "amateurDawn",
+                    "nauticalDawn",
+                    "dawn",
+                    "blueHourRise",
+                    "sunrise",
+                    "sunriseEnd",
+                    "goldenHourEnd",
+                    "solarNoon",
+                    "goldenHour",
+                    "sunsetStart",
+                    "sunset",
+                    "blueHourSet",
+                    "dusk",
+                    "nauticalDusk",
+                    "amateurDusk",
+                    "night",
+                    "nadir"
                 ]
             };
             let typeTimeMoon = {
