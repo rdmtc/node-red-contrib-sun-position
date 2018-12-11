@@ -21,6 +21,8 @@
             "statusSend": "last message",
             "statusTime": "time limits",
             "statusTimeOrSend": "time limits or last message",
+            "startEndOut": "start/end out",
+            "startEndOutTxt": "emit true on start, false on end",
             "seconds": "seconds",
             "minutes": "minutes",
             "hours": "hours",

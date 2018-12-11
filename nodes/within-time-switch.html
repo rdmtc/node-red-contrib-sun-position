@@ -2,6 +2,7 @@
     <div class="form-row">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="within-time-switch.label.position"></span></label>
         <input type="text" id="node-input-positionConfig">
+        <input type="hidden" id="node-input-outputs"/>
     </div>
     <hr>
     <div class="form-row">
@@ -79,6 +80,11 @@
             <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
             <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-startEndOut"><i class="fa fa-play-circle"></i> <span data-i18n="within-time-switch.label.startEndOut"></span></label>
+        <input type="checkbox" id="node-input-startEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="within-time-switch.label.startEndOutTxt"></span
     </div>
     <hr>
     <div class="form-row">
@@ -319,11 +325,18 @@
                 value: 3,
                 required: false
             },
+            startEndOut: {
+                value: false,
+                required: false
+            },
+            outputs: {
+                value: 2
+            }
         },
         icon: 'switch.png',
         inputs: 1,
         outputs: 2,
-        outputLabels: ["within time", "outside time"],
+        outputLabels: ["within time", "outside time", "onStart/End"],
         label: function () {
             const getId = (type, value, offset) => {
                 let suffix = '';
@@ -364,6 +377,14 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare: function () {
+            $("#node-input-startEndOut").change(function () {
+                if ($("#node-input-startEndOut").prop("checked")) {
+                    $("#node-input-outputs").val(2);
+                } else {
+                    $("#node-input-outputs").val(3);
+                }
+            });
+
             if (this.statusOut == "" || this.statusOut == undefined) {
                 this.statusOut = 3;
                 $("#node-input-statusOut").val(this.statusOut);
@@ -481,6 +502,7 @@
             //$("#node-input-endTimeAlt").change();
             $("#node-input-propertyStart").change();
             $("#node-input-propertyEnd").change();
+            $("#node-input-startEndOut").change();
         },
         oneditsave: function () {
             this.propertyStartType = $("#node-input-propertyStart").typedInput('type');

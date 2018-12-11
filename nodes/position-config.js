@@ -105,38 +105,41 @@ module.exports = function (RED) {
 
             var node = this;
 
-            this.getSunTimes = () => {
+            /*this.getSunTimes = () => {
                 //node.debug('getSunTimes');
                 let res = sunTimesCheck(node);
                 res.today = node.sunTimesToday;
                 res.tomorrow = node.sunTimesTomorow;
                 return res;
-            }
+            }*/
             this.getSunTime = (now, value, next, days) => {
                 //node.debug('getSunTime ' + value + ' - ' + next + ' - ' + days);
                 let result = sunTimesCheck(node, now);
-                result.value = new Date(node.sunTimesToday[value]);
+                result = Object.assign(result, node.sunTimesToday[value]);
+                result.value = new Date(result.value);
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
-                        result.value = new Date(node.sunTimesTomorow[value]);
+                        result = Object.assign(result, node.sunTimesTomorow[value]);
                     } else if (next > 1) {
                         let date = (new Date()).addDays(next);
-                        let times = sunCalc.getTimes(date, node.latitude, node.longitude);
-                        result.value = times[value];
+                        result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                     }
+                    result.value = new Date(result.value);
                 }
                 if (days && (days !== '*') && (days !== '')) {
                     let dayx = nextday(days, result.value.getUTCDay());
                     //node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         let date = result.value.addDays(dayx);
-                        let times = sunCalc.getTimes(date, node.latitude, node.longitude);
-                        result.value = new Date(times[value]);
+                        //let times = sunCalc.getTimes(date, node.latitude, node.longitude);
+                        result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
+                        result.value = new Date(result.value);
                     } else if (dayx < 0) {
-                        node.debug('getSunTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
+                        node.debug('getSunTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + JSON.stringify(result));
                         result.error = 'No valid day of week found!';
                     }
                 }
+                //node.debug('getSunTime result=' + JSON.stringify(result));
                 return result;
             }
             this.getMoonTimes = () => {
@@ -175,8 +178,6 @@ module.exports = function (RED) {
                 return result;
             }
 
-            //15 Nov 12:06:32 - [error] [time-inject:7e325169.87e6e] Exception occured on time-inject:node.positionConfig.getTimeProp is not a function
-            //15 Nov 12:06:32 - [debug] [time-inject:7e325169.87e6e] {"stack":"TypeError: node.positionConfig.getTimeProp is not a function\n    at doCreateTimeout (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:66:53)\n    at new timeInjectNode (U:\\Development\\github\\node-red-contrib-sun-position\\nodes\\time-inject.js:227:17)\n    at createNode (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:305:18)\n    at Flow.start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\Flow.js:89:35)\n    at start (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\red\\runtime\\nodes\\flows\\index.js:328:29)\n    at tryCatchReject (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:845:30)\n    at runContinuation1 (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:804:4)\n    at Fulfilled.when (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:592:4)\n    at Pending.run (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\makePromise.js:483:13)\n    at Scheduler._drain (C:\\Users\\rgester\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\when\\lib\\Scheduler.js:62:19)","message":"node.positionConfig.getTimeProp is not a function"}
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
                 //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
                 node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);

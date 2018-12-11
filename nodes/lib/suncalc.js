@@ -3,6 +3,7 @@
  SunCalc is a JavaScript library for calculating sun/moon position and light phases.
  https://github.com/mourner/suncalc
 */
+'use strict';
 
 (function () {
     'use strict';
@@ -79,7 +80,7 @@
 
     function eclipticLongitude(M) {
 
-        var C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
+        let C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
             P = rad * 102.9372; // perihelion of the Earth
 
         return M + C + P + PI;
@@ -87,7 +88,7 @@
 
     function sunCoords(d) {
 
-        var M = solarMeanAnomaly(d),
+        let M = solarMeanAnomaly(d),
             L = eclipticLongitude(M);
 
         return {
@@ -102,7 +103,7 @@
 
     SunCalc.getPosition = function (date, lat, lng) {
 
-        var lw = rad * -lng,
+        let lw = rad * -lng,
             phi = rad * lat,
             d = toDays(date),
 
@@ -116,21 +117,34 @@
     };
 
     // sun times configuration (angle, morning name, evening name)
-    var times = SunCalc.times = [
-        [-0.833, 'sunrise', 'sunset'], // SUNRISE
-        [-0.3, 'sunriseEnd', 'sunsetStart'], // SUNRISE_END
-        [-4, 'blueHourDawnEnd', 'blueHourDuskStart'], // BLUE_HOUR
-        [-6, 'civilDawn', 'civilDusk'], // DAWN
-        [-8, 'blueHourDawnStart', 'blueHourDuskEnd'], // BLUE_HOUR
-        [-12, 'nauticalDawn', 'nauticalDusk'], // NAUTIC_DAWN
-        [-15, 'amateurDawn', 'amateurDusk'],
-        [-18, 'astronomicalDawn', 'astronomicalDusk'], // ASTRO_DAWN
-        [6, 'goldenHourEnd', 'goldenHourStart'] // GOLDEN_HOUR_AM
+    var sunTimes = SunCalc.times = [
+        [6, 'goldenHourEnd', 'goldenHourStart', 9, 11], // GOLDEN_HOUR_AM
+        [-0.3, 'sunriseEnd', 'sunsetStart', 8, 12], // SUNRISE_END
+        [-0.833, 'sunrise', 'sunset', 7, 13], // SUNRISE
+        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 14], // BLUE_HOUR
+        [-6, 'civilDawn', 'civilDusk', 5, 15], // DAWN
+        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 16], // BLUE_HOUR
+        [-12, 'nauticalDawn', 'nauticalDusk', 3, 17], // NAUTIC_DAWN
+        [-15, 'amateurDawn', 'amateurDusk', 2, 18],
+        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 19] // ASTRO_DAWN
     ];
-    // adds a custom time to the times config
+    var sunTimesDefault = SunCalc.timesDefault = {
+        solarNoon: 10,
+        nadir: 0
+    };
+    var sunTimesAlternate = SunCalc.timesAlternate = [
+        // for backward compatibilit
+        ['dawn', 'civilDawn'],
+        ['dusk', 'civilDusk'],
+        ['nightEnd', 'astronomicalDawn'],
+        ['night', 'astronomicalDusk'],
+        ['nightStart', 'astronomicalDusk'],
+        ['goldenHour', 'goldenHourStart']
+    ];
 
-    SunCalc.addTime = function (angle, riseName, setName) {
-        times.push([angle, riseName, setName]);
+    // adds a custom time to the times config
+    SunCalc.addTime = function (angle, riseName, setName, risePos, setPos) {
+        sunTimes.push([angle, riseName, setName, risePos, setPos]);
     };
 
     // calculations for sun times
@@ -156,16 +170,16 @@
     // returns set time for the given sun altitude
     function getSetJ(h, lw, phi, dec, n, M, L) {
 
-        var w = hourAngle(h, phi, dec),
+        let w = hourAngle(h, phi, dec),
             a = approxTransit(w, lw, n);
         return solarTransitJ(a, M, L);
     }
 
     // calculates sun times for a given date and latitude/longitude
 
-    SunCalc.getTimes = function (date, lat, lng) {
+    SunCalc.getTimes = function (date, lat, lng, asArray) {
 
-        var lw = rad * -lng,
+        let lw = rad * -lng,
             phi = rad * lat,
 
             d = toDays(date),
@@ -176,31 +190,48 @@
             L = eclipticLongitude(M),
             dec = declination(L, 0),
 
-            Jnoon = solarTransitJ(ds, M, L),
+            Jnoon = solarTransitJ(ds, M, L);
 
-            i, len, time, Jset, Jrise;
-
-        var result = {
-            solarNoon: fromJulian(Jnoon),
-            nadir: fromJulian(Jnoon + 0.5)
+        let result = {
+            solarNoon: {
+                value: fromJulian(Jnoon),
+                pos: sunTimesDefault.solarNoon,
+                name: 'solarNoon',
+                angle: 90
+            },
+            nadir: {
+                value: fromJulian(Jnoon + 0.5),
+                pos: sunTimesDefault.nadir,
+                name: 'solarNoon',
+                angle: 270
+            }
         };
+        for (let i = 0, len = sunTimes.length; i < len; i += 1) {
+            let time = sunTimes[i];
 
-        for (i = 0, len = times.length; i < len; i += 1) {
-            time = times[i];
+            let Jset = getSetJ(time[0] * rad, lw, phi, dec, n, M, L);
+            let Jrise = Jnoon - (Jset - Jnoon);
 
-            Jset = getSetJ(time[0] * rad, lw, phi, dec, n, M, L);
-            Jrise = Jnoon - (Jset - Jnoon);
-
-            result[time[1]] = fromJulian(Jrise);
-            result[time[2]] = fromJulian(Jset);
+            result[time[2]] = {
+                value: fromJulian(Jset),
+                pos: time[4],
+                name: time[2],
+                angle: time[0]
+            };
+            result[time[1]] = {
+                value: fromJulian(Jrise),
+                pos: time[3],
+                name: time[1],
+                angle: (180 + (time[0] * -1))
+            };
         }
         // for backward compatibilit
-        result['dawn'] = result['civilDawn'];
-        result['dusk'] = result['civilDusk'];
-        result['nightEnd'] = result['astronomicalDawn'];
-        result['night'] = result['astronomicalDusk'];
-        result['nightStart'] = result['astronomicalDusk'];
-        result['goldenHour'] = result['goldenHourStart'];
+        for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
+            let time = sunTimesAlternate[i];
+            result[time[0]] = result[time[1]];
+        }
+        //console.log(JSON.stringify(result));
+
         return result;
     };
 
@@ -208,7 +239,7 @@
 
     function moonCoords(d) { // geocentric ecliptic coordinates of the moon
 
-        var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
+        let L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
             M = rad * (134.963 + 13.064993 * d), // mean anomaly
             F = rad * (93.272 + 13.229350 * d), // mean distance
 
@@ -225,7 +256,7 @@
 
     SunCalc.getMoonPosition = function (date, lat, lng) {
 
-        var lw = rad * -lng,
+        let lw = rad * -lng,
             phi = rad * lat,
             d = toDays(date),
 
@@ -252,7 +283,7 @@
 
     SunCalc.getMoonIllumination = function (date) {
 
-        var d = toDays(date || new Date()),
+        let d = toDays(date || new Date()),
             s = sunCoords(d),
             m = moonCoords(d),
 
@@ -278,16 +309,16 @@
     // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
     SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
-        var t = new Date(date);
+        let t = new Date(date);
         if (inUTC) t.setUTCHours(0, 0, 0, 0);
         else t.setHours(0, 0, 0, 0);
 
-        var hc = 0.133 * rad,
+        let hc = 0.133 * rad,
             h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc,
             h1, h2, rise, set, a, b, xe, ye, d, roots, x1, x2, dx;
 
         // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
-        for (var i = 1; i <= 24; i += 2) {
+        for (let i = 1; i <= 24; i += 2) {
             h1 = SunCalc.getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
             h2 = SunCalc.getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
 
@@ -321,7 +352,7 @@
             h0 = h2;
         }
 
-        var result = {};
+        let result = {};
 
         if (rise) result.rise = hoursLater(t, rise);
         if (set) result.set = hoursLater(t, set);
