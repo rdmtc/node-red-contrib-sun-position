@@ -93,7 +93,7 @@ module.exports = function (RED) {
                     node.nextTimeAlt = null;
                 } else {
                     fixTimeStamp = fixTimeStamp && node.nextTimeAltData.fix;
-                    node.nextTimeAlt = node.nextTimeAlt.value;
+                    node.nextTimeAlt = node.nextTimeAltData.value;
                 }
             }
             if (node.nextTime && !errorStatus) {
