@@ -20,7 +20,6 @@
 
     // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 
-
     // date/time constants and conversions
 
     var dayMs = 1000 * 60 * 60 * 24,
@@ -38,7 +37,6 @@
     function toDays(date) {
         return toJulian(date) - J2000;
     }
-
 
     // general calculations for position
 
@@ -98,9 +96,7 @@
         };
     }
 
-
     var SunCalc = {};
-
 
     // calculates sun position for a given date and latitude/longitude
 
@@ -119,9 +115,7 @@
         };
     };
 
-
     // sun times configuration (angle, morning name, evening name)
-
     var times = SunCalc.times = [
         [-0.833, 'sunrise', 'sunset'], // SUNRISE
         [-0.3, 'sunriseEnd', 'sunsetStart'], // SUNRISE_END
@@ -138,7 +132,6 @@
     SunCalc.addTime = function (angle, riseName, setName) {
         times.push([angle, riseName, setName]);
     };
-
 
     // calculations for sun times
 
@@ -168,7 +161,6 @@
         return solarTransitJ(a, M, L);
     }
 
-
     // calculates sun times for a given date and latitude/longitude
 
     SunCalc.getTimes = function (date, lat, lng) {
@@ -187,7 +179,6 @@
             Jnoon = solarTransitJ(ds, M, L),
 
             i, len, time, Jset, Jrise;
-
 
         var result = {
             solarNoon: fromJulian(Jnoon),
@@ -212,7 +203,6 @@
         result['goldenHour'] = result['goldenHourStart'];
         return result;
     };
-
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 

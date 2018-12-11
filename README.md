@@ -313,28 +313,32 @@ manual timestamps can be entered as one of the following formats:
 
 following Sun times can be choosen:
 
-| Time                | Description                                                              |
-| ------------------- | ------------------------------------------------------------------------ |
-| `astronomicalDawn`  | night ends (morning astronomical twilight starts)                        |
-| `amateurDawn`       | amateur astronomical dawn (sun at 12° before sunrise)                    |
-| `nauticalDawn`      | nautical dawn (morning nautical twilight starts)                         |
-| `blueHourDawnStart` | blue Hour start (time for special photography photos starts)             |
-| `civilDawn`         | dawn (morning nautical twilight ends, morning civil twilight starts)     |
-| `blueHourDawnEnd`   | blue Hour end (time for special photography photos end)                  |
-| `sunrise`           | sunrise (top edge of the sun appears on the horizon)                     |
-| `sunriseEnd`        | sunrise ends (bottom edge of the sun touches the horizon)                |
-| `goldenHourEnd`     | morning golden hour (soft light, best time for photography) ends         |
-| `solarNoon`         | solar noon (sun is in the highest position)                              |
-| `goldenHourStart`   | evening golden hour starts                                               |
-| `sunsetStart`       | sunset starts (bottom edge of the sun touches the horizon)               |
-| `sunset`            | sunset (sun disappears below the horizon, evening civil twilight starts) |
-| `blueHourDuskStart` | blue Hour start (time for special photography photos starts)             |
-| `civilDusk`         | dusk (evening nautical twilight starts)                                  |
-| `blueHourDuskEnd`   | blue Hour end (time for special photography photos end)                  |
-| `nauticalDusk`      | nautical dusk end (evening astronomical twilight starts)                 |
-| `amateurDusk`       | amateur astronomical dusk (sun at 12° after sunrise)                     |
-| `astronomicalDusk`  | night starts (dark enough for astronomical observations)                 |
-| `nadir`             | nadir (darkest moment of the night, sun is in the lowest position)       |
+| Time                | Description                                                              | a      |
+| ------------------- | ------------------------------------------------------------------------ | ------ |
+| `astronomicalDawn`  | night ends (morning astronomical twilight starts)                        | -18    |
+| `amateurDawn`       | amateur astronomical dawn (sun at 12° before sunrise)                    | -15    |
+| `nauticalDawn`      | nautical dawn (morning nautical twilight starts)                         | -12    |
+| `blueHourDawnStart` | blue Hour start (time for special photography photos starts)             | -8     |
+| `civilDawn`         | dawn (morning nautical twilight ends, morning civil twilight starts)     | -6     |
+| `blueHourDawnEnd`   | blue Hour end (time for special photography photos end)                  | -4     |
+| `sunrise`           | sunrise (top edge of the sun appears on the horizon)                     | -0.833 |
+| `sunriseEnd`        | sunrise ends (bottom edge of the sun touches the horizon)                | -0.3   |
+| `goldenHourEnd`     | morning golden hour (soft light, best time for photography) ends         | 6      |
+| `solarNoon`         | solar noon (sun is in the highest position)                              |        |
+| `goldenHourStart`   | evening golden hour starts                                               | 6      |
+| `sunsetStart`       | sunset starts (bottom edge of the sun touches the horizon)               | -0.3   |
+| `sunset`            | sunset (sun disappears below the horizon, evening civil twilight starts) | -0.833 |
+| `blueHourDuskStart` | blue Hour start (time for special photography photos starts)             | -4     |
+| `civilDusk`         | dusk (evening nautical twilight starts)                                  | -6     |
+| `blueHourDuskEnd`   | blue Hour end (time for special photography photos end)                  | -8     |
+| `nauticalDusk`      | nautical dusk end (evening astronomical twilight starts)                 | -12    |
+| `amateurDusk`       | amateur astronomical dusk (sun at 12° after sunrise)                     | -15    |
+| `astronomicalDusk`  | night starts (dark enough for astronomical observations)                 | -18    |
+| `nadir`             | nadir (darkest moment of the night, sun is in the lowest position)       |        |
+
+a = angle in radiants from horizont
+
+![nodes](images/sun-times.svg?raw=true)
 
 The following time parameters are exists in the output for backwart compatibility. These are equal to parameters in the table above:
 
