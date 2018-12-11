@@ -311,9 +311,11 @@ manual timestamps can be entered as one of the following formats:
 - `00:00pm ... 12:59pm` 12h Format
 - `00:00:00pm ... 12:59:00pm` 12h Format
 
+#### sun times
+
 following Sun times can be choosen:
 
-| Time                | Description                                                              | a      |
+| Time                | Description                                                              | Sun*   |
 | ------------------- | ------------------------------------------------------------------------ | ------ |
 | `astronomicalDawn`  | night ends (morning astronomical twilight starts)                        | -18    |
 | `amateurDawn`       | amateur astronomical dawn (sun at 12° before sunrise)                    | -15    |
@@ -336,9 +338,21 @@ following Sun times can be choosen:
 | `astronomicalDusk`  | night starts (dark enough for astronomical observations)                 | -18    |
 | `nadir`             | nadir (darkest moment of the night, sun is in the lowest position)       |        |
 
-a = angle in radiants from horizont
+Sun* the angle of the sun below the horizon
 
 ![nodes](images/sun-times.svg?raw=true)
+
+##### remarks
+
+###### blue hour
+
+Although the blue hour does not have an official definition, the blue color spectrum is most prominent when the Sun is between 4° and 8° below the horizon.
+
+###### amateurDawn /amateurDusk
+
+This is not an official definition, this is happend when the Sun is 15° below the horizon
+
+###### alternate properties
 
 The following time parameters are exists in the output for backwart compatibility. These are equal to parameters in the table above:
 
@@ -351,7 +365,12 @@ The following time parameters are exists in the output for backwart compatibilit
 | `nightStart`   | `astronomicalDusk` |
 | `goldenHour`   | `goldenHourStart`  |
 
+
+#### moon times
+
 moon rise and moon set can be used
+
+#### message, flow or global property
 
 any message, flow or global property. It must contain a timestamp as one of the following formats:
 
