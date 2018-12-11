@@ -96,7 +96,7 @@ The Input is for triggering the calculation. If limits are defined the input mes
     - `msg.payload.times.sunriseEnd` sunrise ends (bottom edge of the sun touches the horizon)
     - `msg.payload.times.goldenHourEnd` morning golden hour (soft light, best time for photography) ends
     - `msg.payload.times.solarNoon` solar noon (sun is in the highest position)
-    - `msg.payload.times.goldenHour` evening golden hour starts
+    - `msg.payload.times.goldenHourStart` evening golden hour starts
     - `msg.payload.times.sunsetStart` sunset starts (bottom edge of the sun touches the horizon)
     - `msg.payload.times.sunset` sunset (sun disappears below the horizon, evening civil twilight starts)
     - `msg.payload.times.blueHourDuskStart` nautical dusk start (evening astronomical twilight starts)
@@ -136,13 +136,13 @@ The Input is for triggering the calculation. If limits are defined the input mes
         "astronomicalDawn":"2018-12-10T04:56:49.931Z",
         "astronomicalDusk":"2018-12-10T17:01:39.696Z",
         "goldenHourEnd":"2018-12-10T07:58:28.541Z",
-        "goldenHour":"2018-12-10T14:00:01.086Z",
+        "goldenHourStart":"2018-12-10T14:00:01.086Z",
         "dawn":"2018-12-10T06:19:31.249Z",
         "dusk":"2018-12-10T15:38:58.379Z",
         "nightEnd":"2018-12-10T04:56:49.931Z",
         "night":"2018-12-10T17:01:39.696Z",
         "nightStart":"2018-12-10T17:01:39.696Z",
-        "goldenHourStart":"2018-12-10T14:00:01.086Z"
+        "goldenHour":"2018-12-10T14:00:01.086Z"
     },
 		"pos": [],
 		"posChanged": false
@@ -325,7 +325,7 @@ following Sun times can be choosen:
 | `sunriseEnd`        | sunrise ends (bottom edge of the sun touches the horizon)                |
 | `goldenHourEnd`     | morning golden hour (soft light, best time for photography) ends         |
 | `solarNoon`         | solar noon (sun is in the highest position)                              |
-| `goldenHour`        | evening golden hour starts                                               |
+| `goldenHourStart`   | evening golden hour starts                                               |
 | `sunsetStart`       | sunset starts (bottom edge of the sun touches the horizon)               |
 | `sunset`            | sunset (sun disappears below the horizon, evening civil twilight starts) |
 | `blueHourDuskStart` | blue Hour start (time for special photography photos starts)             |
@@ -335,6 +335,17 @@ following Sun times can be choosen:
 | `amateurDusk`       | amateur astronomical dusk (sun at 12° after sunrise)                     |
 | `astronomicalDusk`  | night starts (dark enough for astronomical observations)                 |
 | `nadir`             | nadir (darkest moment of the night, sun is in the lowest position)       |
+
+The following time parameters are exists in the output for backwart compatibility. These are equal to parameters in the table above:
+
+| time parameter | is equal to        |
+| -------------- | ------------------ |
+| `dawn`         | `civilDawn`        |
+| `dusk`         | `civilDusk`        |
+| `nightEnd`     | `astronomicalDawn` |
+| `night`        | `astronomicalDusk` |
+| `nightStart`   | `astronomicalDusk` |
+| `goldenHour`   | `goldenHourStart`  |
 
 moon rise and moon set can be used
 

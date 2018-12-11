@@ -131,7 +131,7 @@
         [-12, 'nauticalDawn', 'nauticalDusk'], // NAUTIC_DAWN
         [-15, 'amateurDawn', 'amateurDusk'],
         [-18, 'astronomicalDawn', 'astronomicalDusk'], // ASTRO_DAWN
-        [6, 'goldenHourEnd', 'goldenHour'] // GOLDEN_HOUR_AM
+        [6, 'goldenHourEnd', 'goldenHourStart'] // GOLDEN_HOUR_AM
     ];
     // adds a custom time to the times config
 
@@ -209,8 +209,7 @@
         result['nightEnd'] = result['astronomicalDawn'];
         result['night'] = result['astronomicalDusk'];
         result['nightStart'] = result['astronomicalDusk'];
-        result['dawn'] = result['civilDawn'];
-        result['goldenHourStart'] = result['goldenHour'];
+        result['goldenHour'] = result['goldenHourStart'];
         return result;
     };
 
