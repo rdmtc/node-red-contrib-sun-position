@@ -58,7 +58,7 @@ function errorHandler(node, err, messageText, stateText) {
 };
 /*******************************************************************************************************/
 function getTimeNumber(date) {
-    return date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
+    return date.getUTCMilliseconds() + date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
 }
 /*******************************************************************************************************/
 /*function compareAzimuth(obj, name, azimuth, low, high, old) {

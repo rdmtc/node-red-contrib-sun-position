@@ -74,6 +74,7 @@ module.exports = function (RED) {
                 if (node.nextTimeData.error) {
                     errorStatus = "could not evaluate time";
                     node.error(node.nextTimeData.error);
+                    //console.log('1');
                     node.nextTime = null;
                     fixTimeStamp = true;
                 } else {
@@ -81,7 +82,7 @@ module.exports = function (RED) {
                     node.nextTime = node.nextTimeData.value;
                 }
             }
-            console.log(JSON.stringify(node.nextTimeData));
+            //console.log(JSON.stringify(node.nextTimeData));
 
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
@@ -90,6 +91,7 @@ module.exports = function (RED) {
                 if (node.nextTimeAltData.error) {
                     errorStatus = "could not evaluate alternate time";
                     node.error(node.nextTimeAltData.error);
+                    //console.log('2');
                     node.nextTimeAlt = null;
                 } else {
                     fixTimeStamp = fixTimeStamp && node.nextTimeAltData.fix;

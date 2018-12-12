@@ -43,8 +43,8 @@ module.exports = function (RED) {
             end: {},
             startSuffix: '',
             endSuffix: '',
-            altStartTime : (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
-            altEndTime : (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'))
+            altStartTime: (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
+            altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'))
         }
 
         if (result.altStartTime) {
@@ -96,9 +96,38 @@ module.exports = function (RED) {
             //node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
             result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
         }
-
         //node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
         return result;
+    }
+
+    function getScheduleTime(time) {
+        var now = new Date();
+        var millis = time.getTime() - now.getTime();
+        while (millis < 10) {
+            millis += 86400000; //24h
+        }
+        return millis;
+    }
+
+    function checkReSendMsgDelayed(isActive, node, time, msg) {
+        if (node.timeOutObj) {
+            clearTimeout(node.timeOutObj);
+            node.timeOutObj = null;
+        }
+        if (!msg.reSendMsgDelayed && isActive && time) {
+            node.lastMsgObj = RED.util.cloneMessage(msg);
+            node.lastMsgObj.reSendMsgDelayed = false;
+            let millis = getScheduleTime(time) + 10;
+            node.debug('timeout for resend last message ' + time + ' is in ' + millis + 'ms');
+            node.timeOutObj = setTimeout(() => {
+                node.debug('setTimeout triggered, resend last message as configured');
+                node.timeOutObj = null;
+                if (node.lastMsgObj) {
+                    node.lastMsgObj.reSendMsgDelayed = true;
+                    node.emit("input", node.lastMsgObj);
+                }
+            }, millis);
+        }
     }
 
     function withinTimeSwitchNode(config) {
@@ -111,6 +140,8 @@ module.exports = function (RED) {
         this.propertyEnd = config.propertyEnd || "";
         this.propertyStartType = config.propertyStartType || "none";
         this.propertyEndType = config.propertyEndType || "none";
+        this.timeOutObj = null;
+        this.lastMsgObj = null;
         var node = this;
 
         this.on('input', msg => {
@@ -118,7 +149,6 @@ module.exports = function (RED) {
                 //this.debug('starting ' + JSON.stringify(msg, Object.getOwnPropertyNames(msg)));
                 //this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
                 //this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
-
                 let result = calcWithinTimes(this, msg, config, true);
                 let now = new Date();
 
@@ -133,39 +163,43 @@ module.exports = function (RED) {
                     throw new Error('Error can not calc time!');
                 }
 
-                //this.debug(result.start.value + ' - ' + now + ' - ' + result.end.value);
                 let startNr = hlp.getTimeNumber(result.start.value);
                 let endNr = hlp.getTimeNumber(result.end.value);
                 let cmpNow = hlp.getTimeNumber(now);
-                //this.debug(startNr + ' - ' + cmpNow + ' - ' + endNr);
                 let status = (config.statusOut || 3);
                 if (startNr < endNr) {
-                    if (cmpNow >= startNr && cmpNow <= endNr) {
+                    if (cmpNow >= startNr && cmpNow < endNr) {
+                        this.debug('compare in time 1 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
                             fill: "green",
                             shape: "ring",
-                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
+                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
                         });
+                        checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
                 } else {
-                    if (!(cmpNow > endNr && cmpNow < startNr)) {
+                    if (!(cmpNow >= endNr && cmpNow < startNr)) {
+                        this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
                             fill: "green",
                             shape: "dot",
-                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix //🖅
+                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
                         });
+                        checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
                 }
+                this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                this.send([null, msg]);
                 setstate(this, result, status, {
                     fill: "yellow",
                     shape: "dot",
-                    text: '⛔ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
+                    text: '⛔' + result.startSuffix + now.toLocaleString() + result.endSuffix
                 });
-                this.send([null, msg]);
+                checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
                 hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
             }

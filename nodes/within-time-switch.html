@@ -2,7 +2,6 @@
     <div class="form-row">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="within-time-switch.label.position"></span></label>
         <input type="text" id="node-input-positionConfig">
-        <input type="hidden" id="node-input-outputs"/>
     </div>
     <hr>
     <div class="form-row">
@@ -82,9 +81,14 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-startEndOut"><i class="fa fa-play-circle"></i> <span data-i18n="within-time-switch.label.startEndOut"></span></label>
-        <input type="checkbox" id="node-input-startEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.startEndOutTxt"></span
+        <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
+        <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span
+    </div>
+    <div class="form-row">
+        <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
+        <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span
     </div>
     <hr>
     <div class="form-row">
@@ -325,12 +329,13 @@
                 value: 3,
                 required: false
             },
-            startEndOut: {
+            lastMsgOnStartOut: {
                 value: false,
                 required: false
             },
-            outputs: {
-                value: 2
+            lastMsgOnEndOut: {
+                value: false,
+                required: false
             }
         },
         icon: 'switch.png',
@@ -377,14 +382,6 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare: function () {
-            $("#node-input-startEndOut").change(function () {
-                if ($("#node-input-startEndOut").prop("checked") == true) {
-                    $("#node-input-outputs").val(3);
-                } else {
-                    $("#node-input-outputs").val(2);
-                }
-            });
-
             if (this.statusOut == "" || this.statusOut == undefined) {
                 this.statusOut = 3;
                 $("#node-input-statusOut").val(this.statusOut);
@@ -502,7 +499,6 @@
             //$("#node-input-endTimeAlt").change();
             $("#node-input-propertyStart").change();
             $("#node-input-propertyEnd").change();
-            $("#node-input-startEndOut").change();
         },
         oneditsave: function () {
             this.propertyStartType = $("#node-input-propertyStart").typedInput('type');

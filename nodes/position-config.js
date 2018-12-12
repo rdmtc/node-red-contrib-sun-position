@@ -135,7 +135,7 @@ module.exports = function (RED) {
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                         result.value = new Date(result.value);
                     } else if (dayx < 0) {
-                        node.debug('getSunTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + JSON.stringify(result));
+                        node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + JSON.stringify(result));
                         result.error = 'No valid day of week found!';
                     }
                 }
@@ -172,15 +172,14 @@ module.exports = function (RED) {
                         result.value = new Date(times[value]);
                     } else if (dayx < 0) {
                         result.error = 'no valid week day found!';
-                        node.debug('getMoonTime value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
+                        node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                     }
                 }
                 return result;
             }
 
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
-                //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
-                node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                //node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 let now = new Date();
                 let result = {
                     value: null,
@@ -195,7 +194,7 @@ module.exports = function (RED) {
                         result.fix = true;
                     } else if (vType === 'entered') {
                         result.value = hlp.getTimeOfText(String(value), offset, next, days, now);
-                        node.debug(String(value) + '  --  ' + result.value);
+                        //node.debug(String(value) + '  --  ' + result.value);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         //sun
@@ -209,7 +208,7 @@ module.exports = function (RED) {
                         let val = JSON.parse(value);
                         let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
                         result.value = hlp.hlp.getDateOfText(date, offset, next, days);
-                        node.debug(date + '  --  ' + result.value);
+                        //node.debug(date + '  --  ' + result.value);
                         result.fix = true;
                     } else {
                         //evaluateNodeProperty(value, type, node, msg, callback)
@@ -217,14 +216,14 @@ module.exports = function (RED) {
                         if (res) {
                             result.value = hlp.getDateOfText(String(res), offset, next, days);
                             result.fix = false; // not a fixed time, because can be changed
-                            node.debug(String(res) + '  --  ' + result.value);
+                            //node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;
                         }
                     }
                 } catch (err) {
                     result.error = "could not evaluate " + vType + '=' + value + ': ' + err.message;
-                    node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    //node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
                 }
 
                 if (!result.value) {
@@ -242,17 +241,17 @@ module.exports = function (RED) {
         /**************************************************************************************************************/
         this.getSunCalc = (date) => {
             if (typeof date === 'string') {
-                node.debug('date ' + date);
+                node.debug('getSunCalc for date ' + date);
                 let dto = new Date(date);
                 if (dto !== "Invalid Date" && !isNaN(dto)) {
-                    node.debug('date ' + dto);
                     date = dto;
                 }
             }
             if ((typeof date === 'undefined') || !(date instanceof Date)) {
-                node.debug('no date' + date);
+                node.debug('getSunCalc, no valid date ' + date + ' given');
                 date = new Date();
                 if (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000) {
+                    node.debug('getSunCalc, time difference since last output to low, do no calculation');
                     return this.lastSunCalc;
                 }
             }
