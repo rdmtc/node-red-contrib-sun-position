@@ -359,7 +359,7 @@ following Sun times can be choosen:
 
 SunBH is the angle of the sun below the horizon
 
-![nodes](images/sun-times.svg?raw=true)
+![sun times](images/sun-times.svg.png?raw=true)
 
 ##### remarks
 
