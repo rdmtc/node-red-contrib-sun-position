@@ -229,6 +229,10 @@
             return "{sun position}";
         } else if (t == "pdmCalcData") {
             return "{moon position}";
+        } else if (t == "pdsTime") {
+            let res = v.replace('astronomical', 'astro.').replace('nautical', 'naut.').replace('civil', '').replace(
+                'amateur', 'amat.').replace('blueHour', 'blHr.').replace('goldenHour', 'goHr.');
+            return clipValueLength(res, l);
         } else if (t == "pdmTime") {
             return "moon " + v;
         }
