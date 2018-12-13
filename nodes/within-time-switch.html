@@ -223,7 +223,7 @@
         } else if (t === 'msg') {
             return t + "." + clipValueLength(v, l);
         } else if (t === 'flow' || t === 'global') {
-            var result = RED.utils.parseContextKey(key);
+            var result = RED.utils.parseContextKey(v);
             return t + "." + clipValueLength(result.key, l);
         } else if (t == "pdsCalcData") {
             return "{sun position}";
@@ -234,7 +234,7 @@
                 'amateur', 'amat.').replace('blueHour', 'blHr.').replace('goldenHour', 'goHr.');
             return clipValueLength(res, l);
         } else if (t == "pdmTime") {
-            return "moon " + v;
+            return "moon" + v;
         }
         return clipValueLength(v, l);
     }
