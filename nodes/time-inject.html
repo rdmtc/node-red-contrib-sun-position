@@ -685,7 +685,8 @@
                     typeTimeSun,
                     typeTimeMoon,
                     "flow",
-                    "global"
+                    "global",
+                    "env"
                 ]
             });
             $("#node-input-time").on("change", function (type, value) {
@@ -722,7 +723,7 @@
             });
             $("#node-input-property").typedInput({
                 default: this.propertyType || "none",
-                types: [typeTimeNone, "flow", "global", "jsonata"]
+                types: [typeTimeNone, "flow", "global", "jsonata", "env"]
             });
             $("#node-input-property").on("change", function (type, value) {
                 let timeType = $("#node-input-time").typedInput("type");
@@ -747,7 +748,7 @@
             });
             $("#node-input-timeAlt").typedInput({
                 default: this.timeAltType || "entered",
-                types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global"]
+                types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
             });
             $(".wt-offset-time").spinner({
                 max: 1439,

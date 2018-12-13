@@ -476,11 +476,11 @@
             };
             $("#node-input-propertyStart").typedInput({
                 default: this.propertyStartType || 'none',
-                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata']
+                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
             });
             $("#node-input-propertyEnd").typedInput({
                 default: this.propertyEndType || 'none',
-                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata']
+                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
             });
             $("#node-input-propertyStart").on('change', function (type, value) {
                 if ($("#node-input-propertyStart").typedInput('type') === 'none') {
@@ -502,15 +502,15 @@
             });
             $("#node-input-startTime").typedInput({
                 default: this.startTimeType || 'entered',
-                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $("#node-input-endTime").typedInput({
                 default: this.endTimeType || 'entered',
-                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $("#node-input-startTimeAlt").typedInput({
                 default: this.startTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $("#node-input-startTimeAlt").on('change', function (type, value) {
                 if (($("#node-input-startTimeAlt").typedInput('type') === 'none') ||
@@ -522,7 +522,7 @@
             });
             $("#node-input-endTimeAlt").typedInput({
                 default: this.endTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global']
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $("#node-input-endTimeAlt").on('change', function (type, value) {
                 if (($("#node-input-endTimeAlt").typedInput('type') === 'none') ||

@@ -205,18 +205,12 @@ module.exports = function (RED) {
                         //moon
                         result = node.getMoonTime(now, value, next, days);
                         result.fix = true;
-                    } else if (vType === 'json') {
-                        let val = JSON.parse(value);
-                        let date = (val.now) ? val.now : ((val.date) ? val.date : ((val.time) ? val.time : ((val.ts) ? val.ts : "")));
-                        result.value = hlp.hlp.getDateOfText(date, offset, next, days);
-                        //node.debug(date + '  --  ' + result.value);
-                        result.fix = true;
                     } else {
-                        //evaluateNodeProperty(value, type, node, msg, callback)
+                        //can handle context, json, jsonata, env, ...
+                        result.fix = (vType === 'json'); // is not a fixed time if can be changed
                         let res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText(String(res), offset, next, days);
-                            result.fix = false; // not a fixed time, because can be changed
+                            result.value = hlp.getDateOfText(res, offset, next, days);
                             //node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = "could not evaluate " + vType + '.' + value;

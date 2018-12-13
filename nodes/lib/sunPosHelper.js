@@ -10,9 +10,9 @@ module.exports = {
     calcTimeValue,
     calcTimeValueUTC,
     getTimeOfText,
-    getTimeOfTextUTC,
     getDateOfText,
-    getDateOfTextUTC,
+    //getTimeOfTextUTC,
+    //getDateOfTextUTC,
     getTimeNumber,
     getNodeId
 };
@@ -194,21 +194,42 @@ function getTimeOfText(t, offset, next, days, date) {
 };
 /*******************************************************************************************************/
 function getDateOfText(date, offset, next, days) {
+    if (date == null) {
+        throw new Error('Could not evaluate as a valid Date or time. Value is null!');
+    }
+    if ( typeof date === 'object') {
+        if ( x.hasOwnProperty('now') ) {
+            date = date.now;
+        } else if ( x.hasOwnProperty('date') ) {
+            date = date.date;
+        } else if ( x.hasOwnProperty('time') ) {
+            date = date.time;
+        } else if ( x.hasOwnProperty('ts') ) {
+            date = date.ts;
+        } else if ( x.hasOwnProperty('lc') ) {
+            date = date.lc;
+        } else if ( x.hasOwnProperty('value') ) {
+            date = date.lc;
+        }
+    }
+    var re = /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/;
+    if (re.test(String(date))) {
+        let result = getTimeOfText(String(date), offset, next, days);
+        if (result != null) {
+            return result;
+        }
+    }
     if (!isNaN(date)) {
         date = Number(date);
     }
     let dto = new Date(date);
     if (dto !== "Invalid Date" && !isNaN(dto)) {
         return calcTimeValue(dto, offset, next, days);
-    } else {
-        let result = getTimeOfText(String(date), offset, next, days);
-        if (result != null) {
-            return result;
-        }
     }
     throw new Error("could not evaluate " + String(date) + ' as a valid Date or time.');
 };
 /*******************************************************************************************************/
+/*
 function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
     //console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
     let d = date || new Date();
@@ -227,6 +248,7 @@ function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
     return null;
 };
 /*******************************************************************************************************/
+/*
 function getDateOfTextUTC(date, tzOffset, offset, next, days) {
     if (!isNaN(date)) {
         date = Number(date);
@@ -241,4 +263,4 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
         }
     }
     throw new Error("could not evaluate " + String(date) + ' as a valid Date or time.');
-};
+};/** **/

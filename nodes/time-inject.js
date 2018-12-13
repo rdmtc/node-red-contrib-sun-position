@@ -58,8 +58,8 @@ module.exports = function (RED) {
 
         function doCreateTimeout(node, msg) {
             let errorStatus = '';
-            let fixTimeStamp = false;
             let isAltFirst = false;
+            let isFixedTime = true;
             node.nextTime = null;
             node.nextTimeAlt = null;
 
@@ -78,10 +78,10 @@ module.exports = function (RED) {
                     node.debug(util.inspect(node.nextTimeData));
                     //console.log('1');
                     node.nextTime = null;
-                    fixTimeStamp = true;
+                    isFixedTime = false;
                 } else {
-                    fixTimeStamp = node.nextTimeData.fix;
                     node.nextTime = node.nextTimeData.value;
+                    isFixedTime = node.nextTimeData.fix;
                 }
             }
             //console.log(util.inspect(node.nextTimeData));
@@ -95,9 +95,10 @@ module.exports = function (RED) {
                     node.error(node.nextTimeAltData.error);
                     //console.log('2');
                     node.nextTimeAlt = null;
+                    isFixedTime = false;
                 } else {
-                    fixTimeStamp = fixTimeStamp && node.nextTimeAltData.fix;
                     node.nextTimeAlt = node.nextTimeAltData.value;
+                    isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
             if (node.nextTime && !errorStatus) {
@@ -158,16 +159,24 @@ module.exports = function (RED) {
                 } else {
                     errorStatus = "invalid calculated time";
                     node.nextTime = null;
-                    fixTimeStamp = false;
                 }
-            } else {
-                fixTimeStamp = false;
             }
+
+            if (!isFixedTime && !node.intervalObj) {
+                node.intervalObj = setInterval(() => {
+                    node.debug('retrigger timecalc');
+                    doCreateTimeout(node, msg);
+                }, node.recalcTime);
+            } else if (isFixedTime && node.intervalObj) {
+                clearInterval(node.intervalObj);
+                node.intervalObj = null;
+            }
+
             if (errorStatus) {
                 node.status({
                     fill: "red",
                     shape: "dot",
-                    text: errorStatus
+                    text: errorStatus + ((node.intervalObj) ? ' 🖩' : '')
                 });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
@@ -191,16 +200,6 @@ module.exports = function (RED) {
                 });
             } else {
                 node.status({});
-            }
-
-            if (!fixTimeStamp && !node.intervalObj) {
-                node.intervalObj = setInterval(() => {
-                    node.debug('retrigger timecalc');
-                    doCreateTimeout(node, msg);
-                }, node.recalcTime);
-            } else if (fixTimeStamp && node.intervalObj) {
-                clearInterval(node.intervalObj);
-                node.intervalObj = null;
             }
         }
 
