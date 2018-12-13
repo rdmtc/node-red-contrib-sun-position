@@ -406,11 +406,11 @@
             } else if (this.startTime && this.endTime) {
                 return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
                         this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-                        (lastMsgOnStartOut) ? '⇻ - ' : ' - '
+                        ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ')
                     +
                     getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
                         this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
-                        (lastMsgOnEndOut) ? '⇻ - ' : '';
+                        ((this.lastMsgOnEndOut) ? '⨧' : '');
             }
             return 'within-time';
         },
