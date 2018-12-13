@@ -4,6 +4,7 @@
  https://github.com/mourner/suncalc
 */
 'use strict';
+const util = require('util');
 
 (function () {
     'use strict';
@@ -230,7 +231,7 @@
             let time = sunTimesAlternate[i];
             result[time[0]] = result[time[1]];
         }
-        //console.log(JSON.stringify(result));
+        //console.log(util.inspect(result));
 
         return result;
     };

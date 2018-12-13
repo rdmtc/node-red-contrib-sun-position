@@ -2,6 +2,7 @@
  * sun-position:
  *********************************************/
 "use strict";
+const util = require('util');
 
 module.exports = {
     errorHandler,
@@ -27,7 +28,7 @@ module.exports = {
 /* exported functions                                                                                  */
 /*******************************************************************************************************/
 function getNodeId(node) {
-    //node.debug(node.debug(JSON.stringify(srcNode, Object.getOwnPropertyNames(srcNode))));
+    //node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
 /*******************************************************************************************************/
@@ -44,7 +45,7 @@ function errorHandler(node, err, messageText, stateText) {
 
     if (node) {
         node.error(messageText);
-        node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
         node.status({
             fill: "red",
             shape: "ring",
@@ -52,7 +53,7 @@ function errorHandler(node, err, messageText, stateText) {
         });
     } else if (console) {
         console.error(messageText);
-        console.error(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        console.error(util.inspect(err, Object.getOwnPropertyNames(err)));
     }
     return false;
 };

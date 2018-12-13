@@ -14,7 +14,8 @@
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
-This node are for getting sun and moon position or to control a flow by sun or moon position. This can be used for smart home.
+This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variations) and much more.
+Addidional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
 
 ![nodes](images/appearance1.png?raw=true)
 
@@ -49,6 +50,16 @@ This node are for getting sun and moon position or to control a flow by sun or m
 ## Quick Start
 
 tbd
+
+## General
+
+### Saving resources
+
+The nodes are designed to do not calculate time events with every arriving message or with an interval every x time. This is to be able to handle a huge amount of messages also on even on computers with low resources.
+
+### second based accuracy
+
+The nodes are designed to be accurate to seconds. This means it was designed to turn on/off at exact given second. Other timers often work using intervals where they check your schedule only once a minute or even less. This means when you want something to come on at 08:00am, it may actually not come on until 30 seconds later. This nodes does not have this problem, it will come on at exactly 08:00:00am.
 
 ## Implemented Nodes
 
@@ -281,11 +292,16 @@ A simple node that routes messages depending on the time. If the current time fa
 
 - **Position** defines the current position
 - **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
+  - **Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
 - **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
+  - **Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
 - **Property** _optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.
 - **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
+  - **End time** alternate start time
+  - **Offset** offset for the alternate start time
 - **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
-
+  - **End time** alternate end time
+  - **Offset** offset for the alternate end time
 - **Status** here can be adjusted which status should be displayed under the node.
   - this has the following posibilities:
     - **none** - no status will be displayed - **only errors** - if an error occures it will be displayed
@@ -297,6 +313,9 @@ A simple node that routes messages depending on the time. If the current time fa
       if the message was pass throught the timestamp of this message will be shown.
       ![within-time-status-send](images/within-time-status-message-send.png?raw=true)
     - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
+- **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point.
+- **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point.
+
 
 ### Times definitions
 
@@ -309,7 +328,7 @@ manual timestamps can be entered as one of the following formats:
 - `00:00 ... 23:59` 24h Format
 - `00:00:00 ... 23:59:00` 24h Format with seconds
 - `00:00pm ... 12:59pm` 12h Format
-- `00:00:00pm ... 12:59:00pm` 12h Format
+- `00:00:00pm ... 12:59:00pm` 12h Format with seconds
 
 #### sun times
 
@@ -369,14 +388,18 @@ The following time parameters are exists in the output for backwart compatibilit
 
 moon rise and moon set can be used
 
-#### message, flow or global property
+#### message, flow or global property or JSONATA expression
 
-any message, flow or global property. It must contain a timestamp as one of the following formats:
+any message, flow or global property which contain any of the following types:
 
+- Integer which is a [Unix Time Stamp](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16) representing the number of milliseconds since January 1, 1970, 00:00:00 UTC, with leap seconds ignored.
+- String value representing a valid JavaScript date-string.
+
+String as one of the following formats:
 - `00:00 ... 23:59` 24h Format
 - `00:00:00 ... 23:59:00` 24h Format with seconds
 - `00:00pm ... 12:59pm` 12h Format
-- `00:00:00pm ... 12:59:00pm` 12h Format
+- `00:00:00pm ... 12:59:00pm` 12h Format with seconds
 
 **Offsets:**
 The start and end time can have an offset. This is specified in seconds,minutes or hours:

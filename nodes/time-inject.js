@@ -2,6 +2,7 @@
  * within-time-switch:
  *********************************************/
 "use strict";
+const util = require('util');
 
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
@@ -14,7 +15,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        //this.debug('initialize timeInjectNode ' + JSON.stringify(config));
+        //this.debug('initialize timeInjectNode ' + util.inspect(config));
 
         this.payload = config.payload || '';
         this.payloadType = config.payloadType || 'none';
@@ -74,6 +75,7 @@ module.exports = function (RED) {
                 if (node.nextTimeData.error) {
                     errorStatus = "could not evaluate time";
                     node.error(node.nextTimeData.error);
+                    node.debug(util.inspect(node.nextTimeData));
                     //console.log('1');
                     node.nextTime = null;
                     fixTimeStamp = true;
@@ -82,7 +84,7 @@ module.exports = function (RED) {
                     node.nextTime = node.nextTimeData.value;
                 }
             }
-            //console.log(JSON.stringify(node.nextTimeData));
+            //console.log(util.inspect(node.nextTimeData));
 
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
@@ -130,7 +132,7 @@ module.exports = function (RED) {
                                     type: node.propertyType,
                                     value: node.property
                                 }));
-                                node.debug(JSON.stringify(err));
+                                node.debug(util.inspect(err));
                             }
                             if (needsRecalc) {
                                 try {
@@ -215,7 +217,7 @@ module.exports = function (RED) {
         this.on('input', msg => {
             try {
                 doCreateTimeout(node, msg);
-                //node.debug('input ' + JSON.stringify(msg));
+                //node.debug('input ' + util.inspect(msg));
                 let plType = 'date';
                 let plValue = '';
 

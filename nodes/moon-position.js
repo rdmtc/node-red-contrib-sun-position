@@ -3,9 +3,10 @@
  *********************************************/
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const util = require('util');
 //const hlp = '/lib/sunPosHelper.js';
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function moonPositionNode(config) {
@@ -17,7 +18,7 @@ module.exports = function(RED) {
         this.azimuthPos = {};
         var node = this;
 
-        this.on('input', function(msg) {
+        this.on('input', function (msg) {
             try {
                 var ports = new Array(this.rules.length);
                 ports[0] = {
@@ -78,7 +79,7 @@ module.exports = function(RED) {
                     }
                 } catch (err) {
                     node.error("could not evaluate " + vType + '.' + value + ': ' + err.message);
-                    node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
             return result;

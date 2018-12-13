@@ -19,6 +19,8 @@
     }],
     "keywords": [
         "node-red",
+        "nodes",
+        "flow",
         "sun-position",
         "moon-position",
         "heavenly body",
@@ -34,7 +36,16 @@
         "router",
         "switch",
         "inject",
-        "time"
+        "timer",
+        "time",
+        "timeswitch",
+        "timerswitch",
+        "time-range",
+        "time-range-switch",
+        "timecheck",
+        "compare",
+        "clock",
+        "schedule"
     ],
     "homepage": "https://github.com/HM-RedMatic/node-red-contrib-sun-position",
     "license": "Apache-2.0",
@@ -53,6 +64,9 @@
             "within-time-switch": "nodes/within-time-switch.js",
             "time-inject": "nodes/time-inject.js"
         }
+    },
+    "dependencies": {
+        "util": ">=0.10.0"
     },
     "extensions": [
         "js",

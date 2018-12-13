@@ -2,6 +2,7 @@
  * within-time-switch:
  *********************************************/
 "use strict";
+const util = require('util');
 
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
@@ -59,7 +60,7 @@ module.exports = function (RED) {
                     type: node.propertyStartType,
                     value: node.propertyStart
                 }));
-                node.debug(JSON.stringify(err));
+                node.debug(util.inspect(err));
             }
         }
 
@@ -75,7 +76,7 @@ module.exports = function (RED) {
                     type: node.propertyEndType,
                     value: node.propertyEnd
                 }));
-                node.debug(JSON.stringify(err));
+                node.debug(util.inspect(err));
             }
         }
 
@@ -96,7 +97,7 @@ module.exports = function (RED) {
             //node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
             result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
         }
-        //node.debug(JSON.stringify(result, Object.getOwnPropertyNames(result)));
+        //node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
         return result;
     }
 
@@ -134,7 +135,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        //this.debug('initialize withinTimeSwitchNode ' + JSON.stringify(config));
+        //this.debug('initialize withinTimeSwitchNode ' + util.inspect(config));
 
         this.propertyStart = config.propertyStart || "";
         this.propertyEnd = config.propertyEnd || "";
@@ -146,9 +147,9 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                //this.debug('starting ' + JSON.stringify(msg, Object.getOwnPropertyNames(msg)));
-                //this.debug('self ' + JSON.stringify(this, Object.getOwnPropertyNames(this)));
-                //this.debug('config ' + JSON.stringify(config, Object.getOwnPropertyNames(config)));
+                //this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
+                //this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
+                //this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
                 let result = calcWithinTimes(this, msg, config, true);
                 let now = new Date();
 

@@ -5,6 +5,7 @@
 
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const util = require('util');
 const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 
 /*******************************************************************************************************/
@@ -135,11 +136,11 @@ module.exports = function (RED) {
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                         result.value = new Date(result.value);
                     } else if (dayx < 0) {
-                        node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + JSON.stringify(result));
+                        node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
                         result.error = 'No valid day of week found!';
                     }
                 }
-                //node.debug('getSunTime result=' + JSON.stringify(result));
+                //node.debug('getSunTime result=' + util.inspect(result));
                 return result;
             }
             this.getMoonTimes = () => {
@@ -223,7 +224,7 @@ module.exports = function (RED) {
                     }
                 } catch (err) {
                     result.error = "could not evaluate " + vType + '=' + value + ': ' + err.message;
-                    //node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    //node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
 
                 if (!result.value) {

@@ -201,6 +201,40 @@
 </script>
 
 <script type="text/javascript">
+    function clipValueLength(v, l) {
+        if (v.length > l) {
+            return v.substring(0, (l - 3)) + "...";
+        }
+        return v;
+    }
+
+    function getValueLabel(t, v, l) {
+        l = l || 15;
+        if (t === "string" || t === "str") {
+            if (v == "") {
+                return v;
+            }
+            return '"' + clipValueLength(v, l) + '"';
+        } else if (t === "num" || t === "bool") {
+            if (v == "") {
+                return v;
+            }
+            return "" + v;
+        } else if (t === 'msg') {
+            return t + "." + clipValueLength(v, l);
+        } else if (t === 'flow' || t === 'global') {
+            var result = RED.utils.parseContextKey(key);
+            return t + "." + clipValueLength(result.key, l);
+        } else if (t == "pdsCalcData") {
+            return "{sun position}";
+        } else if (t == "pdmCalcData") {
+            return "{moon position}";
+        } else if (t == "pdmTime") {
+            return "moon " + v;
+        }
+        return clipValueLength(v, l);
+    }
+
     RED.nodes.registerType('within-time-switch', {
         category: 'function',
         color: '#f37a33',
@@ -341,7 +375,7 @@
         icon: 'switch.png',
         inputs: 1,
         outputs: 2,
-        outputLabels: ["within time", "outside time", "onStart/End"],
+        outputLabels: ["within time", "out of time"],
         label: function () {
             const getId = (type, value, offset) => {
                 let suffix = '';
@@ -350,12 +384,11 @@
                 } else if (offset && offset < 0) {
                     suffix = '↶';
                 }
-                if (type === 'msg' || type === 'flow' || type === 'global') {
-                    return type + '.' + value + suffix;
-                } else if (type === 'pdmTime') {
-                    return 'moon ' + value + suffix;
+                let v = getValueLabel(type, value, 12);
+                if (v == "") {
+                    return this._("time-inject.label.blank");
                 }
-                return value + suffix;
+                return v + suffix;
             }
             const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                 if (property !== 'none' && property !== '' && value2) {

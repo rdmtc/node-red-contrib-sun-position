@@ -255,6 +255,40 @@
 </script>
 
 <script type="text/javascript">
+    function clipValueLength(v, l) {
+        if (v.length > l) {
+            return v.substring(0, (l - 3)) + "...";
+        }
+        return v;
+    }
+
+    function getValueLabel(t, v, l) {
+        l = l || 15;
+        if (t === "string" || t === "str") {
+            if (v == "") {
+                return v;
+            }
+            return '"' + clipValueLength(v, l) + '"';
+        } else if (t === "num" || t === "bool") {
+            if (v == "") {
+                return v;
+            }
+            return "" + v;
+        } else if (t === 'msg') {
+            return t + "." + clipValueLength(v, l);
+        } else if (t === 'flow' || t === 'global') {
+            var result = RED.utils.parseContextKey(key);
+            return t + "." + clipValueLength(result.key, l);
+        } else if (t == "pdsCalcData") {
+            return "{sun position}";
+        } else if (t == "pdmCalcData") {
+            return "{moon position}";
+        } else if (t == "pdmTime") {
+            return "moon " + v;
+        }
+        return clipValueLength(v, l);
+    }
+
     RED.nodes.registerType("time-inject", {
         category: "input",
         color: "#a6bbcf",
@@ -388,7 +422,37 @@
         icon: "injectSun.png",
         inputs: 0,
         outputs: 1,
-        outputLabels: ["once per minute", "only on change"],
+        outputLabels: function (index) {
+            var labels = {
+                str: "string",
+                num: "number",
+                bool: "boolean",
+                json: "object",
+                flow: "flow context",
+                global: "global context",
+                bin: "binary data",
+                date: "timestamp",
+                env: "Enviroment variable",
+                jsonata: "result of jsonata expression",
+                pdmTime: "time",
+                typeSunCalc: "object of sun position",
+                typeMoonCalc: "object of moon position"
+            };
+            var lab = labels[this.payloadType] || this.payloadType;
+            if (lab === "object") {
+                try {
+                    lab = typeof JSON.parse(this.payload);
+                    if (lab === "object") {
+                        if (Array.isArray(JSON.parse(this.payload))) {
+                            lab = "Array";
+                        }
+                    }
+                } catch (e) {
+                    lab = "Invalid JSON Object";
+                }
+            }
+            return lab;
+        },
         label: function () {
             if (this.name) {
                 return this.name;
@@ -398,24 +462,15 @@
             if (this.once) {
                 prefix += " ¹";
             }
-            const getId = (type, value, offset) => {
+            const getId = (type, value, offset, maxLength) => {
                 let suffix = "";
                 if (offset && offset > 0) {
                     suffix = "↷";
                 } else if (offset && offset < 0) {
                     suffix = "↶";
                 }
-                if (type === "string" || type === "str") {
-                    if (value == "") {
-                        return this._("time-inject.label.blank");
-                    }
-                    return '"' + value + '"' + suffix;
-                } else if (type === "num" || type === "bool") {
-                    if (value == "") {
-                        return this._("time-inject.label.blank");
-                    }
-                    return value + suffix;
-                } else if (type === "jsonata") {
+
+                if (type === "jsonata") {
                     if (value.length < 15) {
                         return value + suffix;
                     }
@@ -429,16 +484,13 @@
                     return this._("time-inject.label.binary") + suffix;
                 } else if (type === "date") {
                     return this._("time-inject.label.timestamp") + suffix;
-                } else if (type === "msg" || type === "flow" || type === "global") {
-                    return type + "." + value + suffix;
-                } else if (type == "pdsCalcData") {
-                    return "{sun position}" + suffix;
-                } else if (type == "pdmCalcData") {
-                    return "{moon position}" + suffix;
-                } else if (type == "pdmTime") {
-                    return "moon " + value + suffix;
                 }
-                return value + suffix;
+
+                let v = getValueLabel(type, value, maxLength);
+                if (v == "") {
+                    return this._("time-inject.label.blank");
+                }
+                return v + suffix;
             };
             const getTimeId = () => {
                 let suffix = "";
@@ -501,7 +553,7 @@
                 if (timeTxt.length > 24) {
                     result += timeTxt + " =...";
                 } else {
-                    result += timeTxt + " = " + getId(this.payloadType, this.payload);
+                    result += timeTxt + " = " + getId(this.payloadType, this.payload, 12);
                 }
             }
             if (this.topic && this.topic.length + result.length <= 32) {
@@ -762,10 +814,7 @@
                     var key = RED.utils.parseContextKey(payload);
                     payload = this.payloadType + "." + key.key;
                 }
-                var label = this.name || payload;
-                if (label.length > 30) {
-                    label = label.substring(0, 50) + "...";
-                }
+                var label = clipValueLength(this.name || payload, 30);
                 label = label
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")

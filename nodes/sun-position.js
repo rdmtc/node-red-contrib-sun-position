@@ -3,6 +3,7 @@
  *********************************************/
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const util = require('util');
 
 module.exports = function (RED) {
     "use strict";
@@ -35,7 +36,7 @@ module.exports = function (RED) {
                     let low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     let high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
                     let chk = hlp.compareAzimuth(ports[0].payload.azimuth, low, high);
-                    let chg =  (node.azimuthPos[i] !== chk);
+                    let chg = (node.azimuthPos[i] !== chk);
                     ports[0].payload.pos.push(chk);
                     ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
@@ -77,7 +78,7 @@ module.exports = function (RED) {
                     }
                 } catch (err) {
                     node.error("could not evaluate " + vType + '.' + value + ': ' + err.message);
-                    node.debug(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
             return result;
