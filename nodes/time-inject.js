@@ -119,6 +119,10 @@ module.exports = function (RED) {
                         }
                     }
                     node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
+                        let msg = {
+                            type: 'start',
+                            timeData: {}
+                        };
                         node.timeOutObj = null;
                         let useAlternateTime = false;
                         if (isAlt) {
@@ -133,7 +137,7 @@ module.exports = function (RED) {
                                     type: node.propertyType,
                                     value: node.property
                                 }));
-                                node.debug(util.inspect(err));
+                                node.log(util.inspect(err));
                             }
                             if (needsRecalc) {
                                 try {
@@ -144,10 +148,6 @@ module.exports = function (RED) {
                                 return;
                             }
                         }
-                        let msg = {
-                            type: 'start',
-                            timeData: {}
-                        };
                         if (useAlternateTime && node.nextTimeAltData) {
                             msg.timeData = node.nextTimeAltData;
                         } else if (node.nextTimeData) {

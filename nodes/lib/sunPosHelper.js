@@ -45,7 +45,7 @@ function errorHandler(node, err, messageText, stateText) {
 
     if (node) {
         node.error(messageText);
-        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         node.status({
             fill: "red",
             shape: "ring",
