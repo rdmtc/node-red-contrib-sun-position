@@ -103,13 +103,13 @@ module.exports = function (RED) {
             }
             if (node.nextTime && !errorStatus) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
-                    node.debug(node.nextTime);
+                    //node.debug(node.nextTime);
                     hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
                     return;
                 }
                 let millis = node.getScheduleTime(node.nextTime);
                 if (millis > 500) {
-                    node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
+                    //node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                     let isAlt = (node.nextTimeAlt);
                     if (isAlt) {
                         let millisAlt = node.getScheduleTime(node.nextTimeAlt);
@@ -153,7 +153,7 @@ module.exports = function (RED) {
                         } else if (node.nextTimeData) {
                             msg.timeData = node.nextTimeData;
                         }
-                        node.debug('redo doCreateTimeout');
+                        //node.debug('redo doCreateTimeout');
                         node.emit("input", msg);
                     }, millis, isAlt, isAltFirst);
                 } else {
@@ -164,7 +164,7 @@ module.exports = function (RED) {
 
             if (!isFixedTime && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
-                    node.debug('retrigger timecalc');
+                    //node.debug('retrigger timecalc');
                     doCreateTimeout(node, msg);
                 }, node.recalcTime);
             } else if (isFixedTime && node.intervalObj) {
