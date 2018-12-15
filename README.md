@@ -292,16 +292,16 @@ A simple node that routes messages depending on the time. If the current time fa
 
 - **Position** defines the current position
 - **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
-  - **Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
+  - **Start Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
 - **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
-  - **Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
+  - **End Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
 - **Property** _optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.
 - **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
-  - **End time** alternate start time
-  - **Offset** offset for the alternate start time
+  - **Start time** alternate start time
+  - **Start Offset** offset for the alternate start time
 - **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
   - **End time** alternate end time
-  - **Offset** offset for the alternate end time
+  - **End Offset** offset for the alternate end time
 - **Status** here can be adjusted which status should be displayed under the node.
   - this has the following posibilities:
     - **none** - no status will be displayed - **only errors** - if an error occures it will be displayed
@@ -313,8 +313,8 @@ A simple node that routes messages depending on the time. If the current time fa
       if the message was pass throught the timestamp of this message will be shown.
       ![within-time-status-send](images/within-time-status-message-send.png?raw=true)
     - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
-- **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point.
-- **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point.
+- **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
+- **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
 
 ### Times definitions
