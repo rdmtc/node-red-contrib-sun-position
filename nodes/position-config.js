@@ -118,7 +118,7 @@ module.exports = function (RED) {
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                         result.value = hlp.addOffset(new Date(result.value), offset);
                     } else if (dayx < 0) {
-                        node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
+                        //node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
                         result.error = 'No valid day of week found!';
                     }
                 }
@@ -133,19 +133,19 @@ module.exports = function (RED) {
                 return res;
             }
             this.getMoonTime = (now, value, offset, next, days) => {
-                node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                //node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 let result = moonTimesCheck(node, now);
-                node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
+                //node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
                 result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset);
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = hlp.addOffset(new Date(node.moonTimesTomorow[value]), offset);
-                        node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
+                        //node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
                     } else if (next > 1) {
                         let date = (new Date()).addDays(next);
                         let times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
                         result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
-                        node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
+                        //node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
@@ -154,13 +154,13 @@ module.exports = function (RED) {
                         let date = (new Date()).addDays(dayx);
                         let times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
                         result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
-                        node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
+                        //node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     } else if (dayx < 0) {
                         result.error = 'No valid day of week found!';
-                        node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
+                        //node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                     }
                 }
-                node.debug('getMoonTime result' + util.inspect(result));
+                //node.debug('getMoonTime result' + util.inspect(result));
                 return result;
             }
 
@@ -222,17 +222,17 @@ module.exports = function (RED) {
         /**************************************************************************************************************/
         this.getSunCalc = (date) => {
             if (typeof date === 'string') {
-                node.debug('getSunCalc for date ' + date);
+                //node.debug('getSunCalc for date ' + date);
                 let dto = new Date(date);
                 if (dto !== "Invalid Date" && !isNaN(dto)) {
                     date = dto;
                 }
             }
             if ((typeof date === 'undefined') || !(date instanceof Date)) {
-                node.debug('getSunCalc, no valid date ' + date + ' given');
+                //node.debug('getSunCalc, no valid date ' + date + ' given');
                 date = new Date();
                 if (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000) {
-                    node.debug('getSunCalc, time difference since last output to low, do no calculation');
+                    //node.debug('getSunCalc, time difference since last output to low, do no calculation');
                     return this.lastSunCalc;
                 }
             }
@@ -346,7 +346,7 @@ module.exports = function (RED) {
         } /* */
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('sunTimesRefresh - calculate sun times');
+            //node.debug('sunTimesRefresh - calculate sun times');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
@@ -367,7 +367,7 @@ module.exports = function (RED) {
         }
 
         function moonTimesRefresh(node, today, tomorrow, dayId) {
-            node.debug('moonTimesRefresh - calculate moon times');
+            //node.debug('moonTimesRefresh - calculate moon times');
             node.moonTimesToday = sunCalc.getMoonTimes(today, node.latitude, node.longitude, true);
             if (!node.moonTimesToday.alwaysUp) {
                 //true if the moon never rises/sets and is always above the horizon during the day
@@ -404,7 +404,7 @@ module.exports = function (RED) {
         }
 
         function initTimes(node) {
-            node.debug('initTimes');
+            //node.debug('initTimes');
             let today = new Date();
             let dayId = getUTCDayId(today);
             let tomorrow = today.addDays(1);
