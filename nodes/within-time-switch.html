@@ -70,7 +70,7 @@
         </select>
     </div>
     <hr>
-    <div class="form-row time-row">
+    <div class="form-row debug-row">
         <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
         <select id="node-input-statusOut"  style="width:70%;" >
             <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
@@ -80,15 +80,15 @@
             <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
         </select>
     </div>
-    <div class="form-row">
+    <div class="form-row msg-start-out-row">
         <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
         <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span
+        <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
     </div>
-    <div class="form-row">
+    <div class="form-row msg-end-out-row">
         <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
         <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span
+        <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
     </div>
     <hr>
     <div class="form-row">
@@ -420,6 +420,33 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare: function () {
+
+            function checkMsgOnStartOut() {
+                let valStart = $("#node-input-startTime").typedInput('type');
+                let valStartAlt = $("#node-input-startTimeAlt").typedInput('type');
+                let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
+console.log('start = ' + valStart + ' alt=' + valStartAlt + ' pos=' + vals.indexOf(valStart));
+
+                if (vals.indexOf(valStart) >=0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=0)) {
+                    $(".msg-start-out-row").show();
+                } else {
+                    $(".msg-start-out-row").hide();
+                }
+            }
+
+            function checkMsgOnEndOut() {
+                let valEnd = $("#node-input-endTime").typedInput('type');
+                let valEndAlt = $("#node-input-endTimeAlt").typedInput('type');
+                let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
+console.log('end = ' + valEnd + ' alt=' + valEndAlt + ' pos=' + vals.indexOf(valEnd));
+
+                if (vals.indexOf(valEnd) >=0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >=0)) {
+                    $(".msg-end-out-row").show();
+                } else {
+                    $(".msg-end-out-row").hide();
+                }
+            }
+
             if (this.statusOut == "" || this.statusOut == undefined) {
                 this.statusOut = 3;
                 $("#node-input-statusOut").val(this.statusOut);
@@ -432,13 +459,13 @@
 
             let typeTimeNone = {
                 value: "none",
-                label: "not used",
+                label: "not used ",
                 icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
                 hasValue: false
             };
             let typeTime = {
                 value: "entered",
-                label: "timestamp",
+                label: "timestamp ",
                 icon: "icons/node-red-contrib-sun-position/inputTypeTime.png",
                 hasValue: true,
                 validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/
@@ -475,6 +502,7 @@
                 icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
                 options: ['rise', 'set']
             };
+
             $("#node-input-propertyStart").typedInput({
                 default: this.propertyStartType || 'none',
                 types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
@@ -501,37 +529,46 @@
                 }
                 $("#node-input-endTimeAlt").change();
             });
+
             $("#node-input-startTime").typedInput({
                 default: this.startTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
+            });
+            $('#node-input-startTime').on('change focus focusin focusout', function (type, value) {
+                checkMsgOnStartOut(type, value);
             });
             $("#node-input-endTime").typedInput({
                 default: this.endTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
+            $('#node-input-endTime').on('change focus focusin focusout', function (type, value) {
+                checkMsgOnEndOut(type, value);
+            });
             $("#node-input-startTimeAlt").typedInput({
                 default: this.startTimeAltType || 'none',
                 types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $("#node-input-startTimeAlt").on('change', function (type, value) {
+            $("#node-input-startTimeAlt").on('change focus focusin focusout', function (type, value) {
                 if (($("#node-input-startTimeAlt").typedInput('type') === 'none') ||
                     ($("#node-input-propertyStart").typedInput('type') === 'none')) {
                     $(".alternate-time-start-offset").hide();
                 } else {
                     $(".alternate-time-start-offset").show();
                 }
+                checkMsgOnStartOut();
             });
             $("#node-input-endTimeAlt").typedInput({
                 default: this.endTimeAltType || 'none',
                 types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $("#node-input-endTimeAlt").on('change', function (type, value) {
+            $("#node-input-endTimeAlt").on('change focus focusin focusout', function (type, value) {
                 if (($("#node-input-endTimeAlt").typedInput('type') === 'none') ||
                     ($("#node-input-propertyEnd").typedInput('type') === 'none')) {
                     $(".alternate-time-end-offset").hide();
                 } else {
                     $(".alternate-time-end-offset").show();
                 }
+                checkMsgOnEndOut();
             });
             //$("#node-input-startTimeAlt").change();
             //$("#node-input-endTimeAlt").change();
