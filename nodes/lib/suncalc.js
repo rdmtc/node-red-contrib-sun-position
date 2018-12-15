@@ -178,7 +178,7 @@ const util = require('util');
 
     // calculates sun times for a given date and latitude/longitude
 
-    SunCalc.getTimes = function (date, lat, lng, asArray) {
+    SunCalc.getTimes = function (date, lat, lng) {
 
         let lw = rad * -lng,
             phi = rad * lat,

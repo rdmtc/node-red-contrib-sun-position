@@ -7,6 +7,8 @@ const util = require('util');
 module.exports = {
     errorHandler,
     compareAzimuth,
+    addOffset,
+    calcDayOffset,
     calcTimeValue,
     calcTimeValueUTC,
     getTimeOfText,
@@ -96,12 +98,36 @@ function compareAzimuth(azimuth, low, high) {
     }
     return false;
 };
+
+/*******************************************************************************************************/
+function addOffset(d, offset) {
+    if (offset && !isNaN(offset) && offset !== 0) {
+        return new Date(d.getTime() + offset * 1000); //- does not work
+    }
+    return d;
+}
+/*******************************************************************************************************/
+function calcDayOffset(days, daystart) {
+    let dayx = 0;
+    let daypos = daystart;
+    while (days.indexOf(daypos) === -1) {
+        dayx += 1;
+        if ((daystart + dayx) > 6) {
+            daystart = (dayx * -1);
+        }
+        daypos = daystart + dayx;
+
+        if (dayx > 7) {
+            dayx = -1;
+            break;
+        }
+    }
+    return dayx;
+}
 /*******************************************************************************************************/
 function calcTimeValue(d, offset, next, days) {
     //console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    if (offset && !isNaN(offset) && offset !== 0) {
-        d = new Date(d.getTime() + offset * 1000); //- does not work
-    }
+    d = addOffset(d, offset);
     if (next && !isNaN(next)) {
         let now = new Date();
         d.setMilliseconds(0);
@@ -113,21 +139,7 @@ function calcTimeValue(d, offset, next, days) {
         }
     }
     if (days && (days !== '*') && (days !== '')) {
-        let daystart = d.getDay();
-        let dayx = 0;
-        let daypos = daystart;
-        while (days.indexOf(daypos) === -1) {
-            dayx += 1;
-            if ((daystart + dayx) > 6) {
-                daystart = (dayx * -1);
-            }
-            daypos = daystart + dayx;
-
-            if (dayx > 7) {
-                dayx = -1;
-                break;
-            }
-        }
+        let dayx = calcDayOffset(days,d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
             //d = d.addDays(dayx);
@@ -138,9 +150,7 @@ function calcTimeValue(d, offset, next, days) {
 /*******************************************************************************************************/
 function calcTimeValueUTC(d, offset, next, days) {
     //console.debug('calcTimeValueUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    if (offset && !isNaN(offset) && offset !== 0) {
-        d = new Date(d.getTime() + offset * 1000); //- does not work
-    }
+    d = addOffset(d, offset);
     if (next && !isNaN(next)) {
         let now = new Date();
         d.setUTCMilliseconds(0);
@@ -152,21 +162,7 @@ function calcTimeValueUTC(d, offset, next, days) {
         }
     }
     if (days && (days !== '*') && (days !== '')) {
-        let daystart = d.getUTCDay();
-        let dayx = 0;
-        let daypos = daystart;
-        while (days.indexOf(daypos) === -1) {
-            dayx += 1;
-            if ((daystart + dayx) > 6) {
-                daystart = (dayx * -1);
-            }
-            daypos = daystart + dayx;
-
-            if (dayx > 7) {
-                dayx = -1;
-                break;
-            }
-        }
+        let dayx = calcDayOffset(days,d.getUTCDay());
         if (dayx > 0) {
             d.setUTCDate(d.getUTCDate() + dayx);
             //d = d.addDays(dayx);
