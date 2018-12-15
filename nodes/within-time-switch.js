@@ -170,7 +170,7 @@ module.exports = function (RED) {
                 let status = (config.statusOut || 3);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {
-                        this.debug('compare in time 1 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                        //this.debug('compare in time 1 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
                             fill: "green",
@@ -182,7 +182,7 @@ module.exports = function (RED) {
                     }
                 } else {
                     if (!(cmpNow >= endNr && cmpNow < startNr)) {
-                        this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                        //this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
                             fill: "green",
@@ -193,7 +193,7 @@ module.exports = function (RED) {
                         return null;
                     }
                 }
-                this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                //this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                 this.send([null, msg]);
                 setstate(this, result, status, {
                     fill: "yellow",

@@ -77,7 +77,7 @@ module.exports = function (RED) {
             this.latitude = n.latitude;
             this.angleType = n.angleType;
             this.tzOffset = (n.timezoneOffset * -60) || 0;
-            this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
+            //this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
 
             this.lastSunCalc = {
                 ts: 0
