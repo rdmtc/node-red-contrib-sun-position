@@ -400,24 +400,42 @@
         outputs: 2,
         outputLabels: ["within time", "out of time"],
         label: function () {
-            const getId = (type, value, offset) => {
+            const getId = (type, value, offset, maxLength) => {
                 let suffix = '';
                 if (offset && offset > 0) {
                     suffix = '↷';
                 } else if (offset && offset < 0) {
                     suffix = '↶';
                 }
-                let v = getValueLabel(type, value, 12);
+
+                if (type === "jsonata") {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
+                    return this._("within-time-switch.label.jsonata");
+                } else if (type === "json") {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
+                    return this._("within-time-switch.label.json") + suffix;
+                } else if (type === "bin") {
+                    return this._("within-time-switch.label.binary") + suffix;
+                } else if (type === "date") {
+                    return this._("within-time-switch.label.timestamp") + suffix;
+                }
+
+                let v = getValueLabel(type, value, maxLength);
                 if (v == "") {
-                    return this._("time-inject.label.blank");
+                    return this._("within-time-switch.label.blank");
                 }
                 return v + suffix;
             }
+
             const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                 if (property !== 'none' && property !== '' && value2) {
-                    return getId(type1, value1, offset1) + '/' + getId(type2, value2, offset2);
+                    return getId(type1, value1, offset1, 12) + '/' + getId(type2, value2, offset2, 12);
                 }
-                return getId(type1, value1);
+                return getId(type1, value1, undefined, 12);
             }
 
             if (this.name) {

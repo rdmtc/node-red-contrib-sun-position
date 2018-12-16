@@ -557,7 +557,7 @@
                 if (timeTxt.length > 24) {
                     result += timeTxt + " =...";
                 } else {
-                    result += timeTxt + " = " + getId(this.payloadType, this.payload, 12);
+                    result += timeTxt + " = " + getId(this.payloadType, this.payload, undefined, 12);
                 }
             }
             if (this.topic && this.topic.length + result.length <= 32) {
