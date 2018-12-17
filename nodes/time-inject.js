@@ -216,7 +216,7 @@ module.exports = function (RED) {
         this.on('input', msg => {
             try {
                 doCreateTimeout(node, msg);
-                //node.debug('input ' + util.inspect(msg));
+                node.debug('input ' + util.inspect(msg));
                 let plType = 'date';
                 let plValue = '';
 
@@ -232,22 +232,34 @@ module.exports = function (RED) {
                     } else {
                         msg.payload = plValue;
                     }
-                    node.send(msg);
                 } else if (plType === "pdsCalcData") {
                     msg.payload = this.positionConfig.getSunCalc(msg.ts);
                 } else if (plType === "pdmCalcData") {
                     msg.payload = this.positionConfig.getMoonCalc(msg.ts);
+                } else if (plType === "pdsTime" || plType === "pdmTime") {
+                    msg.timeData = this.positionConfig.getTimeProp(node, msg, plType,plValue, undefined, 1);
+                    if (msg.timeData.error) {
+                        hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                        return null;
+                    }
+                    msg.payload = msg.timeData.value;
+                    msg.timeName = plValue;
+                    msg.timeStr = msg.timeData.value.toLocaleString();
+                    msg.timeUTCStr = msg.timeData.value.toUTCString();
+                    msg.timeOffsetMs = node.getScheduleTime(msg.timeData.value);
+                    msg.timeOffsetSec = Math.round(msg.timeOffsetMs / 1000);
+                    msg.timeOffsetMin = Math.round(msg.timeOffsetSec / 60);
                 } else {
                     RED.util.evaluateNodeProperty(plValue, plType, this, msg, function (err, res) {
                         if (err) {
                             hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                            return null;
                         } else {
                             msg.payload = res;
-                            node.send(msg);
                         }
                     });
                 }
-                msg = null;
+                node.send(msg);
             } catch (err) {
                 hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
             }

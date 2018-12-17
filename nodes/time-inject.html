@@ -633,7 +633,7 @@
             };
             let typeTimeSun = {
                 value: "pdsTime",
-                label: "sun ",
+                label: "sun times ",
                 icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
                 options: [
                     "astronomicalDawn",
@@ -659,7 +659,7 @@
             };
             let typeTimeMoon = {
                 value: "pdmTime",
-                label: "moon ",
+                label: "moon times ",
                 icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
                 options: ["rise", "set"]
             };
@@ -718,7 +718,9 @@
                     "env",
                     "jsonata",
                     typeSunCalc,
-                    typeMoonCalc
+                    typeMoonCalc,
+                    typeTimeSun,
+                    typeTimeMoon,
                 ]
             });
             $("#node-input-property").typedInput({
