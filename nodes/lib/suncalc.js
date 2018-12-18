@@ -207,6 +207,8 @@ const util = require('util');
                 angle: 270
             }
         };
+        result.solarNoon.ts = result.solarNoon.value.getTime();
+        result.nadir.ts = result.nadir.value.getTime();
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
             let time = sunTimes[i];
 
@@ -225,6 +227,8 @@ const util = require('util');
                 name: time[1],
                 angle: (180 + (time[0] * -1))
             };
+            result[time[2]].ts = result[time[2]].value.getTime();
+            result[time[1]].ts = result[time[1]].value.getTime();
         }
         // for backward compatibilit
         for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {

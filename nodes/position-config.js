@@ -176,7 +176,7 @@ module.exports = function (RED) {
                     if (vType === '' || vType === 'none' || days === '') {
                         //nix
                     } else if (vType === 'date') {
-                        result.value = now;
+                        result.value = hlp.calcTimeValue(now, offset);
                         result.fix = true;
                     } else if (vType === 'entered') {
                         result.value = hlp.getTimeOfText(String(value), offset, next, days, now);
@@ -211,6 +211,8 @@ module.exports = function (RED) {
                         result.error = "Can not get time for " + vType + '=' + value;
                     }
                     result.value = now;
+                } else {
+                    result.ts = result.value.getTime();
                 }
                 //node.debug('getTimeProp result' + util.inspect(result));
                 return result;
