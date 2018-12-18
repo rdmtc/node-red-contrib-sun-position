@@ -8,7 +8,7 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function (RED) {
+module.exports = function(RED) {
     "use strict";
 
     function getScheduleTime(time, limit) {
@@ -22,7 +22,7 @@ module.exports = function (RED) {
         return millis;
     }
 
-    function getPayload(node, msg, msgProperty, type, value, offset, days) {
+    function getPayload(node, msg, msgProperty, type, value, format, offset, days) {
         if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
             if (value === "") {
                 msg[msgProperty] = Date.now();
@@ -33,16 +33,54 @@ module.exports = function (RED) {
             msg[msgProperty] = node.positionConfig.getSunCalc(msg.ts);
         } else if (type === "pdmCalcData") {
             msg[msgProperty] = node.positionConfig.getMoonCalc(msg.ts);
-        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || (type === "date" && offset && offset !== 0)) {
-            msg[msgProperty] = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
-            if (!msg[msgProperty].error) {
-                let delay = getScheduleTime(msg[msgProperty].value, (type === "date") ? 10 : undefined);
-
-                msg[msgProperty].timeStr = msg[msgProperty].value.toLocaleString();
-                msg[msgProperty].timeUTCStr = msg[msgProperty].value.toUTCString();
-                msg[msgProperty].delay = delay;
-                msg[msgProperty].delaySec = Math.round(delay / 1000);
-                msg[msgProperty].delayMin = Math.round(delay / 60000);
+        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
+            let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+            if (!data.error) {
+                switch (Number(format)) {
+                    case 0: //timeformat_msDef - milliseconds since Jan 1, 1970 00:00
+                        msg[msgProperty] = data.value.getTime();
+                        break;
+                    case 1: //timeformat_ECMA262 - date as string ECMA-262
+                        msg[msgProperty] = data.value;
+                        break;
+                    case 2: //timeformat_local
+                        msg[msgProperty] = data.value.toLocaleString();
+                        break;
+                    case 3: //timeformat_localTime
+                        msg[msgProperty] = data.value.toLocaleTimeString();
+                        break;
+                    case 4: //timeformat_UTC
+                        msg[msgProperty] = data.value.toUTCString();
+                        break;
+                    case 5: //timeformat_ISO
+                        msg[msgProperty] = data.value.toISOString();
+                        break;
+                    case 6: //timeformat_ms
+                        msg[msgProperty] = getScheduleTime(data.value, (type === "date") ? 10 : undefined)
+                        break;
+                    case 7: //timeformat_sec
+                        msg[msgProperty] = Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                        break;
+                    case 8: //timeformat_min
+                        msg[msgProperty] = Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60;
+                        break;
+                    default:
+                        msg[msgProperty] = data;
+                        msg[msgProperty].ts = data.value.getTime();
+                        let delay = getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        msg[msgProperty].timeStr = data.value.toLocaleString();
+                        msg[msgProperty].timeUTCStr = data.value.toUTCString();
+                        msg[msgProperty].timeISOStr = data.value.toISOString();
+                        msg[msgProperty].delay = delay;
+                        msg[msgProperty].delaySec = Math.round(delay / 1000);
+                        msg[msgProperty].delayMin = Math.round(delay / 1000) / 60;
+                        break;
+                }
+            } else {
+                if (!msg.error) {
+                    msg.error = {};
+                }
+                msg.error[msgProperty] = data.error;
             }
         } else {
             msg[msgProperty] = RED.util.evaluateNodeProperty(value, type, node, msg);
@@ -228,7 +266,7 @@ module.exports = function (RED) {
             }
         }
 
-        this.on('close', function () {
+        this.on('close', function() {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -244,27 +282,32 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = this.topic;
 
-                msg = getPayload(this, msg, 'payload', this.payloadType, this.payload);
-                if (!msg.payload) {
+                msg = getPayload(this, msg, 'payload', this.payloadType, this.payload, 0);
+                console.log(msg);
+                if (msg.error && msg.error.payload) {
+                    throw new error('error on getting payload: ' + msg.error.payload);
+                } else if (!msg.payload) {
                     throw new error("could not evaluate " + this.payloadType + '.' + this.payload);
-                } else if (msg.payload.error) {
-                    throw new error('error on getting payload: ' + msg.payload.error);
                 }
                 this.debug(config.addPayload1Type);
                 this.debug(config.addPayload1);
                 this.debug(config.addPayload1ValueType);
                 this.debug(config.addPayload1Value);
                 if (config.addPayload1Type === 'msgProperty' && config.addPayload1) {
-                    msg = getPayload(this, msg, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Offset, config.addPayload1Days);
-                    if (msg[config.addPayload1].error) {
-                        this.error('error on getting additional payload 1: ' + msg[config.addPayload1].error);
+                    msg = getPayload(this, msg, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
+                    if (msg.error && msg.error[config.addPayload1]) {
+                        this.error('error on getting additional payload 1: ' + msg.error[config.addPayload1]);
+                    } else if (!msg[config.addPayload1]) {
+                        this.error("could not evaluate " + this.addPayload1ValueType + '.' + this.addPayload1Value);
                     }
                 }
 
                 if (config.addPayload2Type === 'msgProperty' && config.addPayload2) {
-                    msg = getPayload(this, msg, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Offset, config.addPayload2Days);
-                    if (msg[config.addPayload2].error) {
-                        this.error('error on getting additional payload 1: ' + msg[config.addPayload2].error);
+                    msg = getPayload(this, msg, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
+                    if (msg.error && msg.error[config.addPayload2]) {
+                        this.error('error on getting additional payload 2: ' + msg.error[config.addPayload2]);
+                    } else if (!msg[config.addPayload2]) {
+                        this.error("could not evaluate " + this.addPayload2ValueType + '.' + this.addPayload2Value);
                     }
                 }
                 node.send(msg);
@@ -275,7 +318,7 @@ module.exports = function (RED) {
 
         try {
             if (this.once) {
-                this.onceTimeout = setTimeout(function () {
+                this.onceTimeout = setTimeout(function() {
                     node.emit("input", {
                         type: 'once'
                     });

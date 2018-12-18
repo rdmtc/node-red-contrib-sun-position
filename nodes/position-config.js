@@ -211,8 +211,6 @@ module.exports = function (RED) {
                         result.error = "Can not get time for " + vType + '=' + value;
                     }
                     result.value = now;
-                } else {
-                    result.ts = result.value.getTime();
                 }
                 //node.debug('getTimeProp result' + util.inspect(result));
                 return result;
