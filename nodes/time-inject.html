@@ -12,7 +12,7 @@
     <div class="form-row time-inject-row-payloadTimeFormat hidden">
         <label for="node-input-payloadTimeFormat"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.payloadTimeFormat"></span></label>
         <select style="width:70%" id="node-input-payloadTimeFormat">
-            <option value="0" data-i18n="time-inject.label.timeformat_msDef"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+            <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
             <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
             <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
             <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
@@ -63,10 +63,10 @@
         <input type="text" id="node-input-time" style="width: 70%"/>
         <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-inject-row-timeOffset hidden">
-        <label for="node-input-timeOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-        <input id="node-input-timeOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
-        <select style="width:100px" id="node-input-timeOffsetMultiplier">
+    <div class="form-row time-inject-row-offset hidden">
+        <label for="node-input-offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
+        <input id="node-input-offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+        <select style="width:100px" id="node-input-offsetMultiplier">
             <option value="1" data-i18n="time-inject.label.seconds"></option>
             <option value="60" data-i18n="time-inject.label.minutes"></option>
             <option value="3600" data-i18n="time-inject.label.hours"></option>
@@ -135,7 +135,7 @@
     <div class="form-row time-inject-row-addPayload1Format hidden">
         <label for="node-input-addPayload1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload1Format"></span></label>
         <select style="width:70%" id="node-input-addPayload1Format">
-            <option value="0" data-i18n="time-inject.label.timeformat_msDef"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+            <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
             <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
             <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
             <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
@@ -189,7 +189,7 @@
     <div class="form-row time-inject-row-addPayload2Format hidden">
         <label for="node-input-addPayload2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
         <select style="width:70%" id="node-input-addPayload2Format">
-            <option value="0" data-i18n="time-inject.label.timeformat_msDef"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+            <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
             <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
             <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
             <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
@@ -474,7 +474,9 @@
             payloadTimeFormat: {
                 value: 0,
                 required: false,
-                validate: RED.validators.number()
+                validate: function (v) {
+                    return (RED.validators.number()(v) || (typeof v === 'undefined'));
+                }
             },
             payloadOffset: {
                 value: 0,
@@ -510,19 +512,41 @@
             timeType: {
                 value: "none"
             },
-            timeOffset: {
+            offset: {
                 value: 0,
-                required: false,
+                required: true,
                 validate: function (v) {
-                    return (
+                    console.log(this);
+                    let result = (
+                        RED.validators.number()(v) ||
+                        ($("#node-input-time").length ? $("#node-input-time").typedInput("type") ===
+                            "none" : this.timeType === "none"));
+
+                            if (!result) {
+                                console.log(this);
+                                console.log(v);
+                            }
+                    return result;
+                    /*(
                         RED.validators.number()(v) ||
                         RED.validators.number()(this.offset) ||
                         ($("#node-input-time").length ? $("#node-input-time").typedInput("type") ===
                             "none" : this.timeType === "none")
+                    );*/
+                }
+            },
+                        offsetMultiplier: {
+                value: 60,
+                required: true,
+                validate: function (v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $("#node-input-time").typedInput("type") === "none"
                     );
                 }
             },
-            timeOffsetMultiplier: {
+/*
+            offsetMultiplier: {
                 value: 60,
                 required: false,
                 validate: function (v) {
@@ -536,7 +560,7 @@
             },
             timeDays: {
                 value: "*"
-            },
+            },*/
             property: {
                 value: "",
                 required: false,
@@ -599,7 +623,7 @@
             onceDelay: {
                 value: 0.1,
                 validate: function (v) {
-                    return RED.validators.number()(v) || v === "" || v == null;
+                    return RED.validators.number()(v) || v === "" || v == null || (typeof v === 'undefined');
                 }
             },
             addPayload1: {
@@ -717,7 +741,7 @@
             recalcTime: {
                 value: 2,
                 validate: function (v) {
-                    return RED.validators.number()(v) || v === "" || v == null;
+                    return RED.validators.number()(v) || v === "" || v == null || (typeof v === 'undefined');
                 }
             }
         },
@@ -833,7 +857,7 @@
                     }
                     //...
                 }
-                let part1 = getId(this.timeType, this.time, this.timeOffset);
+                let part1 = getId(this.timeType, this.time, this.offset);
                 if (
                     this.propertyType !== "none" &&
                     this.propertyType !== "" &&
@@ -873,7 +897,7 @@
             const typeUndefined = {
                 value: "none",
                 label: "not used",
-                icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+                //icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
                 hasValue: false
             };
             const typeTime = {
@@ -939,60 +963,60 @@
             //#region initialize
             console.log(this);
 
-            function convertOld(idOld, idNew) {
-                if ((typeof this[idOld] !== 'undefined') && ((this[idNew] == null || (typeof this[idNew] ===
+            function convertOld(data, idOld, idNew) {
+                if ((typeof data[idOld] !== 'undefined') && ((data[idNew] == null || (typeof data[idNew] ===
                         'undefined')))) {
-                    $("#node-input-" + idNew).val(this[idOld]);
-                    console.log('convertOld !! ' + idNew + ' = ' + this[idNew]);
+                    $("#node-input-" + idNew).val(data[idOld]);
+                    console.log('convertOld !! ' + idNew + ' = ' + data[idNew]);
                 }
             }
-            convertOld('offset', 'timeOffset');
-            convertOld('offsetMultiplier', 'timeOffsetMultiplier');
+            //convertOld('offset', 'offset');
+            //convertOld('offsetMultiplier', 'offsetMultiplier');
 
-            function initializeValue(id, newVal) {
-                if (this[id] == null || (typeof this[id] === 'undefined')) {
+            function initializeValue(data, id, newVal) {
+                if (data[id] == null || (typeof data[id] === 'undefined')) {
                     //let idHtml = "#node-input-" + id;
-                    //this[id] = newVal;
+                    //data[id] = newVal;
                     $("#node-input-" + id).val(newVal);
-                    console.log('initializeValue !! ' + id + ' = "' + this[id] + '"');
+                    console.log('initializeValue !! "' + id + '" = "' + newVal + '" - ' + data[id]);
                 }
             }
 
-            function initializeNrValue(id, newVal) {
-                if ((this[id] == null) ||
-                    (typeof this[id] === undefined) ||
-                    (this[id] === '')) {
+            function initializeNrValue(data, id, newVal) {
+                if ((data[id] == null) ||
+                    (typeof data[id] === undefined) ||
+                    (data[id] === '')) {
                     $("#node-input-" + id).val(newVal);
                     console.log('initializeNrValue !! ' + id + ' = "' + newVal + '"');
                 }
             }
-            initializeNrValue('payloadTimeFormat', 0);
-            initializeNrValue('payloadOffset', 0);
-            initializeNrValue('payloadOffsetMultiplier', 60);
-            initializeNrValue('timeOffset', 0);
-            initializeNrValue('timeOffsetMultiplier', 60);
-            initializeNrValue('addPayload1Format', 0);
-            initializeNrValue('addPayload1Offset', 0);
-            initializeNrValue('addPayload1OffsetMultiplier', 60);
-            initializeNrValue('addPayload2Format', 0);
-            initializeNrValue('addPayload2Offset', 0);
-            initializeNrValue('addPayload2OffsetMultiplier', 60);
-            initializeValue('payloadDays', '*');
-            initializeValue('timeDays', '*');
-            initializeValue('property', '');
-            initializeValue('propertyType', typeUndefined.value);
-            initializeValue('timeAlt', '');
-            initializeValue('timeAltType', typeUndefined.value);
-            initializeValue('addPayload1', '');
-            initializeValue('addPayload1Type', typeUndefined.value);
-            initializeValue('addPayload1Value', '');
-            initializeValue('addPayload1ValueType', 'date');
-            initializeValue('addPayload1Days', '*');
-            initializeValue('addPayload2', '');
-            initializeValue('addPayload2Type', typeUndefined.value);
-            initializeValue('addPayload2Value', '');
-            initializeValue('addPayload2ValueType', 'date');
-            initializeValue('addPayload2Days', '*');
+            initializeNrValue(this,'payloadTimeFormat', 0);
+            initializeNrValue(this,'payloadOffset', 0);
+            initializeNrValue(this,'payloadOffsetMultiplier', 60);
+            initializeNrValue(this,'offset', 0);
+            initializeNrValue(this,'offsetMultiplier', 60);
+            initializeNrValue(this,'addPayload1Format', 0);
+            initializeNrValue(this,'addPayload1Offset', 0);
+            initializeNrValue(this,'addPayload1OffsetMultiplier', 60);
+            initializeNrValue(this,'addPayload2Format', 0);
+            initializeNrValue(this,'addPayload2Offset', 0);
+            initializeNrValue(this,'addPayload2OffsetMultiplier', 60);
+            initializeValue(this,'payloadDays', '*');
+            initializeValue(this,'timeDays', '*');
+            initializeValue(this,'property', '');
+            initializeValue(this,'propertyType', typeUndefined.value);
+            initializeValue(this,'timeAlt', '');
+            initializeValue(this,'timeAltType', typeUndefined.value);
+            initializeValue(this,'addPayload1', '');
+            initializeValue(this,'addPayload1Type', typeUndefined.value);
+            initializeValue(this,'addPayload1Value', '');
+            initializeValue(this,'addPayload1ValueType', 'date');
+            initializeValue(this,'addPayload1Days', '*');
+            initializeValue(this,'addPayload2', '');
+            initializeValue(this,'addPayload2Type', typeUndefined.value);
+            initializeValue(this,'addPayload2Value', '');
+            initializeValue(this,'addPayload2ValueType', 'date');
+            initializeValue(this,'addPayload2Days', '*');
             console.log(this);
             //#endregion initialize
 
@@ -1080,7 +1104,7 @@
             //#region addPayload1
             $("#node-input-addPayload1Type").val(this.addPayload1Type);
             $("#node-input-addPayload1").typedInput({
-                default: this.addPayload1Type,
+                default: this.addPayload1Type || typeUndefined.value,
                 typeField: $("#node-input-addPayload1Type"),
                 types: [
                     typeUndefined,
@@ -1271,11 +1295,11 @@
             });
             $("#node-input-time").on("change", function (type, value) {
                 if ($("#node-input-time").typedInput("type") === typeUndefined.value) {
-                    $(".time-inject-row-timeOffset").hide();
+                    $(".time-inject-row-offset").hide();
                     $(".time-inject-row-timeDays").hide();
                     $(".time-inject-row-alt").hide();
                 } else {
-                    $(".time-inject-row-timeOffset").show();
+                    $(".time-inject-row-offset").show();
                     $(".time-inject-row-timeDays").show();
                     $(".time-inject-row-alt").show();
                 }

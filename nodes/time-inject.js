@@ -37,7 +37,7 @@ module.exports = function (RED) {
             let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
             if (!data.error) {
                 switch (Number(format)) {
-                    case 0: //timeformat_msDef - milliseconds since Jan 1, 1970 00:00
+                    case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
                         msg[msgProperty] = data.value.getTime();
                         break;
                     case 1: //timeformat_ECMA262 - date as string ECMA-262
