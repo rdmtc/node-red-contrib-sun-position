@@ -8,7 +8,7 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
 
     function getScheduleTime(time, limit) {
@@ -94,15 +94,11 @@ module.exports = function(RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         //this.debug('initialize timeInjectNode ' + util.inspect(config));
 
-        this.payload = config.payload || '';
-        this.payloadType = config.payloadType || 'none';
-        this.topic = config.topic;
-
         this.time = config.time;
         this.timeType = config.timeType || 'none';
-        this.timeDays = config.timeDays;
-        this.offset = config.offset || 0;
-        this.offsetMultiplier = config.offsetMultiplier || 60;
+        this.timeDays = config.timeDays || config.days;
+        this.offset = config.timeOffset || config.offset || 0;
+        this.offsetMultiplier = config.timeOffsetMultiplier || config.offsetMultiplier || 60;
 
         this.property = config.property || '';
         this.propertyType = config.propertyType || 'none';
@@ -112,9 +108,6 @@ module.exports = function(RED) {
         this.timeAltOffsetMultiplier = config.timeAltOffsetMultiplier || 60;
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
-
-        this.once = config.once;
-        this.onceDelay = (config.onceDelay || 0.1) * 1000;
 
         this.timeOutObj = null;
         this.intervalObj = null;
@@ -266,7 +259,7 @@ module.exports = function(RED) {
             }
         }
 
-        this.on('close', function() {
+        this.on('close', function () {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -280,19 +273,15 @@ module.exports = function(RED) {
             try {
                 doCreateTimeout(node, msg);
                 node.debug('input ' + util.inspect(msg));
-                msg.topic = this.topic;
+                msg.topic = config.topic;
 
-                msg = getPayload(this, msg, 'payload', this.payloadType, this.payload, 0);
+                msg = getPayload(this, msg, 'payload', config.payloadType, config.payload, config.payloadOffset, config.payloadDays);
                 console.log(msg);
                 if (msg.error && msg.error.payload) {
                     throw new error('error on getting payload: ' + msg.error.payload);
                 } else if (!msg.payload) {
-                    throw new error("could not evaluate " + this.payloadType + '.' + this.payload);
+                    throw new error("could not evaluate " + config.payloadType + '.' + config.payload);
                 }
-                this.debug(config.addPayload1Type);
-                this.debug(config.addPayload1);
-                this.debug(config.addPayload1ValueType);
-                this.debug(config.addPayload1Value);
                 if (config.addPayload1Type === 'msgProperty' && config.addPayload1) {
                     msg = getPayload(this, msg, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
                     if (msg.error && msg.error[config.addPayload1]) {
@@ -317,13 +306,13 @@ module.exports = function(RED) {
         });
 
         try {
-            if (this.once) {
-                this.onceTimeout = setTimeout(function() {
+            if (config.once) {
+                config.onceTimeout = setTimeout(function () {
                     node.emit("input", {
                         type: 'once'
                     });
                     doCreateTimeout(node, undefined);
-                }, this.onceDelay);
+                }, (config.onceDelay || 0.1) * 1000);
             } else {
                 doCreateTimeout(node, undefined);
             }
