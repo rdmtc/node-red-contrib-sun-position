@@ -361,7 +361,7 @@ module.exports = function (RED) {
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
             }
             return {
-                date: dateb,
+                calcuDate: dateb,
                 dayId: day_id
             }
         }

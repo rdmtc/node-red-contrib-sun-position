@@ -125,12 +125,14 @@
           <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
           <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
           <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
+          <option value="12" data-i18n="time-inject.label.timeformat_JSON"></option>
+          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
           <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
           <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
           <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
           <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
           <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
-
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload1Offset hidden">
@@ -176,18 +178,20 @@
   <div class="form-row time-inject-row-addPayload2Format hidden">
       <label for="node-input-addPayload2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
       <select style="width:70%" id="node-input-addPayload2Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
-
+        <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
+        <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
+        <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
+        <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
+        <option value="12" data-i18n="time-inject.label.timeformat_JSON"></option>
+        <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
+        <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
+        <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+        <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
+        <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
+        <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
+        <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload2Offset hidden">
@@ -233,17 +237,20 @@
   <div class="form-row time-inject-row-addPayload3Format hidden">
       <label for="node-input-addPayload3Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload3Format"></span></label>
       <select style="width:70%" id="node-input-addPayload3Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+        <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
+        <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
+        <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
+        <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
+        <option value="12" data-i18n="time-inject.label.timeformat_JSON"></option>
+        <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
+        <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
+        <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+        <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
+        <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
+        <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
+        <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload3Offset hidden">

@@ -268,6 +268,34 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 - **Additional Inject on Start** If this checkbox is set the inject node dcan emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be usefull for initializing any flow.
 
+- **Set additional** With this selection you can
+  - set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
+  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherfor the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message oprperty as __on time__ with the seconds until sunrise.
+    - **set additional timestamp**:
+      ![time-inject](images/time-inject-settings-addProp1.png?raw=true)
+    - **set additional sun timestamp**:
+      ![time-inject](images/time-inject-settings-addProp2.png?raw=true)
+    - **possible formates of timestamp output**
+      - number - milliseconds UNIX timestamp
+      - string - ECMA-262
+      - string - local date and time
+      - string - local time
+      - string - UTC date and time
+      - string - ISO date and time
+      - string - JSON date and time
+      - string - YYYYMMDDHHMMSS
+      - string - YYYYMMDD.HHMMSS
+      - number - milliseconds since emit
+      - number - seconds since emit
+      - number - minutes since emit
+      - number - hour since emit
+      - as object
+
+time-inject-settings-addProp1
+
+If this checkbox is set the inject node
+
+
 #### Node Input
 
 It has only a button as input, where the massage could injected into a flow manually.

@@ -11,6 +11,32 @@ const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 module.exports = function(RED) {
     "use strict";
 
+    function getforamtDateCmp(date) {
+        function pad2(n) { // always returns a string
+            return (n < 10 ? '0' : '') + n;
+        }
+
+        return Number(date.getFullYear() +
+            pad2(date.getMonth() + 1) +
+            pad2(date.getDate()) +
+            pad2(date.getHours()) +
+            pad2(date.getMinutes()) +
+            pad2(date.getSeconds()));
+    }
+
+    function getforamtDateCmp2(date) {
+        function pad2(n) { // always returns a string
+            return (n < 10 ? '0' : '') + n;
+        }
+
+        return Number(date.getFullYear() +
+            pad2(date.getMonth() + 1) +
+            pad2(date.getDate()) + '.' +
+            pad2(date.getHours()) +
+            pad2(date.getMinutes()) +
+            pad2(date.getSeconds()));
+    }
+
     function tsGetScheduleTime(time, limit) {
         var now = new Date();
         var millis = time.getTime() - now.getTime();
@@ -58,17 +84,26 @@ module.exports = function(RED) {
                         return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
                     case 9: //timeformat_hour
                         return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                    case 10: //timeformat_YYYYMMDDHHMMSS
+                        return getforamtDateCmp(data.value);
+                    case 11: //timeformat_YYYYMMDD.HHMMSS
+                        return getforamtDateCmp2(data.value);
+                    case 12: //timeformat_JSON
+                        return data.value.toJSON();
                     default:
-                        let value = data;
-                        value.ts = data.value.getTime();
+                        let obj = data;
+                        obj.name = value;
+                        obj.offset = offset;
+                        obj.allowedDays = days;
+                        obj.ts = data.value.getTime();
+                        obj.timeUTCStr = data.value.toUTCString();
+                        obj.timeISOStr = data.value.toISOString();
+                        obj.timeLocaleStr = data.value.toLocaleString();
+                        obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
                         let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
-                        value.timeStr = data.value.toLocaleString();
-                        value.timeUTCStr = data.value.toUTCString();
-                        value.timeISOStr = data.value.toISOString();
-                        value.delay = delay;
-                        value.delaySec = Math.round(delay / 1000);
-                        value.delayMin = Math.round(delay / 1000) / 60;
-                        return value;
+                        obj.delay = delay;
+                        obj.delaySec = Math.round(delay / 1000);
+                        return obj;
                 }
             }
             return data;
@@ -87,7 +122,7 @@ module.exports = function(RED) {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {
                 let contextKey = RED.util.parseContextStore(name);
-                 node.context()[type].set(contextKey.key, res, contextKey.store);
+                node.context()[type].set(contextKey.key, res, contextKey.store);
             }
         }
     }
@@ -290,9 +325,9 @@ module.exports = function(RED) {
                 }
 
                 console.log(msg);
-                tsSetAddProp(this,msg,config.addPayload1Type,config.addPayload1,config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
-                tsSetAddProp(this,msg,config.addPayload2Type,config.addPayload2,config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
-                tsSetAddProp(this,msg,config.addPayload3Type,config.addPayload3,config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
+                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
+                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
+                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
 
                 node.send(msg);
             } catch (err) {
