@@ -1044,7 +1044,6 @@
         hasValue: false
       };
       //#endregion definition
-
       //#region initialize
       //console.log(this);
 
@@ -1114,7 +1113,6 @@
       initializeValue(this, "addPayload3Days", "*");
       //console.log(this);
       //#endregion initialize
-
       //#region spinner
       $("#node-input-once").change(function() {
         $("#node-input-onceDelay").attr(
@@ -1136,7 +1134,6 @@
         numberFormat: "n"
       });
       //#endregion spinner
-
       //#region payload
       if (this.payloadType == null) {
         if (this.payload == "") {
@@ -1172,7 +1169,6 @@
         ]
       });
       //#endregion payload
-
       //#region addPayload1
       $("#node-input-addPayload1Type").val(this.addPayload1Type);
       $("#node-input-addPayload1").typedInput({
@@ -1258,7 +1254,6 @@
         });
       }
       //#endregion addPayload1
-
       //#region addPayload2
       $("#node-input-addPayload2Type").val(this.addPayload2Type);
       $("#node-input-addPayload2").typedInput({
@@ -1343,7 +1338,6 @@
         });
       }
       //#endregion addPayload2
-
       //#region addPayload3
       $("#node-input-addPayload3Type").val(this.addPayload3Type);
       $("#node-input-addPayload3").typedInput({
@@ -1425,7 +1419,6 @@
         });
       }
       //#endregion addPayload3
-
       //#region property
       $("#node-input-property").typedInput({
         default: this.propertyType || typeUndefined.value,
@@ -1456,7 +1449,6 @@
         }
       });
       //#endregion property
-
       //#region time
       $("#node-input-timeType").val(this.timeType);
       $("#node-input-time").typedInput({
@@ -1493,14 +1485,12 @@
         });
       }
       //#endregion time
-
       //#region timeAlt
       $("#node-input-timeAlt").typedInput({
         default: this.timeAltType || "entered",
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
       //#endregion timeAlt
-
       //#region onceDelay
       $("#node-input-once").change(function() {
         $("#node-input-onceDelay").attr(
@@ -1509,7 +1499,6 @@
         );
       });
       //#endregion onceDelay
-
       $("#node-input-time").change();
       $("#node-input-property").change();
       $("#node-input-payload").change();

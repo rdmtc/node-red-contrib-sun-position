@@ -22,59 +22,122 @@ module.exports = function (RED) {
         return millis;
     }
 
-    function getPayload(node, msg, msgProperty, type, value, format, offset, days) {
+    function getProperty(node, msg, type, value, format, offset, days) {
         if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
-            if (value === "") {
-                msg[msgProperty] = Date.now();
+            if (value === "" || (typeof value === 'undefined')) {
+                return Date.now();
             } else {
-                msg[msgProperty] = value;
+                return value;
             }
         } else if (type === "pdsCalcData") {
-            msg[msgProperty] = node.positionConfig.getSunCalc(msg.ts);
+            return node.positionConfig.getSunCalc(msg.ts);
         } else if (type === "pdmCalcData") {
-            msg[msgProperty] = node.positionConfig.getMoonCalc(msg.ts);
+            return node.positionConfig.getMoonCalc(msg.ts);
+        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
+            let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+            if (!data.error) {
+                format = format || 0;
+                switch (Number(format)) {
+                    case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
+                        return data.value.getTime();
+                    case 1: //timeformat_ECMA262 - date as string ECMA-262
+                        return data.value;
+                    case 2: //timeformat_local
+                        return data.value.toLocaleString();
+                    case 3: //timeformat_localTime
+                        return data.value.toLocaleTimeString();
+                    case 4: //timeformat_UTC
+                        return data.value.toUTCString();
+                    case 5: //timeformat_ISO
+                        return data.value.toISOString();
+                    case 6: //timeformat_ms
+                        return getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                    case 7: //timeformat_sec
+                        return Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                    case 8: //timeformat_min
+                        return (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
+                    case 9: //timeformat_hour
+                        return (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                    default:
+                        let value = data;
+                        value.ts = data.value.getTime();
+                        let delay = getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        value.timeStr = data.value.toLocaleString();
+                        value.timeUTCStr = data.value.toUTCString();
+                        value.timeISOStr = data.value.toISOString();
+                        value.delay = delay;
+                        value.delaySec = Math.round(delay / 1000);
+                        value.delayMin = Math.round(delay / 1000) / 60;
+                        return value;
+                }
+            } else {
+                return data;
+            }
+        }
+        return RED.util.evaluateNodeProperty(value, type, node, msg);
+    }
+
+    function getPayload(node, msg, msgProperty, type, value, format, offset, days) {
+        if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
+            if (value === "" || (typeof value === 'undefined')) {
+                RED.util.setMessageProperty(msg, msgProperty, Date.now());
+            } else {
+                RED.util.setMessageProperty(msg, msgProperty, value);
+            }
+        } else if (type === "pdsCalcData") {
+            RED.util.setMessageProperty(msg, msgProperty, node.positionConfig.getSunCalc(msg.ts));
+        } else if (type === "pdmCalcData") {
+            RED.util.setMessageProperty(msg, msgProperty, node.positionConfig.getMoonCalc(msg.ts));
         } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
             let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
             format = format || 0;
             if (!data.error) {
                 switch (Number(format)) {
                     case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
-                        msg[msgProperty] = data.value.getTime();
+                        RED.util.setMessageProperty(msg, msgProperty, data.value.getTime());
                         break;
                     case 1: //timeformat_ECMA262 - date as string ECMA-262
-                        msg[msgProperty] = data.value;
+                        RED.util.setMessageProperty(msg, msgProperty, data.value);
                         break;
                     case 2: //timeformat_local
-                        msg[msgProperty] = data.value.toLocaleString();
+                        RED.util.setMessageProperty(msg, msgProperty, data.value.toLocaleString());
                         break;
                     case 3: //timeformat_localTime
-                        msg[msgProperty] = data.value.toLocaleTimeString();
+                        RED.util.setMessageProperty(msg, msgProperty, data.value.toLocaleTimeString());
                         break;
                     case 4: //timeformat_UTC
-                        msg[msgProperty] = data.value.toUTCString();
+                        RED.util.setMessageProperty(msg, msgProperty, data.value.toUTCString());
                         break;
                     case 5: //timeformat_ISO
-                        msg[msgProperty] = data.value.toISOString();
+                        RED.util.setMessageProperty(msg, msgProperty, data.value.toISOString());
                         break;
                     case 6: //timeformat_ms
-                        msg[msgProperty] = getScheduleTime(data.value, (type === "date") ? 10 : undefined)
+                        let value = getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        RED.util.setMessageProperty(msg, msgProperty, value);
                         break;
                     case 7: //timeformat_sec
-                        msg[msgProperty] = Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                        let value = Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                        RED.util.setMessageProperty(msg, msgProperty, value);
                         break;
                     case 8: //timeformat_min
-                        msg[msgProperty] = Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60;
+                        let value = (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
+                        RED.util.setMessageProperty(msg, msgProperty, value);
+                        break;
+                    case 9: //timeformat_hour
+                        let value = (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                        RED.util.setMessageProperty(msg, msgProperty, value);
                         break;
                     default:
-                        msg[msgProperty] = data;
-                        msg[msgProperty].ts = data.value.getTime();
+                        let value = data;
+                        value.ts = data.value.getTime();
                         let delay = getScheduleTime(data.value, (type === "date") ? 10 : undefined);
-                        msg[msgProperty].timeStr = data.value.toLocaleString();
-                        msg[msgProperty].timeUTCStr = data.value.toUTCString();
-                        msg[msgProperty].timeISOStr = data.value.toISOString();
-                        msg[msgProperty].delay = delay;
-                        msg[msgProperty].delaySec = Math.round(delay / 1000);
-                        msg[msgProperty].delayMin = Math.round(delay / 1000) / 60;
+                        value.timeStr = data.value.toLocaleString();
+                        value.timeUTCStr = data.value.toUTCString();
+                        value.timeISOStr = data.value.toISOString();
+                        value.delay = delay;
+                        value.delaySec = Math.round(delay / 1000);
+                        value.delayMin = Math.round(delay / 1000) / 60;
+                        RED.util.setMessageProperty(msg, msgProperty, value);
                         break;
                 }
             } else {
@@ -84,7 +147,10 @@ module.exports = function (RED) {
                 msg.error[msgProperty] = data.error;
             }
         } else {
-            msg[msgProperty] = RED.util.evaluateNodeProperty(value, type, node, msg);
+            let value = RED.util.evaluateNodeProperty(value, type, node, msg);
+            if (value) {
+                RED.util.setMessageProperty(msg, msgProperty, value);
+            }
         }
         return msg;
     }
@@ -276,37 +342,47 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
 
-                msg = getPayload(this, msg, 'payload', config.payloadType, config.payload);
-                console.log(msg);
-                if (msg.error && msg.error.payload) {
-                    throw new Rrror('error on getting payload: ' + msg.error.payload);
-                } else if (!msg.payload) {
+                let value = getProperty(this, msg, config.payloadType, config.payload);
+                if (value == null || (typeof value !== 'undefined')) {
                     throw new Error("could not evaluate " + config.payloadType + '.' + config.payload);
+                } else if (value.error) {
+                    throw new Error('could not getting payload: ' + value.error);
+                } else {
+                    msg.payload = value;
                 }
+
+                console.log(msg);
+
                 if (config.addPayload1Type === 'msgProperty' && config.addPayload1) {
-                    msg = getPayload(this, msg, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
-                    if (msg.error && msg.error[config.addPayload1]) {
-                        this.error('error on getting additional payload 1: ' + msg.error[config.addPayload1]);
-                    } else if (!msg[config.addPayload1]) {
-                        this.error("could not evaluate " + this.addPayload1ValueType + '.' + this.addPayload1Value);
+                    value = getProperty(this, msg, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
+                    if (value == null || (typeof value !== 'undefined')) {
+                        throw new Error("could not evaluate " + this.addPayload1ValueType + '.' + this.addPayload1Value);
+                    } else if (value.error) {
+                        this.error('error on getting additional payload 1: ' + value.error);
+                    } else {
+                        RED.util.setMessageProperty(msg, config.addPayload1, value);
                     }
                 }
 
                 if (config.addPayload2Type === 'msgProperty' && config.addPayload2) {
-                    msg = getPayload(this, msg, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
-                    if (msg.error && msg.error[config.addPayload2]) {
-                        this.error('error on getting additional payload 2: ' + msg.error[config.addPayload2]);
-                    } else if (!msg[config.addPayload2]) {
-                        this.error("could not evaluate " + this.addPayload2ValueType + '.' + this.addPayload2Value);
+                    value = getProperty(this, msg, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
+                    if (value == null || (typeof value !== 'undefined')) {
+                        throw new Error("could not evaluate " + this.addPayload2ValueType + '.' + this.addPayload2Value);
+                    } else if (value.error) {
+                        this.error('error on getting additional payload 2: ' + value.error);
+                    } else {
+                        RED.util.setMessageProperty(msg, config.addPayload2, value);
                     }
                 }
 
                 if (config.addPayload3Type === 'msgProperty' && config.addPayload3) {
-                    msg = getPayload(this, msg, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
-                    if (msg.error && msg.error[config.addPayload3]) {
-                        this.error('error on getting additional payload 2: ' + msg.error[config.addPayload3]);
-                    } else if (!msg[config.addPayload3]) {
-                        this.error("could not evaluate " + this.addPayload3ValueType + '.' + this.addPayload3Value);
+                    value = getProperty(this, msg, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
+                    if (value == null || (typeof value !== 'undefined')) {
+                        throw new Error("could not evaluate " + this.addPayload3ValueType + '.' + this.addPayload3Value);
+                    } else if (value.error) {
+                        this.error('error on getting additional payload 3: ' + value.error);
+                    } else {
+                        RED.util.setMessageProperty(msg, config.addPayload3, value);
                     }
                 }
                 node.send(msg);
