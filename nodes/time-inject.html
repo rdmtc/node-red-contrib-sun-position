@@ -30,23 +30,23 @@
   </div>
   <div class="form-row time-inject-row-timeDays hidden">
       <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
-      <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-      <div style="display:inline-block;">
-          <div>
-              <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-              <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-              <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
-          </div>
-          <div>
-              <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-              <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-              <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
-          </div>
-          <div>
-              <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+          <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+          <div style="display:inline-block;">
+              <div>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+              </div>
+              <div>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+              </div>
+              <div>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+              </div>
           </div>
       </div>
-  </div>
   </div>
   <hr class="time-inject-row-alt hidden">
   <div class="form-row time-inject-row-alt hidden">
@@ -65,6 +65,26 @@
           <option value="60" data-i18n="time-inject.label.minutes"></option>
           <option value="3600" data-i18n="time-inject.label.hours"></option>
       </select>
+  </div>
+  <div class="form-row time-inject-row-timeAltDays hidden">
+      <div id="time-inject-timeAltDays" class="time-inject-days" style="margin-top:5px">
+          <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+          <div style="display:inline-block;">
+              <div>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+              </div>
+              <div>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+              </div>
+              <div>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+              </div>
+          </div>
+      </div>
   </div>
   <div class="form-tips time-inject-row-alt hidden">
       <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
@@ -258,16 +278,18 @@
   <div class="form-tips" data-i18n="[html]time-inject.tips.config"></div>
 </script>
 <style>
+  .time-inject-row-timeDays,
+  .time-inject-row-timeAltDays,
   .time-inject-row-addPayload1days,
   .time-inject-row-addPayload2days,
-  .time-inject-row-addPayload3days,
-  .time-inject-row-timeDays {
+  .time-inject-row-addPayload3days {
     padding-left: 110px;
   }
+  .time-inject-row-timeDays select,
+  .time-inject-row-timeAltDays select,
   .time-inject-row-addPayload1days select,
   .time-inject-row-addPayload2days select,
-  .time-inject-row-addPayload2days select,
-  .time-inject-row-timeDays select {
+  .time-inject-row-addPayload2days select {
     margin: 3px 0;
   }
   .time-inject-days label {
@@ -536,25 +558,13 @@
         value: 0,
         required: false,
         validate: function(v) {
-          //console.log(this);
-          let result =
+          return (
             typeof v === "undefined" ||
             RED.validators.number()(v) ||
             ($("#node-input-time").length
               ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none");
-
-          if (!result) {
-            console.log(this);
-            console.log(v);
-          }
-          return result;
-          /*(
-                        RED.validators.number()(v) ||
-                        RED.validators.number()(this.offset) ||
-                        ($("#node-input-time").length ? $("#node-input-time").typedInput("type") ===
-                            "none" : this.timeType === "none")
-                    );*/
+              : this.timeType === "none")
+          );
         }
       },
       offsetMultiplier: {
@@ -608,6 +618,7 @@
         required: true,
         validate: function(v) {
           return (
+            typeof v === "undefined" ||
             RED.validators.number()(v) ||
             ($("#node-input-time").length
               ? $("#node-input-time").typedInput("type") === "none"
@@ -623,6 +634,7 @@
         required: true,
         validate: function(v) {
           return (
+            typeof v === "undefined" ||
             RED.validators.number()(v) ||
             ($("#node-input-time").length
               ? $("#node-input-time").typedInput("type") === "none"
@@ -632,6 +644,9 @@
               : this.propertyType === "none")
           );
         }
+      },
+      timeDays: {
+        value: "*"
       },
       once: {
         value: false
@@ -1045,27 +1060,18 @@
       };
       //#endregion definition
       //#region initialize
-      //console.log(this);
-
-      function convertOld(data, idOld, idNew) {
-        if (
-          typeof data[idOld] !== "undefined" &&
-          (data[idNew] == null || typeof data[idNew] === "undefined")
-        ) {
-          $("#node-input-" + idNew).val(data[idOld]);
-          //console.log("convertOld !! " + idNew + " = " + data[idNew]);
-        }
-      }
-      //convertOld('offset', 'offset');
-      //convertOld('offsetMultiplier', 'offsetMultiplier');
-
       function initializeValue(data, id, newVal) {
         if (data[id] == null || typeof data[id] === "undefined") {
           //let idHtml = "#node-input-" + id;
           //data[id] = newVal;
           $("#node-input-" + id).val(newVal);
           console.log(
-            'initializeValue !! "' + id + '" = "' + newVal + '" - ' + data[id]
+            'not initialized value !! "' +
+              id +
+              '" = "' +
+              newVal +
+              '" - ' +
+              data[id]
           );
         }
       }
@@ -1077,11 +1083,20 @@
           data[id] === ""
         ) {
           $("#node-input-" + id).val(newVal);
-          console.log("initializeNrValue !! " + id + ' = "' + newVal + '"');
+          console.log(
+            "not initialized numeric value !! " +
+              id +
+              ' = "' +
+              newVal +
+              '" - ' +
+              data[id]
+          );
         }
       }
       initializeNrValue(this, "offset", 0);
       initializeNrValue(this, "offsetMultiplier", 60);
+      initializeNrValue(this, "timeAltOffset", 0);
+      initializeNrValue(this, "timeAltOffsetMultiplier", 60);
       initializeNrValue(this, "addPayload1Format", 0);
       initializeNrValue(this, "addPayload1Offset", 0);
       initializeNrValue(this, "addPayload1OffsetMultiplier", 60);
@@ -1096,6 +1111,7 @@
       initializeValue(this, "propertyType", typeUndefined.value);
       initializeValue(this, "timeAlt", "");
       initializeValue(this, "timeAltType", typeUndefined.value);
+      initializeValue(this, "timeAltDays", "*");
       initializeValue(this, "addPayload1", "");
       initializeValue(this, "addPayload1Type", typeUndefined.value);
       initializeValue(this, "addPayload1Value", "");
@@ -1111,7 +1127,6 @@
       initializeValue(this, "addPayload3Value", "");
       initializeValue(this, "addPayload3ValueType", "date");
       initializeValue(this, "addPayload3Days", "*");
-      //console.log(this);
       //#endregion initialize
       //#region spinner
       $("#node-input-once").change(function() {
@@ -1433,9 +1448,11 @@
         ) {
           $(".time-inject-row-timeAlt").hide();
           $(".time-inject-row-timeAltOffset").hide();
+          $(".time-inject-row-timeAltDays").hide();
         } else {
           $(".time-inject-row-timeAlt").show();
           $(".time-inject-row-timeAltOffset").show();
+          $(".time-inject-row-timeAltDays").show();
         }
         if (
           timeType === "flow" ||
@@ -1490,6 +1507,19 @@
         default: this.timeAltType || "entered",
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
+      if (this.timeAltDays == "*" || typeof this.timeAltDays === "undefined") {
+        $("#time-inject-timeAltDays input[type=checkbox]").prop(
+          "checked",
+          true
+        );
+      } else {
+        $("#time-inject-timeAltDays input[type=checkbox]").removeAttr(
+          "checked"
+        );
+        this.timeAltDays.split(",").forEach(function(v) {
+          $("#time-inject-timeAltDays [value=" + v + "]").prop("checked", true);
+        });
+      }
       //#endregion timeAlt
       //#region onceDelay
       $("#node-input-once").change(function() {
@@ -1521,13 +1551,16 @@
         }
       }
 
-      this.timeType = $("#node-input-time").typedInput("type");
       this.payloadType = $("#node-input-payload").typedInput("type");
+      this.timeType = $("#node-input-time").typedInput("type");
+      this.timeDays = getDaysStr(
+        $("#time-inject-timeDays input[type=checkbox]:checked")
+      );
 
       this.propertyType = $("#node-input-property").typedInput("type");
       this.timeAltType = $("#node-input-timeAlt").typedInput("type");
-      this.timeDays = getDaysStr(
-        $("#time-inject-timeDays input[type=checkbox]:checked")
+      this.timeAltDays = getDaysStr(
+        $("#time-inject-timeAltDays input[type=checkbox]:checked")
       );
 
       this.addPayload1Type = $("#node-input-addPayload1").typedInput("type");
