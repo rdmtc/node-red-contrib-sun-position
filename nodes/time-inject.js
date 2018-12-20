@@ -98,6 +98,7 @@ module.exports = function(RED) {
                         obj.ts = data.value.getTime();
                         obj.timeUTCStr = data.value.toUTCString();
                         obj.timeISOStr = data.value.toISOString();
+                        obj.timeJSON = data.value.toJSON();
                         obj.timeLocaleStr = data.value.toLocaleString();
                         obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
                         let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
