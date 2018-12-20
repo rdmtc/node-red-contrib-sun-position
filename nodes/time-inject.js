@@ -35,6 +35,7 @@ module.exports = function (RED) {
             msg[msgProperty] = node.positionConfig.getMoonCalc(msg.ts);
         } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
             let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+            format = format || 0;
             if (!data.error) {
                 switch (Number(format)) {
                     case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
@@ -97,8 +98,8 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays || config.days;
-        this.offset = config.timeOffset || config.offset || 0;
-        this.offsetMultiplier = config.timeOffsetMultiplier || config.offsetMultiplier || 60;
+        this.offset = config.offset || config.timeOffset || 0;
+        this.offsetMultiplier = config.offsetMultiplier || config.timeOffsetMultiplier || 60;
 
         this.property = config.property || '';
         this.propertyType = config.propertyType || 'none';
@@ -275,12 +276,12 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
 
-                msg = getPayload(this, msg, 'payload', config.payloadType, config.payload, config.payloadOffset, config.payloadDays);
+                msg = getPayload(this, msg, 'payload', config.payloadType, config.payload);
                 console.log(msg);
                 if (msg.error && msg.error.payload) {
-                    throw new error('error on getting payload: ' + msg.error.payload);
+                    throw new Rrror('error on getting payload: ' + msg.error.payload);
                 } else if (!msg.payload) {
-                    throw new error("could not evaluate " + config.payloadType + '.' + config.payload);
+                    throw new Error("could not evaluate " + config.payloadType + '.' + config.payload);
                 }
                 if (config.addPayload1Type === 'msgProperty' && config.addPayload1) {
                     msg = getPayload(this, msg, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
@@ -297,6 +298,15 @@ module.exports = function (RED) {
                         this.error('error on getting additional payload 2: ' + msg.error[config.addPayload2]);
                     } else if (!msg[config.addPayload2]) {
                         this.error("could not evaluate " + this.addPayload2ValueType + '.' + this.addPayload2Value);
+                    }
+                }
+
+                if (config.addPayload3Type === 'msgProperty' && config.addPayload3) {
+                    msg = getPayload(this, msg, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
+                    if (msg.error && msg.error[config.addPayload3]) {
+                        this.error('error on getting additional payload 2: ' + msg.error[config.addPayload3]);
+                    } else if (!msg[config.addPayload3]) {
+                        this.error("could not evaluate " + this.addPayload3ValueType + '.' + this.addPayload3Value);
                     }
                 }
                 node.send(msg);
