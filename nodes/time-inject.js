@@ -238,7 +238,7 @@ module.exports = function(RED) {
                                 type: node.propertyType,
                                 value: node.property
                             }));
-                            node.log(util.inspect(err));
+                            node.log('Error: ' + util.inspect(err));
                         }
                         if (needsRecalc) {
                             try {
@@ -325,7 +325,6 @@ module.exports = function(RED) {
                     msg.payload = value;
                 }
 
-                console.log(msg);
                 tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
                 tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
                 tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
