@@ -398,7 +398,7 @@ module.exports = function (RED) {
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
             }
             return {
-                date: dateb,
+                calcuDate: dateb,
                 dayId: day_id
             }
         }
