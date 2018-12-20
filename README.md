@@ -282,7 +282,6 @@ Injects a message into a flow either manually or at timestamps which can also de
       - string - local time
       - string - UTC date and time
       - string - ISO date and time
-      - string - JSON date and time
       - string - YYYYMMDDHHMMSS
       - string - YYYYMMDD.HHMMSS
       - number - milliseconds since emit

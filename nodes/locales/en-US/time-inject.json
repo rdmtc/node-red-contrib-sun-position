@@ -36,7 +36,6 @@
           "timeformat_sec": "number - seconds since emit",
           "timeformat_min": "number - minutes since emit",
           "timeformat_hour": "number - hour since emit",
-          "timeformat_JSON" : "string - JSON date and time",
           "timeformat_YYYYMMDDHHMMSS" : "string - YYYYMMDDHHMMSS",
           "timeformat_YYYYMMDD_HHMMSS" : "string - YYYYMMDD.HHMMSS",
           "timeformat_obj": "as object",

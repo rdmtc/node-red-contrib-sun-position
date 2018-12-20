@@ -86,10 +86,8 @@ module.exports = function(RED) {
                         return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
                     case 10: //timeformat_YYYYMMDDHHMMSS
                         return getforamtDateCmp(data.value);
-                    case 11: //timeformat_YYYYMMDD.HHMMSS
+                    case 11: //timeformat_YYYYMMDD_HHMMSS
                         return getforamtDateCmp2(data.value);
-                    case 12: //timeformat_JSON
-                        return data.value.toJSON();
                     default:
                         let obj = data;
                         obj.name = value;
@@ -98,7 +96,6 @@ module.exports = function(RED) {
                         obj.ts = data.value.getTime();
                         obj.timeUTCStr = data.value.toUTCString();
                         obj.timeISOStr = data.value.toISOString();
-                        obj.timeJSON = data.value.toJSON();
                         obj.timeLocaleStr = data.value.toLocaleString();
                         obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
                         let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
