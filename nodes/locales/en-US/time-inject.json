@@ -11,11 +11,14 @@
             "timeAlt": "Alternate time",
             "timeAltoffset": "Offset",
             "addPayload1": "add msg payload",
-            "addPayload2": "add msg payload",
+            "addPayload2": "add msg payload 2",
+            "addPayload3": "add msg payload 3",
             "addPayload1Value": "value",
             "addPayload2Value": "value",
+            "addPayload3Value": "value",
             "addPayload1Format": "time format",
             "addPayload2Format": "time format",
+            "addPayload3Format": "time format",
             "recalcTime": "Reclac.",
             "payload": "Payload",
             "topic": "Topic",
@@ -82,7 +85,8 @@
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",
             "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
-            "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done."
+            "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done.",
+            "addPayload" : "With the additional message properties you can send the message with define up to 3 additional properties with enhanced settings. Especial there can be defined timestamps in relation to the message send timestamp."
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
