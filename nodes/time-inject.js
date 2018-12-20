@@ -1,5 +1,5 @@
 /********************************************
- * within-time-switch:
+ * time-inject:
  *********************************************/
 "use strict";
 const util = require('util');
@@ -8,10 +8,10 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function (RED) {
+module.exports = function(RED) {
     "use strict";
 
-    function getScheduleTime(time, limit) {
+    function tsGetScheduleTime(time, limit) {
         var now = new Date();
         var millis = time.getTime() - now.getTime();
         if (limit) {
@@ -22,7 +22,7 @@ module.exports = function (RED) {
         return millis;
     }
 
-    function getProperty(node, msg, type, value, format, offset, days) {
+    function tsGetPropData(node, msg, type, value, format, offset, days) {
         if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
             if (value === "" || (typeof value === 'undefined')) {
                 return Date.now();
@@ -51,17 +51,17 @@ module.exports = function (RED) {
                     case 5: //timeformat_ISO
                         return data.value.toISOString();
                     case 6: //timeformat_ms
-                        return getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        return tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
                     case 7: //timeformat_sec
-                        return Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                        return Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
                     case 8: //timeformat_min
-                        return (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
+                        return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
                     case 9: //timeformat_hour
-                        return (Math.round(getScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                        return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
                     default:
                         let value = data;
                         value.ts = data.value.getTime();
-                        let delay = getScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
                         value.timeStr = data.value.toLocaleString();
                         value.timeUTCStr = data.value.toUTCString();
                         value.timeISOStr = data.value.toISOString();
@@ -74,6 +74,22 @@ module.exports = function (RED) {
             return data;
         }
         return RED.util.evaluateNodeProperty(value, type, node, msg);
+    }
+
+    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, days) {
+        if (type !== 'none' && name) {
+            let res = tsGetPropData(node, msg, valueType, value, format, offset, days);
+            if (res == null || (typeof res === 'undefined')) {
+                throw new Error("could not evaluate " + valueType + '.' + value);
+            } else if (res.error) {
+                this.error('error on getting additional payload 1: ' + res.error);
+            } else if (type === 'msg' || type === 'msgProperty') {
+                RED.util.setMessageProperty(msg, name, res);
+            } else if ((type === 'flow' || type === 'global')) {
+                let contextKey = RED.util.parseContextStore(name);
+                 node.context()[type].set(contextKey.key, res, contextKey.store);
+            }
+        }
     }
 
     function timeInjectNode(config) {
@@ -157,11 +173,11 @@ module.exports = function (RED) {
                     hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
                     return;
                 }
-                let millis = getScheduleTime(node.nextTime, 10);
+                let millis = tsGetScheduleTime(node.nextTime, 10);
                 //node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                 let isAlt = (node.nextTimeAlt);
                 if (isAlt) {
-                    let millisAlt = getScheduleTime(node.nextTimeAlt, 10);
+                    let millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
                     if (millisAlt < millis) {
                         millis = millisAlt;
                         isAltFirst = true;
@@ -248,7 +264,7 @@ module.exports = function (RED) {
             }
         }
 
-        this.on('close', function () {
+        this.on('close', function() {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -264,7 +280,7 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
 
-                let value = getProperty(this, msg, config.payloadType, config.payload);
+                let value = tsGetPropData(this, msg, config.payloadType, config.payload);
                 if (value == null || (typeof value === 'undefined')) {
                     throw new Error("could not evaluate " + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -274,39 +290,10 @@ module.exports = function (RED) {
                 }
 
                 console.log(msg);
+                tsSetAddProp(this,msg,config.addPayload1Type,config.addPayload1,config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
+                tsSetAddProp(this,msg,config.addPayload2Type,config.addPayload2,config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
+                tsSetAddProp(this,msg,config.addPayload3Type,config.addPayload3,config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
 
-                if (config.addPayload1Type === 'msgProperty' && config.addPayload1) {
-                    value = getProperty(this, msg, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
-                    if (value == null || (typeof value === 'undefined')) {
-                        throw new Error("could not evaluate " + this.addPayload1ValueType + '.' + this.addPayload1Value);
-                    } else if (value.error) {
-                        this.error('error on getting additional payload 1: ' + value.error);
-                    } else {
-                        RED.util.setMessageProperty(msg, config.addPayload1, value);
-                    }
-                }
-
-                if (config.addPayload2Type === 'msgProperty' && config.addPayload2) {
-                    value = getProperty(this, msg, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
-                    if (value == null || (typeof value === 'undefined')) {
-                        throw new Error("could not evaluate " + this.addPayload2ValueType + '.' + this.addPayload2Value);
-                    } else if (value.error) {
-                        this.error('error on getting additional payload 2: ' + value.error);
-                    } else {
-                        RED.util.setMessageProperty(msg, config.addPayload2, value);
-                    }
-                }
-
-                if (config.addPayload3Type === 'msgProperty' && config.addPayload3) {
-                    value = getProperty(this, msg, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
-                    if (value == null || (typeof value === 'undefined')) {
-                        throw new Error("could not evaluate " + this.addPayload3ValueType + '.' + this.addPayload3Value);
-                    } else if (value.error) {
-                        this.error('error on getting additional payload 3: ' + value.error);
-                    } else {
-                        RED.util.setMessageProperty(msg, config.addPayload3, value);
-                    }
-                }
                 node.send(msg);
             } catch (err) {
                 hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
@@ -315,7 +302,7 @@ module.exports = function (RED) {
 
         try {
             if (config.once) {
-                config.onceTimeout = setTimeout(function () {
+                config.onceTimeout = setTimeout(function() {
                     node.emit("input", {
                         type: 'once'
                     });
