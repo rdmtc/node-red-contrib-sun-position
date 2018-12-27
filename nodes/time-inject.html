@@ -33,17 +33,17 @@
           <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
           <div style="display:inline-block;">
               <div>
-                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.3"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.6"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.0"></span></label>
               </div>
           </div>
       </div>
@@ -72,17 +72,17 @@
           <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
           <div style="display:inline-block;">
               <div>
-                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.3"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.6"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.0"></span></label>
               </div>
           </div>
       </div>
@@ -117,12 +117,16 @@
       <input type="hidden" id="node-input-addPayload1ValueType">
   </div>
   <div class="form-row time-inject-row-addPayload1Format hidden">
-      <label for="node-input-addPayload1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload1Format"></span></label>
-      <select style="width:70%" id="node-input-addPayload1Format">
+      <label for="node-input-addPayload1Formats"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload1Format"></span></label>
+      <select style="width:70%" id="node-input-addPayload1Formats">
           <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
           <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
           <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
+          <option value="14" data-i18n="time-inject.label.timeformat_localLong"></option>
           <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
+          <option value="13" data-i18n="time-inject.label.timeformat_localTimeLong"></option>
+          <option value="12" data-i18n="time-inject.label.timeformat_localDate"></option>
+          <option value="15" data-i18n="time-inject.label.timeformat_localDateLong"></option>
           <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
           <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
           <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
@@ -131,8 +135,12 @@
           <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
           <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
           <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="16" data-i18n="time-inject.label.timeformat_weekday"></option> <!-- hour since execution -->
+          <option value="17" data-i18n="time-inject.label.timeformat_weekday2"></option> <!-- hour since execution -->
           <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="99" data-i18n="time-inject.label.timeformat_other"></option> <!-- input -->
       </select>
+      <input type="text" id="node-input-addPayload1Format" style="width:30%">
   </div>
   <div class="form-row time-inject-row-addPayload1Offset hidden">
       <label for="node-input-addPayload1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
@@ -148,17 +156,17 @@
           <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
           <div style="display:inline-block;">
               <div>
-                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.3"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.6"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.0"></span></label>
               </div>
           </div>
       </div>
@@ -175,12 +183,16 @@
       <input type="hidden" id="node-input-addPayload2ValueType">
   </div>
   <div class="form-row time-inject-row-addPayload2Format hidden">
-      <label for="node-input-addPayload2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
-      <select style="width:70%" id="node-input-addPayload2Format">
+      <label for="node-input-addPayload2Formats"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
+      <select style="width:70%" id="node-input-addPayload2Formats">
         <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
         <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
         <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
+        <option value="14" data-i18n="time-inject.label.timeformat_localLong"></option>
         <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
+        <option value="13" data-i18n="time-inject.label.timeformat_localTimeLong"></option>
+        <option value="12" data-i18n="time-inject.label.timeformat_localDate"></option>
+        <option value="15" data-i18n="time-inject.label.timeformat_localDateLong"></option>
         <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
         <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
         <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
@@ -189,8 +201,12 @@
         <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
         <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
         <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
+        <option value="16" data-i18n="time-inject.label.timeformat_weekday"></option> <!-- hour since execution -->
+        <option value="17" data-i18n="time-inject.label.timeformat_weekday2"></option> <!-- hour since execution -->
         <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
-      </select>
+        <option value="99" data-i18n="time-inject.label.timeformat_other"></option> <!-- input -->
+    </select>
+    <input type="text" id="node-input-addPayload2Format" style="width:30%">
   </div>
   <div class="form-row time-inject-row-addPayload2Offset hidden">
       <label for="node-input-addPayload2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
@@ -206,17 +222,17 @@
           <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
           <div style="display:inline-block;">
               <div>
-                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.3"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.6"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.0"></span></label>
               </div>
           </div>
       </div>
@@ -233,12 +249,16 @@
       <input type="hidden" id="node-input-addPayload3ValueType">
   </div>
   <div class="form-row time-inject-row-addPayload3Format hidden">
-      <label for="node-input-addPayload3Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload3Format"></span></label>
-      <select style="width:70%" id="node-input-addPayload3Format">
+      <label for="node-input-addPayload3Formats"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload3Format"></span></label>
+      <select style="width:70%" id="node-input-addPayload3Formats">
         <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
         <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
         <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
+        <option value="14" data-i18n="time-inject.label.timeformat_localLong"></option>
         <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
+        <option value="13" data-i18n="time-inject.label.timeformat_localTimeLong"></option>
+        <option value="12" data-i18n="time-inject.label.timeformat_localDate"></option>
+        <option value="15" data-i18n="time-inject.label.timeformat_localDateLong"></option>
         <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
         <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
         <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
@@ -248,7 +268,11 @@
         <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
         <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
         <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
-      </select>
+        <option value="16" data-i18n="time-inject.label.timeformat_weekday"></option> <!-- hour since execution -->
+        <option value="17" data-i18n="time-inject.label.timeformat_weekday2"></option> <!-- hour since execution -->
+      <option value="99" data-i18n="time-inject.label.timeformat_other"></option> <!-- input -->
+    </select>
+    <input type="text" id="node-input-addPayload3Format" style="width:30%">
   </div>
   <div class="form-row time-inject-row-addPayload3Offset hidden">
       <label for="node-input-addPayload3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
@@ -264,17 +288,17 @@
           <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
           <div style="display:inline-block;">
               <div>
-                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.0"></span></label>
-                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.1"></span></label>
-                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='1'/> <span data-i18n="time-inject.days.1"></span></label>
+                  <label><input type='checkbox' checked value='2'/> <span data-i18n="time-inject.days.2"></span></label>
+                  <label><input type='checkbox' checked value='3'/> <span data-i18n="time-inject.days.3"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.3"></span></label>
-                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.4"></span></label>
-                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='4'/> <span data-i18n="time-inject.days.4"></span></label>
+                  <label><input type='checkbox' checked value='5'/> <span data-i18n="time-inject.days.5"></span></label>
+                  <label><input type='checkbox' checked value='6'/> <span data-i18n="time-inject.days.6"></span></label>
               </div>
               <div>
-                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.6"></span></label>
+                  <label><input type='checkbox' checked value='0'/> <span data-i18n="time-inject.days.0"></span></label>
               </div>
           </div>
       </div>
@@ -500,7 +524,7 @@
   }
 
   RED.nodes.registerType("time-inject", {
-    category: "input",
+    category: "time",
     color: "#a6bbcf",
     defaults: {
       name: {
@@ -693,14 +717,7 @@
       },
       addPayload1Format: {
         value: 0,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-addPayload1").typedInput("type") === "none" ||
-            this.addPayload1Type === undefined
-          );
-        }
+        required: false
       },
       addPayload1Offset: {
         value: 0,
@@ -749,14 +766,7 @@
       },
       addPayload2Format: {
         value: 0,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-addPayload2").typedInput("type") === "none" ||
-            this.addPayload2Type === undefined
-          );
-        }
+        required: false
       },
       addPayload2Offset: {
         value: 0,
@@ -805,14 +815,7 @@
       },
       addPayload3Format: {
         value: 0,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-addPayload3").typedInput("type") === "none" ||
-            this.addPayload3Type === undefined
-          );
-        }
+        required: false
       },
       addPayload3Offset: {
         value: 0,
@@ -1099,13 +1102,10 @@
       initializeNrValue(this, "offsetMultiplier", 60);
       initializeNrValue(this, "timeAltOffset", 0);
       initializeNrValue(this, "timeAltOffsetMultiplier", 60);
-      initializeNrValue(this, "addPayload1Format", 0);
       initializeNrValue(this, "addPayload1Offset", 0);
       initializeNrValue(this, "addPayload1OffsetMultiplier", 60);
-      initializeNrValue(this, "addPayload2Format", 0);
       initializeNrValue(this, "addPayload2Offset", 0);
       initializeNrValue(this, "addPayload2OffsetMultiplier", 60);
-      initializeNrValue(this, "addPayload3Format", 0);
       initializeNrValue(this, "addPayload3Offset", 0);
       initializeNrValue(this, "addPayload3OffsetMultiplier", 60);
       initializeValue(this, "timeDays", "*");
@@ -1270,6 +1270,13 @@
           );
         });
       }
+      $('#node-input-addPayload1Formats').on("change", function(type, value) {
+          if($('select option:selected').val() == "99"){
+            $("#node-input-addPayload1Format").show();
+          } else {
+            $("#node-input-addPayload1Format").hide();
+          }
+      });
       //#endregion addPayload1
       //#region addPayload2
       $("#node-input-addPayload2Type").val(this.addPayload2Type);
@@ -1354,6 +1361,13 @@
           );
         });
       }
+      $('#node-input-addPayload2Formats').on("change", function(type, value) {
+          if($('select option:selected').val() == "99"){
+            $("#node-input-addPayload2Format").show();
+          } else {
+            $("#node-input-addPayload2Format").hide();
+          }
+      });
       //#endregion addPayload2
       //#region addPayload3
       $("#node-input-addPayload3Type").val(this.addPayload3Type);
@@ -1435,6 +1449,13 @@
           );
         });
       }
+      $('#node-input-addPayload3Formats').on("change", function(type, value) {
+          if($('select option:selected').val() == "99"){
+            $("#node-input-addPayload3Format").show();
+          } else {
+            $("#node-input-addPayload3Format").hide();
+          }
+      });
       //#endregion addPayload3
       //#region property
       $("#node-input-property").typedInput({
@@ -1588,6 +1609,16 @@
       this.addPayload3Days = getDaysStr(
         $("#time-inject-addPayload3Days input[type=checkbox]:checked")
       );
+
+      if ($('#node-input-addPayload1Formats option:selected').val()  != "99") {
+        this.addPayload1Format = $('#node-input-addPayload1Formats option:selected').val();
+      }
+      if ($('#node-input-addPayload2Formats option:selected').val()  != "99") {
+        this.addPayload1Format = $('#node-input-addPayload2Formats option:selected').val();
+      }
+      if ($('#node-input-addPayload3Formats option:selected').val()  != "99") {
+        this.addPayload1Format = $('#node-input-addPayload3Formats option:selected').val();
+      }
     },
     button: {
       enabled: function() {

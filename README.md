@@ -434,6 +434,18 @@ The start and end time can have an offset. This is specified in seconds,minutes 
 - negative number brings the time forward. E.g. if the time is dusk and offset is -60 minutes, the start time will be 60 minutes before dusk.
 - positive number delays the time by the specified number
 
+## TODO
+  - change icon size to 40x60 (https://github.com/node-red/node-red.github.io/pull/39)
+  - add posibility to select input/output timezone
+    - select auto ad get info from getTimezoneOffset
+    - solve problem of dst
+  - add node: time calculations
+    - zeitraum zu zeitpunkt addieren
+    - zeitraum zwischen 2 zeitpunkten ausrechnen
+    -  die möglichkeit statt Zeitpunkt - Zeitraum auszugeben auch sowas wie Zeitpunkt - Zeitraum > Limit true/false rauszugeben
+  - add node date/time format - date/time parser
+  - bei datumsformatierung die möglichkeit zu sagen "zeig wochentag an (lang/kurz: montag/mon)" und extra konfig für "zeig bei daten in den nächsten 2 tagen statt wochentag 'heute' oder 'morgen' oder 'übermorgen' an"
+
 ## Bugs and Feedback
 
 For bugs, questions and discussions please use the
