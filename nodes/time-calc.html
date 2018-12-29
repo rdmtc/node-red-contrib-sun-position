@@ -1,266 +1,266 @@
-<script type="text/x-red" data-template-name="time-inject">
+<script type="text/x-red" data-template-name="time-calc">
   <div class="form-row">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-inject.label.position"></span></label>
+    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-calc.label.position"></span></label>
     <input type="text" id="node-input-positionConfig">
   </div>
   <hr>
   <div class="form-row time-payload">
-      <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
+      <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-calc.label.payload"></span></label>
       <input type="text" id="node-input-payload" style="width:70%">
       <input type="hidden" id="node-input-payloadType">
   </div>
   <!-- div class="form-row time-topic">
-      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
+      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-calc.label.topic"></span></label>
       <input type="text" id="node-input-topic">
   </div -->
-  <hr class="time-inject-operand">
+  <hr class="time-calc-operand">
   <div class="form-row time-operand1">
-      <label for="node-input-operand1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.operand1"></span></label>
+      <label for="node-input-operand1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand1"></span></label>
       <input type="text" id="node-input-operand1" style="width:70%">
       <input type="hidden" id="node-input-operand1Type">
   </div>
   <div class="form-row time-operand1Value hidden">
-      <label for="node-input-operand1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.operand1Value"></span></label>
+      <label for="node-input-operand1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand1Value"></span></label>
       <input type="text" id="node-input-operand1Value" style="width:70%">
       <input type="hidden" id="node-input-operand1ValueType">
   </div>
-  <div class="form-row time-inject-row-operand1Format hidden">
-      <label for="node-input-operand1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.operand1Format"></span></label>
+  <div class="form-row time-calc-row-operand1Format hidden">
+      <label for="node-input-operand1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand1Format"></span></label>
       <select style="width:70%" id="node-input-operand1Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
-  <div class="form-row time-inject-row-operand1Offset hidden">
-      <label for="node-input-operand1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-operand1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+  <div class="form-row time-calc-row-operand1Offset hidden">
+      <label for="node-input-operand1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-operand1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-operand1OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1" data-i18n="time-calc.label.seconds"></option>
+          <option value="60" data-i18n="time-calc.label.minutes"></option>
+          <option value="3600" data-i18n="time-calc.label.hours"></option>
       </select>
   </div>
-  <hr class="time-inject-operand">
+  <hr class="time-calc-operand">
   <div class="form-row time-operand2">
-      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.operand2"></span></label>
+      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand2"></span></label>
       <input type="text" id="node-input-operand2" style="width:70%">
       <input type="hidden" id="node-input-operand2Type">
   </div>
   <div class="form-row time-operand2Value hidden">
-      <label for="node-input-operand2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.operand2Value"></span></label>
+      <label for="node-input-operand2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand2Value"></span></label>
       <input type="text" id="node-input-operand2Value" style="width:70%">
       <input type="hidden" id="node-input-operand2ValueType">
   </div>
-  <div class="form-row time-inject-row-operand2Format hidden">
-      <label for="node-input-operand2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.operand2Format"></span></label>
+  <div class="form-row time-calc-row-operand2Format hidden">
+      <label for="node-input-operand2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2Format"></span></label>
       <select style="width:70%" id="node-input-operand2Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
-  <div class="form-row time-inject-row-operand2Offset hidden">
-      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-operand2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+  <div class="form-row time-calc-row-operand2Offset hidden">
+      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-operand2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-operand2OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1" data-i18n="time-calc.label.seconds"></option>
+          <option value="60" data-i18n="time-calc.label.minutes"></option>
+          <option value="3600" data-i18n="time-calc.label.hours"></option>
       </select>
   </div>
   <hr>
-  <div class="form-row time-inject-row-operator">
-    <label for="node-input-operator"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.operator"></span></label>
+  <div class="form-row time-calc-row-operator">
+    <label for="node-input-operator"><i class="fa fa-calculator"></i> <span data-i18n="time-calc.label.operator"></span></label>
     <select style="width:70%" id="node-input-operator">
-        <option value="0" data-i18n="time-inject.label.add"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-        <option value="1" data-i18n="time-inject.label.sub"></option> <!-- date as string ECMA-262 -->
-        <option value="2" data-i18n="time-inject.label.timespan"></option>
-        <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-        <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-        <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-        <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-        <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-        <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-        <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-        <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-        <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-        <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+        <option value="0" data-i18n="time-calc.label.add"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-calc.label.sub"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-calc.label.timespan"></option>
+        <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+        <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+        <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+        <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+        <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+        <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+        <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+        <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+        <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+        <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
     </select>
 </div>
 
-  <hr class="time-inject-result">
+  <hr class="time-calc-result">
   <div class="form-row time-result1">
-      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.result1"></span></label>
+      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.result1"></span></label>
       <input type="text" id="node-input-result1" style="width:70%">
       <input type="hidden" id="node-input-result1Type">
   </div>
   <div class="form-row time-result1Value hidden">
-      <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.result1Value"></span></label>
+      <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" style="width:70%">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row time-inject-row-result1Format hidden">
-      <label for="node-input-result1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.result1Format"></span></label>
+  <div class="form-row time-calc-row-result1Format hidden">
+      <label for="node-input-result1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result1Format"></span></label>
       <select style="width:70%" id="node-input-result1Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
-  <div class="form-row time-inject-row-result1Offset hidden">
-      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-result1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+  <div class="form-row time-calc-row-result1Offset hidden">
+      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-result1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-result1OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1" data-i18n="time-calc.label.seconds"></option>
+          <option value="60" data-i18n="time-calc.label.minutes"></option>
+          <option value="3600" data-i18n="time-calc.label.hours"></option>
       </select>
   </div>
   <hr>
-  <div class="form-row time-inject-row-comparison">
-    <label for="node-input-comparison"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.comparison"></span></label>
+  <div class="form-row time-calc-row-comparison">
+    <label for="node-input-comparison"><i class="fa fa-calculator"></i> <span data-i18n="time-calc.label.comparison"></span></label>
     <select style="width:70%" id="node-input-comparison">
-        <option value="0" data-i18n="time-inject.label.equal"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-        <option value="1" data-i18n="time-inject.label.unequal"></option> <!-- date as string ECMA-262 -->
-        <option value="2" data-i18n="time-inject.label.greater"></option>
-        <option value="3" data-i18n="time-inject.label.greaterOrEqual"></option>
-        <option value="4" data-i18n="time-inject.label.lesser"></option>
-        <option value="5" data-i18n="time-inject.label.lesserOrEqual"></option>
+        <option value="0" data-i18n="time-calc.label.equal"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-calc.label.unequal"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-calc.label.greater"></option>
+        <option value="3" data-i18n="time-calc.label.greaterOrEqual"></option>
+        <option value="4" data-i18n="time-calc.label.lesser"></option>
+        <option value="5" data-i18n="time-calc.label.lesserOrEqual"></option>
     </select>
 </div>
-  <hr class="time-inject-result">
+  <hr class="time-calc-result">
   <div class="form-row time-operand3">
-      <label for="node-input-operand3"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.operand3"></span></label>
+      <label for="node-input-operand3"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand3"></span></label>
       <input type="text" id="node-input-operand3" style="width:70%">
       <input type="hidden" id="node-input-operand3Type">
   </div>
   <div class="form-row time-operand3Value hidden">
-      <label for="node-input-operand3Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.operand3Value"></span></label>
+      <label for="node-input-operand3Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand3Value"></span></label>
       <input type="text" id="node-input-operand3Value" style="width:70%">
       <input type="hidden" id="node-input-operand3ValueType">
   </div>
-  <div class="form-row time-inject-row-operand3Format hidden">
-      <label for="node-input-operand3Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.operand3Format"></span></label>
+  <div class="form-row time-calc-row-operand3Format hidden">
+      <label for="node-input-operand3Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand3Format"></span></label>
       <select style="width:70%" id="node-input-operand3Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
-  <div class="form-row time-inject-row-operand3Offset hidden">
-      <label for="node-input-operand3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-operand3Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+  <div class="form-row time-calc-row-operand3Offset hidden">
+      <label for="node-input-operand3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-operand3Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-operand3OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1" data-i18n="time-calc.label.seconds"></option>
+          <option value="60" data-i18n="time-calc.label.minutes"></option>
+          <option value="3600" data-i18n="time-calc.label.hours"></option>
       </select>
   </div>
 
-  <hr class="time-inject-result">
+  <hr class="time-calc-result">
   <div class="form-row time-result2">
-      <label for="node-input-result2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.result2"></span></label>
+      <label for="node-input-result2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.result2"></span></label>
       <input type="text" id="node-input-result2" style="width:70%">
       <input type="hidden" id="node-input-result2Type">
   </div>
   <div class="form-row time-result2Value hidden">
-      <label for="node-input-result2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.result2Value"></span></label>
+      <label for="node-input-result2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.result2Value"></span></label>
       <input type="text" id="node-input-result2Value" style="width:70%">
       <input type="hidden" id="node-input-result2ValueType">
   </div>
-  <div class="form-row time-inject-row-result2Format hidden">
-      <label for="node-input-result2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.result2Format"></span></label>
+  <div class="form-row time-calc-row-result2Format hidden">
+      <label for="node-input-result2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result2Format"></span></label>
       <select style="width:70%" id="node-input-result2Format">
-          <option value="0" data-i18n="time-inject.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-inject.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-inject.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-inject.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-inject.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-inject.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-inject.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-inject.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-inject.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-inject.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-inject.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-inject.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-inject.label.timeformat_obj"></option> <!-- as object -->
+          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
       </select>
   </div>
-  <div class="form-row time-inject-row-result2Offset hidden">
-      <label for="node-input-result2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-result2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+  <div class="form-row time-calc-row-result2Offset hidden">
+      <label for="node-input-result2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-result2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-result2OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1" data-i18n="time-calc.label.seconds"></option>
+          <option value="60" data-i18n="time-calc.label.minutes"></option>
+          <option value="3600" data-i18n="time-calc.label.hours"></option>
       </select>
   </div>
 
   <hr>
 
-  <div class="form-tips time-inject-addPayload" data-i18n="[html]time-inject.tips.addPayload"></div>
+  <div class="form-tips time-calc-addPayload" data-i18n="[html]time-calc.tips.addPayload"></div>
   <hr>
   <div class="form-row">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
-      <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
+      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-calc.label.name"></span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]time-calc.placeholder.name">
   </div>
 </script>
 <style>
-  .time-inject-times {
+  .time-calc-times {
     width: 90px;
   }
-  #time-inject-time {
+  #time-calc-time {
     width: 75px;
     margin-left: 8px;
     margin-bottom: 8px;
   }
-  .time-inject-count {
+  .time-calc-count {
     width: 40px !important;
   }
 </style>
 
-<script type="text/x-red" data-help-name="time-inject">
+<script type="text/x-red" data-help-name="time-calc">
     <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
   payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
   <h3>Outputs</h3>
@@ -277,7 +277,7 @@
       <dd>An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.</dd>
   </dl>
   <h3>Details</h3>
-  <p>The Time-Inject node can initiate a flow with a specific payload value.
+  <p>The time-calc node can initiate a flow with a specific payload value.
   The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
   <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
   <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
@@ -432,8 +432,8 @@
     return clipValueLength(v, l);
   }
 
-  RED.nodes.registerType("time-inject", {
-    category: "time",
+  RED.nodes.registerType("time-calc", {
+    category: 'time and position',
     color: "#a6bbcf",
     defaults: {
       name: {
@@ -732,6 +732,7 @@
           );
         }
       },
+    },
     icon: "injectSun.png",
     inputs: 0,
     outputs: 1,
@@ -757,21 +758,21 @@
           if (value.length < 15) {
             return value + suffix;
           }
-          return this._("time-inject.label.jsonata");
+          return this._("time-calc.label.jsonata");
         } else if (type === "json") {
           if (value.length < 15) {
             return value + suffix;
           }
-          return this._("time-inject.label.json") + suffix;
+          return this._("time-calc.label.json") + suffix;
         } else if (type === "bin") {
-          return this._("time-inject.label.binary") + suffix;
+          return this._("time-calc.label.binary") + suffix;
         } else if (type === "date") {
-          return this._("time-inject.label.timestamp") + suffix;
+          return this._("time-calc.label.timestamp") + suffix;
         }
 
         let v = getValueLabel(type, value, maxLength);
         if (v == "") {
-          return this._("time-inject.label.blank");
+          return this._("time-calc.label.blank");
         }
         return v + suffix;
       };
@@ -830,7 +831,7 @@
         return part1 + suffix;
       };
       if (this.timeType === "none" || this.timeType === "") {
-        return this._("time-inject.label.inject");
+        return this._("time-calc.label.inject");
       } else {
         let timeTxt = getTimeId();
         if (timeTxt.length > 24) {
@@ -995,23 +996,23 @@
             plVType === "pdsTime" ||
             plVType === "pdmTime"
           ) {
-            $(".time-inject-row-operand1Format").show();
-            $(".time-inject-row-operand1Offset").show();
-            $(".time-inject-row-operand1days").show();
+            $(".time-calc-row-operand1Format").show();
+            $(".time-calc-row-operand1Offset").show();
+            $(".time-calc-row-operand1days").show();
           } else if (plVType === "date") {
-            $(".time-inject-row-operand1Format").show();
-            $(".time-inject-row-operand1Offset").show();
-            $(".time-inject-row-operand1days").hide();
+            $(".time-calc-row-operand1Format").show();
+            $(".time-calc-row-operand1Offset").show();
+            $(".time-calc-row-operand1days").hide();
           } else {
-            $(".time-inject-row-operand1Format").hide();
-            $(".time-inject-row-operand1Offset").hide();
-            $(".time-inject-row-operand1days").hide();
+            $(".time-calc-row-operand1Format").hide();
+            $(".time-calc-row-operand1Offset").hide();
+            $(".time-calc-row-operand1days").hide();
           }
         } else {
           $(".time-operand1Value").hide();
-          $(".time-inject-row-operand1Format").hide();
-          $(".time-inject-row-operand1Offset").hide();
-          $(".time-inject-row-operand1days").hide();
+          $(".time-calc-row-operand1Format").hide();
+          $(".time-calc-row-operand1Offset").hide();
+          $(".time-calc-row-operand1days").hide();
           $(".time-operand2").hide();
         }
         $("#node-input-operand2").change();
@@ -1023,16 +1024,16 @@
         this.operand1Days == "*" ||
         typeof this.operand1Days === "undefined"
       ) {
-        $("#time-inject-operand1Days input[type=checkbox]").prop(
+        $("#time-calc-operand1Days input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-inject-operand1Days input[type=checkbox]").removeAttr(
+        $("#time-calc-operand1Days input[type=checkbox]").removeAttr(
           "checked"
         );
         this.operand1Days.split(",").forEach(function(v) {
-          $("#time-inject-operand1Days [value=" + v + "]").prop(
+          $("#time-calc-operand1Days [value=" + v + "]").prop(
             "checked",
             true
           );
@@ -1079,23 +1080,23 @@
             plVType === "pdsTime" ||
             plVType === "pdmTime"
           ) {
-            $(".time-inject-row-operand2Format").show();
-            $(".time-inject-row-operand2Offset").show();
-            $(".time-inject-row-operand2days").show();
+            $(".time-calc-row-operand2Format").show();
+            $(".time-calc-row-operand2Offset").show();
+            $(".time-calc-row-operand2days").show();
           } else if (plVType === "date") {
-            $(".time-inject-row-operand2Format").show();
-            $(".time-inject-row-operand2Offset").show();
-            $(".time-inject-row-operand2days").hide();
+            $(".time-calc-row-operand2Format").show();
+            $(".time-calc-row-operand2Offset").show();
+            $(".time-calc-row-operand2days").hide();
           } else {
-            $(".time-inject-row-operand2Format").hide();
-            $(".time-inject-row-operand2Offset").hide();
-            $(".time-inject-row-operand2days").hide();
+            $(".time-calc-row-operand2Format").hide();
+            $(".time-calc-row-operand2Offset").hide();
+            $(".time-calc-row-operand2days").hide();
           }
         } else {
           $(".time-operand2Value").hide();
-          $(".time-inject-row-operand2Format").hide();
-          $(".time-inject-row-operand2Offset").hide();
-          $(".time-inject-row-operand2days").hide();
+          $(".time-calc-row-operand2Format").hide();
+          $(".time-calc-row-operand2Offset").hide();
+          $(".time-calc-row-operand2days").hide();
           $(".time-result1").hide();
         }
         $("#node-input-result1").change();
@@ -1107,16 +1108,16 @@
         this.operand2Days == "*" ||
         typeof this.operand2Days === "undefined"
       ) {
-        $("#time-inject-operand2Days input[type=checkbox]").prop(
+        $("#time-calc-operand2Days input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-inject-operand2Days input[type=checkbox]").removeAttr(
+        $("#time-calc-operand2Days input[type=checkbox]").removeAttr(
           "checked"
         );
         this.operand2Days.split(",").forEach(function(v) {
-          $("#time-inject-operand2Days [value=" + v + "]").prop(
+          $("#time-calc-operand2Days [value=" + v + "]").prop(
             "checked",
             true
           );
@@ -1162,23 +1163,23 @@
             plVType === "pdsTime" ||
             plVType === "pdmTime"
           ) {
-            $(".time-inject-row-result1Format").show();
-            $(".time-inject-row-result1Offset").show();
-            $(".time-inject-row-result1days").show();
+            $(".time-calc-row-result1Format").show();
+            $(".time-calc-row-result1Offset").show();
+            $(".time-calc-row-result1days").show();
           } else if (plVType === "date") {
-            $(".time-inject-row-result1Format").show();
-            $(".time-inject-row-result1Offset").show();
-            $(".time-inject-row-result1days").hide();
+            $(".time-calc-row-result1Format").show();
+            $(".time-calc-row-result1Offset").show();
+            $(".time-calc-row-result1days").hide();
           } else {
-            $(".time-inject-row-result1Format").hide();
-            $(".time-inject-row-result1Offset").hide();
-            $(".time-inject-row-result1days").hide();
+            $(".time-calc-row-result1Format").hide();
+            $(".time-calc-row-result1Offset").hide();
+            $(".time-calc-row-result1days").hide();
           }
         } else {
           $(".time-result1Value").hide();
-          $(".time-inject-row-result1Format").hide();
-          $(".time-inject-row-result1Offset").hide();
-          $(".time-inject-row-result1days").hide();
+          $(".time-calc-row-result1Format").hide();
+          $(".time-calc-row-result1Offset").hide();
+          $(".time-calc-row-result1days").hide();
         }
       });
       $("#node-input-result1Value").on("change", function(type, value) {
@@ -1188,16 +1189,16 @@
         this.result1Days == "*" ||
         typeof this.result1Days === "undefined"
       ) {
-        $("#time-inject-result1Days input[type=checkbox]").prop(
+        $("#time-calc-result1Days input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-inject-result1Days input[type=checkbox]").removeAttr(
+        $("#time-calc-result1Days input[type=checkbox]").removeAttr(
           "checked"
         );
         this.result1Days.split(",").forEach(function(v) {
-          $("#time-inject-result1Days [value=" + v + "]").prop(
+          $("#time-calc-result1Days [value=" + v + "]").prop(
             "checked",
             true
           );
@@ -1243,23 +1244,23 @@
             plVType === "pdsTime" ||
             plVType === "pdmTime"
           ) {
-            $(".time-inject-row-result2Format").show();
-            $(".time-inject-row-result2Offset").show();
-            $(".time-inject-row-result2days").show();
+            $(".time-calc-row-result2Format").show();
+            $(".time-calc-row-result2Offset").show();
+            $(".time-calc-row-result2days").show();
           } else if (plVType === "date") {
-            $(".time-inject-row-result2Format").show();
-            $(".time-inject-row-result2Offset").show();
-            $(".time-inject-row-result2days").hide();
+            $(".time-calc-row-result2Format").show();
+            $(".time-calc-row-result2Offset").show();
+            $(".time-calc-row-result2days").hide();
           } else {
-            $(".time-inject-row-result2Format").hide();
-            $(".time-inject-row-result2Offset").hide();
-            $(".time-inject-row-result2days").hide();
+            $(".time-calc-row-result2Format").hide();
+            $(".time-calc-row-result2Offset").hide();
+            $(".time-calc-row-result2days").hide();
           }
         } else {
           $(".time-result2Value").hide();
-          $(".time-inject-row-result2Format").hide();
-          $(".time-inject-row-result2Offset").hide();
-          $(".time-inject-row-result2days").hide();
+          $(".time-calc-row-result2Format").hide();
+          $(".time-calc-row-result2Offset").hide();
+          $(".time-calc-row-result2days").hide();
         }
       });
       $("#node-input-result2Value").on("change", function(type, value) {
@@ -1269,16 +1270,16 @@
         this.result2Days == "*" ||
         typeof this.result2Days === "undefined"
       ) {
-        $("#time-inject-result2Days input[type=checkbox]").prop(
+        $("#time-calc-result2Days input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-inject-result2Days input[type=checkbox]").removeAttr(
+        $("#time-calc-result2Days input[type=checkbox]").removeAttr(
           "checked"
         );
         this.result2Days.split(",").forEach(function(v) {
-          $("#time-inject-result2Days [value=" + v + "]").prop(
+          $("#time-calc-result2Days [value=" + v + "]").prop(
             "checked",
             true
           );
@@ -1297,23 +1298,23 @@
           timeType === typeUndefined.value ||
           propType === typeUndefined.value
         ) {
-          $(".time-inject-row-timeAlt").hide();
-          $(".time-inject-row-timeAltOffset").hide();
-          $(".time-inject-row-timeAltDays").hide();
+          $(".time-calc-row-timeAlt").hide();
+          $(".time-calc-row-timeAltOffset").hide();
+          $(".time-calc-row-timeAltDays").hide();
         } else {
-          $(".time-inject-row-timeAlt").show();
-          $(".time-inject-row-timeAltOffset").show();
-          $(".time-inject-row-timeAltDays").show();
+          $(".time-calc-row-timeAlt").show();
+          $(".time-calc-row-timeAltOffset").show();
+          $(".time-calc-row-timeAltDays").show();
         }
         if (
           timeType === "flow" ||
           timeType === "global" ||
           propType !== typeUndefined.value
         ) {
-          $(".time-inject-recalc").show();
+          $(".time-calc-recalc").show();
         } else {
-          $(".time-inject-recalc").hide();
-          $("#time-inject-recalcTime").val("");
+          $(".time-calc-recalc").hide();
+          $("#time-calc-recalcTime").val("");
         }
       });
       //#endregion property
@@ -1334,22 +1335,22 @@
       });
       $("#node-input-time").on("change", function(type, value) {
         if ($("#node-input-time").typedInput("type") === typeUndefined.value) {
-          $(".time-inject-row-offset").hide();
-          $(".time-inject-row-timeDays").hide();
-          $(".time-inject-row-alt").hide();
+          $(".time-calc-row-offset").hide();
+          $(".time-calc-row-timeDays").hide();
+          $(".time-calc-row-alt").hide();
         } else {
-          $(".time-inject-row-offset").show();
-          $(".time-inject-row-timeDays").show();
-          $(".time-inject-row-alt").show();
+          $(".time-calc-row-offset").show();
+          $(".time-calc-row-timeDays").show();
+          $(".time-calc-row-alt").show();
         }
         $("#node-input-property").change();
       });
       if (this.timeDays == "*" || typeof this.timeDays === "undefined") {
-        $("#time-inject-timeDays input[type=checkbox]").prop("checked", true);
+        $("#time-calc-timeDays input[type=checkbox]").prop("checked", true);
       } else {
-        $("#time-inject-timeDays input[type=checkbox]").removeAttr("checked");
+        $("#time-calc-timeDays input[type=checkbox]").removeAttr("checked");
         this.timeDays.split(",").forEach(function(v) {
-          $("#time-inject-timeDays [value=" + v + "]").prop("checked", true);
+          $("#time-calc-timeDays [value=" + v + "]").prop("checked", true);
         });
       }
       //#endregion time
@@ -1359,16 +1360,16 @@
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
       if (this.timeAltDays == "*" || typeof this.timeAltDays === "undefined") {
-        $("#time-inject-timeAltDays input[type=checkbox]").prop(
+        $("#time-calc-timeAltDays input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-inject-timeAltDays input[type=checkbox]").removeAttr(
+        $("#time-calc-timeAltDays input[type=checkbox]").removeAttr(
           "checked"
         );
         this.timeAltDays.split(",").forEach(function(v) {
-          $("#time-inject-timeAltDays [value=" + v + "]").prop("checked", true);
+          $("#time-calc-timeAltDays [value=" + v + "]").prop("checked", true);
         });
       }
       //#endregion timeAlt
@@ -1405,13 +1406,13 @@
       this.payloadType = $("#node-input-payload").typedInput("type");
       this.timeType = $("#node-input-time").typedInput("type");
       this.timeDays = getDaysStr(
-        $("#time-inject-timeDays input[type=checkbox]:checked")
+        $("#time-calc-timeDays input[type=checkbox]:checked")
       );
 
       this.propertyType = $("#node-input-property").typedInput("type");
       this.timeAltType = $("#node-input-timeAlt").typedInput("type");
       this.timeAltDays = getDaysStr(
-        $("#time-inject-timeAltDays input[type=checkbox]:checked")
+        $("#time-calc-timeAltDays input[type=checkbox]:checked")
       );
 
       this.operand1Type = $("#node-input-operand1").typedInput("type");
@@ -1433,87 +1434,6 @@
       this.result2ValueType = $("#node-input-result2Value").typedInput(
         "type"
       );
-    },
-    button: {
-      enabled: function() {
-        return !this.changed;
-      },
-      onclick: function() {
-        if (this.changed) {
-          return RED.notify(
-            RED._("notification.warning", {
-              message: RED._("notification.warnings.undeployedChanges")
-            }),
-            "warning"
-          );
-        }
-        var payload = this.payload;
-        if (this.payloadType === "str" || this.payloadType === "string") {
-          payload = '"' + this.payload + '"';
-        }
-        if (this.payloadType === "flow" || this.payloadType === "global") {
-          var key = RED.utils.parseContextKey(payload);
-          payload = this.payloadType + "." + key.key;
-        }
-        var label = clipValueLength(this.name || payload, 30);
-        label = label
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
-        if (this.payloadType === "date") {
-          label = this._("time-inject.label.timestamp");
-        }
-        if (this.payloadType === "none") {
-          label = this._("time-inject.label.blank");
-        }
-        var node = this;
-        $.ajax({
-          url: "inject/" + this.id,
-          type: "POST",
-          success: function(resp) {
-            RED.notify(
-              node._("time-inject.label.success", {
-                label: label
-              }),
-              "success"
-            );
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            if (jqXHR.status == 404) {
-              RED.notify(
-                RED._("time-inject.errors.error", {
-                  message: RED._("time-inject.errors.not-deployed")
-                }),
-                "error"
-              );
-            } else if (jqXHR.status == 500) {
-              RED.notify(
-                RED._("time-inject.errors.error", {
-                  message: RED._("time-inject.errors.failed")
-                }),
-                "error"
-              );
-            } else if (jqXHR.status == 0) {
-              RED.notify(
-                RED._("time-inject.errors.error", {
-                  message: RED._("time-inject.errors.no-response")
-                }),
-                "error"
-              );
-            } else {
-              RED.notify(
-                RED._("time-inject.errors.error", {
-                  message: RED._("time-inject.errors.unexpected", {
-                    status: jqXHR.status,
-                    message: textStatus
-                  })
-                }),
-                "error"
-              );
-            }
-          }
-        });
-      }
     }
   });
 </script>

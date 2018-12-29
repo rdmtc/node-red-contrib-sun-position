@@ -64,59 +64,60 @@ module.exports = function(RED) {
             if (!data.error) {
                 format = format || 0;
                 if (isNaN(format)) {
-                    return hlp.formatDate(data.value,""+format,false,RED._("time-inject.days"),RED._("time-inject.month"),RED._("time-inject.dayDiffNames"));
+                    return hlp.formatDate(data.value, "" + format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
                 } else {
-                switch (Number(format)) {
-                    case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
-                        return data.value.getTime();
-                    case 1: //timeformat_ECMA262 - date as string ECMA-262
-                        return data.value;
-                    case 2: //timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
-                        return data.value.toLocaleString();
-                    case 3: //timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
-                        return data.value.toLocaleTimeString();
-                    case 4: //timeformat_UTC
-                        return data.value.toUTCString();
-                    case 5: //timeformat_ISO
-                        return data.value.toISOString();
-                    case 6: //timeformat_ms
-                        return tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
-                    case 7: //timeformat_sec
-                        return Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
-                    case 8: //timeformat_min
-                        return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
-                    case 9: //timeformat_hour
-                        return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
-                    case 10: //timeformat_YYYYMMDDHHMMSS
-                        return getforamtDateCmp(data.value);
-                    case 11: //timeformat_YYYYMMDD_HHMMSS
-                        return getforamtDateCmp2(data.value);
-                    case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
-                        return data.value.toLocaleDateString();
-                    case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
-                        return data.value.toTimeString();
-                    case 14: //timeformat_localLong       - Wed Dec 26 2018 23:44:12 GMT+0100 (Mitteleuropäische Normalzeit)
-                        return data.value.toString();
-                    case 15: //timeformat_localDateLong       - Wed Dec 26 2018
-                        return data.value.toDateString();
-                    case 16: //timeformat_weekday           - Montag, 22.12.
-                        return hlp.formatDate(data.value,"dddd, d.m.",false,RED._("time-inject.days"),RED._("time-inject.month"),RED._("time-inject.dayDiffNames"));
-                    case 17: //timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-                        return hlp.formatDate(data.value,"xx, d.m.",false,RED._("time-inject.days"),RED._("time-inject.month"),RED._("time-inject.dayDiffNames"));
-                    default:
-                        let obj = data;
-                        obj.name = value;
-                        obj.offset = offset;
-                        obj.allowedDays = days;
-                        obj.ts = data.value.getTime();
-                        obj.timeUTCStr = data.value.toUTCString();
-                        obj.timeISOStr = data.value.toISOString();
-                        obj.timeLocaleStr = data.value.toLocaleString();
-                        obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
-                        let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
-                        obj.delay = delay;
-                        obj.delaySec = Math.round(delay / 1000);
-                        return obj;
+                    switch (Number(format)) {
+                        case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
+                            return data.value.getTime();
+                        case 1: //timeformat_ECMA262 - date as string ECMA-262
+                            return data.value;
+                        case 2: //timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
+                            return data.value.toLocaleString();
+                        case 3: //timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
+                            return data.value.toLocaleTimeString();
+                        case 4: //timeformat_UTC
+                            return data.value.toUTCString();
+                        case 5: //timeformat_ISO
+                            return data.value.toISOString();
+                        case 6: //timeformat_ms
+                            return tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                        case 7: //timeformat_sec
+                            return Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                        case 8: //timeformat_min
+                            return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
+                        case 9: //timeformat_hour
+                            return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                        case 10: //timeformat_YYYYMMDDHHMMSS
+                            return getforamtDateCmp(data.value);
+                        case 11: //timeformat_YYYYMMDD_HHMMSS
+                            return getforamtDateCmp2(data.value);
+                        case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
+                            return data.value.toLocaleDateString();
+                        case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
+                            return data.value.toTimeString();
+                        case 14: //timeformat_localLong       - Wed Dec 26 2018 23:44:12 GMT+0100 (Mitteleuropäische Normalzeit)
+                            return data.value.toString();
+                        case 15: //timeformat_localDateLong       - Wed Dec 26 2018
+                            return data.value.toDateString();
+                        case 16: //timeformat_weekday           - Montag, 22.12.
+                            return hlp.formatDate(data.value, "dddd, d.m.", false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                        case 17: //timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
+                            return hlp.formatDate(data.value, "xx, d.m.", false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                        default:
+                            let obj = data;
+                            obj.name = value;
+                            obj.offset = offset;
+                            obj.allowedDays = days;
+                            obj.ts = data.value.getTime();
+                            obj.timeUTCStr = data.value.toUTCString();
+                            obj.timeISOStr = data.value.toISOString();
+                            obj.timeLocaleStr = data.value.toLocaleString();
+                            obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
+                            let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                            obj.delay = delay;
+                            obj.delaySec = Math.round(delay / 1000);
+                            return obj;
+                    }
                 }
             }
             return data;

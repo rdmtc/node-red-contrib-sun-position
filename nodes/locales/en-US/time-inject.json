@@ -94,6 +94,20 @@
             "timeAlt": "18:15",
             "timeAltOffset": "0"
         },
+        "timeFormat": {
+            "default": "ddd mmm dd yyyy HH:MM:ss",
+            "shortDate": "m/d/yy",
+            "mediumDate": "mmm d, yyyy",
+            "longDate": "mmmm d, yyyy",
+            "fullDate": "dddd, mmmm d, yyyy",
+            "shortTime": "h:MM TT",
+            "mediumTime": "h:MM:ss TT",
+            "longTime": "h:MM:ss TT Z",
+            "isoDate": "yyyy-mm-dd",
+            "isoTime": "HH:MM:ss",
+            "isoDateTime": "yyyy-mm-dd'T'HH:MM:ss",
+            "isoUtcDateTime": "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+        },
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",
             "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",

@@ -1,5 +1,5 @@
 /********************************************
- * time-inject:
+ * time-calc:
  *********************************************/
 "use strict";
 const util = require('util');
@@ -231,7 +231,7 @@ module.exports = function(RED) {
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;
-                            hlp.errorHandler(node, err, RED._("time-inject.errors.invalid-property-type", {
+                            hlp.errorHandler(node, err, RED._("time-calc.errors.invalid-property-type", {
                                 type: node.propertyType,
                                 value: node.property
                             }));
@@ -241,7 +241,7 @@ module.exports = function(RED) {
                             try {
                                 doCreateTimeout(node, msg);
                             } catch (err) {
-                                hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                                hlp.errorHandler(node, err, RED._("time-calc.errors.error-text"), RED._("time-calc.errors.error-title"));
                             }
                             return;
                         }
@@ -328,7 +328,7 @@ module.exports = function(RED) {
 
                 node.send(msg);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                hlp.errorHandler(this, err, RED._("time-calc.errors.error-text"), RED._("time-calc.errors.error-title"));
             }
         });
 
@@ -344,8 +344,8 @@ module.exports = function(RED) {
                 doCreateTimeout(node, undefined);
             }
         } catch (err) {
-            hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+            hlp.errorHandler(this, err, RED._("time-calc.errors.error-text"), RED._("time-calc.errors.error-title"));
         }
     }
-    RED.nodes.registerType('time-inject', timeInjectNode);
+    RED.nodes.registerType('time-calc', timeInjectNode);
 };
