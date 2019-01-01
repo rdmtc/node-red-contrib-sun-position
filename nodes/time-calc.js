@@ -48,19 +48,17 @@ module.exports = function(RED) {
         return millis;
     }
 
-    function tsGetPropData(node, msg, type, value, format, offset, days) {
-        if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
-            if (value === "" || (typeof value === 'undefined')) {
-                return Date.now();
-            } else {
-                return value;
-            }
+    function tsGetOperandData(node, msg, type, value, format, offset, days) {
+        if (type == null || type === "none" || type === "" || (typeof type === 'undefined') || type === "date") {
+            return Date.now();
         } else if (type === "pdsCalcData") {
             return node.positionConfig.getSunCalc(msg.ts);
         } else if (type === "pdmCalcData") {
             return node.positionConfig.getMoonCalc(msg.ts);
-        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
+        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" ) {
             let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
+
             if (!data.error) {
                 format = format || 0;
                 switch (Number(format)) {

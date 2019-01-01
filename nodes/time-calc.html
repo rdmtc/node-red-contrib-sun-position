@@ -831,7 +831,7 @@
         return part1 + suffix;
       };
       if (this.timeType === "none" || this.timeType === "") {
-        return this._("time-calc.label.inject");
+        return this._("time-calc.label.calc");
       } else {
         let timeTxt = getTimeId();
         if (timeTxt.length > 24) {
@@ -851,7 +851,7 @@
     labelStyle: function() {
       return this.name ? "node_label_italic" : "";
     },
-    paletteLabel: "time inject",
+    paletteLabel: "time calc",
     align: "left",
     oneditprepare: function() {
       //#region definition

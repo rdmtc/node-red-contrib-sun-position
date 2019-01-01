@@ -2,7 +2,7 @@
     "time-calc": {
         "label": {
             "time-calc": "time-calc",
-            "inject": "inject",
+            "calc": "calc",
             "position": "Position",
             "name": "Name",
             "property": "Property",
