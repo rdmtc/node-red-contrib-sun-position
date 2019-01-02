@@ -19,6 +19,7 @@ module.exports = {
     getNodeId,
     formatDate,
     parseDate,
+    parseDateTime,
     parseDateFromFormat
 };
 
@@ -282,119 +283,119 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
  * http://stevenlevithan.com/assets/misc/date.format.js
  */
 
-    // Regexes and supporting functions are cached through closure
+// Regexes and supporting functions are cached through closure
 
-    var dateFormat = function () {
-        var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
-            timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
-            timezoneClip = /[^-+\dA-Z]/g,
-            pad = function (val, len) {
-                val = String(val);
-                len = len || 2;
-                while (val.length < len) val = "0" + val;
-                return val;
+var dateFormat = function () {
+    var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
+        timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
+        timezoneClip = /[^-+\dA-Z]/g,
+        pad = function (val, len) {
+            val = String(val);
+            len = len || 2;
+            while (val.length < len) val = "0" + val;
+            return val;
+        };
+
+    // Regexes and supporting functions are cached through closure
+    return function (date, mask, utc) {
+        var dF = dateFormat;
+
+        // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
+        if (arguments.length == 1 && Object.prototype.toString.call(date) == "[object String]" && !/\d/.test(date)) {
+            mask = date;
+            date = undefined;
+        }
+
+        // Passing date through Date applies Date.parse, if necessary
+        let now = new Date;
+        date = date ? new Date(date) : now;
+        let dayDiff = (date.getDate() - now.getDate());
+        if (isNaN(date)) throw SyntaxError("invalid date");
+
+        mask = String(dF.masks[mask] || mask || dF.masks["default"]);
+
+        // Allow setting the utc argument via the mask
+        if (mask.slice(0, 4) == "UTC:") {
+            mask = mask.slice(4);
+            utc = true;
+        }
+
+        var _ = utc ? "getUTC" : "get",
+            d = date[_ + "Date"](),
+            D = date[_ + "Day"](),
+            m = date[_ + "Month"](),
+            y = date[_ + "FullYear"](),
+            H = date[_ + "Hours"](),
+            M = date[_ + "Minutes"](),
+            s = date[_ + "Seconds"](),
+            L = date[_ + "Milliseconds"](),
+            o = utc ? 0 : date.getTimezoneOffset(),
+            flags = {
+                d: d,
+                dd: pad(d),
+                ddd: dF.i18n.dayNames[D + 7],
+                dddd: dF.i18n.dayNames[D],
+                m: m + 1,
+                mm: pad(m + 1),
+                mmm: dF.i18n.monthNames[m + 12],
+                mmmm: dF.i18n.monthNames[m],
+                yy: String(y).slice(2),
+                yyyy: y,
+                h: H % 12 || 12,
+                hh: pad(H % 12 || 12),
+                H: H,
+                HH: pad(H),
+                M: M,
+                MM: pad(M),
+                s: s,
+                ss: pad(s),
+                l: pad(L, 3),
+                L: pad(L > 99 ? Math.round(L / 10) : L),
+                t: H < 12 ? "a" : "p",
+                tt: H < 12 ? "am" : "pm",
+                T: H < 12 ? "A" : "P",
+                TT: H < 12 ? "AM" : "PM",
+                Z: utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
+                o: (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+                S: ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10],
+                x: dayDiff,
+                xx: (dayDiff >= -1 && dayDiff <= dF.i18n.dayDiffNames.length) ? dF.i18n.dayDiffNames(dayDiff + 1) : dF.i18n.dayNames[D]
             };
 
-        // Regexes and supporting functions are cached through closure
-        return function (date, mask, utc) {
-            var dF = dateFormat;
-
-            // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
-            if (arguments.length == 1 && Object.prototype.toString.call(date) == "[object String]" && !/\d/.test(date)) {
-                mask = date;
-                date = undefined;
-            }
-
-            // Passing date through Date applies Date.parse, if necessary
-            let now = new Date;
-            date = date ? new Date(date) : now;
-            let dayDiff = (date.getDate() - now.getDate());
-            if (isNaN(date)) throw SyntaxError("invalid date");
-
-            mask = String(dF.masks[mask] || mask || dF.masks["default"]);
-
-            // Allow setting the utc argument via the mask
-            if (mask.slice(0, 4) == "UTC:") {
-                mask = mask.slice(4);
-                utc = true;
-            }
-
-            var	_ = utc ? "getUTC" : "get",
-                d = date[_ + "Date"](),
-                D = date[_ + "Day"](),
-                m = date[_ + "Month"](),
-                y = date[_ + "FullYear"](),
-                H = date[_ + "Hours"](),
-                M = date[_ + "Minutes"](),
-                s = date[_ + "Seconds"](),
-                L = date[_ + "Milliseconds"](),
-                o = utc ? 0 : date.getTimezoneOffset(),
-                flags = {
-                    d:    d,
-                    dd:   pad(d),
-                    ddd:  dF.i18n.dayNames[D + 7],
-                    dddd: dF.i18n.dayNames[D],
-                    m:    m + 1,
-                    mm:   pad(m + 1),
-                    mmm:  dF.i18n.monthNames[m + 12],
-                    mmmm: dF.i18n.monthNames[m],
-                    yy:   String(y).slice(2),
-                    yyyy: y,
-                    h:    H % 12 || 12,
-                    hh:   pad(H % 12 || 12),
-                    H:    H,
-                    HH:   pad(H),
-                    M:    M,
-                    MM:   pad(M),
-                    s:    s,
-                    ss:   pad(s),
-                    l:    pad(L, 3),
-                    L:    pad(L > 99 ? Math.round(L / 10) : L),
-                    t:    H < 12 ? "a"  : "p",
-                    tt:   H < 12 ? "am" : "pm",
-                    T:    H < 12 ? "A"  : "P",
-                    TT:   H < 12 ? "AM" : "PM",
-                    Z:    utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
-                    o:    (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
-                    S:    ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10],
-                    x:    dayDiff,
-                    xx:   (dayDiff >=  -1 && dayDiff <= dF.i18n.dayDiffNames.length ) ? dF.i18n.dayDiffNames(dayDiff + 1) : dF.i18n.dayNames[D]
-                };
-
-            return mask.replace(token, function ($0) {
-                return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
-            });
-        };
-    }();
-
-    // Some common format strings
-    dateFormat.masks = {
-        "default":      "ddd mmm dd yyyy HH:MM:ss",
-        shortDate:      "m/d/yy",
-        mediumDate:     "mmm d, yyyy",
-        longDate:       "mmmm d, yyyy",
-        fullDate:       "dddd, mmmm d, yyyy",
-        shortTime:      "h:MM TT",
-        mediumTime:     "h:MM:ss TT",
-        longTime:       "h:MM:ss TT Z",
-        isoDate:        "yyyy-mm-dd",
-        isoTime:        "HH:MM:ss",
-        isoDateTime:    "yyyy-mm-dd'T'HH:MM:ss",
-        isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+        return mask.replace(token, function ($0) {
+            return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
+        });
     };
-    dateFormat.i18n = {
-        dayNames: [
-            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-        ],
-        monthNames: [
-            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ],
-        dayDiffNames: [
-            "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
-        ]
-    };
+}();
+
+// Some common format strings
+dateFormat.masks = {
+    "default": "ddd mmm dd yyyy HH:MM:ss",
+    shortDate: "m/d/yy",
+    mediumDate: "mmm d, yyyy",
+    longDate: "mmmm d, yyyy",
+    fullDate: "dddd, mmmm d, yyyy",
+    shortTime: "h:MM TT",
+    mediumTime: "h:MM:ss TT",
+    longTime: "h:MM:ss TT Z",
+    isoDate: "yyyy-mm-dd",
+    isoTime: "HH:MM:ss",
+    isoDateTime: "yyyy-mm-dd'T'HH:MM:ss",
+    isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+};
+dateFormat.i18n = {
+    dayNames: [
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    ],
+    monthNames: [
+        "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ],
+    dayDiffNames: [
+        "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
+    ]
+};
 
 function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
@@ -467,26 +468,35 @@ function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
 //  "MMM dd, yyyy hh:mm:ssa" matches: "January 01, 2000 12:30:45AM"
 // ------------------------------------------------------------------
 
-function LZ(x) {return(x<0||x>9?"":"0")+x}
+function LZ(x) {
+    return (x < 0 || x > 9 ? "" : "0") + x
+}
 
 // ------------------------------------------------------------------
 // Utility functions for parsing in getDateFromFormat()
 // ------------------------------------------------------------------
 function _isInteger(val) {
-	var digits="1234567890";
-	for (var i=0; i < val.length; i++) {
-		if (digits.indexOf(val.charAt(i))==-1) { return false; }
-		}
-	return true;
-	}
-function _getInt(str,i,minlength,maxlength) {
-	for (var x=maxlength; x>=minlength; x--) {
-		var token=str.substring(i,i+x);
-		if (token.length < minlength) { return null; }
-		if (_isInteger(token)) { return token; }
-		}
-	return null;
-	}
+    var digits = "1234567890";
+    for (var i = 0; i < val.length; i++) {
+        if (digits.indexOf(val.charAt(i)) == -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function _getInt(str, i, minlength, maxlength) {
+    for (var x = maxlength; x >= minlength; x--) {
+        var token = str.substring(i, i + x);
+        if (token.length < minlength) {
+            return null;
+        }
+        if (_isInteger(token)) {
+            return token;
+        }
+    }
+    return null;
+}
 
 // ------------------------------------------------------------------
 // getDateFromFormat( date_string , format_string )
@@ -495,129 +505,180 @@ function _getInt(str,i,minlength,maxlength) {
 // If the date string matches the format string, it returns the
 // getTime() of the date. If it does not match, it returns 0.
 // ------------------------------------------------------------------
-function getDateFromFormat(val,format) {
-	val=val+"";
-	format=format+"";
-	var i_val=0;
-	var i_format=0;
-	var c="";
-	var token="";
-	var token2="";
-	var x,y;
-	var now=new Date();
-	var year=now.getYear();
-	var month=now.getMonth()+1;
-	var date=1;
-	var hh=now.getHours();
-	var mm=now.getMinutes();
-	var ss=now.getSeconds();
-	var ampm="";
+function getDateFromFormat(val, format) {
+    val = val + "";
+    format = format + "";
+    var i_val = 0;
+    var i_format = 0;
+    var c = "";
+    var token = "";
+    var token2 = "";
+    var x, y;
+    var now = new Date();
+    var year = now.getYear();
+    var month = now.getMonth() + 1;
+    var date = 1;
+    var hh = now.getHours();
+    var mm = now.getMinutes();
+    var ss = now.getSeconds();
+    var ampm = "";
 
-	while (i_format < format.length) {
-		// Get next token from format string
-		c=format.charAt(i_format);
-		token="";
-		while ((format.charAt(i_format)==c) && (i_format < format.length)) {
-			token += format.charAt(i_format++);
-			}
-		// Extract contents of value based on format token
-		if (token=="yyyy" || token=="yy" || token=="y") {
-			if (token=="yyyy") { x=4;y=4; }
-			if (token=="yy")   { x=2;y=2; }
-			if (token=="y")    { x=2;y=4; }
-			year=_getInt(val,i_val,x,y);
-			if (year==null) { return 0; }
-			i_val += year.length;
-			if (year.length==2) {
-				if (year > 70) { year=1900+(year-0); }
-				else { year=2000+(year-0); }
-				}
-			}
-		else if (token=="MMM"||token=="NNN"){
-			month=0;
-			for (var i=0; i<dateFormat.i18n.monthNames.length; i++) {
-				var month_name=dateFormat.i18n.monthNames[i];
-				if (val.substring(i_val,i_val+month_name.length).toLowerCase()==month_name.toLowerCase()) {
-					if (token=="MMM"||(token=="NNN"&&i>11)) {
-						month=i+1;
-						if (month>12) { month -= 12; }
-						i_val += month_name.length;
-						break;
-						}
-					}
-				}
-			if ((month < 1)||(month>12)){return 0;}
-			}
-		else if (token=="EE"||token=="E"){
-			for (var i=0; i<dateFormat.i18n.dayNames.length; i++) {
-				var day_name=dateFormat.i18n.dayNames[i];
-				if (val.substring(i_val,i_val+day_name.length).toLowerCase()==day_name.toLowerCase()) {
-					i_val += day_name.length;
-					break;
-					}
-				}
-			}
-		else if (token=="MM"||token=="M") {
-			month=_getInt(val,i_val,token.length,2);
-			if(month==null||(month<1)||(month>12)){return 0;}
-			i_val+=month.length;}
-		else if (token=="dd"||token=="d") {
-			date=_getInt(val,i_val,token.length,2);
-			if(date==null||(date<1)||(date>31)){return 0;}
-			i_val+=date.length;}
-		else if (token=="hh"||token=="h") {
-			hh=_getInt(val,i_val,token.length,2);
-			if(hh==null||(hh<1)||(hh>12)){return 0;}
-			i_val+=hh.length;}
-		else if (token=="HH"||token=="H") {
-			hh=_getInt(val,i_val,token.length,2);
-			if(hh==null||(hh<0)||(hh>23)){return 0;}
-			i_val+=hh.length;}
-		else if (token=="KK"||token=="K") {
-			hh=_getInt(val,i_val,token.length,2);
-			if(hh==null||(hh<0)||(hh>11)){return 0;}
-			i_val+=hh.length;}
-		else if (token=="kk"||token=="k") {
-			hh=_getInt(val,i_val,token.length,2);
-			if(hh==null||(hh<1)||(hh>24)){return 0;}
-			i_val+=hh.length;hh--;}
-		else if (token=="mm"||token=="m") {
-			mm=_getInt(val,i_val,token.length,2);
-			if(mm==null||(mm<0)||(mm>59)){return 0;}
-			i_val+=mm.length;}
-		else if (token=="ss"||token=="s") {
-			ss=_getInt(val,i_val,token.length,2);
-			if(ss==null||(ss<0)||(ss>59)){return 0;}
-			i_val+=ss.length;}
-		else if (token=="a") {
-			if (val.substring(i_val,i_val+2).toLowerCase()=="am") {ampm="AM";}
-			else if (val.substring(i_val,i_val+2).toLowerCase()=="pm") {ampm="PM";}
-			else {return 0;}
-			i_val+=2;}
-		else {
-			if (val.substring(i_val,i_val+token.length)!=token) {return 0;}
-			else {i_val+=token.length;}
-			}
-		}
-	// If there are any trailing characters left in the value, it doesn't match
-	if (i_val != val.length) { return 0; }
-	// Is date valid for month?
-	if (month==2) {
-		// Check for leap year
-		if ( ( (year%4==0)&&(year%100 != 0) ) || (year%400==0) ) { // leap year
-			if (date > 29){ return 0; }
-			}
-		else { if (date > 28) { return 0; } }
-		}
-	if ((month==4)||(month==6)||(month==9)||(month==11)) {
-		if (date > 30) { return 0; }
-		}
-	// Correct hours value
-	if (hh<12 && ampm=="PM") { hh=hh-0+12; }
-	else if (hh>11 && ampm=="AM") { hh-=12; }
-	var newdate=new Date(year,month-1,date,hh,mm,ss);
-	return newdate.getTime();
-	}
+    while (i_format < format.length) {
+        // Get next token from format string
+        c = format.charAt(i_format);
+        token = "";
+        while ((format.charAt(i_format) == c) && (i_format < format.length)) {
+            token += format.charAt(i_format++);
+        }
+        // Extract contents of value based on format token
+        if (token == "yyyy" || token == "yy" || token == "y") {
+            if (token == "yyyy") {
+                x = 4;
+                y = 4;
+            }
+            if (token == "yy") {
+                x = 2;
+                y = 2;
+            }
+            if (token == "y") {
+                x = 2;
+                y = 4;
+            }
+            year = _getInt(val, i_val, x, y);
+            if (year == null) {
+                return 0;
+            }
+            i_val += year.length;
+            if (year.length == 2) {
+                if (year > 70) {
+                    year = 1900 + (year - 0);
+                } else {
+                    year = 2000 + (year - 0);
+                }
+            }
+        } else if (token == "MMM" || token == "NNN") {
+            month = 0;
+            for (var i = 0; i < dateFormat.i18n.monthNames.length; i++) {
+                var month_name = dateFormat.i18n.monthNames[i];
+                if (val.substring(i_val, i_val + month_name.length).toLowerCase() == month_name.toLowerCase()) {
+                    if (token == "MMM" || (token == "NNN" && i > 11)) {
+                        month = i + 1;
+                        if (month > 12) {
+                            month -= 12;
+                        }
+                        i_val += month_name.length;
+                        break;
+                    }
+                }
+            }
+            if ((month < 1) || (month > 12)) {
+                return 0;
+            }
+        } else if (token == "EE" || token == "E") {
+            for (var i = 0; i < dateFormat.i18n.dayNames.length; i++) {
+                var day_name = dateFormat.i18n.dayNames[i];
+                if (val.substring(i_val, i_val + day_name.length).toLowerCase() == day_name.toLowerCase()) {
+                    i_val += day_name.length;
+                    break;
+                }
+            }
+        } else if (token == "MM" || token == "M") {
+            month = _getInt(val, i_val, token.length, 2);
+            if (month == null || (month < 1) || (month > 12)) {
+                return 0;
+            }
+            i_val += month.length;
+        } else if (token == "dd" || token == "d") {
+            date = _getInt(val, i_val, token.length, 2);
+            if (date == null || (date < 1) || (date > 31)) {
+                return 0;
+            }
+            i_val += date.length;
+        } else if (token == "hh" || token == "h") {
+            hh = _getInt(val, i_val, token.length, 2);
+            if (hh == null || (hh < 1) || (hh > 12)) {
+                return 0;
+            }
+            i_val += hh.length;
+        } else if (token == "HH" || token == "H") {
+            hh = _getInt(val, i_val, token.length, 2);
+            if (hh == null || (hh < 0) || (hh > 23)) {
+                return 0;
+            }
+            i_val += hh.length;
+        } else if (token == "KK" || token == "K") {
+            hh = _getInt(val, i_val, token.length, 2);
+            if (hh == null || (hh < 0) || (hh > 11)) {
+                return 0;
+            }
+            i_val += hh.length;
+        } else if (token == "kk" || token == "k") {
+            hh = _getInt(val, i_val, token.length, 2);
+            if (hh == null || (hh < 1) || (hh > 24)) {
+                return 0;
+            }
+            i_val += hh.length;
+            hh--;
+        } else if (token == "mm" || token == "m") {
+            mm = _getInt(val, i_val, token.length, 2);
+            if (mm == null || (mm < 0) || (mm > 59)) {
+                return 0;
+            }
+            i_val += mm.length;
+        } else if (token == "ss" || token == "s") {
+            ss = _getInt(val, i_val, token.length, 2);
+            if (ss == null || (ss < 0) || (ss > 59)) {
+                return 0;
+            }
+            i_val += ss.length;
+        } else if (token == "a") {
+            if (val.substring(i_val, i_val + 2).toLowerCase() == "am") {
+                ampm = "AM";
+            } else if (val.substring(i_val, i_val + 2).toLowerCase() == "pm") {
+                ampm = "PM";
+            } else {
+                return 0;
+            }
+            i_val += 2;
+        } else {
+            if (val.substring(i_val, i_val + token.length) != token) {
+                return 0;
+            } else {
+                i_val += token.length;
+            }
+        }
+    }
+    // If there are any trailing characters left in the value, it doesn't match
+    if (i_val != val.length) {
+        return 0;
+    }
+    // Is date valid for month?
+    if (month == 2) {
+        // Check for leap year
+        if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) { // leap year
+            if (date > 29) {
+                return 0;
+            }
+        } else {
+            if (date > 28) {
+                return 0;
+            }
+        }
+    }
+    if ((month == 4) || (month == 6) || (month == 9) || (month == 11)) {
+        if (date > 30) {
+            return 0;
+        }
+    }
+    // Correct hours value
+    if (hh < 12 && ampm == "PM") {
+        hh = hh - 0 + 12;
+    } else if (hh > 11 && ampm == "AM") {
+        hh -= 12;
+    }
+    var newdate = new Date(year, month - 1, date, hh, mm, ss);
+    return newdate.getTime();
+}
 
 // ------------------------------------------------------------------
 // parseDate( date_string [, prefer_euro_format] )
@@ -632,32 +693,56 @@ function getDateFromFormat(val,format) {
 // for formats like d/M/y (european format) before M/d/y (American).
 // Returns a Date object or null if no patterns match.
 // ------------------------------------------------------------------
-function parseDate(val,preferEuro) {
-	var preferEuro=(arguments.length==2)?arguments[1]:false;
-	generalFormats=new Array('y-M-d','MMM d, y','MMM d,y','y-MMM-d','d-MMM-y','MMM d');
-	monthFirst=new Array('M/d/y','M-d-y','M.d.y','MMM-d','M/d','M-d');
-	dateFirst =new Array('d/M/y','d-M-y','d.M.y','d-MMM','d/M','d-M');
-	var checkList=new Array('generalFormats',preferEuro?'dateFirst':'monthFirst',preferEuro?'monthFirst':'dateFirst');
-	var d=null;
-	for (var i=0; i<checkList.length; i++) {
-		var l=window[checkList[i]];
-		for (var j=0; j<l.length; j++) {
-			d=getDateFromFormat(val,l[j]);
-			if (d!=0) { return new Date(d); }
-			}
-		}
-	return null;
-	}
+function parseDate(val, preferEuro) {
+    var preferEuro = (arguments.length == 2) ? arguments[1] : false;
+    generalFormats = new Array('y-M-d', 'MMM d, y', 'MMM d,y', 'y-MMM-d', 'd-MMM-y', 'MMM d');
+    monthFirst = new Array('M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'M-d');
+    dateFirst = new Array('d/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M');
+    var checkList = new Array('generalFormats', preferEuro ? 'dateFirst' : 'monthFirst', preferEuro ? 'monthFirst' : 'dateFirst');
+    var d = null;
+    for (var i = 0; i < checkList.length; i++) {
+        var l = window[checkList[i]];
+        for (var j = 0; j < l.length; j++) {
+            d = getDateFromFormat(val, l[j]);
+            if (d != 0) {
+                return new Date(d);
+            }
+        }
+    }
+    return null;
+}
+
+function parseDateTime(val, preferEuro) {
+    var preferEuro = (arguments.length == 2) ? arguments[1] : false;
+    generalFormats = new Array('y-M-d hh:mm:ssa', 'MMM d, y hh:mm:ssa', 'MMM d,y hh:mm:ssa', 'y-MMM-d hh:mm:ssa', 'd-MMM-y hh:mm:ssa', 'MMM d hh:mm:ssa',
+        'y-M-d HH:mm:ss', 'MMM d, y HH:mm:ss', 'MMM d,y HH:mm:ss', 'y-MMM-d HH:mm:ss', 'd-MMM-y HH:mm:ss', 'MMM d HH:mm:ss');
+    monthFirst = new Array('M/d/y hh:mm:ssa', 'M-d-y hh:mm:ssa', 'M.d.y hh:mm:ssa', 'MMM-d hh:mm:ssa', 'M/d hh:mm:ssa', 'M-d hh:mm:ssa',
+        'M/d/y HH:mm:ss', 'M-d-y HH:mm:ss', 'M.d.y HH:mm:ss', 'MMM-d HH:mm:ss', 'M/d HH:mm:ss', 'M-d HH:mm:ss');
+    dateFirst = new Array('d/M/y hh:mm:ssa', 'd-M-y hh:mm:ssa', 'd.M.y hh:mm:ssa', 'd-MMM hh:mm:ssa', 'd/M hh:mm:ssa', 'd-M hh:mm:ssa',
+        'd/M/y HH:mm:ss', 'd-M-y HH:mm:ss', 'd.M.y HH:mm:ss', 'd-MMM HH:mm:ss', 'd/M HH:mm:ss', 'd-M HH:mm:ss');
+    var checkList = new Array('generalFormats', preferEuro ? 'dateFirst' : 'monthFirst', preferEuro ? 'monthFirst' : 'dateFirst');
+    var d = null;
+    for (var i = 0; i < checkList.length; i++) {
+        var l = window[checkList[i]];
+        for (var j = 0; j < l.length; j++) {
+            d = getDateFromFormat(val, l[j]);
+            if (d != 0) {
+                return new Date(d);
+            }
+        }
+    }
+    return null;
+}
 
 function parseDateFromFormat(val, format, dayNames, monthNames, dayDiffNames) {
-        if (dayNames) {
-            dateFormat.i18n.dayNames = dayNames;
-        }
-        if (monthNames) {
-            dateFormat.i18n.monthNames = monthNames;
-        }
-        if (dayDiffNames) {
-            dateFormat.i18n.dayDiffNames = dayDiffNames;
-        }
-        return getDateFromFormat(val,format)
+    if (dayNames) {
+        dateFormat.i18n.dayNames = dayNames;
+    }
+    if (monthNames) {
+        dateFormat.i18n.monthNames = monthNames;
+    }
+    if (dayDiffNames) {
+        dateFormat.i18n.dayDiffNames = dayDiffNames;
+    }
+    return getDateFromFormat(val, format);
 };

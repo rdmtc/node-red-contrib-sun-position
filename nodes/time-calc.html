@@ -4,42 +4,24 @@
     <input type="text" id="node-input-positionConfig">
   </div>
   <hr>
-  <div class="form-row time-payload">
-      <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-calc.label.payload"></span></label>
-      <input type="text" id="node-input-payload" style="width:70%">
-      <input type="hidden" id="node-input-payloadType">
-  </div>
-  <!-- div class="form-row time-topic">
-      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-calc.label.topic"></span></label>
-      <input type="text" id="node-input-topic">
-  </div -->
-  <hr class="time-calc-operand">
   <div class="form-row time-operand1">
       <label for="node-input-operand1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand1"></span></label>
       <input type="text" id="node-input-operand1" style="width:70%">
       <input type="hidden" id="node-input-operand1Type">
   </div>
-  <div class="form-row time-operand1Value hidden">
-      <label for="node-input-operand1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand1Value"></span></label>
-      <input type="text" id="node-input-operand1Value" style="width:70%">
-      <input type="hidden" id="node-input-operand1ValueType">
-  </div>
   <div class="form-row time-calc-row-operand1Format hidden">
       <label for="node-input-operand1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand1Format"></span></label>
       <select style="width:70%" id="node-input-operand1Format">
-          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
+        <option value="0" data-i18n="time-calc.label.timeparse_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-calc.label.timeparse_ECMA262"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-calc.label.timeparse_TextOther"></option> <!-- date as string ECMA-262 -->
+        <option value="3" data-i18n="time-calc.label.timeparse_YYYYMMDDHHMMSS"></option>
+        <option value="4" data-i18n="time-calc.label.timeparse_YYYYMMDD_HHMMSS"></option>
+        <option value="5" data-i18n="time-calc.label.timeparse_ms"></option> <!-- milliseconds since execution -->
+        <option value="6" data-i18n="time-calc.label.timeparse_sec"></option> <!-- seconds since execution -->
+        <option value="7" data-i18n="time-calc.label.timeparse_min"></option> <!-- minutes since execution -->
+        <option value="8" data-i18n="time-calc.label.timeparse_hour"></option> <!-- hour since execution -->
+        <option value="99" data-i18n="time-calc.label.timeparse_other"></option> <!-- input -->
       </select>
   </div>
   <div class="form-row time-calc-row-operand1Offset hidden">
@@ -49,65 +31,63 @@
           <option value="1" data-i18n="time-calc.label.seconds"></option>
           <option value="60" data-i18n="time-calc.label.minutes"></option>
           <option value="3600" data-i18n="time-calc.label.hours"></option>
-      </select>
-  </div>
-  <hr class="time-calc-operand">
-  <div class="form-row time-operand2">
-      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand2"></span></label>
-      <input type="text" id="node-input-operand2" style="width:70%">
-      <input type="hidden" id="node-input-operand2Type">
-  </div>
-  <div class="form-row time-operand2Value hidden">
-      <label for="node-input-operand2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand2Value"></span></label>
-      <input type="text" id="node-input-operand2Value" style="width:70%">
-      <input type="hidden" id="node-input-operand2ValueType">
-  </div>
-  <div class="form-row time-calc-row-operand2Format hidden">
-      <label for="node-input-operand2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2Format"></span></label>
-      <select style="width:70%" id="node-input-operand2Format">
-          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
-      </select>
-  </div>
-  <div class="form-row time-calc-row-operand2Offset hidden">
-      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
-      <input id="node-input-operand2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
-      <select style="width:100px" id="node-input-operand2OffsetMultiplier">
-          <option value="1" data-i18n="time-calc.label.seconds"></option>
-          <option value="60" data-i18n="time-calc.label.minutes"></option>
-          <option value="3600" data-i18n="time-calc.label.hours"></option>
+          <option value="86400" data-i18n="time-calc.label.days"></option>
+          <option value="604800" data-i18n="time-calc.label.weeks"></option>
+          <option value="-1" data-i18n="time-calc.label.month"></option>
+          <option value="-2" data-i18n="time-calc.label.year"></option>
       </select>
   </div>
   <hr>
   <div class="form-row time-calc-row-operator">
     <label for="node-input-operator"><i class="fa fa-calculator"></i> <span data-i18n="time-calc.label.operator"></span></label>
     <select style="width:70%" id="node-input-operator">
-        <option value="0" data-i18n="time-calc.label.add"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-        <option value="1" data-i18n="time-calc.label.sub"></option> <!-- date as string ECMA-262 -->
-        <option value="2" data-i18n="time-calc.label.timespan"></option>
-        <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-        <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-        <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-        <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-        <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-        <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-        <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-        <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-        <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-        <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
+        <option value="0" data-i18n="time-calc.label.nothing"></option>
+        <option value="1" data-i18n="time-calc.label.greater"></option>
+        <option value="2" data-i18n="time-calc.label.greaterOrEqual"></option>
+        <option value="3" data-i18n="time-calc.label.lesser"></option>
+        <option value="4" data-i18n="time-calc.label.lesserOrEqual"></option>
+        <option value="5" data-i18n="time-calc.label.equal"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="6" data-i18n="time-calc.label.unequal"></option> <!-- date as string ECMA-262 -->
+        <option value="7" data-i18n="time-calc.label.equalSec"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="8" data-i18n="time-calc.label.unequalSec"></option> <!-- date as string ECMA-262 -->
+        <option value="9" data-i18n="time-calc.label.equalMin"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="10" data-i18n="time-calc.label.unequalMin"></option> <!-- date as string ECMA-262 -->
     </select>
-</div>
+  </div>
+  <hr class="time-operand2 hidden">
+  <div class="form-row time-operand2 time-calc-row-operand2 hidden">
+      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand2"></span></label>
+      <input type="text" id="node-input-operand2" style="width:70%">
+      <input type="hidden" id="node-input-operand2Type">
+  </div>
+  <div class="form-row time-calc-row-operand2Format hidden">
+      <label for="node-input-operand2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2Format"></span></label>
+      <select style="width:70%" id="node-input-operand2Format">
+        <option value="0" data-i18n="time-calc.label.timeparse_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-calc.label.timeparse_ECMA262"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-calc.label.timeparse_TextOther"></option> <!-- date as string ECMA-262 -->
+        <option value="3" data-i18n="time-calc.label.timeparse_YYYYMMDDHHMMSS"></option>
+        <option value="4" data-i18n="time-calc.label.timeparse_YYYYMMDD_HHMMSS"></option>
+        <option value="5" data-i18n="time-calc.label.timeparse_ms"></option> <!-- milliseconds since execution -->
+        <option value="6" data-i18n="time-calc.label.timeparse_sec"></option> <!-- seconds since execution -->
+        <option value="7" data-i18n="time-calc.label.timeparse_min"></option> <!-- minutes since execution -->
+        <option value="8" data-i18n="time-calc.label.timeparse_hour"></option> <!-- hour since execution -->
+        <option value="99" data-i18n="time-calc.label.timeparse_other"></option> <!-- input -->
+      </select>
+  </div>
+  <div class="form-row time-calc-row-operand2Offset hidden">
+      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
+      <input id="node-input-operand2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
+      <select style="width:100px" id="node-input-operand2OffsetMultiplier">
+        <option value="1" data-i18n="time-calc.label.seconds"></option>
+        <option value="60" data-i18n="time-calc.label.minutes"></option>
+        <option value="3600" data-i18n="time-calc.label.hours"></option>
+        <option value="86400" data-i18n="time-calc.label.days"></option>
+        <option value="604800" data-i18n="time-calc.label.weeks"></option>
+        <option value="-1" data-i18n="time-calc.label.month"></option>
+        <option value="-2" data-i18n="time-calc.label.year"></option>
+      </select>
+  </div>
 
   <hr class="time-calc-result">
   <div class="form-row time-result1">
@@ -123,122 +103,42 @@
   <div class="form-row time-calc-row-result1Format hidden">
       <label for="node-input-result1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result1Format"></span></label>
       <select style="width:70%" id="node-input-result1Format">
-          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
+        <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+        <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
+        <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
+        <option value="14" data-i18n="time-calc.label.timeformat_localLong"></option>
+        <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
+        <option value="13" data-i18n="time-calc.label.timeformat_localTimeLong"></option>
+        <option value="12" data-i18n="time-calc.label.timeformat_localDate"></option>
+        <option value="15" data-i18n="time-calc.label.timeformat_localDateLong"></option>
+        <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
+        <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
+        <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
+        <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
+        <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
+        <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
+        <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
+        <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
+        <option value="16" data-i18n="time-calc.label.timeformat_weekday"></option> <!-- hour since execution -->
+        <option value="17" data-i18n="time-calc.label.timeformat_weekday2"></option> <!-- hour since execution -->
+        <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
+        <option value="99" data-i18n="time-calc.label.timeformat_other"></option> <!-- input -->
       </select>
   </div>
   <div class="form-row time-calc-row-result1Offset hidden">
       <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
       <input id="node-input-result1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
       <select style="width:100px" id="node-input-result1OffsetMultiplier">
-          <option value="1" data-i18n="time-calc.label.seconds"></option>
-          <option value="60" data-i18n="time-calc.label.minutes"></option>
-          <option value="3600" data-i18n="time-calc.label.hours"></option>
+        <option value="1" data-i18n="time-calc.label.seconds"></option>
+        <option value="60" data-i18n="time-calc.label.minutes"></option>
+        <option value="3600" data-i18n="time-calc.label.hours"></option>
+        <option value="86400" data-i18n="time-calc.label.days"></option>
+        <option value="604800" data-i18n="time-calc.label.weeks"></option>
+        <option value="-1" data-i18n="time-calc.label.month"></option>
+        <option value="-2" data-i18n="time-calc.label.year"></option>
       </select>
   </div>
   <hr>
-  <div class="form-row time-calc-row-comparison">
-    <label for="node-input-comparison"><i class="fa fa-calculator"></i> <span data-i18n="time-calc.label.comparison"></span></label>
-    <select style="width:70%" id="node-input-comparison">
-        <option value="0" data-i18n="time-calc.label.equal"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-        <option value="1" data-i18n="time-calc.label.unequal"></option> <!-- date as string ECMA-262 -->
-        <option value="2" data-i18n="time-calc.label.greater"></option>
-        <option value="3" data-i18n="time-calc.label.greaterOrEqual"></option>
-        <option value="4" data-i18n="time-calc.label.lesser"></option>
-        <option value="5" data-i18n="time-calc.label.lesserOrEqual"></option>
-    </select>
-</div>
-  <hr class="time-calc-result">
-  <div class="form-row time-operand3">
-      <label for="node-input-operand3"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.operand3"></span></label>
-      <input type="text" id="node-input-operand3" style="width:70%">
-      <input type="hidden" id="node-input-operand3Type">
-  </div>
-  <div class="form-row time-operand3Value hidden">
-      <label for="node-input-operand3Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.operand3Value"></span></label>
-      <input type="text" id="node-input-operand3Value" style="width:70%">
-      <input type="hidden" id="node-input-operand3ValueType">
-  </div>
-  <div class="form-row time-calc-row-operand3Format hidden">
-      <label for="node-input-operand3Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand3Format"></span></label>
-      <select style="width:70%" id="node-input-operand3Format">
-          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
-      </select>
-  </div>
-  <div class="form-row time-calc-row-operand3Offset hidden">
-      <label for="node-input-operand3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
-      <input id="node-input-operand3Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
-      <select style="width:100px" id="node-input-operand3OffsetMultiplier">
-          <option value="1" data-i18n="time-calc.label.seconds"></option>
-          <option value="60" data-i18n="time-calc.label.minutes"></option>
-          <option value="3600" data-i18n="time-calc.label.hours"></option>
-      </select>
-  </div>
-
-  <hr class="time-calc-result">
-  <div class="form-row time-result2">
-      <label for="node-input-result2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-calc.label.result2"></span></label>
-      <input type="text" id="node-input-result2" style="width:70%">
-      <input type="hidden" id="node-input-result2Type">
-  </div>
-  <div class="form-row time-result2Value hidden">
-      <label for="node-input-result2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-calc.label.result2Value"></span></label>
-      <input type="text" id="node-input-result2Value" style="width:70%">
-      <input type="hidden" id="node-input-result2ValueType">
-  </div>
-  <div class="form-row time-calc-row-result2Format hidden">
-      <label for="node-input-result2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result2Format"></span></label>
-      <select style="width:70%" id="node-input-result2Format">
-          <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
-          <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
-          <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
-          <option value="3" data-i18n="time-calc.label.timeformat_localTime"></option>
-          <option value="4" data-i18n="time-calc.label.timeformat_UTC"></option>
-          <option value="5" data-i18n="time-calc.label.timeformat_ISO"></option>
-          <option value="10" data-i18n="time-calc.label.timeformat_YYYYMMDDHHMMSS"></option>
-          <option value="11" data-i18n="time-calc.label.timeformat_YYYYMMDD_HHMMSS"></option>
-          <option value="6" data-i18n="time-calc.label.timeformat_ms"></option> <!-- milliseconds since execution -->
-          <option value="7" data-i18n="time-calc.label.timeformat_sec"></option> <!-- seconds since execution -->
-          <option value="8" data-i18n="time-calc.label.timeformat_min"></option> <!-- minutes since execution -->
-          <option value="9" data-i18n="time-calc.label.timeformat_hour"></option> <!-- hour since execution -->
-          <option value="-1" data-i18n="time-calc.label.timeformat_obj"></option> <!-- as object -->
-      </select>
-  </div>
-  <div class="form-row time-calc-row-result2Offset hidden">
-      <label for="node-input-result2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.offset"></span></label>
-      <input id="node-input-result2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.offset">
-      <select style="width:100px" id="node-input-result2OffsetMultiplier">
-          <option value="1" data-i18n="time-calc.label.seconds"></option>
-          <option value="60" data-i18n="time-calc.label.minutes"></option>
-          <option value="3600" data-i18n="time-calc.label.hours"></option>
-      </select>
-  </div>
-
-  <hr>
-
   <div class="form-tips time-calc-addPayload" data-i18n="[html]time-calc.tips.addPayload"></div>
   <hr>
   <div class="form-row">
@@ -261,7 +161,7 @@
 </style>
 
 <script type="text/x-red" data-help-name="time-calc">
-    <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
+  <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
   payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
   <h3>Outputs</h3>
   <dl class="message-properties">
@@ -440,109 +340,107 @@
         value: "",
         required: false
       },
-      topic: {
-        value: ""
-      },
       positionConfig: {
         value: "",
         type: "position-config",
         required: true
       },
+      //#region operand1
       operand1: {
-        value: "",
+        value: "payload",
         validate: RED.validators.typedInput("operand1Type")
       },
       operand1Type: {
-        value: "date"
+        value: "msg"
       },
       operand1Format: {
         value: 0,
         required: true,
-                validate: function (v) {
-                    return (RED.validators.number()(v) || (typeof v === 'undefined'));
-                }
+        validate: function (v) {
+          return (RED.validators.number()(v) || (typeof v === 'undefined'));
+        }
       },
       operand1Offset: {
         value: 0,
         required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand1Type === undefined || (typeof v === 'undefined')
-                    );
-                }
+        validate: RED.validators.number()
       },
       operand1OffsetMultiplier: {
         value: 60,
         required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand1Type === undefined || (typeof v === 'undefined')
-                    );
-                }
+        validate: RED.validators.number()
       },
+      //#endregion operand1
+      //#region operator
+      operator: {
+        value: 0,
+        required: true,
+        validate: RED.validators.number()
+      },
+      //#endregion operator
+      //#region operand2
       operand2: {
         value: "",
-        validate: RED.validators.typedInput("operand2Type")
+        validate: function (v) {
+          return (RED.validators.typedInput("operand2Type")(v) ||
+            ($("#node-input-operand2").length ?
+              $("#node-input-operand2").typedInput("type") === "none" :
+              this.operand2Type === "none"));
+        }
       },
       operand2Type: {
-        value: "date"
+        value: "entered"
       },
       operand2Format: {
         value: 0,
         required: true,
-                validate: function (v) {
-                    return (RED.validators.number()(v) || (typeof v === 'undefined'));
-                }
+        validate: function (v) {
+          return (RED.validators.number()(v) ||
+            (typeof v === 'undefined') ||
+            ($("#node-input-operand2").length ?
+              $("#node-input-operand2").typedInput("type") === "none" :
+              this.operand2Type === "none"));
+        }
       },
       operand2Offset: {
         value: 0,
         required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand2Type === undefined || (typeof v === 'undefined')
-                    );
-                }
+        validate: RED.validators.number()
       },
       operand2OffsetMultiplier: {
         value: 60,
         required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand2Type === undefined || (typeof v === 'undefined')
-                    );
-                }
+        validate: RED.validators.number()
       },
       operand2Property: {
         value: "",
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("operand2PropertyType")(v) ||
-            ($("#node-input-operand2").length
-              ? $("#node-input-operand2").typedInput("type") === "none"
-              : this.operand2Type === "none")
+            ($("#node-input-operand2").length ?
+              $("#node-input-operand2").typedInput("type") === "none" :
+              this.operand2Type === "none")
           );
         }
       },
       operand2PropertyType: {
         value: "none"
       },
+      //#endregion operand2
+      //#region operand2Alt
       operand2Alt: {
         value: "",
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("operand2AltType")(v) ||
-            ($("#node-input-timeType").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
+            ($("#node-input-operator").length ?
+              $("#node-input-operator").val() === 0 :
+              this.operator === 0) ||
+            ($("#node-input-operand2Type").length ?
+              $("#node-input-operand2").typedInput("type") === "none" :
+              this.operand2Type === "none")
           );
         }
       },
@@ -552,50 +450,30 @@
       operand2AltOffset: {
         value: 0,
         required: true,
-        validate: function(v) {
+        validate: function (v) {
           return (
             typeof v === "undefined" ||
-            RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
+            RED.validators.number()(v)
           );
         }
       },
       operand2AltOffsetMultiplier: {
         value: 60,
         required: true,
-        validate: function(v) {
-          return (
-            typeof v === "undefined" ||
-            RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
-          );
-        }
-      },
-      operator: {
-        value: 60,
-        required: true,
         validate: RED.validators.number()
       },
+      //#endregion operand2Alt
+      //#region result1
       result1: {
-        value: "",
+        value: "payload",
         validate: RED.validators.typedInput("result1Type")
       },
       result1Type: {
-        value: "none"
+        value: "msg"
       },
       result1Value: {
         value: "",
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("result1ValueType")(v) ||
             $("#node-input-result1").typedInput("type") === "none" ||
@@ -609,7 +487,7 @@
       result1Format: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-result1").typedInput("type") === "none" ||
@@ -620,7 +498,7 @@
       result1Offset: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-result1").typedInput("type") === "none" ||
@@ -631,113 +509,15 @@
       result1OffsetMultiplier: {
         value: 60,
         required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-result1").typedInput("type") === "none" ||
-            this.result1Type === undefined
-          );
-        }
-      },
-      operand3: {
-        value: "",
-        validate: RED.validators.typedInput("operand3Type")
-      },
-      operand3Type: {
-        value: "date"
-      },
-      operand3Format: {
-        value: 0,
-        required: true,
-                validate: function (v) {
-                    return (RED.validators.number()(v) || (typeof v === 'undefined'));
-                }
-      },
-      operand3Offset: {
-        value: 0,
-        required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand3Type === undefined || (typeof v === 'undefined')
-                    );
-                }
-      },
-      operand3OffsetMultiplier: {
-        value: 60,
-        required: true,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.operand3Type === undefined || (typeof v === 'undefined')
-                    );
-                }
-      },
-      comparison: {
-        value: 60,
-        required: true,
         validate: RED.validators.number()
-      },
-
-      result2: {
-        value: "",
-        validate: RED.validators.typedInput("result2Type")
-      },
-      result2Type: {
-        value: "none"
-      },
-      result2Value: {
-        value: "",
-        validate: function(v) {
-          return (
-            RED.validators.typedInput("result2ValueType")(v) ||
-            $("#node-input-result2").typedInput("type") === "none" ||
-            this.result2Type === undefined
-          );
-        }
-      },
-      result2ValueType: {
-        value: "date"
-      },
-      result2Format: {
-        value: 0,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-result2").typedInput("type") === "none" ||
-            this.result2Type === undefined
-          );
-        }
-      },
-      result2Offset: {
-        value: 0,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-result2").typedInput("type") === "none" ||
-            this.result2Type === undefined
-          );
-        }
-      },
-      result2OffsetMultiplier: {
-        value: 60,
-        required: false,
-        validate: function(v) {
-          return (
-            RED.validators.number()(v) ||
-            $("#node-input-result2").typedInput("type") === "none" ||
-            this.result2Type === undefined
-          );
-        }
-      },
+      }
+      //#endregion result1
     },
-    icon: "injectSun.png",
-    inputs: 0,
+    icon: "time-calc.png",
+    inputs: 1,
     outputs: 1,
     outputLabels: "result",
-    label: function() {
+    label: function () {
       if (this.name) {
         return this.name;
       }
@@ -848,12 +628,12 @@
       }
       return prefix + result;
     },
-    labelStyle: function() {
+    labelStyle: function () {
       return this.name ? "node_label_italic" : "";
     },
     paletteLabel: "time calc",
     align: "left",
-    oneditprepare: function() {
+    oneditprepare: function () {
       //#region definition
       const typeUndefined = {
         value: "none",
@@ -920,105 +700,46 @@
       });
 
       //#endregion spinner
-      //#region payload
-      if (this.payloadType == null) {
-        if (this.payload == "") {
-          this.payloadType = "date";
-        } else {
-          this.payloadType = "str";
-        }
-      } else if (
-        this.payloadType === "string" ||
-        this.payloadType === typeUndefined.value
-      ) {
-        this.payloadType = "str";
-      }
-      $("#node-input-payloadType").val(this.payloadType);
-      $("#node-input-payload").typedInput({
-        default: this.payloadType || "date",
-        typeField: $("#node-input-payloadType"),
-        types: [
-          "date",
-          "flow",
-          "global",
-          "str",
-          "num",
-          "bool",
-          "json",
-          "bin",
-          "env",
-          "jsonata",
-          typeSunCalc,
-          typeMoonCalc,
-          typeTimeSun,
-          typeTimeMoon
-        ]
-      });
-      //#endregion payload
       //#region operand1
       $("#node-input-operand1Type").val(this.operand1Type);
       $("#node-input-operand1").typedInput({
-        default: this.operand1Type || typeUndefined.value,
+        default: this.operand1Type || "msg",
         typeField: $("#node-input-operand1Type"),
-        types: [typeUndefined, "msg", "flow", "global"]
-      });
-
-      $("#node-input-operand1ValueType").val(this.operand1ValueType);
-      $("#node-input-operand1Value").typedInput({
-        default: this.operand1ValueType || "date",
-        typeField: $("#node-input-operand1ValueType"),
         types: [
+          "msg",
+          "flow",
+          "global",
           "date",
           typeTime,
           typeTimeSun,
           typeTimeMoon,
-          "flow",
-          "global",
           "str",
           "num",
-          "bool",
-          "json",
-          "bin",
           "env",
-          "jsonata",
-          typeSunCalc,
-          typeMoonCalc
+          "jsonata"
         ]
       });
-      $("#node-input-operand1").on("change", function(type, value) {
+
+      $("#node-input-operand1").on("change", function (type, value) {
         let plType = $("#node-input-operand1").typedInput("type");
-        if (plType !== typeUndefined.value) {
-          $(".time-operand1Value").show();
-          $(".time-operand2").show();
-          let plVType = $("#node-input-operand1Value").typedInput("type");
-          if (
-            plVType === "entered" ||
-            plVType === "pdsTime" ||
-            plVType === "pdmTime"
-          ) {
-            $(".time-calc-row-operand1Format").show();
-            $(".time-calc-row-operand1Offset").show();
-            $(".time-calc-row-operand1days").show();
-          } else if (plVType === "date") {
-            $(".time-calc-row-operand1Format").show();
-            $(".time-calc-row-operand1Offset").show();
-            $(".time-calc-row-operand1days").hide();
-          } else {
-            $(".time-calc-row-operand1Format").hide();
-            $(".time-calc-row-operand1Offset").hide();
-            $(".time-calc-row-operand1days").hide();
-          }
+        if (
+          plType === "entered" ||
+          plType === "pdsTime" ||
+          plType === "pdmTime"
+        ) {
+          $(".time-calc-row-operand1Format").show();
+          $(".time-calc-row-operand1Offset").show();
+          $(".time-calc-row-operand1days").show();
+        } else if (plType === "date") {
+          $(".time-calc-row-operand1Format").show();
+          $(".time-calc-row-operand1Offset").show();
+          $(".time-calc-row-operand1days").hide();
         } else {
-          $(".time-operand1Value").hide();
           $(".time-calc-row-operand1Format").hide();
           $(".time-calc-row-operand1Offset").hide();
           $(".time-calc-row-operand1days").hide();
-          $(".time-operand2").hide();
         }
         $("#node-input-operand2").change();
-      });
-      $("#node-input-operand1Value").on("change", function(type, value) {
-        $("#node-input-operand1").change();
       });
       if (
         this.operand1Days == "*" ||
@@ -1032,7 +753,7 @@
         $("#time-calc-operand1Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.operand1Days.split(",").forEach(function(v) {
+        this.operand1Days.split(",").forEach(function (v) {
           $("#time-calc-operand1Days [value=" + v + "]").prop(
             "checked",
             true
@@ -1040,50 +761,52 @@
         });
       }
       //#endregion operand1
+      $("#node-input-operator").on("change", function (type, value) {
+        console.log('operator change');
+        $("#node-input-operand2").change();
+      });
       //#region operand2
       $("#node-input-operand2Type").val(this.operand2Type);
       $("#node-input-operand2").typedInput({
-        default: this.operand2Type || typeUndefined.value,
+        default: this.operand2Type || typeTime.value,
         typeField: $("#node-input-operand2Type"),
-        types: [typeUndefined, "msg", "flow", "global"]
-      });
-      $("#node-input-operand2ValueType").val(this.operand2ValueType);
-      $("#node-input-operand2Value").typedInput({
-        default: this.operand2ValueType || "date",
-        typeField: $("#node-input-operand2ValueType"),
         types: [
+          "msg",
+          "flow",
+          "global",
           "date",
           typeTime,
           typeTimeSun,
           typeTimeMoon,
-          "flow",
-          "global",
           "str",
           "num",
-          "bool",
-          "json",
           "bin",
           "env",
-          "jsonata",
-          typeSunCalc,
-          typeMoonCalc
+          "jsonata"
         ]
       });
-      $("#node-input-operand2").on("change", function(type, value) {
-        let plType = $("#node-input-operand2").typedInput("type");
-        if (plType !== typeUndefined.value) {
-          $(".time-operand2Value").show();
-          $(".time-result1").show();
-          let plVType = $("#node-input-operand2Value").typedInput("type");
+      $("#node-input-operand2").on("change", function (type, value) {
+        console.log('operand2 change');
+        console.log($("#node-input-operator").val());
+        if ($("#node-input-operator").val() == 0) {
+          $(".time-operand2").hide();
+          $(".time-calc-row-operand2").hide();
+          $(".time-calc-row-operand2Format").hide();
+          $(".time-calc-row-operand2Offset").hide();
+          $(".time-calc-row-operand2days").hide();
+        } else {
+          $(".time-operand2").show();
+          $(".time-calc-row-operand2").show();
+          let plType = $("#node-input-operand2").typedInput("type");
           if (
-            plVType === "entered" ||
-            plVType === "pdsTime" ||
-            plVType === "pdmTime"
+            plType === "entered" ||
+            plType === "pdsTime" ||
+            plType === "pdmTime"
           ) {
             $(".time-calc-row-operand2Format").show();
             $(".time-calc-row-operand2Offset").show();
             $(".time-calc-row-operand2days").show();
-          } else if (plVType === "date") {
+          } else if (plType === "date") {
             $(".time-calc-row-operand2Format").show();
             $(".time-calc-row-operand2Offset").show();
             $(".time-calc-row-operand2days").hide();
@@ -1092,17 +815,9 @@
             $(".time-calc-row-operand2Offset").hide();
             $(".time-calc-row-operand2days").hide();
           }
-        } else {
-          $(".time-operand2Value").hide();
-          $(".time-calc-row-operand2Format").hide();
-          $(".time-calc-row-operand2Offset").hide();
-          $(".time-calc-row-operand2days").hide();
-          $(".time-result1").hide();
         }
+
         $("#node-input-result1").change();
-      });
-      $("#node-input-operand2Value").on("change", function(type, value) {
-        $("#node-input-operand2").change();
       });
       if (
         this.operand2Days == "*" ||
@@ -1116,7 +831,7 @@
         $("#time-calc-operand2Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.operand2Days.split(",").forEach(function(v) {
+        this.operand2Days.split(",").forEach(function (v) {
           $("#time-calc-operand2Days [value=" + v + "]").prop(
             "checked",
             true
@@ -1153,7 +868,7 @@
           typeMoonCalc
         ]
       });
-      $("#node-input-result1").on("change", function(type, value) {
+      $("#node-input-result1").on("change", function (type, value) {
         let plType = $("#node-input-result1").typedInput("type");
         if (plType !== typeUndefined.value) {
           $(".time-result1Value").show();
@@ -1182,7 +897,7 @@
           $(".time-calc-row-result1days").hide();
         }
       });
-      $("#node-input-result1Value").on("change", function(type, value) {
+      $("#node-input-result1Value").on("change", function (type, value) {
         $("#node-input-result1").change();
       });
       if (
@@ -1197,7 +912,7 @@
         $("#time-calc-result1Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.result1Days.split(",").forEach(function(v) {
+        this.result1Days.split(",").forEach(function (v) {
           $("#time-calc-result1Days [value=" + v + "]").prop(
             "checked",
             true
@@ -1205,191 +920,36 @@
         });
       }
       //#endregion result1
-      //#region result2
-      $("#node-input-result2Type").val(this.result2Type);
-      $("#node-input-result2").typedInput({
-        default: this.result2Type || typeUndefined.value,
-        typeField: $("#node-input-result2Type"),
-        types: [typeUndefined, "msg", "flow", "global"]
-      });
-      $("#node-input-result2ValueType").val(this.result2ValueType);
-      $("#node-input-result2Value").typedInput({
-        default: this.result2ValueType || "date",
-        typeField: $("#node-input-result2ValueType"),
-        types: [
-          "date",
-          typeTime,
-          typeTimeSun,
-          typeTimeMoon,
-          "flow",
-          "global",
-          "str",
-          "num",
-          "bool",
-          "json",
-          "bin",
-          "env",
-          "jsonata",
-          typeSunCalc,
-          typeMoonCalc
-        ]
-      });
-      $("#node-input-result2").on("change", function(type, value) {
-        let plType = $("#node-input-result2").typedInput("type");
-        if (plType !== typeUndefined.value) {
-          $(".time-result2Value").show();
-          let plVType = $("#node-input-result2Value").typedInput("type");
-          if (
-            plVType === "entered" ||
-            plVType === "pdsTime" ||
-            plVType === "pdmTime"
-          ) {
-            $(".time-calc-row-result2Format").show();
-            $(".time-calc-row-result2Offset").show();
-            $(".time-calc-row-result2days").show();
-          } else if (plVType === "date") {
-            $(".time-calc-row-result2Format").show();
-            $(".time-calc-row-result2Offset").show();
-            $(".time-calc-row-result2days").hide();
-          } else {
-            $(".time-calc-row-result2Format").hide();
-            $(".time-calc-row-result2Offset").hide();
-            $(".time-calc-row-result2days").hide();
-          }
-        } else {
-          $(".time-result2Value").hide();
-          $(".time-calc-row-result2Format").hide();
-          $(".time-calc-row-result2Offset").hide();
-          $(".time-calc-row-result2days").hide();
-        }
-      });
-      $("#node-input-result2Value").on("change", function(type, value) {
-        $("#node-input-result2").change();
-      });
-      if (
-        this.result2Days == "*" ||
-        typeof this.result2Days === "undefined"
-      ) {
-        $("#time-calc-result2Days input[type=checkbox]").prop(
-          "checked",
-          true
-        );
-      } else {
-        $("#time-calc-result2Days input[type=checkbox]").removeAttr(
-          "checked"
-        );
-        this.result2Days.split(",").forEach(function(v) {
-          $("#time-calc-result2Days [value=" + v + "]").prop(
-            "checked",
-            true
-          );
-        });
-      }
-      //#endregion result2
-      //#region property
-      $("#node-input-property").typedInput({
-        default: this.propertyType || typeUndefined.value,
-        types: [typeUndefined, "flow", "global", "jsonata", "env"]
-      });
-      $("#node-input-property").on("change", function(type, value) {
-        let timeType = $("#node-input-time").typedInput("type");
-        let propType = $("#node-input-property").typedInput("type");
-        if (
-          timeType === typeUndefined.value ||
-          propType === typeUndefined.value
-        ) {
-          $(".time-calc-row-timeAlt").hide();
-          $(".time-calc-row-timeAltOffset").hide();
-          $(".time-calc-row-timeAltDays").hide();
-        } else {
-          $(".time-calc-row-timeAlt").show();
-          $(".time-calc-row-timeAltOffset").show();
-          $(".time-calc-row-timeAltDays").show();
-        }
-        if (
-          timeType === "flow" ||
-          timeType === "global" ||
-          propType !== typeUndefined.value
-        ) {
-          $(".time-calc-recalc").show();
-        } else {
-          $(".time-calc-recalc").hide();
-          $("#time-calc-recalcTime").val("");
-        }
-      });
-      //#endregion property
-      //#region time
-      $("#node-input-timeType").val(this.timeType);
-      $("#node-input-time").typedInput({
-        default: this.timeType || typeUndefined.value,
-        typeField: $("#node-input-timeType"),
-        types: [
-          typeUndefined,
-          typeTime,
-          typeTimeSun,
-          typeTimeMoon,
-          "flow",
-          "global",
-          "env"
-        ]
-      });
-      $("#node-input-time").on("change", function(type, value) {
-        if ($("#node-input-time").typedInput("type") === typeUndefined.value) {
-          $(".time-calc-row-offset").hide();
-          $(".time-calc-row-timeDays").hide();
-          $(".time-calc-row-alt").hide();
-        } else {
-          $(".time-calc-row-offset").show();
-          $(".time-calc-row-timeDays").show();
-          $(".time-calc-row-alt").show();
-        }
-        $("#node-input-property").change();
-      });
-      if (this.timeDays == "*" || typeof this.timeDays === "undefined") {
-        $("#time-calc-timeDays input[type=checkbox]").prop("checked", true);
-      } else {
-        $("#time-calc-timeDays input[type=checkbox]").removeAttr("checked");
-        this.timeDays.split(",").forEach(function(v) {
-          $("#time-calc-timeDays [value=" + v + "]").prop("checked", true);
-        });
-      }
-      //#endregion time
-      //#region timeAlt
-      $("#node-input-timeAlt").typedInput({
-        default: this.timeAltType || "entered",
+      //#region operand2Alt
+      $("#node-input-operand2Alt").typedInput({
+        default: this.operand2AltType || "entered",
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
-      if (this.timeAltDays == "*" || typeof this.timeAltDays === "undefined") {
-        $("#time-calc-timeAltDays input[type=checkbox]").prop(
+      if (this.operand2AltDays == "*" || typeof this.operand2AltDays === "undefined") {
+        $("#time-calc-operand2AltDays input[type=checkbox]").prop(
           "checked",
           true
         );
       } else {
-        $("#time-calc-timeAltDays input[type=checkbox]").removeAttr(
+        $("#time-calc-operand2AltDays input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.timeAltDays.split(",").forEach(function(v) {
-          $("#time-calc-timeAltDays [value=" + v + "]").prop("checked", true);
+        this.operand2AltDays.split(",").forEach(function (v) {
+          $("#time-calc-operand2AltDays [value=" + v + "]").prop("checked", true);
         });
       }
-      //#endregion timeAlt
-      //#region onceDelay
-      $("#node-input-once").change(function() {
-        $("#node-input-onceDelay").attr(
-          "disabled",
-          !$("#node-input-once").prop("checked")
-        );
-      });
-      //#endregion onceDelay
+      //#endregion operand2Alt
+
       $("#node-input-time").change();
       $("#node-input-property").change();
       $("#node-input-payload").change();
       $("#node-input-operand1").change();
+      $("#node-input-operator").change();
     },
-    oneditsave: function() {
+    oneditsave: function () {
       function getDaysStr(value) {
         let days = value
-          .map(function(_, el) {
+          .map(function (_, el) {
             return $(el).val();
           })
           .get();
@@ -1402,27 +962,13 @@
           return days.join(",");
         }
       }
-
-      this.payloadType = $("#node-input-payload").typedInput("type");
-      this.timeType = $("#node-input-time").typedInput("type");
-      this.timeDays = getDaysStr(
-        $("#time-calc-timeDays input[type=checkbox]:checked")
-      );
-
-      this.propertyType = $("#node-input-property").typedInput("type");
-      this.timeAltType = $("#node-input-timeAlt").typedInput("type");
-      this.timeAltDays = getDaysStr(
-        $("#time-calc-timeAltDays input[type=checkbox]:checked")
-      );
-
       this.operand1Type = $("#node-input-operand1").typedInput("type");
-      this.operand1ValueType = $("#node-input-operand1Value").typedInput(
-        "type"
-      );
 
       this.operand2Type = $("#node-input-operand2").typedInput("type");
-      this.operand2ValueType = $("#node-input-operand2Value").typedInput(
-        "type"
+
+      this.operand2AltType = $("#node-input-operand2Alt").typedInput("type");
+      this.operand2AltDays = getDaysStr(
+        $("#time-calc-operand2AltDays input[type=checkbox]:checked")
       );
 
       this.result1Type = $("#node-input-result1").typedInput("type");
