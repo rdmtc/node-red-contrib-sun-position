@@ -8,34 +8,8 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
-
-    function getforamtDateCmp(date) {
-        function pad2(n) { // always returns a string
-            return (n < 10 ? '0' : '') + n;
-        }
-
-        return Number(date.getFullYear() +
-            pad2(date.getMonth() + 1) +
-            pad2(date.getDate()) +
-            pad2(date.getHours()) +
-            pad2(date.getMinutes()) +
-            pad2(date.getSeconds()));
-    }
-
-    function getforamtDateCmp2(date) {
-        function pad2(n) { // always returns a string
-            return (n < 10 ? '0' : '') + n;
-        }
-
-        return Number(date.getFullYear() +
-            pad2(date.getMonth() + 1) +
-            pad2(date.getDate()) + '.' +
-            pad2(date.getHours()) +
-            pad2(date.getMinutes()) +
-            pad2(date.getSeconds()));
-    }
 
     function tsGetScheduleTime(time, limit) {
         var now = new Date();
@@ -62,6 +36,8 @@ module.exports = function(RED) {
         } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
             let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
             if (!data.error) {
+                return hlp.getFormatedDateOut(data.value, format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                /*
                 format = format || 0;
                 if (isNaN(format)) {
                     return hlp.formatDate(data.value, "" + format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
@@ -118,7 +94,7 @@ module.exports = function(RED) {
                             obj.delaySec = Math.round(delay / 1000);
                             return obj;
                     }
-                }
+            }*/
             }
             return data;
         }
@@ -313,7 +289,7 @@ module.exports = function(RED) {
             }
         }
 
-        this.on('close', function() {
+        this.on('close', function () {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -350,7 +326,7 @@ module.exports = function(RED) {
 
         try {
             if (config.once) {
-                config.onceTimeout = setTimeout(function() {
+                config.onceTimeout = setTimeout(function () {
                     node.emit("input", {
                         type: 'once'
                     });

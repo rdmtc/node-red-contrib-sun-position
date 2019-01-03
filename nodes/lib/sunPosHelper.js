@@ -6,6 +6,10 @@ const util = require('util');
 
 module.exports = {
     errorHandler,
+    getComperableDateFormat,
+    parseComperableDateFormat,
+    getComperableDateFormat2,
+    parseComperableDateFormat2,
     compareAzimuth,
     addOffset,
     calcDayOffset,
@@ -18,6 +22,7 @@ module.exports = {
     getTimeNumber,
     getNodeId,
     formatDate,
+    getFormatedDateOut,
     parseDate,
     parseDateTime,
     parseDateFromFormat
@@ -63,6 +68,79 @@ function errorHandler(node, err, messageText, stateText) {
     }
     return false;
 };
+
+/*******************************************************************************************************/
+/**
+ * cratetes a string with two digets
+ * @param {number} n number to format
+ * @returns {string} number with minimum two digets
+ */
+function pad2(n) { // always returns a string
+    return (n < 10 ? '0' : '') + n;
+}
+
+/**
+ * gets a comparable date Format
+ * @param {Date} date - Date to format
+ * @return {string} number in Format YYYYMMDDHHMMSS
+ */
+function getComperableDateFormat(date) {
+    return Number(date.getFullYear() +
+        pad2(date.getMonth() + 1) +
+        pad2(date.getDate()) +
+        pad2(date.getHours()) +
+        pad2(date.getMinutes()) +
+        pad2(date.getSeconds()));
+}
+
+/*******************************************************************************************************/
+/**
+ * gets a date from a comparable date Format
+ * @param {number} date - number or string in Format YYYYMMDDHHMMSS
+ * @return {Date} date of the number
+ */
+function parseComperableDateFormat(date) {
+    date = date + "";
+    let year = date.substr(0, 4);
+    let month = date.substr(4, 2);
+    let day = date.substr(6, 2);
+    let hours = date.substr(8, 2);
+    let mins = date.substr(10, 2);
+    let secs = date.substr(12, 2);
+    let mss = date.substr(14);
+    return new Date(year, month, day, hours, mins, secs, mss);
+}
+/*******************************************************************************************************/
+/**
+ * gets a comparable date Format
+ * @param {Date} date - Date to format
+ * @return {string} number in Format YYYYMMDD.HHMMSS
+ */
+function getComperableDateFormat2(date) {
+    return Number(date.getFullYear() +
+        pad2(date.getMonth() + 1) +
+        pad2(date.getDate()) + '.' +
+        pad2(date.getHours()) +
+        pad2(date.getMinutes()) +
+        pad2(date.getSeconds()));
+}
+/*******************************************************************************************************/
+/**
+ * gets a date from a comparable date Format
+ * @param {number} date - number or string in Format YYYYMMDD.HHMMSS or YYYYMMDDTHHMMSS
+ * @return {Date} date of the number
+ */
+function parseComperableDateFormat2(date) {
+    date = date + "";
+    let year = date.substr(0, 4);
+    let month = date.substr(4, 2);
+    let day = date.substr(6, 2);
+    let hours = date.substr(9, 2);
+    let mins = date.substr(11, 2);
+    let secs = date.substr(13, 2);
+    let mss = date.substr(15);
+    return new Date(year, month, day, hours, mins, secs, mss);
+}
 /*******************************************************************************************************/
 function getTimeNumber(date) {
     return date.getUTCMilliseconds() + date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
@@ -359,7 +437,7 @@ var dateFormat = function () {
                 o: (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
                 S: ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10],
                 x: dayDiff,
-                xx: (dayDiff >= -1 && dayDiff <= dF.i18n.dayDiffNames.length) ? dF.i18n.dayDiffNames(dayDiff + 1) : dF.i18n.dayNames[D]
+                xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
             };
 
         return mask.replace(token, function ($0) {
@@ -393,10 +471,20 @@ dateFormat.i18n = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ],
     dayDiffNames: [
-        "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
+        "1 week ago", "6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
     ]
 };
 
+/**
+ * Formate a date to the given Format string
+ * @param  {Date} date -  Javascript Date to format
+ * @param  {string} mask -  mask of the date
+ * @param  {bool} utc - indicates if the formated date should be in utc or not
+ * @param  {Array.<string>} [dayNames]       -  Array of day Names long and short ["Sunday", "Monday", ..., "Mo", "Tu", ...]
+ * @param  {Array.<string>} [monthNames]     -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
+ * @param  {Array.<string>} [dayDiffNames]   -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
+ * @return {string}   date as depending on the given Format
+ */
 function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
@@ -410,6 +498,73 @@ function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
     return dateFormat(date, mask, utc);
 };
 
+
+/**
+ * pre defined formates of a given date
+ * @param  {Date}            date            -  Javascript Date to format
+ * @param  {string}          [format]        -  format of the date
+ * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
+ * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
+ * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
+ * @return {any}   returns a number, string or object depending on the given Format
+ */
+function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
+    format = format || 0;
+    if (isNaN(format)) {
+        return formatDate(date, "" + format, false, dayNames, monthNames, dayDiffNames);
+    } else {
+        switch (Number(format)) {
+            case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
+                return date.getTime();
+            case 1: //timeformat_ECMA262 - date as string ECMA-262
+                return date;
+            case 2: //timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
+                return date.toLocaleString();
+            case 3: //timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
+                return date.toLocaleTimeString();
+            case 4: //timeformat_UTC
+                return date.toUTCString();
+            case 5: //timeformat_ISO
+                return date.toISOString();
+            case 6: //timeformat_ms
+                return tsGetScheduleTime(date, (type === "date") ? 10 : undefined);
+            case 7: //timeformat_sec
+                return Math.round(tsGetScheduleTime(date, (type === "date") ? 10 : undefined) / 1000);
+            case 8: //timeformat_min
+                return (Math.round(tsGetScheduleTime(date, (type === "date") ? 10 : undefined) / 1000) / 60);
+            case 9: //timeformat_hour
+                return (Math.round(tsGetScheduleTime(date, (type === "date") ? 10 : undefined) / 1000) / 3600);
+            case 10: //timeformat_YYYYMMDDHHMMSS
+                return getComperableDateFormat(date);
+            case 11: //timeformat_YYYYMMDD_HHMMSS
+                return getComperableDateFormat2(date);
+            case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
+                return date.toLocaleDateString();
+            case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
+                return date.toTimeString();
+            case 14: //timeformat_localLong       - Wed Dec 26 2018 23:44:12 GMT+0100 (Mitteleuropäische Normalzeit)
+                return date.toString();
+            case 15: //timeformat_localDateLong       - Wed Dec 26 2018
+                return date.toDateString();
+            case 16: //timeformat_weekday           - Montag, 22.12.
+                return formatDate(date, "dddd, d.m.", false, dayNames, monthNames, dayDiffNames);
+            case 17: //timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
+                return formatDate(date, "xx, d.m.", false, dayNames, monthNames, dayDiffNames);
+            default:
+                let delay = tsGetScheduleTime(date, (type === "date") ? 10 : undefined);
+                return {
+                    date: date,
+                    ts: date.getTime(),
+                    timeUTCStr: date.toUTCString(),
+                    timeISOStr: date.toISOString(),
+                    timeLocaleStr: date.toLocaleString(),
+                    timeLocaleTimeStr: date.toLocaleTimeString(),
+                    delay: delay,
+                    delaySec: Math.round(delay / 1000)
+                }
+        }
+    }
+}
 // ===================================================================
 // Author: Matt Kruse <matt@mattkruse.com>
 // WWW: http://www.mattkruse.com/
@@ -734,7 +889,7 @@ function parseDateTime(val, preferEuro) {
     return null;
 }
 
-function parseDateFromFormat(val, format, dayNames, monthNames, dayDiffNames) {
+function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
@@ -744,5 +899,29 @@ function parseDateFromFormat(val, format, dayNames, monthNames, dayDiffNames) {
     if (dayDiffNames) {
         dateFormat.i18n.dayDiffNames = dayDiffNames;
     }
-    return getDateFromFormat(val, format);
-};
+    format = format || 0;
+    if (isNaN(format)) {
+        return getDateFromFormat(date, format);
+    } else {
+        switch (Number(format)) {
+            case 1: //timeparse_ECMA262
+                return Date.parse(date);
+            case 2: //timeparse_TextOther
+                return parseDateTime(date, true);
+            case 3: //timeformat_YYYYMMDDHHMMSS
+                return parseComperableDateFormat(date);
+            case 4: //timeformat_YYYYMMDD_HHMMSS
+                return parseComperableDateFormat2(date);
+            case 5: //timeformat_ms
+                return new Date(Number(date));
+            case 6: //timeformat_sec
+                return new Date(Number(date) * 1000);
+            case 7: //timeformat_min
+                return new Date(Number(date) * 60000);
+            case 8: //timeformat_hour
+                return new Date(Number(date) * 3600000);
+            default:
+                return getDateOfText(date);
+        }
+    }
+}

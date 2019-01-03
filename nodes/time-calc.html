@@ -2,6 +2,7 @@
   <div class="form-row">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-calc.label.position"></span></label>
     <input type="text" id="node-input-positionConfig">
+    <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
   <div class="form-row time-operand1">
@@ -10,8 +11,8 @@
       <input type="hidden" id="node-input-operand1Type">
   </div>
   <div class="form-row time-calc-row-operand1Format hidden">
-      <label for="node-input-operand1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand1Format"></span></label>
-      <select style="width:70%" id="node-input-operand1Format">
+      <label for="node-input-operand1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand1Format"></span></label>
+      <select style="width:70%" id="node-input-operand1Formatsel">
         <option value="0" data-i18n="time-calc.label.timeparse_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
         <option value="1" data-i18n="time-calc.label.timeparse_ECMA262"></option> <!-- date as string ECMA-262 -->
         <option value="2" data-i18n="time-calc.label.timeparse_TextOther"></option> <!-- date as string ECMA-262 -->
@@ -61,8 +62,8 @@
       <input type="hidden" id="node-input-operand2Type">
   </div>
   <div class="form-row time-calc-row-operand2Format hidden">
-      <label for="node-input-operand2Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2Format"></span></label>
-      <select style="width:70%" id="node-input-operand2Format">
+      <label for="node-input-operand2Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2Format"></span></label>
+      <select style="width:70%" id="node-input-operand2Formatsel">
         <option value="0" data-i18n="time-calc.label.timeparse_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
         <option value="1" data-i18n="time-calc.label.timeparse_ECMA262"></option> <!-- date as string ECMA-262 -->
         <option value="2" data-i18n="time-calc.label.timeparse_TextOther"></option> <!-- date as string ECMA-262 -->
@@ -88,6 +89,43 @@
         <option value="-2" data-i18n="time-calc.label.year"></option>
       </select>
   </div>
+  <hr class="time-calc-row-alt hidden">
+  <div class="form-row time-calc-row-alt hidden">
+      <label for="node-input-operand2Property"><i class="fa fa-sun-o"></i> <span data-i18n="time-calc.label.operand2Property"></span></label>
+      <input type="text" id="node-input-operand2Property" style="width: 70%"/>
+  </div>
+  <div class="form-row time-calc-row-operand2Alt hidden">
+    <label for="node-input-operand2Alt"><i class="fa fa-clock-o"></i> <span data-i18n="time-calc.label.operand2Alt"></span></label>
+    <input type="text" id="node-input-operand2Alt" style="width: 70%"/>
+  </div>
+  <div class="form-row time-calc-row-operand2AltFormat hidden">
+    <label for="node-input-operand2AltFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.operand2AltFormat"></span></label>
+    <select style="width:70%" id="node-input-operand2AltFormatsel">
+      <option value="0" data-i18n="time-calc.label.timeparse_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
+      <option value="1" data-i18n="time-calc.label.timeparse_ECMA262"></option> <!-- date as string ECMA-262 -->
+      <option value="2" data-i18n="time-calc.label.timeparse_TextOther"></option> <!-- date as string ECMA-262 -->
+      <option value="3" data-i18n="time-calc.label.timeparse_YYYYMMDDHHMMSS"></option>
+      <option value="4" data-i18n="time-calc.label.timeparse_YYYYMMDD_HHMMSS"></option>
+      <option value="5" data-i18n="time-calc.label.timeparse_ms"></option> <!-- milliseconds since execution -->
+      <option value="6" data-i18n="time-calc.label.timeparse_sec"></option> <!-- seconds since execution -->
+      <option value="7" data-i18n="time-calc.label.timeparse_min"></option> <!-- minutes since execution -->
+      <option value="8" data-i18n="time-calc.label.timeparse_hour"></option> <!-- hour since execution -->
+      <option value="99" data-i18n="time-calc.label.timeparse_other"></option> <!-- input -->
+    </select>
+  </div>
+  <div class="form-row time-calc-row-operand2AltOffset hidden">
+      <label for="node-input-operand2AltOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-calc.label.operand2AltOffset"></span></label>
+      <input id="node-input-operand2AltOffset"" class="wt-offset-time" data-i18n="[placeholder]time-calc.placeholder.operand2AltOffset">
+      <select style="width:100px" id="node-input-operand2AltOffsetMultiplier">
+        <option value="1" data-i18n="time-calc.label.seconds"></option>
+        <option value="60" data-i18n="time-calc.label.minutes"></option>
+        <option value="3600" data-i18n="time-calc.label.hours"></option>
+        <option value="86400" data-i18n="time-calc.label.days"></option>
+        <option value="604800" data-i18n="time-calc.label.weeks"></option>
+        <option value="-1" data-i18n="time-calc.label.month"></option>
+        <option value="-2" data-i18n="time-calc.label.year"></option>
+      </select>
+  </div>
 
   <hr class="time-calc-result">
   <div class="form-row time-result1">
@@ -101,8 +139,8 @@
       <input type="hidden" id="node-input-result1ValueType">
   </div>
   <div class="form-row time-calc-row-result1Format hidden">
-      <label for="node-input-result1Format"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result1Format"></span></label>
-      <select style="width:70%" id="node-input-result1Format">
+      <label for="node-input-result1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-calc.label.result1Format"></span></label>
+      <select style="width:70%" id="node-input-result1Formatsel">
         <option value="0" data-i18n="time-calc.label.timeformat_UNIX"></option> <!-- milliseconds since Jan 1, 1970 00:00 -->
         <option value="1" data-i18n="time-calc.label.timeformat_ECMA262"></option> <!-- date as string ECMA-262 -->
         <option value="2" data-i18n="time-calc.label.timeformat_local"></option>
@@ -138,8 +176,6 @@
         <option value="-2" data-i18n="time-calc.label.year"></option>
       </select>
   </div>
-  <hr>
-  <div class="form-tips time-calc-addPayload" data-i18n="[html]time-calc.tips.addPayload"></div>
   <hr>
   <div class="form-row">
       <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-calc.label.name"></span></label>
@@ -313,6 +349,8 @@
     } else if (t === "flow" || t === "global") {
       var result = RED.utils.parseContextKey(v);
       return t + "." + clipValueLength(result.key, l);
+    } else if (t == "operand1") {
+      return "input data";
     } else if (t == "pdsCalcData") {
       return "{sun position}";
     } else if (t == "pdmCalcData") {
@@ -333,9 +371,15 @@
   }
 
   RED.nodes.registerType("time-calc", {
-    category: 'time and position',
-    color: "#a6bbcf",
+    category: "time and astro",
+    color: "#FDF0C2",
+    icon: "time-calc-black.png",
+    inputs: 1,
+    outputs: 1,
     defaults: {
+      outputs: {
+        value: 1
+      },
       name: {
         value: "",
         required: false
@@ -357,7 +401,7 @@
         value: 0,
         required: true,
         validate: function (v) {
-          return (RED.validators.number()(v) || (typeof v === 'undefined'));
+          return RED.validators.number()(v) || typeof v === "undefined";
         }
       },
       operand1Offset: {
@@ -382,24 +426,28 @@
       operand2: {
         value: "",
         validate: function (v) {
-          return (RED.validators.typedInput("operand2Type")(v) ||
+          return (
+            RED.validators.typedInput("operand2Type")(v) ||
             ($("#node-input-operand2").length ?
               $("#node-input-operand2").typedInput("type") === "none" :
-              this.operand2Type === "none"));
+              this.operand2Type === "none")
+          );
         }
       },
       operand2Type: {
-        value: "entered"
+        value: "str"
       },
       operand2Format: {
         value: 0,
         required: true,
         validate: function (v) {
-          return (RED.validators.number()(v) ||
-            (typeof v === 'undefined') ||
+          return (
+            RED.validators.number()(v) ||
+            typeof v === "undefined" ||
             ($("#node-input-operand2").length ?
               $("#node-input-operand2").typedInput("type") === "none" :
-              this.operand2Type === "none"));
+              this.operand2Type === "none")
+          );
         }
       },
       operand2Offset: {
@@ -412,12 +460,17 @@
         required: true,
         validate: RED.validators.number()
       },
+      //#endregion operand2
+      //#region operand2Alt
       operand2Property: {
         value: "",
         required: false,
         validate: function (v) {
           return (
             RED.validators.typedInput("operand2PropertyType")(v) ||
+            ($("#node-input-operator").length ?
+              $("#node-input-operator").val() === 0 :
+              this.operator === 0) ||
             ($("#node-input-operand2").length ?
               $("#node-input-operand2").typedInput("type") === "none" :
               this.operand2Type === "none")
@@ -427,8 +480,6 @@
       operand2PropertyType: {
         value: "none"
       },
-      //#endregion operand2
-      //#region operand2Alt
       operand2Alt: {
         value: "",
         required: false,
@@ -440,22 +491,21 @@
               this.operator === 0) ||
             ($("#node-input-operand2Type").length ?
               $("#node-input-operand2").typedInput("type") === "none" :
-              this.operand2Type === "none")
+              this.operand2Type === "none") ||
+            ($("#node-input-operand2PropertyType").length ?
+              $("#node-input-operand2PropertyType").typedInput("type") ===
+              "none" :
+              this.operand2PropertyType === "none")
           );
         }
       },
       operand2AltType: {
-        value: "entered"
+        value: "str"
       },
       operand2AltOffset: {
         value: 0,
         required: true,
-        validate: function (v) {
-          return (
-            typeof v === "undefined" ||
-            RED.validators.number()(v)
-          );
-        }
+        validate: RED.validators.number()
       },
       operand2AltOffsetMultiplier: {
         value: 60,
@@ -482,7 +532,7 @@
         }
       },
       result1ValueType: {
-        value: "date"
+        value: "operand1"
       },
       result1Format: {
         value: 0,
@@ -513,120 +563,39 @@
       }
       //#endregion result1
     },
-    icon: "time-calc.png",
-    inputs: 1,
-    outputs: 1,
-    outputLabels: "result",
+    outputLabels: function () {
+      if (this.outputs === 1) {
+        return ["input msg after evaluation"];
+      }
+      return ["msg if comparision is true", "msg if comparision is false"];
+    },
     label: function () {
       if (this.name) {
         return this.name;
       }
-      var result = "";
-      let prefix = "";
-      if (this.once) {
-        prefix += " ¹";
-      }
-      const getId = (type, value, offset, maxLength) => {
-        let suffix = "";
-        if (offset && offset > 0) {
-          suffix = "↷";
-        } else if (offset && offset < 0) {
-          suffix = "↶";
-        }
-
-        if (type === "jsonata") {
-          if (value.length < 15) {
-            return value + suffix;
-          }
-          return this._("time-calc.label.jsonata");
-        } else if (type === "json") {
-          if (value.length < 15) {
-            return value + suffix;
-          }
-          return this._("time-calc.label.json") + suffix;
-        } else if (type === "bin") {
-          return this._("time-calc.label.binary") + suffix;
-        } else if (type === "date") {
-          return this._("time-calc.label.timestamp") + suffix;
-        }
-
-        let v = getValueLabel(type, value, maxLength);
-        if (v == "") {
-          return this._("time-calc.label.blank");
-        }
-        return v + suffix;
-      };
-      const getTimeId = () => {
-        let suffix = "";
-        let days = this.timeDays;
-        if (days && days !== "*" && days !== "1,2,3,4,5,6,0") {
-          if (days === "1,2,3,4,5") {
-            suffix += " [Mo-Fr]"; //'👷'
-          } else if (days === "1,2,3,4") {
-            suffix += " [Mo-Th]";
-          } else if (days === "5,6,0") {
-            suffix += " [Fr-Su]";
-          } else if (days === "6,0") {
-            suffix += " [Sa+Su]";
-          } else {
-            let dayarr = [];
-            if (days.indexOf("1") >= 0) {
-              dayarr.push("Mo");
-            }
-            if (days.indexOf("2") >= 0) {
-              dayarr.push("Tu");
-            }
-            if (days.indexOf("3") >= 0) {
-              dayarr.push("We");
-            }
-            if (days.indexOf("4") >= 0) {
-              dayarr.push("Th");
-            }
-            if (days.indexOf("5") >= 0) {
-              dayarr.push("Fr");
-            }
-            if (days.indexOf("6") >= 0) {
-              dayarr.push("Sa");
-            }
-            if (days.indexOf("0") >= 0) {
-              dayarr.push("Su");
-            }
-            suffix += " [" + dayarr.join(",") + "]";
-          }
-          //...
-        }
-        let part1 = getId(this.timeType, this.time, this.offset);
-        if (
-          this.propertyType !== "none" &&
-          this.propertyType !== "" &&
-          this.timeAlt
-        ) {
-          return (
-            part1 +
-            "/" +
-            getId(this.timeAltType, this.timeAlt, this.timeAltOffset) +
-            suffix
-          );
-        }
-        return part1 + suffix;
-      };
-      if (this.timeType === "none" || this.timeType === "") {
-        return this._("time-calc.label.calc");
-      } else {
-        let timeTxt = getTimeId();
-        if (timeTxt.length > 24) {
-          result += timeTxt + " =...";
-        } else {
-          result +=
-            timeTxt +
-            " = " +
-            getId(this.payloadType, this.payload, undefined, 12);
+      if (this.operator > 0) {
+        let op1 = getValueLabel(this.operand1Type, this.operand1);
+        let op2 = getValueLabel(this.operand2Type, this.operand2);
+        switch (this.operator) {
+          case 1:
+            return op1 + " > " + op2;
+          case 2:
+            return op1 + " >= " + op2;
+          case 3:
+            return op1 + " < " + op2;
+          case 4:
+            return op1 + " <= " + op2;
+          case 5:
+          case 7:
+          case 10:
+            return op1 + " == " + op2;
+          case 6:
+          case 8:
+          case 9:
+            return op1 + " != " + op2;
         }
       }
-      if (this.topic && this.topic.length + result.length <= 32) {
-        return this.topic + ":" + prefix + result;
-      }
-      return prefix + result;
+      return this._("time-calc.label.time-calc");
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
@@ -710,134 +679,256 @@
           "flow",
           "global",
           "date",
-          typeTime,
-          typeTimeSun,
-          typeTimeMoon,
           "str",
           "num",
-          "env",
-          "jsonata"
+          typeTimeSun,
+          typeTimeMoon,
+          "env"
         ]
       });
 
       $("#node-input-operand1").on("change", function (type, value) {
         let plType = $("#node-input-operand1").typedInput("type");
         if (
-          plType === "entered" ||
-          plType === "pdsTime" ||
-          plType === "pdmTime"
+          plType === typeTime.value ||
+          plType === typeTimeSun.value ||
+          plType === typeTimeMoon.value ||
+          plType === "date"
+        ) {
+          $(".time-calc-row-operand1Format").hide();
+          $(".time-calc-row-operand1Offset").show();
+        } else if (
+          plType === "msg" ||
+          plType === "flow" ||
+          plType === "global" ||
+          plType === "str" ||
+          plType === "num" ||
+          plType === "env"
         ) {
           $(".time-calc-row-operand1Format").show();
           $(".time-calc-row-operand1Offset").show();
-          $(".time-calc-row-operand1days").show();
-        } else if (plType === "date") {
-          $(".time-calc-row-operand1Format").show();
-          $(".time-calc-row-operand1Offset").show();
-          $(".time-calc-row-operand1days").hide();
         } else {
           $(".time-calc-row-operand1Format").hide();
           $(".time-calc-row-operand1Offset").hide();
-          $(".time-calc-row-operand1days").hide();
         }
         $("#node-input-operand2").change();
       });
-      if (
-        this.operand1Days == "*" ||
-        typeof this.operand1Days === "undefined"
-      ) {
-        $("#time-calc-operand1Days input[type=checkbox]").prop(
-          "checked",
-          true
-        );
+
+      $('#node-input-operand1Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-operand1Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-operand1Formatsel').val()) == 99) {
+          $("#node-input-operand1Format").show();
+          $('#node-input-operand1Format').css({
+            'width': '40%'
+          });
+          $('#node-input-operand1Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-operand1Format").val())) {
+            $("#node-input-operand1Format").val($('#node-input-operand1Format').attr("defValue"));
+          }
+        } else {
+          $("#node-input-operand1Format").hide();
+          $('#node-input-operand1Formatsel').css({
+            'width': '70%'
+          });
+        }
+      });
+      if (isNaN(this.operand1Format)) {
+        $('#node-input-operand1Formatsel').val(99);
       } else {
-        $("#time-calc-operand1Days input[type=checkbox]").removeAttr(
-          "checked"
-        );
-        this.operand1Days.split(",").forEach(function (v) {
-          $("#time-calc-operand1Days [value=" + v + "]").prop(
-            "checked",
-            true
-          );
-        });
+        $('#node-input-operand1Formatsel').val(Number(this.operand1Format));
       }
+      $("#node-input-operand1Formatsel").change();
       //#endregion operand1
       $("#node-input-operator").on("change", function (type, value) {
-        console.log('operator change');
+        let val = $("#node-input-operator").val();
+        if (val < 1) {
+          $("#node-input-outputs").val(1);
+        } else if (val > 0) {
+          $("#node-input-outputs").val(2);
+        }
         $("#node-input-operand2").change();
       });
       //#region operand2
       $("#node-input-operand2Type").val(this.operand2Type);
       $("#node-input-operand2").typedInput({
-        default: this.operand2Type || typeTime.value,
+        default: this.operand2Type || "str",
         typeField: $("#node-input-operand2Type"),
         types: [
           "msg",
           "flow",
           "global",
           "date",
-          typeTime,
-          typeTimeSun,
-          typeTimeMoon,
           "str",
           "num",
+          typeTimeSun,
+          typeTimeMoon,
           "bin",
           "env",
           "jsonata"
         ]
       });
       $("#node-input-operand2").on("change", function (type, value) {
-        console.log('operand2 change');
-        console.log($("#node-input-operator").val());
         if ($("#node-input-operator").val() == 0) {
           $(".time-operand2").hide();
           $(".time-calc-row-operand2").hide();
           $(".time-calc-row-operand2Format").hide();
           $(".time-calc-row-operand2Offset").hide();
-          $(".time-calc-row-operand2days").hide();
         } else {
           $(".time-operand2").show();
           $(".time-calc-row-operand2").show();
           let plType = $("#node-input-operand2").typedInput("type");
           if (
-            plType === "entered" ||
-            plType === "pdsTime" ||
-            plType === "pdmTime"
+            plType === typeTime.value ||
+            plType === typeTimeSun.value ||
+            plType === typeTimeMoon.value ||
+            plType === "date"
+          ) {
+            $(".time-calc-row-operand2Format").hide();
+            $(".time-calc-row-operand2Offset").show();
+          } else if (
+            plType === "msg" ||
+            plType === "flow" ||
+            plType === "global" ||
+            plType === "str" ||
+            plType === "num" ||
+            plType === "env"
           ) {
             $(".time-calc-row-operand2Format").show();
             $(".time-calc-row-operand2Offset").show();
-            $(".time-calc-row-operand2days").show();
-          } else if (plType === "date") {
-            $(".time-calc-row-operand2Format").show();
-            $(".time-calc-row-operand2Offset").show();
-            $(".time-calc-row-operand2days").hide();
           } else {
             $(".time-calc-row-operand2Format").hide();
             $(".time-calc-row-operand2Offset").hide();
-            $(".time-calc-row-operand2days").hide();
           }
         }
-
+        $("#node-input-operand2Property").change();
         $("#node-input-result1").change();
       });
-      if (
-        this.operand2Days == "*" ||
-        typeof this.operand2Days === "undefined"
-      ) {
-        $("#time-calc-operand2Days input[type=checkbox]").prop(
-          "checked",
-          true
-        );
+
+      $('#node-input-operand2Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-operand2Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-operand2Formatsel').val()) == 99) {
+          $("#node-input-operand2Format").show();
+          $('#node-input-operand2Format').css({
+            'width': '40%'
+          });
+          $('#node-input-operand2Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-operand2Format").val())) {
+            $("#node-input-operand2Format").val($('#node-input-operand2Format').attr("defValue"));
+          }
+        } else {
+          $("#node-input-operand2Format").hide();
+          $('#node-input-operand2Formatsel').css({
+            'width': '70%'
+          });
+        }
+      });
+      if (isNaN(this.operand2Format)) {
+        $('#node-input-operand2Formatsel').val(99);
       } else {
-        $("#time-calc-operand2Days input[type=checkbox]").removeAttr(
-          "checked"
-        );
-        this.operand2Days.split(",").forEach(function (v) {
-          $("#time-calc-operand2Days [value=" + v + "]").prop(
-            "checked",
-            true
-          );
-        });
+        $('#node-input-operand2Formatsel').val(Number(this.operand2Format));
       }
+      $("#node-input-operand2Formatsel").change();
+      //#region operand2Alt
+      //#region property
+      $("#node-input-operand2Property").typedInput({
+        default: this.propertyType || typeUndefined.value,
+        types: [typeUndefined, "flow", "global", "jsonata", "env"]
+      });
+      $("#node-input-operand2Property").on("change", function (type, value) {
+        $("#node-input-operand2Alt").change();
+      });
+      //#endregion property
+      $("#node-input-operand2AltType").val(this.operand2AltType);
+      $("#node-input-operand2Alt").typedInput({
+        default: this.operand2AltType || "str",
+        typeField: $("#node-input-operand2AltType"),
+        types: [
+          "msg",
+          "flow",
+          "global",
+          "date",
+          "str",
+          "num",
+          typeTimeSun,
+          typeTimeMoon,
+          "bin",
+          "env",
+          "jsonata"
+        ]
+      });
+      $("#node-input-operand2Alt").on("change", function (type, value) {
+        let oper = $("#node-input-operator").val();
+        let opType = $("#node-input-operand2").typedInput("type");
+        let propType = $("#node-input-operand2Property").typedInput("type");
+        if (
+          opType === typeUndefined.value ||
+          propType === typeUndefined.value ||
+          oper == 0
+        ) {
+          $(".time-operand2Alt").hide();
+          $(".time-inject-row-operand2Alt").hide();
+          $(".time-inject-row-operand2AltOffset").hide();
+          $(".time-calc-row-operand2AltFormat").hide();
+        } else {
+          $(".time-operand2Alt").show();
+          $(".time-calc-row-operand2Alt").show();
+          let plType = $("#node-input-operand2Alt").typedInput("type");
+          if (
+            plType === typeTime.value ||
+            plType === typeTimeSun.value ||
+            plType === typeTimeMoon.value ||
+            plType === "date"
+          ) {
+            $(".time-calc-row-operand2AltFormat").hide();
+            $(".time-calc-row-operand2AltOffset").show();
+          } else if (
+            plType === "msg" ||
+            plType === "flow" ||
+            plType === "global" ||
+            plType === "str" ||
+            plType === "num" ||
+            plType === "env"
+          ) {
+            $(".time-calc-row-operand2AltFormat").show();
+            $(".time-calc-row-operand2AltOffset").show();
+          } else {
+            $(".time-calc-row-operand2AltFormat").hide();
+            $(".time-calc-row-operand2AltOffset").hide();
+          }
+        }
+      });
+
+      $('#node-input-operand2AltFormat').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-operand2AltFormatsel').on("change", function (type, value) {
+        if (Number($('#node-input-operand2AltFormatsel').val()) == 99) {
+          $("#node-input-operand2AltFormat").show();
+          $('#node-input-operand2AltFormat').css({
+            'width': '40%'
+          });
+          $('#node-input-operand2AltFormatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-operand2AltFormat").val())) {
+            $("#node-input-operand2AltFormat").val($('#node-input-operand2AltFormat').attr("defValue"));
+          }
+        } else {
+          $("#node-input-operand2AltFormat").hide();
+          $('#node-input-operand2AltFormatsel').css({
+            'width': '70%'
+          });
+        }
+      });
+      if (isNaN(this.operand2AltFormat)) {
+        $('#node-input-operand2AltFormatsel').val(99);
+      } else {
+        $('#node-input-operand2AltFormatsel').val(Number(this.operand2AltFormat));
+      }
+      $("#node-input-operand2AltFormatsel").change();
+      //#endregion operand2Alt
       //#endregion operand2
       //#region result1
       $("#node-input-result1Type").val(this.result1Type);
@@ -848,9 +939,18 @@
       });
       $("#node-input-result1ValueType").val(this.result1ValueType);
       $("#node-input-result1Value").typedInput({
-        default: this.result1ValueType || "date",
+        default: this.result1ValueType || "operand1",
         typeField: $("#node-input-result1ValueType"),
-        types: [
+        types: [{
+            value: "operand1",
+            label: "Input value",
+            hasValue: false
+          },
+          {
+            value: "operand2",
+            label: "Operand value",
+            hasValue: false
+          },
           "date",
           typeTime,
           typeTimeSun,
@@ -874,71 +974,57 @@
           $(".time-result1Value").show();
           let plVType = $("#node-input-result1Value").typedInput("type");
           if (
-            plVType === "entered" ||
-            plVType === "pdsTime" ||
-            plVType === "pdmTime"
+            plType === typeTime.value ||
+            plType === typeTimeSun.value ||
+            plType === typeTimeMoon.value ||
+            plType === "date"
           ) {
             $(".time-calc-row-result1Format").show();
             $(".time-calc-row-result1Offset").show();
-            $(".time-calc-row-result1days").show();
-          } else if (plVType === "date") {
+          } else if (plVType === "operand1" || plVType === "operand2") {
             $(".time-calc-row-result1Format").show();
-            $(".time-calc-row-result1Offset").show();
-            $(".time-calc-row-result1days").hide();
+            $(".time-calc-row-result1Offset").hide();
           } else {
             $(".time-calc-row-result1Format").hide();
             $(".time-calc-row-result1Offset").hide();
-            $(".time-calc-row-result1days").hide();
           }
         } else {
           $(".time-result1Value").hide();
           $(".time-calc-row-result1Format").hide();
           $(".time-calc-row-result1Offset").hide();
-          $(".time-calc-row-result1days").hide();
         }
       });
       $("#node-input-result1Value").on("change", function (type, value) {
         $("#node-input-result1").change();
       });
-      if (
-        this.result1Days == "*" ||
-        typeof this.result1Days === "undefined"
-      ) {
-        $("#time-calc-result1Days input[type=checkbox]").prop(
-          "checked",
-          true
-        );
-      } else {
-        $("#time-calc-result1Days input[type=checkbox]").removeAttr(
-          "checked"
-        );
-        this.result1Days.split(",").forEach(function (v) {
-          $("#time-calc-result1Days [value=" + v + "]").prop(
-            "checked",
-            true
-          );
-        });
-      }
-      //#endregion result1
-      //#region operand2Alt
-      $("#node-input-operand2Alt").typedInput({
-        default: this.operand2AltType || "entered",
-        types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
+
+      $('#node-input-result1Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-result1Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-result1Formatsel').val()) == 99) {
+          $("#node-input-result1Format").show();
+          $('#node-input-result1Format').css({
+            'width': '40%'
+          });
+          $('#node-input-result1Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-result1Format").val())) {
+            $("#node-input-result1Format").val($('#node-input-result1Format').attr("defValue"));
+          }
+        } else {
+          $("#node-input-result1Format").hide();
+          $('#node-input-result1Formatsel').css({
+            'width': '70%'
+          });
+        }
       });
-      if (this.operand2AltDays == "*" || typeof this.operand2AltDays === "undefined") {
-        $("#time-calc-operand2AltDays input[type=checkbox]").prop(
-          "checked",
-          true
-        );
+      if (isNaN(this.result1Format)) {
+        $('#node-input-result1Formatsel').val(99);
       } else {
-        $("#time-calc-operand2AltDays input[type=checkbox]").removeAttr(
-          "checked"
-        );
-        this.operand2AltDays.split(",").forEach(function (v) {
-          $("#time-calc-operand2AltDays [value=" + v + "]").prop("checked", true);
-        });
+        $('#node-input-result1Formatsel').val(Number(this.result1Format));
       }
-      //#endregion operand2Alt
+      $("#node-input-result1Formatsel").change();
+      //#endregion result1
 
       $("#node-input-time").change();
       $("#node-input-property").change();
@@ -947,39 +1033,35 @@
       $("#node-input-operator").change();
     },
     oneditsave: function () {
-      function getDaysStr(value) {
-        let days = value
-          .map(function (_, el) {
-            return $(el).val();
-          })
-          .get();
 
-        if (days.length == 0) {
-          return "";
-        } else if (days.length == 7) {
-          return "*";
-        } else {
-          return days.join(",");
-        }
+      if (Number($('#node-input-operand1Formatsel').val()) != 99) {
+        $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
+        this.operand1Format = $('#node-input-operand1Formatsel').val();
       }
+      if (Number($('#node-input-operand2Formatsel').val()) != 99) {
+        $('#node-input-operand2Format').val($('#node-input-operand2Formatsel').val());
+        this.operand2Format = $('#node-input-operand2Formatsel').val();
+      }
+      if (Number($('#node-input-operand2AltFormatsel').val()) != 99) {
+        $('#node-input-operand2AltFormat').val($('#node-input-operand2AltFormatsel').val());
+        this.operand2AltFormat = $('#node-input-operand2AltFormatsel').val();
+      }
+      if (Number($('#node-input-result1Formatsel').val()) != 99) {
+        $('#node-input-result1Format').val($('#node-input-result1Formatsel').val());
+        this.result1Format = $('#node-input-result1Formatsel').val();
+      }
+
+      operand2AltFormat
+
       this.operand1Type = $("#node-input-operand1").typedInput("type");
-
       this.operand2Type = $("#node-input-operand2").typedInput("type");
-
       this.operand2AltType = $("#node-input-operand2Alt").typedInput("type");
-      this.operand2AltDays = getDaysStr(
-        $("#time-calc-operand2AltDays input[type=checkbox]:checked")
-      );
-
       this.result1Type = $("#node-input-result1").typedInput("type");
-      this.result1ValueType = $("#node-input-result1Value").typedInput(
-        "type"
-      );
-
+      this.result1ValueType = $("#node-input-result1Value").typedInput("type");
       this.result2Type = $("#node-input-result2").typedInput("type");
-      this.result2ValueType = $("#node-input-result2Value").typedInput(
-        "type"
-      );
+      this.result2ValueType = $("#node-input-result2Value").typedInput("type");
+
+      console.log($("#node-input-outputs").val());
     }
   });
 </script>

@@ -352,7 +352,7 @@
 </style>
 
 <script type="text/x-red" data-help-name="time-inject">
-    <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
+  <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
   payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
   <h3>Outputs</h3>
   <dl class="message-properties">
@@ -524,8 +524,11 @@
   }
 
   RED.nodes.registerType("time-inject", {
-    category: 'time and position',
+    category: 'time and astro',
     color: "#a6bbcf",
+    icon: "injectSun-white.png",
+    inputs: 0,
+    outputs: 1,
     defaults: {
       name: {
         value: "",
@@ -590,38 +593,38 @@
       offset: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             typeof v === "undefined" ||
             RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none")
+            ($("#node-input-time").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none")
           );
         }
       },
       offsetMultiplier: {
         value: 60,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             typeof v === "undefined" ||
             RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none")
+            ($("#node-input-time").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none")
           );
         }
       },
       property: {
         value: "",
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("propertyType")(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none")
+            ($("#node-input-time").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none")
           );
         }
       },
@@ -631,15 +634,15 @@
       timeAlt: {
         value: "",
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("timeAltType")(v) ||
-            ($("#node-input-timeType").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
+            ($("#node-input-timeType").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none") ||
+            ($("#node-input-propertyType").length ?
+              $("#node-input-property").typedInput("type") === "none" :
+              this.propertyType === "none")
           );
         }
       },
@@ -649,32 +652,32 @@
       timeAltOffset: {
         value: 0,
         required: true,
-        validate: function(v) {
+        validate: function (v) {
           return (
             typeof v === "undefined" ||
             RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
+            ($("#node-input-time").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none") ||
+            ($("#node-input-propertyType").length ?
+              $("#node-input-property").typedInput("type") === "none" :
+              this.propertyType === "none")
           );
         }
       },
       timeAltOffsetMultiplier: {
         value: 60,
         required: true,
-        validate: function(v) {
+        validate: function (v) {
           return (
             typeof v === "undefined" ||
             RED.validators.number()(v) ||
-            ($("#node-input-time").length
-              ? $("#node-input-time").typedInput("type") === "none"
-              : this.timeType === "none") ||
-            ($("#node-input-propertyType").length
-              ? $("#node-input-property").typedInput("type") === "none"
-              : this.propertyType === "none")
+            ($("#node-input-time").length ?
+              $("#node-input-time").typedInput("type") === "none" :
+              this.timeType === "none") ||
+            ($("#node-input-propertyType").length ?
+              $("#node-input-property").typedInput("type") === "none" :
+              this.propertyType === "none")
           );
         }
       },
@@ -686,7 +689,7 @@
       },
       onceDelay: {
         value: 0.1,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             v === "" ||
@@ -704,7 +707,7 @@
       },
       addPayload1Value: {
         value: "",
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("addPayload1ValueType")(v) ||
             $("#node-input-addPayload1").typedInput("type") === "none" ||
@@ -722,7 +725,7 @@
       addPayload1Offset: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload1").typedInput("type") === "none" ||
@@ -733,7 +736,7 @@
       addPayload1OffsetMultiplier: {
         value: 60,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload1").typedInput("type") === "none" ||
@@ -753,7 +756,7 @@
       },
       addPayload2Value: {
         value: "",
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("addPayload2ValueType")(v) ||
             $("#node-input-addPayload2").typedInput("type") === "none" ||
@@ -771,7 +774,7 @@
       addPayload2Offset: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload2").typedInput("type") === "none" ||
@@ -782,7 +785,7 @@
       addPayload2OffsetMultiplier: {
         value: 60,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload2").typedInput("type") === "none" ||
@@ -802,7 +805,7 @@
       },
       addPayload3Value: {
         value: "",
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.typedInput("addPayload3ValueType")(v) ||
             $("#node-input-addPayload3").typedInput("type") === "none" ||
@@ -820,7 +823,7 @@
       addPayload3Offset: {
         value: 0,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload3").typedInput("type") === "none" ||
@@ -831,7 +834,7 @@
       addPayload3OffsetMultiplier: {
         value: 60,
         required: false,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             $("#node-input-addPayload3").typedInput("type") === "none" ||
@@ -844,7 +847,7 @@
       },
       recalcTime: {
         value: 2,
-        validate: function(v) {
+        validate: function (v) {
           return (
             RED.validators.number()(v) ||
             v === "" ||
@@ -854,10 +857,7 @@
         }
       }
     },
-    icon: "injectSun.png",
-    inputs: 0,
-    outputs: 1,
-    outputLabels: function(index) {
+    outputLabels: function (index) {
       var labels = {
         str: "string",
         num: "number",
@@ -888,7 +888,7 @@
       }
       return lab;
     },
-    label: function() {
+    label: function () {
       if (this.name) {
         return this.name;
       }
@@ -999,12 +999,12 @@
       }
       return prefix + result;
     },
-    labelStyle: function() {
+    labelStyle: function () {
       return this.name ? "node_label_italic" : "";
     },
     paletteLabel: "time inject",
     align: "left",
-    oneditprepare: function() {
+    oneditprepare: function () {
       //#region definition
       const typeUndefined = {
         value: "none",
@@ -1072,11 +1072,11 @@
           $("#node-input-" + id).val(newVal);
           console.log(
             'not initialized value !! "' +
-              id +
-              '" = "' +
-              newVal +
-              '" - ' +
-              data[id]
+            id +
+            '" = "' +
+            newVal +
+            '" - ' +
+            data[id]
           );
         }
       }
@@ -1090,11 +1090,11 @@
           $("#node-input-" + id).val(newVal);
           console.log(
             "not initialized numeric value !! " +
-              id +
-              ' = "' +
-              newVal +
-              '" - ' +
-              data[id]
+            id +
+            ' = "' +
+            newVal +
+            '" - ' +
+            data[id]
           );
         }
       }
@@ -1131,7 +1131,7 @@
       initializeValue(this, "addPayload3Days", "*");
       //#endregion initialize
       //#region spinner
-      $("#node-input-once").change(function() {
+      $("#node-input-once").change(function () {
         $("#node-input-onceDelay").attr(
           "disabled",
           !$("#node-input-once").prop("checked")
@@ -1185,7 +1185,7 @@
           typeTimeMoon
         ]
       });
-      $("#node-input-payload").typedInput('type',this.payloadType);
+      $("#node-input-payload").typedInput('type', this.payloadType);
       //#endregion payload
       //#region addPayload1
       $("#node-input-addPayload1Type").val(this.addPayload1Type);
@@ -1194,7 +1194,7 @@
         typeField: $("#node-input-addPayload1Type"),
         types: [typeUndefined, "msg", "flow", "global"]
       });
-      $("#node-input-addPayload1").typedInput('type',this.addPayload1Type);
+      $("#node-input-addPayload1").typedInput('type', this.addPayload1Type);
 
       $("#node-input-addPayload1ValueType").val(this.addPayload1ValueType);
       $("#node-input-addPayload1Value").typedInput({
@@ -1218,8 +1218,8 @@
           typeMoonCalc
         ]
       });
-      $("#node-input-addPayload1Value").typedInput('type',this.addPayload1ValueType);
-      $("#node-input-addPayload1").on("change", function(type, value) {
+      $("#node-input-addPayload1Value").typedInput('type', this.addPayload1ValueType);
+      $("#node-input-addPayload1").on("change", function (type, value) {
         let plType = $("#node-input-addPayload1").typedInput("type");
         if (plType !== typeUndefined.value) {
           $(".time-addPayload1Value").show();
@@ -1251,7 +1251,7 @@
         }
         $("#node-input-addPayload2").change();
       });
-      $("#node-input-addPayload1Value").on("change", function(type, value) {
+      $("#node-input-addPayload1Value").on("change", function (type, value) {
         $("#node-input-addPayload1").change();
       });
       if (
@@ -1266,26 +1266,32 @@
         $("#time-inject-addPayload1Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.addPayload1Days.split(",").forEach(function(v) {
+        this.addPayload1Days.split(",").forEach(function (v) {
           $("#time-inject-addPayload1Days [value=" + v + "]").prop(
             "checked",
             true
           );
         });
       }
-      $('#node-input-addPayload1Format'). attr("defValue", this._("time-inject.timeFormat.default"));
-      $('#node-input-addPayload1Formatsel').on("change", function(type, value) {
-          if(Number($('#node-input-addPayload1Formatsel').val()) == 99){
-            $("#node-input-addPayload1Format").show();
-            $('#node-input-addPayload1Format').css({'width': '40%'});
-            $('#node-input-addPayload1Formatsel').css({'width': '30%'});
-            if (!isNaN($("#node-input-addPayload1Format").val())) {
-              $("#node-input-addPayload1Format").val( $('#node-input-addPayload1Format'). attr("defValue"));
-            }
-          } else {
-            $("#node-input-addPayload1Format").hide();
-            $('#node-input-addPayload1Formatsel').css({'width': '70%'});
+      $('#node-input-addPayload1Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-addPayload1Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-addPayload1Formatsel').val()) == 99) {
+          $("#node-input-addPayload1Format").show();
+          $('#node-input-addPayload1Format').css({
+            'width': '40%'
+          });
+          $('#node-input-addPayload1Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-addPayload1Format").val())) {
+            $("#node-input-addPayload1Format").val($('#node-input-addPayload1Format').attr("defValue"));
           }
+        } else {
+          $("#node-input-addPayload1Format").hide();
+          $('#node-input-addPayload1Formatsel').css({
+            'width': '70%'
+          });
+        }
       });
       if (isNaN(this.addPayload1Format)) {
         $('#node-input-addPayload1Formatsel').val(99);
@@ -1301,7 +1307,7 @@
         typeField: $("#node-input-addPayload2Type"),
         types: [typeUndefined, "msg", "flow", "global"]
       });
-      $("#node-input-addPayload2").typedInput('type',this.addPayload2Type);
+      $("#node-input-addPayload2").typedInput('type', this.addPayload2Type);
       $("#node-input-addPayload2ValueType").val(this.addPayload2ValueType);
       $("#node-input-addPayload2Value").typedInput({
         default: this.addPayload2ValueType || "date",
@@ -1324,8 +1330,8 @@
           typeMoonCalc
         ]
       });
-      $("#node-input-addPayload2Value").typedInput('type',this.addPayload2ValueType);
-      $("#node-input-addPayload2").on("change", function(type, value) {
+      $("#node-input-addPayload2Value").typedInput('type', this.addPayload2ValueType);
+      $("#node-input-addPayload2").on("change", function (type, value) {
         let plType = $("#node-input-addPayload2").typedInput("type");
         if (plType !== typeUndefined.value) {
           $(".time-addPayload2Value").show();
@@ -1357,7 +1363,7 @@
         }
         $("#node-input-addPayload3").change();
       });
-      $("#node-input-addPayload2Value").on("change", function(type, value) {
+      $("#node-input-addPayload2Value").on("change", function (type, value) {
         $("#node-input-addPayload2").change();
       });
       if (
@@ -1372,7 +1378,7 @@
         $("#time-inject-addPayload2Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.addPayload2Days.split(",").forEach(function(v) {
+        this.addPayload2Days.split(",").forEach(function (v) {
           $("#time-inject-addPayload2Days [value=" + v + "]").prop(
             "checked",
             true
@@ -1380,19 +1386,25 @@
         });
       }
 
-      $('#node-input-addPayload2Format'). attr("defValue", this._("time-inject.timeFormat.default"));
-      $('#node-input-addPayload2Formatsel').on("change", function(type, value) {
-          if(Number($('#node-input-addPayload2Formatsel').val()) == 99){
-            $("#node-input-addPayload2Format").show();
-            $('#node-input-addPayload2Format').css({'width': '40%'});
-            $('#node-input-addPayload2Formatsel').css({'width': '30%'});
-            if (!isNaN($("#node-input-addPayload2Format").val())) {
-              $("#node-input-addPayload2Format").val( $('#node-input-addPayload2Format'). attr("defValue"));
-            }
-          } else {
-            $("#node-input-addPayload2Format").hide();
-            $('#node-input-addPayload2Formatsel').css({'width': '70%'});
+      $('#node-input-addPayload2Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-addPayload2Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-addPayload2Formatsel').val()) == 99) {
+          $("#node-input-addPayload2Format").show();
+          $('#node-input-addPayload2Format').css({
+            'width': '40%'
+          });
+          $('#node-input-addPayload2Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-addPayload2Format").val())) {
+            $("#node-input-addPayload2Format").val($('#node-input-addPayload2Format').attr("defValue"));
           }
+        } else {
+          $("#node-input-addPayload2Format").hide();
+          $('#node-input-addPayload2Formatsel').css({
+            'width': '70%'
+          });
+        }
       });
       if (isNaN(this.addPayload2Format)) {
         $('#node-input-addPayload2Formatsel').val(99);
@@ -1409,7 +1421,7 @@
         typeField: $("#node-input-addPayload3Type"),
         types: [typeUndefined, "msg", "flow", "global"]
       });
-      $("#node-input-addPayload3").typedInput('type',this.addPayload3Type);
+      $("#node-input-addPayload3").typedInput('type', this.addPayload3Type);
       $("#node-input-addPayload3ValueType").val(this.addPayload3ValueType);
       $("#node-input-addPayload3Value").typedInput({
         default: this.addPayload3ValueType || "date",
@@ -1432,8 +1444,8 @@
           typeMoonCalc
         ]
       });
-      $("#node-input-addPayload3Value").typedInput('type',this.addPayload3ValueType);
-      $("#node-input-addPayload3").on("change", function(type, value) {
+      $("#node-input-addPayload3Value").typedInput('type', this.addPayload3ValueType);
+      $("#node-input-addPayload3").on("change", function (type, value) {
         let plType = $("#node-input-addPayload3").typedInput("type");
         if (plType !== typeUndefined.value) {
           $(".time-addPayload3Value").show();
@@ -1462,7 +1474,7 @@
           $(".time-inject-row-addPayload3days").hide();
         }
       });
-      $("#node-input-addPayload3Value").on("change", function(type, value) {
+      $("#node-input-addPayload3Value").on("change", function (type, value) {
         $("#node-input-addPayload3").change();
       });
       if (
@@ -1477,26 +1489,32 @@
         $("#time-inject-addPayload3Days input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.addPayload3Days.split(",").forEach(function(v) {
+        this.addPayload3Days.split(",").forEach(function (v) {
           $("#time-inject-addPayload3Days [value=" + v + "]").prop(
             "checked",
             true
           );
         });
       }
-      $('#node-input-addPayload3Format'). attr("defValue", this._("time-inject.timeFormat.default"));
-      $('#node-input-addPayload3Formatsel').on("change", function(type, value) {
-          if(Number($('#node-input-addPayload3Formatsel').val()) == 99){
-            $("#node-input-addPayload3Format").show();
-            $('#node-input-addPayload3Format').css({'width': '40%'});
-            $('#node-input-addPayload3Formatsel').css({'width': '30%'});
-            if (!isNaN($("#node-input-addPayload3Format").val())) {
-              $("#node-input-addPayload3Format").val( $('#node-input-addPayload3Format'). attr("defValue"));
-            }
-          } else {
-            $("#node-input-addPayload3Format").hide();
-            $('#node-input-addPayload3Formatsel').css({'width': '70%'});
+      $('#node-input-addPayload3Format').attr("defValue", this._("time-inject.timeFormat.default"));
+      $('#node-input-addPayload3Formatsel').on("change", function (type, value) {
+        if (Number($('#node-input-addPayload3Formatsel').val()) == 99) {
+          $("#node-input-addPayload3Format").show();
+          $('#node-input-addPayload3Format').css({
+            'width': '40%'
+          });
+          $('#node-input-addPayload3Formatsel').css({
+            'width': '30%'
+          });
+          if (!isNaN($("#node-input-addPayload3Format").val())) {
+            $("#node-input-addPayload3Format").val($('#node-input-addPayload3Format').attr("defValue"));
           }
+        } else {
+          $("#node-input-addPayload3Format").hide();
+          $('#node-input-addPayload3Formatsel').css({
+            'width': '70%'
+          });
+        }
       });
       if (isNaN(this.addPayload3Format)) {
         $('#node-input-addPayload3Formatsel').val(99);
@@ -1511,7 +1529,7 @@
         default: this.propertyType || typeUndefined.value,
         types: [typeUndefined, "flow", "global", "jsonata", "env"]
       });
-      $("#node-input-property").on("change", function(type, value) {
+      $("#node-input-property").on("change", function (type, value) {
         let timeType = $("#node-input-time").typedInput("type");
         let propType = $("#node-input-property").typedInput("type");
         if (
@@ -1553,8 +1571,8 @@
           "env"
         ]
       });
-      $("#node-input-time").typedInput('type',this.timeType);
-      $("#node-input-time").on("change", function(type, value) {
+      $("#node-input-time").typedInput('type', this.timeType);
+      $("#node-input-time").on("change", function (type, value) {
         if ($("#node-input-time").typedInput("type") === typeUndefined.value) {
           $(".time-inject-row-offset").hide();
           $(".time-inject-row-timeDays").hide();
@@ -1570,7 +1588,7 @@
         $("#time-inject-timeDays input[type=checkbox]").prop("checked", true);
       } else {
         $("#time-inject-timeDays input[type=checkbox]").removeAttr("checked");
-        this.timeDays.split(",").forEach(function(v) {
+        this.timeDays.split(",").forEach(function (v) {
           $("#time-inject-timeDays [value=" + v + "]").prop("checked", true);
         });
       }
@@ -1580,7 +1598,7 @@
         default: this.timeAltType || "entered",
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
-      $("#node-input-timeAlt").typedInput('type',this.timeAltType);
+      $("#node-input-timeAlt").typedInput('type', this.timeAltType);
       if (this.timeAltDays == "*" || typeof this.timeAltDays === "undefined") {
         $("#time-inject-timeAltDays input[type=checkbox]").prop(
           "checked",
@@ -1590,13 +1608,13 @@
         $("#time-inject-timeAltDays input[type=checkbox]").removeAttr(
           "checked"
         );
-        this.timeAltDays.split(",").forEach(function(v) {
+        this.timeAltDays.split(",").forEach(function (v) {
           $("#time-inject-timeAltDays [value=" + v + "]").prop("checked", true);
         });
       }
       //#endregion timeAlt
       //#region onceDelay
-      $("#node-input-once").change(function() {
+      $("#node-input-once").change(function () {
         $("#node-input-onceDelay").attr(
           "disabled",
           !$("#node-input-once").prop("checked")
@@ -1608,10 +1626,10 @@
       $("#node-input-payload").change();
       $("#node-input-addPayload1").change();
     },
-    oneditsave: function() {
+    oneditsave: function () {
       function getDaysStr(value) {
         let days = value
-          .map(function(_, el) {
+          .map(function (_, el) {
             return $(el).val();
           })
           .get();
@@ -1636,7 +1654,7 @@
       //this.addPayload1Type = $("#node-input-addPayload1").typedInput("type");
       //this.addPayload1ValueType = $("#node-input-addPayload1Value").typedInput("type");
       this.addPayload1Days = getDaysStr($("#time-inject-addPayload1Days input[type=checkbox]:checked"));
-      if (Number($('#node-input-addPayload1Formatsel').val())  != 99) {
+      if (Number($('#node-input-addPayload1Formatsel').val()) != 99) {
         $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
         this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
       }
@@ -1644,7 +1662,7 @@
       //this.addPayload2Type = $("#node-input-addPayload2").typedInput("type");
       //this.addPayload2ValueType = $("#node-input-addPayload2Value").typedInput("type");
       this.addPayload2Days = getDaysStr($("#time-inject-addPayload2Days input[type=checkbox]:checked"));
-      if (Number($('#node-input-addPayload2Formatsel').val())  != 99) {
+      if (Number($('#node-input-addPayload2Formatsel').val()) != 99) {
         $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
         this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
       }
@@ -1652,16 +1670,16 @@
       //this.addPayload3Type = $("#node-input-addPayload3").typedInput("type");
       //this.addPayload3ValueType = $("#node-input-addPayload3Value").typedInput("type");
       this.addPayload3Days = getDaysStr($("#time-inject-addPayload3Days input[type=checkbox]:checked"));
-      if (Number($('#node-input-addPayload3Formatsel').val())  != 99) {
+      if (Number($('#node-input-addPayload3Formatsel').val()) != 99) {
         $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
         this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
       }
     },
     button: {
-      enabled: function() {
+      enabled: function () {
         return !this.changed;
       },
-      onclick: function() {
+      onclick: function () {
         if (this.changed) {
           return RED.notify(
             RED._("notification.warning", {
@@ -1693,7 +1711,7 @@
         $.ajax({
           url: "inject/" + this.id,
           type: "POST",
-          success: function(resp) {
+          success: function (resp) {
             RED.notify(
               node._("time-inject.label.success", {
                 label: label
@@ -1701,7 +1719,7 @@
               "success"
             );
           },
-          error: function(jqXHR, textStatus, errorThrown) {
+          error: function (jqXHR, textStatus, errorThrown) {
             if (jqXHR.status == 404) {
               RED.notify(
                 RED._("time-inject.errors.error", {

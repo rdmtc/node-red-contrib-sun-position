@@ -78,7 +78,7 @@
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ],
         "dayDiffNames": [
-            "Yesterday", "Today", "Tomorrow", "day after tomorrow"
+            "1 week ago", "6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
         ],
         "placeholder": {
             "position": "Position",

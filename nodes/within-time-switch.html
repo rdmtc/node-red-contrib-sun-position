@@ -259,8 +259,11 @@
     }
 
     RED.nodes.registerType('within-time-switch', {
-        category: 'time and position',
+        category: 'time and astro',
         color: '#f37a33',
+        icon: 'switch-white.png',
+        inputs: 1,
+        outputs: 2,
         defaults: {
             name: {
                 value: "",
@@ -395,9 +398,6 @@
                 required: false
             }
         },
-        icon: 'switch.png',
-        inputs: 1,
-        outputs: 2,
         outputLabels: ["within time", "out of time"],
         label: function () {
             const getId = (type, value, offset, maxLength) => {
@@ -443,11 +443,10 @@
             } else if (this.startTime && this.endTime) {
                 return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
                         this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-                        ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ')
-                    +
+                    ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
                     getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
                         this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
-                        ((this.lastMsgOnEndOut) ? '⨧' : '');
+                    ((this.lastMsgOnEndOut) ? '⨧' : '');
             }
             return 'within-time';
         },
@@ -463,7 +462,8 @@
                 let valStartAlt = $("#node-input-startTimeAlt").typedInput('type');
                 let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
 
-                if (vals.indexOf(valStart) >=0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=0)) {
+                if (vals.indexOf(valStart) >= 0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=
+                        0)) {
                     $(".msg-start-out-row").show();
                 } else {
                     $(".msg-start-out-row").hide();
@@ -475,7 +475,7 @@
                 let valEndAlt = $("#node-input-endTimeAlt").typedInput('type');
                 let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
 
-                if (vals.indexOf(valEnd) >=0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >=0)) {
+                if (vals.indexOf(valEnd) >= 0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >= 0)) {
                     $(".msg-end-out-row").show();
                 } else {
                     $(".msg-end-out-row").hide();
@@ -581,7 +581,9 @@
             });
             $("#node-input-startTimeAlt").typedInput({
                 default: this.startTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global',
+                    'env'
+                ]
             });
             $("#node-input-startTimeAlt").on('change focus focusin focusout', function (type, value) {
                 if (($("#node-input-startTimeAlt").typedInput('type') === 'none') ||
@@ -594,7 +596,9 @@
             });
             $("#node-input-endTimeAlt").typedInput({
                 default: this.endTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
+                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global',
+                    'env'
+                ]
             });
             $("#node-input-endTimeAlt").on('change focus focusin focusout', function (type, value) {
                 if (($("#node-input-endTimeAlt").typedInput('type') === 'none') ||

@@ -6,11 +6,13 @@
             "position": "Position",
             "name": "Name",
             "operand1": "Input",
-            "operand1Format": "time format",
+            "operand1Format": "parse format",
             "operand2": "Operand 2",
-            "operand2Format": "time format",
+            "operand2Format": "parse format",
+            "operand2Property": "Property",
             "operand2Alt": "Alternate time",
             "operand2Altoffset": "Offset",
+            "operand2AltFormat": "parse format",
             "operator": "operator",
             "nothing": "nothing",
             "add": "add",
@@ -27,7 +29,7 @@
             "lesserOrEqual": "<= (lesserOrEqual)",
             "result1": "result",
             "result1Value": "value",
-            "result1Format": "time format",
+            "result1Format": "output format",
             "offset": "Offset",
             "recalcTime": "Reclac.",
             "payload": "Payload",
@@ -54,8 +56,8 @@
             "timeformat_sec": "number - seconds since emit",
             "timeformat_min": "number - minutes since emit",
             "timeformat_hour": "number - hour since emit",
-            "timeformat_YYYYMMDDHHMMSS": "string - YYYYMMDDHHMMSS",
-            "timeformat_YYYYMMDD_HHMMSS": "string - YYYYMMDD.HHMMSS",
+            "timeformat_YYYYMMDDHHMMSS": "number - YYYYMMDDHHMMSS",
+            "timeformat_YYYYMMDD_HHMMSS": "number - YYYYMMDD.HHMMSS",
             "timeformat_obj": "as object",
             "timeformat_other": "string - Other - free format",
             "timeformat_weekday": "string - day of week, e.g. Monday, 22.12.",
@@ -63,8 +65,8 @@
             "timeparse_UNIX": "number - milliseconds UNIX timestamp",
             "timeparse_ECMA262": "string - ECMA-262",
             "timeparse_TextOther": "string - various",
-            "timeparse_YYYYMMDDHHMMSS": "string - YYYYMMDDHHMMSS",
-            "timeparse_YYYYMMDD_HHMMSS": "string - YYYYMMDD.HHMMSS",
+            "timeparse_YYYYMMDDHHMMSS": "number - YYYYMMDDHHMMSS",
+            "timeparse_YYYYMMDD_HHMMSS": "number - YYYYMMDD.HHMMSS",
             "timeparse_ms": "number - milliseconds since emit",
             "timeparse_sec": "number - seconds since emit",
             "timeparse_min": "number - minutes since emit",
@@ -102,7 +104,7 @@
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ],
         "dayDiffNames": [
-            "Yesterday", "Today", "Tomorrow", "day after tomorrow"
+            "1 week ago", "6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
         ],
         "placeholder": {
             "position": "Position",
@@ -117,6 +119,20 @@
             "offset": "0",
             "timeAlt": "18:15",
             "timeAltOffset": "0"
+        },
+        "timeFormat": {
+            "default": "ddd mmm dd yyyy HH:MM:ss",
+            "shortDate": "m/d/yy",
+            "mediumDate": "mmm d, yyyy",
+            "longDate": "mmmm d, yyyy",
+            "fullDate": "dddd, mmmm d, yyyy",
+            "shortTime": "h:MM TT",
+            "mediumTime": "h:MM:ss TT",
+            "longTime": "h:MM:ss TT Z",
+            "isoDate": "yyyy-mm-dd",
+            "isoTime": "HH:MM:ss",
+            "isoDateTime": "yyyy-mm-dd'T'HH:MM:ss",
+            "isoUtcDateTime": "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
         },
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",

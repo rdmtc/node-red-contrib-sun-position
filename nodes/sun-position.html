@@ -166,7 +166,11 @@
     }
 
     RED.nodes.registerType('sun-position', {
-        category: 'time and position',
+        category: 'time and astro',
+        color: "#F3B567",
+        icon: "sun-white.png", // saved in  icons/myicon.png - myicon.png
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1,
         defaults: {
             name: {
                 value: "",
@@ -191,8 +195,6 @@
                 value: 1
             }
         },
-        inputs: 1, // set the number of inputs - only 0 or 1
-        outputs: 1,
         outputLabels: function (index) {
             if (index == 0) {
                 return ((this.topic) ? this.topic + ":" : "") + "sun-position";
@@ -203,8 +205,6 @@
                     rule.valueHigh);
             }
         },
-        icon: "sun.png", // saved in  icons/myicon.png - myicon.png
-        color: "#F3B567",
         label: function () {
             if (this.name) {
                 return this.name;
