@@ -164,7 +164,7 @@ module.exports = function (RED) {
                 //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
-                    errorStatus = "could not evaluate time";
+                    errorStatus = 'could not evaluate time';
                     node.error(node.nextTimeData.error);
                     node.debug(util.inspect(node.nextTimeData));
                     //console.log('1');
