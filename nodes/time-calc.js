@@ -81,6 +81,7 @@ module.exports = function (RED) {
                     throw new Error('Configuration is missing!!');
                 }
                 let operand1 = tsGetOperandData(this, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
+                node.debug('operand1 ' + util.inspect(operand1));
                 let operand2 = null;
                 let result = false;
                 let resObj = null;
@@ -97,6 +98,8 @@ module.exports = function (RED) {
                     } else {
                         operand2 = tsGetOperandData(this, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetMultiplier);
                     }
+                    node.debug('operand2 ' + util.inspect(operand2));
+                    node.debug('operator ' + util.inspect(operator));
                     switch (operator) {
                         case 1: //greater
                             result = operand1.getTime() > operand2.getTime();
@@ -152,6 +155,7 @@ module.exports = function (RED) {
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
+                    node.debug('resObj ' + util.inspect(resObj));
                     if (resObj == null) {
                         throw new Error("could not evaluate " + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
@@ -176,4 +180,12 @@ module.exports = function (RED) {
         });
     }
     RED.nodes.registerType('time-calc', timeCalcNode);
+
+    RED.httpAdmin.get('/sun-position/js/*', function(req,res) {
+        var options = {
+          root: __dirname + '/static/',
+          dotfiles: 'deny'
+        };
+        res.sendFile(req.params[0], options);
+    });
 };

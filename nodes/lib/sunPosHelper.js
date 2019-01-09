@@ -363,11 +363,11 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
 
 // Regexes and supporting functions are cached through closure
 
-var dateFormat = function () {
+var dateFormat = function() {
     var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
         timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
         timezoneClip = /[^-+\dA-Z]/g,
-        pad = function (val, len) {
+        pad = function(val, len) {
             val = String(val);
             len = len || 2;
             while (val.length < len) val = "0" + val;
@@ -375,7 +375,7 @@ var dateFormat = function () {
         };
 
     // Regexes and supporting functions are cached through closure
-    return function (date, mask, utc) {
+    return function(date, mask, utc) {
         var dF = dateFormat;
 
         // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
@@ -401,10 +401,10 @@ var dateFormat = function () {
         var _ = utc ? "getUTC" : "get",
             d = date[_ + "Date"](),
             D = date[_ + "Day"](),
-            m = date[_ + "Month"](),
+            M = date[_ + "Month"](),
             y = date[_ + "FullYear"](),
             H = date[_ + "Hours"](),
-            M = date[_ + "Minutes"](),
+            m = date[_ + "Minutes"](),
             s = date[_ + "Seconds"](),
             L = date[_ + "Milliseconds"](),
             o = utc ? 0 : date.getTimezoneOffset(),
@@ -413,21 +413,30 @@ var dateFormat = function () {
                 dd: pad(d),
                 ddd: dF.i18n.dayNames[D + 7],
                 dddd: dF.i18n.dayNames[D],
-                m: m + 1,
-                mm: pad(m + 1),
-                mmm: dF.i18n.monthNames[m + 12],
-                mmmm: dF.i18n.monthNames[m],
+                E: dF.i18n.dayNames[D + 7],
+                EE: dF.i18n.dayNames[D],
+                M: M + 1,
+                MM: pad(M + 1),
+                MMM: dF.i18n.monthNames[M + 12],
+                MMMM: dF.i18n.monthNames[M],
+                NNN: dF.i18n.monthNames[M],
                 yy: String(y).slice(2),
                 yyyy: y,
                 h: H % 12 || 12,
                 hh: pad(H % 12 || 12),
                 H: H,
                 HH: pad(H),
-                M: M,
-                MM: pad(M),
+                k: (H % 12 || 12) - 1,
+                kk: pad((H % 12 || 12) - 1),
+                KK: H - 1,
+                KK: pad(H - 1),
+                m: m,
+                mm: pad(m),
                 s: s,
                 ss: pad(s),
-                l: pad(L, 3),
+                lll: pad(L, 3),
+                ll: pad(Math.round(L / 10)),
+                l: L,
                 L: pad(L > 99 ? Math.round(L / 10) : L),
                 t: H < 12 ? "a" : "p",
                 tt: H < 12 ? "am" : "pm",
@@ -440,7 +449,7 @@ var dateFormat = function () {
                 xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
             };
 
-        return mask.replace(token, function ($0) {
+        return mask.replace(token, function($0) {
             return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
         });
     };
@@ -448,18 +457,18 @@ var dateFormat = function () {
 
 // Some common format strings
 dateFormat.masks = {
-    "default": "ddd mmm dd yyyy HH:MM:ss",
+    "default": "ddd MMM dd yyyy HH:mm:ss",
     shortDate: "m/d/yy",
-    mediumDate: "mmm d, yyyy",
-    longDate: "mmmm d, yyyy",
-    fullDate: "dddd, mmmm d, yyyy",
-    shortTime: "h:MM TT",
-    mediumTime: "h:MM:ss TT",
-    longTime: "h:MM:ss TT Z",
-    isoDate: "yyyy-mm-dd",
+    mediumDate: "MMM d, yyyy",
+    longDate: "MMMM d, yyyy",
+    fullDate: "dddd, MMMM d, yyyy",
+    shortTime: "h:mm TT",
+    mediumTime: "h:mm:ss TT",
+    longTime: "h:mm:ss TT Z",
+    isoDate: "yyyy-MM-dd",
     isoTime: "HH:MM:ss",
-    isoDateTime: "yyyy-mm-dd'T'HH:MM:ss",
-    isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+    isoDateTime: "yyyy-MM-dd'T'HH:mm:ss",
+    isoUtcDateTime: "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
 };
 dateFormat.i18n = {
     dayNames: [
@@ -474,6 +483,72 @@ dateFormat.i18n = {
         "1 week ago", "6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
     ]
 };
+
+dateFormat.parse = [
+    { label: 'Year yy (2 digits)', value: 'yy'},
+    { label: 'Year yyyy (4 digits)', value: 'yyyy'},
+    { label: 'Month M (1 digit)', value: 'M'},
+    { label: 'Month MM (2 digits)', value: 'MM'},
+    { label: 'Month MMM (name or abbr.)', value: 'MMM'},
+    { label: 'Month NNN (abbr.)', value: 'NNN'},
+    { label: 'Day of Month d (1 digit)', value: 'd'},
+    { label: 'Day of Month dd (2 digits)', value: 'dd'},
+    { label: 'Day of Week E (abbr)', value: 'E'},
+    { label: 'Day of Week EE (name)', value: 'EE'},
+    { label: 'Hour h (1 digit 1-12)', value: 'h'},
+    { label: 'Hour hh (2 digits 1-12)', value: 'hh'},
+    { label: 'Hour H (1 digit 0-23)', value: 'H'},
+    { label: 'Hour HH (2 digits 0-23)', value: 'HH'},
+    { label: 'Hour K (1 digit 0-11)', value: 'K'},
+    { label: 'Hour KK (2 digits 0-11)', value: 'KK'},
+    { label: 'Hour k (1 digit 1-24)', value: 'k'},
+    { label: 'Hour kk (2 digits 1-24)', value: 'kk'},
+    { label: 'Minute m (1 digit)', value: 'm'},
+    { label: 'Minute mm (2 digits)', value: 'mm'},
+    { label: 'Second s (1 digit)', value: 's'},
+    { label: 'Second ss (2 digits)', value: 'ss'},
+    { label: 'Milliseconds ll (2 digits)', value: 'll'},
+    { label: 'Milliseconds lll (3 digits)', value: 'lll'},
+    { label: 'AM/PM t (1 digit)', value: 't'},
+    { label: 'AM/PM tt (2 digits)', value: 'tt'}
+];
+dateFormat.format = [
+    { label: 'Year yyyy (4 digits)', value: 'yyyy'},
+    { label: 'Year yy (2 digits)', value: 'yy'},
+    { label: 'Month M (1 digit)', value: 'M'},
+    { label: 'Month MM (2 digits)', value: 'MM'},
+    { label: 'Month MMM (abbr.)', value: 'MMM'},
+    { label: 'Month NNN (name)', value: 'NNN'},
+    { label: 'Day of Month d (1 digit)', value: 'd'},
+    { label: 'Day of Month dd (2 digits)', value: 'dd'},
+    { label: 'Day of Week E (abbr)', value: 'E'},
+    { label: 'Day of Week EE (name)', value: 'EE'},
+    { label: 'Hour h (1-12)', value: 'h'},
+    { label: 'Hour hh (2 digits 01-12)', value: 'hh'},
+    { label: 'Hour H (0-23)', value: 'H'},
+    { label: 'Hour HH (2 digits 00-23)', value: 'HH'},
+    { label: 'Hour K (0-11)', value: 'K'},
+    { label: 'Hour KK (2 digits 00-11)', value: 'KK'},
+    { label: 'Hour k (1-24)', value: 'k'},
+    { label: 'Hour kk (2 digits 01-24)', value: 'kk'},
+    { label: 'Minute m (0-59)', value: 'm'},
+    { label: 'Minute mm (2 digits 00-59)', value: 'mm'},
+    { label: 'Second s (0-59)', value: 's'},
+    { label: 'Second ss (2 digits 00-59)', value: 'ss'},
+    { label: 'Milliseconds l (0-999)', value: 'l'},
+    { label: 'Milliseconds ll (2 digits 00-99)', value: 'll'},
+    { label: 'Milliseconds lll (3 digits 000-999)', value: 'lll'},
+    { label: 'AM/PM t (1 digit - Lowercase)', value: 't'},
+    { label: 'AM/PM tt (2 digits - Lowercase)', value: 'tt'},
+    { label: 'AM/PM T (1 digit - Uppercase)', value: 'T'},
+    { label: 'AM/PM TT (2 digits - Uppercase)', value: 'TT'},
+    { label: 'timezone Z (abbr.)', value: 'Z'},
+    { label: 'timezone offset o (abbr.)', value: 'o'},
+    { label: "date's ordinal suffix (st, nd, rd, or th) S", value: 'S'},
+    { label: 'Day difference x', value: 'x'},
+    { label: 'Day difference (name) xx', value: 'xx'}
+];
+
 
 /**
  * Formate a date to the given Format string
@@ -611,7 +686,8 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
 // Minute       | mm (2 digits)      | m (1 or 2 digits)
 // Second       | ss (2 digits)      | s (1 or 2 digits)
-// AM/PM        | a                  |
+// Millisecond  | ll (3 digits)      | l (1, 2 or 3 digits)
+// AM/PM        | tt  (2 digits)     | t (1 or 2 digits)
 //
 // NOTE THE DIFFERENCE BETWEEN MM and mm! Month=MM, not mm!
 // Examples:
@@ -676,6 +752,7 @@ function getDateFromFormat(val, format) {
     var hh = now.getHours();
     var mm = now.getMinutes();
     var ss = now.getSeconds();
+    var ll = now.getMilliseconds();
     var ampm = "";
 
     while (i_format < format.length) {
@@ -711,12 +788,12 @@ function getDateFromFormat(val, format) {
                     year = 2000 + (year - 0);
                 }
             }
-        } else if (token == "MMM" || token == "NNN") {
+        } else if (token == "MMM" || token == "NNN" || token == "MMMM") {
             month = 0;
             for (var i = 0; i < dateFormat.i18n.monthNames.length; i++) {
                 var month_name = dateFormat.i18n.monthNames[i];
                 if (val.substring(i_val, i_val + month_name.length).toLowerCase() == month_name.toLowerCase()) {
-                    if (token == "MMM" || (token == "NNN" && i > 11)) {
+                    if (token == "MMM" || ((token == "NNN" || token == "MMMM") && i > 11)) {
                         month = i + 1;
                         if (month > 12) {
                             month -= 12;
@@ -729,7 +806,7 @@ function getDateFromFormat(val, format) {
             if ((month < 1) || (month > 12)) {
                 return 0;
             }
-        } else if (token == "EE" || token == "E") {
+        } else if (token == "EE" || token == "E" || token == "dddd" || token == "ddd") {
             for (var i = 0; i < dateFormat.i18n.dayNames.length; i++) {
                 var day_name = dateFormat.i18n.dayNames[i];
                 if (val.substring(i_val, i_val + day_name.length).toLowerCase() == day_name.toLowerCase()) {
@@ -786,15 +863,28 @@ function getDateFromFormat(val, format) {
                 return 0;
             }
             i_val += ss.length;
-        } else if (token == "a") {
+        } else if (token == "lll" || token == "ll" || token == "l" || token == "L") {
+            ll = _getInt(val, i_val, token.length, 3);
+            if (ll == null || (ll < 0) || (ll > 999)) {
+                return 0;
+            }
+            i_val += ll.length;
+        } else if ((token == "tt") || (token == "t") || (token == "TT") || (token == "T")) {
             if (val.substring(i_val, i_val + 2).toLowerCase() == "am") {
                 ampm = "AM";
+                i_val += 2;
             } else if (val.substring(i_val, i_val + 2).toLowerCase() == "pm") {
                 ampm = "PM";
+                i_val += 2;
+            } else if (val.substring(i_val, i_val + 1).toLowerCase() == "a") {
+                ampm = "AM";
+                i_val += 1;
+            } else if (val.substring(i_val, i_val + 1).toLowerCase() == "p") {
+                ampm = "PM";
+                i_val += 1;
             } else {
                 return 0;
             }
-            i_val += 2;
         } else {
             if (val.substring(i_val, i_val + token.length) != token) {
                 return 0;
@@ -904,6 +994,8 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
         return getDateFromFormat(date, format);
     } else {
         switch (Number(format)) {
+            case 0: //UNIX Timestamp
+                return new Date(Number(date));
             case 1: //timeparse_ECMA262
                 return Date.parse(date);
             case 2: //timeparse_TextOther
@@ -912,14 +1004,6 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
                 return parseComperableDateFormat(date);
             case 4: //timeformat_YYYYMMDD_HHMMSS
                 return parseComperableDateFormat2(date);
-            case 5: //timeformat_ms
-                return new Date(Number(date));
-            case 6: //timeformat_sec
-                return new Date(Number(date) * 1000);
-            case 7: //timeformat_min
-                return new Date(Number(date) * 60000);
-            case 8: //timeformat_hour
-                return new Date(Number(date) * 3600000);
             default:
                 return getDateOfText(date);
         }
