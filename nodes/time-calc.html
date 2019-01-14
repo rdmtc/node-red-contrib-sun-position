@@ -62,7 +62,7 @@
       <input type="text" id="node-input-name" data-i18n="[placeholder]time-calc.placeholder.name">
   </div>
 </script>
-<!-- link rel='stylesheet' href='sun-position/js/jquery.selectBox.css' / -->
+<link rel='stylesheet' href='sun-position/js/jquery.selectBox.css' />
 <style> .time-calc-times {
     width: 90px;
   }
@@ -588,15 +588,15 @@ console.log(this.rules);
                 let groupLength = groups.length;
                 let elementsLength = elements.length;
                 for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    //console.log(groups[gIndex].id + ': ' + groups[gIndex].label + ' - ' + node._("time-calc." +elementName+'Groups.'+gIndex+'.label' ));
+                    console.log(groups[gIndex].id + ': ' + groups[gIndex].label + ' - ' + node._("time-calc." +elementName+'Groups.'+gIndex+'.label' ));
                     //const group = groups[gIndex];
-                    const group = $('<optgroup/>', { label: node._("time-calc." +elementName+'Groups.'+gIndex+'.label' ) }).appendTo(parent);
+                    let group = $('<optgroup/>', { label: node._("time-calc." +elementName+'Groups.'+gIndex+'.label' ) }).appendTo(parent);
                     for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
+                        console.log(elements[eIndex].id + ': ' + elements[eIndex].label + ' - ' + node._("time-calc." +elementName+'.'+eIndex+'.label' ));
                         //const el = elements[eIndex];
                         if (groups[gIndex].id === elements[eIndex].group) {
                             //group.append($("<option></option>").val(elements[eIndex].id).text(elements[eIndex].label).attr("addText", elements[eIndex].add));
-                            //group.append($("<option></option>").val(elements[eIndex].id).text(elements[eIndex].label).attr("addText", elements[eIndex].add));
-                            group.append($("<option></option>").val(elements[eIndex].id).text(node._("time-calc." +elementName+'.'+gIndex+'.label' )).attr("addText", elements[eIndex].add));
+                            group.append($("<option></option>").val(elements[eIndex].id).text(node._("time-calc." +elementName+'.'+eIndex+'.label' )).attr("addText", elements[eIndex].add));
                         }
                     }
                 }
@@ -617,7 +617,7 @@ console.log(this.rules);
                 if (plType === typeTimeEntered.value || plType === typeTimeSun.value || plType === typeTimeMoon.value || plType === "date") {
                     $(".time-calc-row-operand1Format").hide();
                     $(".time-calc-row-operand1Offset").show();
-                } else if (plType === "msg" || plType === "flow" || plType === "global" || plType === "str" || plType === "num" || plType === "env") {
+                } else if (plType === typeDateEntered.value || plType === "msg" || plType === "flow" || plType === "global" || plType === "str" || plType === "num" || plType === "env") {
                     $(".time-calc-row-operand1Format").show();
                     $(".time-calc-row-operand1Offset").show();
                 } else {
@@ -790,7 +790,7 @@ console.log(this.rules);
                             row2.hide(); //format
                             row3.show(); //offset
                             row4.show(); //limit
-                        } else if (opType === "msg" || opType === "flow" || opType === "global" || opType === "str" || opType === "num" || opType === "env") {
+                        } else if (plType === typeDateEntered.value || opType === "msg" || opType === "flow" || opType === "global" || opType === "str" || opType === "num" || opType === "env") {
                             row2.show(); //format
                             row3.show(); //offset
                             row4.show(); //limit
