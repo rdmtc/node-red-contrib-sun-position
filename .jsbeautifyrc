@@ -1,0 +1,13 @@
+{
+    "beautify.language": {
+        "js": {
+            "type": ["javascript", "json"],
+            "filename": [".jshintrc", ".jsbeautifyrc"],
+            "ext": ["js", "json"]
+        },
+        "css": ["css", "scss"],
+        "html": ["htm", "html"]
+    },
+    "newline_between_rules": false,
+    "preserve_newlines": true
+}
