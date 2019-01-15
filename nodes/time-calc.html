@@ -127,8 +127,9 @@
     #option-checkboxes {
         display: none;
         border: 1px #dadada solid;
-        z-index: 10;
-        width: 200;
+        z-index: 90;
+        /* width: 200px; */
+        position: relative;
     }
 
     #option-checkboxes label {
@@ -653,8 +654,8 @@
                         html: $("<input>", {
                             type: "checkbox",
                             id: id + '-' + elements[eIndex].id
-                        }).text(elements[eIndex].label)
-                    }));
+                        })
+                    }).text(elements[eIndex].label));
                 }
                 selectbox.on("click", function( event ) {
                             console.log("on click" );
