@@ -2,21 +2,6 @@
     "name": "node-red-contrib-sun-position",
     "version": "0.1.16",
     "description": "NodeRED nodes to get sun and moon position",
-    "main": "none",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "predev": "npm i -g",
-        "dev": "node-red -v"
-    },
-    "author": {
-        "name": "Hypnos3",
-        "email": "hypnos3@online.de",
-        "url": "https://github.com/hypnos3"
-    },
-    "contributors": [{
-        "name": "Hypnos3",
-        "url": "https://github.com/hypnos3"
-    }],
     "keywords": [
         "node-red",
         "nodes",
@@ -43,19 +28,42 @@
         "time-range",
         "time-range-switch",
         "timecheck",
+        "time-calc",
+        "time-offset",
         "compare",
         "clock",
         "schedule"
     ],
-    "homepage": "https://github.com/HM-RedMatic/node-red-contrib-sun-position",
-    "license": "Apache-2.0",
+    "main": "none",
+    "engines": {
+        "node": ">=8.0.0"
+    },
+    "scripts": {
+        "test": "camo-purge; xo",
+        "lintfix": "xo --fix",
+        "predev": "npm i -g",
+        "dev": "node-red -v"
+    },
     "repository": {
         "type": "git",
-        "url": "https://github.com/HM-RedMatic/node-red-contrib-sun-position"
+        "url": "git+https://github.com/HM-RedMatic/node-red-contrib-sun-position.git"
     },
+    "author": {
+        "name": "Hypnos3",
+        "email": "hypnos3@online.de",
+        "url": "https://github.com/hypnos3"
+    },
+    "contributors": [
+        {
+            "name": "Hypnos3",
+            "url": "https://github.com/hypnos3"
+        }
+    ],
+    "license": "Apache-2.0",
     "bugs": {
         "url": "https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues"
     },
+    "homepage": "https://github.com/HM-RedMatic/node-red-contrib-sun-position#readme",
     "node-red": {
         "nodes": {
             "position-config": "nodes/position-config.js",
@@ -69,8 +77,24 @@
     "dependencies": {
         "util": ">=0.10.0"
     },
-    "extensions": [
-        "js",
-        "html"
-    ]
+    "devDependencies": {
+        "camo-purge": "^1.0.2",
+        "eslint-plugin-html": "^4.0.3",
+        "xo": "^0.20.3"
+    },
+    "xo": {
+        "space": 4,
+        "plugin": "html",
+        "global": [
+            "$",
+            "RED"
+        ],
+        "extensions": [
+            "js",
+            "html"
+        ],
+        "rules": {
+            "capitalized-comments": "off"
+        }
+    }
 }
