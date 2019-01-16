@@ -1,7 +1,7 @@
 /********************************************
  * time-inject:
  *********************************************/
-"use strict";
+'use strict';
 const util = require('util');
 
 const path = require('path');
@@ -9,11 +9,11 @@ const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
 module.exports = function (RED) {
-    "use strict";
+    'use strict';
 
     function tsGetScheduleTime(time, limit) {
-        var now = new Date();
-        var millis = time.getTime() - now.getTime();
+        const now = new Date();
+        let millis = time.getTime() - now.getTime();
         if (limit) {
             while (millis < limit) {
                 millis += 86400000; //24h
@@ -23,24 +23,24 @@ module.exports = function (RED) {
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, days) {
-        if (type == null || type === "none" || type === "" || (typeof type === 'undefined')) {
-            if (value === "" || (typeof value === 'undefined')) {
+        if (type == null || type === 'none' || type === '' || (typeof type === 'undefined')) {
+            if (value === '' || (typeof value === 'undefined')) {
                 return Date.now();
             } else {
                 return value;
             }
-        } else if (type === "pdsCalcData") {
+        } else if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
-        } else if (type === "pdmCalcData") {
+        } else if (type === 'pdmCalcData') {
             return node.positionConfig.getMoonCalc(msg.ts);
-        } else if (type === "entered" || type === "pdsTime" || type === "pdmTime" || type === "date") {
-            let data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+        } else if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
+            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
             if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                return hlp.getFormatedDateOut(data.value, format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                 /*
                 format = format || 0;
                 if (isNaN(format)) {
-                    return hlp.formatDate(data.value, "" + format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                    return hlp.formatDate(data.value, '' + format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                 } else {
                     switch (Number(format)) {
                         case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
@@ -56,17 +56,17 @@ module.exports = function (RED) {
                         case 5: //timeformat_ISO
                             return data.value.toISOString();
                         case 6: //timeformat_ms
-                            return tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
+                            return tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined);
                         case 7: //timeformat_sec
-                            return Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000);
+                            return Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000);
                         case 8: //timeformat_min
-                            return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 60);
+                            return (Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000) / 60);
                         case 9: //timeformat_hour
-                            return (Math.round(tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined) / 1000) / 3600);
+                            return (Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000) / 3600);
                         case 10: //timeformat_YYYYMMDDHHMMSS
-                            return getforamtDateCmp(data.value);
+                            return hlp.getComperableDateFormat(data.value);
                         case 11: //timeformat_YYYYMMDD_HHMMSS
-                            return getforamtDateCmp2(data.value);
+                            return hlp.getComperableDateFormat2(data.value);
                         case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
                             return data.value.toLocaleDateString();
                         case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
@@ -76,25 +76,24 @@ module.exports = function (RED) {
                         case 15: //timeformat_localDateLong       - Wed Dec 26 2018
                             return data.value.toDateString();
                         case 16: //timeformat_weekday           - Montag, 22.12.
-                            return hlp.formatDate(data.value, "dddd, d.m.", false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                            return hlp.formatDate(data.value, 'dddd, d.m.', false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                         case 17: //timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-                            return hlp.formatDate(data.value, "xx, d.m.", false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
-                        default:
-                            let obj = data;
-                            obj.name = value;
-                            obj.offset = offset;
-                            obj.allowedDays = days;
-                            obj.ts = data.value.getTime();
-                            obj.timeUTCStr = data.value.toUTCString();
-                            obj.timeISOStr = data.value.toISOString();
-                            obj.timeLocaleStr = data.value.toLocaleString();
-                            obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
-                            let delay = tsGetScheduleTime(data.value, (type === "date") ? 10 : undefined);
-                            obj.delay = delay;
-                            obj.delaySec = Math.round(delay / 1000);
-                            return obj;
+                            return hlp.formatDate(data.value, 'xx, d.m.', false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     }
-            }*/
+                    const obj = data;
+                    obj.name = value;
+                    obj.offset = offset;
+                    obj.allowedDays = days;
+                    obj.ts = data.value.getTime();
+                    obj.timeUTCStr = data.value.toUTCString();
+                    obj.timeISOStr = data.value.toISOString();
+                    obj.timeLocaleStr = data.value.toLocaleString();
+                    obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
+                    const delay = tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined);
+                    obj.delay = delay;
+                    obj.delaySec = Math.round(delay / 1000);
+                    return obj;
+                } */
             }
             return data;
         }
@@ -103,15 +102,15 @@ module.exports = function (RED) {
 
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, days) {
         if (type !== 'none' && name) {
-            let res = tsGetPropData(node, msg, valueType, value, format, offset, days);
+            const res = tsGetPropData(node, msg, valueType, value, format, offset, days);
             if (res == null || (typeof res === 'undefined')) {
-                throw new Error("could not evaluate " + valueType + '.' + value);
+                throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
                 this.error('error on getting additional payload 1: ' + res.error);
             } else if (type === 'msg' || type === 'msgProperty') {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {
-                let contextKey = RED.util.parseContextStore(name);
+                const contextKey = RED.util.parseContextStore(name);
                 node.context()[type].set(contextKey.key, res, contextKey.store);
             }
         }
@@ -145,7 +144,7 @@ module.exports = function (RED) {
         this.nextTimeAlt = null;
         this.nextTimeData = null;
         this.nextTimeAltData = null;
-        var node = this;
+        const node = this;
 
         function doCreateTimeout(node, msg) {
             let errorStatus = '';
@@ -182,7 +181,7 @@ module.exports = function (RED) {
                 node.positionConfig) {
                 node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset * node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
-                    errorStatus = "could not evaluate alternate time";
+                    errorStatus = 'could not evaluate alternate time';
                     node.error(node.nextTimeAltData.error);
                     //console.log('2');
                     node.nextTimeAlt = null;
@@ -200,16 +199,16 @@ module.exports = function (RED) {
                 }
                 let millis = tsGetScheduleTime(node.nextTime, 10);
                 //node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
-                let isAlt = (node.nextTimeAlt);
+                const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
-                    let millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
+                    const millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
                     if (millisAlt < millis) {
                         millis = millisAlt;
                         isAltFirst = true;
                     }
                 }
                 node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
-                    let msg = {
+                    const msg = {
                         type: 'start',
                         timeData: {}
                     };
@@ -218,12 +217,12 @@ module.exports = function (RED) {
                     if (isAlt) {
                         let needsRecalc = false;
                         try {
-                            let res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
+                            const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
                             useAlternateTime = ((res == true) || (res == 'true'));
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;
-                            hlp.errorHandler(node, err, RED._("time-inject.errors.invalid-property-type", {
+                            hlp.errorHandler(node, err, RED._('time-inject.errors.invalid-property-type', {
                                 type: node.propertyType,
                                 value: node.property
                             }));
@@ -233,7 +232,7 @@ module.exports = function (RED) {
                             try {
                                 doCreateTimeout(node, msg);
                             } catch (err) {
-                                hlp.errorHandler(node, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                                hlp.errorHandler(node, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
                             }
                             return;
                         }
@@ -244,7 +243,7 @@ module.exports = function (RED) {
                         msg.timeData = node.nextTimeData;
                     }
                     //node.debug('redo doCreateTimeout');
-                    node.emit("input", msg);
+                    node.emit('input', msg);
                 }, millis, isAlt, isAltFirst);
             }
 
@@ -260,28 +259,28 @@ module.exports = function (RED) {
 
             if (errorStatus) {
                 node.status({
-                    fill: "red",
-                    shape: "dot",
+                    fill: 'red',
+                    shape: 'dot',
                     text: errorStatus + ((node.intervalObj) ? ' 🖩' : '')
                 });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({
-                        fill: "green",
-                        shape: "ring",
+                        fill: 'green',
+                        shape: 'ring',
                         text: node.nextTimeAlt.toLocaleString() + ' / ' + node.nextTime.toLocaleTimeString()
                     });
                 } else {
                     node.status({
-                        fill: "green",
-                        shape: "dot",
+                        fill: 'green',
+                        shape: 'dot',
                         text: node.nextTime.toLocaleString() + ' / ' + node.nextTimeAlt.toLocaleTimeString()
                     });
                 }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
-                    fill: "green",
-                    shape: "dot",
+                    fill: 'green',
+                    shape: 'dot',
                     text: node.nextTime.toLocaleString()
                 });
             } else {
@@ -305,9 +304,9 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
 
-                let value = tsGetPropData(this, msg, config.payloadType, config.payload);
+                const value = tsGetPropData(this, msg, config.payloadType, config.payload);
                 if (value == null || (typeof value === 'undefined')) {
-                    throw new Error("could not evaluate " + config.payloadType + '.' + config.payload);
+                    throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
                     throw new Error('could not getting payload: ' + value.error);
                 } else {
@@ -320,14 +319,14 @@ module.exports = function (RED) {
 
                 node.send(msg);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+                hlp.errorHandler(this, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
             }
         });
 
         try {
             if (config.once) {
                 config.onceTimeout = setTimeout(function () {
-                    node.emit("input", {
+                    node.emit('input', {
                         type: 'once'
                     });
                     doCreateTimeout(node, undefined);
@@ -336,7 +335,7 @@ module.exports = function (RED) {
                 doCreateTimeout(node, undefined);
             }
         } catch (err) {
-            hlp.errorHandler(this, err, RED._("time-inject.errors.error-text"), RED._("time-inject.errors.error-title"));
+            hlp.errorHandler(this, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
         }
     }
     RED.nodes.registerType('time-inject', timeInjectNode);

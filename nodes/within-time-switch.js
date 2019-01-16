@@ -1,30 +1,29 @@
 /********************************************
  * within-time-switch:
  *********************************************/
-"use strict";
+'use strict';
 const util = require('util');
 
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
 module.exports = function (RED) {
-    "use strict";
-
+    'use strict';
 
     function setstate(node, result, status, statusObj) {
         if (status > 255) {
             return result;
         }
         if (result.start.error) {
-            hlp.errorHandler(node, new Error('Error get start time:' + result.start.error), RED._("within-time-switch.errors.error-text"), result.start.error);
+            hlp.errorHandler(node, new Error('Error get start time:' + result.start.error), RED._('within-time-switch.errors.error-text'), result.start.error);
         } else if (result.end.error) {
-            hlp.errorHandler(node, new Error('Error get end time:' + result.end.error), RED._("within-time-switch.errors.error-text"), result.end.error);
+            hlp.errorHandler(node, new Error('Error get end time:' + result.end.error), RED._('within-time-switch.errors.error-text'), result.end.error);
         } else if ((status & 2) && statusObj) {
             node.status(statusObj);
         } else if ((status & 1) && result.start.value && result.end.value) {
             node.status({
-                fill: "yellow",
-                shape: "dot",
+                fill: 'yellow',
+                shape: 'dot',
                 text: '⏲ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
             });
         } else {
@@ -37,26 +36,26 @@ module.exports = function (RED) {
         }
     }
 
-    function calcWithinTimes(node, msg, config, noState) {
+    function calcWithinTimes(node, msg, config) {
         //node.debug('calcWithinTimes');
-        let result = {
+        const result = {
             start: {},
             end: {},
             startSuffix: '',
             endSuffix: '',
             altStartTime: (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
             altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'))
-        }
+        };
 
         if (result.altStartTime) {
             //node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
             try {
                 //evaluateNodeProperty(node.property, type, node, msg, callback)
-                let res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
+                const res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
                 result.altStartTime = ((res == true) || (res == 'true'));
             } catch (err) {
                 result.altStartTime = false;
-                hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-propertyStart-type", {
+                hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyStart-type', {
                     type: node.propertyStartType,
                     value: node.propertyStart
                 }));
@@ -68,11 +67,11 @@ module.exports = function (RED) {
             //node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.propertyEnd);
             try {
                 //evaluateNodeProperty(node.property, type, node, msg, callback)
-                let res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
+                const res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
                 result.altEndTime = ((res == true) || (res == 'true'));
             } catch (err) {
                 result.altEndTime = false;
-                hlp.errorHandler(node, err, RED._("within-time-switch.errors.invalid-propertyEnd-type", {
+                hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyEnd-type', {
                     type: node.propertyEndType,
                     value: node.propertyEnd
                 }));
@@ -102,8 +101,8 @@ module.exports = function (RED) {
     }
 
     function getScheduleTime(time) {
-        var now = new Date();
-        var millis = time.getTime() - now.getTime();
+        const now = new Date();
+        let millis = time.getTime() - now.getTime();
         while (millis < 10) {
             millis += 86400000; //24h
         }
@@ -118,14 +117,14 @@ module.exports = function (RED) {
         if (!msg.reSendMsgDelayed && isActive && time) {
             node.lastMsgObj = RED.util.cloneMessage(msg);
             node.lastMsgObj.reSendMsgDelayed = false;
-            let millis = getScheduleTime(time) + 10;
+            const millis = getScheduleTime(time) + 10;
             node.debug('timeout for resend last message ' + time + ' is in ' + millis + 'ms');
             node.timeOutObj = setTimeout(() => {
                 node.debug('setTimeout triggered, resend last message as configured');
                 node.timeOutObj = null;
                 if (node.lastMsgObj) {
                     node.lastMsgObj.reSendMsgDelayed = true;
-                    node.emit("input", node.lastMsgObj);
+                    node.emit('input', node.lastMsgObj);
                 }
             }, millis);
         }
@@ -137,25 +136,25 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         //this.debug('initialize withinTimeSwitchNode ' + util.inspect(config));
 
-        this.propertyStart = config.propertyStart || "";
-        this.propertyEnd = config.propertyEnd || "";
-        this.propertyStartType = config.propertyStartType || "none";
-        this.propertyEndType = config.propertyEndType || "none";
+        this.propertyStart = config.propertyStart || '';
+        this.propertyEnd = config.propertyEnd || '';
+        this.propertyStartType = config.propertyStartType || 'none';
+        this.propertyEndType = config.propertyEndType || 'none';
         this.timeOutObj = null;
         this.lastMsgObj = null;
-        var node = this;
+        const node = this;
 
         this.on('input', msg => {
             try {
                 //this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
                 //this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 //this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
-                let result = calcWithinTimes(this, msg, config, true);
+                const result = calcWithinTimes(this, msg, config);
                 let now = new Date();
 
                 if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
-                    let dto = new Date(msg.ts);
-                    if (dto !== "Invalid Date" && !isNaN(dto)) {
+                    const dto = new Date(msg.ts);
+                    if (dto !== 'Invalid Date' && !isNaN(dto)) {
                         now = dto;
                     }
                 }
@@ -164,17 +163,17 @@ module.exports = function (RED) {
                     throw new Error('Error can not calc time!');
                 }
 
-                let startNr = hlp.getTimeNumber(result.start.value);
-                let endNr = hlp.getTimeNumber(result.end.value);
-                let cmpNow = hlp.getTimeNumber(now);
-                let status = (config.statusOut || 3);
+                const startNr = hlp.getTimeNumber(result.start.value);
+                const endNr = hlp.getTimeNumber(result.end.value);
+                const cmpNow = hlp.getTimeNumber(now);
+                const status = (config.statusOut || 3);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {
                         //this.debug('compare in time 1 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
-                            fill: "green",
-                            shape: "ring",
+                            fill: 'green',
+                            shape: 'ring',
                             text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
                         });
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
@@ -185,8 +184,8 @@ module.exports = function (RED) {
                         //this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                         this.send([msg, null]);
                         setstate(this, result, status, {
-                            fill: "green",
-                            shape: "dot",
+                            fill: 'green',
+                            shape: 'dot',
                             text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
                         });
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
@@ -196,22 +195,22 @@ module.exports = function (RED) {
                 //this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                 this.send([null, msg]);
                 setstate(this, result, status, {
-                    fill: "yellow",
-                    shape: "dot",
+                    fill: 'yellow',
+                    shape: 'dot',
                     text: '⛔' + result.startSuffix + now.toLocaleString() + result.endSuffix
                 });
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
+                hlp.errorHandler(this, err, RED._('within-time-switch.errors.error-text'), RED._('within-time-switch.errors.error-title'));
             }
         });
 
         try {
             node.status({});
-            let result = calcWithinTimes(this, null, config, true);
+            const result = calcWithinTimes(this, null, config);
             setstate(this, result, (config.statusOut || 3));
         } catch (err) {
-            hlp.errorHandler(this, err, RED._("within-time-switch.errors.error-text"), RED._("within-time-switch.errors.error-title"));
+            hlp.errorHandler(this, err, RED._('within-time-switch.errors.error-text'), RED._('within-time-switch.errors.error-title'));
         }
     }
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);

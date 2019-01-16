@@ -12,7 +12,6 @@ module.exports = {
   rules: {
     indent: [
       "error",
-      "space",
       4,
       {
         SwitchCase: 1

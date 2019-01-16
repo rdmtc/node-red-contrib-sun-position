@@ -1,15 +1,15 @@
 /********************************************
  * time-calc:
  *********************************************/
-"use strict";
-const util = require("util");
+'use strict';
+const util = require('util');
 
-const path = require("path");
-const hlp = require(path.join(__dirname, "/lib/sunPosHelper.js"));
+const path = require('path');
+const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 //const cron = require("cron");
 
 module.exports = function (RED) {
-    "use strict";
+    'use strict';
 
     function tsGetOperandData(
         node,
@@ -21,36 +21,36 @@ module.exports = function (RED) {
         multiplier
     ) {
         let result = {};
-        if (type == null || type === "none" || type === "") {
+        if (type == null || type === 'none' || type === '') {
             return Date.now();
         } else if (
-            type === "entered" ||
-            type === "pdsTime" ||
-            type === "pdmTime" ||
-            type === "date"
+            type === 'entered' ||
+            type === 'pdsTime' ||
+            type === 'pdmTime' ||
+            type === 'date'
         ) {
             result = node.positionConfig.getTimeProp(node, msg, type, value);
             if (result == null) {
-                throw new Error("could not evaluate " + type + "." + value);
+                throw new Error('could not evaluate ' + type + '.' + value);
             } else if (result.error) {
-                throw new Error("error on getting operand: " + result.error);
+                throw new Error('error on getting operand: ' + result.error);
             }
         } else {
             //msg, flow, global, str, num, env
-            let data = RED.util.evaluateNodeProperty(value, type, node, msg);
+            const data = RED.util.evaluateNodeProperty(value, type, node, msg);
             if (!data) {
-                throw new Error("could not evaluate " + type + "." + value);
+                throw new Error('could not evaluate ' + type + '.' + value);
             }
             result.value = hlp.parseDateFromFormat(
                 data,
                 format,
-                RED._("time-calc.days"),
-                RED._("time-calc.month"),
-                RED._("time-calc.dayDiffNames")
+                RED._('time-calc.days'),
+                RED._('time-calc.month'),
+                RED._('time-calc.dayDiffNames')
             );
 
-            if (result.value === "Invalid Date" || isNaN(result.value)) {
-                throw new Error("could not evaluate format of " + data);
+            if (result.value === 'Invalid Date' || isNaN(result.value)) {
+                throw new Error('could not evaluate format of ' + data);
             }
         }
         if (offset != 0 && multiplier > 0) {
@@ -64,23 +64,23 @@ module.exports = function (RED) {
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, days) {
-        if (type == null || type === "none" || type === "") {
-            if (value === "" || typeof value === "undefined") {
+        if (type == null || type === 'none' || type === '') {
+            if (value === '' || typeof value === 'undefined') {
                 return Date.now();
             } else {
                 return value;
             }
-        } else if (type === "pdsCalcData") {
+        } else if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
-        } else if (type === "pdmCalcData") {
+        } else if (type === 'pdmCalcData') {
             return node.positionConfig.getMoonCalc(msg.ts);
         } else if (
-            type === "entered" ||
-            type === "pdsTime" ||
-            type === "pdmTime" ||
-            type === "date"
+            type === 'entered' ||
+            type === 'pdsTime' ||
+            type === 'pdmTime' ||
+            type === 'date'
         ) {
-            let data = node.positionConfig.getTimeProp(
+            const data = node.positionConfig.getTimeProp(
                 node,
                 msg,
                 type,
@@ -94,9 +94,9 @@ module.exports = function (RED) {
                     data.value,
                     format,
                     false,
-                    RED._("time-inject.days"),
-                    RED._("time-inject.month"),
-                    RED._("time-inject.dayDiffNames")
+                    RED._('time-inject.days'),
+                    RED._('time-inject.month'),
+                    RED._('time-inject.dayDiffNames')
                 );
             }
             return data;
@@ -109,57 +109,56 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         //this.debug('initialize timeCalcNode ' + util.inspect(config));
-        let operator = config.operator || 0;
-        var node = this;
+        const node = this;
 
-        this.on("input", msg => {
+        this.on('input', msg => {
             try {
-                node.debug("input " + util.inspect(msg));
+                node.debug('input ' + util.inspect(msg));
                 if (
                     node.positionConfig == null ||
                     config.operator == null ||
                     config.operand1Type == null
                 ) {
-                    throw new Error("Configuration is missing!!");
+                    throw new Error('Configuration is missing!!');
                 }
-                let operand1 = tsGetOperandData(this, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
+                const operand1 = tsGetOperandData(this, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
 
-                if (config.result1Type !== "none" && config.result1Value) {
+                if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
-                    if (config.result1Type == "operand1") {
-                        resObj = hlp.getFormatedDateOut(operand1, config.result1Format, false, RED._("time-inject.days"), RED._("time-inject.month"), RED._("time-inject.dayDiffNames"));
+                    if (config.result1Type == 'operand1') {
+                        resObj = hlp.getFormatedDateOut(operand1, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
-                    node.debug("resObj " + util.inspect(resObj));
+                    node.debug('resObj ' + util.inspect(resObj));
                     if (resObj == null) {
-                        throw new Error("could not evaluate " + config.result1ValueType + "." + config.result1Value);
+                        throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
-                        this.error("error on getting result: " + resObj.error);
-                    } else if (config.result1Type === "msg" || config.result1Type === "msgProperty") {
+                        this.error('error on getting result: ' + resObj.error);
+                    } else if (config.result1Type === 'msg' || config.result1Type === 'msgProperty') {
                         RED.util.setMessageProperty(msg, name, resObj);
-                    } else if ((config.result1Type === "flow" || config.result1Type === "global") && (operator <= 0 || result)) {
-                        let contextKey = RED.util.parseContextStore(name);
-                        node.context()[type].set(contextKey.key, resObj, contextKey.store);
+                    } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
+                        const contextKey = RED.util.parseContextStore(config.result1Value);
+                        node.context()[config.result1Type].set(contextKey.key, resObj, contextKey.store);
                     }
                 }
 
-                node.debug("operand1 " + util.inspect(operand1));
-                let resObj = null;
-                let rules = config.rules;
-                let rulesLength = rules.length;
+                node.debug('operand1 ' + util.inspect(operand1));
+                const resObj = null;
+                const rules = config.rules;
+                const rulesLength = rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
-                    let rule = rules[i];
+                    const rule = rules[i];
                     let operatorValid = true;
-                    if (rule.propertyType !== "none") {
-                        let res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
-                        operatorValid = res == true || res == "true";
+                    if (rule.propertyType !== 'none') {
+                        const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
+                        operatorValid = res == true || res == 'true';
                     }
                     if (operatorValid) {
-                        let ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
-                        node.debug("operand " + util.inspect(ruleoperand));
-                        node.debug("operator " + util.inspect(rule.operator));
-                        node.debug("operatorType " + util.inspect(rule.operatorType));
+                        const ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
+                        node.debug('operand ' + util.inspect(ruleoperand));
+                        node.debug('operator ' + util.inspect(rule.operator));
+                        node.debug('operatorType ' + util.inspect(rule.operatorType));
 
                         let compare = null;
                         switch (rule.operator) {
@@ -174,7 +173,6 @@ module.exports = function (RED) {
                                 break;
                             case 4: //greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
                                 compare = (op1, op2) => op1 >= op2;
-                                result = inputOperant.getTime() >= ruleoperand.getTime();
                                 break;
                             case 5: //lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
                                 compare = (op1, op2) => op1 < op2;
@@ -185,9 +183,9 @@ module.exports = function (RED) {
                         }
                         let result = false;
                         if (compare) {
-                            let inputOperant = new Date(operand1);
+                            const inputOperant = new Date(operand1);
                             //result = inputOperant.getTime() <= ruleoperand.getTime();
-                            if (rule.operatorType !== '*' && typeof rule.operatorType !== "undefined") {
+                            if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': //ms
                                         result = compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
@@ -270,13 +268,13 @@ module.exports = function (RED) {
                 hlp.errorHandler(
                     this,
                     err,
-                    RED._("time-calc.errors.error-text"),
-                    RED._("time-calc.errors.error-title")
+                    RED._('time-calc.errors.error-text'),
+                    RED._('time-calc.errors.error-title')
                 );
             }
         });
     }
-    RED.nodes.registerType("time-calc", timeCalcNode);
+    RED.nodes.registerType('time-calc', timeCalcNode);
 
     /*
       RED.httpAdmin.get('/sun-position/js/*', function(req,res) {
