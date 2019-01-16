@@ -117,11 +117,11 @@
         category: 'config',
         defaults: {
             name: {
-                value: "",
+                value: '',
                 required: false
             },
             longitude: {
-                value: "",
+                value: '',
                 required: true,
                 validate: function (v) {
                     var n = Number(v);
@@ -129,7 +129,7 @@
                 }
             },
             latitude: {
-                value: "",
+                value: '',
                 required: true,
                 validate: function (v) {
                     var n = Number(v);
@@ -166,8 +166,8 @@
                 step: .00001,
                 numberFormat: "n"
             });
-            if (($("#node-config-input-latitude").val() === "") && ($("#node-config-input-longitude").val() ===
-                    "")) {
+            if (($("#node-config-input-latitude").val() === '') && ($("#node-config-input-longitude").val() ===
+                    '')) {
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(function (position) {
                         $("#node-config-input-latitude").val(Number(position.coords.latitude.toFixed(

@@ -1,10 +1,12 @@
 /********************************************
  * moon-position:
  *********************************************/
+
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 const util = require('util');
-//const hlp = '/lib/sunPosHelper.js';
+
+// const hlp = '/lib/sunPosHelper.js';
 
 module.exports = function (RED) {
     'use strict';
@@ -56,21 +58,21 @@ module.exports = function (RED) {
             } catch (err) {
                 hlp.errorHandler(this, err, 'Exception occured on moon-position', 'internal error');
             }
-            //this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
-            //this.status({fill:"red",shape:"dot",text:"error - input parameter"});
+            // this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
+            // this.status({fill:"red",shape:"dot",text:"error - input parameter"});
         });
 
         function getNumProp(srcNode, msg, vType, value) {
-            //srcNode.debug('getNumProp vType=' + vType + ' value=' + value);
+            // srcNode.debug('getNumProp vType=' + vType + ' value=' + value);
             const now = new Date();
             let result = -1;
             if (vType === '' || vType === 'none') {
-                //nix
+                // nix
             } else if (vType === 'num') {
                 result = Number(now);
             } else {
                 try {
-                    //evaluateNodeProperty(value, type, srcNode, msg, callback)
+                    // evaluateNodeProperty(value, type, srcNode, msg, callback)
                     const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                     if (res && !isNaN(res)) {
                         result = Number(now);

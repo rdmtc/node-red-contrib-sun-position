@@ -4,7 +4,23 @@ module.exports = {
     node: true,
     browser: true
   },
+  plugins: [
+    "html"
+  ],
   extends: "eslint:recommended",
+  "settings": {
+    "html/html-extensions": [".html", ".htm", ".we"],  // consider .html and .we files as HTML
+    "html/indent": "+2",
+    "html/report-bad-indent": "warn",
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    }
+  },
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module"
@@ -28,13 +44,19 @@ module.exports = {
         ignoreTemplateLiterals: true
       }
     ],
+    "no-eq-null": "error",
+    "eqeqeq": "error",
+    "no-else-return": "error",
+    "prefer-arrow-callback": "error",
+    "import/newline-after-import": ["warn", { "count": 1 }],
     "no-console": "off",
     "no-unused-vars": [
-      "error",
+      "warn",
       {
         argsIgnorePattern: "^_"
       }
     ],
+    "no-unused-expressions": "warn",
     "no-useless-escape": "warn",
     "no-constant-condition": "off",
     "no-multiple-empty-lines": [
@@ -55,7 +77,7 @@ module.exports = {
       }
     ],
     quotes: [
-      "error",
+      "warn",
       "single",
       {
         avoidEscape: true,
@@ -73,6 +95,18 @@ module.exports = {
         functions: "ignore"
       }
     ],
-    "no-trailing-spaces": "error"
+    "no-trailing-spaces": "error",
+    "spaced-comment":["warn", "always", {
+          "line": {
+            "markers": ["/"],
+            "exceptions": ["-", "+", "*", "#"]
+        },
+        "block": {
+            "markers": ["!"],
+            "exceptions": ["-", "+", "*", "#"],
+            "balanced": true
+        }
+    }],
+    "eol-last": ["error", "never"]
   }
 };

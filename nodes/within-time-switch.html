@@ -10,7 +10,7 @@
     </div>
     <div class="form-row time-row">
         <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
-        <input id="node-input-startOffset"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+        <input id="node-input-startOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
         <select style="width:100px" id="node-input-startOffsetMultiplier">
             <option value="1" data-i18n="within-time-switch.label.seconds"></option>
             <option value="60" data-i18n="within-time-switch.label.minutes"></option>
@@ -45,7 +45,7 @@
     </div>
     <div class="form-row alternate-time-start-offset hidden">
         <label for="node-input-startOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
-        <input id="node-input-startOffsetAlt"" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
+        <input id="node-input-startOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
         <select style="width:100px" id="node-input-startOffsetAltMultiplier">
             <option value="1" data-i18n="within-time-switch.label.seconds"></option>
             <option value="60" data-i18n="within-time-switch.label.minutes"></option>
@@ -230,15 +230,15 @@
     function getValueLabel(t, v, l) {
         l = l || 15;
         if (t === "string" || t === "str") {
-            if (v == "") {
+            if (v == '') {
                 return v;
             }
             return '"' + clipValueLength(v, l) + '"';
         } else if (t === "num" || t === "bool") {
-            if (v == "") {
+            if (v == '') {
                 return v;
             }
-            return "" + v;
+            return '' + v;
         } else if (t === 'msg') {
             return t + "." + clipValueLength(v, l);
         } else if (t === 'flow' || t === 'global') {
@@ -266,16 +266,16 @@
         outputs: 2,
         defaults: {
             name: {
-                value: "",
+                value: '',
                 required: false
             },
             positionConfig: {
-                value: "",
+                value: '',
                 type: "position-config",
                 required: true
             },
             startTime: {
-                value: "",
+                value: '',
                 required: true,
                 validate: RED.validators.typedInput("startTimeType")
             },
@@ -293,7 +293,7 @@
                 validate: RED.validators.number()
             },
             endTime: {
-                value: "",
+                value: '',
                 required: true,
                 validate: RED.validators.typedInput("endTimeType")
             },
@@ -311,7 +311,7 @@
                 validate: RED.validators.number()
             },
             propertyStart: {
-                value: "",
+                value: '',
                 required: false,
                 validate: RED.validators.typedInput("propertyStartType")
             },
@@ -349,7 +349,7 @@
                 }
             },
             propertyEnd: {
-                value: "",
+                value: '',
                 required: false,
                 validate: RED.validators.typedInput("propertyEndType")
             },
@@ -425,7 +425,7 @@
                 }
 
                 let v = getValueLabel(type, value, maxLength);
-                if (v == "") {
+                if (v == '') {
                     return this._("within-time-switch.label.blank");
                 }
                 return v + suffix;
@@ -451,7 +451,7 @@
             return 'within-time';
         },
         labelStyle: function () {
-            return this.name ? "node_label_italic" : "";
+            return this.name ? "node_label_italic" : '';
         },
         paletteLabel: 'within-time',
         align: 'left',
@@ -482,7 +482,7 @@
                 }
             }
 
-            if (this.statusOut == "" || this.statusOut == undefined) {
+            if (this.statusOut == '' || this.statusOut == undefined) {
                 this.statusOut = 3;
                 $("#node-input-statusOut").val(this.statusOut);
             }

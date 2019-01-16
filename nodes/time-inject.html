@@ -21,7 +21,7 @@
   </div>
   <div class="form-row time-inject-row-offset hidden">
       <label for="node-input-offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+      <input id="node-input-offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-offsetMultiplier">
           <option value="1" data-i18n="time-inject.label.seconds"></option>
           <option value="60" data-i18n="time-inject.label.minutes"></option>
@@ -60,7 +60,7 @@
   </div>
   <div class="form-row time-inject-row-timeAltOffset hidden">
       <label for="node-input-timeAltOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
-      <input id="node-input-timeAltOffset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset">
+      <input id="node-input-timeAltOffset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset">
       <select style="width:100px" id="node-input-timeAltOffsetMultiplier">
           <option value="1" data-i18n="time-inject.label.seconds"></option>
           <option value="60" data-i18n="time-inject.label.minutes"></option>
@@ -144,7 +144,7 @@
   </div>
   <div class="form-row time-inject-row-addPayload1Offset hidden">
       <label for="node-input-addPayload1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-addPayload1Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+      <input id="node-input-addPayload1Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload1OffsetMultiplier">
           <option value="1" data-i18n="time-inject.label.seconds"></option>
           <option value="60" data-i18n="time-inject.label.minutes"></option>
@@ -210,7 +210,7 @@
   </div>
   <div class="form-row time-inject-row-addPayload2Offset hidden">
       <label for="node-input-addPayload2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-addPayload2Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+      <input id="node-input-addPayload2Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload2OffsetMultiplier">
           <option value="1" data-i18n="time-inject.label.seconds"></option>
           <option value="60" data-i18n="time-inject.label.minutes"></option>
@@ -276,7 +276,7 @@
   </div>
   <div class="form-row time-inject-row-addPayload3Offset hidden">
       <label for="node-input-addPayload3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
-      <input id="node-input-addPayload3Offset"" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
+      <input id="node-input-addPayload3Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload3OffsetMultiplier">
           <option value="1" data-i18n="time-inject.label.seconds"></option>
           <option value="60" data-i18n="time-inject.label.minutes"></option>
@@ -490,15 +490,15 @@
   function getValueLabel(t, v, l) {
     l = l || 15;
     if (t === "string" || t === "str") {
-      if (v == "") {
+      if (v == '') {
         return v;
       }
       return '"' + clipValueLength(v, l) + '"';
     } else if (t === "num" || t === "bool") {
-      if (v == "") {
+      if (v == '') {
         return v;
       }
-      return "" + v;
+      return '' + v;
     } else if (t === "msg") {
       return t + "." + clipValueLength(v, l);
     } else if (t === "flow" || t === "global") {
@@ -512,7 +512,7 @@
       let res = v
         .replace("astronomical", "astro-")
         .replace("nautical", "naut-")
-        .replace("civil", "")
+        .replace("civil", '')
         .replace("amateur", "amat-")
         .replace("blueHour", "blHr-")
         .replace("goldenHour", "goHr-");
@@ -531,16 +531,16 @@
     outputs: 1,
     defaults: {
       name: {
-        value: "",
+        value: '',
         required: false
       },
       positionConfig: {
-        value: "",
+        value: '',
         type: "position-config",
         required: true
       },
       payload: {
-        value: "",
+        value: '',
         validate: RED.validators.typedInput("payloadType")
       },
       payloadType: {
@@ -574,13 +574,13 @@
                 }*/
       },
       payloadDays: {
-        value: "*"
+        value: '*'
       },
       topic: {
-        value: ""
+        value: ''
       },
       time: {
-        value: "",
+        value: '',
         required: false,
         validate: RED.validators.typedInput("timeType")
       },
@@ -588,7 +588,7 @@
         value: "none"
       },
       timeDays: {
-        value: "*"
+        value: '*'
       },
       offset: {
         value: 0,
@@ -617,7 +617,7 @@
         }
       },
       property: {
-        value: "",
+        value: '',
         required: false,
         validate: function (v) {
           return (
@@ -632,7 +632,7 @@
         value: "none"
       },
       timeAlt: {
-        value: "",
+        value: '',
         required: false,
         validate: function (v) {
           return (
@@ -682,7 +682,7 @@
         }
       },
       timeDays: {
-        value: "*"
+        value: '*'
       },
       once: {
         value: false
@@ -692,21 +692,21 @@
         validate: function (v) {
           return (
             RED.validators.number()(v) ||
-            v === "" ||
+            v === '' ||
             v == null ||
             typeof v === "undefined"
           );
         }
       },
       addPayload1: {
-        value: "",
+        value: '',
         validate: RED.validators.typedInput("addPayload1Type")
       },
       addPayload1Type: {
         value: "none"
       },
       addPayload1Value: {
-        value: "",
+        value: '',
         validate: function (v) {
           return (
             RED.validators.typedInput("addPayload1ValueType")(v) ||
@@ -745,17 +745,17 @@
         }
       },
       addPayload1Days: {
-        value: "*"
+        value: '*'
       },
       addPayload2: {
-        value: "",
+        value: '',
         validate: RED.validators.typedInput("addPayload2Type")
       },
       addPayload2Type: {
         value: "none"
       },
       addPayload2Value: {
-        value: "",
+        value: '',
         validate: function (v) {
           return (
             RED.validators.typedInput("addPayload2ValueType")(v) ||
@@ -794,17 +794,17 @@
         }
       },
       addPayload2Days: {
-        value: "*"
+        value: '*'
       },
       addPayload3: {
-        value: "",
+        value: '',
         validate: RED.validators.typedInput("addPayload3Type")
       },
       addPayload3Type: {
         value: "none"
       },
       addPayload3Value: {
-        value: "",
+        value: '',
         validate: function (v) {
           return (
             RED.validators.typedInput("addPayload3ValueType")(v) ||
@@ -843,14 +843,14 @@
         }
       },
       addPayload3Days: {
-        value: "*"
+        value: '*'
       },
       recalcTime: {
         value: 2,
         validate: function (v) {
           return (
             RED.validators.number()(v) ||
-            v === "" ||
+            v === '' ||
             v == null ||
             typeof v === "undefined"
           );
@@ -892,13 +892,13 @@
       if (this.name) {
         return this.name;
       }
-      var result = "";
-      let prefix = "";
+      var result = '';
+      let prefix = '';
       if (this.once) {
         prefix += " ¹";
       }
       const getId = (type, value, offset, maxLength) => {
-        let suffix = "";
+        let suffix = '';
         if (offset && offset > 0) {
           suffix = "↷";
         } else if (offset && offset < 0) {
@@ -922,15 +922,15 @@
         }
 
         let v = getValueLabel(type, value, maxLength);
-        if (v == "") {
+        if (v == '') {
           return this._("time-inject.label.blank");
         }
         return v + suffix;
       };
       const getTimeId = () => {
-        let suffix = "";
+        let suffix = '';
         let days = this.timeDays;
-        if (days && days !== "*" && days !== "1,2,3,4,5,6,0") {
+        if (days && days !== '*' && days !== "1,2,3,4,5,6,0") {
           if (days === "1,2,3,4,5") {
             suffix += " [Mo-Fr]"; //'👷'
           } else if (days === "1,2,3,4") {
@@ -969,7 +969,7 @@
         let part1 = getId(this.timeType, this.time, this.offset);
         if (
           this.propertyType !== "none" &&
-          this.propertyType !== "" &&
+          this.propertyType !== '' &&
           this.timeAlt
         ) {
           return (
@@ -981,7 +981,7 @@
         }
         return part1 + suffix;
       };
-      if (this.timeType === "none" || this.timeType === "") {
+      if (this.timeType === "none" || this.timeType === '') {
         return this._("time-inject.label.inject");
       } else {
         let timeTxt = getTimeId();
@@ -1000,7 +1000,7 @@
       return prefix + result;
     },
     labelStyle: function () {
-      return this.name ? "node_label_italic" : "";
+      return this.name ? "node_label_italic" : '';
     },
     paletteLabel: "time inject",
     align: "left",
@@ -1085,7 +1085,7 @@
         if (
           data[id] == null ||
           typeof data[id] === undefined ||
-          data[id] === ""
+          data[id] === ''
         ) {
           $("#node-input-" + id).val(newVal);
           console.log(
@@ -1108,27 +1108,27 @@
       initializeNrValue(this, "addPayload2OffsetMultiplier", 60);
       initializeNrValue(this, "addPayload3Offset", 0);
       initializeNrValue(this, "addPayload3OffsetMultiplier", 60);
-      initializeValue(this, "timeDays", "*");
-      initializeValue(this, "property", "");
+      initializeValue(this, "timeDays", '*');
+      initializeValue(this, "property", '');
       initializeValue(this, "propertyType", typeUndefined.value);
-      initializeValue(this, "timeAlt", "");
+      initializeValue(this, "timeAlt", '');
       initializeValue(this, "timeAltType", typeUndefined.value);
-      initializeValue(this, "timeAltDays", "*");
-      initializeValue(this, "addPayload1", "");
+      initializeValue(this, "timeAltDays", '*');
+      initializeValue(this, "addPayload1", '');
       initializeValue(this, "addPayload1Type", typeUndefined.value);
-      initializeValue(this, "addPayload1Value", "");
+      initializeValue(this, "addPayload1Value", '');
       initializeValue(this, "addPayload1ValueType", "date");
-      initializeValue(this, "addPayload1Days", "*");
-      initializeValue(this, "addPayload2", "");
+      initializeValue(this, "addPayload1Days", '*');
+      initializeValue(this, "addPayload2", '');
       initializeValue(this, "addPayload2Type", typeUndefined.value);
-      initializeValue(this, "addPayload2Value", "");
+      initializeValue(this, "addPayload2Value", '');
       initializeValue(this, "addPayload2ValueType", "date");
-      initializeValue(this, "addPayload2Days", "*");
-      initializeValue(this, "addPayload3", "");
+      initializeValue(this, "addPayload2Days", '*');
+      initializeValue(this, "addPayload3", '');
       initializeValue(this, "addPayload3Type", typeUndefined.value);
-      initializeValue(this, "addPayload3Value", "");
+      initializeValue(this, "addPayload3Value", '');
       initializeValue(this, "addPayload3ValueType", "date");
-      initializeValue(this, "addPayload3Days", "*");
+      initializeValue(this, "addPayload3Days", '*');
       //#endregion initialize
       //#region spinner
       $("#node-input-once").change(function () {
@@ -1153,7 +1153,7 @@
       //#endregion spinner
       //#region payload
       if (this.payloadType == null) {
-        if (this.payload == "") {
+        if (this.payload == '') {
           this.payloadType = "date";
         } else {
           this.payloadType = "str";
@@ -1255,7 +1255,7 @@
         $("#node-input-addPayload1").change();
       });
       if (
-        this.addPayload1Days == "*" ||
+        this.addPayload1Days == '*' ||
         typeof this.addPayload1Days === "undefined"
       ) {
         $("#time-inject-addPayload1Days input[type=checkbox]").prop(
@@ -1367,7 +1367,7 @@
         $("#node-input-addPayload2").change();
       });
       if (
-        this.addPayload2Days == "*" ||
+        this.addPayload2Days == '*' ||
         typeof this.addPayload2Days === "undefined"
       ) {
         $("#time-inject-addPayload2Days input[type=checkbox]").prop(
@@ -1478,7 +1478,7 @@
         $("#node-input-addPayload3").change();
       });
       if (
-        this.addPayload3Days == "*" ||
+        this.addPayload3Days == '*' ||
         typeof this.addPayload3Days === "undefined"
       ) {
         $("#time-inject-addPayload3Days input[type=checkbox]").prop(
@@ -1552,7 +1552,7 @@
           $(".time-inject-recalc").show();
         } else {
           $(".time-inject-recalc").hide();
-          $("#time-inject-recalcTime").val("");
+          $("#time-inject-recalcTime").val('');
         }
       });
       //#endregion property
@@ -1584,7 +1584,7 @@
         }
         $("#node-input-property").change();
       });
-      if (this.timeDays == "*" || typeof this.timeDays === "undefined") {
+      if (this.timeDays == '*' || typeof this.timeDays === "undefined") {
         $("#time-inject-timeDays input[type=checkbox]").prop("checked", true);
       } else {
         $("#time-inject-timeDays input[type=checkbox]").removeAttr("checked");
@@ -1599,7 +1599,7 @@
         types: [typeTime, typeTimeSun, typeTimeMoon, "flow", "global", "env"]
       });
       $("#node-input-timeAlt").typedInput('type', this.timeAltType);
-      if (this.timeAltDays == "*" || typeof this.timeAltDays === "undefined") {
+      if (this.timeAltDays == '*' || typeof this.timeAltDays === "undefined") {
         $("#time-inject-timeAltDays input[type=checkbox]").prop(
           "checked",
           true
@@ -1635,9 +1635,9 @@
           .get();
 
         if (days.length == 0) {
-          return "";
+          return '';
         } else if (days.length == 7) {
-          return "*";
+          return '*';
         } else {
           return days.join(",");
         }

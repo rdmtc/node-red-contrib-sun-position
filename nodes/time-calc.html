@@ -291,11 +291,11 @@
     function getValueLabel(t, v, l) {
         l = l || 15;
         if (t === "string" || t === "str") {
-            if (v == "") { return v; }
+            if (v == '') { return v; }
             return '"' + clipValueLength(v, l) + '"';
         } else if (t === "num" || t === "bool") {
-            if (v == "") { return v; }
-            return "" + v;
+            if (v == '') { return v; }
+            return '' + v;
         } else if (t === "msg") {
             return t + "." + clipValueLength(v, l);
         } else if (t === "flow" || t === "global") {
@@ -308,7 +308,7 @@
         } else if (t == "pdmCalcData") {
             return "{moon position}";
         } else if (t == "pdsTime") {
-            let res = v.replace("astronomical", "astro-").replace("nautical", "naut-").replace("civil", "").replace("amateur", "amat-").replace("blueHour", "blHr-").replace("goldenHour", "goHr-");
+            let res = v.replace("astronomical", "astro-").replace("nautical", "naut-").replace("civil", '').replace("amateur", "amat-").replace("blueHour", "blHr-").replace("goldenHour", "goHr-");
             return clipValueLength(res, l);
         } else if (t == "pdmTime") {
             return "moon" + v;
@@ -326,11 +326,11 @@
                 value: 1
             },
             name: {
-                value: "",
+                value: '',
                 required: false
             },
             positionConfig: {
-                value: "",
+                value: '',
                 type: "position-config",
                 required: true
             },
@@ -378,7 +378,7 @@
                 value: "msg"
             },
             result1Value: {
-                value: "",
+                value: '',
                 validate: function (v) {
                     return (RED.validators.typedInput("result1ValueType")(v) || $("#node-input-result1").typedInput("type") === "none" || this.result1Type === undefined);
                 }
@@ -408,7 +408,7 @@
             //#endregion result1
         },
         outputLabels: function () {
-            var label = "";
+            var label = '';
             if (this.rules.length) {
                 var rule = this.rules[index];
                 if (rule) {
@@ -447,7 +447,7 @@
             return this._("time-calc.label.time-calc");
         },
         labelStyle: function () {
-            return this.name ? "node_label_italic" : "";
+            return this.name ? "node_label_italic" : '';
         },
         paletteLabel: "time calc",
         align: "left",
@@ -730,7 +730,7 @@
                         // add the selected item
                         terms.push(ui.item.value);
                         // add placeholder to get the comma-and-space at the end
-                        terms.push("");
+                        terms.push('');
                         this.value = terms.join(" ");
                         return false;
                     }
@@ -1059,7 +1059,7 @@
                     .get();
 
                 if (elements.length == 0) {
-                    return "";
+                    return '';
                 } else {
                     return elements.join(",");
                 }

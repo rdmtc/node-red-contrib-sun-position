@@ -2,11 +2,12 @@
  * time-inject:
  *********************************************/
 'use strict';
-const util = require('util');
 
+const util = require('util');
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
-//const cron = require("cron");
+
+// const cron = require("cron");
 
 module.exports = function (RED) {
     'use strict';
@@ -16,19 +17,18 @@ module.exports = function (RED) {
         let millis = time.getTime() - now.getTime();
         if (limit) {
             while (millis < limit) {
-                millis += 86400000; //24h
+                millis += 86400000; // 24h
             }
         }
         return millis;
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, days) {
-        if (type == null || type === 'none' || type === '' || (typeof type === 'undefined')) {
+        if (type === null || type === 'none' || type === '' || (typeof type === 'undefined')) {
             if (value === '' || (typeof value === 'undefined')) {
                 return Date.now();
-            } else {
-                return value;
             }
+            return value;
         } else if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
         } else if (type === 'pdmCalcData') {
@@ -103,7 +103,7 @@ module.exports = function (RED) {
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, days) {
         if (type !== 'none' && name) {
             const res = tsGetPropData(node, msg, valueType, value, format, offset, days);
-            if (res == null || (typeof res === 'undefined')) {
+            if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
                 this.error('error on getting additional payload 1: ' + res.error);
@@ -120,7 +120,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        //this.debug('initialize timeInjectNode ' + util.inspect(config));
+        // this.debug('initialize timeInjectNode ' + util.inspect(config));
 
         this.time = config.time;
         this.timeType = config.timeType || 'none';
@@ -159,14 +159,14 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                //(srcNode, msg, vType, value, offset, next, days)
-                //node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
+                // (srcNode, msg, vType, value, offset, next, days)
+                // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.error(node.nextTimeData.error);
                     node.debug(util.inspect(node.nextTimeData));
-                    //console.log('1');
+                    // console.log('1');
                     node.nextTime = null;
                     isFixedTime = false;
                 } else {
@@ -174,7 +174,7 @@ module.exports = function (RED) {
                     isFixedTime = node.nextTimeData.fix;
                 }
             }
-            //console.log(util.inspect(node.nextTimeData));
+            // console.log(util.inspect(node.nextTimeData));
 
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
@@ -183,7 +183,7 @@ module.exports = function (RED) {
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.error(node.nextTimeAltData.error);
-                    //console.log('2');
+                    // console.log('2');
                     node.nextTimeAlt = null;
                     isFixedTime = false;
                 } else {
@@ -193,12 +193,12 @@ module.exports = function (RED) {
             }
             if (node.nextTime && !errorStatus) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
-                    //node.debug(node.nextTime);
+                    // node.debug(node.nextTime);
                     hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
                     return;
                 }
                 let millis = tsGetScheduleTime(node.nextTime, 10);
-                //node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
+                // node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                 const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
                     const millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
@@ -218,7 +218,7 @@ module.exports = function (RED) {
                         let needsRecalc = false;
                         try {
                             const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                            useAlternateTime = ((res == true) || (res == 'true'));
+                            useAlternateTime = ((res === true) || (res === 'true'));
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;
@@ -242,14 +242,14 @@ module.exports = function (RED) {
                     } else if (node.nextTimeData) {
                         msg.timeData = node.nextTimeData;
                     }
-                    //node.debug('redo doCreateTimeout');
+                    // node.debug('redo doCreateTimeout');
                     node.emit('input', msg);
                 }, millis, isAlt, isAltFirst);
             }
 
             if (!isFixedTime && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
-                    //node.debug('retrigger timecalc');
+                    // node.debug('retrigger timecalc');
                     doCreateTimeout(node, msg);
                 }, node.recalcTime);
             } else if (isFixedTime && node.intervalObj) {
@@ -288,7 +288,7 @@ module.exports = function (RED) {
             }
         }
 
-        this.on('close', function () {
+        this.on('close', () => {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
@@ -305,7 +305,7 @@ module.exports = function (RED) {
                 msg.topic = config.topic;
 
                 const value = tsGetPropData(this, msg, config.payloadType, config.payload);
-                if (value == null || (typeof value === 'undefined')) {
+                if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
                     throw new Error('could not getting payload: ' + value.error);
@@ -325,7 +325,7 @@ module.exports = function (RED) {
 
         try {
             if (config.once) {
-                config.onceTimeout = setTimeout(function () {
+                config.onceTimeout = setTimeout(() => {
                     node.emit('input', {
                         type: 'once'
                     });
