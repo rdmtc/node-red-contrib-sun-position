@@ -28,407 +28,110 @@
             "blank": "\"\"",
             "success": "Successfully injected: __label__"
         },
+        "multiselectLbl": {
+            "operatorTypes": "include into compare"
+        },
         "operatorsGroups": [
-            {
-                "id": "ms",
-                "label": "complete Timestamp"
-            },
-            {
-                "id": "sec",
-                "label": "Timestamp, ignore Milliseconds"
-            },
-            {
-                "id": "min",
-                "label": "Timestamp, ignore Seconds"
-            },
-            {
-                "id": "hour",
-                "label": "Timestamp, ignore Minutes"
-            },
-            {
-                "id": "date",
-                "label": "complete Date"
-            },
-            {
-                "id": "month",
-                "label": "Year and Month"
-            }
+            "complete Timestamp"
         ],
         "operators": [
-            {
-                "group": "ms",
-                "label": "==",
-                "text": "equal"
-            },
-            {
-                "group": "ms",
-                "label": "!=",
-                "text": "unequal"
-            },
-            {
-                "group": "ms",
-                "label": ">",
-                "text": "greater"
-            },
-            {
-                "group": "ms",
-                "label": ">=",
-                "text": "greater or equal"
-            },
-            {
-                "group": "ms",
-                "label": "<",
-                "text": "lesser"
-            },
-            {
-                "group": "ms",
-                "label": "<=",
-                "text": "lesser or equal"
-            },
-            {
-                "group": "sec",
-                "label": "== (sec)",
-                "text": "equal (ignore milliseconds)"
-            },
-            {
-                "group": "sec",
-                "label": "!= (sec)",
-                "text": "unequal (ignore milliseconds)"
-            },
-            {
-                "group": "sec",
-                "label": "> (sec)",
-                "text": "greater (ignore milliseconds)"
-            },
-            {
-                "group": "sec",
-                "label": ">= (sec)",
-                "text": "greater or equal (ignore milliseconds)"
-            },
-            {
-                "group": "sec",
-                "label": "< (sec)",
-                "text": "lesser (ignore milliseconds)"
-            },
-            {
-                "group": "sec",
-                "label": "<= (sec)",
-                "text": "lesser or equal (ignore milliseconds)"
-            },
-            {
-                "group": "min",
-                "label": "== (min)",
-                "text": "equal (ignore seconds)"
-            },
-            {
-                "group": "min",
-                "label": "!= (min)",
-                "text": "unequal (ignore seconds)"
-            },
-            {
-                "group": "min",
-                "label": "> (min)",
-                "text": "greater (ignore seconds)"
-            },
-            {
-                "group": "min",
-                "label": ">= (min)",
-                "text": "greater or equal (ignore seconds)"
-            },
-            {
-                "group": "min",
-                "label": "< (min)",
-                "text": "lesser (ignore seconds)"
-            },
-            {
-                "group": "min",
-                "label": "<= (min)",
-                "text": "lesser or equal (ignore seconds)"
-            },
-            {
-                "group": "hour",
-                "label": "== (h)",
-                "text": "equal (ignore minutes)"
-            },
-            {
-                "group": "hour",
-                "label": "!= (h)",
-                "text": "unequal (ignore minutes)"
-            },
-            {
-                "group": "hour",
-                "label": "> (h)",
-                "text": "greater (ignore minutes)"
-            },
-            {
-                "group": "hour",
-                "label": ">= (h)",
-                "text": "greater or equal (ignore minutes)"
-            },
-            {
-                "group": "hour",
-                "label": "< (h)",
-                "text": "lesser (ignore minutes)"
-            },
-            {
-                "group": "hour",
-                "label": "<= (h)",
-                "text": "lesser or equal (ignore minutes)"
-            },
-            {
-                "group": "date",
-                "label": "== (date)",
-                "text": "equal (ignore timestamp)"
-            },
-            {
-                "group": "date",
-                "label": "!= (date)",
-                "text": "unequal (ignore timestamp)"
-            },
-            {
-                "group": "date",
-                "label": "> (date)",
-                "text": "greater (ignore timestamp)"
-            },
-            {
-                "group": "date",
-                "label": ">= (date)",
-                "text": "greater or equal (ignore timestamp)"
-            },
-            {
-                "group": "date",
-                "label": "< (date)",
-                "text": "lesser (ignore timestamp)"
-            },
-            {
-                "group": "date",
-                "label": "<= (date)",
-                "text": "lesser or equal (ignore timestamp)"
-            },
-            {
-                "group": "month",
-                "label": "== (month)",
-                "text": "equal (year and month)"
-            },
-            {
-                "group": "month",
-                "label": "!= (month)",
-                "text": "unequal (year and month)"
-            },
-            {
-                "group": "month",
-                "label": "> (month)",
-                "text": "greater (year and month)"
-            },
-            {
-                "group": "month",
-                "label": ">= (month)",
-                "text": "greater or equal (year and month)"
-            },
-            {
-                "group": "month",
-                "label": "< (month)",
-                "text": "lesser (year and month)"
-            },
-            {
-                "group": "month",
-                "label": "<= (month)",
-                "text": "lesser or equal (year and month)"
-            }
+            "==  (equal)",
+            "!=  (unequal)",
+            ">   (greater)",
+            ">=  (greater or equal)",
+            "<   (lesser)",
+            "<=  (lesser or equal)"
+        ],
+        "operatorTypesGroups": [
+            "include into compare",
+            "special"
+        ],
+        "operatorTypes": [
+            "Milliseconds",
+            "Seconds",
+            "Minutes",
+            "Hours",
+            "Day of Month",
+            "Month",
+            "Year",
+            "Day of Week"
         ],
         "outputFormatsGroups": [
-            {
-                "label": "Number"
-            },
-            {
-                "label": "Text (string)"
-            },
-            {
-                "label": "time (number) since emit"
-            },
-            {
-                "label": "day of week"
-            },
-            {
-                "label": "Text free"
-            }
+            "Number",
+            "Text (string)",
+            "time (number) since emit",
+            "day of week",
+            "Text free"
         ],
         "outputFormats": [
-            {
-                "group": "number",
-                "name": "UNIX",
-                "label": "milliseconds UNIX timestamp"
-            },
-            {
-                "group": "number",
-                "name": "YYYYMMDDHHMMSS",
-                "label": "YYYYMMDDHHMMSS"
-            },
-            {
-                "group": "number",
-                "name": "YYYYMMDD_HHMMSS",
-                "label": "YYYYMMDD.HHMMSS"
-            },
-            {
-                "group": "string",
-                "name": "ECMA262",
-                "label": "ECMA-262",
-                "add": "standard JSON Date representation"
-            },
-            {
-                "group": "string",
-                "name": "local",
-                "label": "local date and time"
-            },
-            {
-                "group": "string",
-                "name": "localLong",
-                "label": "local date and time enh."
-            },
-            {
-                "group": "string",
-                "name": "localTime",
-                "label": "local time"
-            },
-            {
-                "group": "string",
-                "name": "localTimeLong",
-                "label": "local time enh."
-            },
-            {
-                "group": "string",
-                "name": "localDate",
-                "label": "local date"
-            },
-            {
-                "group": "string",
-                "name": "localDateLong",
-                "label": "local date long"
-            },
-            {
-                "group": "string",
-                "name": "UTC",
-                "label": "UTC date and time"
-            },
-            {
-                "group": "string",
-                "name": "ISO",
-                "label": "ISO date and time"
-            },
-            {
-                "group": "time",
-                "name": "ms",
-                "label": "milliseconds"
-            },
-            {
-                "group": "time",
-                "name": "sec",
-                "label": "seconds"
-            },
-            {
-                "group": "time",
-                "name": "min",
-                "label": "minutes"
-            },
-            {
-                "group": "time",
-                "name": "hour",
-                "label": "hours"
-            },
-            {
-                "group": "dayofweek",
-                "name": "ISO",
-                "label": "Day Name, e.g. Monday, 22.12."
-            },
-            {
-                "group": "dayofweek",
-                "name": "ISO",
-                "label": "Day in relative, e.g. Today, 22.12."
-            },
-            {
-                "group": "other",
-                "name": "object",
-                "label": "as object"
-            },
-            {
-                "group": "other",
-                "name": "other",
-                "label": "Other"
-            }
+            "milliseconds UNIX timestamp",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "ECMA-262",
+            "local date and time",
+            "local date and time enh.",
+            "local time",
+            "local time enh.",
+            "local date",
+            "local date long",
+            "UTC date and time",
+            "ISO date and time",
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "Day Name, e.g. Monday, 22.12.",
+            "Day in relative, e.g. Today, 22.12.",
+            "as object",
+            "Other"
+        ],
+        "outputFormatsName": [
+            "UNIX",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD_HHMMSS",
+            "ECMA262",
+            "local",
+            "localLong",
+            "localTime",
+            "localTimeLong",
+            "localDate",
+            "localDateLong",
+            "UTC",
+            "ISO",
+            "ms",
+            "sec",
+            "min",
+            "hour",
+            "ISO",
+            "ISO",
+            "object",
+            "other"
         ],
         "parseFormatsGroups": [
-            {
-                "label": "Number"
-            },
-            {
-                "label": "Text (string)"
-            },
-            {
-                "label": "Text free"
-            }
+            "Number",
+            "Text (string)",
+            "Text free"
         ],
         "parseFormats": [
-            {
-                "group": "number",
-                "label": "milliseconds UNIX timestamp",
-                "add": "xxx"
-            },
-            {
-                "group": "string",
-                "label": "ECMA-262",
-                "add": "standard JSON Date representation"
-            },
-            {
-                "group": "string",
-                "label": "various - try different Formats",
-                "add": "will try different formats"
-            },
-            {
-                "group": "number",
-                "label": "YYYYMMDDHHMMSS",
-                "add": "xxx"
-            },
-            {
-                "group": "number",
-                "label": "YYYYMMDD.HHMMSS",
-                "add": "xxx"
-            },
-            {
-                "group": "other",
-                "label": "Other",
-                "add": "xxx"
-            }
+            "milliseconds - UNIX timestamp",
+            "ECMA-262 - JSON Date representation",
+            "various - try different Formats",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "Other"
         ],
         "multiplierGroups": [
-            {
-                "label": "Standard"
-            },
-            {
-                "label": "Special"
-            }
+            "Standard",
+            "Special"
         ],
         "multiplier": [
-            {
-                "label": "seconds"
-            },
-            {
-                "label": "minutes"
-            },
-            {
-                "label": "hours"
-            },
-            {
-                "label": "days"
-            },
-            {
-                "label": "weeks"
-            },
-            {
-                "label": "month"
-            },
-            {
-                "label": "year"
-            }
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "weeks",
+            "month",
+            "year"
         ],
         "days": [
             "Sunday",

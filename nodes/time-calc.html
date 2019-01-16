@@ -64,7 +64,7 @@
 </script>
 <style>
     .node-input-rule-operator {
-        width: 90px;
+        width: 60px;
         margin-left: 5px;
         text-align: center;
     }
@@ -104,14 +104,12 @@
         width: 40px !important;
     }
     .multiselect {
-        width: 55px;
+        width: 60px;
         display: inline-block;
     }
-
     .selectBox {
         position: relative;
     }
-
     .selectBox select {
         width: 100%;
         font-weight: bold;
@@ -123,18 +121,36 @@
         top: 0;
         bottom: 0;
     }
-
     #option-checkboxes {
         display: none;
         border: 1px #dadada solid;
+        background: #ffffff;
         z-index: 10;
-        width: 200;
+        min-width: 150px;
+        /* width: 200px; */
+        position: absolute;
+        z-index: 90000;
     }
-
     #option-checkboxes label {
         display: block;
+        width: auto;
+        text-align: left;
+        margin-right:15px;
+        margin-left:5px;
     }
-
+    #option-checkboxes .header {
+        background:#cccccc;
+        margin-left:5px;
+        margin-right:5px;
+    }
+    #option-checkboxes input {
+        display: block;
+        width: auto;
+        margin-right:5px;
+        margin-left:5px;
+        float:left;
+        /* clear: both; */
+    }
     #option-checkboxes label:hover {
         background-color: #1e90ff;
     }
@@ -441,60 +457,31 @@
             //#region definition
             const SelectFields = {
                 operatorsGroups: [
-                    { id: "ms", label: "complete Timestamp" },
-                    { id: "sec", label: "Timestamp, ignore Milliseconds" },
-                    { id: "min", label: "Timestamp, ignore Seconds" },
-                    { id: "hour", label: "Timestamp, ignore Minutes" },
-                    { id: "date", label: "complete Date" },
-                    { id: "month", label: "Year and Month" }
+                    { id: "cmp", label: "compate Timestamp" },
                 ],
                 operators: [
-                    { id: 1, group: "ms", label: "==", "text": "equal" },
-                    { id: 2, group: "ms", label: "!=", "text": "unequal" },
-                    { id: 3, group: "ms", label: ">", "text": "greater" },
-                    { id: 4, group: "ms", label: ">=", "text": "greater or equal" },
-                    { id: 5, group: "ms", label: "<", "text": "lesser" },
-                    { id: 6, group: "ms", label: "<=", "text": "lesser or equal" },
-                    { id: 11, group: "sec", label: "== (sec)", "text": "equal (ignore milliseconds)" },
-                    { id: 12, group: "sec", label: "!= (sec)", "text": "unequal (ignore milliseconds)" },
-                    { id: 13, group: "sec", label: "> (sec)", "text": "greater (ignore milliseconds)" },
-                    { id: 14, group: "sec", label: ">= (sec)", "text": "greater or equal (ignore milliseconds)" },
-                    { id: 15, group: "sec", label: "< (sec)", "text": "lesser (ignore milliseconds)" },
-                    { id: 16, group: "sec", label: "<= (sec)", "text": "lesser or equal (ignore milliseconds)" },
-                    { id: 21, group: "min", label: "== (min)", "text": "equal (ignore seconds)" },
-                    { id: 22, group: "min", label: "!= (min)", "text": "unequal (ignore seconds)" },
-                    { id: 23, group: "min", label: "> (min)", "text": "greater (ignore seconds)" },
-                    { id: 24, group: "min", label: ">= (min)", "text": "greater or equal (ignore seconds)" },
-                    { id: 25, group: "min", label: "< (min)", "text": "lesser (ignore seconds)" },
-                    { id: 26, group: "min", label: "<= (min)", "text": "lesser or equal (ignore seconds)" },
-                    { id: 31, group: "hour", label: "== (h)", "text": "equal (ignore minutes)" },
-                    { id: 32, group: "hour", label: "!= (h)", "text": "unequal (ignore minutes)" },
-                    { id: 33, group: "hour", label: "> (h)", "text": "greater (ignore minutes)" },
-                    { id: 34, group: "hour", label: ">= (h)", "text": "greater or equal (ignore minutes)" },
-                    { id: 35, group: "hour", label: "< (h)", "text": "lesser (ignore minutes)" },
-                    { id: 36, group: "hour", label: "<= (h)", "text": "lesser or equal (ignore minutes)" },
-                    { id: 41, group: "date", label: "== (date)", "text": "equal (ignore timestamp)" },
-                    { id: 42, group: "date", label: "!= (date)", "text": "unequal (ignore timestamp)" },
-                    { id: 43, group: "date", label: "> (date)", "text": "greater (ignore timestamp)" },
-                    { id: 44, group: "date", label: ">= (date)", "text": "greater or equal (ignore timestamp)" },
-                    { id: 45, group: "date", label: "< (date)", "text": "lesser (ignore timestamp)" },
-                    { id: 46, group: "date", label: "<= (date)", "text": "lesser or equal (ignore timestamp)" },
-                    { id: 51, group: "month", label: "== (month)", "text": "equal (year and month)" },
-                    { id: 52, group: "month", label: "!= (month)", "text": "unequal (year and month)" },
-                    { id: 53, group: "month", label: "> (month)", "text": "greater (year and month)" },
-                    { id: 54, group: "month", label: ">= (month)", "text": "greater or equal (year and month)" },
-                    { id: 55, group: "month", label: "< (month)", "text": "lesser (year and month)" },
-                    { id: 56, group: "month", label: "<= (month)", "text": "lesser or equal (year and month)" }
-                ],operatorTypes: [
-                    { id: 1, label: "Milliseconds" },
-                    { id: 2, label: "Seconds" },
-                    { id: 3, label: "Minutes" },
-                    { id: 4, label: "Hours" },
-                    { id: 5, label: "Day" },
-                    { id: 6, label: "Day of Week" },
-                    { id: 7, label: "Day of Month" },
-                    { id: 8, label: "Month" },
-                    { id: 9, label: "Year" },
+                    { id: 1, group: "cmp", label: "==", "text": "equal" },
+                    { id: 2, group: "cmp", label: "!=", "text": "unequal" },
+                    { id: 3, group: "cmp", label: ">", "text": "greater" },
+                    { id: 4, group: "cmp", label: ">=", "text": "greater or equal" },
+                    { id: 5, group: "cmp", label: "<", "text": "lesser" },
+                    { id: 6, group: "cmp", label: "<=", "text": "lesser or equal" }
+                ], operatorTypesGroups: [
+                    { id: "std", label: "include into compare" },
+                    { id: "spec", label: "special" }
+                ], operatorTypes: [
+                    { id: 11, group: "std", label: "Milliseconds" },
+                    { id: 12, group: "std", label: "Seconds" },
+                    { id: 13, group: "std", label: "Minutes" },
+                    { id: 14, group: "std", label: "Hours" },
+                    { id: 15, group: "std", label: "Day of Month" },
+                    { id: 16, group: "std", label: "Month" },
+                    { id: 17, group: "std", label: "Year" },
+                    { id: 18, group: "spec", label: "Day of Week" },
+                ], operatorTypesShort: [
+                    { selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT' },
+                    { selection: /^(11,)?12,13,14$/, label: 'T' },
+                    { selection: /^15,16(,17)?(,18)?$/, label: 'D' }
                 ], outputFormatsGroups: [
                     { id: "number", label: "Number" },
                     { id: "string", label: "Text (string)" },
@@ -617,114 +604,104 @@
                     return sel.text.length - selLen;
                 }
             }
-
+            function getMultiselectText(val, length, types) {
+                for (let index = 0; index < types.length; index++) {
+                    if (types[index].selection.test(val)) {
+                        return types[index].label;
+                    }
+                }
+                if (length > 0) {
+                    return length;
+                }
+                return 'NA';
+            }
+            function setMultiselect(value, field, types) {
+                if (value == "*" || typeof value === "undefined") {
+                    field.find("#option-checkboxes input[type=checkbox]").prop("checked", true);
+                    field.find('.multiselect-option').text(getMultiselectText("*", 99, types));
+                } else {
+                    field.find("#option-checkboxes input[type=checkbox]").removeAttr("checked");
+                    let elm = value.split(",");
+                    elm.forEach(function (v) {
+                        field.find("#option-checkboxes [value=" + v + "]").prop("checked", true);
+                    });
+                    field.find('.multiselect-option').text(getMultiselectText(value, elm.length, types));
+                }
+            }
             function multiselect(parent, elementName, id) {
-                //https://codepen.io/elmahdim/pen/hlmri
-                //https://stackoverflow.com/questions/17714705/how-to-use-checkbox-inside-select-option
-                //https://codepen.io/arc6789/pen/xzrzja
+                let types = SelectFields[elementName + 'Short'];
 
-                //https://www.jqueryscript.net/form/Dynamic-Multi-Select-Plugin-jQuery.html
-                //operatorTypes
-                let multiselect = $('<div/>', {class: 'multiselect' }).appendTo(parent);
+                let getSelection = function getCBText(parent) {
+                    let value = parent.find("#option-checkboxes input[type=checkbox]:checked")
+                    let elements = value
+                        .map(function (_, el) {
+                            return $(el).val();
+                        })
+                        .get();
+                    parent.find('.multiselect-option').text(getMultiselectText(elements.join(","), elements.length, types));
+                }
+
+                let multiselect = $('<div/>', { class: 'multiselect', id: id }).appendTo(parent);
 
                 let selectbox = $('<div/>', {
                     class: 'selectBox',
                     html: $('<select/>', {
-                            class: 'multiselect-select',
-                            html: $('<option></option>', {
-                                class: 'multiselect-option',
-                            }).text('x')
-                        })
-                    }).appendTo(multiselect);
+                        id: 'multiselect-select',
+                        class: 'multiselect-select',
+                        html: $('<option></option>', {
+                            id: 'multiselect-option',
+                            class: 'multiselect-option',
+                        }).text('x')
+                    })
+                }).appendTo(multiselect);
                 $('<div/>', { class: 'overSelect' }).appendTo(selectbox);
 
                 let list = $('<div/>', {
                     id: 'option-checkboxes',
                     class: 'option-checkboxes'
                 }).appendTo(multiselect)
-                list.attr("expanded",false);
+                list.attr("expanded", "false");
 
+                let groups = SelectFields[elementName + 'Groups'];
+                let groupLength = groups.length;
                 let elements = SelectFields[elementName];
                 let elementsLength = elements.length;
 
-                for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
+                for (let gIndex = 0; gIndex < groupLength; gIndex++) {
                     list.append($("<label></label>", {
-                        for: id + '-' + elements[eIndex].id,
-                        html: $("<input>", {
-                            type: "checkbox",
-                            id: id + '-' + elements[eIndex].id
-                        }).text(elements[eIndex].label)
+                        class: "header",
+                        html: node._("time-calc." + elementName + 'Groups.' + gIndex)
                     }));
+                    for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
+                        if (groups[gIndex].id === elements[eIndex].group) {
+                            let lbl = list.append($("<label></label>", {
+                                for: id + '-' + elements[eIndex].id,
+                                html: [$("<input>", {
+                                    class: id + '-checkbox',
+                                    type: 'checkbox',
+                                    value: elements[eIndex].id,
+                                    id: id + '-' + elements[eIndex].id
+                                }).on("change", function (event) {
+                                    getSelection(multiselect);
+                                }), node._("time-calc." + elementName + '.' + eIndex)]
+                            }));
+                            //elements[eIndex].label
+                        }
+                    }
                 }
-                selectbox.on("click", function( event ) {
-                            console.log("on click" );
-                            //var checkboxes = parent.getElementById("option-checkboxes");
-                            let checkboxes = parent.find(".option-checkboxes");
-                            console.log(checkboxes);
-                            let expanded = (checkboxes.attr("expanded") === true);
-                            console.log(expanded);
-                            if (!expanded) {
-                                //checkboxes.show();
-                                checkboxes.css("display", "block");
-                                //checkboxes.style.display = "block";
-                                checkboxes.attr("expanded", true);
-                                console.log('show');
-                            } else {
-                                //checkboxes.hide();
-                                checkboxes.css("display", "none");
-                                //checkboxes.style.display = "none";
-                                checkboxes.attr("expanded", false);
-                                console.log('hide');
-                            }
-                        });
+                selectbox.on("click", function (event) {
+                    let checkboxes = parent.find(".option-checkboxes");
+                    let expanded = (checkboxes.attr("expanded") === "true");
+                    if (!expanded) {
+                        checkboxes.css("display", "block");
+                        checkboxes.attr("expanded", "true");
+                    } else {
+                        checkboxes.css("display", "none");
+                        checkboxes.attr("expanded", "false");
+                    }
+                });
 
                 return multiselect;
-                //$('<div/>', { class: 'overSelect' }).appendTo(multiselect)
-
-                /*
-                <div class="multiselect">
-                    <div class="selectBox" onclick="showCheckboxes()">
-                        <select>
-                            <option>Select an option</option>
-                        </select>
-                        <div class="overSelect"></div>
-                    </div>
-                    <div id="checkboxes">
-                        <label for="one">
-                            <input type="checkbox" id="one" />First checkbox</label>
-                        <label for="two">
-                            <input type="checkbox" id="two" />Second checkbox</label>
-                        <label for="three">
-                            <input type="checkbox" id="three" />Third checkbox</label>
-                    </div>
-                </div>/* */
-                /*
-
-                <div class="multiselect">
-                    <div class="selectBox">
-                        <select class="multiselect-select">
-                            <option>limit</option>
-                        </select>
-                        <div class="overSelect"></div>
-                    </div>
-                    <select></select>
-                    <div id="option-checkboxes">
-                        <label for="node-input-rule-operatorType-1">
-                            <input type="checkbox" id="node-input-rule-operatorType-1">
-                        </label>
-                        <label for="node-input-rule-operatorType-2">
-                            <input type="checkbox" id="node-input-rule-operatorType-2">
-                        </label>
-                        <label for="node-input-rule-operatorType-3">
-                            <input type="checkbox" id="node-input-rule-operatorType-3">
-                        </label>
-                        <label for="node-input-rule-operatorType-4">
-                            <input type="checkbox" id="node-input-rule-operatorType-4">
-                        </label>
-                        <label for="node-input-rule-operatorType-5"><input type="checkbox" id="node-input-rule-operatorType-5"></label><label for="node-input-rule-operatorType-6"><input type="checkbox" id="node-input-rule-operatorType-6"></label><label for="node-input-rule-operatorType-7"><input type="checkbox" id="node-input-rule-operatorType-7"></label><label for="node-input-rule-operatorType-8"><input type="checkbox" id="node-input-rule-operatorType-8"></label><label for="node-input-rule-operatorType-9"><input type="checkbox" id="node-input-rule-operatorType-9"></label>
-                    </div>
-                </div>
-                /* */
             }
             function autocomplete(inputBox, dataList) {
                 // don't navigate away from the field on tab when selecting an item
@@ -767,10 +744,10 @@
                 let groupLength = groups.length;
                 let elementsLength = elements.length;
                 for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    let group = $('<optgroup/>', { label: node._("time-calc." + elementName + 'Groups.' + gIndex + '.label') }).appendTo(parent);
+                    let group = $('<optgroup/>', { label: node._("time-calc." + elementName + 'Groups.' + gIndex) }).appendTo(parent);
                     for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
                         if (groups[gIndex].id === elements[eIndex].group) {
-                            group.append($("<option></option>").val(elements[eIndex].id).text(node._("time-calc." + elementName + '.' + eIndex + '.label')).attr("addText", elements[eIndex].add));
+                            group.append($("<option></option>").val(elements[eIndex].id).text(node._("time-calc." + elementName + '.' + eIndex)).attr("addText", elements[eIndex].add));
                         }
                     }
                 }
@@ -841,7 +818,7 @@
                 var propertyLblField = rule.find(".node-input-rule-property-lbl");
                 var lblWidth = 25;
                 //row1
-                var operatorWidth = 90 + 50; //operatorField.width(operatorWidth);
+                var operatorWidth = 120;
                 operandField.typedInput("width", (newWidth - operatorWidth - lblWidth - 50));
                 //row2
                 var formatWidth = (newWidth - lblWidth - 18);
@@ -892,7 +869,7 @@
                         id: "node-input-rule-operator" + containerIndex
                     }).appendTo(row);
                     appendOptions(operatorField, "operators");
-                    var operatorTypeField = multiselect(row, 'operatorTypes', 'node-input-rule-operatorType');
+                    var operatorTypeField = multiselect(row, 'operatorTypes', 'node-input-rule-operatorType-' + containerIndex);
 
                     var operandLabel = addLabel(row, "node-input-rule-operand", "fa fa-clock-o");
                     var operandField = $('<input/>', {
@@ -966,9 +943,10 @@
                             row4.show(); //limit
                         }
                     });
-                    //defaultValues
-                    console.log(data);
+                    //setting defaultValues
+                    //console.log(data);
                     operatorField.val(data.operator || SelectFields.operators[0].id);
+                    setMultiselect(data.operatorType, operatorTypeField, SelectFields.operatorTypesShort);
                     operandField.typedInput('type', data.operandType || "str");
                     operandField.typedInput('value', data.operandValue || '');
                     formatIpField.val(data.format || node._("time-calc.timeFormat.default"));
@@ -1074,6 +1052,19 @@
             $("#node-input-result1").change();
         },
         oneditsave: function () {
+            function getMultiSelStr(value) {
+                let elements = value
+                    .map(function (_, el) {
+                        return $(el).val();
+                    })
+                    .get();
+
+                if (elements.length == 0) {
+                    return "";
+                } else {
+                    return elements.join(",");
+                }
+            }
             var node = this;
             node.rules = [];
             var rules = $("#node-input-rule-container").editableList('items');
@@ -1081,6 +1072,7 @@
                 var rule = $(this);
                 var data = {
                     operator: rule.find(".node-input-rule-operator").val(),
+                    operatorType: getMultiSelStr(rule.find("#option-checkboxes input[type=checkbox]:checked")),
                     operatorText: rule.find(".node-input-rule-operator").children(':selected').text(),
                     operandType: rule.find(".node-input-rule-operand").typedInput('type'),
                     operandValue: rule.find(".node-input-rule-operand").typedInput('value'),
@@ -1094,10 +1086,10 @@
                 };
                 node.rules.push(data);
             });
-            console.log(this.rules);
+            //console.log(this.rules);
             let outputs = node.rules.length + 1;
             $("#node-input-outputs").val(outputs);
-            console.log(outputs);
+            //console.log(outputs);
             if (Number($('#node-input-operand1Formatsel').val()) != 99) {
                 $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
                 node.operand1Format = $('#node-input-operand1Formatsel').val();
@@ -1111,7 +1103,7 @@
             node.result1ValueType = $("#node-input-result1Value").typedInput("type");
             node.result2Type = $("#node-input-result2").typedInput("type");
             node.result2ValueType = $("#node-input-result2Value").typedInput("type");
-            console.log($("#node-input-outputs").val());
+            //console.log($("#node-input-outputs").val());
         },
         oneditresize: function (size) {
             var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
