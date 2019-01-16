@@ -1,11 +1,12 @@
-var should = require("should");
-var helper = require("node-red-test-helper");
-var sunNode = require("../sun-position.js");
-var moonNode = require("../moon-position.js");
-var injectNode = require("../time-inject.js");
-var withinNode = require("../within-time.js");
+/* eslint-disable */
+let should = require('should');
+let helper = require('node-red-test-helper');
+let sunNode = require('../sun-position.js');
+let moonNode = require('../moon-position.js');
+let injectNode = require('../time-inject.js');
+let withinNode = require('../within-time.js');
 
-describe('sun-position Node', function () {
+describe('sun-position Node', () => {
 
   afterEach(function () {
     helper.unload();
@@ -34,3 +35,4 @@ describe('sun-position Node', function () {
     });
   });
 });
+/* eslint-enable */

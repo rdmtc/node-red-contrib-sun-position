@@ -39,7 +39,7 @@
         "node": ">=8.0.0"
     },
     "scripts": {
-        "test": "camo-purge; xo",
+        "test": "camo-purge; eslint \"./**/*.js\"",
         "lintfix": "xo --fix",
         "lint": "eslint \"./**/*.js\"",
         "predev": "npm i -g",
@@ -152,12 +152,6 @@
       "eqeqeq": "error",
       "no-else-return": "error",
       "prefer-arrow-callback": "error",
-      "import/newline-after-import": [
-        "warn",
-        {
-          "count": 1
-        }
-      ],
       "no-console": "off",
       "no-unused-vars": [
         "warn",
@@ -235,4 +229,5 @@
       ],
       "eol-last": ["error", "never"]
     }
+  }
 }

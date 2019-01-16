@@ -71,13 +71,13 @@ module.exports = function (RED) {
     function positionConfigurationNode(n) {
         RED.nodes.createNode(this, n);
         try {
-            //this.debug('load position-config ' + n.name);
+            // this.debug('load position-config ' + n.name);
             this.name = n.name;
             this.longitude = n.longitude;
             this.latitude = n.latitude;
             this.angleType = n.angleType;
             this.tzOffset = (n.timezoneOffset * -60) || 0;
-            //this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
+            // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
 
             this.lastSunCalc = {
                 ts: 0
@@ -88,15 +88,17 @@ module.exports = function (RED) {
 
             const node = this;
 
-            /*this.getSunTimes = () => {
+            /*
+            this.getSunTimes = () => {
                 //node.debug('getSunTimes');
                 let res = sunTimesCheck(node);
                 res.today = node.sunTimesToday;
                 res.tomorrow = node.sunTimesTomorow;
                 return res;
-            }*/
+            }
+            */
             this.getSunTime = (now, value, offset, next, days) => {
-                //node.debug('getSunTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                // node.debug('getSunTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 let result = sunTimesCheck(node, now);
                 result = Object.assign(result, node.sunTimesToday[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset);
@@ -111,41 +113,41 @@ module.exports = function (RED) {
                 }
                 if (days && (days !== '*') && (days !== '')) {
                     const dayx = hlp.calcDayOffset(days, result.value.getDay());
-                    //node.debug('move day ' + dayx);
+                    // node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         const date = result.value.addDays(dayx);
-                        //let times = sunCalc.getTimes(date, node.latitude, node.longitude);
+                        // let times = sunCalc.getTimes(date, node.latitude, node.longitude);
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                         result.value = hlp.addOffset(new Date(result.value), offset);
                     } else if (dayx < 0) {
-                        //node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
+                        // node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
                         result.error = 'No valid day of week found!';
                     }
                 }
-                //node.debug('getSunTime result=' + util.inspect(result));
+                // node.debug('getSunTime result=' + util.inspect(result));
                 return result;
             };
             this.getMoonTimes = () => {
-                //node.debug('getMoonTimes');
+                // node.debug('getMoonTimes');
                 const res = moonTimesCheck(node);
                 res.today = node.moonTimesToday;
                 res.tomorrow = node.moonTimesTomorow;
                 return res;
             };
             this.getMoonTime = (now, value, offset, next, days) => {
-                //node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const result = moonTimesCheck(node, now);
-                //node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
+                // node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
                 result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset);
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = hlp.addOffset(new Date(node.moonTimesTomorow[value]), offset);
-                        //node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
+                        // node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
                     } else if (next > 1) {
                         const date = (new Date()).addDays(next);
                         const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
                         result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
-                        //node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
+                        // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     }
                 }
                 if (days && (days !== '*') && (days !== '')) {
@@ -154,18 +156,18 @@ module.exports = function (RED) {
                         const date = (new Date()).addDays(dayx);
                         const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
                         result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
-                        //node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
+                        // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     } else if (dayx < 0) {
                         result.error = 'No valid day of week found!';
-                        //node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
+                        // node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                     }
                 }
-                //node.debug('getMoonTime result' + util.inspect(result));
+                // node.debug('getMoonTime result' + util.inspect(result));
                 return result;
             };
 
             this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
-                //node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const now = new Date();
                 let result = {
                     value: null,
@@ -174,29 +176,29 @@ module.exports = function (RED) {
                 };
                 try {
                     if (vType === '' || vType === 'none' || days === '') {
-                        //nix
+                        // nix
                     } else if (vType === 'date') {
                         result.value = hlp.calcTimeValue(now, offset);
                         result.fix = true;
                     } else if (vType === 'entered') {
                         result.value = hlp.getTimeOfText(String(value), offset, next, days, now);
-                        //node.debug(String(value) + '  --  ' + result.value);
+                        // node.debug(String(value) + '  --  ' + result.value);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
-                        //sun
+                        // sun
                         result = node.getSunTime(now, value, offset, next, days);
                         result.fix = true;
                     } else if (vType === 'pdmTime') {
-                        //moon
+                        // moon
                         result = node.getMoonTime(now, value, offset, next, days);
                         result.fix = true;
                     } else {
-                        //can handle context, json, jsonata, env, ...
+                        // can handle context, json, jsonata, env, ...
                         result.fix = (vType === 'json'); // is not a fixed time if can be changed
                         const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
                             result.value = hlp.getDateOfText(res, offset, next, days);
-                            //node.debug(String(res) + '  --  ' + result.value);
+                            // node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = 'could not evaluate ' + vType + '.' + value;
                         }
@@ -212,23 +214,23 @@ module.exports = function (RED) {
                     }
                     result.value = now;
                 }
-                //node.debug('getTimeProp result' + util.inspect(result));
+                // node.debug('getTimeProp result' + util.inspect(result));
                 return result;
             };
             /**************************************************************************************************************/
             this.getSunCalc = (date) => {
                 if (typeof date === 'string') {
-                    //node.debug('getSunCalc for date ' + date);
+                    // node.debug('getSunCalc for date ' + date);
                     const dto = new Date(date);
                     if (dto !== 'Invalid Date' && !isNaN(dto)) {
                         date = dto;
                     }
                 }
                 if ((typeof date === 'undefined') || !(date instanceof Date)) {
-                    //node.debug('getSunCalc, no valid date ' + date + ' given');
+                    // node.debug('getSunCalc, no valid date ' + date + ' given');
                     date = new Date();
                     if (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000) {
-                        //node.debug('getSunCalc, time difference since last output to low, do no calculation');
+                        // node.debug('getSunCalc, time difference since last output to low, do no calculation');
                         return this.lastSunCalc;
                     }
                 }
@@ -241,7 +243,7 @@ module.exports = function (RED) {
                     longitude: node.longitude,
                     angleType: node.angleType,
                     azimuth: (node.angleType === 'deg') ? 180 + 180 / Math.PI * sunPos.azimuth : sunPos.azimuth,
-                    altitude: (node.angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude //elevation = altitude
+                    altitude: (node.angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude // elevation = altitude
                 };
                 sunTimesCheck(node);
                 result.times = node.sunTimesToday;
@@ -274,7 +276,7 @@ module.exports = function (RED) {
                     longitude: node.longitude,
                     angleType: node.angleType,
                     azimuth: (node.angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth,
-                    altitude: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, //elevation = altitude
+                    altitude: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, // elevation = altitude
                     distance: moonPos.distance,
                     parallacticAngle: (node.angleType === 'deg') ? 180 / Math.PI * moonPos.parallacticAngle : moonPos.parallacticAngle,
                     illumination: {
@@ -286,7 +288,7 @@ module.exports = function (RED) {
                 };
                 sunTimesCheck(node);
                 result.times = node.moonTimesToday;
-                //getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
+                // getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
 
                 if (moonIllum.phase < 0.01) {
                     // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
@@ -317,11 +319,11 @@ module.exports = function (RED) {
                 result.illumination.phase.angle = (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360;
 
                 if (!result.times.alwaysUp) {
-                    //true if the moon never rises/sets and is always above the horizon during the day
+                    // true if the moon never rises/sets and is always above the horizon during the day
                     result.times.alwaysUp = false;
                 }
                 if (!result.times.alwaysDown) {
-                    //true if the moon is always below the horizon
+                    // true if the moon is always below the horizon
                     result.times.alwaysDown = false;
                 }
                 this.lastMoonCalc = result;
@@ -334,8 +336,8 @@ module.exports = function (RED) {
             hlp.errorHandler(this, err, RED._('position-config.errors.error-text'), RED._('position-config.errors.error-title'));
         }
         /**************************************************************************************************************/
-        //sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
-        //{id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path}
+        // sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
+        // {id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path}
         /*
         function sendDebug(msg) {
             // don't put blank errors in sidebar (but do add to logs)
@@ -347,17 +349,17 @@ module.exports = function (RED) {
         } /* */
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
-            //node.debug('sunTimesRefresh - calculate sun times');
+            // node.debug('sunTimesRefresh - calculate sun times');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
             node.sunDayId = dayId;
         }
 
         function sunTimesCheck(node, today, dayId) {
-            //node.debug('sunTimesCheck');
+            // node.debug('sunTimesCheck');
             const dateb = today || new Date();
             const day_id = dayId || getUTCDayId(dateb);
-            if (node.sunDayId != day_id) {
+            if (node.sunDayId !== day_id) {
                 const tomorrow = (new Date()).addDays(1);
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
             }
@@ -368,33 +370,33 @@ module.exports = function (RED) {
         }
 
         function moonTimesRefresh(node, today, tomorrow, dayId) {
-            //node.debug('moonTimesRefresh - calculate moon times');
+            // node.debug('moonTimesRefresh - calculate moon times');
             node.moonTimesToday = sunCalc.getMoonTimes(today, node.latitude, node.longitude, true);
             if (!node.moonTimesToday.alwaysUp) {
-                //true if the moon never rises/sets and is always above the horizon during the day
+                // true if the moon never rises/sets and is always above the horizon during the day
                 node.moonTimesToday.alwaysUp = false;
             }
             if (!node.moonTimesToday.alwaysDown) {
-                //true if the moon is always below the horizon
+                // true if the moon is always below the horizon
                 node.moonTimesToday.alwaysDown = false;
             }
             node.moonTimesTomorow = sunCalc.getMoonTimes(tomorrow, node.latitude, node.longitude, true);
             if (!node.moonTimesTomorow.alwaysUp) {
-                //true if the moon never rises/sets and is always above the horizon during the day
+                // true if the moon never rises/sets and is always above the horizon during the day
                 node.moonTimesTomorow.alwaysUp = false;
             }
             if (!node.moonTimesTomorow.alwaysDown) {
-                //true if the moon is always below the horizon
+                // true if the moon is always below the horizon
                 node.moonTimesTomorow.alwaysDown = false;
             }
             node.moonDayId = dayId;
         }
 
         function moonTimesCheck(node, today, dayId) {
-            //node.debug('moonTimesCheck');
+            // node.debug('moonTimesCheck');
             const dateb = today || new Date();
             const day_id = dayId || getUTCDayId(dateb);
-            if (node.moonDayId != day_id) {
+            if (node.moonDayId !== day_id) {
                 const tomorrow = (new Date()).addDays(1);
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
             }
@@ -405,7 +407,7 @@ module.exports = function (RED) {
         }
 
         function initTimes(node) {
-            //node.debug('initTimes');
+            // node.debug('initTimes');
             const today = new Date();
             const dayId = getUTCDayId(today);
             const tomorrow = today.addDays(1);

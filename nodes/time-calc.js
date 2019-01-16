@@ -6,7 +6,7 @@ const util = require('util');
 
 const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
-//const cron = require("cron");
+// const cron = require("cron");
 
 module.exports = function (RED) {
     'use strict';
@@ -21,7 +21,7 @@ module.exports = function (RED) {
         multiplier
     ) {
         let result = {};
-        if (type == null || type === 'none' || type === '') {
+        if (type === null || type === 'none' || type === '') {
             return Date.now();
         } else if (
             type === 'entered' ||
@@ -30,13 +30,13 @@ module.exports = function (RED) {
             type === 'date'
         ) {
             result = node.positionConfig.getTimeProp(node, msg, type, value);
-            if (result == null) {
+            if (result === null) {
                 throw new Error('could not evaluate ' + type + '.' + value);
             } else if (result.error) {
                 throw new Error('error on getting operand: ' + result.error);
             }
         } else {
-            //msg, flow, global, str, num, env
+            // msg, flow, global, str, num, env
             const data = RED.util.evaluateNodeProperty(value, type, node, msg);
             if (!data) {
                 throw new Error('could not evaluate ' + type + '.' + value);
@@ -53,23 +53,23 @@ module.exports = function (RED) {
                 throw new Error('could not evaluate format of ' + data);
             }
         }
-        if (offset != 0 && multiplier > 0) {
+        if (offset !== 0 && multiplier > 0) {
             return new Date(result.value.getTime() + offset * multiplier);
-        } else if (offset !== 0 && multiplier == -1) {
+        } else if (offset !== 0 && multiplier === -1) {
             result.value.setMonth(result.value.getMonth() + offset);
-        } else if (offset !== 0 && multiplier == -2) {
+        } else if (offset !== 0 && multiplier === -2) {
             result.value.setFullYear(result.value.getFullYear() + offset);
         }
         return result.value;
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, days) {
-        if (type == null || type === 'none' || type === '') {
+        if (type === null || type === 'none' || type === '') {
             if (value === '' || typeof value === 'undefined') {
                 return Date.now();
-            } else {
-                return value;
             }
+            return value;
+
         } else if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
         } else if (type === 'pdmCalcData') {
@@ -108,16 +108,16 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        //this.debug('initialize timeCalcNode ' + util.inspect(config));
+        // this.debug('initialize timeCalcNode ' + util.inspect(config));
         const node = this;
 
         this.on('input', msg => {
             try {
                 node.debug('input ' + util.inspect(msg));
                 if (
-                    node.positionConfig == null ||
-                    config.operator == null ||
-                    config.operand1Type == null
+                    node.positionConfig === null ||
+                    config.operator === null ||
+                    config.operand1Type === null
                 ) {
                     throw new Error('Configuration is missing!!');
                 }
@@ -125,13 +125,13 @@ module.exports = function (RED) {
 
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
-                    if (config.result1Type == 'operand1') {
+                    if (config.result1Type === 'operand1') {
                         resObj = hlp.getFormatedDateOut(operand1, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
                     node.debug('resObj ' + util.inspect(resObj));
-                    if (resObj == null) {
+                    if (resObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
                         this.error('error on getting result: ' + resObj.error);
@@ -152,7 +152,7 @@ module.exports = function (RED) {
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
-                        operatorValid = res == true || res == 'true';
+                        operatorValid = (res === true || res === 'true');
                     }
                     if (operatorValid) {
                         const ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
@@ -162,53 +162,53 @@ module.exports = function (RED) {
 
                         let compare = null;
                         switch (rule.operator) {
-                            case 1: //equal             { id: 1, group: "ms", label: "==", "text": "equal" },
-                                compare = (op1, op2) => op1 == op2;
+                            case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
+                                compare = (op1, op2) => op1 === op2;
                                 break;
-                            case 2: //unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
-                                compare = (op1, op2) => op1 != op2;
+                            case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
+                                compare = (op1, op2) => op1 !== op2;
                                 break;
-                            case 3: //greater           { id: 3, group: "ms", label: ">", "text": "greater" },
+                            case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
                                 compare = (op1, op2) => op1 > op2;
                                 break;
-                            case 4: //greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
+                            case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
                                 compare = (op1, op2) => op1 >= op2;
                                 break;
-                            case 5: //lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
+                            case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
                                 compare = (op1, op2) => op1 < op2;
                                 break;
-                            case 6: //lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
+                            case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
                                 compare = (op1, op2) => op1 <= op2;
                                 break;
                         }
                         let result = false;
                         if (compare) {
                             const inputOperant = new Date(operand1);
-                            //result = inputOperant.getTime() <= ruleoperand.getTime();
+                            // result = inputOperant.getTime() <= ruleoperand.getTime();
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
-                                    case '11': //ms
+                                    case '11': // ms
                                         result = compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
                                         break;
-                                    case '12': //only sec
+                                    case '12': // only sec
                                         result = compare(inputOperant.getSeconds(), ruleoperand.getSeconds());
                                         break;
-                                    case '13': //only min
+                                    case '13': // only min
                                         result = compare(inputOperant.getMinutes(), ruleoperand.getMinutes());
                                         break;
-                                    case '14': //only hour
+                                    case '14': // only hour
                                         result = compare(inputOperant.getHours(), ruleoperand.getHours());
                                         break;
-                                    case '15': //only day
+                                    case '15': // only day
                                         result = compare(inputOperant.getDate(), ruleoperand.getDate());
                                         break;
-                                    case '16': //only Month
+                                    case '16': // only Month
                                         result = compare(inputOperant.getMonth(), ruleoperand.getMonth());
                                         break;
-                                    case '17': //only FullYear
+                                    case '17': // only FullYear
                                         result = compare(inputOperant.getFullYear(), ruleoperand.getFullYear());
                                         break;
-                                    case '18': //only dayOfWeek
+                                    case '18': // only dayOfWeek
                                         result = compare(inputOperant.getDay(), ruleoperand.getDay());
                                         break;
                                     default:
