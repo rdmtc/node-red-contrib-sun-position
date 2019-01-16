@@ -3,6 +3,7 @@
  *********************************************/
 
 const path = require('path');
+
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 const util = require('util');
 
@@ -32,6 +33,7 @@ module.exports = function (RED) {
                     this.send(ports);
                     return;
                 }
+
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
                 for (let i = 0; i < this.rules.length; i += 1) {
@@ -47,6 +49,7 @@ module.exports = function (RED) {
                         ports[i + 1].posChanged = chg;
                     }
                 }
+
                 node.azimuthPos = ports[0].payload.pos;
                 this.send(ports);
                 this.status({
@@ -84,6 +87,7 @@ module.exports = function (RED) {
                     srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
+
             return result;
         }
     }

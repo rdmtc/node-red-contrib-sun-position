@@ -5,6 +5,7 @@
 
 const util = require('util');
 const path = require('path');
+
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
 module.exports = function (RED) {
@@ -14,6 +15,7 @@ module.exports = function (RED) {
         if (status > 255) {
             return result;
         }
+
         if (result.start.error) {
             hlp.errorHandler(node, new Error('Error get start time:' + result.start.error), RED._('within-time-switch.errors.error-text'), result.start.error);
         } else if (result.end.error) {
@@ -97,6 +99,7 @@ module.exports = function (RED) {
             // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
             result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
         }
+
         // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
         return result;
     }
@@ -107,6 +110,7 @@ module.exports = function (RED) {
         while (millis < 10) {
             millis += 86400000; // 24h
         }
+
         return millis;
     }
 
@@ -115,6 +119,7 @@ module.exports = function (RED) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
         }
+
         if (!msg.reSendMsgDelayed && isActive && time) {
             node.lastMsgObj = RED.util.cloneMessage(msg);
             node.lastMsgObj.reSendMsgDelayed = false;
@@ -180,19 +185,18 @@ module.exports = function (RED) {
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
-                } else {
-                    if (!(cmpNow >= endNr && cmpNow < startNr)) {
-                        // this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
-                        this.send([msg, null]);
-                        setstate(this, result, status, {
-                            fill: 'green',
-                            shape: 'dot',
-                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
-                        });
-                        checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
-                        return null;
-                    }
+                } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
+                    // this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                    this.send([msg, null]);
+                    setstate(this, result, status, {
+                        fill: 'green',
+                        shape: 'dot',
+                        text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
+                    });
+                    checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
+                    return null;
                 }
+
                 // this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
                 this.send([null, msg]);
                 setstate(this, result, status, {
@@ -214,5 +218,6 @@ module.exports = function (RED) {
             hlp.errorHandler(this, err, RED._('within-time-switch.errors.error-text'), RED._('within-time-switch.errors.error-title'));
         }
     }
+
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);
 };

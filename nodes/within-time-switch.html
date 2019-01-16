@@ -222,41 +222,59 @@
 <script type="text/javascript">
     function clipValueLength(v, l) {
         if (v.length > l) {
-            return v.substring(0, (l - 3)) + "...";
+            return v.substring(0, (l - 3)) + '...';
         }
+
         return v;
     }
 
     function getValueLabel(t, v, l) {
-        l = l || 15;
-        if (t === "string" || t === "str") {
+    l = l || 15;
+    if (t === 'string' || t === 'str') {
             if (v == '') {
                 return v;
             }
+
             return '"' + clipValueLength(v, l) + '"';
-        } else if (t === "num" || t === "bool") {
+    }
+
+    if (t === 'num' || t === 'bool') {
             if (v == '') {
                 return v;
             }
-            return '' + v;
-        } else if (t === 'msg') {
-            return t + "." + clipValueLength(v, l);
-        } else if (t === 'flow' || t === 'global') {
-            var result = RED.utils.parseContextKey(v);
-            return t + "." + clipValueLength(result.key, l);
-        } else if (t == "pdsCalcData") {
-            return "{sun position}";
-        } else if (t == "pdmCalcData") {
-            return "{moon position}";
-        } else if (t == "pdsTime") {
-            let res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace(
+
+            return String(v);
+    }
+
+    if (t === 'msg') {
+            return t + '.' + clipValueLength(v, l);
+    }
+
+    if (t === 'flow' || t === 'global') {
+            let result = RED.utils.parseContextKey(v);
+            return t + '.' + clipValueLength(result.key, l);
+    }
+
+    if (t == 'pdsCalcData') {
+            return '{sun position}';
+    }
+
+    if (t == 'pdmCalcData') {
+            return '{moon position}';
+    }
+
+    if (t == 'pdsTime') {
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace(
                 'amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
             return clipValueLength(res, l);
-        } else if (t == "pdmTime") {
-            return "moon" + v;
-        }
-        return clipValueLength(v, l);
     }
+
+    if (t == 'pdmTime') {
+            return 'moon' + v;
+    }
+
+    return clipValueLength(v, l);
+}
 
     RED.nodes.registerType('within-time-switch', {
         category: 'time and astro',
@@ -271,16 +289,16 @@
             },
             positionConfig: {
                 value: '',
-                type: "position-config",
+                type: 'position-config',
                 required: true
             },
             startTime: {
                 value: '',
                 required: true,
-                validate: RED.validators.typedInput("startTimeType")
+                validate: RED.validators.typedInput('startTimeType')
             },
             startTimeType: {
-                value: "entered"
+                value: 'entered'
             },
             startOffset: {
                 value: 0,
@@ -295,10 +313,10 @@
             endTime: {
                 value: '',
                 required: true,
-                validate: RED.validators.typedInput("endTimeType")
+                validate: RED.validators.typedInput('endTimeType')
             },
             endTimeType: {
-                value: "entered"
+                value: 'entered'
             },
             endOffset: {
                 value: 0,
@@ -313,76 +331,76 @@
             propertyStart: {
                 value: '',
                 required: false,
-                validate: RED.validators.typedInput("propertyStartType")
+                validate: RED.validators.typedInput('propertyStartType')
             },
             propertyStartType: {
-                value: "none"
+                value: 'none'
             },
             startTimeAlt: {
                 value: '',
                 required: false,
-                validate: function (v) {
-                    return RED.validators.typedInput("startTimeAltType")(v) || ($(
-                        "#node-input-propertyStart").typedInput(
+                validate(v) {
+                    return RED.validators.typedInput('startTimeAltType')(v) || ($(
+                        '#node-input-propertyStart').typedInput(
                         'type') === 'none');
                 }
             },
             startTimeAltType: {
-                value: "none"
+                value: 'none'
             },
             startOffsetAlt: {
                 value: 0,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-propertyStart").typedInput('type') === 'none') ||
-                        ($("#node-input-startTimeAlt").typedInput('type') === 'none');
+                    ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                    ($('#node-input-startTimeAlt').typedInput('type') === 'none');
                 }
             },
             startOffsetAltMultiplier: {
                 value: 60,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-propertyStart").typedInput('type') === 'none') ||
-                        ($("#node-input-startTimeAlt").typedInput('type') === 'none');
+                    ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                    ($('#node-input-startTimeAlt').typedInput('type') === 'none');
                 }
             },
             propertyEnd: {
                 value: '',
                 required: false,
-                validate: RED.validators.typedInput("propertyEndType")
+                validate: RED.validators.typedInput('propertyEndType')
             },
             propertyEndType: {
-                value: "none"
+                value: 'none'
             },
             endTimeAlt: {
                 value: '',
                 required: false,
-                validate: function (v) {
-                    return RED.validators.typedInput("endTimeAltType")(v) || ($("#node-input-propertyEnd").typedInput(
+                validate(v) {
+                    return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
                         'type') === 'none');
                 }
             },
             endTimeAltType: {
-                value: "none"
+                value: 'none'
             },
             endOffsetAlt: {
                 value: 0,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-propertyEnd").typedInput('type') === 'none') ||
-                        ($("#node-input-endTimeAlt").typedInput('type') === 'none');
+                    ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                    ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                 }
             },
             endOffsetAltMultiplier: {
                 value: 60,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     return RED.validators.number()(v) ||
-                        ($("#node-input-propertyEnd").typedInput('type') === 'none') ||
-                        ($("#node-input-endTimeAlt").typedInput('type') === 'none');
+                    ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                    ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                 }
             },
             statusOut: {
@@ -398,8 +416,8 @@
                 required: false
             }
         },
-        outputLabels: ["within time", "out of time"],
-        label: function () {
+        outputLabels: ['within time', 'out of time'],
+        label() {
             const getId = (type, value, offset, maxLength) => {
                 let suffix = '';
                 if (offset && offset > 0) {
@@ -408,219 +426,245 @@
                     suffix = '↶';
                 }
 
-                if (type === "jsonata") {
+                if (type === 'jsonata') {
                     if (value.length < 15) {
-                        return value + suffix;
+    return value + suffix;
                     }
-                    return this._("within-time-switch.label.jsonata");
-                } else if (type === "json") {
-                    if (value.length < 15) {
-                        return value + suffix;
-                    }
-                    return this._("within-time-switch.label.json") + suffix;
-                } else if (type === "bin") {
-                    return this._("within-time-switch.label.binary") + suffix;
-                } else if (type === "date") {
-                    return this._("within-time-switch.label.timestamp") + suffix;
+
+                    return this._('within-time-switch.label.jsonata');
                 }
 
-                let v = getValueLabel(type, value, maxLength);
-                if (v == '') {
-                    return this._("within-time-switch.label.blank");
+                if (type === 'json') {
+                    if (value.length < 15) {
+    return value + suffix;
+                    }
+
+                    return this._('within-time-switch.label.json') + suffix;
                 }
+
+                if (type === 'bin') {
+                    return this._('within-time-switch.label.binary') + suffix;
+                }
+
+                if (type === 'date') {
+                    return this._('within-time-switch.label.timestamp') + suffix;
+                }
+
+                const v = getValueLabel(type, value, maxLength);
+                if (v == '') {
+                    return this._('within-time-switch.label.blank');
+                }
+
                 return v + suffix;
-            }
+            };
 
             const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                 if (property !== 'none' && property !== '' && value2) {
                     return getId(type1, value1, offset1, 12) + '/' + getId(type2, value2, offset2, 12);
                 }
+
                 return getId(type1, value1, undefined, 12);
-            }
+            };
 
             if (this.name) {
                 return this.name;
-            } else if (this.startTime && this.endTime) {
-                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
-                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-                    ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
-                    getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                        this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
-                    ((this.lastMsgOnEndOut) ? '⨧' : '');
             }
+
+            if (this.startTime && this.endTime) {
+                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
+                    this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
+            ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
+            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
+                this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
+            ((this.lastMsgOnEndOut) ? '⨧' : '');
+            }
+
             return 'within-time';
-        },
-        labelStyle: function () {
-            return this.name ? "node_label_italic" : '';
-        },
+    },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+    },
         paletteLabel: 'within-time',
         align: 'left',
-        oneditprepare: function () {
-
+        oneditprepare() {
             function checkMsgOnStartOut() {
-                let valStart = $("#node-input-startTime").typedInput('type');
-                let valStartAlt = $("#node-input-startTimeAlt").typedInput('type');
-                let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
+                const valStart = $('#node-input-startTime').typedInput('type');
+                const valStartAlt = $('#node-input-startTimeAlt').typedInput('type');
+                const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
 
                 if (vals.indexOf(valStart) >= 0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=
-                        0)) {
-                    $(".msg-start-out-row").show();
+                    0)) {
+                    $('.msg-start-out-row').show();
                 } else {
-                    $(".msg-start-out-row").hide();
+                    $('.msg-start-out-row').hide();
                 }
             }
 
             function checkMsgOnEndOut() {
-                let valEnd = $("#node-input-endTime").typedInput('type');
-                let valEndAlt = $("#node-input-endTimeAlt").typedInput('type');
-                let vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
+                const valEnd = $('#node-input-endTime').typedInput('type');
+                const valEndAlt = $('#node-input-endTimeAlt').typedInput('type');
+                const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
 
                 if (vals.indexOf(valEnd) >= 0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >= 0)) {
-                    $(".msg-end-out-row").show();
+                    $('.msg-end-out-row').show();
                 } else {
-                    $(".msg-end-out-row").hide();
+                    $('.msg-end-out-row').hide();
                 }
             }
 
             if (this.statusOut == '' || this.statusOut == undefined) {
                 this.statusOut = 3;
-                $("#node-input-statusOut").val(this.statusOut);
+                $('#node-input-statusOut').val(this.statusOut);
             }
 
-            $(".wt-offset-time").spinner({
+            $('.wt-offset-time').spinner({
                 max: 1439,
                 min: -1439
             });
 
-            let typeTimeNone = {
-                value: "none",
-                label: "not used ",
-                icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+            const typeTimeNone = {
+                value: 'none',
+                label: 'not used ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeNone.png',
                 hasValue: false
             };
-            let typeTime = {
-                value: "entered",
-                label: "timestamp ",
-                icon: "icons/node-red-contrib-sun-position/inputTypeTime.png",
+            const typeTime = {
+                value: 'entered',
+                label: 'timestamp ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
                 hasValue: true,
-                validate: /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/
+                validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
             };
-            let typeTimeSun = {
-                value: "pdsTime",
-                label: "sun ",
-                icon: "icons/node-red-contrib-sun-position/inputTypeSun.png",
+            const typeTimeSun = {
+                value: 'pdsTime',
+                label: 'sun ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
                 options: [
-                    "astronomicalDawn",
-                    "amateurDawn",
-                    "nauticalDawn",
-                    "blueHourDawnStart",
-                    "civilDawn",
-                    "blueHourDawnEnd",
-                    "sunrise",
-                    "sunriseEnd",
-                    "goldenHourEnd",
-                    "solarNoon",
-                    "goldenHourStart",
-                    "sunsetStart",
-                    "sunset",
-                    "blueHourDuskStart",
-                    "civilDusk",
-                    "blueHourDuskEnd",
-                    "amateurDusk",
-                    "astronomicalDusk",
-                    "nadir"
+                    'astronomicalDawn',
+                    'amateurDawn',
+                    'nauticalDawn',
+                    'blueHourDawnStart',
+                    'civilDawn',
+                    'blueHourDawnEnd',
+                    'sunrise',
+                    'sunriseEnd',
+                    'goldenHourEnd',
+                    'solarNoon',
+                    'goldenHourStart',
+                    'sunsetStart',
+                    'sunset',
+                    'blueHourDuskStart',
+                    'civilDusk',
+                    'blueHourDuskEnd',
+                    'amateurDusk',
+                    'astronomicalDusk',
+                    'nadir'
                 ]
             };
-            let typeTimeMoon = {
-                value: "pdmTime",
-                label: "moon ",
-                icon: "icons/node-red-contrib-sun-position/inputTypeMoon.png",
+            const typeTimeMoon = {
+                value: 'pdmTime',
+                label: 'moon ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
                 options: ['rise', 'set']
             };
 
-            $("#node-input-propertyStart").typedInput({
+            $('#node-input-propertyStart').typedInput({
                 default: this.propertyStartType || 'none',
                 types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
             });
-            $("#node-input-propertyEnd").typedInput({
+            $('#node-input-propertyEnd').typedInput({
                 default: this.propertyEndType || 'none',
                 types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
             });
-            $("#node-input-propertyStart").on('change', function (type, value) {
-                if ($("#node-input-propertyStart").typedInput('type') === 'none') {
-                    $(".alternate-time-start").hide();
-                    $(".alternate-time-start-offset").hide();
+            $('#node-input-propertyStart').on('change', (type, value) => {
+                if ($('#node-input-propertyStart').typedInput('type') === 'none') {
+                    $('.alternate-time-start').hide();
+                    $('.alternate-time-start-offset').hide();
                 } else {
-                    $(".alternate-time-start").show();
+                    $('.alternate-time-start').show();
                 }
-                $("#node-input-startTimeAlt").change();
-            });
-            $("#node-input-propertyEnd").on('change', function (type, value) {
-                if ($("#node-input-propertyEnd").typedInput('type') === 'none') {
-                    $(".alternate-time-end").hide();
-                    $(".alternate-time-end-offset").hide();
-                } else {
-                    $(".alternate-time-end").show();
-                }
-                $("#node-input-endTimeAlt").change();
-            });
 
-            $("#node-input-startTime").typedInput({
+                $('#node-input-startTimeAlt').change();
+    });
+            $('#node-input-propertyEnd').on('change', (type, value) => {
+                if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
+                    $('.alternate-time-end').hide();
+                    $('.alternate-time-end-offset').hide();
+                } else {
+                    $('.alternate-time-end').show();
+                }
+
+                $('#node-input-endTimeAlt').change();
+    });
+
+            $('#node-input-startTime').typedInput({
                 default: this.startTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $('#node-input-startTime').on('change focus focusin focusout', function (type, value) {
+            $('#node-input-startTime').on('change focus focusin focusout', (type, value) => {
                 checkMsgOnStartOut(type, value);
-            });
-            $("#node-input-endTime").typedInput({
+    });
+            $('#node-input-endTime').typedInput({
                 default: this.endTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $('#node-input-endTime').on('change focus focusin focusout', function (type, value) {
+            $('#node-input-endTime').on('change focus focusin focusout', (type, value) => {
                 checkMsgOnEndOut(type, value);
-            });
-            $("#node-input-startTimeAlt").typedInput({
+    });
+            $('#node-input-startTimeAlt').typedInput({
                 default: this.startTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global',
-                    'env'
-                ]
+                types: [typeTimeNone,
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'msg',
+                    'flow',
+                    'global',
+                    'env']
             });
-            $("#node-input-startTimeAlt").on('change focus focusin focusout', function (type, value) {
-                if (($("#node-input-startTimeAlt").typedInput('type') === 'none') ||
-                    ($("#node-input-propertyStart").typedInput('type') === 'none')) {
-                    $(".alternate-time-start-offset").hide();
+            $('#node-input-startTimeAlt').on('change focus focusin focusout', (type, value) => {
+                if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                    $('.alternate-time-start-offset').hide();
                 } else {
-                    $(".alternate-time-start-offset").show();
+                    $('.alternate-time-start-offset').show();
                 }
+
                 checkMsgOnStartOut();
-            });
-            $("#node-input-endTimeAlt").typedInput({
+    });
+            $('#node-input-endTimeAlt').typedInput({
                 default: this.endTimeAltType || 'none',
-                types: [typeTimeNone, typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global',
-                    'env'
-                ]
+                types: [typeTimeNone,
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'msg',
+                    'flow',
+                    'global',
+                    'env']
             });
-            $("#node-input-endTimeAlt").on('change focus focusin focusout', function (type, value) {
-                if (($("#node-input-endTimeAlt").typedInput('type') === 'none') ||
-                    ($("#node-input-propertyEnd").typedInput('type') === 'none')) {
-                    $(".alternate-time-end-offset").hide();
+            $('#node-input-endTimeAlt').on('change focus focusin focusout', (type, value) => {
+                if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
+            ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
+                    $('.alternate-time-end-offset').hide();
                 } else {
-                    $(".alternate-time-end-offset").show();
+                    $('.alternate-time-end-offset').show();
                 }
+
                 checkMsgOnEndOut();
-            });
-            //$("#node-input-startTimeAlt").change();
-            //$("#node-input-endTimeAlt").change();
-            $("#node-input-propertyStart").change();
-            $("#node-input-propertyEnd").change();
-        },
-        oneditsave: function () {
-            this.propertyStartType = $("#node-input-propertyStart").typedInput('type');
-            this.propertyEndType = $("#node-input-propertyEnd").typedInput('type');
-            this.startTimeType = $("#node-input-startTime").typedInput('type');
-            this.endTimeType = $("#node-input-endTime").typedInput('type');
-            this.startTimeAltType = $("#node-input-startTimeAlt").typedInput('type');
-            this.endTimeAltType = $("#node-input-endTimeAlt").typedInput('type');
-        }
+    });
+            // $("#node-input-startTimeAlt").change();
+            // $("#node-input-endTimeAlt").change();
+            $('#node-input-propertyStart').change();
+            $('#node-input-propertyEnd').change();
+    },
+        oneditsave() {
+            this.propertyStartType = $('#node-input-propertyStart').typedInput('type');
+            this.propertyEndType = $('#node-input-propertyEnd').typedInput('type');
+            this.startTimeType = $('#node-input-startTime').typedInput('type');
+            this.endTimeType = $('#node-input-endTime').typedInput('type');
+            this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
+            this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
+    }
     });
 </script>

@@ -5,6 +5,7 @@
 const util = require('util');
 
 const path = require('path');
+
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 // const cron = require("cron");
 
@@ -23,7 +24,9 @@ module.exports = function (RED) {
         let result = {};
         if (type === null || type === 'none' || type === '') {
             return Date.now();
-        } else if (
+        }
+
+        if (
             type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
@@ -41,6 +44,7 @@ module.exports = function (RED) {
             if (!data) {
                 throw new Error('could not evaluate ' + type + '.' + value);
             }
+
             result.value = hlp.parseDateFromFormat(
                 data,
                 format,
@@ -53,13 +57,17 @@ module.exports = function (RED) {
                 throw new Error('could not evaluate format of ' + data);
             }
         }
+
         if (offset !== 0 && multiplier > 0) {
             return new Date(result.value.getTime() + offset * multiplier);
-        } else if (offset !== 0 && multiplier === -1) {
+        }
+
+        if (offset !== 0 && multiplier === -1) {
             result.value.setMonth(result.value.getMonth() + offset);
         } else if (offset !== 0 && multiplier === -2) {
             result.value.setFullYear(result.value.getFullYear() + offset);
         }
+
         return result.value;
     }
 
@@ -68,13 +76,19 @@ module.exports = function (RED) {
             if (value === '' || typeof value === 'undefined') {
                 return Date.now();
             }
-            return value;
 
-        } else if (type === 'pdsCalcData') {
+            return value;
+        }
+
+        if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
-        } else if (type === 'pdmCalcData') {
+        }
+
+        if (type === 'pdmCalcData') {
             return node.positionConfig.getMoonCalc(msg.ts);
-        } else if (
+        }
+
+        if (
             type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
@@ -99,8 +113,10 @@ module.exports = function (RED) {
                     RED._('time-inject.dayDiffNames')
                 );
             }
+
             return data;
         }
+
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
@@ -121,6 +137,7 @@ module.exports = function (RED) {
                 ) {
                     throw new Error('Configuration is missing!!');
                 }
+
                 const operand1 = tsGetOperandData(this, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
 
                 if (config.result1Type !== 'none' && config.result1Value) {
@@ -130,6 +147,7 @@ module.exports = function (RED) {
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
+
                     node.debug('resObj ' + util.inspect(resObj));
                     if (resObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
@@ -154,6 +172,7 @@ module.exports = function (RED) {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
                         operatorValid = (res === true || res === 'true');
                     }
+
                     if (operatorValid) {
                         const ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
                         node.debug('operand ' + util.inspect(ruleoperand));
@@ -181,6 +200,7 @@ module.exports = function (RED) {
                                 compare = (op1, op2) => op1 <= op2;
                                 break;
                         }
+
                         let result = false;
                         if (compare) {
                             const inputOperant = new Date(operand1);
@@ -216,34 +236,42 @@ module.exports = function (RED) {
                                             inputOperant.setMilliseconds(0);
                                             ruleoperand.setMilliseconds(0);
                                         }
+
                                         if (rule.operatorType.indexOf('12') < 0) {
                                             inputOperant.setSeconds(0);
                                             ruleoperand.setSeconds(0);
                                         }
+
                                         if (rule.operatorType.indexOf('13') < 0) {
                                             inputOperant.setMinutes(0);
                                             ruleoperand.setMinutes(0);
                                         }
+
                                         if (rule.operatorType.indexOf('14') < 0) {
                                             inputOperant.setHours(0);
                                             ruleoperand.setHours(0);
                                         }
+
                                         if (rule.operatorType.indexOf('15') < 0) {
                                             inputOperant.setDate(0);
                                             ruleoperand.setDate(0);
                                         }
+
                                         if (rule.operatorType.indexOf('16') < 0) {
                                             inputOperant.setMonth(0);
                                             ruleoperand.setMonth(0);
                                         }
+
                                         if (rule.operatorType.indexOf('17') < 0) {
                                             inputOperant.setFullYear(0);
                                             ruleoperand.setFullYear(0);
                                         }
+
                                         result = compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
+
                                         break;
                                 }
                             }
@@ -259,9 +287,11 @@ module.exports = function (RED) {
                         }
                     }
                 }
+
                 for (let i = resObj.length; i < rulesLength; ++i) {
                     resObj.push(null);
                 }
+
                 resObj.push(msg);
                 return resObj;
             } catch (err) {
@@ -274,6 +304,7 @@ module.exports = function (RED) {
             }
         });
     }
+
     RED.nodes.registerType('time-calc', timeCalcNode);
 
     /*

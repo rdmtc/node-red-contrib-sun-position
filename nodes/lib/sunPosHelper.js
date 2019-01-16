@@ -43,11 +43,13 @@ function getNodeId(node) {
     // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
+
 /*******************************************************************************************************/
 function errorHandler(node, err, messageText, stateText) {
     if (!err) {
         return true;
     }
+
     if (err.message) {
         // const msg = err.message.toLowerCase();
         messageText += ':' + err.message;
@@ -67,6 +69,7 @@ function errorHandler(node, err, messageText, stateText) {
         console.error(messageText);
         console.error(util.inspect(err, Object.getOwnPropertyNames(err)));
     }
+
     return false;
 }
 
@@ -101,7 +104,7 @@ function getComperableDateFormat(date) {
  * @return {Date} date of the number
  */
 function parseComperableDateFormat(date) {
-    date = date + '';
+    date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
     const day = date.substr(6, 2);
@@ -111,6 +114,7 @@ function parseComperableDateFormat(date) {
     const mss = date.substr(14);
     return new Date(year, month, day, hours, mins, secs, mss);
 }
+
 /*******************************************************************************************************/
 /**
  * gets a comparable date Format
@@ -125,6 +129,7 @@ function getComperableDateFormat2(date) {
         pad2(date.getMinutes()) +
         pad2(date.getSeconds()));
 }
+
 /*******************************************************************************************************/
 /**
  * gets a date from a comparable date Format
@@ -132,7 +137,7 @@ function getComperableDateFormat2(date) {
  * @return {Date} date of the number
  */
 function parseComperableDateFormat2(date) {
-    date = date + '';
+    date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
     const day = date.substr(6, 2);
@@ -142,10 +147,12 @@ function parseComperableDateFormat2(date) {
     const mss = date.substr(15);
     return new Date(year, month, day, hours, mins, secs, mss);
 }
+
 /*******************************************************************************************************/
 function getTimeNumber(date) {
     return date.getUTCMilliseconds() + date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
 }
+
 /*******************************************************************************************************/
 /* function compareAzimuth(obj, name, azimuth, low, high, old) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
@@ -171,12 +178,17 @@ function compareAzimuth(azimuth, low, high) {
             if (high > low) {
                 return (azimuth > low) && (azimuth < high);
             }
+
             return (azimuth > low) || (azimuth < high);
         }
+
         return (azimuth > low);
-    } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
+    }
+
+    if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
         return (azimuth < high);
     }
+
     return false;
 }
 
@@ -185,8 +197,10 @@ function addOffset(d, offset) {
     if (offset && !isNaN(offset) && offset !== 0) {
         return new Date(d.getTime() + offset * 1000); // - does not work
     }
+
     return d;
 }
+
 /*******************************************************************************************************/
 function calcDayOffset(days, daystart) {
     let dayx = 0;
@@ -196,6 +210,7 @@ function calcDayOffset(days, daystart) {
         if ((daystart + dayx) > 6) {
             daystart = (dayx * -1);
         }
+
         daypos = daystart + dayx;
 
         if (dayx > 7) {
@@ -203,8 +218,10 @@ function calcDayOffset(days, daystart) {
             break;
         }
     }
+
     return dayx;
 }
+
 /*******************************************************************************************************/
 function calcTimeValue(d, offset, next, days) {
     // console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
@@ -219,6 +236,7 @@ function calcTimeValue(d, offset, next, days) {
             // d = d.addDays(Number(next));
         }
     }
+
     if (days && (days !== '*') && (days !== '')) {
         const dayx = calcDayOffset(days, d.getDay());
         if (dayx > 0) {
@@ -226,8 +244,10 @@ function calcTimeValue(d, offset, next, days) {
             // d = d.addDays(dayx);
         }
     }
+
     return d;
 }
+
 /*******************************************************************************************************/
 function calcTimeValueUTC(d, offset, next, days) {
     // console.debug('calcTimeValueUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
@@ -242,6 +262,7 @@ function calcTimeValueUTC(d, offset, next, days) {
             // d = d.addDays(Number(next));
         }
     }
+
     if (days && (days !== '*') && (days !== '')) {
         const dayx = calcDayOffset(days, d.getUTCDay());
         if (dayx > 0) {
@@ -249,14 +270,16 @@ function calcTimeValueUTC(d, offset, next, days) {
             // d = d.addDays(dayx);
         }
     }
+
     return d;
 }
+
 /*******************************************************************************************************/
 function getTimeOfText(t, offset, next, days, date) {
     // console.debug('getTimeOfText t=' + t + ' offset=' + offset + ' next=' + next + ' days=' + days);
     const d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
-        const matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
+        const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
         if (matches) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
                 (parseInt(matches[2]) || 0),
@@ -265,15 +288,19 @@ function getTimeOfText(t, offset, next, days, date) {
         } else {
             return null;
         }
+
         return calcTimeValue(d, offset, next, days);
     }
+
     return null;
 }
+
 /*******************************************************************************************************/
 function getDateOfText(date, offset, next, days) {
     if (date === null) {
         throw new Error('Could not evaluate as a valid Date or time. Value is null!');
     }
+
     if (typeof date === 'object') {
         if (date.hasOwnProperty('now')) {
             date = date.now;
@@ -293,20 +320,24 @@ function getDateOfText(date, offset, next, days) {
             date = String(date);
         }
     }
-    const re = /^(0[0-9]|[0-9]|1[0-9]|2[0-3])(?::([0-5][0-9]|[0-9]))?(?::([0-5][0-9]|[0-9]))?\s*(pm?)?$/;
+
+    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/;
     if (re.test(String(date))) {
         const result = getTimeOfText(String(date), offset, next, days);
         if (result !== null) {
             return result;
         }
     }
+
     if (!isNaN(date)) {
         date = Number(date);
     }
+
     const dto = new Date(date);
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
         return calcTimeValue(dto, offset, next, days);
     }
+
     throw new Error('could not evaluate ' + String(date) + ' as a valid Date or time.');
 }
 /*******************************************************************************************************/
@@ -365,16 +396,22 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
 
 // Regexes and supporting functions are cached through closure
 
-const dateFormat = function () {
-    const token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
-        timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
-        timezoneClip = /[^-+\dA-Z]/g,
-        pad = function (val, len) {
-            val = String(val);
-            len = len || 2;
-            while (val.length < len) val = '0' + val;
-            return val;
-        };
+const dateFormat = (function () {
+    const token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g;
+
+    const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
+
+    const timezoneClip = /[^-+\dA-Z]/g;
+
+    const pad = function (val, len) {
+        val = String(val);
+        len = len || 2;
+        while (val.length < len) {
+            val = '0' + val;
+        }
+
+        return val;
+    };
 
     // Regexes and supporting functions are cached through closure
     return function (date, mask, utc) {
@@ -387,12 +424,14 @@ const dateFormat = function () {
         }
 
         // Passing date through Date applies Date.parse, if necessary
-        const now = new Date;
+        const now = new Date();
         date = date ? new Date(date) : now;
         const dayDiff = (date.getDate() - now.getDate());
-        if (isNaN(date)) throw SyntaxError('invalid date');
+        if (isNaN(date)) {
+            throw new SyntaxError('invalid date');
+        }
 
-        mask = String(dF.masks[mask] || mask || dF.masks['default']);
+        mask = String(dF.masks[mask] || mask || dF.masks.default);
 
         // Allow setting the utc argument via the mask
         if (mask.slice(0, 4) === 'UTC:') {
@@ -400,66 +439,76 @@ const dateFormat = function () {
             utc = true;
         }
 
-        const _ = utc ? 'getUTC' : 'get',
-            d = date[_ + 'Date'](),
-            D = date[_ + 'Day'](),
-            M = date[_ + 'Month'](),
-            y = date[_ + 'FullYear'](),
-            H = date[_ + 'Hours'](),
-            m = date[_ + 'Minutes'](),
-            s = date[_ + 'Seconds'](),
-            L = date[_ + 'Milliseconds'](),
-            o = utc ? 0 : date.getTimezoneOffset(),
-            flags = {
-                d: d,
-                dd: pad(d),
-                ddd: dF.i18n.dayNames[D + 7],
-                dddd: dF.i18n.dayNames[D],
-                E: dF.i18n.dayNames[D + 7],
-                EE: dF.i18n.dayNames[D],
-                M: M + 1,
-                MM: pad(M + 1),
-                MMM: dF.i18n.monthNames[M + 12],
-                MMMM: dF.i18n.monthNames[M],
-                NNN: dF.i18n.monthNames[M],
-                yy: String(y).slice(2),
-                yyyy: y,
-                h: H % 12 || 12,
-                hh: pad(H % 12 || 12),
-                H: H,
-                HH: pad(H),
-                k: (H % 12 || 12) - 1,
-                kk: pad((H % 12 || 12) - 1),
-                K: H - 1,
-                KK: pad(H - 1),
-                m: m,
-                mm: pad(m),
-                s: s,
-                ss: pad(s),
-                lll: pad(L, 3),
-                ll: pad(Math.round(L / 10)),
-                l: L,
-                L: pad(L > 99 ? Math.round(L / 10) : L),
-                t: H < 12 ? 'a' : 'p',
-                tt: H < 12 ? 'am' : 'pm',
-                T: H < 12 ? 'A' : 'P',
-                TT: H < 12 ? 'AM' : 'PM',
-                Z: utc ? 'UTC' : (String(date).match(timezone) || ['']).pop().replace(timezoneClip, ''),
-                o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
-                S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
-                x: dayDiff,
-                xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
-            };
+        const _ = utc ? 'getUTC' : 'get';
 
-        return mask.replace(token, ($0) => {
+        const d = date[_ + 'Date']();
+
+        const D = date[_ + 'Day']();
+
+        const M = date[_ + 'Month']();
+
+        const y = date[_ + 'FullYear']();
+
+        const H = date[_ + 'Hours']();
+
+        const m = date[_ + 'Minutes']();
+
+        const s = date[_ + 'Seconds']();
+
+        const L = date[_ + 'Milliseconds']();
+
+        const o = utc ? 0 : date.getTimezoneOffset();
+
+        const flags = {
+            d,
+            dd: pad(d),
+            ddd: dF.i18n.dayNames[D + 7],
+            dddd: dF.i18n.dayNames[D],
+            E: dF.i18n.dayNames[D + 7],
+            EE: dF.i18n.dayNames[D],
+            M: M + 1,
+            MM: pad(M + 1),
+            MMM: dF.i18n.monthNames[M + 12],
+            MMMM: dF.i18n.monthNames[M],
+            NNN: dF.i18n.monthNames[M],
+            yy: String(y).slice(2),
+            yyyy: y,
+            h: H % 12 || 12,
+            hh: pad(H % 12 || 12),
+            H,
+            HH: pad(H),
+            k: (H % 12 || 12) - 1,
+            kk: pad((H % 12 || 12) - 1),
+            K: H - 1,
+            KK: pad(H - 1),
+            m,
+            mm: pad(m),
+            s,
+            ss: pad(s),
+            lll: pad(L, 3),
+            ll: pad(Math.round(L / 10)),
+            l: L,
+            L: pad(L > 99 ? Math.round(L / 10) : L),
+            t: H < 12 ? 'a' : 'p',
+            tt: H < 12 ? 'am' : 'pm',
+            T: H < 12 ? 'A' : 'P',
+            TT: H < 12 ? 'AM' : 'PM',
+            Z: utc ? 'UTC' : (String(date).match(timezone) || ['']).pop().replace(timezoneClip, ''),
+            o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
+            x: dayDiff,
+            xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
+        };
+
+        return mask.replace(token, $0 => {
             return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
         });
     };
-}();
+})();
 
 // Some common format strings
 dateFormat.masks = {
-    'default': 'ddd MMM dd yyyy HH:mm:ss',
+    default: 'ddd MMM dd yyyy HH:mm:ss',
     shortDate: 'm/d/yy',
     mediumDate: 'MMM d, yyyy',
     longDate: 'MMMM d, yyyy',
@@ -469,17 +518,51 @@ dateFormat.masks = {
     longTime: 'h:mm:ss TT Z',
     isoDate: 'yyyy-MM-dd',
     isoTime: 'HH:MM:ss',
-    isoDateTime: "yyyy-MM-dd'T'HH:mm:ss",
-    isoUtcDateTime: "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
+    isoDateTime: 'yyyy-MM-dd\'T\'HH:mm:ss',
+    isoUtcDateTime: 'UTC:yyyy-MM-dd\'T\'HH:mm:ss\'Z\''
 };
 dateFormat.i18n = {
     dayNames: [
-        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
-        'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sun',
+        'Mon',
+        'Tue',
+        'Wed',
+        'Thu',
+        'Fri',
+        'Sat'
     ],
     monthNames: [
-        'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
     ],
     dayDiffNames: [
         '1 week ago', '6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today', 'Tomorrow', 'day after tomorrow', 'in 3 days', 'in 4 days', 'in 5 days', 'in 6 days'
@@ -487,68 +570,68 @@ dateFormat.i18n = {
 };
 
 dateFormat.parse = [
-    { label: 'Year yy (2 digits)', value: 'yy' },
-    { label: 'Year yyyy (4 digits)', value: 'yyyy' },
-    { label: 'Month M (1 digit)', value: 'M' },
-    { label: 'Month MM (2 digits)', value: 'MM' },
-    { label: 'Month MMM (name or abbr.)', value: 'MMM' },
-    { label: 'Month NNN (abbr.)', value: 'NNN' },
-    { label: 'Day of Month d (1 digit)', value: 'd' },
-    { label: 'Day of Month dd (2 digits)', value: 'dd' },
-    { label: 'Day of Week E (abbr)', value: 'E' },
-    { label: 'Day of Week EE (name)', value: 'EE' },
-    { label: 'Hour h (1 digit 1-12)', value: 'h' },
-    { label: 'Hour hh (2 digits 1-12)', value: 'hh' },
-    { label: 'Hour H (1 digit 0-23)', value: 'H' },
-    { label: 'Hour HH (2 digits 0-23)', value: 'HH' },
-    { label: 'Hour K (1 digit 0-11)', value: 'K' },
-    { label: 'Hour KK (2 digits 0-11)', value: 'KK' },
-    { label: 'Hour k (1 digit 1-24)', value: 'k' },
-    { label: 'Hour kk (2 digits 1-24)', value: 'kk' },
-    { label: 'Minute m (1 digit)', value: 'm' },
-    { label: 'Minute mm (2 digits)', value: 'mm' },
-    { label: 'Second s (1 digit)', value: 's' },
-    { label: 'Second ss (2 digits)', value: 'ss' },
-    { label: 'Milliseconds ll (2 digits)', value: 'll' },
-    { label: 'Milliseconds lll (3 digits)', value: 'lll' },
-    { label: 'AM/PM t (1 digit)', value: 't' },
-    { label: 'AM/PM tt (2 digits)', value: 'tt' }
+    {label: 'Year yy (2 digits)', value: 'yy'},
+    {label: 'Year yyyy (4 digits)', value: 'yyyy'},
+    {label: 'Month M (1 digit)', value: 'M'},
+    {label: 'Month MM (2 digits)', value: 'MM'},
+    {label: 'Month MMM (name or abbr.)', value: 'MMM'},
+    {label: 'Month NNN (abbr.)', value: 'NNN'},
+    {label: 'Day of Month d (1 digit)', value: 'd'},
+    {label: 'Day of Month dd (2 digits)', value: 'dd'},
+    {label: 'Day of Week E (abbr)', value: 'E'},
+    {label: 'Day of Week EE (name)', value: 'EE'},
+    {label: 'Hour h (1 digit 1-12)', value: 'h'},
+    {label: 'Hour hh (2 digits 1-12)', value: 'hh'},
+    {label: 'Hour H (1 digit 0-23)', value: 'H'},
+    {label: 'Hour HH (2 digits 0-23)', value: 'HH'},
+    {label: 'Hour K (1 digit 0-11)', value: 'K'},
+    {label: 'Hour KK (2 digits 0-11)', value: 'KK'},
+    {label: 'Hour k (1 digit 1-24)', value: 'k'},
+    {label: 'Hour kk (2 digits 1-24)', value: 'kk'},
+    {label: 'Minute m (1 digit)', value: 'm'},
+    {label: 'Minute mm (2 digits)', value: 'mm'},
+    {label: 'Second s (1 digit)', value: 's'},
+    {label: 'Second ss (2 digits)', value: 'ss'},
+    {label: 'Milliseconds ll (2 digits)', value: 'll'},
+    {label: 'Milliseconds lll (3 digits)', value: 'lll'},
+    {label: 'AM/PM t (1 digit)', value: 't'},
+    {label: 'AM/PM tt (2 digits)', value: 'tt'}
 ];
 dateFormat.format = [
-    { label: 'Year yyyy (4 digits)', value: 'yyyy' },
-    { label: 'Year yy (2 digits)', value: 'yy' },
-    { label: 'Month M (1 digit)', value: 'M' },
-    { label: 'Month MM (2 digits)', value: 'MM' },
-    { label: 'Month MMM (abbr.)', value: 'MMM' },
-    { label: 'Month NNN (name)', value: 'NNN' },
-    { label: 'Day of Month d (1 digit)', value: 'd' },
-    { label: 'Day of Month dd (2 digits)', value: 'dd' },
-    { label: 'Day of Week E (abbr)', value: 'E' },
-    { label: 'Day of Week EE (name)', value: 'EE' },
-    { label: 'Hour h (1-12)', value: 'h' },
-    { label: 'Hour hh (2 digits 01-12)', value: 'hh' },
-    { label: 'Hour H (0-23)', value: 'H' },
-    { label: 'Hour HH (2 digits 00-23)', value: 'HH' },
-    { label: 'Hour K (0-11)', value: 'K' },
-    { label: 'Hour KK (2 digits 00-11)', value: 'KK' },
-    { label: 'Hour k (1-24)', value: 'k' },
-    { label: 'Hour kk (2 digits 01-24)', value: 'kk' },
-    { label: 'Minute m (0-59)', value: 'm' },
-    { label: 'Minute mm (2 digits 00-59)', value: 'mm' },
-    { label: 'Second s (0-59)', value: 's' },
-    { label: 'Second ss (2 digits 00-59)', value: 'ss' },
-    { label: 'Milliseconds l (0-999)', value: 'l' },
-    { label: 'Milliseconds ll (2 digits 00-99)', value: 'll' },
-    { label: 'Milliseconds lll (3 digits 000-999)', value: 'lll' },
-    { label: 'AM/PM t (1 digit - Lowercase)', value: 't' },
-    { label: 'AM/PM tt (2 digits - Lowercase)', value: 'tt' },
-    { label: 'AM/PM T (1 digit - Uppercase)', value: 'T' },
-    { label: 'AM/PM TT (2 digits - Uppercase)', value: 'TT' },
-    { label: 'timezone Z (abbr.)', value: 'Z' },
-    { label: 'timezone offset o (abbr.)', value: 'o' },
-    { label: "date's ordinal suffix (st, nd, rd, or th) S", value: 'S' },
-    { label: 'Day difference x', value: 'x' },
-    { label: 'Day difference (name) xx', value: 'xx' }
+    {label: 'Year yyyy (4 digits)', value: 'yyyy'},
+    {label: 'Year yy (2 digits)', value: 'yy'},
+    {label: 'Month M (1 digit)', value: 'M'},
+    {label: 'Month MM (2 digits)', value: 'MM'},
+    {label: 'Month MMM (abbr.)', value: 'MMM'},
+    {label: 'Month NNN (name)', value: 'NNN'},
+    {label: 'Day of Month d (1 digit)', value: 'd'},
+    {label: 'Day of Month dd (2 digits)', value: 'dd'},
+    {label: 'Day of Week E (abbr)', value: 'E'},
+    {label: 'Day of Week EE (name)', value: 'EE'},
+    {label: 'Hour h (1-12)', value: 'h'},
+    {label: 'Hour hh (2 digits 01-12)', value: 'hh'},
+    {label: 'Hour H (0-23)', value: 'H'},
+    {label: 'Hour HH (2 digits 00-23)', value: 'HH'},
+    {label: 'Hour K (0-11)', value: 'K'},
+    {label: 'Hour KK (2 digits 00-11)', value: 'KK'},
+    {label: 'Hour k (1-24)', value: 'k'},
+    {label: 'Hour kk (2 digits 01-24)', value: 'kk'},
+    {label: 'Minute m (0-59)', value: 'm'},
+    {label: 'Minute mm (2 digits 00-59)', value: 'mm'},
+    {label: 'Second s (0-59)', value: 's'},
+    {label: 'Second ss (2 digits 00-59)', value: 'ss'},
+    {label: 'Milliseconds l (0-999)', value: 'l'},
+    {label: 'Milliseconds ll (2 digits 00-99)', value: 'll'},
+    {label: 'Milliseconds lll (3 digits 000-999)', value: 'lll'},
+    {label: 'AM/PM t (1 digit - Lowercase)', value: 't'},
+    {label: 'AM/PM tt (2 digits - Lowercase)', value: 'tt'},
+    {label: 'AM/PM T (1 digit - Uppercase)', value: 'T'},
+    {label: 'AM/PM TT (2 digits - Uppercase)', value: 'TT'},
+    {label: 'timezone Z (abbr.)', value: 'Z'},
+    {label: 'timezone offset o (abbr.)', value: 'o'},
+    {label: 'date\'s ordinal suffix (st, nd, rd, or th) S', value: 'S'},
+    {label: 'Day difference x', value: 'x'},
+    {label: 'Day difference (name) xx', value: 'xx'}
 ];
 
 /**
@@ -565,12 +648,15 @@ function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
+
     if (monthNames) {
         dateFormat.i18n.monthNames = monthNames;
     }
+
     if (dayDiffNames) {
         dateFormat.i18n.dayDiffNames = dayDiffNames;
     }
+
     return dateFormat(date, mask, utc);
 }
 
@@ -585,12 +671,14 @@ function getTimeDiff(time1, time2, limit) {
     if (!time2) {
         time2 = new Date();
     }
+
     let millis = time1.getTime() - time2.getTime();
     if (limit) {
         while (millis < limit) {
             millis += 86400000; // 24h
         }
     }
+
     return millis;
 }
 
@@ -606,8 +694,9 @@ function getTimeDiff(time1, time2, limit) {
 function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
     format = format || 0;
     if (isNaN(format)) {
-        return formatDate(date, '' + format, false, dayNames, monthNames, dayDiffNames);
+        return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
     }
+
     switch (Number(format)) {
         case 0: // timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
             return date.getTime();
@@ -646,15 +735,16 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
             return formatDate(date, 'xx, d.m.', false, dayNames, monthNames, dayDiffNames);
     }
+
     const delay = (date.getTime() - (new Date()).getTime());
     return {
-        date: date,
+        date,
         ts: date.getTime(),
         timeUTCStr: date.toUTCString(),
         timeISOStr: date.toISOString(),
         timeLocaleStr: date.toLocaleString(),
         timeLocaleTimeStr: date.toLocaleTimeString(),
-        delay: delay,
+        delay,
         delaySec: Math.round(delay / 1000)
     };
 }
@@ -727,6 +817,7 @@ function _isInteger(val) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -736,10 +827,12 @@ function _getInt(str, i, minlength, maxlength) {
         if (token.length < minlength) {
             return null;
         }
+
         if (_isInteger(token)) {
             return token;
         }
     }
+
     return null;
 }
 
@@ -751,14 +844,14 @@ function _getInt(str, i, minlength, maxlength) {
 // getTime() of the date. If it does not match, it returns 0.
 // ------------------------------------------------------------------
 function getDateFromFormat(val, format) {
-    val = val + '';
-    format = format + '';
+    val = String(val);
+    format = String(format);
     const now = new Date();
     let i_val = 0;
     let i_format = 0;
     let c = '';
     let token = '';
-    let x, y;
+    let x; let y;
     let year = now.getYear();
     let month = now.getMonth() + 1;
     let date = 1;
@@ -775,24 +868,29 @@ function getDateFromFormat(val, format) {
         while ((format.charAt(i_format) === c) && (i_format < format.length)) {
             token += format.charAt(i_format++);
         }
+
         // Extract contents of value based on format token
         if (token === 'yyyy' || token === 'yy' || token === 'y') {
             if (token === 'yyyy') {
                 x = 4;
                 y = 4;
             }
+
             if (token === 'yy') {
                 x = 2;
                 y = 2;
             }
+
             if (token === 'y') {
                 x = 2;
                 y = 4;
             }
+
             year = _getInt(val, i_val, x, y);
             if (year === null) {
                 return 0;
             }
+
             i_val += year.length;
             if (year.length === 2) {
                 if (year > 70) {
@@ -811,11 +909,13 @@ function getDateFromFormat(val, format) {
                         if (month > 12) {
                             month -= 12;
                         }
+
                         i_val += month_name.length;
                         break;
                     }
                 }
             }
+
             if ((month < 1) || (month > 12)) {
                 return 0;
             }
@@ -832,36 +932,42 @@ function getDateFromFormat(val, format) {
             if (month === null || (month < 1) || (month > 12)) {
                 return 0;
             }
+
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || (date < 1) || (date > 31)) {
                 return 0;
             }
+
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 12)) {
                 return 0;
             }
+
             i_val += hh.length;
         } else if (token === 'HH' || token === 'H') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 23)) {
                 return 0;
             }
+
             i_val += hh.length;
         } else if (token === 'KK' || token === 'K') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 11)) {
                 return 0;
             }
+
             i_val += hh.length;
         } else if (token === 'kk' || token === 'k') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 24)) {
                 return 0;
             }
+
             i_val += hh.length;
             hh--;
         } else if (token === 'mm' || token === 'm') {
@@ -869,18 +975,21 @@ function getDateFromFormat(val, format) {
             if (mm === null || (mm < 0) || (mm > 59)) {
                 return 0;
             }
+
             i_val += mm.length;
         } else if (token === 'ss' || token === 's') {
             ss = _getInt(val, i_val, token.length, 2);
             if (ss === null || (ss < 0) || (ss > 59)) {
                 return 0;
             }
+
             i_val += ss.length;
         } else if (token === 'lll' || token === 'll' || token === 'l' || token === 'L') {
             ll = _getInt(val, i_val, token.length, 3);
             if (ll === null || (ll < 0) || (ll > 999)) {
                 return 0;
             }
+
             i_val += ll.length;
         } else if ((token === 'tt') || (token === 't') || (token === 'TT') || (token === 'T')) {
             if (val.substring(i_val, i_val + 2).toLowerCase() === 'am') {
@@ -902,13 +1011,16 @@ function getDateFromFormat(val, format) {
             if (val.substring(i_val, i_val + token.length) !== token) {
                 return 0;
             }
+
             i_val += token.length;
         }
     }
+
     // If there are any trailing characters left in the value, it doesn't match
     if (i_val !== val.length) {
         return 0;
     }
+
     // Is date valid for month?
     if (month === 2) {
         // Check for leap year
@@ -916,23 +1028,24 @@ function getDateFromFormat(val, format) {
             if (date > 29) {
                 return 0;
             }
-        } else {
-            if (date > 28) {
-                return 0;
-            }
+        } else if (date > 28) {
+            return 0;
         }
     }
+
     if ((month === 4) || (month === 6) || (month === 9) || (month === 11)) {
         if (date > 30) {
             return 0;
         }
     }
+
     // Correct hours value
     if (hh < 12 && ampm === 'PM') {
         hh = hh - 0 + 12;
     } else if (hh > 11 && ampm === 'AM') {
         hh -= 12;
     }
+
     const newdate = new Date(year, month - 1, date, hh, mm, ss);
     return newdate.getTime();
 }
@@ -965,6 +1078,7 @@ function parseDate(val, preferEuro) {
             }
         }
     }
+
     return null;
 }
 
@@ -986,6 +1100,7 @@ function parseDateTime(val, preferEuro) {
             }
         }
     }
+
     return null;
 }
 
@@ -993,16 +1108,20 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
+
     if (monthNames) {
         dateFormat.i18n.monthNames = monthNames;
     }
+
     if (dayDiffNames) {
         dateFormat.i18n.dayDiffNames = dayDiffNames;
     }
+
     format = format || 0;
     if (isNaN(format)) {
         return getDateFromFormat(date, format);
     }
+
     switch (Number(format)) {
         case 0: // UNIX Timestamp
             return new Date(Number(date));

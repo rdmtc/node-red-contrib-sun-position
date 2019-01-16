@@ -123,63 +123,63 @@
             longitude: {
                 value: '',
                 required: true,
-                validate: function (v) {
-                    var n = Number(v);
+                validate(v) {
+                    const n = Number(v);
                     return ((n >= -180) && (n <= 180));
                 }
             },
             latitude: {
                 value: '',
                 required: true,
-                validate: function (v) {
-                    var n = Number(v);
+                validate(v) {
+                    const n = Number(v);
                     return ((n >= -90) && (n <= 90));
                 }
             },
             angleType: {
-                value: "deg",
+                value: 'deg',
                 required: true,
-                validate: function (v) {
-                    return (v === 'rad' || v === 'deg')
+                validate(v) {
+                    return (v === 'rad' || v === 'deg');
                 }
             },
             timezoneOffset: {
                 value: null
             }
         },
-        label: function () {
-            return this.name || "default-position";
-        },
-        oneditprepare: function () {
-             if ((this.timezoneOffset == null) ||
-                (typeof this.timezoneOffset === undefined) ||
-                (this.timezoneOffset === '')) {
-                this.timezoneOffset = ((new Date()).getTimezoneOffset()  / -60);
-                $("#node-config-input-timezoneOffset").val(this.timezoneOffset);
+        label() {
+            return this.name || 'default-position';
+    },
+        oneditprepare() {
+            if ((this.timezoneOffset == null) ||
+            (typeof this.timezoneOffset === undefined) ||
+            (this.timezoneOffset === '')) {
+                this.timezoneOffset = ((new Date()).getTimezoneOffset() / -60);
+                $('#node-config-input-timezoneOffset').val(this.timezoneOffset);
             }
 
-            $("#node-config-input-latitude").spinner({
-                step: .00001,
-                numberFormat: "n"
+            $('#node-config-input-latitude').spinner({
+                step: 0.00001,
+                numberFormat: 'n'
             });
-            $("#node-config-input-longitude").spinner({
-                step: .00001,
-                numberFormat: "n"
+            $('#node-config-input-longitude').spinner({
+                step: 0.00001,
+                numberFormat: 'n'
             });
-            if (($("#node-config-input-latitude").val() === '') && ($("#node-config-input-longitude").val() ===
-                    '')) {
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
-                        $("#node-config-input-latitude").val(Number(position.coords.latitude.toFixed(
+            if (($('#node-config-input-latitude').val() === '') && ($('#node-config-input-longitude').val() ===
+                '')) {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        $('#node-config-input-latitude').val(Number(position.coords.latitude.toFixed(
                             5)));
-                        $("#node-config-input-longitude").val(Number(position.coords.longitude.toFixed(
+                        $('#node-config-input-longitude').val(Number(position.coords.longitude.toFixed(
                             5)));
                     });
                 }
             }
-        },
-        oneditsave: function () {
-            //...
-        }
+    },
+        oneditsave() {
+        // ...
+    }
     });
 </script>

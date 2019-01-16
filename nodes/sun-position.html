@@ -144,31 +144,37 @@
 <script type="text/javascript">
     function clipValueLength(v) {
         if (v.length > 15) {
-            return v.substring(0, 15) + "...";
+            return v.substring(0, 15) + '...';
         }
+
         return v;
     }
 
     function prop2name(key) {
-        var result = RED.utils.parseContextKey(key);
+        const result = RED.utils.parseContextKey(key);
         return result.key;
     }
 
     function getValueLabel(t, v) {
-        if (t === 'str') {
-            return '"' + clipValueLength(v) + '"';
-        } else if (t === 'msg') {
-            return t + "." + clipValueLength(v);
-        } else if (t === 'flow' || t === 'global') {
-            return t + "." + clipValueLength(prop2name(v));
-        }
-        return clipValueLength(v);
+    if (t === 'str') {
+    return '"' + clipValueLength(v) + '"';
     }
+
+    if (t === 'msg') {
+    return t + '.' + clipValueLength(v);
+    }
+
+    if (t === 'flow' || t === 'global') {
+    return t + '.' + clipValueLength(prop2name(v));
+    }
+
+    return clipValueLength(v);
+}
 
     RED.nodes.registerType('sun-position', {
         category: 'time and astro',
-        color: "#F3B567",
-        icon: "sun-white.png", // saved in  icons/myicon.png - myicon.png
+        color: '#F3B567',
+        icon: 'sun-white.png', // saved in  icons/myicon.png - myicon.png
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 1,
         defaults: {
@@ -178,14 +184,14 @@
             },
             positionConfig: {
                 value: '',
-                type: "position-config",
+                type: 'position-config',
                 required: true
             },
             rules: {
                 value: []
             },
             onlyOnChange: {
-                value: "true",
+                value: 'true',
                 required: true
             },
             topic: {
@@ -195,51 +201,51 @@
                 value: 1
             }
         },
-        outputLabels: function (index) {
+        outputLabels(index) {
             if (index == 0) {
-                return ((this.topic) ? this.topic + ":" : '') + "sun-position";
+                return ((this.topic) ? this.topic + ':' : '') + 'sun-position';
             }
-            var rule = this.rules[index - 1];
+
+            const rule = this.rules[index - 1];
             if (rule) {
-                return getValueLabel(rule.valueLowType, rule.valueLow) + " & " + getValueLabel(rule.valueHighType,
+                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType,
                     rule.valueHigh);
             }
-        },
-        label: function () {
+    },
+        label() {
             if (this.name) {
                 return this.name;
             }
 
             if (this.topic && (this.topic.length + result.length <= 32)) {
-                return this.topic + ":" + "sun-position";
+                return this.topic + ':' + 'sun-position';
             }
 
-            return "sun-position";
-        },
-        labelStyle: function () {
-            return this.name ? "node_label_italic" : '';
-        },
-        paletteLabel: "sun-position",
-        oneditprepare: function () {
-            var node = this;
+            return 'sun-position';
+    },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+    },
+        paletteLabel: 'sun-position',
+        oneditprepare() {
+            const node = this;
 
-            var outputCount = $("#node-input-outputs").val("{}");
+            const outputCount = $('#node-input-outputs').val('{}');
 
-            var btwnLabel = this._("sun-position.label.between");
-            var andLabel = this._("sun-position.label.and");
-
+            const btwnLabel = this._('sun-position.label.between');
+            const andLabel = this._('sun-position.label.and');
 
             function resizeRule(rule) {
-                var newWidth = rule.width();
-                var btwnField1 = rule.find(".node-input-rule-btwn-value");
-                var btwnField2 = rule.find(".node-input-rule-btwn-value2");
-                var editwidth = (newWidth / 2)
-                btwnField1.typedInput("width", (editwidth - 70));
-                btwnField2.typedInput("width", (editwidth - 70));
+                const newWidth = rule.width();
+                const btwnField1 = rule.find('.node-input-rule-btwn-value');
+                const btwnField2 = rule.find('.node-input-rule-btwn-value2');
+                const editwidth = (newWidth / 2);
+                btwnField1.typedInput('width', (editwidth - 70));
+                btwnField2.typedInput('width', (editwidth - 70));
             }
 
-            $("#node-input-rule-container").css('min-height', '100px').css('min-width', '200px').editableList({
-                addItem: function (container, i, opt) {
+            $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
+                addItem(container, i, opt) {
                     container.css({
                         overflow: 'hidden',
                         whiteSpace: 'nowrap'
@@ -247,48 +253,50 @@
                     if (!opt.hasOwnProperty('r')) {
                         opt.r = {};
                     }
+
                     if (!opt.hasOwnProperty('i')) {
                         opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
                     }
-                    var rule = opt.r;
-                    var row = $('<div/>').appendTo(container);
-                    var row3 = $('<div/>', {
-                        style: "padding-top: 5px;"
+
+                    const rule = opt.r;
+                    const row = $('<div/>').appendTo(container);
+                    const row3 = $('<div/>', {
+                        style: 'padding-top: 5px;'
                     }).appendTo(container);
 
-                    /*validate: function (v) {
-                        var n = Number(v);
-                        return ((n >= 0) && (n <= 360));
-                    }*/
+                    /* validate: function (v) {
+                var n = Number(v);
+                return ((n >= 0) && (n <= 360));
+            } */
 
-                    var btwnMainLabel = $('<span/>', {
-                        class: "node-input-rule-btwn-label"
-                    }).text(" " + btwnLabel + " ").appendTo(row);
-                    var btwnValueField = $('<input/>', {
-                        class: "node-input-rule-btwn-value",
-                        type: "text",
-                        style: "margin-left: 5px;"
+                    const btwnMainLabel = $('<span/>', {
+                        class: 'node-input-rule-btwn-label'
+                    }).text(' ' + btwnLabel + ' ').appendTo(row);
+                    const btwnValueField = $('<input/>', {
+                        class: 'node-input-rule-btwn-value',
+                        type: 'text',
+                        style: 'margin-left: 5px;'
                     }).appendTo(row).typedInput({
                         default: 'num',
                         types: ['msg', 'flow', 'global', 'num', 'env']
                     });
-                    var btwnAndLabel = $('<span/>', {
-                        class: "node-input-rule-btwn-label"
-                    }).text(" " + andLabel + " ").appendTo(row);
-                    var btwnValue2Field = $('<input/>', {
-                        class: "node-input-rule-btwn-value2",
-                        type: "text",
-                        style: "margin-left:2px;"
+                    const btwnAndLabel = $('<span/>', {
+                        class: 'node-input-rule-btwn-label'
+                    }).text(' ' + andLabel + ' ').appendTo(row);
+                    const btwnValue2Field = $('<input/>', {
+                        class: 'node-input-rule-btwn-value2',
+                        type: 'text',
+                        style: 'margin-left:2px;'
                     }).appendTo(row).typedInput({
                         default: 'num',
                         types: ['msg', 'flow', 'global', 'num', 'env']
                     });
 
-                    var finalspan = $('<span/>', {
-                        style: "float: right;margin-top: 6px;"
+                    const finalspan = $('<span/>', {
+                        style: 'float: right;margin-top: 6px;'
                     }).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
-                        '</span> ');
+                '</span> ');
 
                     resizeRule(container);
                     btwnValueField.typedInput('value', rule.valueLow);
@@ -296,95 +304,97 @@
                     btwnValue2Field.typedInput('value', rule.valueHigh);
                     btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
 
-                    //{"0":0,"1":-1,"2":-1,"3":-1}
-                    //{"0":0}
-                    var currentOutputs = JSON.parse(outputCount.val() || '{}');
+                    // {"0":0,"1":-1,"2":-1,"3":-1}
+                    // {"0":0}
+                    const currentOutputs = JSON.parse(outputCount.val() || '{}');
                     currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
-                    currentOutputs['m'] = i + 1;
-                    //console.log(currentOutputs);
+                    currentOutputs.m = i + 1;
+                    // console.log(currentOutputs);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
-                removeItem: function (opt) {
-                    var currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
+                removeItem(opt) {
+                    const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
                     if (opt.hasOwnProperty('i')) {
                         currentOutputs[opt.i] = -1;
                     } else {
                         delete currentOutputs[opt._i];
                     }
-                    var rules = $("#node-input-rule-container").editableList('items');
+
+                    const rules = $('#node-input-rule-container').editableList('items');
                     rules.each(function (i) {
-                        $(this).find(".node-input-rule-index").html(i + 2);
-                        var data = $(this).data('data');
+                        $(this).find('.node-input-rule-index').html(i + 2);
+                        const data = $(this).data('data');
                         currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                     });
-                    currentOutputs['m'] = rules.length;
-                    //console.log(currentOutputs);
-                    //console.log(rules);
+                    currentOutputs.m = rules.length;
+                    // console.log(currentOutputs);
+                    // console.log(rules);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 resizeItem: resizeRule,
-                sortItems: function (rules) {
-                    var currentOutputs = JSON.parse(outputCount.val() || "{}");
-                    var rules = $("#node-input-rule-container").editableList('items');
+                sortItems(rules) {
+                    const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                    var rules = $('#node-input-rule-container').editableList('items');
                     rules.each(function (i) {
-                        $(this).find(".node-input-rule-index").html(i + 2);
-                        var data = $(this).data('data');
+                        $(this).find('.node-input-rule-index').html(i + 2);
+                        const data = $(this).data('data');
                         currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                     });
-                    currentOutputs['m'] = rules.length;
-                    //console.log(currentOutputs);
-                    //console.log(rules);
+                    currentOutputs.m = rules.length;
+                    // console.log(currentOutputs);
+                    // console.log(rules);
                     outputCount.val(JSON.stringify(currentOutputs));
                 },
                 sortable: true,
                 removable: true
             });
 
-            for (var i = 0; i < this.rules.length; i++) {
-                var rule = this.rules[i];
-                $("#node-input-rule-container").editableList('addItem', {
+            for (let i = 0; i < this.rules.length; i++) {
+                const rule = this.rules[i];
+                $('#node-input-rule-container').editableList('addItem', {
                     r: rule,
-                    i: i,
+                    i,
                     l: this.rules.length
                 });
             }
-        },
-        oneditsave: function () {
-            var rules = $("#node-input-rule-container").editableList('items');
-            var ruleset;
-            var node = this;
+    },
+        oneditsave() {
+            const rules = $('#node-input-rule-container').editableList('items');
+            let ruleset;
+            const node = this;
 
             node.rules = [];
             rules.each(function (i) {
-                var ruleData = $(this).data('data');
-                var rule = $(this);
-                var r = {};
-                r.valueLow = rule.find(".node-input-rule-btwn-value").typedInput('value');
-                r.valueLowType = rule.find(".node-input-rule-btwn-value").typedInput('type');
-                r.valueHigh = rule.find(".node-input-rule-btwn-value2").typedInput('value');
-                r.valueHighType = rule.find(".node-input-rule-btwn-value2").typedInput('type');
+                const ruleData = $(this).data('data');
+                const rule = $(this);
+                const r = {};
+                r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
+                r.valueLowType = rule.find('.node-input-rule-btwn-value').typedInput('type');
+                r.valueHigh = rule.find('.node-input-rule-btwn-value2').typedInput('value');
+                r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
                 node.rules.push(r);
             });
-            this.propertyType = $("#node-input-property").typedInput('type');
-            //var outputCount = $("#node-input-outputs").val(); //"{}"
+            this.propertyType = $('#node-input-property').typedInput('type');
+            // var outputCount = $("#node-input-outputs").val(); //"{}"
 
-            var currentOutputs = JSON.parse($("#node-input-outputs").val() || '{"m":0}');
-            currentOutputs['m'] = rules.length;
-            //console.log(currentOutputs);
-            //console.log(rules);
-            $("#node-input-outputs").val(JSON.stringify(currentOutputs));
-            //outputCount.val(JSON.stringify(currentOutputs));
-        },
-        oneditresize: function (size) {
-            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
-            var height = size.height;
-            for (var i = 0; i < rows.size(); i++) {
+            const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
+            currentOutputs.m = rules.length;
+            // console.log(currentOutputs);
+            // console.log(rules);
+            $('#node-input-outputs').val(JSON.stringify(currentOutputs));
+        // outputCount.val(JSON.stringify(currentOutputs));
+    },
+        oneditresize(size) {
+            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+            let height = size.height;
+            for (let i = 0; i < rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
-            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
-            height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+
+            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
             height -= 50;
-            $("#node-input-rule-container").editableList('height', height);
-        }
+            $('#node-input-rule-container').editableList('height', height);
+    }
     });
 </script>

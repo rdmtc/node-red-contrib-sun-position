@@ -4,8 +4,10 @@
 'use strict';
 
 const path = require('path');
+
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 const util = require('util');
+
 const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 
 /*******************************************************************************************************/
@@ -56,8 +58,7 @@ const moonPhases = [{
     code: ':waning_crescent_moon:',
     name: 'Waning Crescent',
     weight: 6.3825
-}
-];
+}];
 
 Date.prototype.addDays = function (days) {
     const date = new Date(this.valueOf());
@@ -109,8 +110,10 @@ module.exports = function (RED) {
                         const date = (new Date()).addDays(next);
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                     }
+
                     result.value = hlp.addOffset(new Date(result.value), offset);
                 }
+
                 if (days && (days !== '*') && (days !== '')) {
                     const dayx = hlp.calcDayOffset(days, result.value.getDay());
                     // node.debug('move day ' + dayx);
@@ -124,9 +127,11 @@ module.exports = function (RED) {
                         result.error = 'No valid day of week found!';
                     }
                 }
+
                 // node.debug('getSunTime result=' + util.inspect(result));
                 return result;
             };
+
             this.getMoonTimes = () => {
                 // node.debug('getMoonTimes');
                 const res = moonTimesCheck(node);
@@ -134,6 +139,7 @@ module.exports = function (RED) {
                 res.tomorrow = node.moonTimesTomorow;
                 return res;
             };
+
             this.getMoonTime = (now, value, offset, next, days) => {
                 // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const result = moonTimesCheck(node, now);
@@ -150,6 +156,7 @@ module.exports = function (RED) {
                         // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     }
                 }
+
                 if (days && (days !== '*') && (days !== '')) {
                     const dayx = hlp.calcDayOffset(days, result.value.getDay());
                     if (dayx > 0) {
@@ -162,6 +169,7 @@ module.exports = function (RED) {
                         // node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                     }
                 }
+
                 // node.debug('getMoonTime result' + util.inspect(result));
                 return result;
             };
@@ -212,13 +220,16 @@ module.exports = function (RED) {
                     if (!result.error) {
                         result.error = 'Can not get time for ' + vType + '=' + value;
                     }
+
                     result.value = now;
                 }
+
                 // node.debug('getTimeProp result' + util.inspect(result));
                 return result;
             };
+
             /**************************************************************************************************************/
-            this.getSunCalc = (date) => {
+            this.getSunCalc = date => {
                 if (typeof date === 'string') {
                     // node.debug('getSunCalc for date ' + date);
                     const dto = new Date(date);
@@ -226,6 +237,7 @@ module.exports = function (RED) {
                         date = dto;
                     }
                 }
+
                 if ((typeof date === 'undefined') || !(date instanceof Date)) {
                     // node.debug('getSunCalc, no valid date ' + date + ' given');
                     date = new Date();
@@ -251,14 +263,16 @@ module.exports = function (RED) {
 
                 return result;
             };
+
             /**************************************************************************************************************/
-            this.getMoonCalc = (date) => {
+            this.getMoonCalc = date => {
                 if (typeof date === 'string') {
                     const dto = new Date(date);
                     if (dto !== 'Invalid Date' && !isNaN(dto)) {
                         date = dto;
                     }
                 }
+
                 if ((typeof date === 'undefined') || !(date instanceof Date)) {
                     date = new Date();
                     if (Math.abs(date.getTime() - this.lastMoonCalc.ts) < 3000) {
@@ -315,6 +329,7 @@ module.exports = function (RED) {
                     // Waning Crescent                  -   letztes Viertel bzw.abnehmende Sichel(Phasenwinkel > 270°).
                     result.illumination.phase = moonPhases[7];
                 }
+
                 result.illumination.phase.value = moonIllum.phase;
                 result.illumination.phase.angle = (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360;
 
@@ -322,19 +337,23 @@ module.exports = function (RED) {
                     // true if the moon never rises/sets and is always above the horizon during the day
                     result.times.alwaysUp = false;
                 }
+
                 if (!result.times.alwaysDown) {
                     // true if the moon is always below the horizon
                     result.times.alwaysDown = false;
                 }
+
                 this.lastMoonCalc = result;
 
                 return result;
             };
+
             /**************************************************************************************************************/
             initTimes(this);
         } catch (err) {
             hlp.errorHandler(this, err, RED._('position-config.errors.error-text'), RED._('position-config.errors.error-title'));
         }
+
         /**************************************************************************************************************/
         // sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
         // {id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path}
@@ -363,6 +382,7 @@ module.exports = function (RED) {
                 const tomorrow = (new Date()).addDays(1);
                 sunTimesRefresh(node, dateb, tomorrow, day_id);
             }
+
             return {
                 calcDate: dateb,
                 dayId: day_id
@@ -376,19 +396,23 @@ module.exports = function (RED) {
                 // true if the moon never rises/sets and is always above the horizon during the day
                 node.moonTimesToday.alwaysUp = false;
             }
+
             if (!node.moonTimesToday.alwaysDown) {
                 // true if the moon is always below the horizon
                 node.moonTimesToday.alwaysDown = false;
             }
+
             node.moonTimesTomorow = sunCalc.getMoonTimes(tomorrow, node.latitude, node.longitude, true);
             if (!node.moonTimesTomorow.alwaysUp) {
                 // true if the moon never rises/sets and is always above the horizon during the day
                 node.moonTimesTomorow.alwaysUp = false;
             }
+
             if (!node.moonTimesTomorow.alwaysDown) {
                 // true if the moon is always below the horizon
                 node.moonTimesTomorow.alwaysDown = false;
             }
+
             node.moonDayId = dayId;
         }
 
@@ -400,6 +424,7 @@ module.exports = function (RED) {
                 const tomorrow = (new Date()).addDays(1);
                 moonTimesRefresh(node, dateb, tomorrow, day_id);
             }
+
             return {
                 calcDate: dateb,
                 dayId: day_id
@@ -419,5 +444,6 @@ module.exports = function (RED) {
             return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
         }
     }
+
     RED.nodes.registerType('position-config', positionConfigurationNode);
 };

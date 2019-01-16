@@ -11,22 +11,31 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     // shortcuts for easier to read formulas
 
-    const PI = Math.PI,
-        sin = Math.sin,
-        cos = Math.cos,
-        tan = Math.tan,
-        asin = Math.asin,
-        atan = Math.atan2,
-        acos = Math.acos,
-        rad = PI / 180;
+    const PI = Math.PI;
+
+    const sin = Math.sin;
+
+    const cos = Math.cos;
+
+    const tan = Math.tan;
+
+    const asin = Math.asin;
+
+    const atan = Math.atan2;
+
+    const acos = Math.acos;
+
+    const rad = PI / 180;
 
     // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 
     // date/time constants and conversions
 
-    const dayMs = 1000 * 60 * 60 * 24,
-        J1970 = 2440588,
-        J2000 = 2451545;
+    const dayMs = 1000 * 60 * 60 * 24;
+
+    const J1970 = 2440588;
+
+    const J2000 = 2451545;
 
     function toJulian(date) {
         return date.valueOf() / dayMs - 0.5 + J1970;
@@ -66,7 +75,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     function astroRefraction(h) {
         if (h < 0) // the following formula works for positive altitudes only.
-            h = 0; // if h = -0.08901179 a div/0 would occur.
+        {
+            h = 0;
+        } // if h = -0.08901179 a div/0 would occur.
 
         // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
@@ -80,17 +91,18 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     }
 
     function eclipticLongitude(M) {
+        const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
+        // equation of center
 
-        const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
-            P = rad * 102.9372; // perihelion of the Earth
+        const P = rad * 102.9372; // perihelion of the Earth
 
         return M + C + P + PI;
     }
 
     function sunCoords(d) {
+        const M = solarMeanAnomaly(d);
 
-        const M = solarMeanAnomaly(d),
-            L = eclipticLongitude(M);
+        const L = eclipticLongitude(M);
 
         return {
             dec: declination(L, 0),
@@ -103,13 +115,15 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // calculates sun position for a given date and latitude/longitude
 
     SunCalc.getPosition = function (date, lat, lng) {
+        const lw = rad * -lng;
 
-        const lw = rad * -lng,
-            phi = rad * lat,
-            d = toDays(date),
+        const phi = rad * lat;
 
-            c = sunCoords(d),
-            H = siderealTime(d, lw) - c.ra;
+        const d = toDays(date);
+
+        const c = sunCoords(d);
+
+        const H = siderealTime(d, lw) - c.ra;
 
         return {
             azimuth: azimuth(H, phi, c.dec),
@@ -170,28 +184,32 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     // returns set time for the given sun altitude
     function getSetJ(h, lw, phi, dec, n, M, L) {
+        const w = hourAngle(h, phi, dec);
 
-        const w = hourAngle(h, phi, dec),
-            a = approxTransit(w, lw, n);
+        const a = approxTransit(w, lw, n);
         return solarTransitJ(a, M, L);
     }
 
     // calculates sun times for a given date and latitude/longitude
 
     SunCalc.getTimes = function (date, lat, lng) {
+        const lw = rad * -lng;
 
-        const lw = rad * -lng,
-            phi = rad * lat,
+        const phi = rad * lat;
 
-            d = toDays(date),
-            n = julianCycle(d, lw),
-            ds = approxTransit(0, lw, n),
+        const d = toDays(date);
 
-            M = solarMeanAnomaly(ds),
-            L = eclipticLongitude(M),
-            dec = declination(L, 0),
+        const n = julianCycle(d, lw);
 
-            Jnoon = solarTransitJ(ds, M, L);
+        const ds = approxTransit(0, lw, n);
+
+        const M = solarMeanAnomaly(ds);
+
+        const L = eclipticLongitude(M);
+
+        const dec = declination(L, 0);
+
+        const Jnoon = solarTransitJ(ds, M, L);
 
         const result = {
             solarNoon: {
@@ -230,6 +248,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time[2]].ts = result[time[2]].value.getTime();
             result[time[1]].ts = result[time[1]].value.getTime();
         }
+
         // for backward compatibilit
         for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
             const time = sunTimesAlternate[i];
@@ -243,14 +262,22 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
     function moonCoords(d) { // geocentric ecliptic coordinates of the moon
+        const L = rad * (218.316 + 13.176396 * d);
+        // ecliptic longitude
 
-        const L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
-            M = rad * (134.963 + 13.064993 * d), // mean anomaly
-            F = rad * (93.272 + 13.229350 * d), // mean distance
+        const M = rad * (134.963 + 13.064993 * d);
+        // mean anomaly
 
-            l = L + rad * 6.289 * sin(M), // longitude
-            b = rad * 5.128 * sin(F), // latitude
-            dt = 385001 - 20905 * cos(M); // distance to the moon in km
+        const F = rad * (93.272 + 13.229350 * d);
+        // mean distance
+
+        const l = L + rad * 6.289 * sin(M);
+        // longitude
+
+        const b = rad * 5.128 * sin(F);
+        // latitude
+
+        const dt = 385001 - 20905 * cos(M); // distance to the moon in km
 
         return {
             ra: rightAscension(l, b),
@@ -260,7 +287,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     }
 
     SunCalc.getMoonPosition = function (date, lat, lng) {
-
         const lw = rad * -lng;
         const phi = rad * lat;
         const d = toDays(date);
@@ -270,7 +296,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
-        h = h + astroRefraction(h); // altitude correction for refraction
+        h += astroRefraction(h); // altitude correction for refraction
 
         return {
             azimuth: azimuth(H, phi, c.dec),
@@ -285,22 +311,26 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
 
     SunCalc.getMoonIllumination = function (date) {
+        const d = toDays(date || new Date());
 
-        const d = toDays(date || new Date()),
-            s = sunCoords(d),
-            m = moonCoords(d),
+        const s = sunCoords(d);
 
-            sdist = 149598000, // distance from Earth to Sun in km
+        const m = moonCoords(d);
 
-            phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra)),
-            inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi)),
-            angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
+        const sdist = 149598000;
+        // distance from Earth to Sun in km
+
+        const phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra));
+
+        const inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
+
+        const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
                 cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
 
         return {
             fraction: (1 + cos(inc)) / 2,
             phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
-            angle: angle
+            angle
         };
     };
 
@@ -312,12 +342,15 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
         const t = new Date(date);
-        if (inUTC) t.setUTCHours(0, 0, 0, 0);
-        else t.setHours(0, 0, 0, 0);
+        if (inUTC) {
+            t.setUTCHours(0, 0, 0, 0);
+        } else {
+            t.setHours(0, 0, 0, 0);
+        }
 
         const hc = 0.133 * rad;
         let h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc;
-        let rise, set, ye, d, roots, x1, x2, dx;
+        let rise; let set; let ye; let d; let roots; let x1; let x2; let dx;
 
         // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
         for (let i = 1; i <= 24; i += 2) {
@@ -335,34 +368,53 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 dx = Math.sqrt(d) / (Math.abs(a) * 2);
                 x1 = xe - dx;
                 x2 = xe + dx;
-                if (Math.abs(x1) <= 1) roots++;
-                if (Math.abs(x2) <= 1) roots++;
-                if (x1 < -1) x1 = x2;
+                if (Math.abs(x1) <= 1) {
+                    roots++;
+                }
+
+                if (Math.abs(x2) <= 1) {
+                    roots++;
+                }
+
+                if (x1 < -1) {
+                    x1 = x2;
+                }
             }
 
             if (roots === 1) {
-                if (h0 < 0) rise = i + x1;
-                else set = i + x1;
-
+                if (h0 < 0) {
+                    rise = i + x1;
+                } else {
+                    set = i + x1;
+                }
             } else if (roots === 2) {
                 rise = i + (ye < 0 ? x2 : x1);
                 set = i + (ye < 0 ? x1 : x2);
             }
 
-            if (rise && set) break;
+            if (rise && set) {
+                break;
+            }
 
             h0 = h2;
         }
 
         const result = {};
 
-        if (rise) result.rise = hoursLater(t, rise);
-        if (set) result.set = hoursLater(t, set);
+        if (rise) {
+            result.rise = hoursLater(t, rise);
+        }
 
-        if (!rise && !set) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+        if (set) {
+            result.set = hoursLater(t, set);
+        }
+
+        if (!rise && !set) {
+            result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+        }
 
         return result;
     };
 
     module.exports = SunCalc;
-}());
+})();

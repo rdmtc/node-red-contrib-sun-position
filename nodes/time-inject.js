@@ -5,6 +5,7 @@
 
 const util = require('util');
 const path = require('path');
+
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 
 // const cron = require("cron");
@@ -20,6 +21,7 @@ module.exports = function (RED) {
                 millis += 86400000; // 24h
             }
         }
+
         return millis;
     }
 
@@ -28,12 +30,19 @@ module.exports = function (RED) {
             if (value === '' || (typeof value === 'undefined')) {
                 return Date.now();
             }
+
             return value;
-        } else if (type === 'pdsCalcData') {
+        }
+
+        if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
-        } else if (type === 'pdmCalcData') {
+        }
+
+        if (type === 'pdmCalcData') {
             return node.positionConfig.getMoonCalc(msg.ts);
-        } else if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
+        }
+
+        if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
             if (!data.error) {
                 return hlp.getFormatedDateOut(data.value, format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
@@ -95,8 +104,10 @@ module.exports = function (RED) {
                     return obj;
                 } */
             }
+
             return data;
         }
+
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
@@ -191,12 +202,14 @@ module.exports = function (RED) {
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
+
             if (node.nextTime && !errorStatus) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
                     // node.debug(node.nextTime);
                     hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
                     return;
                 }
+
                 let millis = tsGetScheduleTime(node.nextTime, 10);
                 // node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
                 const isAlt = (node.nextTimeAlt);
@@ -207,6 +220,7 @@ module.exports = function (RED) {
                         isAltFirst = true;
                     }
                 }
+
                 node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
                     const msg = {
                         type: 'start',
@@ -228,20 +242,24 @@ module.exports = function (RED) {
                             }));
                             node.log('Error: ' + util.inspect(err));
                         }
+
                         if (needsRecalc) {
                             try {
                                 doCreateTimeout(node, msg);
                             } catch (err) {
                                 hlp.errorHandler(node, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
                             }
+
                             return;
                         }
                     }
+
                     if (useAlternateTime && node.nextTimeAltData) {
                         msg.timeData = node.nextTimeAltData;
                     } else if (node.nextTimeData) {
                         msg.timeData = node.nextTimeData;
                     }
+
                     // node.debug('redo doCreateTimeout');
                     node.emit('input', msg);
                 }, millis, isAlt, isAltFirst);
@@ -292,6 +310,7 @@ module.exports = function (RED) {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
             }
+
             if (node.intervalObj) {
                 clearInterval(node.intervalObj);
             }
@@ -338,5 +357,6 @@ module.exports = function (RED) {
             hlp.errorHandler(this, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
         }
     }
+
     RED.nodes.registerType('time-inject', timeInjectNode);
 };
