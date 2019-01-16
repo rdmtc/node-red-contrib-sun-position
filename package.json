@@ -41,6 +41,7 @@
     "scripts": {
         "test": "camo-purge; xo",
         "lintfix": "xo --fix",
+        "lint": "eslint \"./**/*.js\"",
         "predev": "npm i -g",
         "dev": "node-red -v"
     },
