@@ -55,7 +55,7 @@ module.exports = function (RED) {
             try {
                 // evaluateNodeProperty(node.property, type, node, msg, callback)
                 const res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
-                result.altStartTime = ((res === true) || (res === 'true'));
+                result.altStartTime = hlp.toBoolean(res);
             } catch (err) {
                 result.altStartTime = false;
                 hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyStart-type', {
@@ -71,7 +71,7 @@ module.exports = function (RED) {
             try {
                 // evaluateNodeProperty(node.property, type, node, msg, callback)
                 const res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
-                result.altEndTime = ((res === true) || (res === 'true'));
+                result.altEndTime = hlp.toBoolean(res);
             } catch (err) {
                 result.altEndTime = false;
                 hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyEnd-type', {

@@ -232,7 +232,7 @@ module.exports = function (RED) {
                         let needsRecalc = false;
                         try {
                             const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                            useAlternateTime = ((res === true) || (res === 'true'));
+                            useAlternateTime = hlp.toBoolean(res);
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;

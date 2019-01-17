@@ -170,7 +170,7 @@ module.exports = function (RED) {
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
-                        operatorValid = (res === true || res === 'true');
+                        operatorValid = hlp.toBoolean(res);
                     }
 
                     if (operatorValid) {

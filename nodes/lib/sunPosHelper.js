@@ -5,6 +5,9 @@
 const util = require('util');
 
 module.exports = {
+    toBoolean,
+    isTrue,
+    isFalse,
     errorHandler,
     getComperableDateFormat,
     parseComperableDateFormat,
@@ -39,11 +42,41 @@ module.exports = {
 /*******************************************************************************************************/
 /* exported functions                                                                                  */
 /*******************************************************************************************************/
+/**
+ * converts a string to a boolean
+ * a Number >0 is also given back as true
+ * @param {*} val a parameter which should be convertet to Boolean
+ * @returns {boolean} boolean representation of the input value
+ */
+function toBoolean(val) {
+    val = (val+'').toLowerCase();
+    return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
+}
+
+/**
+ * returns **true** if the parameter value is a valid boolean value for **true**
+ * @param {*} val a parameter which should be checkd if  it is a valid true boolean
+ * @returns {boolean} true if the parameter value is a valid boolean value for **true**
+ */
+const isTrue = function(val) {
+    val = (val+'').toLowerCase();
+    return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
+};
+
+/**
+ * returns **true** if the parameter value is a valid boolean value for **false**
+ * @param {*} val a parameter which should be checkd if  it is a valid false boolean
+ * @returns {boolean} true if the parameter value is a valid boolean value for **false**
+ */
+const isFalse = function(val) {
+    val = (val+'').toLowerCase();
+    return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
+};
+/*******************************************************************************************************/
 function getNodeId(node) {
     // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
-
 /*******************************************************************************************************/
 function errorHandler(node, err, messageText, stateText) {
     if (!err) {
@@ -72,7 +105,6 @@ function errorHandler(node, err, messageText, stateText) {
 
     return false;
 }
-
 /*******************************************************************************************************/
 /**
  * cratetes a string with two digets
