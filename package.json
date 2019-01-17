@@ -163,8 +163,8 @@
       "no-var": "error",
       "prefer-const": "error",
       "linebreak-style": [
-        "error",
-        "windows"
+        "warn",
+        "unix"
       ],
       "brace-style": [
         2,
