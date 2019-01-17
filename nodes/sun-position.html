@@ -156,20 +156,20 @@
     }
 
     function getValueLabel(t, v) {
-    if (t === 'str') {
-    return '"' + clipValueLength(v) + '"';
-    }
+        if (t === 'str') {
+            return '"' + clipValueLength(v) + '"';
+        }
 
-    if (t === 'msg') {
-    return t + '.' + clipValueLength(v);
-    }
+        if (t === 'msg') {
+            return t + '.' + clipValueLength(v);
+        }
 
-    if (t === 'flow' || t === 'global') {
-    return t + '.' + clipValueLength(prop2name(v));
-    }
+        if (t === 'flow' || t === 'global') {
+            return t + '.' + clipValueLength(prop2name(v));
+        }
 
-    return clipValueLength(v);
-}
+        return clipValueLength(v);
+    }
 
     RED.nodes.registerType('sun-position', {
         category: 'time and astro',
@@ -202,7 +202,7 @@
             }
         },
         outputLabels(index) {
-            if (index == 0) {
+            if (index === 0) {
                 return ((this.topic) ? this.topic + ':' : '') + 'sun-position';
             }
 
@@ -211,29 +211,28 @@
                 return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType,
                     rule.valueHigh);
             }
-    },
+        },
         label() {
             if (this.name) {
                 return this.name;
             }
-
+            const result = 'sun-position';
             if (this.topic && (this.topic.length + result.length <= 32)) {
-                return this.topic + ':' + 'sun-position';
+                return this.topic + ':' + result;
             }
-
-            return 'sun-position';
-    },
+            return result;
+        },
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
-    },
+        },
         paletteLabel: 'sun-position',
         oneditprepare() {
             const node = this;
 
             const outputCount = $('#node-input-outputs').val('{}');
 
-            const btwnLabel = this._('sun-position.label.between');
-            const andLabel = this._('sun-position.label.and');
+            const btwnLabel = node._('sun-position.label.between');
+            const andLabel = node._('sun-position.label.and');
 
             function resizeRule(rule) {
                 const newWidth = rule.width();
@@ -260,16 +259,16 @@
 
                     const rule = opt.r;
                     const row = $('<div/>').appendTo(container);
-                    const row3 = $('<div/>', {
+                    /* const row3 = $('<div/>', {
                         style: 'padding-top: 5px;'
-                    }).appendTo(container);
+                    }).appendTo(container); */
 
                     /* validate: function (v) {
-                var n = Number(v);
-                return ((n >= 0) && (n <= 360));
-            } */
+                        var n = Number(v);
+                        return ((n >= 0) && (n <= 360));
+                    } */
 
-                    const btwnMainLabel = $('<span/>', {
+                    $('<span/>', {
                         class: 'node-input-rule-btwn-label'
                     }).text(' ' + btwnLabel + ' ').appendTo(row);
                     const btwnValueField = $('<input/>', {
@@ -280,7 +279,7 @@
                         default: 'num',
                         types: ['msg', 'flow', 'global', 'num', 'env']
                     });
-                    const btwnAndLabel = $('<span/>', {
+                    $('<span/>', {
                         class: 'node-input-rule-btwn-label'
                     }).text(' ' + andLabel + ' ').appendTo(row);
                     const btwnValue2Field = $('<input/>', {
@@ -334,7 +333,7 @@
                 resizeItem: resizeRule,
                 sortItems(rules) {
                     const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                    var rules = $('#node-input-rule-container').editableList('items');
+                    rules = $('#node-input-rule-container').editableList('items');
                     rules.each(function (i) {
                         $(this).find('.node-input-rule-index').html(i + 2);
                         const data = $(this).data('data');
@@ -349,23 +348,22 @@
                 removable: true
             });
 
-            for (let i = 0; i < this.rules.length; i++) {
-                const rule = this.rules[i];
+            for (let i = 0; i < node.rules.length; i++) {
+                const rule = node.rules[i];
                 $('#node-input-rule-container').editableList('addItem', {
                     r: rule,
                     i,
-                    l: this.rules.length
+                    l: node.rules.length
                 });
             }
-    },
+        },
         oneditsave() {
             const rules = $('#node-input-rule-container').editableList('items');
-            let ruleset;
             const node = this;
 
             node.rules = [];
-            rules.each(function (i) {
-                const ruleData = $(this).data('data');
+            rules.each(function ( _i ) {
+                // const ruleData = $(this).data('data');
                 const rule = $(this);
                 const r = {};
                 r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
@@ -374,7 +372,7 @@
                 r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
                 node.rules.push(r);
             });
-            this.propertyType = $('#node-input-property').typedInput('type');
+            node.propertyType = $('#node-input-property').typedInput('type');
             // var outputCount = $("#node-input-outputs").val(); //"{}"
 
             const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
@@ -383,7 +381,7 @@
             // console.log(rules);
             $('#node-input-outputs').val(JSON.stringify(currentOutputs));
         // outputCount.val(JSON.stringify(currentOutputs));
-    },
+        },
         oneditresize(size) {
             const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
             let height = size.height;
@@ -395,6 +393,5 @@
             height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
             height -= 50;
             $('#node-input-rule-container').editableList('height', height);
-    }
-    });
-</script>
+        }
+    });</script>

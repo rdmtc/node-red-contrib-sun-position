@@ -480,1344 +480,1236 @@
 </script>
 
 <script type="text/javascript">
-  function clipValueLength(v, l) {
-      if (v.length > l) {
-          return v.substring(0, l - 3) + '...';
-      }
+    function clipValueLength(v, l) {
+        if (v.length > l) {
+            return v.substring(0, l - 3) + '...';
+        }
 
-      return v;
-  }
+        return v;
+    }
 
-  function getValueLabel(t, v, l) {
-      l = l || 15;
-      if (t === 'string' || t === 'str') {
-          if (v == '') {
-              return v;
-          }
+    function getValueLabel(t, v, l) {
+        l = l || 15;
+        if (t === 'string' || t === 'str') {
+            if (v === '') {
+                return v;
+            }
 
-          return '"' + clipValueLength(v, l) + '"';
-      }
+            return '"' + clipValueLength(v, l) + '"';
+        }
 
-      if (t === 'num' || t === 'bool') {
-          if (v == '') {
-              return v;
-          }
+        if (t === 'num' || t === 'bool') {
+            if (v === '') {
+                return v;
+            }
 
-          return String(v);
-      }
+            return String(v);
+        }
 
-      if (t === 'msg') {
-          return t + '.' + clipValueLength(v, l);
-      }
+        if (t === 'msg') {
+            return t + '.' + clipValueLength(v, l);
+        }
 
-      if (t === 'flow' || t === 'global') {
-          let result = RED.utils.parseContextKey(v);
-          return t + '.' + clipValueLength(result.key, l);
-      }
+        if (t === 'flow' || t === 'global') {
+            const result = RED.utils.parseContextKey(v);
+            return t + '.' + clipValueLength(result.key, l);
+        }
 
-      if (t == 'pdsCalcData') {
-          return '{sun position}';
-      }
+        if (t === 'pdsCalcData') {
+            return '{sun position}';
+        }
 
-      if (t == 'pdmCalcData') {
-          return '{moon position}';
-      }
+        if (t === 'pdmCalcData') {
+            return '{moon position}';
+        }
 
-      if (t == 'pdsTime') {
-          const res = v
-              .replace('astronomical', 'astro-')
-              .replace('nautical', 'naut-')
-              .replace('civil', '')
-              .replace('amateur', 'amat-')
-              .replace('blueHour', 'blHr-')
-              .replace('goldenHour', 'goHr-');
-          return clipValueLength(res, l);
-      }
+        if (t === 'pdsTime') {
+            const res = v
+                .replace('astronomical', 'astro-')
+                .replace('nautical', 'naut-')
+                .replace('civil', '')
+                .replace('amateur', 'amat-')
+                .replace('blueHour', 'blHr-')
+                .replace('goldenHour', 'goHr-');
+            return clipValueLength(res, l);
+        }
 
-      if (t == 'pdmTime') {
-          return 'moon' + v;
-      }
+        if (t === 'pdmTime') {
+            return 'moon' + v;
+        }
 
-      return clipValueLength(v, l);
-}
+        return clipValueLength(v, l);
+    }
 
-  RED.nodes.registerType('time-inject', {
-      category: 'time and astro',
-      color: '#a6bbcf',
-      icon: 'injectSun-white.png',
-      inputs: 0,
-      outputs: 1,
-      defaults: {
-          name: {
-              value: '',
-              required: false
-          },
-          positionConfig: {
-              value: '',
-              type: 'position-config',
-              required: true
-          },
-          payload: {
-              value: '',
-              validate: RED.validators.typedInput('payloadType')
-          },
-          payloadType: {
-              value: 'date'
-          },
-          payloadTimeFormat: {
-              value: 0
-              /* required: false,
+    RED.nodes.registerType('time-inject', {
+        category: 'time and astro',
+        color: '#a6bbcf',
+        icon: 'injectSun-white.png',
+        inputs: 0,
+        outputs: 1,
+        defaults: {
+            name: {
+                value: '',
+                required: false
+            },
+            positionConfig: {
+                value: '',
+                type: 'position-config',
+                required: true
+            },
+            payload: {
+                value: '',
+                validate: RED.validators.typedInput('payloadType')
+            },
+            payloadType: {
+                value: 'date'
+            },
+            payloadTimeFormat: {
+                value: 0
+                /* required: false,
                 validate: function (v) {
                     return (RED.validators.number()(v) || (typeof v === 'undefined'));
                 } */
-          },
-          payloadOffset: {
-              value: 0
-              /* required: false,
+            },
+            payloadOffset: {
+                value: 0
+                /* required: false,
                 validate: function (v) {
                     return (
                         RED.validators.number()(v) ||
                         this.payloadType === undefined || (typeof v === 'undefined')
                     );
                 } */
-          },
-          payloadOffsetMultiplier: {
-              value: 60
-              /* required: false,
+            },
+            payloadOffsetMultiplier: {
+                value: 60
+                /* required: false,
                 validate: function (v) {
                     return (
                         RED.validators.number()(v) ||
                         this.payloadType === undefined || (typeof v === 'undefined')
                     );
                 } */
-          },
-          payloadDays: {
-              value: '*'
-          },
-          topic: {
-              value: ''
-          },
-          time: {
-              value: '',
-              required: false,
-              validate: RED.validators.typedInput('timeType')
-          },
-          timeType: {
-              value: 'none'
-          },
-          timeDays: {
-              value: '*'
-          },
-          offset: {
-              value: 0,
-              required: false,
-              validate(v) {
-                  return (
-                      typeof v === 'undefined' ||
-          RED.validators.number()(v) ||
-          ($('#node-input-time').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none')
-                  );
-              }
-          },
-          offsetMultiplier: {
-              value: 60,
-              required: false,
-              validate(v) {
-                  return (
-                      typeof v === 'undefined' ||
-          RED.validators.number()(v) ||
-          ($('#node-input-time').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none')
-                  );
-              }
-          },
-          property: {
-              value: '',
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.typedInput('propertyType')(v) ||
-          ($('#node-input-time').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none')
-                  );
-              }
-          },
-          propertyType: {
-              value: 'none'
-          },
-          timeAlt: {
-              value: '',
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.typedInput('timeAltType')(v) ||
-          ($('#node-input-timeType').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none') ||
-          ($('#node-input-propertyType').length ?
-              $('#node-input-property').typedInput('type') === 'none' :
-              this.propertyType === 'none')
-                  );
-              }
-          },
-          timeAltType: {
-              value: 'entered'
-          },
-          timeAltOffset: {
-              value: 0,
-              required: true,
-              validate(v) {
-                  return (
-                      typeof v === 'undefined' ||
-          RED.validators.number()(v) ||
-          ($('#node-input-time').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none') ||
-          ($('#node-input-propertyType').length ?
-              $('#node-input-property').typedInput('type') === 'none' :
-              this.propertyType === 'none')
-                  );
-              }
-          },
-          timeAltOffsetMultiplier: {
-              value: 60,
-              required: true,
-              validate(v) {
-                  return (
-                      typeof v === 'undefined' ||
-          RED.validators.number()(v) ||
-          ($('#node-input-time').length ?
-              $('#node-input-time').typedInput('type') === 'none' :
-              this.timeType === 'none') ||
-          ($('#node-input-propertyType').length ?
-              $('#node-input-property').typedInput('type') === 'none' :
-              this.propertyType === 'none')
-                  );
-              }
-          },
-          timeDays: {
-              value: '*'
-          },
-          once: {
-              value: false
-          },
-          onceDelay: {
-              value: 0.1,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          v === '' ||
-          v == null ||
-          typeof v === 'undefined'
-                  );
-              }
-          },
-          addPayload1: {
-              value: '',
-              validate: RED.validators.typedInput('addPayload1Type')
-          },
-          addPayload1Type: {
-              value: 'none'
-          },
-          addPayload1Value: {
-              value: '',
-              validate(v) {
-                  return (
-                      RED.validators.typedInput('addPayload1ValueType')(v) ||
-          $('#node-input-addPayload1').typedInput('type') === 'none' ||
-          this.addPayload1Type === undefined
-                  );
-              }
-          },
-          addPayload1ValueType: {
-              value: 'date'
-          },
-          addPayload1Format: {
-              value: 0,
-              required: false
-          },
-          addPayload1Offset: {
-              value: 0,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload1').typedInput('type') === 'none' ||
-          this.addPayload1Type === undefined
-                  );
-              }
-          },
-          addPayload1OffsetMultiplier: {
-              value: 60,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload1').typedInput('type') === 'none' ||
-          this.addPayload1Type === undefined
-                  );
-              }
-          },
-          addPayload1Days: {
-              value: '*'
-          },
-          addPayload2: {
-              value: '',
-              validate: RED.validators.typedInput('addPayload2Type')
-          },
-          addPayload2Type: {
-              value: 'none'
-          },
-          addPayload2Value: {
-              value: '',
-              validate(v) {
-                  return (
-                      RED.validators.typedInput('addPayload2ValueType')(v) ||
-          $('#node-input-addPayload2').typedInput('type') === 'none' ||
-          this.addPayload2Type === undefined
-                  );
-              }
-          },
-          addPayload2ValueType: {
-              value: 'date'
-          },
-          addPayload2Format: {
-              value: 0,
-              required: false
-          },
-          addPayload2Offset: {
-              value: 0,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload2').typedInput('type') === 'none' ||
-          this.addPayload2Type === undefined
-                  );
-              }
-          },
-          addPayload2OffsetMultiplier: {
-              value: 60,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload2').typedInput('type') === 'none' ||
-          this.addPayload2Type === undefined
-                  );
-              }
-          },
-          addPayload2Days: {
-              value: '*'
-          },
-          addPayload3: {
-              value: '',
-              validate: RED.validators.typedInput('addPayload3Type')
-          },
-          addPayload3Type: {
-              value: 'none'
-          },
-          addPayload3Value: {
-              value: '',
-              validate(v) {
-                  return (
-                      RED.validators.typedInput('addPayload3ValueType')(v) ||
-          $('#node-input-addPayload3').typedInput('type') === 'none' ||
-          this.addPayload3Type === undefined
-                  );
-              }
-          },
-          addPayload3ValueType: {
-              value: 'date'
-          },
-          addPayload3Format: {
-              value: 0,
-              required: false
-          },
-          addPayload3Offset: {
-              value: 0,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload3').typedInput('type') === 'none' ||
-          this.addPayload3Type === undefined
-                  );
-              }
-          },
-          addPayload3OffsetMultiplier: {
-              value: 60,
-              required: false,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          $('#node-input-addPayload3').typedInput('type') === 'none' ||
-          this.addPayload3Type === undefined
-                  );
-              }
-          },
-          addPayload3Days: {
-              value: '*'
-          },
-          recalcTime: {
-              value: 2,
-              validate(v) {
-                  return (
-                      RED.validators.number()(v) ||
-          v === '' ||
-          v == null ||
-          typeof v === 'undefined'
-                  );
-              }
-          }
-      },
-      outputLabels(index) {
-          const labels = {
-              str: 'string',
-              num: 'number',
-              bool: 'boolean',
-              json: 'object',
-              flow: 'flow context',
-              global: 'global context',
-              bin: 'binary data',
-              date: 'timestamp',
-              env: 'Enviroment variable',
-              jsonata: 'result of jsonata expression',
-              pdmTime: 'time',
-              typeSunCalc: 'object of sun position',
-              typeMoonCalc: 'object of moon position'
-          };
-          let lab = labels[this.payloadType] || this.payloadType;
-          if (lab === 'object') {
-              try {
-                  lab = typeof JSON.parse(this.payload);
-                  if (lab === 'object') {
-                      if (Array.isArray(JSON.parse(this.payload))) {
-                          lab = 'Array';
-                      }
-                  }
-              } catch (e) {
-                  lab = 'Invalid JSON Object';
-              }
-          }
+            },
+            payloadDays: {
+                value: '*'
+            },
+            topic: {
+                value: ''
+            },
+            time: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('timeType')
+            },
+            timeType: {
+                value: 'none'
+            },
+            timeDays: {
+                value: '*'
+            },
+            offset: {
+                value: 0,
+                required: false,
+                validate(v) {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        ($('#node-input-time').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none')
+                    );
+                }
+            },
+            offsetMultiplier: {
+                value: 60,
+                required: false,
+                validate(v) {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        ($('#node-input-time').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none')
+                    );
+                }
+            },
+            property: {
+                value: '',
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.typedInput('propertyType')(v) ||
+                        ($('#node-input-time').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none')
+                    );
+                }
+            },
+            propertyType: {
+                value: 'none'
+            },
+            timeAlt: {
+                value: '',
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.typedInput('timeAltType')(v) ||
+                        ($('#node-input-timeType').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none') ||
+                        ($('#node-input-propertyType').length ?
+                            $('#node-input-property').typedInput('type') === 'none' :
+                            this.propertyType === 'none')
+                    );
+                }
+            },
+            timeAltType: {
+                value: 'entered'
+            },
+            timeAltOffset: {
+                value: 0,
+                required: true,
+                validate(v) {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        ($('#node-input-time').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none') ||
+                        ($('#node-input-propertyType').length ?
+                            $('#node-input-property').typedInput('type') === 'none' :
+                            this.propertyType === 'none')
+                    );
+                }
+            },
+            timeAltOffsetMultiplier: {
+                value: 60,
+                required: true,
+                validate(v) {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        ($('#node-input-time').length ?
+                            $('#node-input-time').typedInput('type') === 'none' :
+                            this.timeType === 'none') ||
+                        ($('#node-input-propertyType').length ?
+                            $('#node-input-property').typedInput('type') === 'none' :
+                            this.propertyType === 'none')
+                    );
+                }
+            },
+            once: {
+                value: false
+            },
+            onceDelay: {
+                value: 0.1,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        v === '' ||
+                        v === null ||
+                        typeof v === 'undefined'
+                    );
+                }
+            },
+            addPayload1: {
+                value: '',
+                validate: RED.validators.typedInput('addPayload1Type')
+            },
+            addPayload1Type: {
+                value: 'none'
+            },
+            addPayload1Value: {
+                value: '',
+                validate(v) {
+                    return (
+                        RED.validators.typedInput('addPayload1ValueType')(v) ||
+                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                        this.addPayload1Type === undefined
+                    );
+                }
+            },
+            addPayload1ValueType: {
+                value: 'date'
+            },
+            addPayload1Format: {
+                value: 0,
+                required: false
+            },
+            addPayload1Offset: {
+                value: 0,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                        this.addPayload1Type === undefined
+                    );
+                }
+            },
+            addPayload1OffsetMultiplier: {
+                value: 60,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                        this.addPayload1Type === undefined
+                    );
+                }
+            },
+            addPayload1Days: {
+                value: '*'
+            },
+            addPayload2: {
+                value: '',
+                validate: RED.validators.typedInput('addPayload2Type')
+            },
+            addPayload2Type: {
+                value: 'none'
+            },
+            addPayload2Value: {
+                value: '',
+                validate(v) {
+                    return (
+                        RED.validators.typedInput('addPayload2ValueType')(v) ||
+                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                        this.addPayload2Type === undefined
+                    );
+                }
+            },
+            addPayload2ValueType: {
+                value: 'date'
+            },
+            addPayload2Format: {
+                value: 0,
+                required: false
+            },
+            addPayload2Offset: {
+                value: 0,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                        this.addPayload2Type === undefined
+                    );
+                }
+            },
+            addPayload2OffsetMultiplier: {
+                value: 60,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                        this.addPayload2Type === undefined
+                    );
+                }
+            },
+            addPayload2Days: {
+                value: '*'
+            },
+            addPayload3: {
+                value: '',
+                validate: RED.validators.typedInput('addPayload3Type')
+            },
+            addPayload3Type: {
+                value: 'none'
+            },
+            addPayload3Value: {
+                value: '',
+                validate(v) {
+                    return (
+                        RED.validators.typedInput('addPayload3ValueType')(v) ||
+                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                        this.addPayload3Type === undefined
+                    );
+                }
+            },
+            addPayload3ValueType: {
+                value: 'date'
+            },
+            addPayload3Format: {
+                value: 0,
+                required: false
+            },
+            addPayload3Offset: {
+                value: 0,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                        this.addPayload3Type === undefined
+                    );
+                }
+            },
+            addPayload3OffsetMultiplier: {
+                value: 60,
+                required: false,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                        this.addPayload3Type === undefined
+                    );
+                }
+            },
+            addPayload3Days: {
+                value: '*'
+            },
+            recalcTime: {
+                value: 2,
+                validate(v) {
+                    return (
+                        RED.validators.number()(v) ||
+                        v === '' ||
+                        v === null ||
+                        typeof v === 'undefined'
+                    );
+                }
+            }
+        },
+        outputLabels(_index) {
+            const labels = {
+                str: 'string',
+                num: 'number',
+                bool: 'boolean',
+                json: 'object',
+                flow: 'flow context',
+                global: 'global context',
+                bin: 'binary data',
+                date: 'timestamp',
+                env: 'Enviroment variable',
+                jsonata: 'result of jsonata expression',
+                pdmTime: 'time',
+                typeSunCalc: 'object of sun position',
+                typeMoonCalc: 'object of moon position'
+            };
+            let lab = labels[this.payloadType] || this.payloadType;
+            if (lab === 'object') {
+                try {
+                    lab = typeof JSON.parse(this.payload);
+                    if (lab === 'object') {
+                        if (Array.isArray(JSON.parse(this.payload))) {
+                            lab = 'Array';
+                        }
+                    }
+                } catch (e) {
+                    lab = 'Invalid JSON Object';
+                }
+            }
 
-          return lab;
-      },
-      label() {
-  if (this.name) {
-              return this.name;
-  }
+            return lab;
+        },
+        label() {
+            if (this.name) {
+                return this.name;
+            }
 
-  let result = '';
-  let prefix = '';
-  if (this.once) {
-              prefix += ' ¹';
-  }
+            let result = '';
+            let prefix = '';
+            if (this.once) {
+                prefix += ' ¹';
+            }
 
-  const getId = (type, value, offset, maxLength) => {
-              let suffix = '';
-              if (offset && offset > 0) {
-                  suffix = '↷';
-              } else if (offset && offset < 0) {
-                  suffix = '↶';
-              }
+            const getId = (type, value, offset, maxLength) => {
+                let suffix = '';
+                if (offset && offset > 0) {
+                    suffix = '↷';
+                } else if (offset && offset < 0) {
+                    suffix = '↶';
+                }
 
-              if (type === 'jsonata') {
-                  if (value.length < 15) {
-  return value + suffix;
-                  }
+                if (type === 'jsonata') {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
 
-                  return this._('time-inject.label.jsonata');
-              }
+                    return this._('time-inject.label.jsonata');
+                }
 
-              if (type === 'json') {
-                  if (value.length < 15) {
-  return value + suffix;
-                  }
+                if (type === 'json') {
+                    if (value.length < 15) {
+                        return value + suffix;
+                    }
 
-                  return this._('time-inject.label.json') + suffix;
-              }
+                    return this._('time-inject.label.json') + suffix;
+                }
 
-              if (type === 'bin') {
-                  return this._('time-inject.label.binary') + suffix;
-              }
+                if (type === 'bin') {
+                    return this._('time-inject.label.binary') + suffix;
+                }
 
-              if (type === 'date') {
-                  return this._('time-inject.label.timestamp') + suffix;
-              }
+                if (type === 'date') {
+                    return this._('time-inject.label.timestamp') + suffix;
+                }
 
-              const v = getValueLabel(type, value, maxLength);
-              if (v == '') {
-                  return this._('time-inject.label.blank');
-              }
+                const v = getValueLabel(type, value, maxLength);
+                if (v === '') {
+                    return this._('time-inject.label.blank');
+                }
 
-              return v + suffix;
-          };
+                return v + suffix;
+            };
 
-  const getTimeId = () => {
-              let suffix = '';
-              const days = this.timeDays;
-              if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
-                  if (days === '1,2,3,4,5') {
-                      suffix += ' [Mo-Fr]'; // '👷'
-                  } else if (days === '1,2,3,4') {
-                      suffix += ' [Mo-Th]';
-                  } else if (days === '5,6,0') {
-                      suffix += ' [Fr-Su]';
-                  } else if (days === '6,0') {
-                      suffix += ' [Sa+Su]';
-                  } else {
-                      const dayarr = [];
-                      if (days.indexOf('1') >= 0) {
-                          dayarr.push('Mo');
-                      }
+            const getTimeId = () => {
+                let suffix = '';
+                const days = this.timeDays;
+                if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
+                    if (days === '1,2,3,4,5') {
+                        suffix += ' [Mo-Fr]'; // '👷'
+                    } else if (days === '1,2,3,4') {
+                        suffix += ' [Mo-Th]';
+                    } else if (days === '5,6,0') {
+                        suffix += ' [Fr-Su]';
+                    } else if (days === '6,0') {
+                        suffix += ' [Sa+Su]';
+                    } else {
+                        const dayarr = [];
+                        if (days.indexOf('1') >= 0) {
+                            dayarr.push('Mo');
+                        }
 
-                      if (days.indexOf('2') >= 0) {
-                          dayarr.push('Tu');
-                      }
+                        if (days.indexOf('2') >= 0) {
+                            dayarr.push('Tu');
+                        }
 
-                      if (days.indexOf('3') >= 0) {
-                          dayarr.push('We');
-                      }
+                        if (days.indexOf('3') >= 0) {
+                            dayarr.push('We');
+                        }
 
-                      if (days.indexOf('4') >= 0) {
-                          dayarr.push('Th');
-                      }
+                        if (days.indexOf('4') >= 0) {
+                            dayarr.push('Th');
+                        }
 
-                      if (days.indexOf('5') >= 0) {
-                          dayarr.push('Fr');
-                      }
+                        if (days.indexOf('5') >= 0) {
+                            dayarr.push('Fr');
+                        }
 
-                      if (days.indexOf('6') >= 0) {
-                          dayarr.push('Sa');
-                      }
+                        if (days.indexOf('6') >= 0) {
+                            dayarr.push('Sa');
+                        }
 
-                      if (days.indexOf('0') >= 0) {
-                          dayarr.push('Su');
-                      }
+                        if (days.indexOf('0') >= 0) {
+                            dayarr.push('Su');
+                        }
 
-                      suffix += ' [' + dayarr.join(',') + ']';
-                  }
-                  // ...
-              }
+                        suffix += ' [' + dayarr.join(',') + ']';
+                    }
+                    // ...
+                }
 
-              const part1 = getId(this.timeType, this.time, this.offset);
-              if (
-                  this.propertyType !== 'none' &&
+                const part1 = getId(this.timeType, this.time, this.offset);
+                if (
+                    this.propertyType !== 'none' &&
       this.propertyType !== '' &&
       this.timeAlt
-              ) {
-                  return (
-                      part1 +
+                ) {
+                    return (
+                        part1 +
         '/' +
         getId(this.timeAltType, this.timeAlt, this.timeAltOffset) +
         suffix
-                  );
-              }
+                    );
+                }
 
-              return part1 + suffix;
-  };
+                return part1 + suffix;
+            };
 
-  if (this.timeType === 'none' || this.timeType === '') {
-              return this._('time-inject.label.inject');
-  }
+            if (this.timeType === 'none' || this.timeType === '') {
+                return this._('time-inject.label.inject');
+            }
 
-          const timeTxt = getTimeId();
-          if (timeTxt.length > 24) {
-              result += timeTxt + ' =...';
-          } else {
-              result +=
+            const timeTxt = getTimeId();
+            if (timeTxt.length > 24) {
+                result += timeTxt + ' =...';
+            } else {
+                result +=
         timeTxt +
         ' = ' +
         getId(this.payloadType, this.payload, undefined, 12);
-          }
-  
-  if (this.topic && this.topic.length + result.length <= 32) {
-              return this.topic + ':' + prefix + result;
-  }
+            }
 
-  return prefix + result;
-      },
-      labelStyle() {
-          return this.name ? 'node_label_italic' : '';
-      },
-      paletteLabel: 'time inject',
-      align: 'left',
-      oneditprepare() {
-          // #region definition
-          const typeUndefined = {
-              value: 'none',
-              label: 'not used',
-              // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
-              hasValue: false
-          };
-          const typeTime = {
-              value: 'entered',
-              label: 'time of day',
-              icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
-              hasValue: true,
-              validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
-          };
-          const typeTimeSun = {
-              value: 'pdsTime',
-              label: 'sun time ',
-              icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
-              options: [
-                  'astronomicalDawn',
-                  'amateurDawn',
-                  'nauticalDawn',
-                  'blueHourDawnStart',
-                  'civilDawn',
-                  'blueHourDawnEnd',
-                  'sunrise',
-                  'sunriseEnd',
-                  'goldenHourEnd',
-                  'solarNoon',
-                  'goldenHourStart',
-                  'sunsetStart',
-                  'sunset',
-                  'blueHourDuskStart',
-                  'civilDusk',
-                  'blueHourDuskEnd',
-                  'amateurDusk',
-                  'astronomicalDusk',
-                  'nadir'
-              ]
-          };
-          const typeTimeMoon = {
-              value: 'pdmTime',
-              label: 'moon time ',
-              icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
-              options: ['rise', 'set']
-          };
-          const typeSunCalc = {
-              value: 'pdsCalcData',
-              label: 'sun caclucaltion',
-              icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
-              hasValue: false
-          };
-          const typeMoonCalc = {
-              value: 'pdmCalcData',
-              label: 'moon caclucaltion',
-              icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
-              hasValue: false
-          };
-          // #endregion definition
-          // #region initialize
-          function initializeValue(data, id, newVal) {
-              if (data[id] == null || typeof data[id] === 'undefined') {
-                  // let idHtml = "#node-input-" + id;
-                  // data[id] = newVal;
-                  $('#node-input-' + id).val(newVal);
-                  console.log(
-                      'not initialized value !! "' +
-          id +
-          '" = "' +
-          newVal +
-          '" - ' +
-          data[id]
-                  );
-              }
-          }
+            if (this.topic && this.topic.length + result.length <= 32) {
+                return this.topic + ':' + prefix + result;
+            }
 
-          function initializeNrValue(data, id, newVal) {
-              if (
-                  data[id] == null ||
-        typeof data[id] === undefined ||
-        data[id] === ''
-              ) {
-                  $('#node-input-' + id).val(newVal);
-                  console.log(
-                      'not initialized numeric value !! ' +
-          id +
-          ' = "' +
-          newVal +
-          '" - ' +
-          data[id]
-                  );
-              }
-          }
+            return prefix + result;
+        },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+        },
+        paletteLabel: 'time inject',
+        align: 'left',
+        oneditprepare() {
+            // #region definition
+            const typeUndefined = {
+                value: 'none',
+                label: 'not used',
+                // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+                hasValue: false
+            };
+            const typeTime = {
+                value: 'entered',
+                label: 'time of day',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
+                hasValue: true,
+                validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
+            };
+            const typeTimeSun = {
+                value: 'pdsTime',
+                label: 'sun time ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
+                options: [
+                    'astronomicalDawn',
+                    'amateurDawn',
+                    'nauticalDawn',
+                    'blueHourDawnStart',
+                    'civilDawn',
+                    'blueHourDawnEnd',
+                    'sunrise',
+                    'sunriseEnd',
+                    'goldenHourEnd',
+                    'solarNoon',
+                    'goldenHourStart',
+                    'sunsetStart',
+                    'sunset',
+                    'blueHourDuskStart',
+                    'civilDusk',
+                    'blueHourDuskEnd',
+                    'amateurDusk',
+                    'astronomicalDusk',
+                    'nadir'
+                ]
+            };
+            const typeTimeMoon = {
+                value: 'pdmTime',
+                label: 'moon time ',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
+                options: ['rise', 'set']
+            };
+            const typeSunCalc = {
+                value: 'pdsCalcData',
+                label: 'sun caclucaltion',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
+                hasValue: false
+            };
+            const typeMoonCalc = {
+                value: 'pdmCalcData',
+                label: 'moon caclucaltion',
+                icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
+                hasValue: false
+            };
+            // #endregion definition
+            // #region initialize
+            function initializeValue(data, id, newVal) {
+                if (data[id] === null || typeof data[id] === 'undefined') {
+                    // let idHtml = "#node-input-" + id;
+                    // data[id] = newVal;
+                    $('#node-input-' + id).val(newVal);
+                    console.log('not initialized value !! "' + id + '" = "' + newVal + '" - ' + data[id]);
+                }
+            }
 
-          initializeNrValue(this, 'offset', 0);
-          initializeNrValue(this, 'offsetMultiplier', 60);
-          initializeNrValue(this, 'timeAltOffset', 0);
-          initializeNrValue(this, 'timeAltOffsetMultiplier', 60);
-          initializeNrValue(this, 'addPayload1Offset', 0);
-          initializeNrValue(this, 'addPayload1OffsetMultiplier', 60);
-          initializeNrValue(this, 'addPayload2Offset', 0);
-          initializeNrValue(this, 'addPayload2OffsetMultiplier', 60);
-          initializeNrValue(this, 'addPayload3Offset', 0);
-          initializeNrValue(this, 'addPayload3OffsetMultiplier', 60);
-          initializeValue(this, 'timeDays', '*');
-          initializeValue(this, 'property', '');
-          initializeValue(this, 'propertyType', typeUndefined.value);
-          initializeValue(this, 'timeAlt', '');
-          initializeValue(this, 'timeAltType', typeUndefined.value);
-          initializeValue(this, 'timeAltDays', '*');
-          initializeValue(this, 'addPayload1', '');
-          initializeValue(this, 'addPayload1Type', typeUndefined.value);
-          initializeValue(this, 'addPayload1Value', '');
-          initializeValue(this, 'addPayload1ValueType', 'date');
-          initializeValue(this, 'addPayload1Days', '*');
-          initializeValue(this, 'addPayload2', '');
-          initializeValue(this, 'addPayload2Type', typeUndefined.value);
-          initializeValue(this, 'addPayload2Value', '');
-          initializeValue(this, 'addPayload2ValueType', 'date');
-          initializeValue(this, 'addPayload2Days', '*');
-          initializeValue(this, 'addPayload3', '');
-          initializeValue(this, 'addPayload3Type', typeUndefined.value);
-          initializeValue(this, 'addPayload3Value', '');
-          initializeValue(this, 'addPayload3ValueType', 'date');
-          initializeValue(this, 'addPayload3Days', '*');
-          // #endregion initialize
-          // #region spinner
-          $('#node-input-once').change(() => {
-              $('#node-input-onceDelay').attr(
-                  'disabled',
-                  !$('#node-input-once').prop('checked')
-              );
-  });
+            function initializeNrValue(data, id, newVal) {
+                if (data[id] === null ||
+                    typeof data[id] === undefined ||
+                    data[id] === '') {
+                    $('#node-input-' + id).val(newVal);
+                    console.log('not initialized numeric value !! ' + id + ' = "' + newVal + '" - ' + data[id]);
+                }
+            }
 
-          $('.wt-offset-time').spinner({
-              max: 1439,
-              min: -1439
-          });
-          $('#node-input-onceDelay').spinner({
-              step: 0.1,
-              numberFormat: 'n'
-          });
-          $('#node-input-recalcTime').spinner({
-              step: 0.1,
-              numberFormat: 'n'
-          });
-          // #endregion spinner
-          // #region payload
-          if (this.payloadType == null) {
-              if (this.payload == '') {
-                  this.payloadType = 'date';
-              } else {
-                  this.payloadType = 'str';
-              }
-          } else if (
-              this.payloadType === 'string' ||
-      this.payloadType === typeUndefined.value
-          ) {
-              this.payloadType = 'str';
-          }
+            initializeNrValue(this, 'offset', 0);
+            initializeNrValue(this, 'offsetMultiplier', 60);
+            initializeNrValue(this, 'timeAltOffset', 0);
+            initializeNrValue(this, 'timeAltOffsetMultiplier', 60);
+            initializeNrValue(this, 'addPayload1Offset', 0);
+            initializeNrValue(this, 'addPayload1OffsetMultiplier', 60);
+            initializeNrValue(this, 'addPayload2Offset', 0);
+            initializeNrValue(this, 'addPayload2OffsetMultiplier', 60);
+            initializeNrValue(this, 'addPayload3Offset', 0);
+            initializeNrValue(this, 'addPayload3OffsetMultiplier', 60);
+            initializeValue(this, 'timeDays', '*');
+            initializeValue(this, 'property', '');
+            initializeValue(this, 'propertyType', typeUndefined.value);
+            initializeValue(this, 'timeAlt', '');
+            initializeValue(this, 'timeAltType', typeUndefined.value);
+            initializeValue(this, 'timeAltDays', '*');
+            initializeValue(this, 'addPayload1', '');
+            initializeValue(this, 'addPayload1Type', typeUndefined.value);
+            initializeValue(this, 'addPayload1Value', '');
+            initializeValue(this, 'addPayload1ValueType', 'date');
+            initializeValue(this, 'addPayload1Days', '*');
+            initializeValue(this, 'addPayload2', '');
+            initializeValue(this, 'addPayload2Type', typeUndefined.value);
+            initializeValue(this, 'addPayload2Value', '');
+            initializeValue(this, 'addPayload2ValueType', 'date');
+            initializeValue(this, 'addPayload2Days', '*');
+            initializeValue(this, 'addPayload3', '');
+            initializeValue(this, 'addPayload3Type', typeUndefined.value);
+            initializeValue(this, 'addPayload3Value', '');
+            initializeValue(this, 'addPayload3ValueType', 'date');
+            initializeValue(this, 'addPayload3Days', '*');
+            // #endregion initialize
+            // #region spinner
+            $('#node-input-once').change(() => {
+                $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+            });
 
-          $('#node-input-payloadType').val(this.payloadType);
-          $('#node-input-payload').typedInput({
-              default: this.payloadType || 'date',
-              typeField: $('#node-input-payloadType'),
-              types: [
-                  'date',
-                  'flow',
-                  'global',
-                  'str',
-                  'num',
-                  'bool',
-                  'json',
-                  'bin',
-                  'env',
-                  'jsonata',
-                  typeSunCalc,
-                  typeMoonCalc,
-                  typeTimeSun,
-                  typeTimeMoon
-              ]
-          });
-          $('#node-input-payload').typedInput('type', this.payloadType);
-          // #endregion payload
-          // #region addPayload1
-          $('#node-input-addPayload1Type').val(this.addPayload1Type);
-          $('#node-input-addPayload1').typedInput({
-              default: this.addPayload1Type || typeUndefined.value,
-              typeField: $('#node-input-addPayload1Type'),
-              types: [typeUndefined, 'msg', 'flow', 'global']
-          });
-          $('#node-input-addPayload1').typedInput('type', this.addPayload1Type);
+            $('.wt-offset-time').spinner({
+                max: 1439,
+                min: -1439
+            });
+            $('#node-input-onceDelay').spinner({
+                step: 0.1,
+                numberFormat: 'n'
+            });
+            $('#node-input-recalcTime').spinner({
+                step: 0.1,
+                numberFormat: 'n'
+            });
+            // #endregion spinner
+            // #region payload
+            if (this.payloadType === null) {
+                if (this.payload === '') {
+                    this.payloadType = 'date';
+                } else {
+                    this.payloadType = 'str';
+                }
+            } else if (this.payloadType === 'string' || this.payloadType === typeUndefined.value) {
+                this.payloadType = 'str';
+            }
 
-          $('#node-input-addPayload1ValueType').val(this.addPayload1ValueType);
-          $('#node-input-addPayload1Value').typedInput({
-              default: this.addPayload1ValueType || 'date',
-              typeField: $('#node-input-addPayload1ValueType'),
-              types: [
-                  'date',
-                  typeTime,
-                  typeTimeSun,
-                  typeTimeMoon,
-                  'flow',
-                  'global',
-                  'str',
-                  'num',
-                  'bool',
-                  'json',
-                  'bin',
-                  'env',
-                  'jsonata',
-                  typeSunCalc,
-                  typeMoonCalc
-              ]
-          });
-          $('#node-input-addPayload1Value').typedInput('type', this.addPayload1ValueType);
-          $('#node-input-addPayload1').on('change', (type, value) => {
-              const plType = $('#node-input-addPayload1').typedInput('type');
-              if (plType !== typeUndefined.value) {
-                  $('.time-addPayload1Value').show();
-                  $('.time-addPayload2').show();
-                  const plVType = $('#node-input-addPayload1Value').typedInput('type');
-                  if (
-                      plVType === 'entered' ||
+            $('#node-input-payloadType').val(this.payloadType);
+            $('#node-input-payload').typedInput({
+                default: this.payloadType || 'date',
+                typeField: $('#node-input-payloadType'),
+                types: [
+                    'date',
+                    'flow',
+                    'global',
+                    'str',
+                    'num',
+                    'bool',
+                    'json',
+                    'bin',
+                    'env',
+                    'jsonata',
+                    typeSunCalc,
+                    typeMoonCalc,
+                    typeTimeSun,
+                    typeTimeMoon
+                ]
+            });
+            $('#node-input-payload').typedInput('type', this.payloadType);
+            // #endregion payload
+            // #region addPayload1
+            $('#node-input-addPayload1Type').val(this.addPayload1Type);
+            $('#node-input-addPayload1').typedInput({
+                default: this.addPayload1Type || typeUndefined.value,
+                typeField: $('#node-input-addPayload1Type'),
+                types: [typeUndefined, 'msg', 'flow', 'global']
+            });
+            $('#node-input-addPayload1').typedInput('type', this.addPayload1Type);
+
+            $('#node-input-addPayload1ValueType').val(this.addPayload1ValueType);
+            $('#node-input-addPayload1Value').typedInput({
+                default: this.addPayload1ValueType || 'date',
+                typeField: $('#node-input-addPayload1ValueType'),
+                types: [
+                    'date',
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'flow',
+                    'global',
+                    'str',
+                    'num',
+                    'bool',
+                    'json',
+                    'bin',
+                    'env',
+                    'jsonata',
+                    typeSunCalc,
+                    typeMoonCalc
+                ]
+            });
+            $('#node-input-addPayload1Value').typedInput('type', this.addPayload1ValueType);
+            $('#node-input-addPayload1').on('change', (_type, _value) => {
+                const plType = $('#node-input-addPayload1').typedInput('type');
+                if (plType !== typeUndefined.value) {
+                    $('.time-addPayload1Value').show();
+                    $('.time-addPayload2').show();
+                    const plVType = $('#node-input-addPayload1Value').typedInput('type');
+                    if (plVType === 'entered' || plVType === 'pdsTime' || plVType === 'pdmTime') {
+                        $('.time-inject-row-addPayload1Format').show();
+                        $('.time-inject-row-addPayload1Offset').show();
+                        $('.time-inject-row-addPayload1days').show();
+                    } else if (plVType === 'date') {
+                        $('.time-inject-row-addPayload1Format').show();
+                        $('.time-inject-row-addPayload1Offset').show();
+                        $('.time-inject-row-addPayload1days').hide();
+                    } else {
+                        $('.time-inject-row-addPayload1Format').hide();
+                        $('.time-inject-row-addPayload1Offset').hide();
+                        $('.time-inject-row-addPayload1days').hide();
+                    }
+                } else {
+                    $('.time-addPayload1Value').hide();
+                    $('.time-inject-row-addPayload1Format').hide();
+                    $('.time-inject-row-addPayload1Offset').hide();
+                    $('.time-inject-row-addPayload1days').hide();
+                    $('.time-addPayload2').hide();
+                }
+                $('#node-input-addPayload2').change();
+            });
+            $('#node-input-addPayload1Value').on('change', (_type, _value) => {
+                $('#node-input-addPayload1').change();
+            });
+            if (this.addPayload1Days === '*' || typeof this.addPayload1Days === 'undefined') {
+                $('#time-inject-addPayload1Days input[type=checkbox]').prop('checked', true);
+            } else {
+                $('#time-inject-addPayload1Days input[type=checkbox]').removeAttr('checked');
+                this.addPayload1Days.split(',').forEach(v => {
+                    $('#time-inject-addPayload1Days [value=' + v + ']').prop('checked', true);
+                });
+            }
+
+            $('#node-input-addPayload1Format').attr('defValue', this._('time-inject.timeFormat.default'));
+            $('#node-input-addPayload1Formatsel').on('change', (_type, _value) => {
+                if (Number($('#node-input-addPayload1Formatsel').val()) === 99) {
+                    $('#node-input-addPayload1Format').show();
+                    $('#node-input-addPayload1Format').css({ width: '40%' });
+                    $('#node-input-addPayload1Formatsel').css({ width: '30%' });
+                    if (!isNaN($('#node-input-addPayload1Format').val())) {
+                        $('#node-input-addPayload1Format').val($('#node-input-addPayload1Format').attr('defValue'));
+                    }
+                } else {
+                    $('#node-input-addPayload1Format').hide();
+                    $('#node-input-addPayload1Formatsel').css({ width: '70%' });
+                }
+            });
+            if (isNaN(this.addPayload1Format)) {
+                $('#node-input-addPayload1Formatsel').val(99);
+            } else {
+                $('#node-input-addPayload1Formatsel').val(Number(this.addPayload1Format));
+            }
+
+            $('#node-input-addPayload1Formatsel').change();
+            // #endregion addPayload1
+            // #region addPayload2
+            $('#node-input-addPayload2Type').val(this.addPayload2Type);
+            $('#node-input-addPayload2').typedInput({
+                default: this.addPayload2Type || typeUndefined.value,
+                typeField: $('#node-input-addPayload2Type'),
+                types: [typeUndefined, 'msg', 'flow', 'global']
+            });
+            $('#node-input-addPayload2').typedInput('type', this.addPayload2Type);
+            $('#node-input-addPayload2ValueType').val(this.addPayload2ValueType);
+            $('#node-input-addPayload2Value').typedInput({
+                default: this.addPayload2ValueType || 'date',
+                typeField: $('#node-input-addPayload2ValueType'),
+                types: [
+                    'date',
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'flow',
+                    'global',
+                    'str',
+                    'num',
+                    'bool',
+                    'json',
+                    'bin',
+                    'env',
+                    'jsonata',
+                    typeSunCalc,
+                    typeMoonCalc
+                ]
+            });
+            $('#node-input-addPayload2Value').typedInput('type', this.addPayload2ValueType);
+            $('#node-input-addPayload2').on('change', (_type, _value) => {
+                const plType = $('#node-input-addPayload2').typedInput('type');
+                if (plType !== typeUndefined.value) {
+                    $('.time-addPayload2Value').show();
+                    $('.time-addPayload3').show();
+                    const plVType = $('#node-input-addPayload2Value').typedInput('type');
+                    if (
+                        plVType === 'entered' ||
         plVType === 'pdsTime' ||
         plVType === 'pdmTime'
-                  ) {
-                      $('.time-inject-row-addPayload1Format').show();
-                      $('.time-inject-row-addPayload1Offset').show();
-                      $('.time-inject-row-addPayload1days').show();
-                  } else if (plVType === 'date') {
-                      $('.time-inject-row-addPayload1Format').show();
-                      $('.time-inject-row-addPayload1Offset').show();
-                      $('.time-inject-row-addPayload1days').hide();
-                  } else {
-                      $('.time-inject-row-addPayload1Format').hide();
-                      $('.time-inject-row-addPayload1Offset').hide();
-                      $('.time-inject-row-addPayload1days').hide();
-                  }
-              } else {
-                  $('.time-addPayload1Value').hide();
-                  $('.time-inject-row-addPayload1Format').hide();
-                  $('.time-inject-row-addPayload1Offset').hide();
-                  $('.time-inject-row-addPayload1days').hide();
-                  $('.time-addPayload2').hide();
-              }
+                    ) {
+                        $('.time-inject-row-addPayload2Format').show();
+                        $('.time-inject-row-addPayload2Offset').show();
+                        $('.time-inject-row-addPayload2days').show();
+                    } else if (plVType === 'date') {
+                        $('.time-inject-row-addPayload2Format').show();
+                        $('.time-inject-row-addPayload2Offset').show();
+                        $('.time-inject-row-addPayload2days').hide();
+                    } else {
+                        $('.time-inject-row-addPayload2Format').hide();
+                        $('.time-inject-row-addPayload2Offset').hide();
+                        $('.time-inject-row-addPayload2days').hide();
+                    }
+                } else {
+                    $('.time-addPayload2Value').hide();
+                    $('.time-inject-row-addPayload2Format').hide();
+                    $('.time-inject-row-addPayload2Offset').hide();
+                    $('.time-inject-row-addPayload2days').hide();
+                    $('.time-addPayload3').hide();
+                }
 
-              $('#node-input-addPayload2').change();
-  });
-          $('#node-input-addPayload1Value').on('change', (type, value) => {
-              $('#node-input-addPayload1').change();
-  });
-          if (
-              this.addPayload1Days == '*' ||
-      typeof this.addPayload1Days === 'undefined'
-          ) {
-              $('#time-inject-addPayload1Days input[type=checkbox]').prop(
-                  'checked',
-                  true
-              );
-          } else {
-              $('#time-inject-addPayload1Days input[type=checkbox]').removeAttr(
-                  'checked'
-              );
-              this.addPayload1Days.split(',').forEach(v => {
-                  $('#time-inject-addPayload1Days [value=' + v + ']').prop(
-                      'checked',
-                      true
-                  );
-              });
-          }
+                $('#node-input-addPayload3').change();
+            });
+            $('#node-input-addPayload2Value').on('change', (_type, _value) => {
+                $('#node-input-addPayload2').change();
+            });
+            if (
+                this.addPayload2Days === '*' || typeof this.addPayload2Days === 'undefined' ) {
+                $('#time-inject-addPayload2Days input[type=checkbox]').prop('checked', true);
+            } else {
+                $('#time-inject-addPayload2Days input[type=checkbox]').removeAttr('checked');
+                this.addPayload2Days.split(',').forEach(v => {
+                    $('#time-inject-addPayload2Days [value=' + v + ']').prop('checked',true);
+                });
+            }
 
-          $('#node-input-addPayload1Format').attr('defValue', this._('time-inject.timeFormat.default'));
-          $('#node-input-addPayload1Formatsel').on('change', (type, value) => {
-              if (Number($('#node-input-addPayload1Formatsel').val()) == 99) {
-                  $('#node-input-addPayload1Format').show();
-                  $('#node-input-addPayload1Format').css({
-                      width: '40%'
-                  });
-                  $('#node-input-addPayload1Formatsel').css({
-                      width: '30%'
-                  });
-                  if (!isNaN($('#node-input-addPayload1Format').val())) {
-                      $('#node-input-addPayload1Format').val($('#node-input-addPayload1Format').attr('defValue'));
-                  }
-              } else {
-                  $('#node-input-addPayload1Format').hide();
-                  $('#node-input-addPayload1Formatsel').css({
-                      width: '70%'
-                  });
-              }
-  });
-          if (isNaN(this.addPayload1Format)) {
-              $('#node-input-addPayload1Formatsel').val(99);
-          } else {
-              $('#node-input-addPayload1Formatsel').val(Number(this.addPayload1Format));
-          }
+            $('#node-input-addPayload2Format').attr('defValue', this._('time-inject.timeFormat.default'));
+            $('#node-input-addPayload2Formatsel').on('change', (_type, _value) => {
+                if (Number($('#node-input-addPayload2Formatsel').val()) === 99) {
+                    $('#node-input-addPayload2Format').show();
+                    $('#node-input-addPayload2Format').css({ width: '40%' });
+                    $('#node-input-addPayload2Formatsel').css({ width: '30%' });
+                    if (!isNaN($('#node-input-addPayload2Format').val())) {
+                        $('#node-input-addPayload2Format').val($('#node-input-addPayload2Format').attr('defValue'));
+                    }
+                } else {
+                    $('#node-input-addPayload2Format').hide();
+                    $('#node-input-addPayload2Formatsel').css({ width: '70%' });
+                }
+            });
+            if (isNaN(this.addPayload2Format)) {
+                $('#node-input-addPayload2Formatsel').val(99);
+            } else {
+                $('#node-input-addPayload2Formatsel').val(Number(this.addPayload2Format));
+            }
 
-          $('#node-input-addPayload1Formatsel').change();
-          // #endregion addPayload1
-          // #region addPayload2
-          $('#node-input-addPayload2Type').val(this.addPayload2Type);
-          $('#node-input-addPayload2').typedInput({
-              default: this.addPayload2Type || typeUndefined.value,
-              typeField: $('#node-input-addPayload2Type'),
-              types: [typeUndefined, 'msg', 'flow', 'global']
-          });
-          $('#node-input-addPayload2').typedInput('type', this.addPayload2Type);
-          $('#node-input-addPayload2ValueType').val(this.addPayload2ValueType);
-          $('#node-input-addPayload2Value').typedInput({
-              default: this.addPayload2ValueType || 'date',
-              typeField: $('#node-input-addPayload2ValueType'),
-              types: [
-                  'date',
-                  typeTime,
-                  typeTimeSun,
-                  typeTimeMoon,
-                  'flow',
-                  'global',
-                  'str',
-                  'num',
-                  'bool',
-                  'json',
-                  'bin',
-                  'env',
-                  'jsonata',
-                  typeSunCalc,
-                  typeMoonCalc
-              ]
-          });
-          $('#node-input-addPayload2Value').typedInput('type', this.addPayload2ValueType);
-          $('#node-input-addPayload2').on('change', (type, value) => {
-              const plType = $('#node-input-addPayload2').typedInput('type');
-              if (plType !== typeUndefined.value) {
-                  $('.time-addPayload2Value').show();
-                  $('.time-addPayload3').show();
-                  const plVType = $('#node-input-addPayload2Value').typedInput('type');
-                  if (
-                      plVType === 'entered' ||
-        plVType === 'pdsTime' ||
-        plVType === 'pdmTime'
-                  ) {
-                      $('.time-inject-row-addPayload2Format').show();
-                      $('.time-inject-row-addPayload2Offset').show();
-                      $('.time-inject-row-addPayload2days').show();
-                  } else if (plVType === 'date') {
-                      $('.time-inject-row-addPayload2Format').show();
-                      $('.time-inject-row-addPayload2Offset').show();
-                      $('.time-inject-row-addPayload2days').hide();
-                  } else {
-                      $('.time-inject-row-addPayload2Format').hide();
-                      $('.time-inject-row-addPayload2Offset').hide();
-                      $('.time-inject-row-addPayload2days').hide();
-                  }
-              } else {
-                  $('.time-addPayload2Value').hide();
-                  $('.time-inject-row-addPayload2Format').hide();
-                  $('.time-inject-row-addPayload2Offset').hide();
-                  $('.time-inject-row-addPayload2days').hide();
-                  $('.time-addPayload3').hide();
-              }
+            $('#node-input-addPayload2Formatsel').change();
 
-              $('#node-input-addPayload3').change();
-  });
-          $('#node-input-addPayload2Value').on('change', (type, value) => {
-              $('#node-input-addPayload2').change();
-  });
-          if (
-              this.addPayload2Days == '*' ||
-      typeof this.addPayload2Days === 'undefined'
-          ) {
-              $('#time-inject-addPayload2Days input[type=checkbox]').prop(
-                  'checked',
-                  true
-              );
-          } else {
-              $('#time-inject-addPayload2Days input[type=checkbox]').removeAttr(
-                  'checked'
-              );
-              this.addPayload2Days.split(',').forEach(v => {
-                  $('#time-inject-addPayload2Days [value=' + v + ']').prop(
-                      'checked',
-                      true
-                  );
-              });
-          }
+            // #endregion addPayload2
+            // #region addPayload3
+            $('#node-input-addPayload3Type').val(this.addPayload3Type);
+            $('#node-input-addPayload3').typedInput({
+                default: this.addPayload3Type || typeUndefined.value,
+                typeField: $('#node-input-addPayload3Type'),
+                types: [typeUndefined, 'msg', 'flow', 'global']
+            });
+            $('#node-input-addPayload3').typedInput('type', this.addPayload3Type);
+            $('#node-input-addPayload3ValueType').val(this.addPayload3ValueType);
+            $('#node-input-addPayload3Value').typedInput({
+                default: this.addPayload3ValueType || 'date',
+                typeField: $('#node-input-addPayload3ValueType'),
+                types: [
+                    'date',
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'flow',
+                    'global',
+                    'str',
+                    'num',
+                    'bool',
+                    'json',
+                    'bin',
+                    'env',
+                    'jsonata',
+                    typeSunCalc,
+                    typeMoonCalc
+                ]
+            });
+            $('#node-input-addPayload3Value').typedInput('type', this.addPayload3ValueType);
+            $('#node-input-addPayload3').on('change', (_type, _value) => {
+                const plType = $('#node-input-addPayload3').typedInput('type');
+                if (plType !== typeUndefined.value) {
+                    $('.time-addPayload3Value').show();
+                    const plVType = $('#node-input-addPayload3Value').typedInput('type');
+                    if (plVType === 'entered' || plVType === 'pdsTime' || plVType === 'pdmTime') {
+                        $('.time-inject-row-addPayload3Format').show();
+                        $('.time-inject-row-addPayload3Offset').show();
+                        $('.time-inject-row-addPayload3days').show();
+                    } else if (plVType === 'date') {
+                        $('.time-inject-row-addPayload3Format').show();
+                        $('.time-inject-row-addPayload3Offset').show();
+                        $('.time-inject-row-addPayload3days').hide();
+                    } else {
+                        $('.time-inject-row-addPayload3Format').hide();
+                        $('.time-inject-row-addPayload3Offset').hide();
+                        $('.time-inject-row-addPayload3days').hide();
+                    }
+                } else {
+                    $('.time-addPayload3Value').hide();
+                    $('.time-inject-row-addPayload3Format').hide();
+                    $('.time-inject-row-addPayload3Offset').hide();
+                    $('.time-inject-row-addPayload3days').hide();
+                }
+            });
+            $('#node-input-addPayload3Value').on('change', (_type, _value) => {
+                $('#node-input-addPayload3').change();
+            });
+            if (this.addPayload3Days === '*' || typeof this.addPayload3Days === 'undefined') {
+                $('#time-inject-addPayload3Days input[type=checkbox]').prop(
+                    'checked',
+                    true
+                );
+            } else {
+                $('#time-inject-addPayload3Days input[type=checkbox]').removeAttr('checked');
+                this.addPayload3Days.split(',').forEach(v => {
+                    $('#time-inject-addPayload3Days [value=' + v + ']').prop('checked',true);
+                });
+            }
 
-          $('#node-input-addPayload2Format').attr('defValue', this._('time-inject.timeFormat.default'));
-          $('#node-input-addPayload2Formatsel').on('change', (type, value) => {
-              if (Number($('#node-input-addPayload2Formatsel').val()) == 99) {
-                  $('#node-input-addPayload2Format').show();
-                  $('#node-input-addPayload2Format').css({
-                      width: '40%'
-                  });
-                  $('#node-input-addPayload2Formatsel').css({
-                      width: '30%'
-                  });
-                  if (!isNaN($('#node-input-addPayload2Format').val())) {
-                      $('#node-input-addPayload2Format').val($('#node-input-addPayload2Format').attr('defValue'));
-                  }
-              } else {
-                  $('#node-input-addPayload2Format').hide();
-                  $('#node-input-addPayload2Formatsel').css({
-                      width: '70%'
-                  });
-              }
-  });
-          if (isNaN(this.addPayload2Format)) {
-              $('#node-input-addPayload2Formatsel').val(99);
-          } else {
-              $('#node-input-addPayload2Formatsel').val(Number(this.addPayload2Format));
-          }
+            $('#node-input-addPayload3Format').attr('defValue', this._('time-inject.timeFormat.default'));
+            $('#node-input-addPayload3Formatsel').on('change', (_type, _value) => {
+                if (Number($('#node-input-addPayload3Formatsel').val()) === 99) {
+                    $('#node-input-addPayload3Format').show();
+                    $('#node-input-addPayload3Format').css({ width: '40%' });
+                    $('#node-input-addPayload3Formatsel').css({ width: '30%' });
+                    if (!isNaN($('#node-input-addPayload3Format').val())) {
+                        $('#node-input-addPayload3Format').val($('#node-input-addPayload3Format').attr('defValue'));
+                    }
+                } else {
+                    $('#node-input-addPayload3Format').hide();
+                    $('#node-input-addPayload3Formatsel').css({ width: '70%' });
+                }
+            });
+            if (isNaN(this.addPayload3Format)) {
+                $('#node-input-addPayload3Formatsel').val(99);
+            } else {
+                $('#node-input-addPayload3Formatsel').val(Number(this.addPayload3Format));
+            }
 
-          $('#node-input-addPayload2Formatsel').change();
+            $('#node-input-addPayload3Formatsel').change();
 
-          // #endregion addPayload2
-          // #region addPayload3
-          $('#node-input-addPayload3Type').val(this.addPayload3Type);
-          $('#node-input-addPayload3').typedInput({
-              default: this.addPayload3Type || typeUndefined.value,
-              typeField: $('#node-input-addPayload3Type'),
-              types: [typeUndefined, 'msg', 'flow', 'global']
-          });
-          $('#node-input-addPayload3').typedInput('type', this.addPayload3Type);
-          $('#node-input-addPayload3ValueType').val(this.addPayload3ValueType);
-          $('#node-input-addPayload3Value').typedInput({
-              default: this.addPayload3ValueType || 'date',
-              typeField: $('#node-input-addPayload3ValueType'),
-              types: [
-                  'date',
-                  typeTime,
-                  typeTimeSun,
-                  typeTimeMoon,
-                  'flow',
-                  'global',
-                  'str',
-                  'num',
-                  'bool',
-                  'json',
-                  'bin',
-                  'env',
-                  'jsonata',
-                  typeSunCalc,
-                  typeMoonCalc
-              ]
-          });
-          $('#node-input-addPayload3Value').typedInput('type', this.addPayload3ValueType);
-          $('#node-input-addPayload3').on('change', (type, value) => {
-              const plType = $('#node-input-addPayload3').typedInput('type');
-              if (plType !== typeUndefined.value) {
-                  $('.time-addPayload3Value').show();
-                  const plVType = $('#node-input-addPayload3Value').typedInput('type');
-                  if (
-                      plVType === 'entered' ||
-        plVType === 'pdsTime' ||
-        plVType === 'pdmTime'
-                  ) {
-                      $('.time-inject-row-addPayload3Format').show();
-                      $('.time-inject-row-addPayload3Offset').show();
-                      $('.time-inject-row-addPayload3days').show();
-                  } else if (plVType === 'date') {
-                      $('.time-inject-row-addPayload3Format').show();
-                      $('.time-inject-row-addPayload3Offset').show();
-                      $('.time-inject-row-addPayload3days').hide();
-                  } else {
-                      $('.time-inject-row-addPayload3Format').hide();
-                      $('.time-inject-row-addPayload3Offset').hide();
-                      $('.time-inject-row-addPayload3days').hide();
-                  }
-              } else {
-                  $('.time-addPayload3Value').hide();
-                  $('.time-inject-row-addPayload3Format').hide();
-                  $('.time-inject-row-addPayload3Offset').hide();
-                  $('.time-inject-row-addPayload3days').hide();
-              }
-  });
-          $('#node-input-addPayload3Value').on('change', (type, value) => {
-              $('#node-input-addPayload3').change();
-  });
-          if (
-              this.addPayload3Days == '*' ||
-      typeof this.addPayload3Days === 'undefined'
-          ) {
-              $('#time-inject-addPayload3Days input[type=checkbox]').prop(
-                  'checked',
-                  true
-              );
-          } else {
-              $('#time-inject-addPayload3Days input[type=checkbox]').removeAttr(
-                  'checked'
-              );
-              this.addPayload3Days.split(',').forEach(v => {
-                  $('#time-inject-addPayload3Days [value=' + v + ']').prop(
-                      'checked',
-                      true
-                  );
-              });
-          }
+            // #endregion addPayload3
+            // #region property
+            $('#node-input-property').typedInput({
+                default: this.propertyType || typeUndefined.value,
+                types: [typeUndefined, 'flow', 'global', 'jsonata', 'env']
+            });
+            $('#node-input-property').on('change', (_type, _value) => {
+                const timeType = $('#node-input-time').typedInput('type');
+                const propType = $('#node-input-property').typedInput('type');
+                if ( timeType === typeUndefined.value || propType === typeUndefined.value ) {
+                    $('.time-inject-row-timeAlt').hide();
+                    $('.time-inject-row-timeAltOffset').hide();
+                    $('.time-inject-row-timeAltDays').hide();
+                } else {
+                    $('.time-inject-row-timeAlt').show();
+                    $('.time-inject-row-timeAltOffset').show();
+                    $('.time-inject-row-timeAltDays').show();
+                }
 
-          $('#node-input-addPayload3Format').attr('defValue', this._('time-inject.timeFormat.default'));
-          $('#node-input-addPayload3Formatsel').on('change', (type, value) => {
-              if (Number($('#node-input-addPayload3Formatsel').val()) == 99) {
-                  $('#node-input-addPayload3Format').show();
-                  $('#node-input-addPayload3Format').css({
-                      width: '40%'
-                  });
-                  $('#node-input-addPayload3Formatsel').css({
-                      width: '30%'
-                  });
-                  if (!isNaN($('#node-input-addPayload3Format').val())) {
-                      $('#node-input-addPayload3Format').val($('#node-input-addPayload3Format').attr('defValue'));
-                  }
-              } else {
-                  $('#node-input-addPayload3Format').hide();
-                  $('#node-input-addPayload3Formatsel').css({
-                      width: '70%'
-                  });
-              }
-  });
-          if (isNaN(this.addPayload3Format)) {
-              $('#node-input-addPayload3Formatsel').val(99);
-          } else {
-              $('#node-input-addPayload3Formatsel').val(Number(this.addPayload3Format));
-          }
+                if ( timeType === 'flow' || timeType === 'global' || propType !== typeUndefined.value ) {
+                    $('.time-inject-recalc').show();
+                } else {
+                    $('.time-inject-recalc').hide();
+                    $('#time-inject-recalcTime').val('');
+                }
+            });
+            // #endregion property
+            // #region time
+            $('#node-input-timeType').val(this.timeType);
+            $('#node-input-time').typedInput({
+                default: this.timeType || typeUndefined.value,
+                typeField: $('#node-input-timeType'),
+                types: [
+                    typeUndefined,
+                    typeTime,
+                    typeTimeSun,
+                    typeTimeMoon,
+                    'flow',
+                    'global',
+                    'env'
+                ]
+            });
+            $('#node-input-time').typedInput('type', this.timeType);
+            $('#node-input-time').on('change', (_type, _value) => {
+                if ($('#node-input-time').typedInput('type') === typeUndefined.value) {
+                    $('.time-inject-row-offset').hide();
+                    $('.time-inject-row-timeDays').hide();
+                    $('.time-inject-row-alt').hide();
+                } else {
+                    $('.time-inject-row-offset').show();
+                    $('.time-inject-row-timeDays').show();
+                    $('.time-inject-row-alt').show();
+                }
 
-          $('#node-input-addPayload3Formatsel').change();
+                $('#node-input-property').change();
+            });
+            if (this.timeDays === '*' || typeof this.timeDays === 'undefined') {
+                $('#time-inject-timeDays input[type=checkbox]').prop('checked', true);
+            } else {
+                $('#time-inject-timeDays input[type=checkbox]').removeAttr('checked');
+                this.timeDays.split(',').forEach(v => {
+                    $('#time-inject-timeDays [value=' + v + ']').prop('checked', true);
+                });
+            }
 
-          // #endregion addPayload3
-          // #region property
-          $('#node-input-property').typedInput({
-              default: this.propertyType || typeUndefined.value,
-              types: [typeUndefined, 'flow', 'global', 'jsonata', 'env']
-          });
-          $('#node-input-property').on('change', (type, value) => {
-              const timeType = $('#node-input-time').typedInput('type');
-              const propType = $('#node-input-property').typedInput('type');
-              if (
-                  timeType === typeUndefined.value ||
-      propType === typeUndefined.value
-              ) {
-                  $('.time-inject-row-timeAlt').hide();
-                  $('.time-inject-row-timeAltOffset').hide();
-                  $('.time-inject-row-timeAltDays').hide();
-              } else {
-                  $('.time-inject-row-timeAlt').show();
-                  $('.time-inject-row-timeAltOffset').show();
-                  $('.time-inject-row-timeAltDays').show();
-              }
+            // #endregion time
+            // #region timeAlt
+            $('#node-input-timeAlt').typedInput({
+                default: this.timeAltType || 'entered',
+                types: [typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global', 'env']
+            });
+            $('#node-input-timeAlt').typedInput('type', this.timeAltType);
+            if (this.timeAltDays === '*' || typeof this.timeAltDays === 'undefined') {
+                $('#time-inject-timeAltDays input[type=checkbox]').prop('checked', true);
+            } else {
+                $('#time-inject-timeAltDays input[type=checkbox]').removeAttr(
+                    'checked'
+                );
+                this.timeAltDays.split(',').forEach(v => {
+                    $('#time-inject-timeAltDays [value=' + v + ']').prop('checked', true);
+                });
+            }
 
-              if (
-                  timeType === 'flow' ||
-      timeType === 'global' ||
-      propType !== typeUndefined.value
-              ) {
-                  $('.time-inject-recalc').show();
-              } else {
-                  $('.time-inject-recalc').hide();
-                  $('#time-inject-recalcTime').val('');
-              }
-  });
-          // #endregion property
-          // #region time
-          $('#node-input-timeType').val(this.timeType);
-          $('#node-input-time').typedInput({
-              default: this.timeType || typeUndefined.value,
-              typeField: $('#node-input-timeType'),
-              types: [
-                  typeUndefined,
-                  typeTime,
-                  typeTimeSun,
-                  typeTimeMoon,
-                  'flow',
-                  'global',
-                  'env'
-              ]
-          });
-          $('#node-input-time').typedInput('type', this.timeType);
-          $('#node-input-time').on('change', (type, value) => {
-              if ($('#node-input-time').typedInput('type') === typeUndefined.value) {
-                  $('.time-inject-row-offset').hide();
-                  $('.time-inject-row-timeDays').hide();
-                  $('.time-inject-row-alt').hide();
-              } else {
-                  $('.time-inject-row-offset').show();
-                  $('.time-inject-row-timeDays').show();
-                  $('.time-inject-row-alt').show();
-              }
+            // #endregion timeAlt
+            // #region onceDelay
+            $('#node-input-once').change(() => {
+                $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+            });
+            // #endregion onceDelay
+            $('#node-input-time').change();
+            $('#node-input-property').change();
+            $('#node-input-payload').change();
+            $('#node-input-addPayload1').change();
+        },
+        oneditsave() {
+            function getDaysStr(value) {
+                const days = value
+                    .map((_, el) => {
+                        return $(el).val();
+                    })
+                    .get();
 
-              $('#node-input-property').change();
-  });
-          if (this.timeDays == '*' || typeof this.timeDays === 'undefined') {
-              $('#time-inject-timeDays input[type=checkbox]').prop('checked', true);
-          } else {
-              $('#time-inject-timeDays input[type=checkbox]').removeAttr('checked');
-              this.timeDays.split(',').forEach(v => {
-                  $('#time-inject-timeDays [value=' + v + ']').prop('checked', true);
-              });
-          }
+                if (days.length === 0) { return ''; }
+                if (days.length === 7) { return '*'; }
+                return days.join(',');
+            }
 
-          // #endregion time
-          // #region timeAlt
-          $('#node-input-timeAlt').typedInput({
-              default: this.timeAltType || 'entered',
-              types: [typeTime, typeTimeSun, typeTimeMoon, 'flow', 'global', 'env']
-          });
-          $('#node-input-timeAlt').typedInput('type', this.timeAltType);
-          if (this.timeAltDays == '*' || typeof this.timeAltDays === 'undefined') {
-              $('#time-inject-timeAltDays input[type=checkbox]').prop(
-                  'checked',
-                  true
-              );
-          } else {
-              $('#time-inject-timeAltDays input[type=checkbox]').removeAttr(
-                  'checked'
-              );
-              this.timeAltDays.split(',').forEach(v => {
-                  $('#time-inject-timeAltDays [value=' + v + ']').prop('checked', true);
-              });
-          }
+            // this.payloadType = $("#node-input-payload").typedInput("type");
+            // this.timeType = $("#node-input-time").typedInput("type");
+            this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
 
-          // #endregion timeAlt
-          // #region onceDelay
-          $('#node-input-once').change(() => {
-              $('#node-input-onceDelay').attr(
-                  'disabled',
-                  !$('#node-input-once').prop('checked')
-              );
-  });
-          // #endregion onceDelay
-          $('#node-input-time').change();
-          $('#node-input-property').change();
-          $('#node-input-payload').change();
-          $('#node-input-addPayload1').change();
-      },
-      oneditsave() {
-          function getDaysStr(value) {
-              const days = value
-                  .map((_, el) => {
-                      return $(el).val();
-                  })
-                  .get();
+            // this.propertyType = $("#node-input-property").typedInput("type");
+            // this.timeAltType = $("#node-input-timeAlt").typedInput("type");
+            this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
 
-              if (days.length == 0) {
-                  return '';
-              }
+            // this.addPayload1Type = $("#node-input-addPayload1").typedInput("type");
+            // this.addPayload1ValueType = $("#node-input-addPayload1Value").typedInput("type");
+            this.addPayload1Days = getDaysStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'));
+            if (Number($('#node-input-addPayload1Formatsel').val()) !== 99) {
+                $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
+                this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
+            }
 
-              if (days.length == 7) {
-                  return '*';
-              }
+            // this.addPayload2Type = $("#node-input-addPayload2").typedInput("type");
+            // this.addPayload2ValueType = $("#node-input-addPayload2Value").typedInput("type");
+            this.addPayload2Days = getDaysStr($('#time-inject-addPayload2Days input[type=checkbox]:checked'));
+            if (Number($('#node-input-addPayload2Formatsel').val()) !== 99) {
+                $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
+                this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
+            }
 
-              return days.join(',');
-          }
+            // this.addPayload3Type = $("#node-input-addPayload3").typedInput("type");
+            // this.addPayload3ValueType = $("#node-input-addPayload3Value").typedInput("type");
+            this.addPayload3Days = getDaysStr($('#time-inject-addPayload3Days input[type=checkbox]:checked'));
+            if (Number($('#node-input-addPayload3Formatsel').val()) !== 99) {
+                $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
+                this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
+            }
+        },
+        button: {
+            enabled() {
+                return !this.changed;
+            },
+            onclick() {
+                if (this.changed) {
+                    return RED.notify(
+                        RED._('notification.warning', { message: RED._('notification.warnings.undeployedChanges') }), 'warning');
+                }
 
-          // this.payloadType = $("#node-input-payload").typedInput("type");
-          // this.timeType = $("#node-input-time").typedInput("type");
-          this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
+                let payload = this.payload;
+                if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
+                if (this.payloadType === 'flow' || this.payloadType === 'global') {
+                    const key = RED.utils.parseContextKey(payload);
+                    payload = this.payloadType + '.' + key.key;
+                }
 
-          // this.propertyType = $("#node-input-property").typedInput("type");
-          // this.timeAltType = $("#node-input-timeAlt").typedInput("type");
-          this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
+                let label = clipValueLength(this.name || payload, 30);
+                label = label
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                if (this.payloadType === 'date') {
+                    label = this._('time-inject.label.timestamp');
+                }
 
-          // this.addPayload1Type = $("#node-input-addPayload1").typedInput("type");
-          // this.addPayload1ValueType = $("#node-input-addPayload1Value").typedInput("type");
-          this.addPayload1Days = getDaysStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'));
-          if (Number($('#node-input-addPayload1Formatsel').val()) != 99) {
-              $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
-              this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
-          }
+                if (this.payloadType === 'none') {
+                    label = this._('time-inject.label.blank');
+                }
 
-          // this.addPayload2Type = $("#node-input-addPayload2").typedInput("type");
-          // this.addPayload2ValueType = $("#node-input-addPayload2Value").typedInput("type");
-          this.addPayload2Days = getDaysStr($('#time-inject-addPayload2Days input[type=checkbox]:checked'));
-          if (Number($('#node-input-addPayload2Formatsel').val()) != 99) {
-              $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
-              this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
-          }
-
-          // this.addPayload3Type = $("#node-input-addPayload3").typedInput("type");
-          // this.addPayload3ValueType = $("#node-input-addPayload3Value").typedInput("type");
-          this.addPayload3Days = getDaysStr($('#time-inject-addPayload3Days input[type=checkbox]:checked'));
-          if (Number($('#node-input-addPayload3Formatsel').val()) != 99) {
-              $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
-              this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
-          }
-      },
-      button: {
-          enabled() {
-              return !this.changed;
-          },
-          onclick() {
-              if (this.changed) {
-                  return RED.notify(
-                      RED._('notification.warning', {
-                          message: RED._('notification.warnings.undeployedChanges')
-                      }),
-                      'warning'
-                  );
-              }
-
-              let payload = this.payload;
-              if (this.payloadType === 'str' || this.payloadType === 'string') {
-                  payload = '"' + this.payload + '"';
-              }
-
-              if (this.payloadType === 'flow' || this.payloadType === 'global') {
-                  const key = RED.utils.parseContextKey(payload);
-                  payload = this.payloadType + '.' + key.key;
-              }
-
-              let label = clipValueLength(this.name || payload, 30);
-              label = label
-                  .replace(/&/g, '&amp;')
-                  .replace(/</g, '&lt;')
-                  .replace(/>/g, '&gt;');
-              if (this.payloadType === 'date') {
-                  label = this._('time-inject.label.timestamp');
-              }
-
-              if (this.payloadType === 'none') {
-                  label = this._('time-inject.label.blank');
-              }
-
-              const node = this;
-              $.ajax({
-                  url: 'inject/' + this.id,
-                  type: 'POST',
-                  success(resp) {
-                      RED.notify(
-                          node._('time-inject.label.success', {
-                              label
-                          }),
-                          'success'
-                      );
-                  },
-                  error(jqXHR, textStatus, errorThrown) {
-                      if (jqXHR.status == 404) {
-                          RED.notify(
-                              RED._('time-inject.errors.error', {
-                                  message: RED._('time-inject.errors.not-deployed')
-                              }),
-                              'error'
-                          );
-                      } else if (jqXHR.status == 500) {
-                          RED.notify(
-                              RED._('time-inject.errors.error', {
-                                  message: RED._('time-inject.errors.failed')
-                              }),
-                              'error'
-                          );
-                      } else if (jqXHR.status == 0) {
-                          RED.notify(
-                              RED._('time-inject.errors.error', {
-                                  message: RED._('time-inject.errors.no-response')
-                              }),
-                              'error'
-                          );
-                      } else {
-                          RED.notify(
-                              RED._('time-inject.errors.error', {
-                                  message: RED._('time-inject.errors.unexpected', {
-                                      status: jqXHR.status,
-                                      message: textStatus
-                                  })
-                              }),
-                              'error'
-                          );
-                      }
-                  }
-              });
-          }
-      }
-  });
-</script>
+                const node = this;
+                $.ajax({
+                    url: 'inject/' + this.id,
+                    type: 'POST',
+                    success(_resp) {
+                        RED.notify(
+                            node._('time-inject.label.success', {
+                                label
+                            }),
+                            'success'
+                        );
+                    },
+                    error(jqXHR, textStatus, _errorThrown) {
+                        if (jqXHR.status === 404) {
+                            RED.notify(
+                                RED._('time-inject.errors.error', {
+                                    message: RED._('time-inject.errors.not-deployed')
+                                }),
+                                'error'
+                            );
+                        } else if (jqXHR.status === 500) {
+                            RED.notify(
+                                RED._('time-inject.errors.error', {
+                                    message: RED._('time-inject.errors.failed')
+                                }),
+                                'error'
+                            );
+                        } else if (jqXHR.status === 0) {
+                            RED.notify(
+                                RED._('time-inject.errors.error', {
+                                    message: RED._('time-inject.errors.no-response')
+                                }),
+                                'error'
+                            );
+                        } else {
+                            RED.notify(
+                                RED._('time-inject.errors.error', {
+                                    message: RED._('time-inject.errors.unexpected', {
+                                        status: jqXHR.status,
+                                        message: textStatus
+                                    })
+                                }),
+                                'error'
+                            );
+                        }
+                    }
+                });
+            }
+        }
+    });</script>

@@ -149,11 +149,11 @@
         },
         label() {
             return this.name || 'default-position';
-    },
+        },
         oneditprepare() {
-            if ((this.timezoneOffset == null) ||
-            (typeof this.timezoneOffset === undefined) ||
-            (this.timezoneOffset === '')) {
+            if ((this.timezoneOffset === null) ||
+                (typeof this.timezoneOffset === undefined) ||
+                (this.timezoneOffset === '')) {
                 this.timezoneOffset = ((new Date()).getTimezoneOffset() / -60);
                 $('#node-config-input-timezoneOffset').val(this.timezoneOffset);
             }
@@ -177,9 +177,5 @@
                     });
                 }
             }
-    },
-        oneditsave() {
-        // ...
-    }
-    });
-</script>
+        }
+    });</script>

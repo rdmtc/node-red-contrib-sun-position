@@ -74,8 +74,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     }
 
     function astroRefraction(h) {
-        if (h < 0) // the following formula works for positive altitudes only.
-        {
+        if (h < 0) { // the following formula works for positive altitudes only.
             h = 0;
         } // if h = -0.08901179 a div/0 would occur.
 

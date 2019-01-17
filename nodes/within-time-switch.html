@@ -229,52 +229,45 @@
     }
 
     function getValueLabel(t, v, l) {
-    l = l || 15;
-    if (t === 'string' || t === 'str') {
-            if (v == '') {
-                return v;
-            }
-
+        l = l || 15;
+        if (t === 'string' || t === 'str') {
+            if (v === '') { return v; }
             return '"' + clipValueLength(v, l) + '"';
-    }
+        }
 
-    if (t === 'num' || t === 'bool') {
-            if (v == '') {
-                return v;
-            }
-
+        if (t === 'num' || t === 'bool') {
+            if (v === '') { return v; }
             return String(v);
-    }
+        }
 
-    if (t === 'msg') {
+        if (t === 'msg') {
             return t + '.' + clipValueLength(v, l);
-    }
+        }
 
-    if (t === 'flow' || t === 'global') {
-            let result = RED.utils.parseContextKey(v);
+        if (t === 'flow' || t === 'global') {
+            const result = RED.utils.parseContextKey(v);
             return t + '.' + clipValueLength(result.key, l);
-    }
+        }
 
-    if (t == 'pdsCalcData') {
+        if (t === 'pdsCalcData') {
             return '{sun position}';
-    }
+        }
 
-    if (t == 'pdmCalcData') {
+        if (t === 'pdmCalcData') {
             return '{moon position}';
-    }
+        }
 
-    if (t == 'pdsTime') {
+        if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace(
                 'amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
             return clipValueLength(res, l);
-    }
+        }
 
-    if (t == 'pdmTime') {
+        if (t === 'pdmTime') {
             return 'moon' + v;
+        }
+        return clipValueLength(v, l);
     }
-
-    return clipValueLength(v, l);
-}
 
     RED.nodes.registerType('within-time-switch', {
         category: 'time and astro',
@@ -427,18 +420,12 @@
                 }
 
                 if (type === 'jsonata') {
-                    if (value.length < 15) {
-    return value + suffix;
-                    }
-
+                    if (value.length < 15) { return value + suffix; }
                     return this._('within-time-switch.label.jsonata');
                 }
 
                 if (type === 'json') {
-                    if (value.length < 15) {
-    return value + suffix;
-                    }
-
+                    if (value.length < 15) { return value + suffix; }
                     return this._('within-time-switch.label.json') + suffix;
                 }
 
@@ -451,9 +438,7 @@
                 }
 
                 const v = getValueLabel(type, value, maxLength);
-                if (v == '') {
-                    return this._('within-time-switch.label.blank');
-                }
+                if (v === '') { return this._('within-time-switch.label.blank'); }
 
                 return v + suffix;
             };
@@ -480,10 +465,10 @@
             }
 
             return 'within-time';
-    },
+        },
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
-    },
+        },
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare() {
@@ -512,7 +497,7 @@
                 }
             }
 
-            if (this.statusOut == '' || this.statusOut == undefined) {
+            if (this.statusOut === '' || this.statusOut === undefined) {
                 this.statusOut = 3;
                 $('#node-input-statusOut').val(this.statusOut);
             }
@@ -576,7 +561,7 @@
                 default: this.propertyEndType || 'none',
                 types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
             });
-            $('#node-input-propertyStart').on('change', (type, value) => {
+            $('#node-input-propertyStart').on('change', (_type, _value) => {
                 if ($('#node-input-propertyStart').typedInput('type') === 'none') {
                     $('.alternate-time-start').hide();
                     $('.alternate-time-start-offset').hide();
@@ -585,8 +570,8 @@
                 }
 
                 $('#node-input-startTimeAlt').change();
-    });
-            $('#node-input-propertyEnd').on('change', (type, value) => {
+            });
+            $('#node-input-propertyEnd').on('change', (_type, _value) => {
                 if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
                     $('.alternate-time-end').hide();
                     $('.alternate-time-end-offset').hide();
@@ -595,22 +580,22 @@
                 }
 
                 $('#node-input-endTimeAlt').change();
-    });
+            });
 
             $('#node-input-startTime').typedInput({
                 default: this.startTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $('#node-input-startTime').on('change focus focusin focusout', (type, value) => {
-                checkMsgOnStartOut(type, value);
-    });
+            $('#node-input-startTime').on('change focus focusin focusout', (_type, _value) => {
+                checkMsgOnStartOut(_type, _value);
+            });
             $('#node-input-endTime').typedInput({
                 default: this.endTimeType || 'entered',
                 types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
-            $('#node-input-endTime').on('change focus focusin focusout', (type, value) => {
-                checkMsgOnEndOut(type, value);
-    });
+            $('#node-input-endTime').on('change focus focusin focusout', (_type, _value) => {
+                checkMsgOnEndOut(_type, _value);
+            });
             $('#node-input-startTimeAlt').typedInput({
                 default: this.startTimeAltType || 'none',
                 types: [typeTimeNone,
@@ -622,7 +607,7 @@
                     'global',
                     'env']
             });
-            $('#node-input-startTimeAlt').on('change focus focusin focusout', (type, value) => {
+            $('#node-input-startTimeAlt').on('change focus focusin focusout', (_type, _value) => {
                 if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
             ($('#node-input-propertyStart').typedInput('type') === 'none')) {
                     $('.alternate-time-start-offset').hide();
@@ -631,7 +616,7 @@
                 }
 
                 checkMsgOnStartOut();
-    });
+            });
             $('#node-input-endTimeAlt').typedInput({
                 default: this.endTimeAltType || 'none',
                 types: [typeTimeNone,
@@ -643,7 +628,7 @@
                     'global',
                     'env']
             });
-            $('#node-input-endTimeAlt').on('change focus focusin focusout', (type, value) => {
+            $('#node-input-endTimeAlt').on('change focus focusin focusout', (_type, _value) => {
                 if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
             ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
                     $('.alternate-time-end-offset').hide();
@@ -652,12 +637,12 @@
                 }
 
                 checkMsgOnEndOut();
-    });
+            });
             // $("#node-input-startTimeAlt").change();
             // $("#node-input-endTimeAlt").change();
             $('#node-input-propertyStart').change();
             $('#node-input-propertyEnd').change();
-    },
+        },
         oneditsave() {
             this.propertyStartType = $('#node-input-propertyStart').typedInput('type');
             this.propertyEndType = $('#node-input-propertyEnd').typedInput('type');
@@ -665,6 +650,5 @@
             this.endTimeType = $('#node-input-endTime').typedInput('type');
             this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
             this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
-    }
-    });
-</script>
+        }
+    });</script>
