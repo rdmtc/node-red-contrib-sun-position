@@ -1,65 +1,88 @@
-<script type="text/x-red" data-template-name="time-comp"> <div class="form-row">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-comp.label.position"></span></label>
+<script type="text/x-red" data-template-name="time-span">
+  <div class="form-row">
+    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-span.label.position"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row time-input">
-      <label for="node-input-input"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-comp.label.input"></span></label>
-      <input type="text" id="node-input-input" style="width:70%">
-      <input type="hidden" id="node-input-inputType">
+  <div class="form-row time-operand1">
+      <label for="node-input-operand1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.operand1"></span></label>
+      <input type="text" id="node-input-operand1" style="width:70%">
+      <input type="hidden" id="node-input-operand1Type">
   </div>
-  <div class="form-row time-comp-row-inputFormat hidden">
-      <label for="node-input-inputFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
-      <select style="width:70%" id="node-input-inputFormatsel">
-      <input type="text" id="node-input-inputFormat" style="width:50%; margin-left: 5px;">
+  <div class="form-row time-span-row-operand1Format hidden">
+      <label for="node-input-operand1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.operand1Format"></span></label>
+      <select style="width:70%" id="node-input-operand1Formatsel">
+      <input type="text" id="node-input-operand1Format" style="width:50%; margin-left: 5px;">
   </div>
-  <div class="form-row time-comp-row-inputOffset hidden">
-      <label for="node-input-inputOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
-      <input id="node-input-inputOffset" class="wt-offset-time" data-i18n="[placeholder]time-comp.placeholder.offset">
-      <select style="width:100px" id="node-input-inputOffsetMultiplier">
+  <div class="form-row time-span-row-operand1Offset hidden">
+      <label for="node-input-operand1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operand1Offset"></span></label>
+      <input id="node-input-operand1Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
+      <select style="width:100px" id="node-input-operand1OffsetMultiplier">
+      </select>
+  </div>
+  <hr>
+  <div class="form-row time-operand2">
+      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.operand2"></span></label>
+      <input type="text" id="node-input-operand2" style="width:70%">
+      <input type="hidden" id="node-input-operand2Type">
+  </div>
+  <div class="form-row time-span-row-operand2Format hidden">
+      <label for="node-input-operand2Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.operand2Format"></span></label>
+      <select style="width:70%" id="node-input-operand2Formatsel">
+      <input type="text" id="node-input-operand2Format" style="width:50%; margin-left: 5px;">
+  </div>
+  <div class="form-row time-span-row-operand2Offset hidden">
+      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operand2Offset"></span></label>
+      <input id="node-input-operand2Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
+      <select style="width:100px" id="node-input-operand2OffsetMultiplier">
       </select>
   </div>
   <hr>
   <div>
-    <label for="node-input-rule-container-row"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.operatorContainer"></span></label>
+    <label for="node-input-rule-container-row"><i class="fa fa-spanulator"></i> <span data-i18n="time-span.label.operatorContainer"></span></label>
     <div class="form-row node-input-rule-container-row">
       <ol id="node-input-rule-container"></ol>
     </div>
   </div>
   <div class="form-row">
       <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-          <option value="false" data-i18n="time-comp.label.stopfirst"></option>
-          <option value="true" data-i18n="time-comp.label.checkall"></option>
+          <option value="false" data-i18n="time-span.label.stopfirst"></option>
+          <option value="true" data-i18n="time-span.label.checkall"></option>
       </select>
   </div>
-  <hr class="time-comp-result">
+  <hr class="time-span-result">
   <div class="form-row time-result1">
-      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-comp.label.result1"></span></label>
+      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.result1"></span></label>
       <input type="text" id="node-input-result1" style="width:70%">
       <input type="hidden" id="node-input-result1Type">
   </div>
   <div class="form-row time-result1Value hidden">
-      <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
+      <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-span.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" style="width:70%">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row time-comp-row-result1Format hidden">
-      <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
+  <div class="form-row time-span-row-result1TSFormat hidden">
+    <label for="node-input-result1TSFormat"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
+    <select style="width:70%" id="node-input-result1TSFormat">
+    </select>
+  </div>
+  <div class="form-row time-span-row-result1Format hidden">
+      <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1Format"></span></label>
       <select style="width:70%" id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="width:50%; margin-left: 5px;">
   </div>
-  <div class="form-row time-comp-row-result1Offset hidden">
-      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" class="wt-offset-time" data-i18n="[placeholder]time-comp.placeholder.offset">
+  <div class="form-row time-span-row-result1Offset hidden">
+      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.result1Offset"></span></label>
+      <input id="node-input-result1Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
       <select style="width:100px" id="node-input-result1OffsetMultiplier">
       </select>
   </div>
   <hr>
   <div class="form-row">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-comp.label.name"></span></label>
-      <input type="text" id="node-input-name" data-i18n="[placeholder]time-comp.placeholder.name">
+      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-span.label.name"></span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]time-span.placeholder.name">
   </div>
 </script>
 <style>
@@ -92,15 +115,15 @@
         margin-left: 5px;
         width:70px
     }
-    .time-comp-times {
+    .time-span-times {
         width: 90px;
     }
-    #time-comp-time {
+    #time-span-time {
         width: 75px;
         margin-left: 8px;
         margin-bottom: 8px;
     }
-    .time-comp-count {
+    .time-span-count {
         width: 40px !important;
     }
     .multiselect {
@@ -197,8 +220,14 @@
             const result = RED.utils.parseContextKey(v);
             return t + '.' + clipValueLength(result.key, l);
         }
-        if (t === 'input') {
-            return 'input data';
+        if (t === 'timespan') {
+            return 'timespan';
+        }
+        if (t === 'operand1') {
+            return 'operand1 data';
+        }
+        if (t === 'operand2') {
+            return 'operand2 data';
         }
 
         if (t === 'pdsCalcData') {
@@ -221,10 +250,10 @@
         return clipValueLength(v, l);
     }
 
-    RED.nodes.registerType('time-comp', {
+    RED.nodes.registerType('time-span', {
         category: 'time and astro',
-        color: '#FDF0C2',
-        icon: 'time-comp-black.png',
+        color: '#FDF0C0',
+        icon: 'time-span-black.png',
         inputs: 1,
         outputs: 1,
         defaults: {
@@ -240,32 +269,58 @@
                 type: 'position-config',
                 required: true
             },
-            // #region input
-            input: {
+            // #region operand1
+            operand1: {
                 value: 'payload',
-                validate: RED.validators.typedInput('inputType')
+                validate: RED.validators.typedInput('operand1Type')
             },
-            inputType: {
+            operand1Type: {
                 value: 'msg'
             },
-            inputFormat: {
+            operand1Format: {
                 value: 0,
                 required: true,
                 validate(v) {
                     return RED.validators.number()(v) || typeof v === 'undefined';
                 }
             },
-            inputOffset: {
+            operand1Offset: {
                 value: 0,
                 required: true,
                 validate: RED.validators.number()
             },
-            inputOffsetMultiplier: {
+            operand1OffsetMultiplier: {
                 value: 60,
                 required: true,
                 validate: RED.validators.number()
             },
-            // #endregion input
+            // #endregion operand1
+            // #region operand2
+            operand2: {
+                value: 'payload',
+                validate: RED.validators.typedInput('inputType')
+            },
+            operand2Type: {
+                value: 'msg'
+            },
+            operand2Format: {
+                value: 0,
+                required: true,
+                validate(v) {
+                    return RED.validators.number()(v) || typeof v === 'undefined';
+                }
+            },
+            operand2Offset: {
+                value: 0,
+                required: true,
+                validate: RED.validators.number()
+            },
+            operand2OffsetMultiplier: {
+                value: 60,
+                required: true,
+                validate: RED.validators.number()
+            },
+            // #endregion operand2
             // #region rules
             rules: {
                 value: {}
@@ -290,7 +345,14 @@
                 }
             },
             result1ValueType: {
-                value: 'input'
+                value: 'timespan'
+            },
+            result1TSFormat: {
+                value: 1,
+                required: false,
+                validate(v) {
+                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                }
             },
             result1Format: {
                 value: 0,
@@ -339,26 +401,29 @@
                 return this.name;
             }
             if (!this.rules || this.rules.length <= 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
-                return op1;
+                const op1 = getValueLabel(this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                return op1 + ' - ' + op2;
             }
 
             if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
-                const op2 = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
-                return op1 + this.rules[0].operatorText + op2;
+                const op1 = getValueLabel(this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                const cmp = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
+                return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
             }
 
             if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
-                return op1 + ' ' + this._('time-comp.label.compare');
+                const op1 = getValueLabel(this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                return op1 + ' - ' + op2 + + ' ' + this._('time-span.label.compare');
             }
-            return this._('time-comp.label.time-comp');
+            return this._('time-span.label.time-span');
         },
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
         },
-        paletteLabel: 'time compare and change',
+        paletteLabel: 'time span',
         align: 'left',
         oneditprepare() {
             const node = this;
@@ -374,22 +439,23 @@
                     {id: 4, group: 'cmp', label: '>=', text: 'greater or equal'},
                     {id: 5, group: 'cmp', label: '<', text: 'lesser'},
                     {id: 6, group: 'cmp', label: '<=', text: 'lesser or equal'}
-                ], operatorTypesGroups: [
-                    {id: 'std', label: 'include into compare'},
-                    {id: 'spec', label: 'special'}
-                ], operatorTypes: [
-                    {id: 11, group: 'std', label: 'Milliseconds'},
-                    {id: 12, group: 'std', label: 'Seconds'},
-                    {id: 13, group: 'std', label: 'Minutes'},
-                    {id: 14, group: 'std', label: 'Hours'},
-                    {id: 15, group: 'std', label: 'Day of Month'},
-                    {id: 16, group: 'std', label: 'Month'},
-                    {id: 17, group: 'std', label: 'Year'},
-                    {id: 18, group: 'spec', label: 'Day of Week'}
-                ], operatorTypesShort: [
-                    {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
-                    {selection: /^(11,)?12,13,14$/, label: 'T'},
-                    {selection: /^15,16(,17)?(,18)?$/, label: 'D'}
+                ], outputTSFormatsGroups: [
+                    {id: 'time', label: 'timestamp'},
+                    {id: 'timeround', label: 'timestamp rounded'}
+                ], outputTSFormats: [
+                    {id: 1, group: 'time', name: 'ms', label: 'milliseconds'},
+                    {id: 2, group: 'time', name: 'sec', label: 'seconds'},
+                    {id: 3, group: 'time', name: 'min', label: 'minutes'},
+                    {id: 4, group: 'time', name: 'hour', label: 'hours'},
+                    {id: 5, group: 'time', name: 'days', label: 'days'},
+                    {id: 6, group: 'time', name: 'month', label: 'month'},
+                    {id: 7, group: 'time', name: 'years', label: 'years'},
+                    {id: 12, group: 'timeround', name: 'sec', label: 'seconds'},
+                    {id: 13, group: 'timeround', name: 'min', label: 'minutes'},
+                    {id: 14, group: 'timeround', name: 'hour', label: 'hours'},
+                    {id: 15, group: 'timeround', name: 'days', label: 'days'},
+                    {id: 16, group: 'timeround', name: 'month', label: 'month'},
+                    {id: 17, group: 'timeround', name: 'years', label: 'years'}
                 ], outputFormatsGroups: [
                     {id: 'number', label: 'Number'},
                     {id: 'string', label: 'Text (string)'},
@@ -662,7 +728,7 @@
                 for (let gIndex = 0; gIndex < groupLength; gIndex++) {
                     list.append($('<label></label>', {
                         class: 'header',
-                        html: node._('time-comp.' + elementName + 'Groups.' + gIndex)
+                        html: node._('time-span.' + elementName + 'Groups.' + gIndex)
                     }));
                     for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
                         if (groups[gIndex].id === elements[eIndex].group) {
@@ -675,7 +741,7 @@
                                     id: id + '-' + elements[eIndex].id
                                 }).on('change', _event => {
                                     getSelection(multiselect);
-                                }), node._('time-comp.' + elementName + '.' + eIndex)]
+                                }), node._('time-span.' + elementName + '.' + eIndex)]
                             }));
                         // elements[eIndex].label
                         }
@@ -739,10 +805,10 @@
                 const groupLength = groups.length;
                 const elementsLength = elements.length;
                 for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    const group = $('<optgroup/>', {label: node._('time-comp.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+                    const group = $('<optgroup/>', {label: node._('time-span.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
                     for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
                         if (groups[gIndex].id === elements[eIndex].group) {
-                            group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-comp.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                            group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-span.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                         }
                     }
                 }
@@ -751,89 +817,117 @@
             // #region spinner
             $('.wt-offset-time').spinner({max: 1439, min: -1439});
             // #endregion spinner
-            // #region input
-            $('#node-input-inputType').val(node.inputType);
-            $('#node-input-input').typedInput({
-                default: node.inputType || 'msg',
-                typeField: $('#node-input-inputType'),
+            // #region operand1
+            $('#node-input-operand1Type').val(node.operand1Type);
+            $('#node-input-operand1').typedInput({
+                default: node.operand1Type || 'msg',
+                typeField: $('#node-input-operand1Type'),
                 types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
-            $('#node-input-input').on('change', (_type, _value) => {
-                const opType = $('#node-input-input').typedInput('type');
+            $('#node-input-operand1').on('change', (_type, _value) => {
+                const opType = $('#node-input-operand1').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                    $('.time-comp-row-inputFormat').hide();
-                    $('.time-comp-row-inputOffset').show();
+                    $('.time-span-row-operand1Format').hide();
+                    $('.time-span-row-operand1Offset').show();
                 } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                    $('.time-comp-row-inputFormat').show();
-                    $('.time-comp-row-inputOffset').show();
+                    $('.time-span-row-operand1Format').show();
+                    $('.time-span-row-operand1Offset').show();
                 } else {
-                    $('.time-comp-row-inputFormat').hide();
-                    $('.time-comp-row-inputOffset').hide();
+                    $('.time-span-row-operand1Format').hide();
+                    $('.time-span-row-operand1Offset').hide();
                 }
             });
-            const inputFormatSelField = $('#node-input-inputFormatsel');
-            appendOptions(inputFormatSelField, 'parseFormats');
-            autocomplete($('#node-input-inputFormat'), dateParseFormat);
-            inputFormatSelField.on('change', (_type, _value) => {
-                const inputFormatIpField = $('#node-input-inputFormat');
-                const inputFormatSelField = $('#node-input-inputFormatsel');
-                if (Number(inputFormatSelField.val()) === 99) {
-                    inputFormatIpField.show();
-                    $('#node-input-inputFormat').css({width: '40%'});
-                    inputFormatSelField.css({width: '30%'});
-                    if (!isNaN(inputFormatIpField.val())) {
-                        inputFormatIpField.val(node._('time-comp.timeFormat.default'));
+            const operand1FormatSelField = $('#node-input-operand1Formatsel');
+            appendOptions(operand1FormatSelField, 'parseFormats');
+            autocomplete($('#node-input-operand1Format'), dateParseFormat);
+            operand1FormatSelField.on('change', (_type, _value) => {
+                const operand1FormatIpField = $('#node-input-operand1Format');
+                const operand1FormatSelField = $('#node-input-operand1Formatsel');
+                if (Number(operand1FormatSelField.val()) === 99) {
+                    operand1FormatIpField.show();
+                    $('#node-input-operand1Format').css({width: '40%'});
+                    operand1FormatSelField.css({width: '30%'});
+                    if (!isNaN(operand1FormatIpField.val())) {
+                        operand1FormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
-                    inputFormatIpField.hide();
-                    inputFormatSelField.css({width: '70%'});
+                    operand1FormatIpField.hide();
+                    operand1FormatSelField.css({width: '70%'});
                 }
             });
-            if (isNaN(node.inputFormat)) {
-                inputFormatSelField.val(99);
+            if (isNaN(node.operand1Format)) {
+                operand1FormatSelField.val(99);
             } else {
-                inputFormatSelField.val(Number(node.inputFormat));
+                operand1FormatSelField.val(Number(node.operand1Format));
             }
 
-            inputFormatSelField.change();
-            const inputMultiplierField = $('#node-input-inputOffsetMultiplier');
-            appendOptions(inputMultiplierField, 'multiplier');
-            inputMultiplierField.val(node.inputOffsetMultiplier);
-            // #endregion input
+            operand1FormatSelField.change();
+            const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
+            appendOptions(operand1MultiplierField, 'multiplier');
+            operand1MultiplierField.val(node.operand1OffsetMultiplier);
+            // #endregion operand1
+            // #region operand2
+            $('#node-input-operand2Type').val(node.operand2Type);
+            $('#node-input-operand2').typedInput({
+                default: node.operand2Type || 'msg',
+                typeField: $('#node-input-operand2Type'),
+                types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+            });
+            $('#node-input-operand2').on('change', (_type, _value) => {
+                const opType = $('#node-input-operand2').typedInput('type');
+                if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
+                    $('.time-span-row-operand2Format').hide();
+                    $('.time-span-row-operand2Offset').show();
+                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                    $('.time-span-row-operand2Format').show();
+                    $('.time-span-row-operand2Offset').show();
+                } else {
+                    $('.time-span-row-operand2Format').hide();
+                    $('.time-span-row-operand2Offset').hide();
+                }
+            });
+            const operand2FormatSelField = $('#node-input-operand2Formatsel');
+            appendOptions(operand2FormatSelField, 'parseFormats');
+            autocomplete($('#node-input-operand2Format'), dateParseFormat);
+            operand2FormatSelField.on('change', (_type, _value) => {
+                const operand2FormatIpField = $('#node-input-operand2Format');
+                const operand2FormatSelField = $('#node-input-operand2Formatsel');
+                if (Number(operand2FormatSelField.val()) === 99) {
+                    operand2FormatIpField.show();
+                    $('#node-input-operand2Format').css({width: '40%'});
+                    operand2FormatSelField.css({width: '30%'});
+                    if (!isNaN(operand2FormatIpField.val())) {
+                        operand2FormatIpField.val(node._('time-span.timeFormat.default'));
+                    }
+                } else {
+                    operand2FormatIpField.hide();
+                    operand2FormatSelField.css({width: '70%'});
+                }
+            });
+            if (isNaN(node.operand2Format)) {
+                operand2FormatSelField.val(99);
+            } else {
+                operand2FormatSelField.val(Number(node.operand2Format));
+            }
+
+            operand2FormatSelField.change();
+            const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
+            appendOptions(operand2MultiplierField, 'multiplier');
+            operand2MultiplierField.val(node.operand2OffsetMultiplier);
+            // #endregion operand2
             // #region rule-container
             function resizeRule(rule) {
                 const newWidth = rule.width() - 10;
                 // const operatorField = rule.find('.node-input-rule-operator');
                 const operandField = rule.find('.node-input-rule-operand');
-                const formatSelField = rule.find('.node-input-rule-operandFormatSel');
-                const formatIpField = rule.find('.node-input-rule-operandFormatIp');
-                const offsetField = rule.find('.node-input-rule-offset');
-                const multipierField = rule.find('.node-input-rule-multipier');
                 const propertyField = rule.find('.node-input-rule-property');
                 const propertyLblSpanField = rule.find('.node-input-rule-property-span');
                 const propertyLblField = rule.find('.node-input-rule-property-lbl');
                 const lblWidth = 25;
                 // row1
-                const operatorWidth = 120;
+                const operatorWidth = 60;
                 operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
                 // row2
-                let formatWidth = (newWidth - lblWidth - 18);
-                if (Number(formatSelField.val()) === 99) {
-                    formatIpField.show();
-                    formatWidth = Math.floor(formatWidth / 3);
-                    formatSelField.width(formatWidth - 5);
-                    formatIpField.width((formatWidth * 2) - 10);
-                } else {
-                    formatIpField.hide();
-                    // formatIpField.width(0);
-                    formatSelField.width(formatWidth);
-                }
-
-                // row3
-                const multiplierWidth = 100;
-                multipierField.width(multiplierWidth);
-                offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
-                // row4
                 const lblwidth = propertyLblSpanField.width() + 25;
                 propertyField.typedInput('width', (newWidth - lblwidth - 10));
                 propertyLblField.width(lblwidth);
@@ -844,8 +938,6 @@
                     containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                     const row = $('<div/>').appendTo(containerRow);
                     const row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                    const row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                    const row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                     // row1
                     // operator
                     const operatorField = $('<select/>', {
@@ -853,7 +945,6 @@
                         id: 'node-input-rule-operator' + containerIndex
                     }).appendTo(row);
                     appendOptions(operatorField, 'operators');
-                    const operatorTypeField = multiselect(row, 'operatorTypes', 'node-input-rule-operatorType-' + containerIndex);
 
                     addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
                     const operandField = $('<input/>', {
@@ -861,87 +952,31 @@
                         id: 'node-input-rule-operand' + containerIndex,
                         type: 'text'
                     }).appendTo(row).typedInput({
-                        default: 'str',
-                        types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'bin', 'env', 'jsonata']
+                        default: 'num',
+                        types: ['msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata']
                     });
                     const finalspan = $('<span/>', {
                         style: 'float: right; margin-top: 6px;'
                     }).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
                     // row2
-                    const operandSelFieldName = 'node-input-rule-operandFormatSel';
-                    addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
-                    const formatSelField = $('<select/>', {
-                        class: operandSelFieldName,
-                        id: operandSelFieldName + containerIndex
-                    }).appendTo(row2);
-                    appendOptions(formatSelField, 'parseFormats');
-                    const formatIpField = $('<input/>', {
-                        class: 'node-input-rule-operandFormatIp',
-                        id: 'node-input-rule-operandFormatIp' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row2);
-                    formatSelField.change(() => {
-                        resizeRule(containerRow);
-                    });
-                    // row3
-                    addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
-                    const offsetField = $('<input/>', {
-                        class: 'node-input-rule-offset',
-                        id: 'node-input-rule-offset' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row3).typedInput({
-                        default: typeUndefined.value,
-                        types: [typeUndefined, 'num', 'msg', 'flow', 'global']
-                    });
-                    const multiplierField = $('<select/>', {
-                        class: 'node-input-rule-multiplier',
-                        id: 'node-input-rule-multiplier' + containerIndex
-                    }).appendTo(row3);
-                    appendOptions(multiplierField, 'multiplier');
-                    // row4
-                    addLabel(row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
+                    addLabel(row2, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-span.label.onlyif'));
                     const propertyField = $('<input/>', {
                         class: 'node-input-rule-property',
                         id: 'node-input-rule-property' + containerIndex,
                         type: 'text'
-                    }).appendTo(row4).typedInput({
+                    }).appendTo(row2).typedInput({
                         default: typeUnlimited.value,
                         types: [typeUnlimited, 'msg', 'flow', 'global', 'env']
-                    });
-                    // changes
-                    operandField.change(() => {
-                        operandField.show();
-                        const opType = operandField.typedInput('type');
-                        if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                            row2.hide(); // format
-                            row3.show(); // offset
-                            row4.show(); // limit
-                        } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                            row2.show(); // format
-                            row3.show(); // offset
-                            row4.show(); // limit
-                        } else {
-                            row2.hide(); // format
-                            row3.hide(); // offset
-                            row4.show(); // limit
-                        }
                     });
                     // setting defaultValues
                     // console.log(data);
                     operatorField.val(data.operator || SelectFields.operators[0].id);
-                    setMultiselect(data.operatorType, operatorTypeField, SelectFields.operatorTypesShort);
-                    operandField.typedInput('type', data.operandType || 'str');
+                    operandField.typedInput('type', data.operandType || 'num');
                     operandField.typedInput('value', data.operandValue || '');
-                    formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
-                    formatSelField.val(data.formatSelection || SelectFields.parseFormats[0].id);
-                    offsetField.typedInput('type', data.offsetType || typeUndefined.value);
-                    offsetField.typedInput('value', data.offsetValue || '');
-                    multiplierField.val(data.multiplier || SelectFields.multiplier[0].id);
                     propertyField.typedInput('type', data.propertyType || typeUnlimited.value);
                     propertyField.typedInput('value', data.propertyValue || '');
                     resizeRule(containerRow);
-                    autocomplete(formatIpField, dateParseFormat);
                 },
                 sortItems(rules) {
                     rules = $('#node-input-rule-container').editableList('items');
@@ -969,9 +1004,12 @@
             });
             $('#node-input-result1ValueType').val(node.result1ValueType);
             $('#node-input-result1Value').typedInput({
-                default: node.result1ValueType || 'input',
+                default: node.result1ValueType || 'timespan',
                 typeField: $('#node-input-result1ValueType'),
-                types: [{value: 'input', label: 'Input value', hasValue: false},
+                types: [
+                    {value: 'timespan', label: 'timespan between Inputs', hasValue: false},
+                    {value: 'operand1', label: 'Input 1 value', hasValue: false},
+                    {value: 'operand2', label: 'Input 2 value', hasValue: false},
                     'date',
                     typeTimeEntered,
                     typeTimeSun,
@@ -989,29 +1027,53 @@
                     typeMoonCalc]
             });
             $('#node-input-result1').on('change', (_type, _value) => {
+                $('.time-span-row-result1Format').hide();
                 if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
                     $('.time-result1Value').show();
+                    $('.time-span-row-result1Format').hide();
+                    $('.time-span-row-result1FormatSel').hide();
                     const plVType = $('#node-input-result1Value').typedInput('type');
                     if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                        $('.time-comp-row-result1Format').show();
-                        $('.time-comp-row-result1Offset').show();
-                    } else if (plVType === 'input') {
-                        $('.time-comp-row-result1Format').show();
-                        $('.time-comp-row-result1Offset').hide();
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Offset').show();
+                        $('.time-span-row-result1FormatSel').show();
+                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
+                    } else if (plVType === 'timespan') {
+                        $('.time-span-row-result1TSFormat').show();
+                        $('.time-span-row-result1FormatSel').hide();
+                        $('.time-span-row-result1Format').hide();
+                        $('.time-span-row-result1Offset').hide();
+                    } else if (plVType === 'operand1') {
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Offset').hide();
+                        $('.time-span-row-result1FormatSel').show();
+                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
+                    } else if (plVType === 'operand2') {
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Offset').hide();
+                        $('.time-span-row-result1FormatSel').show();
+                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
                     } else {
-                        $('.time-comp-row-result1Format').hide();
-                        $('.time-comp-row-result1Offset').hide();
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1FormatSel').hide();
+                        $('.time-span-row-result1Format').hide();
+                        $('.time-span-row-result1Offset').hide();
                     }
                 } else {
                     $('.time-result1Value').hide();
-                    $('.time-comp-row-result1Format').hide();
-                    $('.time-comp-row-result1Offset').hide();
+                    $('.time-span-row-result1TSFormat').hide();
+                    $('.time-span-row-result1FormatSel').hide();
+                    $('.time-span-row-result1Format').hide();
+                    $('.time-span-row-result1Offset').hide();
                 }
             });
             $('#node-input-result1Value').on('change', (_type, _value) => {
                 $('#node-input-result1').change();
             });
             /********************************************************/
+            const resultTSFormatField = $('#node-input-result1TSFormat');
+            appendOptions(resultTSFormatField, 'outputTSFormats');
+
             const resultFormatSelField = $('#node-input-result1FormatSel');
             appendOptions(resultFormatSelField, 'outputFormats');
             resultFormatSelField.on('change', (_type, _value) => {
@@ -1022,7 +1084,7 @@
                     resultFormatIpField.css({width: '40%'});
                     resultFormatSelField.css({width: '30%'});
                     if (!isNaN(resultFormatIpField.val())) {
-                        resultFormatIpField.val(node._('time-comp.timeFormat.default'));
+                        resultFormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
                     resultFormatIpField.hide();
@@ -1044,7 +1106,8 @@
             $('#node-input-time').change();
             $('#node-input-property').change();
             $('#node-input-payload').change();
-            $('#node-input-input').change();
+            $('#node-input-operand1').change();
+            $('#node-input-operand2').change();
             $('#node-input-result1').change();
         },
         oneditsave() {
@@ -1055,9 +1118,13 @@
             }
 
             const node = this;
-            if (Number($('#node-input-inputFormatsel').val()) !== 99) {
-                $('#node-input-inputFormat').val($('#node-input-inputFormatsel').val());
-                node.inputFormat = $('#node-input-inputFormatsel').val();
+            if (Number($('#node-input-operand1Formatsel').val()) !== 99) {
+                $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
+                node.operand1Format = $('#node-input-operand1Formatsel').val();
+            }
+            if (Number($('#node-input-operand2Formatsel').val()) !== 99) {
+                $('#node-input-operand2Format').val($('#node-input-operand2Formatsel').val());
+                node.operand2Format = $('#node-input-operand2Formatsel').val();
             }
             // #region rule-container
             node.rules = [];
@@ -1091,7 +1158,8 @@
                 node.result1Format = $('#node-input-result1FormatSel').val();
             }
 
-            node.inputType = $('#node-input-input').typedInput('type');
+            node.operand1Type = $('#node-input-operand1').typedInput('type');
+            node.operand2Type = $('#node-input-operand2').typedInput('type');
             node.result1Type = $('#node-input-result1').typedInput('type');
             node.result1ValueType = $('#node-input-result1Value').typedInput('type');
             node.result2Type = $('#node-input-result2').typedInput('type');

@@ -1,15 +1,18 @@
 {
-    "time-comp": {
+    "time-span": {
         "label": {
-            "time-comp": "time-comp",
+            "time-span": "time-span",
             "compare": "compare",
+            "span": "span",
             "calc": "calc",
-            "comp": "comp",
             "name": "Name",
             "position": "Position",
-            "input": "Input",
-            "inputFormat": "parse format",
-            "inputOffset": "Offset",
+            "operand1": "Input 1",
+            "operand1Format": "parse format",
+            "operand1Offset": "Offset",
+            "operand2": "Input 2",
+            "operand2Format": "parse format",
+            "operand2Offset": "Offset",
             "operatorContainer": "compare with",
             "onlyif": "only if",
             "checkall": "stopping after first match (if)",
@@ -17,6 +20,7 @@
             "nothing": "nothing",
             "result1": "result",
             "result1Value": "value",
+            "result1TSFormat": "output format",
             "result1Format": "output format",
             "result1Offset": "Offset",
             "payload": "Payload",
@@ -229,7 +233,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on time-comp",
+            "error-text": "Exception occured on time-span",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",
