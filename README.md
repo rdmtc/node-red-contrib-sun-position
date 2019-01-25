@@ -24,22 +24,37 @@ Addidional you can get sun and moon position or to control a flow by sun or moon
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [General](#general)
+  * [Saving resources](#saving-resources)
+  * [second based accuracy](#second-based-accuracy)
 - [Implemented Nodes](#implemented-nodes)
-  - [sun-position](#sun-position)
-    - [Node settings](#node-settings)
-    - [Node Input](#node-input)
-    - [Node Output](#node-output)
-  - [moon-position](#moon-position)
-    - [Node settings](#node-settings-1)
-    - [Node Input](#node-input-1)
-    - [Node Output](#node-output-1)
-  - [time-inject](#time-inject)
-    - [Node settings](#node-settings-2)
-    - [Node Input](#node-input-2)
-    - [Node Output](#node-output-2)
-  - [within-time](#within-time)
-    - [Node settings](#node-settings-3)
-  - [times definitions](#times-definitions)
+  * [sun-position](#sun-position)
+    + [Node settings](#node-settings)
+    + [Node Input](#node-input)
+    + [Node Output](#node-output)
+  * [moon-position](#moon-position)
+    + [Node settings](#node-settings-1)
+    + [Node Input](#node-input-1)
+    + [Node Output](#node-output-1)
+  * [time-inject](#time-inject)
+    + [Node settings](#node-settings-2)
+    + [Node Input](#node-input-2)
+    + [Node Output](#node-output-2)
+  * [within-time](#within-time)
+    + [Node settings](#node-settings-3)
+  * [time-comp](#time-comp)
+    + [Node settings](#node-settings-4)
+  * [Times definitions](#times-definitions)
+    + [sun times](#sun-times)
+      - [remarks](#remarks)
+        * [blue hour](#blue-hour)
+        * [amateurDawn /amateurDusk](#amateurdawn--amateurdusk)
+        * [alternate properties](#alternate-properties)
+    + [moon times](#moon-times)
+    + [message, flow or global property or JSONATA expression](#message--flow-or-global-property-or-jsonata-expression)
+  * [input parse formats](#input-parse-formats)
+  * [output formats](#output-formats)
+- [TODO](#todo)
 - [Bugs and Feedback](#bugs-and-feedback)
 - [LICENSE](#LICENSE)
 
@@ -82,7 +97,7 @@ The node calculates the current sun position on any input message.
 
 ![sun-position](images/sun-position-settings.png?raw=true)
 
-- **Position** defines the current position.
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
 - **position container** here you can define multiple lower and upepr limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 - **Name** name of the Node
@@ -176,7 +191,7 @@ The node calculates the current sun position on any input message.
 
 ![moon-position](images/sun-position-settings.png?raw=true)
 
-- **Position** defines the current position.
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
 - **position container** here you can define multiple lower and upepr limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 - **Name** name of the Node
@@ -256,7 +271,7 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 ![time-inject](images/time-inject-settings.png?raw=true)
 
-- **Position** defines the current position
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Payload** defines the payload of the message object send to the output
 - **Topic** defines the topic of the send message
 - **Time** An optional property that can be [configured](#times-definitions) when the inject node should emit a message on that timestamp.
@@ -305,7 +320,7 @@ The output is a message with the defined payload and topic in the settings.
 
 ### within-time
 
-![time-inject](images/time-inject-example.png?raw=true)
+![within-time](images/within-time-example.png?raw=true)
 
 ```
 [{"id":"bd9bd279.302eb","type":"inject","z":"de4e9c38.0d942","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":1180,"wires":[["b5c283be.eb945"]]},{"id":"273eb4cb.2715fc","type":"debug","z":"de4e9c38.0d942","name":"out1","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":590,"y":1180,"wires":[]},{"id":"78f068d6.2fe9f8","type":"debug","z":"de4e9c38.0d942","name":"out2","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":590,"y":1220,"wires":[]},{"id":"b5c283be.eb945","type":"within-time-switch","z":"de4e9c38.0d942","name":"","positionConfig":"bdf7c4a.9ca6c38","startTime":"7:00","startTimeType":"entered","startOffset":0,"startOffsetMultiplier":"60","endTime":"9:00","endTimeType":"entered","endOffset":0,"endOffsetMultiplier":"60","property":"","propertyType":"none","startTimeAlt":"","startTimeAltType":"none","startOffsetAlt":0,"startOffsetAltMultiplier":"60","endTimeAlt":"","endTimeAltType":"none","endOffsetAlt":0,"endOffsetAltMultiplier":"60","x":330,"y":1180,"wires":[["273eb4cb.2715fc"],["78f068d6.2fe9f8"]]},{"id":"bdf7c4a.9ca6c38","type":"position-config","z":"","name":"","longitude":"13.71587","latitude":"51.01732","angleType":"deg"}]
@@ -317,7 +332,7 @@ A simple node that routes messages depending on the time. If the current time fa
 
 ![within-time](images/within-time-settings.png?raw=true)
 
-- **Position** defines the current position
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
   - **Start Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
 - **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
@@ -343,6 +358,36 @@ A simple node that routes messages depending on the time. If the current time fa
 - **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 - **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
+### time-comp
+
+A enhanced node for time format change and time comparision.
+
+![time-comp](images/time-comp-example.png?raw=true)
+
+This node is in development and has a pre release state!!
+
+```
+[{"id":"1a6b5f99.4c928","type":"time-comp","z":"4e9a710a.bf0b9","outputs":1,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":120,"wires":[["fd45b2d2.eba89"]]},{"id":"fd45b2d2.eba89","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":120,"wires":[]},{"id":"f390b758.7dd9b8","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":120,"wires":[["1a6b5f99.4c928"]]},{"id":"b87a5c79.d4ce3","type":"comment","z":"4e9a710a.bf0b9","name":"change Unix Timestamp to ISO","info":"","x":210,"y":80,"wires":[]},{"id":"20afdf5d.4cd8d","type":"comment","z":"4e9a710a.bf0b9","name":"compare Time","info":"","x":150,"y":180,"wires":[]},{"id":"3d8ee66c.7c86ea","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":240,"wires":[["f19f0fd9.8ad1d"]]},{"id":"f19f0fd9.8ad1d","type":"time-comp","z":"4e9a710a.bf0b9","outputs":3,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[{"operator":"5","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"12:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""},{"operator":"3","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"15:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""}],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":240,"wires":[["723d7d7c.e7a874"],["44ac03f7.fd68fc"],["4d8512cd.73c90c"]]},{"id":"723d7d7c.e7a874","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":220,"wires":[]},{"id":"44ac03f7.fd68fc","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":260,"wires":[]},{"id":"4d8512cd.73c90c","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":300,"wires":[]},{"id":"d9e9ca6a.952218","type":"position-config","z":0,"name":"Entenhausen","longitude":"13.72324","latitude":"51.12381","angleType":"deg"}]
+```
+
+#### Node settings
+
+A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.
+
+![time-comp](images/time-comp-settings.png?raw=true)
+
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+- **Input** defines the input parameter for the time stamp
+  - **parse format** defines the format for the input parameter, more information see [input parse formats](#input-parse-formats).
+  - **Offset** allows to define a positive or negative offset to the given **Input Time**.
+- **compare with** here can be defined various definitions of times to which the input time shopuld be compared.
+  - **operator** Drop down to define operator
+  - **compare type** allows to define whoat parts of the timestring shoudl be compared. Default is a comparision of the complete timestamp. But it is possible to only compare a pat like the only the year.
+  - **time** defines where the time to which should be compared comes from
+  - **parse format** defines the format for the time to compare, more information see [input parse formats](#input-parse-formats).
+  - **Offset** allows to define a positive or negative offset to the given time.
+  - **limitation** here it is possible to additionally define a parameter. if defined this comparision will only be made if this parameter has the value "true".
+- **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
 
 ### Times definitions
 
@@ -434,17 +479,114 @@ The start and end time can have an offset. This is specified in seconds,minutes 
 - negative number brings the time forward. E.g. if the time is dusk and offset is -60 minutes, the start time will be 60 minutes before dusk.
 - positive number delays the time by the specified number
 
+### input parse formats
+Some nodes has the ability to get an input time out of different pre defined formats or a free format definition.
+
+The formats are:
+  - **milliseconds UNIX timestamp** This is the default for Node-ed. Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
+  - **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
+  - **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
+  - **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
+  - **various** the system will try to parse different string formats
+  - **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+
+ Field        | Full Form          | Short Form
+ -------------|--------------------|-----------------------
+ Year         | yyyy (4 digits)    | yy (2 digits), y (2 or 4 digits)
+ Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
+ Month        | NNN (abbr.)        |
+ Day of Month | dd (2 digits)      | d (1 or 2 digits)
+ Day of Week  | EE (name)          | E (abbr)
+ Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
+ Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
+ Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
+ Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
+ Minute       | mm (2 digits)      | m (1 or 2 digits)
+ Second       | ss (2 digits)      | s (1 or 2 digits)
+ Millisecond  | ll (3 digits)      | l (1, 2 or 3 digits)
+ AM/PM        | tt  (2 digits)     | t (1 or 2 digits)
+
+
+### output formats
+For timestamp outputs some nodes has the ability to define the format of the timestamp. Therfore different pre defined formates exists or a free format definition.
+
+The formats are:
+  - **milliseconds UNIX timestamp** Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
+  - **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
+  - **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
+  - **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
+  - **local** is the javascript output of date.toLocaleString()
+  - **localLong** is the javascript output of date.toString()
+  - **localTime** is the javascript output of date.toLocaleTimeString()
+  - **localTimeLong** is the javascript output of date.toTimeString()
+  - **localDate** is the javascript output of date.toLocaleDateString()
+  - **localDateLong** is the javascript output of date.toDateString()
+  - **UTC** is the javascript output of date.toUTCString()
+  - **ISO** YYYY-MM-DDTHH:mm:ss.sssZ (output of date.toISOString())
+  - **ms** the time in milliseconds between output and timestamp
+  - **sec** the time in seconds between output and timestamp
+  - **min** the time in minutes between output and timestamp
+  - **hour** the time in hours between output and timestamp
+  - **Day Name** the timestamps day in the format Monday, 22.12.
+  - **Day in relative** the timestamps day in relative to output time in the format Today, 22.12.
+  - **object** gived back an object for the timestamp with the following properties:
+    - **date** Javascript Date object
+    - **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
+    - **timeUTCStr** string representation of the TIme in UTC format
+    - **timeISOStr** string representation of the TIme in ISO format
+    - **timeLocaleStr** the javascript output of date.toLocaleString()
+    - **timeLocaleTimeStr** the javascript output of date.toLocaleTimeString()
+    - **delay** the time in milliseconds between output and timestamp
+    - **delaySec** the time in seconds between output and timestamp
+  - **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+
+|placeholder|Description|
+|--- |--- |
+|d|Day of the month as digits; no leading zero for single-digit days.|
+|dd|Day of the month as digits; leading zero for single-digit days.|
+|ddd|Day of the week as a three-letter abbreviation. (same as E)|
+|dddd|Day of the week as its full name.  (same as EE)|
+|E|Day of the week as a three-letter abbreviation.|
+|EE|Day of the week as its full name.|
+|M|Month as digits; no leading zero for single-digit months.|
+|MM|Month as digits; leading zero for single-digit months.|
+|MMM|Month as a three-letter abbreviation.|
+|MMMM|Month as its full name.|
+|yy|Year as last two digits; leading zero for years less than 10.|
+|yyyy|Year represented by four digits.|
+|h|Hours; no leading zero for single-digit hours (12-hour clock 1-12).|
+|hh|Hours; leading zero for single-digit hours (12-hour clock 01-12).|
+|H|Hours; no leading zero for single-digit hours (24-hour clock  0-23).|
+|HH|Hours; leading zero for single-digit hours (24-hour clock 00-23).|
+|k|Hours; no leading zero for single-digit hours (12-hour clock 0-11).|
+|kk|Hours; leading zero for single-digit hours (12-hour clock  00-11).|
+|K|Hours; no leading zero for single-digit hours (24-hour clock 1-24).|
+|KK|Hours; leading zero for single-digit hours (24-hour clock 01-24).|
+|m|Minutes; no leading zero for single-digit minutes.|
+|mm|Minutes; leading zero for single-digit minutes.|
+|s|Seconds; no leading zero for single-digit seconds.|
+|ss|Seconds; leading zero for single-digit seconds.|
+|l or L|Milliseconds. l gives 3 digits. L gives 2 digits.|
+|t|Lowercase, single-character time marker string: a or p.|
+|tt|Lowercase, two-character time marker string: am or pm.|
+|T|Uppercase, single-character time marker string: A or P.|
+|TT|Uppercase, two-character time marker string: AM or PM.|
+|Z|US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500|
+|o|GMT/UTC timezone offset, e.g. -0500 or +0230.|
+|S|The date's ordinal suffix (st, nd, rd, or th). Works well with d.|
+|x|difference of days from timestamp day to output day|
+|xx|difference of days from timestamp day to output day with relative names for today, tomorrow, ...|
+|'…' or "…"|Literal character sequence. Surrounding quotes are removed.|
+|UTC:|Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed.|
+
 ## TODO
   - change icon size to 40x60 (https://github.com/node-red/node-red.github.io/pull/39)
   - add posibility to select input/output timezone
     - select auto ad get info from getTimezoneOffset
     - solve problem of dst
-  - add node: time calculations
-    - zeitraum zu zeitpunkt addieren
+  - add node: time Span
     - zeitraum zwischen 2 zeitpunkten ausrechnen
     -  die möglichkeit statt Zeitpunkt - Zeitraum auszugeben auch sowas wie Zeitpunkt - Zeitraum > Limit true/false rauszugeben
-  - add node date/time format - date/time parser
-  - bei datumsformatierung die möglichkeit zu sagen "zeig wochentag an (lang/kurz: montag/mon)" und extra konfig für "zeig bei daten in den nächsten 2 tagen statt wochentag 'heute' oder 'morgen' oder 'übermorgen' an"
 
 ## Bugs and Feedback
 

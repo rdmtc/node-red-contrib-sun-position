@@ -1,13 +1,14 @@
 {
-    "time-calc": {
+    "time-comp": {
         "label": {
-            "time-calc": "time-calc",
+            "time-comp": "time-comp",
             "calc": "calc",
+            "comp": "comp",
             "name": "Name",
             "position": "Position",
-            "operand1": "Input",
-            "operand1Format": "parse format",
-            "operand1Offset": "Offset",
+            "input": "Input",
+            "inputFormat": "parse format",
+            "inputOffset": "Offset",
             "operatorContainer": "compare with",
             "onlyif": "only if",
             "checkall": "stopping after first match (if)",
@@ -227,7 +228,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on time-calc",
+            "error-text": "Exception occured on time-comp",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",

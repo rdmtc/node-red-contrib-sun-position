@@ -1,5 +1,5 @@
 /********************************************
- * time-calc:
+ * time-comp:
  *********************************************/
 'use strict';
 const util = require('util');
@@ -48,9 +48,9 @@ module.exports = function (RED) {
             result.value = hlp.parseDateFromFormat(
                 data,
                 format,
-                RED._('time-calc.days'),
-                RED._('time-calc.month'),
-                RED._('time-calc.dayDiffNames')
+                RED._('time-comp.days'),
+                RED._('time-comp.month'),
+                RED._('time-comp.dayDiffNames')
             );
 
             if (result.value === 'Invalid Date' || isNaN(result.value)) {
@@ -133,17 +133,17 @@ module.exports = function (RED) {
                 if (
                     node.positionConfig === null ||
                     config.operator === null ||
-                    config.operand1Type === null
+                    config.inputType === null
                 ) {
                     throw new Error('Configuration is missing!!');
                 }
 
-                const operand1 = tsGetOperandData(this, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
+                const inputData = tsGetOperandData(this, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetMultiplier);
 
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
-                    if (config.result1Type === 'operand1') {
-                        resObj = hlp.getFormatedDateOut(operand1, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                    if (config.result1Type === 'input') {
+                        resObj = hlp.getFormatedDateOut(inputData, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
@@ -161,7 +161,7 @@ module.exports = function (RED) {
                     }
                 }
 
-                node.debug('operand1 ' + util.inspect(operand1));
+                node.debug('input ' + util.inspect(inputData));
                 const resObj = null;
                 const rules = config.rules;
                 const rulesLength = rules.length;
@@ -203,7 +203,7 @@ module.exports = function (RED) {
 
                         let result = false;
                         if (compare) {
-                            const inputOperant = new Date(operand1);
+                            const inputOperant = new Date(inputData);
                             // result = inputOperant.getTime() <= ruleoperand.getTime();
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
@@ -298,14 +298,14 @@ module.exports = function (RED) {
                 hlp.errorHandler(
                     this,
                     err,
-                    RED._('time-calc.errors.error-text'),
-                    RED._('time-calc.errors.error-title')
+                    RED._('time-comp.errors.error-text'),
+                    RED._('time-comp.errors.error-title')
                 );
             }
         });
     }
 
-    RED.nodes.registerType('time-calc', timeCalcNode);
+    RED.nodes.registerType('time-comp', timeCalcNode);
 
     /*
       RED.httpAdmin.get('/sun-position/js/*', function(req,res) {
