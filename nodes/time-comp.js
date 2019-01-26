@@ -1,5 +1,5 @@
 /********************************************
- * time-calc:
+ * time-comp:
  *********************************************/
 'use strict';
 const util = require('util');
@@ -12,67 +12,62 @@ const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
 module.exports = function (RED) {
     'use strict';
 
-    function tsGetOperandData(node, msg, type, value, format, offset, multiplier) {
-        function getName(type,val){
-            if (type === 'date' ||
-                type === 'str' ||
-                type === 'num') {
-                if (val+'' === '') {
-                    return '""';
-                }
-                return val+'';
-            }
-            return type + '.' + val;
-        }
-
+    function tsGetOperandData(
+        node,
+        msg,
+        type,
+        value,
+        format,
+        offset,
+        multiplier
+    ) {
         let result = {};
         if (type === null || type === 'none' || type === '') {
             return Date.now();
         }
 
-        if (type === 'entered' ||
+        if (
+            type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
             type === 'date'
         ) {
             result = node.positionConfig.getTimeProp(node, msg, type, value);
             if (result === null) {
-                const errMsg = 'Could not evaluate ' + getName(type, value) + '!';
-                hlp.handleError(node, errMsg);
+                throw new Error('could not evaluate ' + type + '.' + value);
             } else if (result.error) {
-                hlp.handleError(node, 'Error on getting input: ' + result.error + '!');
-                return null;
+                throw new Error('error on getting operand: ' + result.error);
             }
         } else {
             // msg, flow, global, str, num, env
             const data = RED.util.evaluateNodeProperty(value, type, node, msg);
-node.debug('data ' + util.inspect(data)); // eslint-disable-line
             if (!data) {
-                hlp.handleError(node, 'Could not evaluate ' + getName(type, value) + '!');
-                return null;
+                throw new Error('could not evaluate ' + type + '.' + value);
             }
-            try {
-                result.value = hlp.parseDateFromFormat(data, format, RED._('time-calc.days'), RED._('time-calc.month'), RED._('time-calc.dayDiffNames'));
-            } catch (err) {
-                hlp.handleError(node, RED._('time-calc.errors.error-text'), err, RED._('time-calc.errors.error-title'));
-            }
-node.debug('result1 ' + util.inspect(result)); // eslint-disable-line
-            if (result.value === null || result.value === 'Invalid Date' || isNaN(result.value)) {
-                hlp.handleError(node, 'wrong format ' + getName(type, value) + '="' + data + '"');
-                return null;
+
+            result.value = hlp.parseDateFromFormat(
+                data,
+                format,
+                RED._('time-comp.days'),
+                RED._('time-comp.month'),
+                RED._('time-comp.dayDiffNames')
+            );
+
+            if (result.value === 'Invalid Date' || isNaN(result.value)) {
+                throw new Error('could not evaluate format of ' + data);
             }
         }
 
         if (offset !== 0 && multiplier > 0) {
             return new Date(result.value.getTime() + offset * multiplier);
         }
-node.debug('result2 ' + util.inspect(result)); // eslint-disable-line
+
         if (offset !== 0 && multiplier === -1) {
             result.value.setMonth(result.value.getMonth() + offset);
         } else if (offset !== 0 && multiplier === -2) {
             result.value.setFullYear(result.value.getFullYear() + offset);
         }
-node.debug('result3 ' + util.inspect(result)); // eslint-disable-line
+
         return result.value;
     }
 
@@ -81,6 +76,7 @@ node.debug('result3 ' + util.inspect(result)); // eslint-disable-line
             if (value === '' || typeof value === 'undefined') {
                 return Date.now();
             }
+
             return value;
         }
 
@@ -92,16 +88,35 @@ node.debug('result3 ' + util.inspect(result)); // eslint-disable-line
             return node.positionConfig.getMoonCalc(msg.ts);
         }
 
-        if (type === 'entered' ||
+        if (
+            type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
-            type === 'date') {
-            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+            type === 'date'
+        ) {
+            const data = node.positionConfig.getTimeProp(
+                node,
+                msg,
+                type,
+                value,
+                offset,
+                1,
+                days
+            );
             if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                return hlp.getFormatedDateOut(
+                    data.value,
+                    format,
+                    false,
+                    RED._('time-inject.days'),
+                    RED._('time-inject.month'),
+                    RED._('time-inject.dayDiffNames')
+                );
             }
+
             return data;
         }
+
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
@@ -113,74 +128,53 @@ node.debug('result3 ' + util.inspect(result)); // eslint-disable-line
         const node = this;
 
         this.on('input', msg => {
-            node.debug('config ' + util.inspect(config)); // eslint-disable-line
-            node.debug('on input - msg ' + util.inspect(msg)); // eslint-disable-line
-            if (node.positionConfig === null ||
-                config.operator === null ||
-                config.operand1Type === null) {
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: 'Configuration is missing!!'
-                });
-                throw new Error('Configuration is missing!!');
-            }
-
-            const operand1 = tsGetOperandData(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
-node.debug('operand1 ' + util.inspect(operand1)); // eslint-disable-line
-            if (operand1 === null) {
-                return null;
-            }
             try {
-                if (config.result1Type !== 'none') {
+                node.debug('input ' + util.inspect(msg));
+                if (
+                    node.positionConfig === null ||
+                    config.operator === null ||
+                    config.inputType === null
+                ) {
+                    throw new Error('Configuration is missing!!');
+                }
+
+                const inputData = tsGetOperandData(this, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetMultiplier);
+
+                if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
-node.debug('resObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.inspect(config.result1Format)); // eslint-disable-line
-                    if (config.result1ValueType === 'operand1') {
-                        resObj = hlp.getFormatedDateOut(operand1, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                    if (config.result1Type === 'input') {
+                        resObj = hlp.getFormatedDateOut(inputData, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
                     }
-                    // to
-node.debug('resObj1 ' + util.inspect(resObj)); // eslint-disable-line
-                    if (config.result1Type === 'msgPayload') {
-                        config.result1Type = 'msg';
-                        config.result1 = 'payload';
-                    }
-                    if (config.result1Type === 'msgTs') {
-                        config.result1Type = 'msg';
-                        config.result1 = 'ts';
-                    }
-node.debug('resObj2 ' + util.inspect(resObj)); // eslint-disable-line
+
+                    node.debug('resObj ' + util.inspect(resObj));
                     if (resObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
                         this.error('error on getting result: ' + resObj.error);
                     } else if (config.result1Type === 'msg' || config.result1Type === 'msgProperty') {
-                        RED.util.setMessageProperty(msg, config.result1, resObj);
+                        RED.util.setMessageProperty(msg, name, resObj);
                     } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
-                        const contextKey = RED.util.parseContextStore(config.result1);
+                        const contextKey = RED.util.parseContextStore(config.result1Value);
                         node.context()[config.result1Type].set(contextKey.key, resObj, contextKey.store);
                     }
                 }
 
-node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
-                const resObj = [];
+                node.debug('input ' + util.inspect(inputData));
+                const resObj = null;
                 const rules = config.rules;
                 const rulesLength = rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
-node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
-                        operatorValid = hlp.isTrue(res);
+                        operatorValid = hlp.toBoolean(res);
                     }
 
                     if (operatorValid) {
                         const ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
-                        if (ruleoperand === null) {
-                            continue;
-                        }
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
                         node.debug('operatorType ' + util.inspect(rule.operatorType));
@@ -209,7 +203,7 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 
                         let result = false;
                         if (compare) {
-                            const inputOperant = new Date(operand1);
+                            const inputOperant = new Date(inputData);
                             // result = inputOperant.getTime() <= ruleoperand.getTime();
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
@@ -299,15 +293,19 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                 }
 
                 resObj.push(msg);
-node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
-                this.send(resObj);
+                return resObj;
             } catch (err) {
-                hlp.handleError(this, RED._('time-calc.errors.error-text'), err, RED._('time-calc.errors.error-title'));
+                hlp.errorHandler(
+                    this,
+                    err,
+                    RED._('time-comp.errors.error-text'),
+                    RED._('time-comp.errors.error-title')
+                );
             }
         });
     }
 
-    RED.nodes.registerType('time-calc', timeCalcNode);
+    RED.nodes.registerType('time-comp', timeCalcNode);
 
     /*
       RED.httpAdmin.get('/sun-position/js/*', function(req,res) {

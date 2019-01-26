@@ -63,7 +63,6 @@ function isFalse(val) {
     val = (val+'').toLowerCase();
     return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
 }
-
 /*******************************************************************************************************/
 function getNodeId(node) {
     // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
@@ -479,23 +478,14 @@ const dateFormat = (function () {
         }
 
         const _ = utc ? 'getUTC' : 'get';
-
         const d = date[_ + 'Date']();
-
         const D = date[_ + 'Day']();
-
         const M = date[_ + 'Month']();
-
         const y = date[_ + 'FullYear']();
-
-        const H = date[_ + 'Hours']();
-
+        const H = date[_ + 'Hours'](); // 0-23
         const m = date[_ + 'Minutes']();
-
         const s = date[_ + 'Seconds']();
-
         const L = date[_ + 'Milliseconds']();
-
         const o = utc ? 0 : date.getTimezoneOffset();
 
         const flags = {
@@ -514,12 +504,12 @@ const dateFormat = (function () {
             yyyy: y,
             h: H % 12 || 12,
             hh: pad(H % 12 || 12),
-            H,
-            HH: pad(H),
+            H, // 0-23
+            HH: pad(H), // 00-23
             k: (H % 12 || 12) - 1,
             kk: pad((H % 12 || 12) - 1),
-            K: H - 1,
-            KK: pad(H - 1),
+            K: H + 1,
+            KK: pad(H + 1),
             m,
             mm: pad(m),
             s,
@@ -841,8 +831,8 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // Day of Week  | EE (name)          | E (abbr)
 // Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
 // Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
-// Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
-// Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
+// Hour (0-11)  | kk (2 digits)      | k (1 or 2 digits)
+// Hour (1-24)  | KK (2 digits)      | K (1 or 2 digits)
 // Minute       | mm (2 digits)      | m (1 or 2 digits)
 // Second       | ss (2 digits)      | s (1 or 2 digits)
 // Millisecond  | ll (3 digits)      | l (1, 2 or 3 digits)
@@ -1006,14 +996,14 @@ function getDateFromFormat(val, format) {
             }
 
             i_val += hh.length;
-        } else if (token === 'KK' || token === 'K') {
+        } else if (token === 'kk' || token === 'k') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 11)) {
                 return null;
             }
 
             i_val += hh.length;
-        } else if (token === 'kk' || token === 'k') {
+        } else if (token === 'KK' || token === 'K') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 24)) {
                 return null;
