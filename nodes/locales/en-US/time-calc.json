@@ -115,7 +115,8 @@
         "parseFormats": [
             "milliseconds - UNIX timestamp",
             "ECMA-262 - JSON Date representation",
-            "various - try different Formats",
+            "various - try different Formats, prefere european formats",
+            "various - try different Formats, prefere american formats",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
             "Other"

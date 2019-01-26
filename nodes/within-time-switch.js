@@ -17,9 +17,9 @@ module.exports = function (RED) {
         }
 
         if (result.start.error) {
-            hlp.errorHandler(node, new Error('Error get start time:' + result.start.error), RED._('within-time-switch.errors.error-text'), result.start.error);
+            hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : result.start.error}), undefined, result.start.error);
         } else if (result.end.error) {
-            hlp.errorHandler(node, new Error('Error get end time:' + result.end.error), RED._('within-time-switch.errors.error-text'), result.end.error);
+            hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : result.end.error}), undefined, result.end.error);
         } else if ((status & 2) && statusObj) {
             node.status(statusObj);
         } else if ((status & 1) && result.start.value && result.end.value) {
@@ -55,13 +55,13 @@ module.exports = function (RED) {
             try {
                 // evaluateNodeProperty(node.property, type, node, msg, callback)
                 const res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
-                result.altStartTime = hlp.toBoolean(res);
+                result.altStartTime = hlp.isTrue(res);
             } catch (err) {
                 result.altStartTime = false;
-                hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyStart-type', {
+                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', {
                     type: node.propertyStartType,
                     value: node.propertyStart
-                }));
+                }), err);
                 node.debug(util.inspect(err));
             }
         }
@@ -71,13 +71,13 @@ module.exports = function (RED) {
             try {
                 // evaluateNodeProperty(node.property, type, node, msg, callback)
                 const res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
-                result.altEndTime = hlp.toBoolean(res);
+                result.altEndTime = hlp.isTrue(res);
             } catch (err) {
                 result.altEndTime = false;
-                hlp.errorHandler(node, err, RED._('within-time-switch.errors.invalid-propertyEnd-type', {
+                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyEnd-type', {
                     type: node.propertyEndType,
                     value: node.propertyEnd
-                }));
+                }), err);
                 node.debug(util.inspect(err));
             }
         }
@@ -206,7 +206,7 @@ module.exports = function (RED) {
                 });
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._('within-time-switch.errors.error-text'), RED._('within-time-switch.errors.error-title'));
+                hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
             }
         });
 
@@ -215,7 +215,7 @@ module.exports = function (RED) {
             const result = calcWithinTimes(this, null, config);
             setstate(this, result, (config.statusOut || 3));
         } catch (err) {
-            hlp.errorHandler(this, err, RED._('within-time-switch.errors.error-text'), RED._('within-time-switch.errors.error-title'));
+            hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
         }
     }
 

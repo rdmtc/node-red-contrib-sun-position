@@ -304,6 +304,12 @@
         if (t === 'msg') {
             return t + '.' + clipValueLength(v, l);
         }
+        if (t === 'msgPayload') {
+            return 'msg.payload';
+        }
+        if (t === 'msgTs') {
+            return 'msg.ts';
+        }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
@@ -358,7 +364,7 @@
                 validate: RED.validators.typedInput('operand1Type')
             },
             operand1Type: {
-                value: 'msg'
+                value: 'msgPayload'
             },
             operand1Format: {
                 value: 0,
@@ -393,7 +399,7 @@
                 validate: RED.validators.typedInput('result1Type')
             },
             result1Type: {
-                value: 'msg'
+                value: 'msgPayload'
             },
             result1Value: {
                 value: '',
@@ -537,9 +543,10 @@
                 ], parseFormats: [
                     {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
                     {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-                    {id: 2, group: 'string', label: 'various - try different Formats', add: 'will try different formats'},
-                    {id: 3, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
-                    {id: 4, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
+                    {id: 2, group: 'string', label: 'various - try different Formats, prefere european formats', add: 'will try different formats, prefere european formats'},
+                    {id: 3, group: 'string', label: 'various - try different Formats, prefere american formats', add: 'will try different formats, prefere european formats'},
+                    {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
+                    {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
                     {id: 99, group: 'other', label: 'free definition', add: 'xxx'}
                 ], multiplierGroups: [
                     {id: 'std', label: 'Standard'},
@@ -564,6 +571,16 @@
                 value: 'none',
                 label: 'not used',
                 // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+                hasValue: false
+            };
+            const typeMsgPayload = {
+                value: 'msgPayload',
+                label: 'msg.payload',
+                hasValue: false
+            };
+            const typeMsgTs = {
+                value: 'msgTs',
+                label: 'msg.ts',
                 hasValue: false
             };
             const typeTimeEntered = {
@@ -850,16 +867,24 @@
             // #region operand1
             $('#node-input-operand1Type').val(node.operand1Type);
             $('#node-input-operand1').typedInput({
-                default: node.operand1Type || 'msg',
+                default: node.operand1Type || typeMsgPayload.value,
                 typeField: $('#node-input-operand1Type'),
-                types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
             $('#node-input-operand1').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand1').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
                     $('.time-calc-row-operand1Format').hide();
                     $('.time-calc-row-operand1Offset').show();
-                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                } else if ( opType === typeDateEntered.value ||
+                            opType === 'msg' ||
+                            opType === 'msgPayload' ||
+                            opType === 'msgTs' ||
+                            opType === 'flow' ||
+                            opType === 'global' ||
+                            opType === 'str' ||
+                            opType === 'num' ||
+                            opType === 'env') {
                     $('.time-calc-row-operand1Format').show();
                     $('.time-calc-row-operand1Offset').show();
                 } else {
@@ -1077,7 +1102,7 @@
             $('#node-input-result1').typedInput({
                 default: node.result1Type || typeUndefined.value,
                 typeField: $('#node-input-result1Type'),
-                types: [typeUndefined, 'msg', 'flow', 'global']
+                types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global']
             });
             $('#node-input-result1ValueType').val(node.result1ValueType);
             $('#node-input-result1Value').typedInput({

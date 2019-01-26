@@ -351,7 +351,7 @@ module.exports = function (RED) {
             /**************************************************************************************************************/
             initTimes(this);
         } catch (err) {
-            hlp.errorHandler(this, err, RED._('position-config.errors.error-text'), RED._('position-config.errors.error-title'));
+            hlp.handleError(this,  RED._('position-config.errors.error-text'), err, RED._('position-config.errors.error-title'));
         }
 
         /**************************************************************************************************************/

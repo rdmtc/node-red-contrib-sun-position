@@ -1,3 +1,5 @@
+/* sunPosHelper.js */
+
 /********************************************
  * sun-position:
  *********************************************/
@@ -5,10 +7,9 @@
 const util = require('util');
 
 module.exports = {
-    toBoolean,
     isTrue,
     isFalse,
-    errorHandler,
+    handleError,
     getComperableDateFormat,
     parseComperableDateFormat,
     getComperableDateFormat2,
@@ -28,6 +29,7 @@ module.exports = {
     formatDate,
     getFormatedDateOut,
     parseDate,
+    parseArray,
     parseDateTime,
     parseDateFromFormat
 };
@@ -43,67 +45,55 @@ module.exports = {
 /* exported functions                                                                                  */
 /*******************************************************************************************************/
 /**
- * converts a string to a boolean
- * a Number >0 is also given back as true
- * @param {*} val a parameter which should be convertet to Boolean
- * @returns {boolean} boolean representation of the input value
- */
-function toBoolean(val) {
-    val = (val+'').toLowerCase();
-    return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
-}
-
-/**
  * returns **true** if the parameter value is a valid boolean value for **true**
  * @param {*} val a parameter which should be checkd if  it is a valid true boolean
  * @returns {boolean} true if the parameter value is a valid boolean value for **true**
  */
-const isTrue = function(val) {
+function isTrue(val) {
     val = (val+'').toLowerCase();
     return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
-};
+}
 
 /**
  * returns **true** if the parameter value is a valid boolean value for **false**
  * @param {*} val a parameter which should be checkd if  it is a valid false boolean
  * @returns {boolean} true if the parameter value is a valid boolean value for **false**
  */
-const isFalse = function(val) {
+function isFalse(val) {
     val = (val+'').toLowerCase();
     return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
-};
+}
+
 /*******************************************************************************************************/
 function getNodeId(node) {
     // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
 /*******************************************************************************************************/
-function errorHandler(node, err, messageText, stateText) {
+function handleError(node, messageText, err, stateText) {
     if (!err) {
-        return true;
-    }
-
-    if (err.message) {
-        // const msg = err.message.toLowerCase();
-        messageText += ':' + err.message;
+        err = new Error(messageText);
     } else {
-        messageText += '! (No error message given!)';
+        if (messageText && err.message) {
+            messageText += ':' + err.message;
+        } else if (err.message) {
+            messageText = err.message;
+        }
     }
 
-    if (node) {
+    if (node && messageText) {
         node.error(messageText);
-        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
         node.status({
             fill: 'red',
             shape: 'ring',
-            text: stateText
+            text: (stateText) ? stateText : messageText
         });
     } else if (console) {
         console.error(messageText);
-        console.error(util.inspect(err, Object.getOwnPropertyNames(err)));
+        console.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+        console.trace();
     }
-
-    return false;
 }
 /*******************************************************************************************************/
 /**
@@ -316,7 +306,6 @@ function getTimeOfText(t, offset, next, days, date) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
                 (parseInt(matches[2]) || 0),
                 (parseInt(matches[3]) || 0), 0);
-            // console.log(d);
         } else {
             return null;
         }
@@ -348,6 +337,14 @@ function getDateOfText(date, offset, next, days) {
             date = date.lc;
         } else if (date.hasOwnProperty('payload')) {
             date = date.payload;
+        } else if (date.hasOwnProperty('date')) {
+            date = date.date;
+        } else if (date.hasOwnProperty('timeStamp')) {
+            date = date.timeStamp;
+        } else if (date.hasOwnProperty('created')) {
+            date = date.created;
+        } else if (date.hasOwnProperty('changed')) {
+            date = date.changed;
         } else {
             date = String(date);
         }
@@ -370,6 +367,16 @@ function getDateOfText(date, offset, next, days) {
         return calcTimeValue(dto, offset, next, days);
     }
 
+    if (typeof date === 'string') {
+        let res = parseDateTime(date, true);
+        if (res === null) {
+            res = parseDate(date, true);
+        }
+        if (res === null) {
+            res = parseArray(date, dateFormat.parseTimes);
+        }
+        return res;
+    }
     throw new Error('could not evaluate ' + String(date) + ' as a valid Date or time.');
 }
 /*******************************************************************************************************/
@@ -553,6 +560,15 @@ dateFormat.masks = {
     isoDateTime: 'yyyy-MM-dd\'T\'HH:mm:ss',
     isoUtcDateTime: 'UTC:yyyy-MM-dd\'T\'HH:mm:ss\'Z\''
 };
+
+dateFormat.parseDates = {
+    general : ['y-M-d', 'MMM d, y', 'MMM d,y', 'y-MMM-d', 'd-MMM-y', 'MMM d'],
+    monthFirst : ['M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'M-d'],
+    dateFirst : ['d/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M']
+};
+
+dateFormat.parseTimes = ['hh:mm:ss:lt', 'hh:mm:ss.lt', 'hh:mm:sst', 'hh:mmt', 'HH:mm:ss:l', 'HH:mm:ss.l', 'HH:mm:ss', 'HH:mm', 'h:mm:ss TT Z', 'h:mm:ss TT', 'h:mm TT'];
+
 dateFormat.i18n = {
     dayNames: [
         'Sunday',
@@ -724,6 +740,7 @@ function getTimeDiff(time1, time2, limit) {
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
+    // console.log('getFormatedDateOut ' + date + ' --> ' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (isNaN(format)) {
         return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
@@ -783,6 +800,8 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // ===================================================================
 // Author: Matt Kruse <matt@mattkruse.com>
 // WWW: http://www.mattkruse.com/
+// https://www.mattkruse.com/javascript/date/source.html
+// http://javascripttoolbox.com/lib/date/index.php
 //
 // NOTICE: You may use this code for any purpose, commercial or
 // private, without any further permission from the author. You may
@@ -876,6 +895,7 @@ function _getInt(str, i, minlength, maxlength) {
 // getTime() of the date. If it does not match, it returns 0.
 // ------------------------------------------------------------------
 function getDateFromFormat(val, format) {
+    // console.log('getDateFromFormat ' + val + ' --> ' + format); // eslint-disable-line
     val = String(val);
     format = String(format);
     const now = new Date();
@@ -884,9 +904,9 @@ function getDateFromFormat(val, format) {
     let c = '';
     let token = '';
     let x; let y;
-    let year = now.getYear();
+    let year = now.getFullYear();
     let month = now.getMonth() + 1;
-    let date = 1;
+    let date = now.getDate();
     let hh = now.getHours();
     let mm = now.getMinutes();
     let ss = now.getSeconds();
@@ -917,10 +937,9 @@ function getDateFromFormat(val, format) {
                 x = 2;
                 y = 4;
             }
-
             year = _getInt(val, i_val, x, y);
             if (year === null) {
-                return 0;
+                return null;
             }
 
             i_val += year.length;
@@ -949,7 +968,7 @@ function getDateFromFormat(val, format) {
             }
 
             if ((month < 1) || (month > 12)) {
-                return 0;
+                return null;
             }
         } else if (token === 'EE' || token === 'E' || token === 'dddd' || token === 'ddd') {
             for (let i = 0; i < dateFormat.i18n.dayNames.length; i++) {
@@ -962,42 +981,42 @@ function getDateFromFormat(val, format) {
         } else if (token === 'MM' || token === 'M') {
             month = _getInt(val, i_val, token.length, 2);
             if (month === null || (month < 1) || (month > 12)) {
-                return 0;
+                return null;
             }
 
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || (date < 1) || (date > 31)) {
-                return 0;
+                return null;
             }
 
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 12)) {
-                return 0;
+                return null;
             }
 
             i_val += hh.length;
         } else if (token === 'HH' || token === 'H') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 23)) {
-                return 0;
+                return null;
             }
 
             i_val += hh.length;
         } else if (token === 'KK' || token === 'K') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 11)) {
-                return 0;
+                return null;
             }
 
             i_val += hh.length;
         } else if (token === 'kk' || token === 'k') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 24)) {
-                return 0;
+                return null;
             }
 
             i_val += hh.length;
@@ -1005,21 +1024,21 @@ function getDateFromFormat(val, format) {
         } else if (token === 'mm' || token === 'm') {
             mm = _getInt(val, i_val, token.length, 2);
             if (mm === null || (mm < 0) || (mm > 59)) {
-                return 0;
+                return null;
             }
 
             i_val += mm.length;
         } else if (token === 'ss' || token === 's') {
             ss = _getInt(val, i_val, token.length, 2);
             if (ss === null || (ss < 0) || (ss > 59)) {
-                return 0;
+                return null;
             }
 
             i_val += ss.length;
         } else if (token === 'lll' || token === 'll' || token === 'l' || token === 'L') {
             ll = _getInt(val, i_val, token.length, 3);
             if (ll === null || (ll < 0) || (ll > 999)) {
-                return 0;
+                return null;
             }
 
             i_val += ll.length;
@@ -1037,11 +1056,11 @@ function getDateFromFormat(val, format) {
                 ampm = 'PM';
                 i_val += 1;
             } else {
-                return 0;
+                return null;
             }
         } else {
             if (val.substring(i_val, i_val + token.length) !== token) {
-                return 0;
+                return null;
             }
 
             i_val += token.length;
@@ -1050,7 +1069,7 @@ function getDateFromFormat(val, format) {
 
     // If there are any trailing characters left in the value, it doesn't match
     if (i_val !== val.length) {
-        return 0;
+        return null;
     }
 
     // Is date valid for month?
@@ -1058,16 +1077,16 @@ function getDateFromFormat(val, format) {
         // Check for leap year
         if (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)) { // leap year
             if (date > 29) {
-                return 0;
+                return null;
             }
         } else if (date > 28) {
-            return 0;
+            return null;
         }
     }
 
     if ((month === 4) || (month === 6) || (month === 9) || (month === 11)) {
         if (date > 30) {
-            return 0;
+            return null;
         }
     }
 
@@ -1077,9 +1096,8 @@ function getDateFromFormat(val, format) {
     } else if (hh > 11 && ampm === 'AM') {
         hh -= 12;
     }
-
-    const newdate = new Date(year, month - 1, date, hh, mm, ss);
-    return newdate.getTime();
+    // console.log(year, month, date, hh, mm, ss, ll); // eslint-disable-line
+    return new Date(year, month - 1, date, hh, mm, ss, ll);
 }
 
 // ------------------------------------------------------------------
@@ -1095,48 +1113,48 @@ function getDateFromFormat(val, format) {
 // for formats like d/M/y (european format) before M/d/y (American).
 // Returns a Date object or null if no patterns match.
 // ------------------------------------------------------------------
-function parseDate(val, preferEuro) {
-    const generalFormats = new Array('y-M-d', 'MMM d, y', 'MMM d,y', 'y-MMM-d', 'd-MMM-y', 'MMM d');
-    const monthFirst = new Array('M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'M-d');
-    const dateFirst = new Array('d/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M');
-    const checkList = new Array(generalFormats, (preferEuro) ? dateFirst : monthFirst, (preferEuro) ? monthFirst : dateFirst);
-    let d = null;
-    for (let i = 0; i < checkList.length; i++) {
-        const l = window[checkList[i]];
-        for (let j = 0; j < l.length; j++) {
-            d = getDateFromFormat(val, l[j]);
-            if (d !== 0) {
-                return new Date(d);
-            }
+function parseArray(val, listTocheck) {
+    for (let i = 0, n = listTocheck.length; i < n; i++) {
+        const res = getDateFromFormat(val, listTocheck[i]);
+        if (res !== null) {
+            return res;
         }
     }
-
     return null;
+}
+
+function parseDate(val, preferEuro) {
+    let res = parseArray(val, dateFormat.parseDates.general);
+    if (res !== null) { return res; }
+    res = parseArray(val, (preferEuro) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
+    if (res !== null) { return res; }
+    return parseArray(val, (preferEuro) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
 }
 
 function parseDateTime(val, preferEuro) {
-    const generalFormats = new Array('y-M-d hh:mm:ssa', 'MMM d, y hh:mm:ssa', 'MMM d,y hh:mm:ssa', 'y-MMM-d hh:mm:ssa', 'd-MMM-y hh:mm:ssa', 'MMM d hh:mm:ssa',
-        'y-M-d HH:mm:ss', 'MMM d, y HH:mm:ss', 'MMM d,y HH:mm:ss', 'y-MMM-d HH:mm:ss', 'd-MMM-y HH:mm:ss', 'MMM d HH:mm:ss');
-    const monthFirst = new Array('M/d/y hh:mm:ssa', 'M-d-y hh:mm:ssa', 'M.d.y hh:mm:ssa', 'MMM-d hh:mm:ssa', 'M/d hh:mm:ssa', 'M-d hh:mm:ssa',
-        'M/d/y HH:mm:ss', 'M-d-y HH:mm:ss', 'M.d.y HH:mm:ss', 'MMM-d HH:mm:ss', 'M/d HH:mm:ss', 'M-d HH:mm:ss');
-    const dateFirst = new Array('d/M/y hh:mm:ssa', 'd-M-y hh:mm:ssa', 'd.M.y hh:mm:ssa', 'd-MMM hh:mm:ssa', 'd/M hh:mm:ssa', 'd-M hh:mm:ssa',
-        'd/M/y HH:mm:ss', 'd-M-y HH:mm:ss', 'd.M.y HH:mm:ss', 'd-MMM HH:mm:ss', 'd/M HH:mm:ss', 'd-M HH:mm:ss');
-    const checkList = new Array(generalFormats, (preferEuro) ? dateFirst : monthFirst, (preferEuro) ? monthFirst : dateFirst);
-    let d = null;
-    for (let i = 0; i < checkList.length; i++) {
-        const l = window[checkList[i]];
-        for (let j = 0; j < l.length; j++) {
-            d = getDateFromFormat(val, l[j]);
-            if (d !== 0) {
-                return new Date(d);
+    function mix(lst1, lst2, result) {
+        for (let i = 0; i < lst1.length; i++) {
+            for (let j = 0; j < lst2.length; j++) {
+                result.push(lst1[i] + ' ' + lst2[j]);
             }
         }
+        return result;
     }
 
-    return null;
+    let checkList = [dateFormat.masks.isoDateTime];
+    checkList = mix(dateFormat.parseDates.general, dateFormat.parseTimes, checkList);
+    if (preferEuro) {
+        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
+    } else {
+        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
+    }
+    return parseArray(val, checkList);
 }
 
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
+    console.debug('parseDateFromFormat ' + util.inspect(date) + ' - ' + util.inspect(format) + 'dayNames'); // eslint-disable-line
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
@@ -1150,20 +1168,35 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     }
 
     format = format || 0;
-    if (isNaN(format)) {
+
+    if (isNaN(format)) { // timeparse_TextOther
         return getDateFromFormat(date, format);
     }
+
+    const tryparse = (val, preferEuro) => {
+console.debug('tryparse ' + util.inspect(preferEuro)); // eslint-disable-line
+        let res = parseDateTime(val, preferEuro);
+        if (res === null) {
+            res = parseDate(val, preferEuro);
+        }
+        if (res === null) {
+            res = parseArray(val, dateFormat.parseTimes);
+        }
+        return res;
+    };
 
     switch (Number(format)) {
         case 0: // UNIX Timestamp
             return new Date(Number(date));
         case 1: // timeparse_ECMA262
             return Date.parse(date);
-        case 2: // timeparse_TextOther
-            return parseDateTime(date, true);
-        case 3: // timeformat_YYYYMMDDHHMMSS
+        case 2: // various - try different Formats, prefere european formats
+            return tryparse(date, true);
+        case 3: // various - try different Formats, prefere american formats
+            return tryparse(date, false);
+        case 4: // timeformat_YYYYMMDDHHMMSS
             return parseComperableDateFormat(date);
-        case 4: // timeformat_YYYYMMDD_HHMMSS
+        case 5: // timeformat_YYYYMMDD_HHMMSS
             return parseComperableDateFormat2(date);
         default:
             return getDateOfText(date);

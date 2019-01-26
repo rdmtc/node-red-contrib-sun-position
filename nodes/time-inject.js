@@ -206,7 +206,7 @@ module.exports = function (RED) {
             if (node.nextTime && !errorStatus) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
                     // node.debug(node.nextTime);
-                    hlp.errorHandler(this, new Error('Invalid Date'), 'Invalid time format', 'internal error!');
+                    hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
                     return;
                 }
 
@@ -232,22 +232,21 @@ module.exports = function (RED) {
                         let needsRecalc = false;
                         try {
                             const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                            useAlternateTime = hlp.toBoolean(res);
+                            useAlternateTime = hlp.isTrue(res);
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;
-                            hlp.errorHandler(node, err, RED._('time-inject.errors.invalid-property-type', {
+                            hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
                                 type: node.propertyType,
                                 value: node.property
-                            }));
-                            node.log('Error: ' + util.inspect(err));
+                            }),  err);
                         }
 
                         if (needsRecalc) {
                             try {
                                 doCreateTimeout(node, msg);
                             } catch (err) {
-                                hlp.errorHandler(node, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
+                                hlp.handleError(node, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
                             }
 
                             return;
@@ -338,7 +337,7 @@ module.exports = function (RED) {
 
                 node.send(msg);
             } catch (err) {
-                hlp.errorHandler(this, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
+                hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
             }
         });
 
@@ -354,7 +353,7 @@ module.exports = function (RED) {
                 doCreateTimeout(node, undefined);
             }
         } catch (err) {
-            hlp.errorHandler(this, err, RED._('time-inject.errors.error-text'), RED._('time-inject.errors.error-title'));
+            hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
         }
     }
 
