@@ -281,12 +281,7 @@ module.exports = function (RED) {
                 resObj.push(msg);
                 return resObj;
             } catch (err) {
-                hlp.errorHandler(
-                    this,
-                    err,
-                    RED._('time-comp.errors.error-text'),
-                    RED._('time-comp.errors.error-title')
-                );
+                hlp.handleError(this, RED._('time-comp.errors.error-text'), err, RED._('time-comp.errors.error-title'));
             }
         });
     }
