@@ -113,6 +113,25 @@
             "object",
             "other"
         ],
+        "outputTSFormatsGroups": [
+            "timestamp",
+            "timestamp rounded"
+        ],
+        "outputTSFormats": [
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "month",
+            "years",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "month",
+            "years"
+        ],
         "parseFormatsGroups": [
             "Number",
             "Text (string)",
@@ -131,6 +150,7 @@
             "Special"
         ],
         "multiplier": [
+            "milliseconds",
             "seconds",
             "minutes",
             "hours",

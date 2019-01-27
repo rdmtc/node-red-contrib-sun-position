@@ -115,12 +115,9 @@
 <script type="text/javascript">
     RED.nodes.registerType('position-config', {
         category: 'config',
-        defaults: {
-            name: {
-                value: '',
-                required: false
-            },
+        credentials: {
             longitude: {
+                type: 'text',
                 value: '',
                 required: true,
                 validate(v) {
@@ -129,12 +126,19 @@
                 }
             },
             latitude: {
+                type: 'text',
                 value: '',
                 required: true,
                 validate(v) {
                     const n = Number(v);
                     return ((n >= -90) && (n <= 90));
                 }
+            }
+        },
+        defaults: {
+            name: {
+                value: '',
+                required: false
             },
             angleType: {
                 value: 'deg',
@@ -170,10 +174,8 @@
                 '')) {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(position => {
-                        $('#node-config-input-latitude').val(Number(position.coords.latitude.toFixed(
-                            5)));
-                        $('#node-config-input-longitude').val(Number(position.coords.longitude.toFixed(
-                            5)));
+                        $('#node-config-input-latitude').val(Number(position.coords.latitude.toFixed(5)));
+                        $('#node-config-input-longitude').val(Number(position.coords.longitude.toFixed(5)));
                     });
                 }
             }

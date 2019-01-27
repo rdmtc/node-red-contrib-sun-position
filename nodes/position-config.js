@@ -74,8 +74,8 @@ module.exports = function (RED) {
         try {
             // this.debug('load position-config ' + n.name);
             this.name = n.name;
-            this.longitude = n.longitude;
-            this.latitude = n.latitude;
+            this.longitude = n.longitude || this.credentials.longitude;
+            this.latitude = n.latitude || this.credentials.latitude;
             this.angleType = n.angleType;
             this.tzOffset = (n.timezoneOffset * -60) || 0;
             // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
@@ -98,11 +98,11 @@ module.exports = function (RED) {
                 return res;
             }
             */
-            this.getSunTime = (now, value, offset, next, days) => {
+            this.getSunTime = (now, value, offset, multiplier, next, days) => {
                 // node.debug('getSunTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 let result = sunTimesCheck(node, now);
                 result = Object.assign(result, node.sunTimesToday[value]);
-                result.value = hlp.addOffset(new Date(result.value), offset);
+                result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result = Object.assign(result, node.sunTimesTomorow[value]);
@@ -111,7 +111,7 @@ module.exports = function (RED) {
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
                     }
 
-                    result.value = hlp.addOffset(new Date(result.value), offset);
+                    result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
 
                 if (days && (days !== '*') && (days !== '')) {
@@ -121,7 +121,7 @@ module.exports = function (RED) {
                         const date = result.value.addDays(dayx);
                         // let times = sunCalc.getTimes(date, node.latitude, node.longitude);
                         result = Object.assign(result, sunCalc.getTimes(date, node.latitude, node.longitude)[value]);
-                        result.value = hlp.addOffset(new Date(result.value), offset);
+                        result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                     } else if (dayx < 0) {
                         // node.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
                         result.error = 'No valid day of week found!';
@@ -140,19 +140,19 @@ module.exports = function (RED) {
                 return res;
             };
 
-            this.getMoonTime = (now, value, offset, next, days) => {
+            this.getMoonTime = (now, value, offset, multiplier, next, days) => {
                 // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const result = moonTimesCheck(node, now);
                 // node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
-                result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset);
+                result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset, multiplier);
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
-                        result.value = hlp.addOffset(new Date(node.moonTimesTomorow[value]), offset);
+                        result.value = hlp.addOffset(new Date(node.moonTimesTomorow[value]), offset, multiplier);
                         // node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
                     } else if (next > 1) {
                         const date = (new Date()).addDays(next);
                         const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
-                        result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
+                        result.value = hlp.addOffset(new Date(new Date(times[value])), offset, multiplier);
                         // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     }
                 }
@@ -162,7 +162,7 @@ module.exports = function (RED) {
                     if (dayx > 0) {
                         const date = (new Date()).addDays(dayx);
                         const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
-                        result.value = hlp.addOffset(new Date(new Date(times[value])), offset);
+                        result.value = hlp.addOffset(new Date(new Date(times[value])), offset, multiplier);
                         // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                     } else if (dayx < 0) {
                         result.error = 'No valid day of week found!';
@@ -174,7 +174,7 @@ module.exports = function (RED) {
                 return result;
             };
 
-            this.getTimeProp = (srcNode, msg, vType, value, offset, next, days) => {
+            this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
                 // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const now = new Date();
                 let result = {
@@ -186,26 +186,26 @@ module.exports = function (RED) {
                     if (vType === '' || vType === 'none' || days === '') {
                         // nix
                     } else if (vType === 'date') {
-                        result.value = hlp.calcTimeValue(now, offset);
+                        result.value = hlp.calcTimeValue(now, offset, multiplier);
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), offset, next, days, now);
+                        result.value = hlp.getTimeOfText(String(value), offset, multiplier, next, days, now);
                         // node.debug(String(value) + '  --  ' + result.value);
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         // sun
-                        result = node.getSunTime(now, value, offset, next, days);
+                        result = node.getSunTime(now, value, offset, multiplier, next, days);
                         result.fix = true;
                     } else if (vType === 'pdmTime') {
                         // moon
-                        result = node.getMoonTime(now, value, offset, next, days);
+                        result = node.getMoonTime(now, value, offset, multiplier, next, days);
                         result.fix = true;
                     } else {
                         // can handle context, json, jsonata, env, ...
                         result.fix = (vType === 'json'); // is not a fixed time if can be changed
                         const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText(res, offset, next, days);
+                            result.value = hlp.getDateOfText(res, offset, multiplier, next, days);
                             // node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = 'could not evaluate ' + vType + '.' + value;
@@ -445,5 +445,26 @@ module.exports = function (RED) {
         }
     }
 
-    RED.nodes.registerType('position-config', positionConfigurationNode);
+    RED.nodes.registerType('position-config', positionConfigurationNode, {
+        credentials: {
+            longitude: {
+                type: 'text',
+                value: '',
+                required: true,
+                validate(v) {
+                    const n = Number(v);
+                    return ((n >= -180) && (n <= 180));
+                }
+            },
+            latitude: {
+                type: 'text',
+                value: '',
+                required: true,
+                validate(v) {
+                    const n = Number(v);
+                    return ((n >= -90) && (n <= 90));
+                }
+            }
+        }
+    });
 };

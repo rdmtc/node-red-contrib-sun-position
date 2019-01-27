@@ -63,10 +63,11 @@
       <input type="hidden" id="node-input-result1ValueType">
   </div>
   <div class="form-row time-span-row-result1TSFormat hidden">
-    <label for="node-input-result1TSFormat"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
-    <select style="width:70%" id="node-input-result1TSFormat">
+    <label for="node-input-result1TSFormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
+    <select style="width:70%" id="node-input-result1TSFormatSel">
     </select>
-  </div>
+    <input type="text" id="node-input-result1TSFormat" style="width:50%; margin-left: 5px;">
+</div>
   <div class="form-row time-span-row-result1Format hidden">
       <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1Format"></span></label>
       <select style="width:70%" id="node-input-result1FormatSel">
@@ -215,6 +216,12 @@
         if (t === 'msg') {
             return t + '.' + clipValueLength(v, l);
         }
+        if (t === 'msgPayload') {
+            return 'msg.payload';
+        }
+        if (t === 'msgTs') {
+            return 'msg.ts';
+        }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
@@ -275,13 +282,13 @@
                 validate: RED.validators.typedInput('operand1Type')
             },
             operand1Type: {
-                value: 'msg'
+                value: 'msgPayload'
             },
             operand1Format: {
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || typeof v === 'undefined';
+                    return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand1Offset: {
@@ -290,7 +297,7 @@
                 validate: RED.validators.number()
             },
             operand1OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate: RED.validators.number()
             },
@@ -307,7 +314,7 @@
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || typeof v === 'undefined';
+                    return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand2Offset: {
@@ -316,14 +323,19 @@
                 validate: RED.validators.number()
             },
             operand2OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate: RED.validators.number()
             },
             // #endregion operand2
             // #region rules
             rules: {
-                value: {}
+                value: [{
+                    operator: 1,
+                    operatorText: '==',
+                    operandType: 'num',
+                    operandValue: ''
+                }]
             },
             checkall: {
                 value: 'true',
@@ -336,7 +348,7 @@
                 validate: RED.validators.typedInput('result1Type')
             },
             result1Type: {
-                value: 'msg'
+                value: 'msgPayload'
             },
             result1Value: {
                 value: '',
@@ -351,14 +363,14 @@
                 value: 1,
                 required: false,
                 validate(v) {
-                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
                 }
             },
             result1Format: {
                 value: 0,
                 required: false,
                 validate(v) {
-                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
                 }
             },
             result1Offset: {
@@ -369,23 +381,17 @@
                 }
             },
             result1OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate: RED.validators.number()
             }
             // #endregion result1
         },
         outputLabels(index) {
-            let label = '';
             if (this.rules.length) {
                 const rule = this.rules[index];
                 if (rule) {
-                    label = rule.operatorText + getValueLabel(rule.operandType, rule.operandValue);
-                    if (rule.propertyType !== 'none') {
-                        label += ' only if ' + getValueLabel(rule.propertyType, rule.propertyValue) + ' is true';
-                    }
-
-                    return label;
+                    return rule.operatorText + getValueLabel(rule.operandType, rule.operandValue);
                 }
                 if (this.checkall) {
                     return 'always';
@@ -440,8 +446,9 @@
                     {id: 5, group: 'cmp', label: '<', text: 'lesser'},
                     {id: 6, group: 'cmp', label: '<=', text: 'lesser or equal'}
                 ], outputTSFormatsGroups: [
-                    {id: 'time', label: 'timestamp'},
-                    {id: 'timeround', label: 'timestamp rounded'}
+                    {id: 'time', label: 'timestamp (number)'},
+                    {id: 'timeround', label: 'timestamp rounded (number)'},
+                    {id: 'string', label: 'Text'}
                 ], outputTSFormats: [
                     {id: 1, group: 'time', name: 'ms', label: 'milliseconds'},
                     {id: 2, group: 'time', name: 'sec', label: 'seconds'},
@@ -455,7 +462,8 @@
                     {id: 14, group: 'timeround', name: 'hour', label: 'hours'},
                     {id: 15, group: 'timeround', name: 'days', label: 'days'},
                     {id: 16, group: 'timeround', name: 'month', label: 'month'},
-                    {id: 17, group: 'timeround', name: 'years', label: 'years'}
+                    {id: 17, group: 'timeround', name: 'years', label: 'years'},
+                    {id: 20, group: 'string', name: 'Other', label: 'Other'}
                 ], outputFormatsGroups: [
                     {id: 'number', label: 'Number'},
                     {id: 'string', label: 'Text (string)'},
@@ -490,9 +498,10 @@
                 ], parseFormats: [
                     {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
                     {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-                    {id: 2, group: 'string', label: 'various - try different Formats', add: 'will try different formats'},
-                    {id: 3, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
-                    {id: 4, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
+                    {id: 2, group: 'string', label: 'various - try different Formats, prefere european formats', add: 'will try different formats, prefere european formats'},
+                    {id: 3, group: 'string', label: 'various - try different Formats, prefere american formats', add: 'will try different formats, prefere european formats'},
+                    {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
+                    {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
                     {id: 99, group: 'other', label: 'free definition', add: 'xxx'}
                 ], multiplierGroups: [
                     {id: 'std', label: 'Standard'},
@@ -508,16 +517,20 @@
                     {id: -2, group: 'other', label: 'year'}
                 ]
             };
-            const typeUnlimited = {
-                value: 'none',
-                label: 'no limitation',
-                // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
-                hasValue: false
-            };
             const typeUndefined = {
                 value: 'none',
                 label: 'not used',
                 // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+                hasValue: false
+            };
+            const typeMsgPayload = {
+                value: 'msgPayload',
+                label: 'msg.payload',
+                hasValue: false
+            };
+            const typeMsgTs = {
+                value: 'msgTs',
+                label: 'msg.ts',
                 hasValue: false
             };
             const typeTimeEntered = {
@@ -592,6 +605,46 @@
                 {label: 'lll  Milliseconds (3 digits)', value: 'lll'},
                 {label: 't    AM/PM (1 digit)', value: 't'},
                 {label: 'tt   AM/PM (2 digits)', value: 'tt'}];
+            const dateOutTSFormat = [
+                {label: 'd    Days (1 digit)', value: 'd'},
+                {label: 'dd   Days (2 digits)', value: 'dd'},
+                {label: 'td   total Days (1 digit)', value: 'td'},
+                {label: 'tdd  total Days (2 digits)', value: 'tdd'},
+                {label: 'h    Hours (1-12)', value: 'h'},
+                {label: 'hh   Hours (2 digits 01-12)', value: 'hh'},
+                {label: 'th   total Hours (1-12)', value: 'h'},
+                {label: 'thh  total Hours (2 digits 01-12)', value: 'hh'},
+                {label: 'H    Hours (0-23)', value: 'H'},
+                {label: 'HH   Hours (2 digits 00-23)', value: 'HH'},
+                {label: 'tH   total Hours (0-23)', value: 'H'},
+                {label: 'tHH  total Hours (2 digits 00-23)', value: 'HH'},
+                {label: 'K    Hours (0-11)', value: 'K'},
+                {label: 'KK   Hours (2 digits 00-11)', value: 'KK'},
+                {label: 'tK   total Hours (0-11)', value: 'K'},
+                {label: 'tKK  total Hours (2 digits 00-11)', value: 'KK'},
+                {label: 'k    Hours (1-24)', value: 'k'},
+                {label: 'kk   Hours (2 digits 01-24)', value: 'kk'},
+                {label: 'tk   total Hours (1-24)', value: 'k'},
+                {label: 'tkk  total Hours (2 digits 01-24)', value: 'kk'},
+                {label: 'm    Minutes (0-59)', value: 'm'},
+                {label: 'mm   Minutes (2 digits 00-59)', value: 'mm'},
+                {label: 'tm   total Minutes (0-59)', value: 'm'},
+                {label: 'tmm  total Minutes (2 digits 00-59)', value: 'mm'},
+                {label: 's    Second (0-59)', value: 's'},
+                {label: 'ss   Second (2 digits 00-59)', value: 'ss'},
+                {label: 'ts   total Second (0-59)', value: 's'},
+                {label: 'tss  total Second (2 digits 00-59)', value: 'ss'},
+                {label: 'l    Milliseconds (0-999)', value: 'l'},
+                {label: 'll   Milliseconds (2 digits 00-99)', value: 'll'},
+                {label: 'lll  Milliseconds (3 digits 000-999)', value: 'lll'},
+                {label: 'tl   total Milliseconds (0-999)', value: 'l'},
+                {label: 'tll  total Milliseconds (2 digits 00-99)', value: 'll'},
+                {label: 'tlll total Milliseconds (3 digits 000-999)', value: 'lll'},
+                {label: 't    AM/PM (1 digit - Lowercase)', value: 't'},
+                {label: 'tt   AM/PM (2 digits - Lowercase)', value: 'tt'},
+                {label: 'T    AM/PM (1 digit - Uppercase)', value: 'T'},
+                {label: 'TT   AM/PM (2 digits - Uppercase)', value: 'TT'},
+                {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'}];
             const dateOutFormat = [{label: 'yyyy Year (4 digits)', value: 'yyyy'},
                 {label: 'yy   Year (2 digits)', value: 'yy'},
                 {label: 'M    Month (1 digit)', value: 'M'},
@@ -664,105 +717,6 @@
                 return lbl;
             }
 
-            function getMultiselectText(val, length, types) {
-                for (let index = 0; index < types.length; index++) {
-                    if (types[index].selection.test(val)) {
-                        return types[index].label;
-                    }
-                }
-                if (length > 0) {
-                    return length;
-                }
-                return 'NA';
-            }
-
-            function setMultiselect(value, field, types) {
-                if (value === '*' || typeof value === 'undefined') {
-                    field.find('#option-checkboxes input[type=checkbox]').prop('checked', true);
-                    field.find('.multiselect-option').text(getMultiselectText('*', 99, types));
-                } else {
-                    field.find('#option-checkboxes input[type=checkbox]').removeAttr('checked');
-                    const elm = value.split(',');
-                    elm.forEach(v => {
-                        field.find('#option-checkboxes [value=' + v + ']').prop('checked', true);
-                    });
-                    field.find('.multiselect-option').text(getMultiselectText(value, elm.length, types));
-                }
-            }
-
-            function multiselect(parent, elementName, id) {
-                const types = SelectFields[elementName + 'Short'];
-
-                const getSelection = function getCBText(parent) {
-                    const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
-                    const elements = value.map((_, el) => { return $(el).val(); }).get();
-                    parent.find('.multiselect-option').text(getMultiselectText(elements.join(','), elements.length, types));
-                };
-
-                const multiselect = $('<div/>', {class: 'multiselect', id}).appendTo(parent);
-
-                const selectbox = $('<div/>', {
-                    class: 'selectBox',
-                    html: $('<select/>', {
-                        id: 'multiselect-select',
-                        class: 'multiselect-select',
-                        html: $('<option></option>', {
-                            id: 'multiselect-option',
-                            class: 'multiselect-option'
-                        }).text('x')
-                    })
-                }).appendTo(multiselect);
-                $('<div/>', {class: 'overSelect'}).appendTo(selectbox);
-
-                const list = $('<div/>', {
-                    id: 'option-checkboxes',
-                    class: 'option-checkboxes'
-                }).appendTo(multiselect);
-                list.attr('expanded', 'false');
-
-                const groups = SelectFields[elementName + 'Groups'];
-                const groupLength = groups.length;
-                const elements = SelectFields[elementName];
-                const elementsLength = elements.length;
-
-                for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    list.append($('<label></label>', {
-                        class: 'header',
-                        html: node._('time-span.' + elementName + 'Groups.' + gIndex)
-                    }));
-                    for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-                        if (groups[gIndex].id === elements[eIndex].group) {
-                            list.append($('<label></label>', {
-                                for: id + '-' + elements[eIndex].id,
-                                html: [$('<input>', {
-                                    class: id + '-checkbox',
-                                    type: 'checkbox',
-                                    value: elements[eIndex].id,
-                                    id: id + '-' + elements[eIndex].id
-                                }).on('change', _event => {
-                                    getSelection(multiselect);
-                                }), node._('time-span.' + elementName + '.' + eIndex)]
-                            }));
-                        // elements[eIndex].label
-                        }
-                    }
-                }
-
-                selectbox.on('click', _event => {
-                    const checkboxes = parent.find('.option-checkboxes');
-                    const expanded = (checkboxes.attr('expanded') === 'true');
-                    if (!expanded) {
-                        checkboxes.css('display', 'block');
-                        checkboxes.attr('expanded', 'true');
-                    } else {
-                        checkboxes.css('display', 'none');
-                        checkboxes.attr('expanded', 'false');
-                    }
-                });
-
-                return multiselect;
-            }
-
             function autocomplete(inputBox, dataList) {
             // don't navigate away from the field on tab when selecting an item
                 inputBox.on('keydown', function (event) {
@@ -820,16 +774,16 @@
             // #region operand1
             $('#node-input-operand1Type').val(node.operand1Type);
             $('#node-input-operand1').typedInput({
-                default: node.operand1Type || 'msg',
+                default: node.operand1Type || typeMsgPayload.value,
                 typeField: $('#node-input-operand1Type'),
-                types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
             $('#node-input-operand1').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand1').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
                     $('.time-span-row-operand1Format').hide();
                     $('.time-span-row-operand1Offset').show();
-                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
                     $('.time-span-row-operand1Format').show();
                     $('.time-span-row-operand1Offset').show();
                 } else {
@@ -871,14 +825,14 @@
             $('#node-input-operand2').typedInput({
                 default: node.operand2Type || 'msg',
                 typeField: $('#node-input-operand2Type'),
-                types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
             $('#node-input-operand2').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand2').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
                     $('.time-span-row-operand2Format').hide();
                     $('.time-span-row-operand2Offset').show();
-                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
                     $('.time-span-row-operand2Format').show();
                     $('.time-span-row-operand2Offset').show();
                 } else {
@@ -920,24 +874,16 @@
                 const newWidth = rule.width() - 10;
                 // const operatorField = rule.find('.node-input-rule-operator');
                 const operandField = rule.find('.node-input-rule-operand');
-                const propertyField = rule.find('.node-input-rule-property');
-                const propertyLblSpanField = rule.find('.node-input-rule-property-span');
-                const propertyLblField = rule.find('.node-input-rule-property-lbl');
                 const lblWidth = 25;
                 // row1
                 const operatorWidth = 60;
                 operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
-                // row2
-                const lblwidth = propertyLblSpanField.width() + 25;
-                propertyField.typedInput('width', (newWidth - lblwidth - 10));
-                propertyLblField.width(lblwidth);
             }
 
             $('#node-input-rule-container').css('min-height', '250px').css('min-width', '300px').editableList({
                 addItem(containerRow, containerIndex, data) {
                     containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                     const row = $('<div/>').appendTo(containerRow);
-                    const row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                     // row1
                     // operator
                     const operatorField = $('<select/>', {
@@ -959,23 +905,11 @@
                         style: 'float: right; margin-top: 6px;'
                     }).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-                    // row2
-                    addLabel(row2, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-span.label.onlyif'));
-                    const propertyField = $('<input/>', {
-                        class: 'node-input-rule-property',
-                        id: 'node-input-rule-property' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row2).typedInput({
-                        default: typeUnlimited.value,
-                        types: [typeUnlimited, 'msg', 'flow', 'global', 'env']
-                    });
                     // setting defaultValues
                     // console.log(data);
                     operatorField.val(data.operator || SelectFields.operators[0].id);
                     operandField.typedInput('type', data.operandType || 'num');
                     operandField.typedInput('value', data.operandValue || '');
-                    propertyField.typedInput('type', data.propertyType || typeUnlimited.value);
-                    propertyField.typedInput('value', data.propertyValue || '');
                     resizeRule(containerRow);
                 },
                 sortItems(rules) {
@@ -1000,7 +934,7 @@
             $('#node-input-result1').typedInput({
                 default: node.result1Type || typeUndefined.value,
                 typeField: $('#node-input-result1Type'),
-                types: [typeUndefined, 'msg', 'flow', 'global']
+                types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global']
             });
             $('#node-input-result1ValueType').val(node.result1ValueType);
             $('#node-input-result1Value').typedInput({
@@ -1028,51 +962,58 @@
             });
             $('#node-input-result1').on('change', (_type, _value) => {
                 $('.time-span-row-result1Format').hide();
+                $('.time-span-row-result1TSFormat').hide();
                 if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
                     $('.time-result1Value').show();
-                    $('.time-span-row-result1Format').hide();
-                    $('.time-span-row-result1FormatSel').hide();
                     const plVType = $('#node-input-result1Value').typedInput('type');
                     if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                        $('.time-span-row-result1TSFormat').hide();
                         $('.time-span-row-result1Offset').show();
+                        $('.time-span-row-result1TSFormatSel').hide();
                         $('.time-span-row-result1FormatSel').show();
                         $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
                     } else if (plVType === 'timespan') {
-                        $('.time-span-row-result1TSFormat').show();
+                        $('.time-span-row-result1Offset').hide();
                         $('.time-span-row-result1FormatSel').hide();
-                        $('.time-span-row-result1Format').hide();
+                        $('.time-span-row-result1TSFormatSel').show();
+                        $('.time-span-row-result1TSFormatSel').change(); // show '.time-span-row-result1Format'
+                    } else if (plVType === 'operand1' || plVType === 'operand2') {
                         $('.time-span-row-result1Offset').hide();
-                    } else if (plVType === 'operand1') {
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1FormatSel').show();
-                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
-                    } else if (plVType === 'operand2') {
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1Offset').hide();
+                        $('.time-span-row-result1TSFormatSel').hide();
                         $('.time-span-row-result1FormatSel').show();
                         $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
                     } else {
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1FormatSel').hide();
-                        $('.time-span-row-result1Format').hide();
                         $('.time-span-row-result1Offset').hide();
+                        $('.time-span-row-result1TSFormatSel').hide();
+                        $('.time-span-row-result1FormatSel').hide();
                     }
                 } else {
                     $('.time-result1Value').hide();
-                    $('.time-span-row-result1TSFormat').hide();
-                    $('.time-span-row-result1FormatSel').hide();
-                    $('.time-span-row-result1Format').hide();
                     $('.time-span-row-result1Offset').hide();
+                    $('.time-span-row-result1TSFormatSel').hide();
+                    $('.time-span-row-result1FormatSel').hide();
                 }
             });
             $('#node-input-result1Value').on('change', (_type, _value) => {
                 $('#node-input-result1').change();
             });
             /********************************************************/
-            const resultTSFormatField = $('#node-input-result1TSFormat');
-            appendOptions(resultTSFormatField, 'outputTSFormats');
+            const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
+            appendOptions(resultTSFormatSelField, 'outputTSFormats');
+            resultTSFormatSelField.on('change', (_type, _value) => {
+                const resultTSFormatIpField = $('#node-input-result1TSFormat');
+                const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
+                if (Number(resultTSFormatSelField.val()) === 99) {
+                    resultTSFormatIpField.show();
+                    resultTSFormatIpField.css({width: '40%'});
+                    resultTSFormatSelField.css({width: '30%'});
+                    if (!isNaN(resultTSFormatIpField.val())) {
+                        resultTSFormatIpField.val(node._('time-span.timeFormat.default'));
+                    }
+                } else {
+                    resultTSFormatIpField.hide();
+                    resultTSFormatSelField.css({width: '70%'});
+                }
+            });
 
             const resultFormatSelField = $('#node-input-result1FormatSel');
             appendOptions(resultFormatSelField, 'outputFormats');
@@ -1101,22 +1042,16 @@
             const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
             appendOptions(resultMultiplierField, 'multiplier');
             resultMultiplierField.val(node.result1OffsetMultiplier);
+            autocomplete($('#node-input-result1TSFormat'), dateOutTSFormat);
             autocomplete($('#node-input-result1Format'), dateOutFormat);
             // #endregion result1
             $('#node-input-time').change();
-            $('#node-input-property').change();
             $('#node-input-payload').change();
             $('#node-input-operand1').change();
             $('#node-input-operand2').change();
             $('#node-input-result1').change();
         },
         oneditsave() {
-            function getMultiSelStr(value) {
-                const elements = value.map((_, el) => { return $(el).val(); }).get();
-                if (elements.length === 0) { return ''; }
-                return elements.join(',');
-            }
-
             const node = this;
             if (Number($('#node-input-operand1Formatsel').val()) !== 99) {
                 $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
@@ -1133,17 +1068,9 @@
                 const rule = $(this);
                 const data = {
                     operator: rule.find('.node-input-rule-operator').val(),
-                    operatorType: getMultiSelStr(rule.find('#option-checkboxes input[type=checkbox]:checked')),
                     operatorText: rule.find('.node-input-rule-operator').children(':selected').text(),
                     operandType: rule.find('.node-input-rule-operand').typedInput('type'),
-                    operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
-                    format: rule.find('.node-input-rule-operandFormatIp').val(),
-                    formatSelection: rule.find('.node-input-rule-operandFormatSel').val(),
-                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
-                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
-                    multiplier: rule.find('.node-input-rule-multipier').val(),
-                    propertyType: rule.find('.node-input-rule-property').typedInput('type'),
-                    propertyValue: rule.find('.node-input-rule-property').typedInput('value')
+                    operandValue: rule.find('.node-input-rule-operand').typedInput('value')
                 };
                 node.rules.push(data);
             });

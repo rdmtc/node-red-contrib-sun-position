@@ -12,9 +12,9 @@
         <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
         <input id="node-input-startOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
         <select style="width:100px" id="node-input-startOffsetMultiplier">
-            <option value="1" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600" data-i18n="within-time-switch.label.hours"></option>
+            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
+            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
+            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
         </select>
     </div>
     <div class="form-row">
@@ -25,9 +25,9 @@
         <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
         <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
         <select style="width:100px" id="node-input-endOffsetMultiplier">
-            <option value="1" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600" data-i18n="within-time-switch.label.hours"></option>
+            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
+            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
+            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
         </select>
     </div>
     <hr>
@@ -47,9 +47,9 @@
         <label for="node-input-startOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
         <input id="node-input-startOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
         <select style="width:100px" id="node-input-startOffsetAltMultiplier">
-            <option value="1" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600" data-i18n="within-time-switch.label.hours"></option>
+            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
+            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
+            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
         </select>
     </div>
     <div class="form-row">
@@ -64,9 +64,9 @@
         <label for="node-input-endOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
         <input id="node-input-endOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
         <select style="width:100px" id="node-input-endOffsetAltMultiplier">
-            <option value="1" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600" data-i18n="within-time-switch.label.hours"></option>
+            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
+            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
+            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
         </select>
     </div>
     <hr>
@@ -299,7 +299,7 @@
                 validate: RED.validators.number()
             },
             startOffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate: RED.validators.number()
             },
@@ -317,7 +317,7 @@
                 validate: RED.validators.number()
             },
             endOffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate: RED.validators.number()
             },
@@ -351,7 +351,7 @@
                 }
             },
             startOffsetAltMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate(v) {
                     return RED.validators.number()(v) ||
@@ -388,7 +388,7 @@
                 }
             },
             endOffsetAltMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate(v) {
                     return RED.validators.number()(v) ||
@@ -496,6 +496,25 @@
                     $('.msg-end-out-row').hide();
                 }
             }
+
+            function multilpierUpdate(mp, name) {
+                if (mp=== 1) {
+                    $('node-input-' + name).val(1000);
+                    return 1000;
+                } else if (mp === 60) {
+                    $('node-input-' + name).val(60000);
+                    return 60000;
+                } else if (mp === 3600) {
+                    $('node-input-' + name).val(3600000);
+                    return 3600000;
+                }
+                return mp;
+            }
+
+            this.startOffsetMultiplier = multilpierUpdate(this.startOffsetMultiplier, 'startOffsetMultiplier');
+            this.endOffsetMultiplier = multilpierUpdate(this.endOffsetMultiplier, 'endOffsetMultiplier');
+            this.startOffsetAltMultiplier = multilpierUpdate(this.startOffsetAltMultiplier, 'startOffsetAltMultiplier');
+            this.endOffsetAltMultiplier = multilpierUpdate(this.endOffsetAltMultiplier, 'endOffsetAltMultiplier');
 
             if (this.statusOut === '' || this.statusOut === undefined) {
                 this.statusOut = 3;

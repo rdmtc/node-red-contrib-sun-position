@@ -252,13 +252,13 @@
                 validate: RED.validators.typedInput('inputType')
             },
             inputType: {
-                value: 'msg'
+                value: 'msgPayload'
             },
             inputFormat: {
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || typeof v === 'undefined';
+                    return (v !== '');
                 }
             },
             inputOffset: {
@@ -267,7 +267,7 @@
                 validate: RED.validators.number()
             },
             inputOffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate: RED.validators.number()
             },
@@ -302,7 +302,7 @@
                 value: 0,
                 required: false,
                 validate(v) {
-                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
                 }
             },
             result1Offset: {
@@ -313,7 +313,7 @@
                 }
             },
             result1OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate: RED.validators.number()
             }
@@ -771,16 +771,16 @@
             // #region input
             $('#node-input-inputType').val(node.inputType);
             $('#node-input-input').typedInput({
-                default: node.inputType || 'msg',
+                default: node.inputType || typeMsgPayload.value,
                 typeField: $('#node-input-inputType'),
-                types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
             $('#node-input-input').on('change', (_type, _value) => {
                 const opType = $('#node-input-input').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
                     $('.time-comp-row-inputFormat').hide();
                     $('.time-comp-row-inputOffset').show();
-                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'msgPayload' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
                     $('.time-comp-row-inputFormat').show();
                     $('.time-comp-row-inputOffset').show();
                 } else {

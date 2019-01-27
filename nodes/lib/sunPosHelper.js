@@ -214,11 +214,16 @@ function compareAzimuth(azimuth, low, high) {
 }
 
 /*******************************************************************************************************/
-function addOffset(d, offset) {
+function addOffset(d, offset, multiplier) {
     if (offset && !isNaN(offset) && offset !== 0) {
-        return new Date(d.getTime() + offset * 1000); // - does not work
+        if (offset !== 0 && multiplier > 0) {
+            return new Date(d.getTime() + offset * multiplier);
+        } else if (multiplier === -1) {
+            d.setMonth(d.getMonth() + offset);
+        } else if (multiplier === -2) {
+            d.setFullYear(d.getFullYear() + offset);
+        }
     }
-
     return d;
 }
 
@@ -244,9 +249,9 @@ function calcDayOffset(days, daystart) {
 }
 
 /*******************************************************************************************************/
-function calcTimeValue(d, offset, next, days) {
+function calcTimeValue(d, offset, multiplier, next, days) {
     // console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    d = addOffset(d, offset);
+    d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
         d.setMilliseconds(0);
@@ -270,9 +275,9 @@ function calcTimeValue(d, offset, next, days) {
 }
 
 /*******************************************************************************************************/
-function calcTimeValueUTC(d, offset, next, days) {
+function calcTimeValueUTC(d, offset, multiplier, next, days) {
     // console.debug('calcTimeValueUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    d = addOffset(d, offset);
+    d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
         d.setUTCMilliseconds(0);
@@ -296,7 +301,7 @@ function calcTimeValueUTC(d, offset, next, days) {
 }
 
 /*******************************************************************************************************/
-function getTimeOfText(t, offset, next, days, date) {
+function getTimeOfText(t, offset, multiplier, next, days, date) {
     // console.debug('getTimeOfText t=' + t + ' offset=' + offset + ' next=' + next + ' days=' + days);
     const d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
@@ -309,14 +314,14 @@ function getTimeOfText(t, offset, next, days, date) {
             return null;
         }
 
-        return calcTimeValue(d, offset, next, days);
+        return calcTimeValue(d, offset, multiplier, next, days);
     }
 
     return null;
 }
 
 /*******************************************************************************************************/
-function getDateOfText(date, offset, next, days) {
+function getDateOfText(date, offset, multiplier, next, days) {
     if (date === null) {
         throw new Error('Could not evaluate as a valid Date or time. Value is null!');
     }
@@ -351,7 +356,7 @@ function getDateOfText(date, offset, next, days) {
 
     const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/;
     if (re.test(String(date))) {
-        const result = getTimeOfText(String(date), offset, next, days);
+        const result = getTimeOfText(String(date), offset, multiplier, next, days);
         if (result !== null) {
             return result;
         }
@@ -363,7 +368,7 @@ function getDateOfText(date, offset, next, days) {
 
     const dto = new Date(date);
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
-        return calcTimeValue(dto, offset, next, days);
+        return calcTimeValue(dto, offset, multiplier, next, days);
     }
 
     if (typeof date === 'string') {
@@ -380,7 +385,7 @@ function getDateOfText(date, offset, next, days) {
 }
 /*******************************************************************************************************/
 /*
-function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
+function getTimeOfTextUTC(t, tzOffset, offset. multiplier, next, days, date) {
     //console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
     let d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
@@ -393,21 +398,21 @@ function getTimeOfTextUTC(t, tzOffset, offset, next, days, date) {
         } else {
             return null;
         }
-        return calcTimeValueUTC(d, offset, next, days)
+        return calcTimeValueUTC(d, offset, multiplier, next, days)
     }
     return null;
 };
 /*******************************************************************************************************/
 /*
-function getDateOfTextUTC(date, tzOffset, offset, next, days) {
+function getDateOfTextUTC(date, tzOffset, offset, multiplier, next, days) {
     if (!isNaN(date)) {
         date = Number(date);
     }
     let dto = new Date(date);
     if (dto !== "Invalid Date" && !isNaN(dto)) {
-        return calcTimeValueUTC(dto, offset, next, days);
+        return calcTimeValueUTC(dto, offset, multiplier, next, days);
     } else {
-        let result = getTimeOfTextUTC(String(date), tzOffset, offset, next, days);
+        let result = getTimeOfTextUTC(String(date), tzOffset, offset, multiplier, next, days);
         if (result != null) {
             return result;
         }
@@ -435,7 +440,7 @@ function getDateOfTextUTC(date, tzOffset, offset, next, days) {
 // Regexes and supporting functions are cached through closure
 
 const dateFormat = (function () {
-    const token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g;
+    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LoSZ]|"[^"]*"|'[^']*'/g;
 
     const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
 
@@ -527,6 +532,86 @@ const dateFormat = (function () {
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
             x: dayDiff,
             xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
+        };
+
+        return mask.replace(token, $0 => {
+            return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
+        });
+    };
+})();
+
+dateFormat.timeSpan = (function () {
+    const token = /t?[dhHkKms]{1,2}|t?l{1,3}|[tT]{1,2}|S|L|"[^"]*"|'[^']*'/g;
+
+    const pad = function (val, len) {
+        val = String(val);
+        len = len || 2;
+        while (val.length < len) {
+            val = '0' + val;
+        }
+
+        return val;
+    };
+
+    return function (timespan, mask) {
+        const perSecond = 1000;
+        const perMinute = 60000;
+        const perHour = 3600000;
+        const perDay = 86400000;
+
+        const tl = timespan;
+        const ts = timespan / perSecond;
+        const tm = timespan / perMinute;
+        const tH = timespan / perHour;
+        const td = timespan / perDay;
+
+        const L = timespan % 1000;
+        const s = Math.floor(timespan / perSecond) % 60;
+        const m = Math.floor(timespan / perMinute) % 60;
+        const H = Math.floor(timespan / perHour) % 60;
+        const d = Math.floor(timespan / perDay) % 24;
+
+        const flags = {
+            d,
+            dd: pad(d),
+            td,
+            tdd: pad(td),
+            h: H % 12 || 12,
+            hh: pad(H % 12 || 12),
+            th: tH % 12 || 12,
+            thh: pad(tH % 12 || 12),
+            H, // 0-23
+            HH: pad(H), // 00-23
+            tH, // 0-23
+            tHH: pad(tH), // 00-23
+            k: (H % 12 || 12) - 1,
+            kk: pad((H % 12 || 12) - 1),
+            tk: (tH % 12 || 12) - 1,
+            tkk: pad((tH % 12 || 12) - 1),
+            K: H + 1, // 1-24
+            KK: pad(H + 1), // 01-24
+            tK: tH + 1,
+            tKK: pad(tH + 1),
+            m,
+            mm: pad(m),
+            tm,
+            tmm: pad(tm),
+            s,
+            ss: pad(s),
+            ts,
+            tss: pad(ts),
+            lll: pad(L, 3),
+            ll: pad(Math.round(L / 10)),
+            l: L,
+            tlll: pad(tl, 3),
+            tll: pad(Math.round(tl / 10)),
+            tl,
+            L: pad(L > 99 ? Math.round(L / 10) : L),
+            t: H < 12 ? 'a' : 'p',
+            tt: H < 12 ? 'am' : 'pm',
+            T: H < 12 ? 'A' : 'P',
+            TT: H < 12 ? 'AM' : 'PM',
+            S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10]
         };
 
         return mask.replace(token, $0 => {
@@ -1143,7 +1228,7 @@ function parseDateTime(val, preferEuro) {
     return parseArray(val, checkList);
 }
 
-function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
+function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, offset, multiplier) {
     console.debug('parseDateFromFormat ' + util.inspect(date) + ' - ' + util.inspect(format) + 'dayNames'); // eslint-disable-line
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
@@ -1160,7 +1245,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     format = format || 0;
 
     if (isNaN(format)) { // timeparse_TextOther
-        return getDateFromFormat(date, format);
+        return addOffset(getDateFromFormat(date, format), offset, multiplier);
     }
 
     const tryparse = (val, preferEuro) => {
@@ -1177,18 +1262,18 @@ console.debug('tryparse ' + util.inspect(preferEuro)); // eslint-disable-line
 
     switch (Number(format)) {
         case 0: // UNIX Timestamp
-            return new Date(Number(date));
+            return addOffset(new Date(Number(date)), offset, multiplier);
         case 1: // timeparse_ECMA262
-            return Date.parse(date);
+            return addOffset(Date.parse(date), offset, multiplier);
         case 2: // various - try different Formats, prefere european formats
-            return tryparse(date, true);
+            return addOffset(tryparse(date, true), offset, multiplier);
         case 3: // various - try different Formats, prefere american formats
-            return tryparse(date, false);
+            return addOffset(tryparse(date, false), offset, multiplier);
         case 4: // timeformat_YYYYMMDDHHMMSS
-            return parseComperableDateFormat(date);
+            return addOffset(parseComperableDateFormat(date), offset, multiplier);
         case 5: // timeformat_YYYYMMDD_HHMMSS
-            return parseComperableDateFormat2(date);
+            return addOffset(parseComperableDateFormat2(date), offset, multiplier);
         default:
-            return getDateOfText(date);
+            return getDateOfText(date, offset, multiplier);
     }
 }

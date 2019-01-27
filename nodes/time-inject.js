@@ -25,7 +25,7 @@ module.exports = function (RED) {
         return millis;
     }
 
-    function tsGetPropData(node, msg, type, value, format, offset, days) {
+    function tsGetPropData(node, msg, type, value, format, offset, multiplier, days) {
         if (type === null || type === 'none' || type === '' || (typeof type === 'undefined')) {
             if (value === '' || (typeof value === 'undefined')) {
                 return Date.now();
@@ -43,7 +43,7 @@ module.exports = function (RED) {
         }
 
         if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
-            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, 1, days);
+            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
                 return hlp.getFormatedDateOut(data.value, format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                 /*
@@ -171,8 +171,8 @@ module.exports = function (RED) {
 
             if (node.timeType !== 'none' && node.positionConfig) {
                 // (srcNode, msg, vType, value, offset, next, days)
-                // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset * node.offsetMultiplier, 1);
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset * node.offsetMultiplier, 1, node.timeDays);
+                // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset, node.offsetMultiplier, 1);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.error(node.nextTimeData.error);
@@ -190,7 +190,7 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset * node.timeAltOffsetMultiplier, 1, node.timeAltDays);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.error(node.nextTimeAltData.error);

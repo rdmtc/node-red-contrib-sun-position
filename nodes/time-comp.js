@@ -32,46 +32,36 @@ module.exports = function (RED) {
             type === 'pdmTime' ||
             type === 'date'
         ) {
-            result = node.positionConfig.getTimeProp(node, msg, type, value);
+            result = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier);
             if (result === null) {
                 throw new Error('could not evaluate ' + type + '.' + value);
             } else if (result.error) {
                 throw new Error('error on getting operand: ' + result.error);
             }
+            return result.value;
+        }
+        let data;
+        if (type === 'msgPayload') {
+            data = msg.payload;
+        } else if (type === 'msgTs') {
+            data = msg.ts;
         } else {
             // msg, flow, global, str, num, env
-            const data = RED.util.evaluateNodeProperty(value, type, node, msg);
-            if (!data) {
-                throw new Error('could not evaluate ' + type + '.' + value);
-            }
-
-            result.value = hlp.parseDateFromFormat(
-                data,
-                format,
-                RED._('time-comp.days'),
-                RED._('time-comp.month'),
-                RED._('time-comp.dayDiffNames')
-            );
-
-            if (result.value === 'Invalid Date' || isNaN(result.value)) {
-                throw new Error('could not evaluate format of ' + data);
-            }
+            data = RED.util.evaluateNodeProperty(value, type, node, msg);
+        }
+        if (data === null || typeof data === undefined) {
+            throw new Error('could not evaluate ' + type + '.' + value);
         }
 
-        if (offset !== 0 && multiplier > 0) {
-            return new Date(result.value.getTime() + offset * multiplier);
-        }
+        result.value = hlp.parseDateFromFormat(data, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'), offset, multiplier);
 
-        if (offset !== 0 && multiplier === -1) {
-            result.value.setMonth(result.value.getMonth() + offset);
-        } else if (offset !== 0 && multiplier === -2) {
-            result.value.setFullYear(result.value.getFullYear() + offset);
+        if (result.value === 'Invalid Date' || isNaN(result.value)) {
+            throw new Error('could not evaluate format of ' + data);
         }
-
         return result.value;
     }
 
-    function tsGetPropData(node, msg, type, value, format, offset, days) {
+    function tsGetPropData(node, msg, type, value, format, offset, multiplier, days) {
         if (type === null || type === 'none' || type === '') {
             if (value === '' || typeof value === 'undefined') {
                 return Date.now();
@@ -94,15 +84,7 @@ module.exports = function (RED) {
             type === 'pdmTime' ||
             type === 'date'
         ) {
-            const data = node.positionConfig.getTimeProp(
-                node,
-                msg,
-                type,
-                value,
-                offset,
-                1,
-                days
-            );
+            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
                 return hlp.getFormatedDateOut(
                     data.value,
@@ -145,7 +127,7 @@ module.exports = function (RED) {
                     if (config.result1Type === 'input') {
                         resObj = hlp.getFormatedDateOut(inputData, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
-                        resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset);
+                        resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }
 
                     node.debug('resObj ' + util.inspect(resObj));
@@ -153,8 +135,12 @@ module.exports = function (RED) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
                         this.error('error on getting result: ' + resObj.error);
-                    } else if (config.result1Type === 'msg' || config.result1Type === 'msgProperty') {
-                        RED.util.setMessageProperty(msg, name, resObj);
+                    } else if (config.result1Type === 'msgPayload') {
+                        msg.payload = resObj;
+                    } else if (config.result1Type === 'msgTs') {
+                        msg.ts = resObj;
+                    } else if (config.result1Type === 'msg') {
+                        RED.util.setMessageProperty(msg, config.result1Value, resObj, true);
                     } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
                         const contextKey = RED.util.parseContextStore(config.result1Value);
                         node.context()[config.result1Type].set(contextKey.key, resObj, contextKey.store);

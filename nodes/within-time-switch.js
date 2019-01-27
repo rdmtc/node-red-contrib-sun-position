@@ -84,20 +84,20 @@ module.exports = function (RED) {
 
         if (result.altStartTime && config.startTimeAltType !== 'none') {
             // node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, (config.startOffsetAlt || 0) * (config.startOffsetAltMultiplier || 60));
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt, config.startOffsetAltMultiplier);
             result.startSuffix = '⎇ ';
         } else {
             // node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, (config.startOffset || 0) * (config.startOffsetMultiplier || 60));
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffset, config.startOffsetMultiplier);
         }
 
         if (result.altEndTime && config.endTimeAltType !== 'none') {
             // node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, (config.endOffsetAlt || 0) * (config.endOffsetAltMultiplier || 60));
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt, config.endOffsetAltMultiplier);
             result.endSuffix = ' ⎇';
         } else {
             // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, (config.endOffset || 0) * (config.endOffsetMultiplier || 60));
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffset, config.endOffsetMultiplier);
         }
 
         // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));

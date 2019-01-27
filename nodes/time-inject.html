@@ -23,9 +23,9 @@
       <label for="node-input-offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
       <input id="node-input-offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-offsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1000" data-i18n="time-inject.label.seconds"></option>
+          <option value="60000" data-i18n="time-inject.label.minutes"></option>
+          <option value="3600000" data-i18n="time-inject.label.hours"></option>
       </select>
   </div>
   <div class="form-row time-inject-row-timeDays hidden">
@@ -62,9 +62,9 @@
       <label for="node-input-timeAltOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
       <input id="node-input-timeAltOffset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset">
       <select style="width:100px" id="node-input-timeAltOffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1000" data-i18n="time-inject.label.seconds"></option>
+          <option value="60000" data-i18n="time-inject.label.minutes"></option>
+          <option value="3600000" data-i18n="time-inject.label.hours"></option>
       </select>
   </div>
   <div class="form-row time-inject-row-timeAltDays hidden">
@@ -146,9 +146,9 @@
       <label for="node-input-addPayload1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
       <input id="node-input-addPayload1Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload1OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1000" data-i18n="time-inject.label.seconds"></option>
+          <option value="60000" data-i18n="time-inject.label.minutes"></option>
+          <option value="3600000" data-i18n="time-inject.label.hours"></option>
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload1days hidden">
@@ -212,9 +212,9 @@
       <label for="node-input-addPayload2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
       <input id="node-input-addPayload2Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload2OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1000" data-i18n="time-inject.label.seconds"></option>
+          <option value="60000" data-i18n="time-inject.label.minutes"></option>
+          <option value="3600000" data-i18n="time-inject.label.hours"></option>
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload2days hidden">
@@ -278,9 +278,9 @@
       <label for="node-input-addPayload3Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.offset"></span></label>
       <input id="node-input-addPayload3Offset" class="wt-offset-time" data-i18n="[placeholder]time-inject.placeholder.offset">
       <select style="width:100px" id="node-input-addPayload3OffsetMultiplier">
-          <option value="1" data-i18n="time-inject.label.seconds"></option>
-          <option value="60" data-i18n="time-inject.label.minutes"></option>
-          <option value="3600" data-i18n="time-inject.label.hours"></option>
+          <option value="1000" data-i18n="time-inject.label.seconds"></option>
+          <option value="60000" data-i18n="time-inject.label.minutes"></option>
+          <option value="3600000" data-i18n="time-inject.label.hours"></option>
       </select>
   </div>
   <div class="form-row time-inject-row-addPayload3days hidden">
@@ -566,30 +566,12 @@
             },
             payloadTimeFormat: {
                 value: 0
-                /* required: false,
-                validate: function (v) {
-                    return (RED.validators.number()(v) || (typeof v === 'undefined'));
-                } */
             },
             payloadOffset: {
                 value: 0
-                /* required: false,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.payloadType === undefined || (typeof v === 'undefined')
-                    );
-                } */
             },
             payloadOffsetMultiplier: {
-                value: 60
-                /* required: false,
-                validate: function (v) {
-                    return (
-                        RED.validators.number()(v) ||
-                        this.payloadType === undefined || (typeof v === 'undefined')
-                    );
-                } */
+                value: 60000
             },
             payloadDays: {
                 value: '*'
@@ -622,7 +604,7 @@
                 }
             },
             offsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate(v) {
                     return (
@@ -684,7 +666,7 @@
                 }
             },
             timeAltOffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: true,
                 validate(v) {
                     return (
@@ -749,7 +731,7 @@
                 }
             },
             addPayload1OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate(v) {
                     return (
@@ -798,7 +780,7 @@
                 }
             },
             addPayload2OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate(v) {
                     return (
@@ -847,7 +829,7 @@
                 }
             },
             addPayload3OffsetMultiplier: {
-                value: 60,
+                value: 60000,
                 required: false,
                 validate(v) {
                     return (
@@ -1123,16 +1105,35 @@
                 }
             }
 
+            function multilpierUpdate(mp, name) {
+                if (mp=== 1) {
+                    $('node-input-' + name).val(1000);
+                    return 1000;
+                } else if (mp === 60) {
+                    $('node-input-' + name).val(60000);
+                    return 60000;
+                } else if (mp === 3600) {
+                    $('node-input-' + name).val(3600000);
+                    return 3600000;
+                } else if (mp === null || typeof mp === undefined || mp === '') {
+                    $('node-input-' + name).val(60000);
+                    return 60000;
+                }
+                return mp;
+            }
+
+            this.payloadOffsetMultiplier = multilpierUpdate(this.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
+            this.offsetMultiplier = multilpierUpdate(this.offsetMultiplier, 'offsetMultiplier');
+            this.timeAltOffsetMultiplier = multilpierUpdate(this.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
+            this.addPayload1OffsetMultiplier = multilpierUpdate(this.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
+            this.addPayload2OffsetMultiplier = multilpierUpdate(this.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
+            this.addPayload3OffsetMultiplier = multilpierUpdate(this.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
+
             initializeNrValue(this, 'offset', 0);
-            initializeNrValue(this, 'offsetMultiplier', 60);
             initializeNrValue(this, 'timeAltOffset', 0);
-            initializeNrValue(this, 'timeAltOffsetMultiplier', 60);
             initializeNrValue(this, 'addPayload1Offset', 0);
-            initializeNrValue(this, 'addPayload1OffsetMultiplier', 60);
             initializeNrValue(this, 'addPayload2Offset', 0);
-            initializeNrValue(this, 'addPayload2OffsetMultiplier', 60);
             initializeNrValue(this, 'addPayload3Offset', 0);
-            initializeNrValue(this, 'addPayload3OffsetMultiplier', 60);
             initializeValue(this, 'timeDays', '*');
             initializeValue(this, 'property', '');
             initializeValue(this, 'propertyType', typeUndefined.value);
