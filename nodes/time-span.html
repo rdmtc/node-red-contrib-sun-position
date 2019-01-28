@@ -5,51 +5,48 @@
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row time-operand1">
-      <label for="node-input-operand1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.operand1"></span></label>
-      <input type="text" id="node-input-operand1" style="width:70%">
+  <div class="form-row block-noindent time-operand1">
+      <label for="node-input-operand1"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand1"></span></label>
+      <input type="text" id="node-input-operand1">
       <input type="hidden" id="node-input-operand1Type">
   </div>
-  <div class="form-row time-span-row-operand1Format hidden">
-      <label for="node-input-operand1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.operand1Format"></span></label>
-      <select style="width:70%" id="node-input-operand1Formatsel">
-      <input type="text" id="node-input-operand1Format" style="width:50%; margin-left: 5px;">
+  <div class="form-row block-indent1 time-row-operand1Format hidden">
+      <label for="node-input-operand1Formatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-span.label.operand1Format"></span></label>
+      <select id="node-input-operand1Formatsel" >
+      <input type="text" id="node-input-operand1Format" style="margin-left: 5px;"></input>
   </div>
-  <div class="form-row time-span-row-operand1Offset hidden">
-      <label for="node-input-operand1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operand1Offset"></span></label>
-      <input id="node-input-operand1Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
-      <select style="width:100px" id="node-input-operand1OffsetMultiplier">
-      </select>
-  </div>
-  <hr>
-  <div class="form-row time-operand2">
-      <label for="node-input-operand2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.operand2"></span></label>
-      <input type="text" id="node-input-operand2" style="width:70%">
-      <input type="hidden" id="node-input-operand2Type">
-  </div>
-  <div class="form-row time-span-row-operand2Format hidden">
-      <label for="node-input-operand2Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.operand2Format"></span></label>
-      <select style="width:70%" id="node-input-operand2Formatsel">
-      <input type="text" id="node-input-operand2Format" style="width:50%; margin-left: 5px;">
-  </div>
-  <div class="form-row time-span-row-operand2Offset hidden">
-      <label for="node-input-operand2Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operand2Offset"></span></label>
-      <input id="node-input-operand2Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
-      <select style="width:100px" id="node-input-operand2OffsetMultiplier">
-      </select>
+  <div class="form-row block-indent1 time-row-operand1Offset hidden">
+      <label for="node-input-operand1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.operand1Offset"></span></label>
+      <input id="node-input-operand1Offset" class="wg-offset-spinner" data-i18n="[placeholder]time-span.placeholder.offset"></input>
+      <select id="node-input-operand1OffsetMultiplier" class="node-input-multiplier"></select>
   </div>
   <hr>
-  <div class="form-row time-span-row-operator">
-    <label for="node-input-operator"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operator"></span></label>
-    <select id="node-input-operator">
-        <option value="0" data-i18n="within-time-switch.calcOperator.0"></option>
-        <option value="1" data-i18n="within-time-switch.calcOperator.1"></option>
-        <option value="2" data-i18n="within-time-switch.calcOperator.2"></option>
+  <div class="form-row block-noindent time-operand2">
+      <label for="node-input-operand2"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand2"></span></label>
+      <input type="text" id="node-input-operand2">
+      <input type="hidden" id="node-input-operand2Type"></input>
+  </div>
+  <div class="form-row block-indent1 time-row-operand2Format hidden">
+      <label for="node-input-operand2Formatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-span.label.operand2Format"></span></label>
+      <select id="node-input-operand2Formatsel">
+      <input type="text" id="node-input-operand2Format" style="margin-left: 5px;">
+  </div>
+  <div class="form-row block-indent1 time-row-operand2Offset hidden">
+      <label for="node-input-operand2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.operand2Offset"></span></label>
+      <input id="node-input-operand2Offset" class="wg-offset-spinner" data-i18n="[placeholder]time-span.placeholder.offset">
+      <select id="node-input-operand2OffsetMultiplier" class="node-input-multiplier"></select>
+  </div>
+  <hr>
+  <div class="form-row block-noindent time-row-operator">
+    <label for="node-input-operator"><i class="fa fa-dot-circle-o"></i> <span data-i18n="time-span.label.operator"></span></label>
+    <select id="node-input-operator" class="row-full-width">
+        <option value="0" data-i18n="time-span.calcOperator.0"></option>
+        <option value="10" data-i18n="time-span.calcOperator.1"></option>
     </select>
   </div>
   <hr>
   <div>
-    <label for="node-input-rule-container-row"><i class="fa fa-spanulator"></i> <span data-i18n="time-span.label.operatorContainer"></span></label>
+    <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="time-span.label.operatorContainer"></span></label>
     <div class="form-row node-input-rule-container-row">
       <ol id="node-input-rule-container"></ol>
     </div>
@@ -60,33 +57,33 @@
           <option value="true" data-i18n="time-span.label.checkall"></option>
       </select>
   </div>
-  <hr class="time-span-result">
-  <div class="form-row time-result1">
-      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-span.label.result1"></span></label>
-      <input type="text" id="node-input-result1" style="width:70%">
+  <hr>
+  <div class="form-row block-noindent time-result1">
+      <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-span.label.result1"></span></label>
+      <input type="text" id="node-input-result1" class="row-full-width">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row time-result1Value hidden">
+  <div class="form-row block-indent1 time-result1Value hidden">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-span.label.result1Value"></span></label>
-      <input type="text" id="node-input-result1Value" style="width:70%">
+      <input type="text" id="node-input-result1Value" class="row-full-width">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row time-span-row-result1TSFormat hidden">
-    <label for="node-input-result1TSFormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
-    <select style="width:70%" id="node-input-result1TSFormatSel">
+  <div class="form-row block-indent2 time-row-result1TSFormat hidden">
+    <label for="node-input-result1TSFormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
+    <select id="node-input-result1TSFormatSel">
     </select>
-    <input type="text" id="node-input-result1TSFormat" class="form-row time-input-result1TSFormat hidden" style="width:50%; margin-left: 5px;">
+    <input type="text" id="node-input-result1TSFormat" class="form-row time-input-result1TSFormat hidden" style="margin-left: 5px;">
 </div>
-  <div class="form-row time-span-row-result1Format hidden">
-      <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1Format"></span></label>
-      <select style="width:70%" id="node-input-result1FormatSel">
+  <div class="form-row block-indent2 time-row-result1Format hidden">
+      <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-span.label.result1Format"></span></label>
+      <select id="node-input-result1FormatSel">
       </select>
-      <input type="text" id="node-input-result1Format" style="width:50%; margin-left: 5px;">
+      <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row time-span-row-result1Offset hidden">
-      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" class="wt-offset-time" data-i18n="[placeholder]time-span.placeholder.offset">
-      <select style="width:100px" id="node-input-result1OffsetMultiplier">
+  <div class="form-row block-indent2 time-row-result1Offset hidden">
+      <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.result1Offset"></span></label>
+      <input id="node-input-result1Offset" class="wg-offset-spinner" data-i18n="[placeholder]time-span.placeholder.offset">
+      <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
       </select>
   </div>
   <hr>
@@ -96,6 +93,39 @@
   </div>
 </script>
 <style>
+    hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
     .node-input-rule-operator {
         width: 60px;
         margin-left: 5px;
@@ -104,87 +134,17 @@
     .node-input-rule-operand {
         margin-left: 5px;
     }
-    .node-input-rule-operandFormatIp {
-        width:0px;
-        margin-left: 5px;
-        text-align: left;
-    }
-    .node-input-rule-operandFormatSel {
-        width:70px;
-        margin-left: 5px;
-        text-align: left;
-    };
-    .node-input-rule-offset {
-        margin-left: 5px;
-    }
     .node-input-rule-multiplier {
-        width:100px;
+        width: 125px;
         margin-left: 5px;
     }
-    .node-input-rule-property {
+    .node-input-multiplier {
+        width: 125px;
         margin-left: 5px;
-        width:70px
-    }
-    .time-span-times {
-        width: 90px;
-    }
-    #time-span-time {
-        width: 75px;
-        margin-left: 8px;
-        margin-bottom: 8px;
-    }
-    .time-span-count {
-        width: 40px !important;
     }
     .multiselect {
         width: 60px;
         display: inline-block;
-    }
-    .selectBox {
-        position: relative;
-    }
-    .selectBox select {
-        width: 100%;
-        font-weight: bold;
-    }
-    .overSelect {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-    }
-    #option-checkboxes {
-        display: none;
-        border: 1px #dadada solid;
-        background: #ffffff;
-        min-width: 150px;
-        /* width: 200px; */
-        position: absolute;
-        z-index: 90000;
-    }
-    #option-checkboxes label {
-        display: block;
-        width: auto;
-        text-align: left;
-        margin-right:15px;
-        margin-left:5px;
-    }
-    #option-checkboxes .header {
-        background:#cccccc;
-        margin-left:5px;
-        margin-right:5px;
-    }
-    #option-checkboxes input {
-        display: block;
-        width: auto;
-        margin-right:5px;
-        margin-left:5px;
-        float:left;
-        /* clear: both; */
-    }
-    #option-checkboxes label:hover {
-        background-color: #1e90ff;
     }
 </style>
 <script type="text/x-red" data-help-name="time-comp"> <p>A enhanced node for time format change and time comparision.</p>
@@ -268,7 +228,7 @@
 
     RED.nodes.registerType('time-span', {
         category: 'time and astro',
-        color: '#FDF0C0',
+        color: '#EDFDBF',
         icon: 'time-span-black.png',
         inputs: 1,
         outputs: 1,
@@ -406,11 +366,12 @@
         },
         outputLabels(index) {
             if (this.rules.length) {
+                console.log(this.rules);
                 const rule = this.rules[index];
                 if (rule) {
-                    return rule.operatorText + getValueLabel(rule.operandType, rule.operandValue);
+                    return rule.operatorText + ' ' + getValueLabel(rule.operandType, rule.operandValue);
                 }
-                if (this.checkall) {
+                if (this.checkall === 'true') {
                     return 'always';
                 }
                 return 'otherwise';
@@ -785,9 +746,6 @@
                 }
             }
             // #endregion functions
-            // #region spinner
-            $('.wt-offset-time').spinner({max: 1439, min: -1439});
-            // #endregion spinner
             // #region operand1
             $('#node-input-operand1Type').val(node.operand1Type);
             $('#node-input-operand1').typedInput({
@@ -795,17 +753,18 @@
                 typeField: $('#node-input-operand1Type'),
                 types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
+            $("#node-input-operand1").typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand1').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand1').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                    $('.time-span-row-operand1Format').hide();
-                    $('.time-span-row-operand1Offset').show();
+                    $('.time-row-operand1Format').hide();
+                    $('.time-row-operand1Offset').show();
                 } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                    $('.time-span-row-operand1Format').show();
-                    $('.time-span-row-operand1Offset').show();
+                    $('.time-row-operand1Format').show();
+                    $('.time-row-operand1Offset').show();
                 } else {
-                    $('.time-span-row-operand1Format').hide();
-                    $('.time-span-row-operand1Offset').hide();
+                    $('.time-row-operand1Format').hide();
+                    $('.time-row-operand1Offset').hide();
                 }
             });
             const operand1FormatSelField = $('#node-input-operand1Formatsel');
@@ -815,15 +774,15 @@
                 const operand1FormatIpField = $('#node-input-operand1Format');
                 const operand1FormatSelField = $('#node-input-operand1Formatsel');
                 if (Number(operand1FormatSelField.val()) === 99) {
+                    operand1FormatSelField.css({width: '100px'});
+                    operand1FormatIpField.css({width: 'calc(100% - 225px)'});
                     operand1FormatIpField.show();
-                    $('#node-input-operand1Format').css({width: '40%'});
-                    operand1FormatSelField.css({width: '30%'});
                     if (!isNaN(operand1FormatIpField.val())) {
                         operand1FormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
                     operand1FormatIpField.hide();
-                    operand1FormatSelField.css({width: '70%'});
+                    operand1FormatSelField.css({width: 'calc(100% - 120px)'});
                 }
             });
             if (isNaN(node.operand1Format)) {
@@ -844,17 +803,18 @@
                 typeField: $('#node-input-operand2Type'),
                 types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
+            $("#node-input-operand2").typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand2').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand2').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                    $('.time-span-row-operand2Format').hide();
-                    $('.time-span-row-operand2Offset').show();
+                    $('.time-row-operand2Format').hide();
+                    $('.time-row-operand2Offset').show();
                 } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                    $('.time-span-row-operand2Format').show();
-                    $('.time-span-row-operand2Offset').show();
+                    $('.time-row-operand2Format').show();
+                    $('.time-row-operand2Offset').show();
                 } else {
-                    $('.time-span-row-operand2Format').hide();
-                    $('.time-span-row-operand2Offset').hide();
+                    $('.time-row-operand2Format').hide();
+                    $('.time-row-operand2Offset').hide();
                 }
             });
             const operand2FormatSelField = $('#node-input-operand2Formatsel');
@@ -864,15 +824,15 @@
                 const operand2FormatIpField = $('#node-input-operand2Format');
                 const operand2FormatSelField = $('#node-input-operand2Formatsel');
                 if (Number(operand2FormatSelField.val()) === 99) {
+                    operand2FormatSelField.css({width: '100px'});
+                    operand2FormatIpField.css({width: 'calc(100% - 225px)'});
                     operand2FormatIpField.show();
-                    $('#node-input-operand2Format').css({width: '40%'});
-                    operand2FormatSelField.css({width: '30%'});
                     if (!isNaN(operand2FormatIpField.val())) {
                         operand2FormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
                     operand2FormatIpField.hide();
-                    operand2FormatSelField.css({width: '70%'});
+                    operand2FormatSelField.css({width: 'calc(100% - 120px)'});
                 }
             });
             if (isNaN(node.operand2Format)) {
@@ -895,12 +855,12 @@
                 const lblWidth = 25;
                 // row1
                 const operatorWidth = 60;
-                const multiplierWidth = 100;
+                const multiplierWidth = 125;
                 multipierField.width(multiplierWidth);
-                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 50));
+                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 40));
             }
 
-            $('#node-input-rule-container').css('min-height', '250px').css('min-width', '300px').editableList({
+            $('#node-input-rule-container').css('min-height', '150px').css('min-width', '200px').editableList({
                 addItem(containerRow, containerIndex, data) {
                     containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                     const row = $('<div/>').appendTo(containerRow);
@@ -962,6 +922,7 @@
                 typeField: $('#node-input-result1Type'),
                 types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global']
             });
+            $("#node-input-result1").typedInput('width', 'calc(100% - 110px)');
             $('#node-input-result1ValueType').val(node.result1ValueType);
             $('#node-input-result1Value').typedInput({
                 default: node.result1ValueType || 'timespan',
@@ -986,6 +947,7 @@
                     typeSunCalc,
                     typeMoonCalc]
             });
+            $("#node-input-result1Value").typedInput('width', 'calc(100% - 120px)');
             $('#node-input-result1').on('change', (_type, _value) => {
                 console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
                 if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
@@ -994,30 +956,30 @@
                     console.log('plVType= ' + plVType); // eslint-disable-line
 
                     if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                        $('.time-span-row-result1Offset').show();
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1Format').show();
+                        $('.time-row-result1Offset').show();
+                        $('.time-row-result1TSFormat').hide();
+                        $('.time-row-result1Format').show();
                     } else if (plVType === 'timespan') {
-                        $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1Format').hide();
-                        $('.time-span-row-result1TSFormat').show();
+                        $('.time-row-result1Offset').hide();
+                        $('.time-row-result1Format').hide();
+                        $('.time-row-result1TSFormat').show();
                     } else if (plVType === 'operand1' || plVType === 'operand2') {
-                        $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1Format').show();
+                        $('.time-row-result1Offset').hide();
+                        $('.time-row-result1TSFormat').hide();
+                        $('.time-row-result1Format').show();
                     } else {
-                        $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1TSFormat').hide();
-                        $('.time-span-row-result1Format').hide();
+                        $('.time-row-result1Offset').hide();
+                        $('.time-row-result1TSFormat').hide();
+                        $('.time-row-result1Format').hide();
                     }
                 } else {
                     $('.time-result1Value').hide();
-                    $('.time-span-row-result1Offset').hide();
-                    $('.time-span-row-result1TSFormat').hide();
-                    $('.time-span-row-result1Format').hide();
+                    $('.time-row-result1Offset').hide();
+                    $('.time-row-result1TSFormat').hide();
+                    $('.time-row-result1Format').hide();
                 }
-                $('#time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
-                $('#time-span-row-result1TSFormatSel').change(); // show '.time-span-row-result1Format'
+                $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
+                $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
             });
             $('#node-input-result1Value').on('change', (_type, _value) => {
                 $('#node-input-result1').change();
@@ -1032,18 +994,18 @@
                 console.log('node-input-resultTSFormatSelField change ' + resultTSFormatSelField.val() + ' - ' + resultTSFormatIpField.val()); // eslint-disable-line
 
                 if (Number(resultTSFormatSelField.val()) === 99) {
+                    resultTSFormatSelField.css({width: '100px'});
+                    resultTSFormatIpField.css({width: 'calc(100% - 235px)'});
                     resultTSFormatIpField.show();
-                    resultTSFormatIpField.css({width: '40%'});
-                    resultTSFormatSelField.css({width: '30%'});
                     if (!isNaN(resultTSFormatIpField.val())) {
                         resultTSFormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
                     resultTSFormatIpField.hide();
-                    resultTSFormatSelField.css({width: '70%'});
+                    resultTSFormatSelField.css({width: 'calc(100% - 130px)'});
                 }
             });
-            // resultTSFormatSelField.change(); - triggered by $('#node-input-result1').change();
+            resultTSFormatSelField.change();
             /********************************************************/
             const resultFormatSelField = $('#node-input-result1FormatSel');
             appendOptions(resultFormatSelField, 'outputFormats');
@@ -1051,30 +1013,36 @@
                 const resultFormatIpField = $('#node-input-result1Format');
                 const resultFormatSelField = $('#node-input-result1FormatSel');
                 if (Number(resultFormatSelField.val()) === 99) {
+                    resultFormatSelField.css({width: '100px'});
+                    resultFormatIpField.css({width: 'calc(100% - 235px)'});
                     resultFormatIpField.show();
-                    resultFormatIpField.css({width: '40%'});
-                    resultFormatSelField.css({width: '30%'});
                     if (!isNaN(resultFormatIpField.val())) {
                         resultFormatIpField.val(node._('time-span.timeFormat.default'));
                     }
                 } else {
                     resultFormatIpField.hide();
-                    resultFormatSelField.css({width: '70%'});
+                    resultFormatSelField.css({width: 'calc(100% - 130px)'});
                 }
             });
+            /********************************************************/
             if (isNaN(node.result1Format)) {
                 resultFormatSelField.val(99);
             } else {
                 resultFormatSelField.val(Number(node.result1Format));
             }
-            // resultFormatSelField.change(); - triggered by $('#node-input-result1').change();
+            resultFormatSelField.change();
             const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
             appendOptions(resultMultiplierField, 'multiplier');
             resultMultiplierField.val(node.result1OffsetMultiplier);
             autocomplete($('#node-input-result1TSFormat'), dateOutTSFormat);
             autocomplete($('#node-input-result1Format'), dateOutFormat);
             // #endregion result1
-            /********************************************************/
+            // #region spinner
+                $('.wg-offset-spinner').spinner({
+                max: 1439,
+                min: -1439});
+            // #endregion spinner
+
             $('#node-input-time').change();
             $('#node-input-payload').change();
             $('#node-input-operand1').change();
@@ -1098,7 +1066,7 @@
                 const rule = $(this);
                 const data = {
                     operator: rule.find('.node-input-rule-operator').val(),
-                    operatorText: rule.find('.node-input-rule-operator').children(':selected').text(),
+                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
                     operandType: rule.find('.node-input-rule-operand').typedInput('type'),
                     operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
                     multiplier: rule.find('.node-input-rule-multipier').val()

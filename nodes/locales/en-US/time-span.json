@@ -13,6 +13,7 @@
             "operand2": "Input 2",
             "operand2Format": "parse format",
             "operand2Offset": "Offset",
+            "operator":"calculation",
             "operatorContainer": "compare with",
             "onlyif": "only if",
             "checkall": "stopping after first match (if)",
@@ -39,7 +40,6 @@
         },
         "calcOperator": [
             "Input 1 - Input 2",
-            "Input 2 - Input 1",
             "abs(Input 1 - Input 2)"
         ],
         "operatorsGroups": [
@@ -147,10 +147,11 @@
         "parseFormats": [
             "milliseconds - UNIX timestamp",
             "ECMA-262 - JSON Date representation",
-            "various - try different Formats",
+            "various - try different Formats, prefere european formats",
+            "various - try different Formats, prefere american formats",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "Other"
+            "Other - free definition"
         ],
         "multiplierGroups": [
             "Standard",

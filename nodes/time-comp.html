@@ -1,28 +1,29 @@
-<script type="text/x-red" data-template-name="time-comp"> <div class="form-row">
+<script type="text/x-red" data-template-name="time-comp">
+  <div class="form-row">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-comp.label.position"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
   <div class="form-row time-input">
-      <label for="node-input-input"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-comp.label.input"></span></label>
+      <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
       <input type="text" id="node-input-input" style="width:70%">
       <input type="hidden" id="node-input-inputType">
   </div>
-  <div class="form-row time-comp-row-inputFormat hidden">
-      <label for="node-input-inputFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
+  <div class="form-row time-row-inputFormat hidden">
+      <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
       <select style="width:70%" id="node-input-inputFormatsel">
       <input type="text" id="node-input-inputFormat" style="width:50%; margin-left: 5px;">
   </div>
-  <div class="form-row time-comp-row-inputOffset hidden">
-      <label for="node-input-inputOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
-      <input id="node-input-inputOffset" class="wt-offset-time" data-i18n="[placeholder]time-comp.placeholder.offset">
+  <div class="form-row time-row-inputOffset hidden">
+      <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
+      <input id="node-input-inputOffset" class="wg-offset-spinner" data-i18n="[placeholder]time-comp.placeholder.offset">
       <select style="width:100px" id="node-input-inputOffsetMultiplier">
       </select>
   </div>
   <hr>
   <div>
-    <label for="node-input-rule-container-row"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.operatorContainer"></span></label>
+    <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="time-comp.label.operatorContainer"></span></label>
     <div class="form-row node-input-rule-container-row">
       <ol id="node-input-rule-container"></ol>
     </div>
@@ -35,7 +36,7 @@
   </div>
   <hr class="time-comp-result">
   <div class="form-row time-result1">
-      <label for="node-input-result1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-comp.label.result1"></span></label>
+      <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-comp.label.result1"></span></label>
       <input type="text" id="node-input-result1" style="width:70%">
       <input type="hidden" id="node-input-result1Type">
   </div>
@@ -44,15 +45,15 @@
       <input type="text" id="node-input-result1Value" style="width:70%">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row time-comp-row-result1Format hidden">
-      <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
+  <div class="form-row time-row-result1Format hidden">
+      <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
       <select style="width:70%" id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="width:50%; margin-left: 5px;">
   </div>
-  <div class="form-row time-comp-row-result1Offset hidden">
-      <label for="node-input-result1Offset"><i class="fa fa-arrows-h"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" class="wt-offset-time" data-i18n="[placeholder]time-comp.placeholder.offset">
+  <div class="form-row time-row-result1Offset hidden">
+      <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
+      <input id="node-input-result1Offset" class="wg-offset-spinner" data-i18n="[placeholder]time-comp.placeholder.offset">
       <select style="width:100px" id="node-input-result1OffsetMultiplier">
       </select>
   </div>
@@ -91,14 +92,6 @@
     .node-input-rule-property {
         margin-left: 5px;
         width:70px
-    }
-    .time-comp-times {
-        width: 90px;
-    }
-    #time-comp-time {
-        width: 75px;
-        margin-left: 8px;
-        margin-bottom: 8px;
     }
     .time-comp-count {
         width: 40px !important;
@@ -324,14 +317,13 @@
             if (this.rules.length) {
                 const rule = this.rules[index];
                 if (rule) {
-                    label = rule.operatorText + getValueLabel(rule.operandType, rule.operandValue);
+                    label = rule.operatorText +  ' ' + getValueLabel(rule.operandType, rule.operandValue);
                     if (rule.propertyType !== 'none') {
                         label += ' only if ' + getValueLabel(rule.propertyType, rule.propertyValue) + ' is true';
                     }
-
                     return label;
                 }
-                if (this.checkall) {
+                if (this.checkall === 'true') {
                     return 'always';
                 }
                 return 'otherwise';
@@ -765,9 +757,6 @@
                 }
             }
             // #endregion functions
-            // #region spinner
-            $('.wt-offset-time').spinner({max: 1439, min: -1439});
-            // #endregion spinner
             // #region input
             $('#node-input-inputType').val(node.inputType);
             $('#node-input-input').typedInput({
@@ -778,14 +767,14 @@
             $('#node-input-input').on('change', (_type, _value) => {
                 const opType = $('#node-input-input').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                    $('.time-comp-row-inputFormat').hide();
-                    $('.time-comp-row-inputOffset').show();
+                    $('.time-row-inputFormat').hide();
+                    $('.time-row-inputOffset').show();
                 } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                    $('.time-comp-row-inputFormat').show();
-                    $('.time-comp-row-inputOffset').show();
+                    $('.time-row-inputFormat').show();
+                    $('.time-row-inputOffset').show();
                 } else {
-                    $('.time-comp-row-inputFormat').hide();
-                    $('.time-comp-row-inputOffset').hide();
+                    $('.time-row-inputFormat').hide();
+                    $('.time-row-inputOffset').hide();
                 }
             });
             const inputFormatSelField = $('#node-input-inputFormatsel');
@@ -904,7 +893,7 @@
                     // row3
                     addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
                     const offsetField = $('<input/>', {
-                        class: 'node-input-rule-offset',
+                        class: 'wg-offset-spinner node-input-rule-offset',
                         id: 'node-input-rule-offset' + containerIndex,
                         type: 'text'
                     }).appendTo(row3).typedInput({
@@ -1010,19 +999,19 @@
                     $('.time-result1Value').show();
                     const plVType = $('#node-input-result1Value').typedInput('type');
                     if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                        $('.time-comp-row-result1Format').show();
-                        $('.time-comp-row-result1Offset').show();
+                        $('.time-row-result1Format').show();
+                        $('.time-row-result1Offset').show();
                     } else if (plVType === 'input') {
-                        $('.time-comp-row-result1Format').show();
-                        $('.time-comp-row-result1Offset').hide();
+                        $('.time-row-result1Format').show();
+                        $('.time-row-result1Offset').hide();
                     } else {
-                        $('.time-comp-row-result1Format').hide();
-                        $('.time-comp-row-result1Offset').hide();
+                        $('.time-row-result1Format').hide();
+                        $('.time-row-result1Offset').hide();
                     }
                 } else {
                     $('.time-result1Value').hide();
-                    $('.time-comp-row-result1Format').hide();
-                    $('.time-comp-row-result1Offset').hide();
+                    $('.time-row-result1Format').hide();
+                    $('.time-row-result1Offset').hide();
                 }
             });
             $('#node-input-result1Value').on('change', (_type, _value) => {
@@ -1058,6 +1047,10 @@
             resultMultiplierField.val(node.result1OffsetMultiplier);
             autocomplete($('#node-input-result1Format'), dateOutFormat);
             // #endregion result1
+            // #region spinner
+            $('.wg-offset-spinner').spinner({max: 1439, min: -1439});
+            // #endregion spinner
+
             $('#node-input-time').change();
             $('#node-input-property').change();
             $('#node-input-payload').change();
@@ -1084,7 +1077,7 @@
                 const data = {
                     operator: rule.find('.node-input-rule-operator').val(),
                     operatorType: getMultiSelStr(rule.find('#option-checkboxes input[type=checkbox]:checked')),
-                    operatorText: rule.find('.node-input-rule-operator').children(':selected').text(),
+                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
                     operandType: rule.find('.node-input-rule-operand').typedInput('type'),
                     operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
                     format: rule.find('.node-input-rule-operandFormatIp').val(),

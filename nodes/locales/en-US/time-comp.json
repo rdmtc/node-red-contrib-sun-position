@@ -121,7 +121,7 @@
             "various - try different Formats, prefere american formats",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "Other"
+            "Other - free definition"
         ],
         "multiplierGroups": [
             "Standard",
