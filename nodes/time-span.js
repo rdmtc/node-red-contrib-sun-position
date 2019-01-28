@@ -13,18 +13,6 @@ module.exports = function (RED) {
     'use strict';
 
     function tsGetOperandData(node, msg, type, value, format, offset, multiplier) {
-        function getName(type,val){
-            if (type === 'date' ||
-                type === 'str' ||
-                type === 'num') {
-                if (val+'' === '') {
-                    return '""';
-                }
-                return val+'';
-            }
-            return type + '.' + val;
-        }
-
         let result = {};
         if (type === null || type === 'none' || type === '') {
             return Date.now();
@@ -56,12 +44,12 @@ module.exports = function (RED) {
             throw new Error('could not evaluate ' + type + '.' + value);
         }
 
-        result.value = hlp.parseDateFromFormat(data, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'), offset, multiplier);
+        result.value = hlp.parseDateFromFormat(data, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
 
-        if (result.value === 'Invalid Date' || isNaN(result.value)) {
+        if (result.value === 'Invalid Date' || isNaN(result.value) || result.value === null) {
             throw new Error('could not evaluate format of ' + data);
         }
-        return result.value;
+        return hlp.addOffset(result.value, offset, multiplier);
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, multiplier, days) {

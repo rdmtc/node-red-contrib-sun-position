@@ -37,6 +37,11 @@
         "multiselectLbl": {
             "operatorTypes": "include into compare"
         },
+        "calcOperator": [
+            "Input 1 - Input 2",
+            "Input 2 - Input 1",
+            "abs(Input 1 - Input 2)"
+        ],
         "operatorsGroups": [
             "complete Timestamp"
         ],
@@ -114,8 +119,9 @@
             "other"
         ],
         "outputTSFormatsGroups": [
-            "timestamp",
-            "timestamp rounded"
+            "timestamp  (number)",
+            "timestamp rounded  (number)",
+            "Text "
         ],
         "outputTSFormats": [
             "milliseconds",
@@ -130,7 +136,8 @@
             "hours",
             "days",
             "month",
-            "years"
+            "years",
+            "Other (free defined)"
         ],
         "parseFormatsGroups": [
             "Number",

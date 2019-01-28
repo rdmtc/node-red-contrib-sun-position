@@ -15,21 +15,18 @@ module.exports = {
     getComperableDateFormat2,
     parseComperableDateFormat2,
     getTimeDiff,
-    compareAzimuth,
+    checkLimits,
     addOffset,
     calcDayOffset,
-    calcTimeValue,
-    calcTimeValueUTC,
+    normalizeDate,
+    normalizeDateUTC,
     getTimeOfText,
     getDateOfText,
-    // getTimeOfTextUTC,
-    // getDateOfTextUTC,
     getTimeNumber,
     getNodeId,
     formatDate,
     getFormatedDateOut,
     parseDate,
-    parseArray,
     parseDateTime,
     parseDateFromFormat
 };
@@ -64,11 +61,23 @@ function isFalse(val) {
     return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
 }
 /*******************************************************************************************************/
+/**
+ * gives a ID of a node
+ * @param {any} node a node
+ * @returns {string} id of the given node
+ */
 function getNodeId(node) {
     // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
 /*******************************************************************************************************/
+/**
+ * generic function for handle a error in a node
+ * @param {any} node the node where the error occurs
+ * @param {String} messageText the message text
+ * @param {Error} err the error object
+ * @param {string} stateText the state text which should be set to the node
+ */
 function handleError(node, messageText, err, stateText) {
     if (!err) {
         err = new Error(messageText);
@@ -89,9 +98,11 @@ function handleError(node, messageText, err, stateText) {
             text: (stateText) ? stateText : messageText
         });
     } else if (console) {
+        /* eslint-disable no-console */
         console.error(messageText);
         console.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
         console.trace();
+        /* eslint-enable no-console */
     }
 }
 /*******************************************************************************************************/
@@ -170,50 +181,51 @@ function parseComperableDateFormat2(date) {
 }
 
 /*******************************************************************************************************/
+/**
+ * converst the time part of a date into a comparable number
+ * @param {Date} date  - date to convert
+ * @return {number}   numeric representation of the time part of the date
+ */
 function getTimeNumber(date) {
-    return date.getUTCMilliseconds() + date.getUTCSeconds() + date.getUTCMinutes() * 60 + date.getUTCHours() * 3600;
+    return date.getUTCMilliseconds() + date.getUTCSeconds() * 1000 + date.getUTCMinutes() * 60000 + date.getUTCHours() * 3600000;
 }
 
 /*******************************************************************************************************/
-/* function compareAzimuth(obj, name, azimuth, low, high, old) {
-    if (typeof low !== 'undefined' && low !== '' && !isNaN(low)) {
-        if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
-            if (high > low) {
-                obj[name] = (azimuth > low) && (azimuth < high);
-            } else {
-                obj[name] = (azimuth > low) || (azimuth < high);
-            }
-        } else {
-            obj[name] = (azimuth > low);
-        }
-        return obj[name] != old[name];
-    } else if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
-        obj[name] = (azimuth < high);
-        return obj[name] != old[name];
-    }
-    return false;
-}; */
-function compareAzimuth(azimuth, low, high) {
+/**
+ * check if a given number is in given limits
+ * @param {number} num number angle to compare
+ * @param {number} low low limit
+ * @param number*} high high limit
+ * @return {bool}  **true** if the number is inside given limits, at least one limit must be valide, otherwise returns **false**
+ */
+function checkLimits(num, low, high) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low) && low >= 0) {
         if (typeof high !== 'undefined' && high !== '' && !isNaN(high) && high >= 0) {
             if (high > low) {
-                return (azimuth > low) && (azimuth < high);
+                return (num > low) && (num < high);
             }
 
-            return (azimuth > low) || (azimuth < high);
+            return (num > low) || (num < high);
         }
 
-        return (azimuth > low);
+        return (num > low);
     }
 
     if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
-        return (azimuth < high);
+        return (num < high);
     }
 
     return false;
 }
 
 /*******************************************************************************************************/
+/**
+ * adds an offset to a given Date object
+ * @param {Date} d Date object where the offset should be added
+ * @param {number} offset the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
+ * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
+ * @return {Date}  Date with added offset
+ */
 function addOffset(d, offset, multiplier) {
     if (offset && !isNaN(offset) && offset !== 0) {
         if (offset !== 0 && multiplier > 0) {
@@ -222,12 +234,20 @@ function addOffset(d, offset, multiplier) {
             d.setMonth(d.getMonth() + offset);
         } else if (multiplier === -2) {
             d.setFullYear(d.getFullYear() + offset);
+        } else {
+            return new Date(d.getTime() + offset); // if multiplier is not a valid value
         }
     }
     return d;
 }
 
 /*******************************************************************************************************/
+/**
+ * calculates the number of days to get a positive date object
+ * @param {Array.<number>} days array of allowed days
+ * @param {number} daystart start day (0=sunday)
+ * @return {number} number of days for the next valid day as offset to the daystart
+ */
 function calcDayOffset(days, daystart) {
     let dayx = 0;
     let daypos = daystart;
@@ -249,8 +269,17 @@ function calcDayOffset(days, daystart) {
 }
 
 /*******************************************************************************************************/
-function calcTimeValue(d, offset, multiplier, next, days) {
-    // console.debug('calcTimeValue d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
+/**
+ * normalize date by adding offset, get only the next valid date, etc...
+ * @param {Date} d input Date to normalize
+ * @param {number} offset offset to add tot he Date object
+ * @param {number} multiplier multiplier for the offset
+ * @param {number} next If date is less then today this number of days will be added to the date
+ * @param {Array.<number>} days array of allowed days
+ * @return {Date} a normalized date moved tot the future to fulfill all conditions
+ */
+function normalizeDate(d, offset, multiplier, next, days) {
+    // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
     d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
@@ -259,7 +288,6 @@ function calcTimeValue(d, offset, multiplier, next, days) {
         const cmp = now.getTime();
         if (d.getTime() <= cmp) {
             d.setDate(d.getDate() + Number(next));
-            // d = d.addDays(Number(next));
         }
     }
 
@@ -267,7 +295,6 @@ function calcTimeValue(d, offset, multiplier, next, days) {
         const dayx = calcDayOffset(days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
-            // d = d.addDays(dayx);
         }
     }
 
@@ -275,8 +302,17 @@ function calcTimeValue(d, offset, multiplier, next, days) {
 }
 
 /*******************************************************************************************************/
-function calcTimeValueUTC(d, offset, multiplier, next, days) {
-    // console.debug('calcTimeValueUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
+/**
+ * normalize date by adding offset, get only the next valid date, etc...
+ * @param {Date} d input Date to normalize
+ * @param {number} offset offset to add tot he Date object
+ * @param {number} multiplier multiplier for the offset
+ * @param {number} next If date is less then today this number of days will be added to the date
+ * @param {Array.<number>} days array of allowed days
+ * @return {Date} a normalized date moved tot the future to fulfill all conditions
+ */
+function normalizeDateUTC(d, offset, multiplier, next, days) {
+    // console.debug('normalizeDateUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
     d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
@@ -285,7 +321,6 @@ function calcTimeValueUTC(d, offset, multiplier, next, days) {
         const cmp = now.getTime();
         if (d.getTime() <= cmp) {
             d.setUTCDate(d.getUTCDate() + Number(next));
-            // d = d.addDays(Number(next));
         }
     }
 
@@ -293,7 +328,6 @@ function calcTimeValueUTC(d, offset, multiplier, next, days) {
         const dayx = calcDayOffset(days, d.getUTCDay());
         if (dayx > 0) {
             d.setUTCDate(d.getUTCDate() + dayx);
-            // d = d.addDays(dayx);
         }
     }
 
@@ -301,8 +335,14 @@ function calcTimeValueUTC(d, offset, multiplier, next, days) {
 }
 
 /*******************************************************************************************************/
-function getTimeOfText(t, offset, multiplier, next, days, date) {
-    // console.debug('getTimeOfText t=' + t + ' offset=' + offset + ' next=' + next + ' days=' + days);
+/**
+ * parses a string which contains only a time to a Date object of today
+ * @param {string} t text representation of a time
+ * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
+ * @return {Date} the parsed date object or **null** if can not parsed
+ */
+function getTimeOfText(t, date) {
+    // console.debug('getTimeOfText t=' + t + ' date=' + date);
     const d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
@@ -313,113 +353,77 @@ function getTimeOfText(t, offset, multiplier, next, days, date) {
         } else {
             return null;
         }
-
-        return calcTimeValue(d, offset, multiplier, next, days);
+        return d;
     }
-
     return null;
 }
-
 /*******************************************************************************************************/
-function getDateOfText(date, offset, multiplier, next, days) {
-    if (date === null) {
+/**
+ * parses a string which contains a date or only a time to a Date object
+ * @param {any} dt number or text which contains a date or a time
+ * @return {Date} the parsed date object, throws an error if can not parsed
+ */
+function getDateOfText(dt) {
+    if (dt === null) {
         throw new Error('Could not evaluate as a valid Date or time. Value is null!');
     }
 
-    if (typeof date === 'object') {
-        if (date.hasOwnProperty('now')) {
-            date = date.now;
-        } else if (date.hasOwnProperty('date')) {
-            date = date.date;
-        } else if (date.hasOwnProperty('time')) {
-            date = date.time;
-        } else if (date.hasOwnProperty('ts')) {
-            date = date.ts;
-        } else if (date.hasOwnProperty('lc')) {
-            date = date.lc;
-        } else if (date.hasOwnProperty('value')) {
-            date = date.lc;
-        } else if (date.hasOwnProperty('payload')) {
-            date = date.payload;
-        } else if (date.hasOwnProperty('date')) {
-            date = date.date;
-        } else if (date.hasOwnProperty('timeStamp')) {
-            date = date.timeStamp;
-        } else if (date.hasOwnProperty('created')) {
-            date = date.created;
-        } else if (date.hasOwnProperty('changed')) {
-            date = date.changed;
+    if (typeof dt === 'object') {
+        if (dt.hasOwnProperty('now')) {
+            dt = dt.now;
+        } else if (dt.hasOwnProperty('date')) {
+            dt = dt.date;
+        } else if (dt.hasOwnProperty('time')) {
+            dt = dt.time;
+        } else if (dt.hasOwnProperty('ts')) {
+            dt = dt.ts;
+        } else if (dt.hasOwnProperty('lc')) {
+            dt = dt.lc;
+        } else if (dt.hasOwnProperty('value')) {
+            dt = dt.lc;
+        } else if (dt.hasOwnProperty('payload')) {
+            dt = dt.payload;
+        } else if (dt.hasOwnProperty('timeStamp')) {
+            dt = dt.timeStamp;
+        } else if (dt.hasOwnProperty('created')) {
+            dt = dt.created;
+        } else if (dt.hasOwnProperty('changed')) {
+            dt = dt.changed;
         } else {
-            date = String(date);
+            dt = String(dt);
         }
     }
 
     const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/;
-    if (re.test(String(date))) {
-        const result = getTimeOfText(String(date), offset, multiplier, next, days);
+    if (re.test(String(dt))) {
+        const result = getTimeOfText(String(dt));
         if (result !== null) {
             return result;
         }
     }
 
-    if (!isNaN(date)) {
-        date = Number(date);
+    if (!isNaN(dt)) {
+        dt = Number(dt);
     }
 
-    const dto = new Date(date);
+    const dto = new Date(dt);
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
-        return calcTimeValue(dto, offset, multiplier, next, days);
+        return dto;
     }
 
-    if (typeof date === 'string') {
-        let res = parseDateTime(date, true);
+    if (typeof dt === 'string') {
+        let res = parseDateTime(dt, true);
         if (res === null) {
-            res = parseDate(date, true);
+            res = parseDate(dt, true);
         }
         if (res === null) {
-            res = parseArray(date, dateFormat.parseTimes);
+            res = _parseArray(dt, dateFormat.parseTimes);
         }
         return res;
     }
-    throw new Error('could not evaluate ' + String(date) + ' as a valid Date or time.');
+    throw new Error('could not evaluate ' + String(dt) + ' as a valid Date or time.');
 }
 /*******************************************************************************************************/
-/*
-function getTimeOfTextUTC(t, tzOffset, offset. multiplier, next, days, date) {
-    //console.debug('getTimeOfTextUTC t=' + t + ' tzOffset=' + tzOffset + ' offset=' + offset + ' next=' + next + ' days=' + days);
-    let d = date || new Date();
-    if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
-        let matches = t.match(/(0[0-9]|1[0-9]|2[0-3]|[0-9])(?::([0-5][0-9]|[0-9]))(?::([0-5][0-9]|[0-9]))?\s*(p?)/);
-        if (matches) {
-            d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
-                (parseInt(matches[2]) || 0) + (tzOffset || 0),
-                (parseInt(matches[3]) || 0), 0);
-            //console.log(d);
-        } else {
-            return null;
-        }
-        return calcTimeValueUTC(d, offset, multiplier, next, days)
-    }
-    return null;
-};
-/*******************************************************************************************************/
-/*
-function getDateOfTextUTC(date, tzOffset, offset, multiplier, next, days) {
-    if (!isNaN(date)) {
-        date = Number(date);
-    }
-    let dto = new Date(date);
-    if (dto !== "Invalid Date" && !isNaN(dto)) {
-        return calcTimeValueUTC(dto, offset, multiplier, next, days);
-    } else {
-        let result = getTimeOfTextUTC(String(date), tzOffset, offset, multiplier, next, days);
-        if (result != null) {
-            return result;
-        }
-    }
-    throw new Error("could not evaluate " + String(date) + ' as a valid Date or time.');
-};/** **/
-
 /*
  * Date Format 1.2.3
  * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
@@ -936,6 +940,11 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // ------------------------------------------------------------------
 // Utility functions for parsing in getDateFromFormat()
 // ------------------------------------------------------------------
+/**
+ * check if string is integer
+ * @param {any} val value to scheck
+ * @return {bool} **true** if value is integer otherwise **false**
+ */
 function _isInteger(val) {
     const digits = '1234567890';
     for (let i = 0; i < val.length; i++) {
@@ -947,6 +956,14 @@ function _isInteger(val) {
     return true;
 }
 
+/**
+ * returns integer token
+ * @param {string} str string to parse
+ * @param {number} i position
+ * @param {*} minlength minimum required length
+ * @param {*} maxlength maximum length
+ * @returns {string|null} token if it is an integer oherwise **null**
+ */
 function _getInt(str, i, minlength, maxlength) {
     for (let x = maxlength; x >= minlength; x--) {
         const token = str.substring(i, i + x);
@@ -962,13 +979,14 @@ function _getInt(str, i, minlength, maxlength) {
     return null;
 }
 
-// ------------------------------------------------------------------
-// getDateFromFormat( date_string , format_string )
-//
-// This function takes a date string and a format string. It matches
-// If the date string matches the format string, it returns the
-// getTime() of the date. If it does not match, it returns 0.
-// ------------------------------------------------------------------
+/**
+ * This function takes a date string and a format string. It matches
+ * If the date string matches the format string, it returns the
+ * getTime() of the date. If it does not match, it returns 0.
+ * @param {string} val date string to parse
+ * @param {string} format format of the value
+ * @returns {Date|null} a Date object or **null** if pattern does not match.
+ */
 function getDateFromFormat(val, format) {
     // console.log('getDateFromFormat ' + val + ' --> ' + format); // eslint-disable-line
     val = String(val);
@@ -1175,20 +1193,13 @@ function getDateFromFormat(val, format) {
     return new Date(year, month - 1, date, hh, mm, ss, ll);
 }
 
-// ------------------------------------------------------------------
-// parseDate( date_string [, prefer_euro_format] )
-//
-// This function takes a date string and tries to match it to a
-// number of possible date formats to get the value. It will try to
-// match against the following international formats, in this order:
-// y-M-d   MMM d, y   MMM d,y   y-MMM-d   d-MMM-y  MMM d
-// M/d/y   M-d-y      M.d.y     MMM-d     M/d      M-d
-// d/M/y   d-M-y      d.M.y     d-MMM     d/M      d-M
-// A second argument may be passed to instruct the method to search
-// for formats like d/M/y (european format) before M/d/y (American).
-// Returns a Date object or null if no patterns match.
-// ------------------------------------------------------------------
-function parseArray(val, listTocheck) {
+/**
+ * parses an array of different formats
+ * @param {string} val date string to parse
+ * @param {Array.<string>} listTocheck a list of strings with different formats to check
+ * @returns {Date|null} a Date object or **null** if no patterns match.
+ */
+function _parseArray(val, listTocheck) {
     for (let i = 0, n = listTocheck.length; i < n; i++) {
         const res = getDateFromFormat(val, listTocheck[i]);
         if (res !== null) {
@@ -1198,14 +1209,32 @@ function parseArray(val, listTocheck) {
     return null;
 }
 
+/**
+ * This function takes a date string and tries to match it to a
+ * number of possible date formats to get the value. It will try to
+ * match against the following international formats, in this order:
+ * y-M-d   MMM d, y   MMM d,y   y-MMM-d   d-MMM-y  MMM d
+ * M/d/y   M-d-y      M.d.y     MMM-d     M/d      M-d
+ * d/M/y   d-M-y      d.M.y     d-MMM     d/M      d-M
+ * @param {string} val date string to parse
+ * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (european format) before M/d/y (American).
+ * @returns {Date|null} a Date object or **null** if no patterns match.
+ */
 function parseDate(val, preferEuro) {
-    let res = parseArray(val, dateFormat.parseDates.general);
+    let res = _parseArray(val, dateFormat.parseDates.general);
     if (res !== null) { return res; }
-    res = parseArray(val, (preferEuro) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
+    res = _parseArray(val, (preferEuro) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
     if (res !== null) { return res; }
-    return parseArray(val, (preferEuro) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
+    return _parseArray(val, (preferEuro) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
 }
 
+/**
+ * This function takes a date and time string and tries to match it to a
+ * number of possible date formats to get the value.
+ * @param {string} val date string to parse
+ * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (european format) before M/d/y (American).
+ * @returns {Date|null} a Date object or **null** if no patterns match.
+ */
 function parseDateTime(val, preferEuro) {
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
@@ -1225,10 +1254,19 @@ function parseDateTime(val, preferEuro) {
         checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
         checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
     }
-    return parseArray(val, checkList);
+    return _parseArray(val, checkList);
 }
 
-function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, offset, multiplier) {
+/**
+ * parses a date string to given format definition
+ * @param {string} val date string to parse
+ * @param {number|string} format Format definition, if it is a number a predefined format will be try
+ * @param {Array.<string>} [dayNames] list of day names
+ * @param {Array.<string>} [monthNames] list ofmonth names
+ * @param {Array.<string>} [dayDiffNames] listof day diffnames
+ * @returns {Date|null} a Date object or **null** if no patterns match.
+ */
+function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     console.debug('parseDateFromFormat ' + util.inspect(date) + ' - ' + util.inspect(format) + 'dayNames'); // eslint-disable-line
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
@@ -1245,7 +1283,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, o
     format = format || 0;
 
     if (isNaN(format)) { // timeparse_TextOther
-        return addOffset(getDateFromFormat(date, format), offset, multiplier);
+        return getDateFromFormat(date, format);
     }
 
     const tryparse = (val, preferEuro) => {
@@ -1255,25 +1293,26 @@ console.debug('tryparse ' + util.inspect(preferEuro)); // eslint-disable-line
             res = parseDate(val, preferEuro);
         }
         if (res === null) {
-            res = parseArray(val, dateFormat.parseTimes);
+            res = _parseArray(val, dateFormat.parseTimes);
         }
         return res;
     };
 
     switch (Number(format)) {
         case 0: // UNIX Timestamp
-            return addOffset(new Date(Number(date)), offset, multiplier);
+            return new Date(Number(date));
         case 1: // timeparse_ECMA262
-            return addOffset(Date.parse(date), offset, multiplier);
+            return Date.parse(date);
         case 2: // various - try different Formats, prefere european formats
-            return addOffset(tryparse(date, true), offset, multiplier);
+            return tryparse(date, true);
         case 3: // various - try different Formats, prefere american formats
-            return addOffset(tryparse(date, false), offset, multiplier);
+            return tryparse(date, false);
         case 4: // timeformat_YYYYMMDDHHMMSS
-            return addOffset(parseComperableDateFormat(date), offset, multiplier);
+            return parseComperableDateFormat(date);
         case 5: // timeformat_YYYYMMDD_HHMMSS
-            return addOffset(parseComperableDateFormat2(date), offset, multiplier);
-        default:
-            return getDateOfText(date, offset, multiplier);
+            return parseComperableDateFormat2(date);
+        default: {
+            return getDateOfText(date);
+        }
     }
 }

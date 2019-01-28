@@ -37,7 +37,7 @@ module.exports = function (RED) {
                     const rule = this.rules[i];
                     const low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     const high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
-                    const chk = hlp.compareAzimuth(ports[0].payload.azimuth, low, high);
+                    const chk = hlp.checkLimits(ports[0].payload.azimuth, low, high);
                     const chg = (node.azimuthPos[i] !== chk);
                     ports[0].payload.pos.push(chk);
                     ports[0].payload.posChanged = ports[0].payload.posChanged && chg;

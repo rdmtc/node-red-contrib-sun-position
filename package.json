@@ -82,7 +82,8 @@
   "devDependencies": {
     "camo-purge": "^1.0.2",
     "eslint": "^5.12.0",
-    "eslint-plugin-html": "^5.0.0"
+    "eslint-plugin-html": "^5.0.0",
+    "eslint-plugin-jsdoc": "^4.1.0"
   },
   "eslintConfig": {
     "env": {
@@ -93,7 +94,8 @@
       "jquery": true
     },
     "plugins": [
-      "html"
+      "html",
+      "jsdoc"
     ],
     "extends": "eslint:recommended",
     "settings": {
@@ -143,9 +145,9 @@
       "eqeqeq": "error",
       "no-else-return": "error",
       "prefer-arrow-callback": "error",
-      "no-console": "off",
+      "no-console": "warn",
       "no-unused-vars": [
-        "warn",
+        "error",
         {
           "args": "after-used",
           "argsIgnorePattern": "^_"
@@ -157,7 +159,7 @@
       "no-multiple-empty-lines": [
         "error",
         {
-          "max": 1,
+          "max": 2,
           "maxEOF": 1
         }
       ],

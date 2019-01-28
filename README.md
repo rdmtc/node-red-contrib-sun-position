@@ -364,7 +364,7 @@ A enhanced node for time format change and time comparision.
 
 ![time-comp](images/time-comp-example.png?raw=true)
 
-This node is in development and has a pre release state!!
+**This node is in development and has a pre release state!!**
 
 ```
 [{"id":"1a6b5f99.4c928","type":"time-comp","z":"4e9a710a.bf0b9","outputs":1,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":120,"wires":[["fd45b2d2.eba89"]]},{"id":"fd45b2d2.eba89","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":120,"wires":[]},{"id":"f390b758.7dd9b8","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":120,"wires":[["1a6b5f99.4c928"]]},{"id":"b87a5c79.d4ce3","type":"comment","z":"4e9a710a.bf0b9","name":"change Unix Timestamp to ISO","info":"","x":210,"y":80,"wires":[]},{"id":"20afdf5d.4cd8d","type":"comment","z":"4e9a710a.bf0b9","name":"compare Time","info":"","x":150,"y":180,"wires":[]},{"id":"3d8ee66c.7c86ea","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":240,"wires":[["f19f0fd9.8ad1d"]]},{"id":"f19f0fd9.8ad1d","type":"time-comp","z":"4e9a710a.bf0b9","outputs":3,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[{"operator":"5","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"12:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""},{"operator":"3","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"15:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""}],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":240,"wires":[["723d7d7c.e7a874"],["44ac03f7.fd68fc"],["4d8512cd.73c90c"]]},{"id":"723d7d7c.e7a874","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":220,"wires":[]},{"id":"44ac03f7.fd68fc","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":260,"wires":[]},{"id":"4d8512cd.73c90c","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":300,"wires":[]},{"id":"d9e9ca6a.952218","type":"position-config","z":0,"name":"Entenhausen","longitude":"13.72324","latitude":"51.12381","angleType":"deg"}]
@@ -380,7 +380,7 @@ A simple node that routes messages depending on the time. If the current time fa
 - **Input** defines the input parameter for the time stamp
   - **parse format** defines the format for the input parameter, more information see [input parse formats](#input-parse-formats).
   - **Offset** allows to define a positive or negative offset to the given **Input Time**.
-- **compare with** here can be defined various definitions of times to which the input time shopuld be compared.
+- **compare with** here can be defined various definitions of times to which the input time should be compared.
   - **operator** Drop down to define operator
   - **compare type** allows to define whoat parts of the timestring shoudl be compared. Default is a comparision of the complete timestamp. But it is possible to only compare a pat like the only the year.
   - **time** defines where the time to which should be compared comes from
@@ -388,6 +388,38 @@ A simple node that routes messages depending on the time. If the current time fa
   - **Offset** allows to define a positive or negative offset to the given time.
   - **limitation** here it is possible to additionally define a parameter. if defined this comparision will only be made if this parameter has the value "true".
 - **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
+
+### time-span
+
+A enhanced node for time span calculation and time span comparision.
+
+![time-span](images/time-span-example.png?raw=true)
+
+**This node is in development and has a pre release state!!**
+
+```
+
+```
+
+#### Node settings
+
+A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.
+
+![time-span](images/time-span-settings.png?raw=true)
+
+- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+- **Input 1** defines the first input parameter for the time span calculation
+  - **parse format** defines the format for the first input parameter, more information see [input parse formats](#input-parse-formats).
+  - **Offset** allows to define a positive or negative offset to the given **Input 1 Time**.
+- **Input 2** defines the second input parameter for the time span calculation
+  - **parse format** defines the format for the second input parameter, more information see [input parse formats](#input-parse-formats).
+  - **Offset** allows to define a positive or negative offset to the given **Input 2 Time**.
+- **compare with** here can be defined various time spams to which the time span between timestamp of input 1 and input 2 should be compared.
+  - **operator** Drop down to define operator for comparision
+  - **time** defines a number where the time to which should be compared comes from
+  - **time type** allows to define a positive or negative offset to the given time.
+- **result** allows to write the timestamp or one of the Input times to a parameter in a different format. Without defining any **compare with**, the node allows by only defining inputs and result parameter a simply timespan calculation.
+
 
 ### Times definitions
 

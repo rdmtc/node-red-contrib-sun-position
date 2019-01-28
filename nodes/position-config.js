@@ -186,11 +186,13 @@ module.exports = function (RED) {
                     if (vType === '' || vType === 'none' || days === '') {
                         // nix
                     } else if (vType === 'date') {
-                        result.value = hlp.calcTimeValue(now, offset, multiplier);
+                        result.value = hlp.normalizeDate(now, offset, multiplier);
                         result.fix = true;
                     } else if (vType === 'entered') {
-                        result.value = hlp.getTimeOfText(String(value), offset, multiplier, next, days, now);
-                        // node.debug(String(value) + '  --  ' + result.value);
+                        result.value = hlp.getTimeOfText(String(value), now);
+                        if (result.value !== null) {
+                            result.value = hlp.normalizeDate(result.value, offset, multiplier, next, days);
+                        }
                         result.fix = true;
                     } else if (vType === 'pdsTime') {
                         // sun
@@ -205,7 +207,8 @@ module.exports = function (RED) {
                         result.fix = (vType === 'json'); // is not a fixed time if can be changed
                         const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                         if (res) {
-                            result.value = hlp.getDateOfText(res, offset, multiplier, next, days);
+                            result.value = hlp.getDateOfText(res);
+                            result.value = hlp.normalizeDate(result.value, offset, multiplier, next, days);
                             // node.debug(String(res) + '  --  ' + result.value);
                         } else {
                             result.error = 'could not evaluate ' + vType + '.' + value;

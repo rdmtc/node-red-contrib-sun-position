@@ -39,6 +39,15 @@
       </select>
   </div>
   <hr>
+  <div class="form-row time-span-row-operator">
+    <label for="node-input-operator"><i class="fa fa-arrows-h"></i> <span data-i18n="time-span.label.operator"></span></label>
+    <select id="node-input-operator">
+        <option value="0" data-i18n="within-time-switch.calcOperator.0"></option>
+        <option value="1" data-i18n="within-time-switch.calcOperator.1"></option>
+        <option value="2" data-i18n="within-time-switch.calcOperator.2"></option>
+    </select>
+  </div>
+  <hr>
   <div>
     <label for="node-input-rule-container-row"><i class="fa fa-spanulator"></i> <span data-i18n="time-span.label.operatorContainer"></span></label>
     <div class="form-row node-input-rule-container-row">
@@ -66,7 +75,7 @@
     <label for="node-input-result1TSFormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
     <select style="width:70%" id="node-input-result1TSFormatSel">
     </select>
-    <input type="text" id="node-input-result1TSFormat" style="width:50%; margin-left: 5px;">
+    <input type="text" id="node-input-result1TSFormat" class="form-row time-input-result1TSFormat hidden" style="width:50%; margin-left: 5px;">
 </div>
   <div class="form-row time-span-row-result1Format hidden">
       <label for="node-input-result1FormatSel"><i class="fa fa-calendar"></i> <span data-i18n="time-span.label.result1Format"></span></label>
@@ -304,7 +313,7 @@
             // #endregion operand1
             // #region operand2
             operand2: {
-                value: 'payload',
+                value: '',
                 validate: RED.validators.typedInput('inputType')
             },
             operand2Type: {
@@ -328,13 +337,21 @@
                 validate: RED.validators.number()
             },
             // #endregion operand2
+            // #region operator
+            operator: {
+                value: 0,
+                required: true,
+                validate: RED.validators.number()
+            },
+            // #endregion operator
             // #region rules
             rules: {
                 value: [{
                     operator: 1,
                     operatorText: '==',
                     operandType: 'num',
-                    operandValue: ''
+                    operandValue: '',
+                    multiplier: 60000
                 }]
             },
             checkall: {
@@ -463,7 +480,7 @@
                     {id: 15, group: 'timeround', name: 'days', label: 'days'},
                     {id: 16, group: 'timeround', name: 'month', label: 'month'},
                     {id: 17, group: 'timeround', name: 'years', label: 'years'},
-                    {id: 20, group: 'string', name: 'Other', label: 'Other'}
+                    {id: 99, group: 'string', name: 'Other', label: 'Other'}
                 ], outputFormatsGroups: [
                     {id: 'number', label: 'Number'},
                     {id: 'string', label: 'Text (string)'},
@@ -753,7 +770,7 @@
                 });
             }
 
-            function appendOptions(parent, elementName) {
+            function appendOptions(parent, elementName, limit) {
                 const groups = SelectFields[elementName + 'Groups'];
                 const elements = SelectFields[elementName];
                 const groupLength = groups.length;
@@ -761,7 +778,7 @@
                 for (let gIndex = 0; gIndex < groupLength; gIndex++) {
                     const group = $('<optgroup/>', {label: node._('time-span.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
                     for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-                        if (groups[gIndex].id === elements[eIndex].group) {
+                        if (groups[gIndex].id === elements[eIndex].group && (!limit || limit(elements[eIndex].id))) {
                             group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-span.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                         }
                     }
@@ -874,10 +891,13 @@
                 const newWidth = rule.width() - 10;
                 // const operatorField = rule.find('.node-input-rule-operator');
                 const operandField = rule.find('.node-input-rule-operand');
+                const multipierField = rule.find('.node-input-rule-multipier');
                 const lblWidth = 25;
                 // row1
                 const operatorWidth = 60;
-                operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
+                const multiplierWidth = 100;
+                multipierField.width(multiplierWidth);
+                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 50));
             }
 
             $('#node-input-rule-container').css('min-height', '250px').css('min-width', '300px').editableList({
@@ -901,6 +921,11 @@
                         default: 'num',
                         types: ['msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata']
                     });
+                    const multiplierField = $('<select/>', {
+                        class: 'node-input-rule-multiplier',
+                        id: 'node-input-rule-multiplier' + containerIndex
+                    }).appendTo(row);
+                    appendOptions(multiplierField, 'multiplier', (id) => (id > 0) );
                     const finalspan = $('<span/>', {
                         style: 'float: right; margin-top: 6px;'
                     }).appendTo(row);
@@ -910,6 +935,7 @@
                     operatorField.val(data.operator || SelectFields.operators[0].id);
                     operandField.typedInput('type', data.operandType || 'num');
                     operandField.typedInput('value', data.operandValue || '');
+                    multiplierField.val(data.multiplier || SelectFields.multiplier[0].id);
                     resizeRule(containerRow);
                 },
                 sortItems(rules) {
@@ -961,37 +987,37 @@
                     typeMoonCalc]
             });
             $('#node-input-result1').on('change', (_type, _value) => {
-                $('.time-span-row-result1Format').hide();
-                $('.time-span-row-result1TSFormat').hide();
+                console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
                 if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
                     $('.time-result1Value').show();
                     const plVType = $('#node-input-result1Value').typedInput('type');
+                    console.log('plVType= ' + plVType); // eslint-disable-line
+
                     if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
                         $('.time-span-row-result1Offset').show();
-                        $('.time-span-row-result1TSFormatSel').hide();
-                        $('.time-span-row-result1FormatSel').show();
-                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Format').show();
                     } else if (plVType === 'timespan') {
                         $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1FormatSel').hide();
-                        $('.time-span-row-result1TSFormatSel').show();
-                        $('.time-span-row-result1TSFormatSel').change(); // show '.time-span-row-result1Format'
+                        $('.time-span-row-result1Format').hide();
+                        $('.time-span-row-result1TSFormat').show();
                     } else if (plVType === 'operand1' || plVType === 'operand2') {
                         $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1TSFormatSel').hide();
-                        $('.time-span-row-result1FormatSel').show();
-                        $('.time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Format').show();
                     } else {
                         $('.time-span-row-result1Offset').hide();
-                        $('.time-span-row-result1TSFormatSel').hide();
-                        $('.time-span-row-result1FormatSel').hide();
+                        $('.time-span-row-result1TSFormat').hide();
+                        $('.time-span-row-result1Format').hide();
                     }
                 } else {
                     $('.time-result1Value').hide();
                     $('.time-span-row-result1Offset').hide();
-                    $('.time-span-row-result1TSFormatSel').hide();
-                    $('.time-span-row-result1FormatSel').hide();
+                    $('.time-span-row-result1TSFormat').hide();
+                    $('.time-span-row-result1Format').hide();
                 }
+                $('#time-span-row-result1FormatSel').change(); // show '.time-span-row-result1Format'
+                $('#time-span-row-result1TSFormatSel').change(); // show '.time-span-row-result1Format'
             });
             $('#node-input-result1Value').on('change', (_type, _value) => {
                 $('#node-input-result1').change();
@@ -1002,6 +1028,9 @@
             resultTSFormatSelField.on('change', (_type, _value) => {
                 const resultTSFormatIpField = $('#node-input-result1TSFormat');
                 const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
+
+                console.log('node-input-resultTSFormatSelField change ' + resultTSFormatSelField.val() + ' - ' + resultTSFormatIpField.val()); // eslint-disable-line
+
                 if (Number(resultTSFormatSelField.val()) === 99) {
                     resultTSFormatIpField.show();
                     resultTSFormatIpField.css({width: '40%'});
@@ -1014,7 +1043,8 @@
                     resultTSFormatSelField.css({width: '70%'});
                 }
             });
-
+            // resultTSFormatSelField.change(); - triggered by $('#node-input-result1').change();
+            /********************************************************/
             const resultFormatSelField = $('#node-input-result1FormatSel');
             appendOptions(resultFormatSelField, 'outputFormats');
             resultFormatSelField.on('change', (_type, _value) => {
@@ -1037,14 +1067,14 @@
             } else {
                 resultFormatSelField.val(Number(node.result1Format));
             }
-
-            resultFormatSelField.change();
+            // resultFormatSelField.change(); - triggered by $('#node-input-result1').change();
             const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
             appendOptions(resultMultiplierField, 'multiplier');
             resultMultiplierField.val(node.result1OffsetMultiplier);
             autocomplete($('#node-input-result1TSFormat'), dateOutTSFormat);
             autocomplete($('#node-input-result1Format'), dateOutFormat);
             // #endregion result1
+            /********************************************************/
             $('#node-input-time').change();
             $('#node-input-payload').change();
             $('#node-input-operand1').change();
@@ -1070,7 +1100,8 @@
                     operator: rule.find('.node-input-rule-operator').val(),
                     operatorText: rule.find('.node-input-rule-operator').children(':selected').text(),
                     operandType: rule.find('.node-input-rule-operand').typedInput('type'),
-                    operandValue: rule.find('.node-input-rule-operand').typedInput('value')
+                    operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
+                    multiplier: rule.find('.node-input-rule-multipier').val()
                 };
                 node.rules.push(data);
             });
