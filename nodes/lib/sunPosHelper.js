@@ -809,6 +809,9 @@ function getTimeDiff(time1, time2, limit) {
     return millis;
 }
 
+function getFormatedTimeSpanOut(timeSpan, format) {
+
+}
 /**
  * pre defined formates of a given date
  * @param  {Date}            date            -  Javascript Date to format

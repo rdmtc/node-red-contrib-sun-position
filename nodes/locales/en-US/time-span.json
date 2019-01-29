@@ -120,8 +120,8 @@
         ],
         "outputTSFormatsGroups": [
             "timestamp  (number)",
-            "timestamp rounded  (number)",
-            "Text "
+            "timestamp rounded (number)",
+            "Text"
         ],
         "outputTSFormats": [
             "milliseconds",
@@ -129,12 +129,14 @@
             "minutes",
             "hours",
             "days",
+            "weeks",
             "month",
             "years",
             "seconds",
             "minutes",
             "hours",
             "days",
+            "weeks",
             "month",
             "years",
             "Other (free defined)"

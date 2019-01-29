@@ -45,7 +45,7 @@ module.exports = function (RED) {
         if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                return hlp.getFormatedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                 /*
                 format = format || 0;
                 if (isNaN(format)) {

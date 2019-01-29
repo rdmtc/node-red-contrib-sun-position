@@ -18,8 +18,7 @@ module.exports = function (RED) {
             return Date.now();
         }
 
-        if (
-            type === 'entered' ||
+        if (type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
             type === 'date'
@@ -70,22 +69,14 @@ module.exports = function (RED) {
             return node.positionConfig.getMoonCalc(msg.ts);
         }
 
-        if (
-            type === 'entered' ||
+        if (type === 'entered' ||
             type === 'pdsTime' ||
             type === 'pdmTime' ||
             type === 'date'
         ) {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
-                return hlp.getFormatedDateOut(
-                    data.value,
-                    format,
-                    false,
-                    RED._('time-inject.days'),
-                    RED._('time-inject.month'),
-                    RED._('time-inject.dayDiffNames')
-                );
+                return hlp.getFormatedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
             }
 
             return data;
@@ -117,7 +108,7 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
                     if (config.result1Type === 'input') {
-                        resObj = hlp.getFormatedDateOut(inputData, config.result1Format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormatedDateOut(inputData, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
                         resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }
