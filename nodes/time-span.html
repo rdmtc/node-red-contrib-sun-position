@@ -366,7 +366,6 @@
         },
         outputLabels(index) {
             if (this.rules.length) {
-                console.log(this.rules);
                 const rule = this.rules[index];
                 if (rule) {
                     return rule.operatorText + ' ' + getValueLabel(rule.operandType, rule.operandValue);
@@ -753,7 +752,7 @@
                 typeField: $('#node-input-operand1Type'),
                 types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
-            $("#node-input-operand1").typedInput('width', 'calc(100% - 110px)');
+            $('#node-input-operand1').typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand1').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand1').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
@@ -803,7 +802,7 @@
                 typeField: $('#node-input-operand2Type'),
                 types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
             });
-            $("#node-input-operand2").typedInput('width', 'calc(100% - 110px)');
+            $('#node-input-operand2').typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand2').on('change', (_type, _value) => {
                 const opType = $('#node-input-operand2').typedInput('type');
                 if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
@@ -922,7 +921,7 @@
                 typeField: $('#node-input-result1Type'),
                 types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global']
             });
-            $("#node-input-result1").typedInput('width', 'calc(100% - 110px)');
+            $('#node-input-result1').typedInput('width', 'calc(100% - 110px)');
             $('#node-input-result1ValueType').val(node.result1ValueType);
             $('#node-input-result1Value').typedInput({
                 default: node.result1ValueType || 'timespan',
@@ -947,7 +946,7 @@
                     typeSunCalc,
                     typeMoonCalc]
             });
-            $("#node-input-result1Value").typedInput('width', 'calc(100% - 120px)');
+            $('#node-input-result1Value').typedInput('width', 'calc(100% - 120px)');
             $('#node-input-result1').on('change', (_type, _value) => {
                 console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
                 if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
@@ -1038,9 +1037,7 @@
             autocomplete($('#node-input-result1Format'), dateOutFormat);
             // #endregion result1
             // #region spinner
-                $('.wg-offset-spinner').spinner({
-                max: 1439,
-                min: -1439});
+            $('.wg-offset-spinner').spinner({max: 1439,min: -1439});
             // #endregion spinner
 
             $('#node-input-time').change();

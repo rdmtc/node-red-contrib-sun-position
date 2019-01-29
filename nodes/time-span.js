@@ -7,6 +7,7 @@ const util = require('util');
 const path = require('path');
 
 const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
+const def = require(path.join(__dirname, '/lib/genericDefinitions.js'));
 // const cron = require("cron");
 
 module.exports = function (RED) {
@@ -285,12 +286,15 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
 
     RED.nodes.registerType('time-span', timeCalcNode);
 
-    /*
-      RED.httpAdmin.get('/sun-position/js/*', function(req,res) {
-          var options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-          };
-          res.sendFile(req.params[0], options);
-      });/* */
+    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
+        if (req.params[0] === 'definitions') {
+            res.json(def);
+        } else {
+            const options = {
+                root: __dirname + '/static/',
+                dotfiles: 'deny'
+            };
+            res.sendFile(req.params[0], options);
+        }
+    });
 };
