@@ -6,9 +6,7 @@
 const util = require('util');
 const path = require('path');
 
-const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
-
-// const cron = require("cron");
+const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
@@ -111,9 +109,9 @@ module.exports = function (RED) {
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
-    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, days) {
+    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, multiplier, days) {
         if (type !== 'none' && name) {
-            const res = tsGetPropData(node, msg, valueType, value, format, offset, days);
+            const res = tsGetPropData(node, msg, valueType, value, format, offset, multiplier, days);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
@@ -322,7 +320,7 @@ module.exports = function (RED) {
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
 
-                const value = tsGetPropData(this, msg, config.payloadType, config.payload);
+                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, config.payloadOffset, config.payloadOffsetMultiplier);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -331,9 +329,9 @@ module.exports = function (RED) {
                     msg.payload = value;
                 }
 
-                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1Days);
-                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2Days);
-                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3Days);
+                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1OffsetMultiplier, config.addPayload1Days);
+                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2OffsetMultiplier, config.addPayload2Days);
+                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3OffsetMultiplier, config.addPayload3Days);
 
                 node.send(msg);
             } catch (err) {

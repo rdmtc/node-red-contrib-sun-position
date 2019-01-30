@@ -142,10 +142,6 @@
         width: 125px;
         margin-left: 5px;
     }
-    .multiselect {
-        width: 60px;
-        display: inline-block;
-    }
 </style>
 <script type="text/x-red" data-help-name="time-comp"> <p>A enhanced node for time format change and time comparision.</p>
     <h3>Input</h3>
@@ -880,7 +876,7 @@
                         type: 'text'
                     }).appendTo(row).typedInput({
                         default: 'num',
-                        types: ['msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata']
+                        types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
                     });
                     const multiplierField = $('<select/>', {
                         class: 'node-input-rule-multiplier',

@@ -6,8 +6,7 @@ const util = require('util');
 
 const path = require('path');
 
-const hlp = require(path.join(__dirname, '/lib/sunPosHelper.js'));
-// const cron = require("cron");
+const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
