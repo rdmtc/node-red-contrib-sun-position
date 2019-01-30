@@ -8,6 +8,8 @@ module.exports = {
     isTrue,
     isFalse,
     handleError,
+    isLeapYear,
+    days_of_a_year,
     getComperableDateFormat,
     parseComperableDateFormat,
     getComperableDateFormat2,
@@ -58,6 +60,24 @@ function isFalse(val) {
     val = (val+'').toLowerCase();
     return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
 }
+/*******************************************************************************************************/
+/**
+ * get the number of days in a year
+ * @param {number} year year to get info
+ * @returns {number} number of days in given year
+ */
+function days_of_a_year(year) {
+    return isLeapYear(year) ? 366 : 365;
+  }
+
+/**
+ * indicates if a year is a leap year
+ * @param {*} year year to check
+ * @returns {bool} *true* if the given year is a leap year
+ */
+function isLeapYear(year) {
+       return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0);
+  }
 /*******************************************************************************************************/
 /**
  * gives a ID of a node
