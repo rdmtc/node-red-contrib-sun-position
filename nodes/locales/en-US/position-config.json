@@ -33,6 +33,17 @@
             "failed": "inject failed, see log for details",
             "failed2": "Inject failed: __error__",
             "toolong": "Interval too large"
-        }
+        },
+        "days": [
+            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+        ],
+        "month": [
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        "dayDiffNames": [
+            "1 week ago", "6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today", "Tomorrow", "day after tomorrow", "in 3 days", "in 4 days", "in 5 days", "in 6 days"
+        ]
     }
 }

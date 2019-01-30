@@ -10,6 +10,8 @@ module.exports = {
     handleError,
     isLeapYear,
     days_of_a_year,
+    getFirstDayOfMonth,
+    getLastDayOfMonth,
     getComperableDateFormat,
     parseComperableDateFormat,
     getComperableDateFormat2,
@@ -39,7 +41,7 @@ module.exports = {
 } */
 
 /*******************************************************************************************************/
-/* exported functions                                                                                  */
+/* simple functions                                                                                    */
 /*******************************************************************************************************/
 /**
  * returns **true** if the parameter value is a valid boolean value for **true**
@@ -90,6 +92,31 @@ function getNodeId(node) {
 }
 /*******************************************************************************************************/
 /**
+ * cratetes a string with two digets
+ * @param {number} n number to format
+ * @returns {string} number with minimum two digets
+ */
+function pad2(n) { // always returns a string
+    return (n < 0 || n > 9 ? '' : '0') + n;
+}
+/*******************************************************************************************************/
+/**
+ * gets a comparable date Format
+ * @param {Date} date - Date to format
+ * @return {string} number in Format YYYYMMDDHHMMSS
+ */
+function getComperableDateFormat(date) {
+    return Number(date.getFullYear() +
+        pad2(date.getMonth() + 1) +
+        pad2(date.getDate()) +
+        pad2(date.getHours()) +
+        pad2(date.getMinutes()) +
+        pad2(date.getSeconds()));
+}
+/*******************************************************************************************************/
+/* Node-Red Helper functions                                                                           */
+/*******************************************************************************************************/
+/**
  * generic function for handle a error in a node
  * @param {any} node the node where the error occurs
  * @param {String} messageText the message text
@@ -123,30 +150,41 @@ function handleError(node, messageText, err, stateText) {
         /* eslint-enable no-console */
     }
 }
+
 /*******************************************************************************************************/
 /**
- * cratetes a string with two digets
- * @param {number} n number to format
- * @returns {string} number with minimum two digets
+ * get a date for the first day of week in the given month
+ * @param {number} year year to check
+ * @param {number} month month to check
+ * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monda ... 6 saturday
+ * @returns {Date} first day of given month
  */
-function pad2(n) { // always returns a string
-    return (n < 0 || n > 9 ? '' : '0') + n;
+function getFirstDayOfMonth(year, month, dayOfWeek) {
+    const d = new Date(year, month, 1);
+    dayOfWeek = dayOfWeek || 1; // monday
+    while (d.getDay() !== dayOfWeek) {
+        d.setDate(d.getDate() + 1);
+    }
+    return d;
 }
 
 /**
- * gets a comparable date Format
- * @param {Date} date - Date to format
- * @return {string} number in Format YYYYMMDDHHMMSS
+ * get a date for the last day of week in the given month
+ * @param {number} year year to check
+ * @param {number} month month to check
+ * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monda ... 6 saturday
+ * @returns {Date} last day of given month
  */
-function getComperableDateFormat(date) {
-    return Number(date.getFullYear() +
-        pad2(date.getMonth() + 1) +
-        pad2(date.getDate()) +
-        pad2(date.getHours()) +
-        pad2(date.getMinutes()) +
-        pad2(date.getSeconds()));
+function getLastDayOfMonth(year, month, dayOfWeek) {
+    const d = new Date(year, month+1, 0);
+    dayOfWeek = dayOfWeek || 1; // monday
+    while (d.getDay() !== dayOfWeek) {
+        d.setDate(d.getDate() - 1);
+    }
+    return d;
 }
-
+/*******************************************************************************************************/
+/* date-time functions                                                                                 */
 /*******************************************************************************************************/
 /**
  * gets a date from a comparable date Format

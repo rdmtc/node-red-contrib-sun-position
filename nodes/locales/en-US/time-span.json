@@ -14,7 +14,7 @@
             "operand2Format": "parse format",
             "operand2Offset": "Offset",
             "operator":"calculation",
-            "operatorContainer": "compare with",
+            "operatorContainer": "compare timespan between Inputs",
             "onlyif": "only if",
             "checkall": "stopping after first match (if)",
             "stopfirst": "checking all rules",
@@ -38,20 +38,16 @@
         "multiselectLbl": {
             "operatorTypes": "include into compare"
         },
-        "calcOperator": [
-            "Input 1 - Input 2",
-            "abs(Input 1 - Input 2)"
-        ],
         "operatorsGroups": [
             "complete Timestamp"
         ],
         "operators": [
-            "==  (equal)",
-            "!=  (unequal)",
-            ">   (greater)",
-            ">=  (greater or equal)",
-            "<   (lesser)",
-            "<=  (lesser or equal)"
+            "==     (equal)",
+            "!=     (unequal)",
+            ">      (greater)",
+            ">=     (greater or equal)",
+            "<      (lesser)",
+            "<=     (lesser or equal)"
         ],
         "operatorTypesGroups": [
             "include into compare",

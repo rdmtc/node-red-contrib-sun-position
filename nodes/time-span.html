@@ -37,14 +37,6 @@
       <select id="node-input-operand2OffsetMultiplier" class="node-input-multiplier"></select>
   </div>
   <hr>
-  <div class="form-row block-noindent time-row-operator">
-    <label for="node-input-operator"><i class="fa fa-dot-circle-o"></i> <span data-i18n="time-span.label.operator"></span></label>
-    <select id="node-input-operator" class="row-full-width">
-        <option value="0" data-i18n="time-span.calcOperator.0"></option>
-        <option value="10" data-i18n="time-span.calcOperator.1"></option>
-    </select>
-  </div>
-  <hr>
   <div>
     <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="time-span.label.operatorContainer"></span></label>
     <div class="form-row node-input-rule-container-row">
@@ -293,13 +285,6 @@
                 validate: RED.validators.number()
             },
             // #endregion operand2
-            // #region operator
-            operator: {
-                value: 0,
-                required: true,
-                validate: RED.validators.number()
-            },
-            // #endregion operator
             // #region rules
             rules: {
                 value: [{
@@ -383,16 +368,12 @@
                 const op1 = getValueLabel(this.operand1Type, this.operand1);
                 const op2 = getValueLabel(this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2;
-            }
-
-            if (this.rules && this.rules.length === 1) {
+            } else if (this.rules && this.rules.length === 1) {
                 const op1 = getValueLabel(this.operand1Type, this.operand1);
                 const op2 = getValueLabel(this.operand2Type, this.operand2);
                 const cmp = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
                 return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
-            }
-
-            if (this.rules && this.rules.length === 1) {
+            } else if (this.rules && this.rules.length > 1) {
                 const op1 = getValueLabel(this.operand1Type, this.operand1);
                 const op2 = getValueLabel(this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2 + + ' ' + this._('time-span.label.compare');
@@ -521,12 +502,26 @@
                 icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
                 hasValue: true
             };
-            /*
-            const typeTimePedefined = {
-                value: 'predefined',
-                label: 'time (current day)',
-                options: ['midnight (current day)', 'noon (current day)', 'last this month (0:00)']
-            }; */
+            const typeDayOfMonth = {
+                value: 'DayOfMonth',
+                label: 'day of month',
+                options: [
+                    'first Monday',
+                    'first Tuseday',
+                    'first Wednesday',
+                    'first Thursday',
+                    'first Friday',
+                    'first Saturday',
+                    'first Sunday',
+                    'last Monday',
+                    'last Tuseday',
+                    'last Wednesday',
+                    'last Thursday',
+                    'last Friday',
+                    'last Saturday',
+                    'last Sunday',
+                ]
+            };
             const typeTimeSun = {
                 value: 'pdsTime',
                 label: 'sun time ',
@@ -675,22 +670,6 @@
                     return sel.text.length - selLen;
                 }
             };
-            function addLabel(row, forEl, symb, text) {
-                const lbl = $('<label class="' + forEl + '-lbl"/>').attr('for', forEl).appendTo(row);
-                if (symb) {
-                    lbl.append('<i class= "' + symb + '" >');
-                }
-
-                if (text) {
-                    const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; */">' + text + '</span>');
-                    lbl.append(span);
-                    lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
-                } else {
-                    lbl.attr('style', 'margin-left: 5px; width:20px');
-                }
-
-                return lbl;
-            }
 
             function autocomplete(inputBox, dataList) {
             // don't navigate away from the field on tab when selecting an item
@@ -748,7 +727,7 @@
             $('#node-input-operand1').typedInput({
                 default: node.operand1Type || typeMsgPayload.value,
                 typeField: $('#node-input-operand1Type'),
-                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, typeDayOfMonth, 'env']
             });
             $('#node-input-operand1').typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand1').on('change', (_type, _value) => {
@@ -798,7 +777,7 @@
             $('#node-input-operand2').typedInput({
                 default: node.operand2Type || 'msg',
                 typeField: $('#node-input-operand2Type'),
-                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
+                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, typeDayOfMonth, 'env']
             });
             $('#node-input-operand2').typedInput('width', 'calc(100% - 110px)');
             $('#node-input-operand2').on('change', (_type, _value) => {
@@ -854,7 +833,7 @@
                 const operatorWidth = 60;
                 const multiplierWidth = 125;
                 multipierField.width(multiplierWidth);
-                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 40));
+                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 20));
             }
 
             $('#node-input-rule-container').css('min-height', '150px').css('min-width', '200px').editableList({
@@ -869,7 +848,6 @@
                     }).appendTo(row);
                     appendOptions(operatorField, 'operators');
 
-                    addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
                     const operandField = $('<input/>', {
                         class: 'node-input-rule-operand',
                         id: 'node-input-rule-operand' + containerIndex,

@@ -25,14 +25,21 @@
     "time",
     "timeswitch",
     "timerswitch",
+    "timerspan",
     "time-range",
     "time-range-switch",
     "timecheck",
+    "time-calc",
     "time-comp",
+    "time-compare",
+    "time-span",
     "time-offset",
     "compare",
     "clock",
-    "schedule"
+    "schedule",
+    "compare",
+    "calculate",
+    "redmatic"
   ],
   "main": "none",
   "engines": {

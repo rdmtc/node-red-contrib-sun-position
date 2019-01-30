@@ -174,6 +174,82 @@ module.exports = function (RED) {
                 return result;
             };
 
+            this.getDateProp = (srcNode, msg, vType, value, format, offset, multiplier, days) => {
+                if (vType === null || vType === 'none' || vType === '') {
+                    // nix
+                } else if (vType === 'date') {
+                    return hlp.addOffset(Date.now(), offset, multiplier);
+                } else if (vType === 'dayOfMonth') {
+                    let d = new Date();
+                    let day = 1;
+                    switch (value) {
+                        case 'first Monday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),1);
+                            break;
+                        case 'first Tuseday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),2);
+                            break;
+                        case 'first Wednesday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),3);
+                            break;
+                        case 'first Thursday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),4);
+                            break;
+                        case 'first Friday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),5);
+                            break;
+                        case 'first Saturday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),6);
+                            break;
+                        case 'first Sunday':
+                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),0);
+                            break;
+                        case 'last Monday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),1);
+                            break;
+                        case 'last Tuseday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),2);
+                            break;
+                        case 'last Wednesday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),3);
+                            break;
+                        case 'last Thursday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),4);
+                            break;
+                        case 'last Friday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),5);
+                            break;
+                        case 'last Saturday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),6);
+                            break;
+                        case 'last Sunday':
+                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),0);
+                            break;
+                    }
+                    return hlp.addOffset(d, offset, multiplier);
+                } else if (vType === 'pdsCalcData') {
+                    result = getSunCalc(msg.ts);
+                    result.value = hlp.addOffset(result.value, offset, multiplier);
+                } else if (vType === 'pdmCalcData') {
+                    result = getMoonCalc(msg.ts);
+                    result.value = hlp.addOffset(result.value, offset, multiplier);
+                } else {
+                    if (vType === 'entered') {
+                        result.value = value;
+                    if (vType === 'msgPayload') {
+                        result.value = msg.payload;
+                    } else if (vType === 'msgTs') {
+                        result.value = msg.ts;
+                    } else {
+                        // msg, flow, global, str, num, env
+                        result.value = RED.util.evaluateNodeProperty(value, vType, node, msg);
+                    }
+                    result.value = hlp.parseDateFromFormat(result.value, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    result.value = hlp.addOffset(result.value, offset, multiplier);
+                }
+                return result;
+            }
+
             this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
                 // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const now = new Date();

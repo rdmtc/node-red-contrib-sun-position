@@ -69,15 +69,16 @@ function formatTS(d1, d2, format) {
     const tm = Math.floor(timeSpan / perMinute);
     const tH = Math.floor(timeSpan / perHour);
     const td = Math.floor(timeSpan / perDay);
-    const w = Math.floor(timeSpan / perWeek);
-    const M = getMonthDiffAbs(d1, d2);
-    const y = getYearDiffAbs(d1, d2);
+    const tw = Math.floor(timeSpan / perWeek);
 
     const L = timeSpan % 1000;
     const s = Math.floor(timeSpan / perSecond) % 60;
     const m = Math.floor(timeSpan / perMinute) % 60;
     const H = Math.floor(timeSpan / perHour) % 24;
     const d = Math.floor(timeSpan / perDay) % 7;
+    const M = getMonthDiffAbs(d1, d2);
+    const tw = Math.floor(timeSpan / perWeek);
+    const y = getYearDiffAbs(d1, d2);
 
     const flags = {
         y,
@@ -182,7 +183,45 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             }
             return getYearDiffAbs(date1, date2);
     }
-    return null;
+    const timespan = date1.getTime() - date2.getTime();
+    return {
+        start : {
+            date: date1,
+            ts: date1.getTime(),
+            timeUTCStr: date1.toUTCString(),
+            timeISOStr: date1.toISOString(),
+            timeLocaleStr: date1.toLocaleString(),
+            timeLocaleTimeStr: date1.toLocaleTimeString(),
+        },
+        end: {
+            date: date2,
+            ts: date2.getTime(),
+            timeUTCStr: date2.toUTCString(),
+            timeISOStr: date2.toISOString(),
+            timeLocaleStr: date2.toLocaleString(),
+            timeLocaleTimeStr: date2.toLocaleTimeString(),
+        },
+        timeSpan: timespan,
+        timeSpanAbs: {
+            ms: timeSpan % 1000,
+            sec: Math.floor(timeSpan / perSecond) % 60,
+            min: timeSpan % 1000,
+            hours: Math.floor(timeSpan / perHour) % 24,
+            days: Math.floor(timeSpan / perDay) % 7,
+            month: getMonthDiffAbs(date1, date2),
+            years: getYearDiffAbs(date1, date2),
+        },
+        timeSpanRel: {
+            ms: timespan,
+            sec: (timeSpan / perSecond),
+            min: (timeSpan / perMinute),
+            hour: (timeSpan / perHour),
+            day: (timeSpan / perDay),
+            week: (timeSpan / perWeek),
+            month: getMonthDiff(date1, date2),
+            year:  getMonthDiff(date1, date2) / 12
+        }
+    };
 }
 
 module.exports = function (RED) {
@@ -212,6 +251,28 @@ module.exports = function (RED) {
     }
 
     function tsGetOperandData(node, msg, type, value, format, offset, multiplier) {
+        /*
+        const typeDayOfMonth = {
+            value: 'DayOfMonth',
+            label: 'day of month',
+            options: [
+                'first Monday',
+                'first Tuseday',
+                'first Wednesday',
+                'first Thursday',
+                'first Friday',
+                'first Saturday',
+                'first Sunday',
+                'last Monday',
+                'last Tuseday',
+                'last Wednesday',
+                'last Thursday',
+                'last Friday',
+                'last Saturday',
+                'last Sunday',
+            ]
+        }; */
+
         let result = {};
         if (type === null || type === 'none' || type === '') {
             return Date.now();
@@ -291,7 +352,6 @@ module.exports = function (RED) {
             node.debug('config ' + util.inspect(config)); // eslint-disable-line
             node.debug('on input - msg ' + util.inspect(msg)); // eslint-disable-line
             if (node.positionConfig === null ||
-                config.operator === null ||
                 config.operand1Type === null ||
                 config.operand2Type === null) {
                 node.status({
