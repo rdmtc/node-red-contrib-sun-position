@@ -174,7 +174,7 @@ module.exports = function (RED) {
                 return result;
             };
 
-            this.getDateProp = (srcNode, msg, vType, value, format, offset, multiplier, days) => {
+            this.getDateProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
                 if (vType === null || vType === 'none' || vType === '') {
                     // nix
                 } else if (vType === 'date') {
@@ -236,7 +236,7 @@ module.exports = function (RED) {
                 } else {
                     if (vType === 'entered') {
                         result.value = value;
-                    if (vType === 'msgPayload') {
+                    } else if (vType === 'msgPayload') {
                         result.value = msg.payload;
                     } else if (vType === 'msgTs') {
                         result.value = msg.ts;
@@ -248,7 +248,7 @@ module.exports = function (RED) {
                     result.value = hlp.addOffset(result.value, offset, multiplier);
                 }
                 return result;
-            }
+            };
 
             this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
                 // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
