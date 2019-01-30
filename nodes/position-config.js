@@ -175,13 +175,13 @@ module.exports = function (RED) {
             };
 
             this.getDateProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
+                let result = {};
                 if (vType === null || vType === 'none' || vType === '') {
                     // nix
                 } else if (vType === 'date') {
                     return hlp.addOffset(Date.now(), offset, multiplier);
                 } else if (vType === 'dayOfMonth') {
                     let d = new Date();
-                    let day = 1;
                     switch (value) {
                         case 'first Monday':
                             d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),1);
@@ -228,10 +228,10 @@ module.exports = function (RED) {
                     }
                     return hlp.addOffset(d, offset, multiplier);
                 } else if (vType === 'pdsCalcData') {
-                    result = getSunCalc(msg.ts);
+                    result = node.getSunCalc(msg.ts);
                     result.value = hlp.addOffset(result.value, offset, multiplier);
                 } else if (vType === 'pdmCalcData') {
-                    result = getMoonCalc(msg.ts);
+                    result = node.getMoonCalc(msg.ts);
                     result.value = hlp.addOffset(result.value, offset, multiplier);
                 } else {
                     if (vType === 'entered') {

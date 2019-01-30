@@ -15,7 +15,7 @@
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
 This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variations) and much more.
-Addidional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
+Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
 
 ![nodes](images/appearance1.png?raw=true)
 

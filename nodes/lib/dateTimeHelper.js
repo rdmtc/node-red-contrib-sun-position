@@ -45,7 +45,7 @@ module.exports = {
 /*******************************************************************************************************/
 /**
  * returns **true** if the parameter value is a valid boolean value for **true**
- * @param {*} val a parameter which should be checkd if  it is a valid true boolean
+ * @param {*} val a parameter which should be checked if  it is a valid true boolean
  * @returns {boolean} true if the parameter value is a valid boolean value for **true**
  */
 function isTrue(val) {
@@ -55,7 +55,7 @@ function isTrue(val) {
 
 /**
  * returns **true** if the parameter value is a valid boolean value for **false**
- * @param {*} val a parameter which should be checkd if  it is a valid false boolean
+ * @param {*} val a parameter which should be checked if  it is a valid false boolean
  * @returns {boolean} true if the parameter value is a valid boolean value for **false**
  */
 function isFalse(val) {
@@ -70,7 +70,7 @@ function isFalse(val) {
  */
 function days_of_a_year(year) {
     return isLeapYear(year) ? 366 : 365;
-  }
+}
 
 /**
  * indicates if a year is a leap year
@@ -78,8 +78,8 @@ function days_of_a_year(year) {
  * @returns {bool} *true* if the given year is a leap year
  */
 function isLeapYear(year) {
-       return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0);
-  }
+    return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0);
+}
 /*******************************************************************************************************/
 /**
  * gives a ID of a node
@@ -92,9 +92,9 @@ function getNodeId(node) {
 }
 /*******************************************************************************************************/
 /**
- * cratetes a string with two digets
+ * creates a string with two digits
  * @param {number} n number to format
- * @returns {string} number with minimum two digets
+ * @returns {string} number with minimum two digits
  */
 function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
@@ -156,7 +156,7 @@ function handleError(node, messageText, err, stateText) {
  * get a date for the first day of week in the given month
  * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monda ... 6 saturday
+ * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monday ... 6 saturday
  * @returns {Date} first day of given month
  */
 function getFirstDayOfMonth(year, month, dayOfWeek) {
@@ -172,7 +172,7 @@ function getFirstDayOfMonth(year, month, dayOfWeek) {
  * get a date for the last day of week in the given month
  * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monda ... 6 saturday
+ * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monday ... 6 saturday
  * @returns {Date} last day of given month
  */
 function getLastDayOfMonth(year, month, dayOfWeek) {
@@ -238,7 +238,7 @@ function parseComperableDateFormat2(date) {
 
 /*******************************************************************************************************/
 /**
- * converst the time part of a date into a comparable number
+ * convert the time part of a date into a comparable number
  * @param {Date} date  - date to convert
  * @return {number}   numeric representation of the time part of the date
  */
@@ -252,7 +252,7 @@ function getTimeNumber(date) {
  * @param {number} num number angle to compare
  * @param {number} low low limit
  * @param number*} high high limit
- * @return {bool}  **true** if the number is inside given limits, at least one limit must be valide, otherwise returns **false**
+ * @return {bool}  **true** if the number is inside given limits, at least one limit must be validate, otherwise returns **false**
  */
 function checkLimits(num, low, high) {
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low) && low >= 0) {
