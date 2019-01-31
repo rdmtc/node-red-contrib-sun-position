@@ -17,7 +17,8 @@
   </div>
   <div class="form-row time-row-inputOffset hidden">
       <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
-      <input id="node-input-inputOffset" class="wg-offset-spinner" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input type="hidden" id="node-input-inputOffsetType">
       <select style="width:100px" id="node-input-inputOffsetMultiplier">
       </select>
   </div>
@@ -53,7 +54,8 @@
   </div>
   <div class="form-row time-row-result1Offset hidden">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" class="wg-offset-spinner" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input type="hidden" id="node-input-result1OffsetType">
       <select style="width:100px" id="node-input-result1OffsetMultiplier">
       </select>
   </div>
@@ -257,12 +259,15 @@
             inputOffset: {
                 value: 0,
                 required: true,
-                validate: RED.validators.number()
+                validate: RED.validators.number() || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none'
+            },
+            inputOffsetType: {
+                value: 'none'
             },
             inputOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: RED.validators.number()
+                validate: RED.validators.number() || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none'
             },
             // #endregion input
             // #region rules
@@ -302,13 +307,16 @@
                 value: 0,
                 required: false,
                 validate(v) {
-                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none');
                 }
+            },
+            result1OffsetType: {
+                value: 'none'
             },
             result1OffsetMultiplier: {
                 value: 60000,
                 required: false,
-                validate: RED.validators.number()
+                validate: RED.validators.number() || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none'
             }
             // #endregion result1
         },
