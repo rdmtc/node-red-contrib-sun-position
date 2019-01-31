@@ -77,7 +77,6 @@ function formatTS(d1, d2, format) {
     const H = Math.floor(timeSpan / perHour) % 24;
     const d = Math.floor(timeSpan / perDay) % 7;
     const M = getMonthDiffAbs(d1, d2);
-    const tw = Math.floor(timeSpan / perWeek);
     const y = getYearDiffAbs(d1, d2);
 
     const flags = {
@@ -85,8 +84,8 @@ function formatTS(d1, d2, format) {
         yy: pad(y),
         M,
         MM:pad(M),
-        w,
-        ww:pad(w),
+        tw,
+        tww:pad(tw),
         d,
         dd: pad(d),
         td,
@@ -191,7 +190,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             timeUTCStr: date1.toUTCString(),
             timeISOStr: date1.toISOString(),
             timeLocaleStr: date1.toLocaleString(),
-            timeLocaleTimeStr: date1.toLocaleTimeString(),
+            timeLocaleTimeStr: date1.toLocaleTimeString()
         },
         end: {
             date: date2,
@@ -199,7 +198,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             timeUTCStr: date2.toUTCString(),
             timeISOStr: date2.toISOString(),
             timeLocaleStr: date2.toLocaleString(),
-            timeLocaleTimeStr: date2.toLocaleTimeString(),
+            timeLocaleTimeStr: date2.toLocaleTimeString()
         },
         timeSpan: timespan,
         timeSpanAbs: {
@@ -209,7 +208,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             hours: Math.floor(timeSpan / perHour) % 24,
             days: Math.floor(timeSpan / perDay) % 7,
             month: getMonthDiffAbs(date1, date2),
-            years: getYearDiffAbs(date1, date2),
+            years: getYearDiffAbs(date1, date2)
         },
         timeSpanRel: {
             ms: timespan,
@@ -479,7 +478,20 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
 
     RED.nodes.registerType('time-span', timeCalcNode);
 
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
+    RED.httpAdmin.get('/sun-position/js/*', (req,res) => {
+        const options = {
+            root: __dirname + '/static/',
+            dotfiles: 'deny'
+        };
+        res.sendFile(req.params[0], options);
+    });
+
+    /*
+    RED.httpAdmin.get('/sun-position/js/*', (_req, _res) => {
+        console.log('request file');
+        console.log(_req);
+        console.log(_res);
+        // SRED.auth.needsPermission('sun-position.read')
         // if (req.params[0] === 'definitions') {
         //    res.json(def);
         // } else {
@@ -487,7 +499,7 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
             root: __dirname + '/static/',
             dotfiles: 'deny'
         };
-        res.sendFile(req.params[0], options);
+        _res.sendFile(_req.params[0], options);
         // }
-    });
+    }); /* */
 };

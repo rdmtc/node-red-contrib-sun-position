@@ -395,7 +395,7 @@
             } else if (this.rules && this.rules.length > 1) {
                 const op1 = getValueLabel(this.operand1Type, this.operand1);
                 const op2 = getValueLabel(this.operand2Type, this.operand2);
-                return op1 + ' - ' + op2 + + ' ' + this._('time-span.label.compare');
+                return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
             }
             return this._('time-span.label.time-span');
         },
@@ -406,6 +406,7 @@
         align: 'left',
         oneditprepare() {
             const node = this;
+            /*
             // #region definition
             const SelectFields = {
                 operatorsGroups: [
@@ -668,451 +669,473 @@
                 {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'},
                 {label: 'x    Day difference', value: 'x'},
                 {label: 'xx   Day difference (name)', value: 'xx'}];
+            /* */
             // #endregion definitions
-            // #region functions
-            $.fn.getCursorPosition = function () {
-                const input = this.get(0);
-                if (!input) {
-                    return;
-                } // No (input) element found
+            const setup = function(node) {
+                /* global getOperator getMultiplier getTypes autocomplete appendOptions setupTInput */
 
-                if ('selectionStart' in input) {
-                    // Standard-compliant browsers
-                    return input.selectionStart;
-                }
-                if (document.selection) {
-                    // IE
-                    input.focus();
-                    const sel = document.selection.createRange();
-                    const selLen = document.selection.createRange().text.length;
-                    sel.moveStart('character', -input.value.length);
-                    return sel.text.length - selLen;
-                }
-            };
+                const types = getTypes();
+                /*
+                // #region functions
+                $.fn.getCursorPosition = function () {
+                    const input = this.get(0);
+                    if (!input) {
+                        return;
+                    } // No (input) element found
 
-            function autocomplete(inputBox, dataList) {
-            // don't navigate away from the field on tab when selecting an item
-                inputBox.on('keydown', function (event) {
-                    if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete('instance') && $(this).autocomplete('instance').menu.active) {
-                        event.preventDefault();
+                    if ('selectionStart' in input) {
+                        // Standard-compliant browsers
+                        return input.selectionStart;
                     }
-                }).autocomplete({
-                    minLength: 0,
-                    source(request, response) {
-                        if (inputBox.getCursorPosition() < request.term.length) {
-                            return;
+                    if (document.selection) {
+                        // IE
+                        input.focus();
+                        const sel = document.selection.createRange();
+                        const selLen = document.selection.createRange().text.length;
+                        sel.moveStart('character', -input.value.length);
+                        return sel.text.length - selLen;
+                    }
+                };
+
+                function autocomplete(inputBox, dataList) {
+                // don't navigate away from the field on tab when selecting an item
+                    inputBox.on('keydown', function (event) {
+                        if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete('instance') && $(this).autocomplete('instance').menu.active) {
+                            event.preventDefault();
                         }
+                    }).autocomplete({
+                        minLength: 0,
+                        source(request, response) {
+                            if (inputBox.getCursorPosition() < request.term.length) {
+                                return;
+                            }
 
-                        // delegate back to autocomplete, but extract the last term
-                        const term = request.term.split(/\W+/).pop();
-                        const result = dataList.filter(x => x.value.startsWith(term));
-                        response(result);
-                    },
-                    focus() {
-                        // prevent value inserted on focus
-                        return false;
-                    },
-                    select(event, ui) {
-                        const terms = this.value.split(/\W+/);
-                        // remove the current input
-                        terms.pop();
-                        // add the selected item
-                        terms.push(ui.item.value);
-                        // add placeholder to get the comma-and-space at the end
-                        terms.push('');
-                        this.value = terms.join(' ');
-                        return false;
-                    }
-                });
-            }
+                            // delegate back to autocomplete, but extract the last term
+                            const term = request.term.split(/\W+/).pop();
+                            const result = dataList.filter(x => x.value.startsWith(term));
+                            response(result);
+                        },
+                        focus() {
+                            // prevent value inserted on focus
+                            return false;
+                        },
+                        select(event, ui) {
+                            const terms = this.value.split(/\W+/);
+                            // remove the current input
+                            terms.pop();
+                            // add the selected item
+                            terms.push(ui.item.value);
+                            // add placeholder to get the comma-and-space at the end
+                            terms.push('');
+                            this.value = terms.join(' ');
+                            return false;
+                        }
+                    });
+                }
 
-            function appendOptions(parent, elementName, limit) {
-                const groups = SelectFields[elementName + 'Groups'];
-                const elements = SelectFields[elementName];
-                const groupLength = groups.length;
-                const elementsLength = elements.length;
-                for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    const group = $('<optgroup/>', {label: node._('time-span.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
-                    for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-                        if (groups[gIndex].id === elements[eIndex].group && (!limit || limit(elements[eIndex].id))) {
-                            group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-span.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                function appendOptions(node, parent, elementName, limit) {
+                    const groups = SelectFields[elementName + 'Groups'];
+                    const elements = SelectFields[elementName];
+                    const groupLength = groups.length;
+                    const elementsLength = elements.length;
+                    for (let gIndex = 0; gIndex < groupLength; gIndex++) {
+                        const group = $('<optgroup/>', {label: node._('time-span.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+                        for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
+                            if (groups[gIndex].id === elements[eIndex].group && (!limit || limit(elements[eIndex].id))) {
+                                group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-span.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                            }
                         }
                     }
                 }
-            }
 
-            function setupTInput(data) {
-                const tIField = $('#node-input-' + data.valueProp);
-                $('#node-input-' + data.typeProp).val(node[data.typeProp]);
-                tIField.typedInput({
-                    default: node[data.valueProp] || data.defaultType,
-                    typeField: $('#node-input-' + data.typeProp),
-                    types: data.types
-                });
-                if (data.onChange) {
-                    tIField.on('change', data.onChange);
-                }
-                if (data.width) {
-                    tIField.typedInput('width', '200px');
-                }
-                return tIField;
-            }
-            // #endregion functions
-            // #region operand1
-            setupTInput({
-                typeProp: 'operand1Type',
-                valueProp: 'operand1',
-                defaultType: typeMsgPayload.value,
-                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, typeDayOfMonth, 'env'],
-                onChange: (_type, _value) => {
-                    const opType = $('#node-input-operand1').typedInput('type');
-                    if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                        $('.time-row-operand1Format').hide();
-                        $('.time-row-operand1Offset').show();
-                    } else if (opType === typeDateEntered.value ||
-                                opType === 'msg' ||
-                                opType === typeMsgPayload.value ||
-                                opType === typeMsgTs.value ||
-                                opType === 'flow' ||
-                                opType === 'global' ||
-                                opType === 'str' ||
-                                opType === 'num' ||
-                                opType === 'env') {
-                        $('.time-row-operand1Format').show();
-                        $('.time-row-operand1Offset').show();
-                    } else {
-                        $('.time-row-operand1Format').hide();
-                        $('.time-row-operand1Offset').hide();
-                    }
-                },
-                width:'calc(100% - 110px)'
-            });
-
-            const operand1FormatSelField = $('#node-input-operand1Formatsel');
-            appendOptions(operand1FormatSelField, 'parseFormats');
-            autocomplete($('#node-input-operand1Format'), dateParseFormat);
-            operand1FormatSelField.on('change', (_type, _value) => {
-                const operand1FormatIpField = $('#node-input-operand1Format');
-                const operand1FormatSelField = $('#node-input-operand1Formatsel');
-                if (Number(operand1FormatSelField.val()) === 99) {
-                    operand1FormatSelField.css({width: '100px'});
-                    operand1FormatIpField.css({width: 'calc(100% - 225px)'});
-                    operand1FormatIpField.show();
-                    if (!isNaN(operand1FormatIpField.val())) {
-                        operand1FormatIpField.val(node._('time-span.timeFormat.default'));
-                    }
-                } else {
-                    operand1FormatIpField.hide();
-                    operand1FormatSelField.css({width: 'calc(100% - 120px)'});
-                }
-            });
-            if (isNaN(node.operand1Format)) {
-                operand1FormatSelField.val(99);
-            } else {
-                operand1FormatSelField.val(Number(node.operand1Format));
-            }
-            operand1FormatSelField.change();
-
-            setupTInput({
-                typeProp: 'operand1OffsetType',
-                valueProp: 'operand1Offset',
-                defaultType: typeUndefined.value,
-                types: [typeUndefined, 'num', 'msg', 'flow', 'global', 'env'],
-                onChange: (_type, _value) => {
-                    const type = $('#node-input-operand1Offset').typedInput('type');
-                    if (type === typeUndefined.value) {
-                        $('.time-row-operand1OffsetMultiplier').hide();
-                    } else {
-                        $('.time-row-operand1OffsetMultiplier').show();
-                    }
-                }});
-
-            const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
-            appendOptions(operand1MultiplierField, 'multiplier');
-            operand1MultiplierField.val(node.operand1OffsetMultiplier);
-            // #endregion operand1
-            // #region operand2
-            setupTInput({
-                typeProp: 'operand2Type',
-                valueProp: 'operand2',
-                defaultType: typeMsgPayload.value,
-                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, typeDayOfMonth, 'env'],
-                onChange: (_type, _value) => {
-                    const opType = $('#node-input-operand2').typedInput('type');
-                    if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                        $('.time-row-operand2Format').hide();
-                        $('.time-row-operand2Offset').show();
-                    } else if (opType === typeDateEntered.value ||
-                                opType === 'msg' ||
-                                opType === typeMsgPayload.value ||
-                                opType === typeMsgTs.value ||
-                                opType === 'flow' ||
-                                opType === 'global' ||
-                                opType === 'str' ||
-                                opType === 'num' ||
-                                opType === 'env') {
-                        $('.time-row-operand2Format').show();
-                        $('.time-row-operand2Offset').show();
-                    } else {
-                        $('.time-row-operand2Format').hide();
-                        $('.time-row-operand2Offset').hide();
-                    }
-                },
-                width:'calc(100% - 110px)'
-            });
-
-            const operand2FormatSelField = $('#node-input-operand2Formatsel');
-            appendOptions(operand2FormatSelField, 'parseFormats');
-            autocomplete($('#node-input-operand2Format'), dateParseFormat);
-            operand2FormatSelField.on('change', (_type, _value) => {
-                const operand2FormatIpField = $('#node-input-operand2Format');
-                const operand2FormatSelField = $('#node-input-operand2Formatsel');
-                if (Number(operand2FormatSelField.val()) === 99) {
-                    operand2FormatSelField.css({width: '100px'});
-                    operand2FormatIpField.css({width: 'calc(100% - 225px)'});
-                    operand2FormatIpField.show();
-                    if (!isNaN(operand2FormatIpField.val())) {
-                        operand2FormatIpField.val(node._('time-span.timeFormat.default'));
-                    }
-                } else {
-                    operand2FormatIpField.hide();
-                    operand2FormatSelField.css({width: 'calc(100% - 120px)'});
-                }
-            });
-            if (isNaN(node.operand2Format)) {
-                operand2FormatSelField.val(99);
-            } else {
-                operand2FormatSelField.val(Number(node.operand2Format));
-            }
-            operand2FormatSelField.change();
-
-            setupTInput({
-                typeProp: 'operand2OffsetType',
-                valueProp: 'operand2Offset',
-                defaultType: typeUndefined.value,
-                types: [typeUndefined, 'num', 'msg', 'flow', 'global', 'env'],
-                onChange: (_type, _value) => {
-                    const type = $('#node-input-operand2Offset').typedInput('type');
-                    if (type === typeUndefined.value) {
-                        $('.time-row-operand2OffsetMultiplier').hide();
-                    } else {
-                        $('.time-row-operand2OffsetMultiplier').show();
-                    }
-                }});
-            const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
-            appendOptions(operand2MultiplierField, 'multiplier');
-            operand2MultiplierField.val(node.operand2OffsetMultiplier);
-            // #endregion operand2
-            // #region rule-container
-            function resizeRule(rule) {
-                const newWidth = rule.width() - 10;
-                // const operatorField = rule.find('.node-input-rule-operator');
-                const operandField = rule.find('.node-input-rule-operand');
-                const multipierField = rule.find('.node-input-rule-multipier');
-                const lblWidth = 25;
-                // row1
-                const operatorWidth = 60;
-                const multiplierWidth = 125;
-                multipierField.width(multiplierWidth);
-                operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 20));
-            }
-
-            $('#node-input-rule-container').css('min-height', '150px').css('min-width', '200px').editableList({
-                addItem(containerRow, containerIndex, data) {
-                    containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                    const row = $('<div/>').appendTo(containerRow);
-                    // row1
-                    // operator
-                    const operatorField = $('<select/>', {
-                        class: 'node-input-rule-operator',
-                        id: 'node-input-rule-operator' + containerIndex
-                    }).appendTo(row);
-                    appendOptions(operatorField, 'operators');
-
-                    const operandField = $('<input/>', {
-                        class: 'node-input-rule-operand',
-                        id: 'node-input-rule-operand' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row).typedInput({
-                        default: 'num',
-                        types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
+                function setupTInput(node, data) {
+                    const tIField = $('#node-input-' + data.valueProp);
+                    $('#node-input-' + data.typeProp).val(node[data.typeProp]);
+                    tIField.typedInput({
+                        default: node[data.valueProp] || data.defaultType,
+                        typeField: $('#node-input-' + data.typeProp),
+                        types: data.types
                     });
-                    const multiplierField = $('<select/>', {
-                        class: 'node-input-rule-multiplier',
-                        id: 'node-input-rule-multiplier' + containerIndex
-                    }).appendTo(row);
-                    appendOptions(multiplierField, 'multiplier', (id) => (id > 0) );
-                    const finalspan = $('<span/>', {
-                        style: 'float: right; margin-top: 6px;'
-                    }).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-                    // setting defaultValues
-                    // console.log(data);
-                    operatorField.val(data.operator || SelectFields.operators[0].id);
-                    operandField.typedInput('type', data.operandType || 'num');
-                    operandField.typedInput('value', data.operandValue || '');
-                    multiplierField.val(data.multiplier || SelectFields.multiplier[0].id);
-                    resizeRule(containerRow);
-                },
-                sortItems(rules) {
-                    rules = $('#node-input-rule-container').editableList('items');
-                    rules.each(function (i) {
-                        $(this).find('.node-input-rule-index').html(i + 1);
-                    });
-                },
-                resizeItem: resizeRule,
-                sortable: true,
-                removable: true
-            });
-            if (node.rules) {
-                for (let i = 0; i < node.rules.length; i++) {
-                    const rule = node.rules[i];
-                    $('#node-input-rule-container').editableList('addItem', rule);
+                    if (data.onChange) {
+                        tIField.on('change', data.onChange);
+                    }
+                    if (data.width) {
+                        tIField.typedInput('width', '200px');
+                    }
+                    return tIField;
                 }
-            }
-            // #endregion rule-container
-            // #region result1
-            setupTInput({
-                typeProp: 'result1Type',
-                valueProp: 'result1',
-                defaultType: typeUndefined.value,
-                types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global'],
-                width:'calc(100% - 110px)',
-                onChange: (_type, _value) => {
-                    console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
-                    if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
-                        $('.time-result1Value').show();
-                        const plVType = $('#node-input-result1Value').typedInput('type');
-                        console.log('plVType= ' + plVType); // eslint-disable-line
-
-                        if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                            $('.time-row-result1Offset').show();
-                            $('.time-row-result1TSFormat').hide();
-                            $('.time-row-result1Format').show();
-                        } else if (plVType === 'timespan') {
-                            $('.time-row-result1Offset').hide();
-                            $('.time-row-result1Format').hide();
-                            $('.time-row-result1TSFormat').show();
-                        } else if (plVType === 'operand1' || plVType === 'operand2') {
-                            $('.time-row-result1Offset').hide();
-                            $('.time-row-result1TSFormat').hide();
-                            $('.time-row-result1Format').show();
+                // #endregion functions
+                /*  */
+                // #region operand1
+                setupTInput(node, {
+                    typeProp: 'operand1Type',
+                    valueProp: 'operand1',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.MsgPayload.value,
+                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
+                    onChange: (_type, _value) => {
+                        const opType = $('#node-input-operand1').typedInput('type');
+                        if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date') {
+                            $('.time-row-operand1Format').hide();
+                            $('.time-row-operand1Offset').show();
+                        } else if (opType === types.DateEntered.value ||
+                                    opType === 'msg' ||
+                                    opType === types.MsgPayload.value ||
+                                    opType === types.MsgTs.value ||
+                                    opType === 'flow' ||
+                                    opType === 'global' ||
+                                    opType === 'str' ||
+                                    opType === 'num' ||
+                                    opType === 'env') {
+                            $('.time-row-operand1Format').show();
+                            $('.time-row-operand1Offset').show();
                         } else {
+                            $('.time-row-operand1Format').hide();
+                            $('.time-row-operand1Offset').hide();
+                        }
+                    }
+                });
+
+                const operand1FormatSelField = $('#node-input-operand1Formatsel');
+                appendOptions(node, operand1FormatSelField, 'parseFormats');
+                autocomplete($('#node-input-operand1Format'), 'dateParseFormat');
+                operand1FormatSelField.on('change', (_type, _value) => {
+                    const operand1FormatIpField = $('#node-input-operand1Format');
+                    const operand1FormatSelField = $('#node-input-operand1Formatsel');
+                    if (Number(operand1FormatSelField.val()) === 99) {
+                        operand1FormatSelField.css({width: '100px'});
+                        operand1FormatIpField.css({width: 'calc(100% - 225px)'});
+                        operand1FormatIpField.show();
+                        if (!isNaN(operand1FormatIpField.val())) {
+                            operand1FormatIpField.val(node._('time-span.timeFormat.default'));
+                        }
+                    } else {
+                        operand1FormatIpField.hide();
+                        operand1FormatSelField.css({width: 'calc(100% - 120px)'});
+                    }
+                });
+                if (isNaN(node.operand1Format)) {
+                    operand1FormatSelField.val(99);
+                } else {
+                    operand1FormatSelField.val(Number(node.operand1Format));
+                }
+                operand1FormatSelField.change();
+
+                setupTInput(node, {
+                    typeProp: 'operand1OffsetType',
+                    valueProp: 'operand1Offset',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-operand1Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('.time-row-operand1OffsetMultiplier').hide();
+                        } else {
+                            $('.time-row-operand1OffsetMultiplier').show();
+                        }
+                    }});
+
+                const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
+                appendOptions(node, operand1MultiplierField, 'multiplier');
+                operand1MultiplierField.val(node.operand1OffsetMultiplier);
+                // #endregion operand1
+                // #region operand2
+                setupTInput(node, {
+                    typeProp: 'operand2Type',
+                    valueProp: 'operand2',
+                    defaultType: types.MsgPayload.value,
+                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
+                    onChange: (_type, _value) => {
+                        const opType = $('#node-input-operand2').typedInput('type');
+                        if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date') {
+                            $('.time-row-operand2Format').hide();
+                            $('.time-row-operand2Offset').show();
+                        } else if (opType === types.DateEntered.value ||
+                                    opType === 'msg' ||
+                                    opType === types.MsgPayload.value ||
+                                    opType === types.MsgTs.value ||
+                                    opType === 'flow' ||
+                                    opType === 'global' ||
+                                    opType === 'str' ||
+                                    opType === 'num' ||
+                                    opType === 'env') {
+                            $('.time-row-operand2Format').show();
+                            $('.time-row-operand2Offset').show();
+                        } else {
+                            $('.time-row-operand2Format').hide();
+                            $('.time-row-operand2Offset').hide();
+                        }
+                    },
+                    width:'calc(100% - 110px)'
+                });
+
+                const operand2FormatSelField = $('#node-input-operand2Formatsel');
+                appendOptions(node, operand2FormatSelField, 'parseFormats');
+                autocomplete($('#node-input-operand2Format'), 'dateParseFormat');
+                operand2FormatSelField.on('change', (_type, _value) => {
+                    const operand2FormatIpField = $('#node-input-operand2Format');
+                    const operand2FormatSelField = $('#node-input-operand2Formatsel');
+                    if (Number(operand2FormatSelField.val()) === 99) {
+                        operand2FormatSelField.css({width: '100px'});
+                        operand2FormatIpField.css({width: 'calc(100% - 225px)'});
+                        operand2FormatIpField.show();
+                        if (!isNaN(operand2FormatIpField.val())) {
+                            operand2FormatIpField.val(node._('time-span.timeFormat.default'));
+                        }
+                    } else {
+                        operand2FormatIpField.hide();
+                        operand2FormatSelField.css({width: 'calc(100% - 120px)'});
+                    }
+                });
+                if (isNaN(node.operand2Format)) {
+                    operand2FormatSelField.val(99);
+                } else {
+                    operand2FormatSelField.val(Number(node.operand2Format));
+                }
+                operand2FormatSelField.change();
+
+                setupTInput(node, {
+                    typeProp: 'operand2OffsetType',
+                    valueProp: 'operand2Offset',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-operand2Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('.time-row-operand2OffsetMultiplier').hide();
+                        } else {
+                            $('.time-row-operand2OffsetMultiplier').show();
+                        }
+                    }});
+                const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
+                appendOptions(node, operand2MultiplierField, 'multiplier');
+                operand2MultiplierField.val(node.operand2OffsetMultiplier);
+                // #endregion operand2
+                // #region rule-container
+                function resizeRule(rule) {
+                    const newWidth = rule.width() - 10;
+                    // const operatorField = rule.find('.node-input-rule-operator');
+                    const operandField = rule.find('.node-input-rule-operand');
+                    const multipierField = rule.find('.node-input-rule-multipier');
+                    const lblWidth = 25;
+                    // row1
+                    const operatorWidth = 60;
+                    const multiplierWidth = 125;
+                    multipierField.width(multiplierWidth);
+                    operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 20));
+                }
+
+                $('#node-input-rule-container').css('min-height', '150px').css('min-width', '200px').editableList({
+                    addItem(containerRow, containerIndex, data) {
+                        containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                        const row = $('<div/>').appendTo(containerRow);
+                        // row1
+                        // operator
+                        const operatorField = $('<select/>', {
+                            class: 'node-input-rule-operator',
+                            id: 'node-input-rule-operator' + containerIndex
+                        }).appendTo(row);
+                        appendOptions(node, operatorField, 'operators');
+
+                        const operandField = $('<input/>', {
+                            class: 'node-input-rule-operand',
+                            id: 'node-input-rule-operand' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row).typedInput({
+                            default: 'num',
+                            types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
+                        });
+                        const multiplierField = $('<select/>', {
+                            class: 'node-input-rule-multiplier',
+                            id: 'node-input-rule-multiplier' + containerIndex
+                        }).appendTo(row);
+                        appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0) );
+                        const finalspan = $('<span/>', {
+                            style: 'float: right; margin-top: 6px;'
+                        }).appendTo(row);
+                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
+                        // setting defaultValues
+                        // console.log(data);
+                        operatorField.val(data.operator || getOperator(0).id);
+                        operandField.typedInput('type', data.operandType || 'num');
+                        operandField.typedInput('value', data.operandValue || '');
+                        multiplierField.val(data.multiplier || getMultiplier(0).id);
+                        resizeRule(containerRow);
+                    },
+                    sortItems(rules) {
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 1);
+                        });
+                    },
+                    resizeItem: resizeRule,
+                    sortable: true,
+                    removable: true
+                });
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        $('#node-input-rule-container').editableList('addItem', rule);
+                    }
+                }
+                // #endregion rule-container
+                // #region result1
+                setupTInput(node, {
+                    typeProp: 'result1Type',
+                    valueProp: 'result1',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                    width:'calc(100% - 110px)',
+                    onChange: (_type, _value) => {
+                        console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
+                        if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
+                            $('.time-result1Value').show();
+                            const plVType = $('#node-input-result1Value').typedInput('type');
+                            console.log('plVType= ' + plVType); // eslint-disable-line
+
+                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === 'date') {
+                                $('.time-row-result1Offset').show();
+                                $('.time-row-result1TSFormat').hide();
+                                $('.time-row-result1Format').show();
+                            } else if (plVType === 'timespan') {
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1Format').hide();
+                                $('.time-row-result1TSFormat').show();
+                            } else if (plVType === 'operand1' || plVType === 'operand2') {
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1TSFormat').hide();
+                                $('.time-row-result1Format').show();
+                            } else {
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1TSFormat').hide();
+                                $('.time-row-result1Format').hide();
+                            }
+                        } else {
+                            $('.time-result1Value').hide();
                             $('.time-row-result1Offset').hide();
                             $('.time-row-result1TSFormat').hide();
                             $('.time-row-result1Format').hide();
                         }
-                    } else {
-                        $('.time-result1Value').hide();
-                        $('.time-row-result1Offset').hide();
-                        $('.time-row-result1TSFormat').hide();
-                        $('.time-row-result1Format').hide();
-                    }
-                    $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
-                    $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
-                } });
+                        $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
+                        $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
+                    } });
 
-            setupTInput({
-                typeProp: 'result1ValueType',
-                valueProp: 'result1Value',
-                defaultType: 'timespan',
-                width: 'calc(100% - 120px)',
-                types: [
-                    {value: 'timespan', label: 'timespan between Inputs', hasValue: false},
-                    {value: 'operand1', label: 'Input 1 value', hasValue: false},
-                    {value: 'operand2', label: 'Input 2 value', hasValue: false},
-                    'date',
-                    typeTimeEntered,
-                    typeTimeSun,
-                    typeTimeMoon,
-                    'flow',
-                    'global',
-                    'str',
-                    'num',
-                    'bool',
-                    'json',
-                    'bin',
-                    'env',
-                    'jsonata',
-                    typeSunCalc,
-                    typeMoonCalc
-                ],
-                onChange: (_type, _value) => { $('#node-input-result1').change(); }});
-            /********************************************************/
-            const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
-            appendOptions(resultTSFormatSelField, 'outputTSFormats');
-            resultTSFormatSelField.on('change', (_type, _value) => {
-                const resultTSFormatIpField = $('#node-input-result1TSFormat');
+                setupTInput(node, {
+                    typeProp: 'result1ValueType',
+                    valueProp: 'result1Value',
+                    defaultType: 'timespan',
+                    width: 'calc(100% - 120px)',
+                    types: [
+                        {value: 'timespan', label: 'timespan between Inputs', hasValue: false},
+                        {value: 'operand1', label: 'Input 1 value', hasValue: false},
+                        {value: 'operand2', label: 'Input 2 value', hasValue: false},
+                        'date',
+                        types.TimeEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        'flow',
+                        'global',
+                        'str',
+                        'num',
+                        'bool',
+                        'json',
+                        'bin',
+                        'env',
+                        'jsonata',
+                        types.SunCalc,
+                        types.MoonCalc
+                    ],
+                    onChange: (_type, _value) => { $('#node-input-result1').change(); }});
+                /********************************************************/
                 const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
+                appendOptions(node, resultTSFormatSelField, 'outputTSFormats');
+                resultTSFormatSelField.on('change', (_type, _value) => {
+                    const resultTSFormatIpField = $('#node-input-result1TSFormat');
+                    const resultTSFormatSelField = $('#node-input-result1TSFormatSel');
 
-                console.log('node-input-resultTSFormatSelField change ' + resultTSFormatSelField.val() + ' - ' + resultTSFormatIpField.val()); // eslint-disable-line
+                    console.log('node-input-resultTSFormatSelField change ' + resultTSFormatSelField.val() + ' - ' + resultTSFormatIpField.val()); // eslint-disable-line
 
-                if (Number(resultTSFormatSelField.val()) === 99) {
-                    resultTSFormatSelField.css({width: '100px'});
-                    resultTSFormatIpField.css({width: 'calc(100% - 235px)'});
-                    resultTSFormatIpField.show();
-                    if (!isNaN(resultTSFormatIpField.val())) {
-                        resultTSFormatIpField.val(node._('time-span.timeFormat.default'));
-                    }
-                } else {
-                    resultTSFormatIpField.hide();
-                    resultTSFormatSelField.css({width: 'calc(100% - 130px)'});
-                }
-            });
-            resultTSFormatSelField.change();
-            /********************************************************/
-            const resultFormatSelField = $('#node-input-result1FormatSel');
-            appendOptions(resultFormatSelField, 'outputFormats');
-            resultFormatSelField.on('change', (_type, _value) => {
-                const resultFormatIpField = $('#node-input-result1Format');
-                const resultFormatSelField = $('#node-input-result1FormatSel');
-                if (Number(resultFormatSelField.val()) === 99) {
-                    resultFormatSelField.css({width: '100px'});
-                    resultFormatIpField.css({width: 'calc(100% - 235px)'});
-                    resultFormatIpField.show();
-                    if (!isNaN(resultFormatIpField.val())) {
-                        resultFormatIpField.val(node._('time-span.timeFormat.default'));
-                    }
-                } else {
-                    resultFormatIpField.hide();
-                    resultFormatSelField.css({width: 'calc(100% - 130px)'});
-                }
-            });
-            /********************************************************/
-            if (isNaN(node.result1Format)) {
-                resultFormatSelField.val(99);
-            } else {
-                resultFormatSelField.val(Number(node.result1Format));
-            }
-            resultFormatSelField.change();
-            setupTInput({
-                typeProp: 'result1OffsetType',
-                valueProp: 'result1Offset',
-                defaultType: typeUndefined.value,
-                types: [typeUndefined, 'num', 'msg', 'flow', 'global', 'env'],
-                onChange: (_type, _value) => {
-                    const type = $('#node-input-result1Offset').typedInput('type');
-                    if (type === typeUndefined.value) {
-                        $('.time-row-result1OffsetMultiplier').hide();
+                    if (Number(resultTSFormatSelField.val()) === 99) {
+                        resultTSFormatSelField.css({width: '100px'});
+                        resultTSFormatIpField.css({width: 'calc(100% - 235px)'});
+                        resultTSFormatIpField.show();
+                        if (!isNaN(resultTSFormatIpField.val())) {
+                            resultTSFormatIpField.val(node._('time-span.timeFormat.default'));
+                        }
                     } else {
-                        $('.time-row-result1OffsetMultiplier').show();
+                        resultTSFormatIpField.hide();
+                        resultTSFormatSelField.css({width: 'calc(100% - 130px)'});
                     }
-                }});
-            const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
-            appendOptions(resultMultiplierField, 'multiplier');
-            resultMultiplierField.val(node.result1OffsetMultiplier);
-            autocomplete($('#node-input-result1TSFormat'), dateOutTSFormat);
-            autocomplete($('#node-input-result1Format'), dateOutFormat);
-            // #endregion result1
-            // #region spinner
-            $('.wg-offset-spinner').spinner({max: 1439,min: -1439});
-            // #endregion spinner
+                });
+                resultTSFormatSelField.change();
+                /********************************************************/
+                const resultFormatSelField = $('#node-input-result1FormatSel');
+                appendOptions(node, resultFormatSelField, 'outputFormats');
+                resultFormatSelField.on('change', (_type, _value) => {
+                    const resultFormatIpField = $('#node-input-result1Format');
+                    const resultFormatSelField = $('#node-input-result1FormatSel');
+                    if (Number(resultFormatSelField.val()) === 99) {
+                        resultFormatSelField.css({width: '100px'});
+                        resultFormatIpField.css({width: 'calc(100% - 235px)'});
+                        resultFormatIpField.show();
+                        if (!isNaN(resultFormatIpField.val())) {
+                            resultFormatIpField.val(node._('time-span.timeFormat.default'));
+                        }
+                    } else {
+                        resultFormatIpField.hide();
+                        resultFormatSelField.css({width: 'calc(100% - 130px)'});
+                    }
+                });
+                /********************************************************/
+                if (isNaN(node.result1Format)) {
+                    resultFormatSelField.val(99);
+                } else {
+                    resultFormatSelField.val(Number(node.result1Format));
+                }
+                resultFormatSelField.change();
+                setupTInput(node, {
+                    typeProp: 'result1OffsetType',
+                    valueProp: 'result1Offset',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-result1Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('.time-row-result1OffsetMultiplier').hide();
+                        } else {
+                            $('.time-row-result1OffsetMultiplier').show();
+                        }
+                    }});
+                const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
+                appendOptions(node, resultMultiplierField, 'multiplier');
+                resultMultiplierField.val(node.result1OffsetMultiplier);
+                autocomplete($('#node-input-result1TSFormat'), 'dateOutTSFormat');
+                autocomplete($('#node-input-result1Format'), 'dateOutFormat');
+                // #endregion result1
+                // #region spinner
+                $('.wg-offset-spinner').spinner({max: 1439,min: -1439});
+                // #endregion spinner
 
-            $('#node-input-time').change();
-            $('#node-input-payload').change();
-            $('#node-input-operand1').change();
-            $('#node-input-operand2').change();
-            $('#node-input-result1').change();
+                $('#node-input-time').change();
+                $('#node-input-payload').change();
+                $('#node-input-operand1').change();
+                $('#node-input-operand2').change();
+                $('#node-input-result1').change();
+            }; // setup
+
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    // console.log( _data ); // Data returned
+                    console.log( _textStatus ); // Success
+                    console.log( _jqxhr.status ); // 200
+                    console.log('setup'); // eslint-disable-line
+                    setup(node);
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
         },
         oneditsave() {
             const node = this;
@@ -1158,14 +1181,17 @@
         // console.log($("#node-input-outputs").val());
         },
         oneditresize(size) {
-            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-            let height = size.height;
-            for (let i = 0; i < rows.size(); i++) {
-                height -= $(rows[i]).outerHeight(true);
+            try {
+                const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+                let height = size.height;
+                for (let i = 0; i < rows.size(); i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+                height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
+                $('#node-input-rule-container').editableList('height', height);
+            } catch (err) {
+                console.log(err); // for debuging, later ignore
             }
-
-            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-            $('#node-input-rule-container').editableList('height', height);
         }
     });</script>

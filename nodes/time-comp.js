@@ -84,11 +84,11 @@ module.exports = function (RED) {
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
-    function timeCalcNode(config) {
+    function timeCompNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize timeCalcNode ' + util.inspect(config));
+        // this.debug('initialize time Node ' + util.inspect(config));
         const node = this;
 
         this.on('input', msg => {
@@ -268,14 +268,13 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType('time-comp', timeCalcNode);
+    RED.nodes.registerType('time-comp', timeCompNode);
 
-    /*
-      RED.httpAdmin.get('/sun-position/js/*', function(req,res) {
-          var options = {
+    RED.httpAdmin.get('/sun-position/js/*', (_req,_res) => {
+        const options = {
             root: __dirname + '/static/',
             dotfiles: 'deny'
-          };
-          res.sendFile(req.params[0], options);
-      });/* */
+        };
+        _res.sendFile(_req.params[0], options);
+    });
 };
