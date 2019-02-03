@@ -78,7 +78,7 @@ module.exports = function (RED) {
             this.latitude = n.latitude || this.credentials.latitude;
             this.angleType = n.angleType;
             this.tzOffset = (n.timezoneOffset * -60) || 0;
-            // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' lat:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
+            // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
 
             this.lastSunCalc = {
                 ts: 0
@@ -94,7 +94,7 @@ module.exports = function (RED) {
                 //node.debug('getSunTimes');
                 let res = sunTimesCheck(node);
                 res.today = node.sunTimesToday;
-                res.tomorrow = node.sunTimesTomorow;
+                res.tomorrow = node.sunTimesTomorrow;
                 return res;
             }
             */
@@ -148,7 +148,7 @@ module.exports = function (RED) {
                 if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                     if (next === 1) {
                         result.value = hlp.addOffset(new Date(node.moonTimesTomorow[value]), offset, multiplier);
-                        // node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorow));
+                        // node.debug('Moon Times tomorrow =' + util.inspect(node.moonTimesTomorrow));
                     } else if (next > 1) {
                         const date = (new Date()).addDays(next);
                         const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
@@ -174,10 +174,114 @@ module.exports = function (RED) {
                 return result;
             };
 
-            this.getDateProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
-                let result = {};
-                if (vType === null || vType === 'none' || vType === '') {
-                    // nix
+            this.getFloatProp = (_srcNode, msg, type, value) => {
+                let data;
+                // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
+                if (type === 'msgPayload') {
+                    data = msg.payload;
+                } else {
+                    data = RED.util.evaluateNodeProperty(value, type, node, msg);
+                }
+                if (data === null || typeof data === 'undefined') {
+                    throw new Error('could not evaluate ' + type + '.' + value);
+                }
+                data = parseFloat(data);
+                if (isNaN(data)) {
+                    throw new Error('the value of ' + type + '.' + value + ' is not a valid Number!');
+                }
+                return data;
+            };
+
+            this.getOutDataProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
+                let result = null;
+                if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
+                    return Date.now().getTime();
+                } else if (vType === 'msgPayload') {
+                    return msg.payload;
+                } else if (vType === 'msgTs') {
+                    return msg.ts;
+                } else if (vType === 'pdsCalcData') {
+                    return node.getSunCalc(msg.ts);
+                } else if (vType === 'pdmCalcData') {
+                    return node.getMoonCalc(msg.ts);
+                } else if ((vType === 'pdsTime') ||
+                            (vType === 'pdmTime')) {
+                    if (vType === 'pdsTime') { // sun
+                        result = node.getSunTime(Date.now(), value, offset, multiplier);
+                    } else if (vType === 'pdmTime') { // moon
+                        result = node.getMoonTime(Date.now(), value, offset, multiplier);
+                    }
+                    if (result && result.value && !result.error) {
+                        result = hlp.addOffset(result.value, offset, multiplier);
+                        return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    }
+                    return null;
+                } else if (vType === 'entered' ||
+                            vType === 'date') {
+                    if (vType === 'entered') {
+                        result = hlp.getTimeOfText(String(value), Date.now());
+                    } else if (vType === 'dayOfMonth') {
+                        result = new Date();
+                        switch (value) {
+                            case 'first Monday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),1);
+                                break;
+                            case 'first Tuesday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),2);
+                                break;
+                            case 'first Wednesday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),3);
+                                break;
+                            case 'first Thursday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),4);
+                                break;
+                            case 'first Friday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),5);
+                                break;
+                            case 'first Saturday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),6);
+                                break;
+                            case 'first Sunday':
+                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),0);
+                                break;
+                            case 'last Monday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),1);
+                                break;
+                            case 'last Tuesday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),2);
+                                break;
+                            case 'last Wednesday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),3);
+                                break;
+                            case 'last Thursday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),4);
+                                break;
+                            case 'last Friday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),5);
+                                break;
+                            case 'last Saturday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),6);
+                                break;
+                            case 'last Sunday':
+                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),0);
+                                break;
+                        }
+                    } else {
+                        result = Date.now();
+                    }
+                    if (result !== null && typeof result !== 'undefined') {
+                        result = hlp.addOffset(result, offset, multiplier);
+                        return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    }
+                    return null;
+                }
+                return RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+            };
+
+            this.getDateFromProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
+                let result = null;
+                if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
+                    return Date.now();
                 } else if (vType === 'date') {
                     return hlp.addOffset(Date.now(), offset, multiplier);
                 } else if (vType === 'dayOfMonth') {
@@ -186,7 +290,7 @@ module.exports = function (RED) {
                         case 'first Monday':
                             d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),1);
                             break;
-                        case 'first Tuseday':
+                        case 'first Tuesday':
                             d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),2);
                             break;
                         case 'first Wednesday':
@@ -207,7 +311,7 @@ module.exports = function (RED) {
                         case 'last Monday':
                             d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),1);
                             break;
-                        case 'last Tuseday':
+                        case 'last Tuesday':
                             d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),2);
                             break;
                         case 'last Wednesday':
@@ -227,27 +331,38 @@ module.exports = function (RED) {
                             break;
                     }
                     return hlp.addOffset(d, offset, multiplier);
-                } else if (vType === 'pdsCalcData') {
-                    result = node.getSunCalc(msg.ts);
-                    result.value = hlp.addOffset(result.value, offset, multiplier);
-                } else if (vType === 'pdmCalcData') {
-                    result = node.getMoonCalc(msg.ts);
-                    result.value = hlp.addOffset(result.value, offset, multiplier);
-                } else {
-                    if (vType === 'entered') {
-                        result.value = value;
-                    } else if (vType === 'msgPayload') {
-                        result.value = msg.payload;
-                    } else if (vType === 'msgTs') {
-                        result.value = msg.ts;
-                    } else {
-                        // msg, flow, global, str, num, env
-                        result.value = RED.util.evaluateNodeProperty(value, vType, node, msg);
+                } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
+                    if (vType === 'pdsTime') {
+                        // sun
+                        result = node.getSunTime(Date.now(), value, offset, multiplier);
+                        result.fix = true;
+                    } else if (vType === 'pdmTime') {
+                        // moon
+                        result = node.getMoonTime(Date.now(), value, offset, multiplier);
+                        result.fix = true;
                     }
-                    result.value = hlp.parseDateFromFormat(result.value, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
-                    result.value = hlp.addOffset(result.value, offset, multiplier);
+                    if (result && result.value && !result.error) {
+                        return result.value;
+                    }
+                    throw new Error('could not evaluate ' + vType + '.' + value + ' - ' + result.error);
+                } else if (vType === 'entered') {
+                    result = value;
+                } else if (vType === 'msgPayload') {
+                    result = msg.payload;
+                } else if (vType === 'msgTs') {
+                    result = msg.ts;
+                } else {
+                    // msg, flow, global, str, num, env
+                    result = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
                 }
-                return result;
+                if (result !== null && typeof result !== 'undefined') {
+                    result = hlp.parseDateFromFormat(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    if (result.value === 'Invalid Date' || isNaN(result.value) || result.value === null) {
+                        throw new Error('could not evaluate format of ' + result);
+                    }
+                    return hlp.addOffset(result, offset, multiplier);
+                }
+                throw new Error('could not evaluate ' + vType + '.' + value);
             };
 
             this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
@@ -387,7 +502,7 @@ module.exports = function (RED) {
                     // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
                     result.illumination.phase = moonPhases[0];
                 } else if (moonIllum.phase < 0.25) {
-                    // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw.zunehmende Sichel(0° < Phasenwinkel < 90°),
+                    // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw. zunehmende Sichel(0° < Phasenwinkel < 90°),
                     result.illumination.phase = moonPhases[1];
                 } else if (moonIllum.phase < 0.26) {
                     // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
@@ -405,7 +520,7 @@ module.exports = function (RED) {
                     // 0.75	        Last Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
                     result.illumination.phase = moonPhases[6];
                 } else {
-                    // Waning Crescent                  -   letztes Viertel bzw.abnehmende Sichel(Phasenwinkel > 270°).
+                    // Waning Crescent                  -   letztes Viertel bzw. abnehmende Sichel(Phasenwinkel > 270°).
                     result.illumination.phase = moonPhases[7];
                 }
 
@@ -511,7 +626,6 @@ module.exports = function (RED) {
         }
 
         function initTimes(node) {
-            // node.debug('initTimes');
             const today = new Date();
             const dayId = getUTCDayId(today);
             const tomorrow = today.addDays(1);

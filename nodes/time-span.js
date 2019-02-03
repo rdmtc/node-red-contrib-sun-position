@@ -133,7 +133,7 @@ function formatTS(d1, d2, format) {
     });
 }
 
-function getFormatedTimeSpanOut(date1, date2, format) {
+function getFormattedTimeSpanOut(date1, date2, format) {
     format = format || 0;
     if (isNaN(format)) {
         return formatTS(date1, date2, String(format));
@@ -182,7 +182,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             }
             return getYearDiffAbs(date1, date2);
     }
-    const timespan = date1.getTime() - date2.getTime();
+    const timeSpan = date1.getTime() - date2.getTime();
     return {
         start : {
             date: date1,
@@ -200,7 +200,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             timeLocaleStr: date2.toLocaleString(),
             timeLocaleTimeStr: date2.toLocaleTimeString()
         },
-        timeSpan: timespan,
+        timeSpan: timeSpan,
         timeSpanAbs: {
             ms: timeSpan % 1000,
             sec: Math.floor(timeSpan / perSecond) % 60,
@@ -211,7 +211,7 @@ function getFormatedTimeSpanOut(date1, date2, format) {
             years: getYearDiffAbs(date1, date2)
         },
         timeSpanRel: {
-            ms: timespan,
+            ms: timeSpan,
             sec: (timeSpan / perSecond),
             min: (timeSpan / perMinute),
             hour: (timeSpan / perHour),
@@ -225,53 +225,8 @@ function getFormatedTimeSpanOut(date1, date2, format) {
 
 module.exports = function (RED) {
     'use strict';
-
-    function tsGetCompOperandData(node, msg, type, value, multiplier) {
-        let data;
-        // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
-        if (type === 'msgPayload') {
-            data = msg.payload;
-        } else if (type === 'msgTs') {
-            data = msg.ts;
-        } else {
-            data = RED.util.evaluateNodeProperty(value, type, node, msg);
-        }
-        if (data === null || typeof data === undefined) {
-            throw new Error('could not evaluate ' + type + '.' + value);
-        }
-        data = parseFloat(data);
-        if (isNaN(data)) {
-            throw new Error('the value of ' + type + '.' + value + ' is not a valid Number!');
-        }
-        if (!isNaN(multiplier) && multiplier !== 0) {
-            return data * multiplier;
-        }
-        return data;
-    }
-
+    /*
     function tsGetOperandData(node, msg, type, value, format, offset, multiplier) {
-        /*
-        const typeDayOfMonth = {
-            value: 'DayOfMonth',
-            label: 'day of month',
-            options: [
-                'first Monday',
-                'first Tuseday',
-                'first Wednesday',
-                'first Thursday',
-                'first Friday',
-                'first Saturday',
-                'first Sunday',
-                'last Monday',
-                'last Tuseday',
-                'last Wednesday',
-                'last Thursday',
-                'last Friday',
-                'last Saturday',
-                'last Sunday',
-            ]
-        }; */
-
         let result = {};
         if (type === null || type === 'none' || type === '') {
             return Date.now();
@@ -299,7 +254,7 @@ module.exports = function (RED) {
             // msg, flow, global, str, num, env
             data = RED.util.evaluateNodeProperty(value, type, node, msg);
         }
-        if (data === null || typeof data === undefined) {
+        if (data === null || typeof data === 'undefined') {
             throw new Error('could not evaluate ' + type + '.' + value);
         }
 
@@ -333,18 +288,17 @@ module.exports = function (RED) {
             type === 'date') {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                return hlp.getFormattedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
             }
             return data;
         }
         return RED.util.evaluateNodeProperty(value, type, node, msg);
-    }
+    } /* */
 
     function timeCalcNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize timeCalcNode ' + util.inspect(config));
         const node = this;
 
         this.on('input', msg => {
@@ -362,12 +316,14 @@ module.exports = function (RED) {
             }
 
             try {
-                const operand1 = tsGetOperandData(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetMultiplier);
+                const offset1 = this.positionConfig.getFloatProp(node,msg,config.operand1OffsetType, config.operand1Offset);
+                const operand1 = this.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, offset1, config.operand1OffsetMultiplier);
 node.debug('operand1 ' + util.inspect(operand1)); // eslint-disable-line
                 if (operand1 === null) {
                     return null;
                 }
-                const operand2 = tsGetOperandData(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetMultiplier);
+                const offset2 = this.positionConfig.getFloatProp(node,msg,config.operand2OffsetType, config.operand2Offset);
+                const operand2 = this.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, offset2, config.operand2OffsetMultiplier);
 node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
                 if (operand2 === null) {
                     return null;
@@ -381,13 +337,14 @@ node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
                     let resObj = null;
 node.debug('resObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.inspect(config.result1Format)); // eslint-disable-line
                     if (config.result1ValueType === 'timespan') {
-                        resObj = getFormatedTimeSpanOut(operand1, operand2, config.result1TSFormat);
+                        resObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
                     } else if (config.result1ValueType === 'operand1') {
-                        resObj = hlp.getFormatedDateOut(operand1, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(operand1, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else if (config.result1ValueType === 'operand2') {
-                        resObj = hlp.getFormatedDateOut(operand2, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(operand2, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
-                        resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
+                        const resOffset = this.positionConfig.getFloatProp(node,msg,config.result1OffsetType, config.result1Offset);
+                        resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, resOffset, config.result1Multiplier);
                     }
                     // to
 node.debug('resObj1 ' + util.inspect(resObj)); // eslint-disable-line
@@ -420,7 +377,10 @@ node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
                     const rule = rules[i];
 node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     try {
-                        const ruleoperand = tsGetCompOperandData(this, msg, rule.operandType, rule.operandValue,  rule.multiplier);
+                        let ruleoperand = this.positionConfig.getFloatProp(this, msg, rule.operandType, rule.operandValue);
+                        if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
+                            ruleoperand = ruleoperand * rule.multiplier;
+                        }
 
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
@@ -478,28 +438,11 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
 
     RED.nodes.registerType('time-span', timeCalcNode);
 
-    RED.httpAdmin.get('/sun-position/js/*', (req,res) => {
+    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
         const options = {
             root: __dirname + '/static/',
             dotfiles: 'deny'
         };
         res.sendFile(req.params[0], options);
     });
-
-    /*
-    RED.httpAdmin.get('/sun-position/js/*', (_req, _res) => {
-        console.log('request file');
-        console.log(_req);
-        console.log(_res);
-        // SRED.auth.needsPermission('sun-position.read')
-        // if (req.params[0] === 'definitions') {
-        //    res.json(def);
-        // } else {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        _res.sendFile(_req.params[0], options);
-        // }
-    }); /* */
 };

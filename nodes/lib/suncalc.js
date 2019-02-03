@@ -147,7 +147,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         nadir: 0
     };
     const sunTimesAlternate = SunCalc.timesAlternate = [
-        // for backward compatibilit
+        // for backward compatibility
         ['dawn', 'civilDawn'],
         ['dusk', 'civilDusk'],
         ['nightEnd', 'astronomicalDawn'],
@@ -248,7 +248,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time[1]].ts = result[time[1]].value.getTime();
         }
 
-        // for backward compatibilit
+        // for backward compatibility
         for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
             const time = sunTimesAlternate[i];
             result[time[0]] = result[time[1]];

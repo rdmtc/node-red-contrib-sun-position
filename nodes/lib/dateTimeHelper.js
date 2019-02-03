@@ -12,10 +12,10 @@ module.exports = {
     days_of_a_year,
     getFirstDayOfMonth,
     getLastDayOfMonth,
-    getComperableDateFormat,
-    parseComperableDateFormat,
-    getComperableDateFormat2,
-    parseComperableDateFormat2,
+    getComparableDateFormat,
+    parseComparableDateFormat,
+    getComparableDateFormat2,
+    parseComparableDateFormat2,
     getTimeDiff,
     checkLimits,
     addOffset,
@@ -27,7 +27,7 @@ module.exports = {
     getTimeNumber,
     getNodeId,
     formatDate,
-    getFormatedDateOut,
+    getFormattedDateOut,
     parseDate,
     parseDateTime,
     parseDateFromFormat
@@ -105,7 +105,7 @@ function pad2(n) { // always returns a string
  * @param {Date} date - Date to format
  * @return {string} number in Format YYYYMMDDHHMMSS
  */
-function getComperableDateFormat(date) {
+function getComparableDateFormat(date) {
     return Number(date.getFullYear() +
         pad2(date.getMonth() + 1) +
         pad2(date.getDate()) +
@@ -156,12 +156,12 @@ function handleError(node, messageText, err, stateText) {
  * get a date for the first day of week in the given month
  * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monday ... 6 saturday
+ * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} first day of given month
  */
 function getFirstDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month, 1);
-    dayOfWeek = dayOfWeek || 1; // monday
+    dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
         d.setDate(d.getDate() + 1);
     }
@@ -172,12 +172,12 @@ function getFirstDayOfMonth(year, month, dayOfWeek) {
  * get a date for the last day of week in the given month
  * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} [dayOfWeek]  Day of week, where 0 is sunday, 1 monday ... 6 saturday
+ * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} last day of given month
  */
 function getLastDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month+1, 0);
-    dayOfWeek = dayOfWeek || 1; // monday
+    dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
         d.setDate(d.getDate() - 1);
     }
@@ -191,7 +191,7 @@ function getLastDayOfMonth(year, month, dayOfWeek) {
  * @param {number} date - number or string in Format YYYYMMDDHHMMSS
  * @return {Date} date of the number
  */
-function parseComperableDateFormat(date) {
+function parseComparableDateFormat(date) {
     date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
@@ -209,7 +209,7 @@ function parseComperableDateFormat(date) {
  * @param {Date} date - Date to format
  * @return {string} number in Format YYYYMMDD.HHMMSS
  */
-function getComperableDateFormat2(date) {
+function getComparableDateFormat2(date) {
     return Number(date.getFullYear() +
         pad2(date.getMonth() + 1) +
         pad2(date.getDate()) + '.' +
@@ -224,7 +224,7 @@ function getComperableDateFormat2(date) {
  * @param {number} date - number or string in Format YYYYMMDD.HHMMSS or YYYYMMDDTHHMMSS
  * @return {Date} date of the number
  */
-function parseComperableDateFormat2(date) {
+function parseComparableDateFormat2(date) {
     date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
@@ -301,7 +301,7 @@ function addOffset(d, offset, multiplier) {
 /**
  * calculates the number of days to get a positive date object
  * @param {Array.<number>} days array of allowed days
- * @param {number} daystart start day (0=sunday)
+ * @param {number} daystart start day (0=Sunday)
  * @return {number} number of days for the next valid day as offset to the daystart
  */
 function calcDayOffset(days, daystart) {
@@ -520,7 +520,7 @@ const dateFormat = (function () {
     return function (date, mask, utc) {
         const dF = dateFormat;
 
-        // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
+        // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
             mask = date;
             date = undefined;
@@ -761,7 +761,7 @@ dateFormat.parse = [
     {label: 'Month NNN (abbr.)', value: 'NNN'},
     {label: 'Day of Month d (1 digit)', value: 'd'},
     {label: 'Day of Month dd (2 digits)', value: 'dd'},
-    {label: 'Day of Week E (abbr)', value: 'E'},
+    {label: 'Day of Week E (abbr.)', value: 'E'},
     {label: 'Day of Week EE (name)', value: 'EE'},
     {label: 'Hour h (1 digit 1-12)', value: 'h'},
     {label: 'Hour hh (2 digits 1-12)', value: 'hh'},
@@ -789,7 +789,7 @@ dateFormat.format = [
     {label: 'Month NNN (name)', value: 'NNN'},
     {label: 'Day of Month d (1 digit)', value: 'd'},
     {label: 'Day of Month dd (2 digits)', value: 'dd'},
-    {label: 'Day of Week E (abbr)', value: 'E'},
+    {label: 'Day of Week E (abbr.)', value: 'E'},
     {label: 'Day of Week EE (name)', value: 'EE'},
     {label: 'Hour h (1-12)', value: 'h'},
     {label: 'Hour hh (2 digits 01-12)', value: 'hh'},
@@ -819,9 +819,9 @@ dateFormat.format = [
 
 /**
  * Formate a date to the given Format string
- * @param  {Date} date -  Javascript Date to format
+ * @param  {Date} date -  JavaScript Date to format
  * @param  {string} mask -  mask of the date
- * @param  {bool} utc - indicates if the formated date should be in utc or not
+ * @param  {bool} utc - indicates if the formatted date should be in utc or not
  * @param  {Array.<string>} [dayNames]       -  Array of day Names long and short ["Sunday", "Monday", ..., "Mo", "Tu", ...]
  * @param  {Array.<string>} [monthNames]     -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
  * @param  {Array.<string>} [dayDiffNames]   -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
@@ -845,8 +845,8 @@ function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
 
 /**
  * gives the difference between two times in Milliseconds
- * @param  {Date}    time1       -  Javascript Date object
- * @param  {Date}    [time2]     -  Javascript Date object, if not defined, now will be used
+ * @param  {Date}    time1       -  JavaScript Date object
+ * @param  {Date}    [time2]     -  JavaScript Date object, if not defined, now will be used
  * @param  {Number}  [limit]     -  limit in milliseconds. If defined and result is less then limit, result will be always a positive value.
  * @return {Number}   returns a number, string or object depending on the given Format
  */
@@ -866,16 +866,16 @@ function getTimeDiff(time1, time2, limit) {
 }
 
 /**
- * pre defined formates of a given date
- * @param  {Date}            date            -  Javascript Date to format
+ * pre defined formats of a given date
+ * @param  {Date}            date            -  JavaScript Date to format
  * @param  {string}          [format]        -  format of the date
  * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
  * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
  * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
-    // console.log('getFormatedDateOut ' + date + ' --> ' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
+    // console.log('getFormattedDateOut ' + date + ' --> ' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (isNaN(format)) {
         return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
@@ -903,9 +903,9 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 9: // timeformat_hour
             return (Math.round((date.getTime() - (new Date()).getTime()) / 1000) / 3600);
         case 10: // timeformat_YYYYMMDDHHMMSS
-            return getComperableDateFormat(date);
+            return getComparableDateFormat(date);
         case 11: // timeformat_YYYYMMDD_HHMMSS
-            return getComperableDateFormat2(date);
+            return getComparableDateFormat2(date);
         case 12: // timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
             return date.toLocaleDateString();
         case 13: // timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
@@ -946,8 +946,8 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // You may *NOT* re-distribute this code in any way except through its
 // use. That means, you can include it in your product, or your web
 // site, or any other form where the code is actually being used. You
-// may not put the plain javascript up on your site for download or
-// include it in your javascript libraries for download.
+// may not put the plain JavaScript up on your site for download or
+// include it in your JavaScript libraries for download.
 // If you wish to share this code with others, please just point them
 // to the URL instead.
 // Please DO NOT link directly to my .js files from your site. Copy
@@ -960,7 +960,7 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // March 11, 2003: Added parseDate() function
 // March 11, 2003: Added "NNN" formatting option. Doesn't match up
 //                 perfectly with SimpleDateFormat formats, but
-//                 backwards-compatability was required.
+//                 backwards-compatibility was required.
 
 // ------------------------------------------------------------------
 // These functions use the same 'format' strings as the
@@ -973,7 +973,7 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
 //              | NNN (abbr.)        |
 // Day of Month | dd (2 digits)      | d (1 or 2 digits)
-// Day of Week  | EE (name)          | E (abbr)
+// Day of Week  | EE (name)          | E (abbr.)
 // Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
 // Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
 // Hour (0-11)  | kk (2 digits)      | k (1 or 2 digits)
@@ -998,7 +998,7 @@ function getFormatedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 // ------------------------------------------------------------------
 /**
  * check if string is integer
- * @param {any} val value to scheck
+ * @param {any} val value to check
  * @return {bool} **true** if value is integer otherwise **false**
  */
 function _isInteger(val) {
@@ -1018,7 +1018,7 @@ function _isInteger(val) {
  * @param {number} i position
  * @param {*} minlength minimum required length
  * @param {*} maxlength maximum length
- * @returns {string|null} token if it is an integer oherwise **null**
+ * @returns {string|null} token if it is an integer otherwise **null**
  */
 function _getInt(str, i, minlength, maxlength) {
     for (let x = maxlength; x >= minlength; x--) {
@@ -1252,12 +1252,12 @@ function getDateFromFormat(val, format) {
 /**
  * parses an array of different formats
  * @param {string} val date string to parse
- * @param {Array.<string>} listTocheck a list of strings with different formats to check
+ * @param {Array.<string>} listToCheck a list of strings with different formats to check
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseArray(val, listTocheck) {
-    for (let i = 0, n = listTocheck.length; i < n; i++) {
-        const res = getDateFromFormat(val, listTocheck[i]);
+function _parseArray(val, listToCheck) {
+    for (let i = 0, n = listToCheck.length; i < n; i++) {
+        const res = getDateFromFormat(val, listToCheck[i]);
         if (res !== null) {
             return res;
         }
@@ -1273,7 +1273,7 @@ function _parseArray(val, listTocheck) {
  * M/d/y   M-d-y      M.d.y     MMM-d     M/d      M-d
  * d/M/y   d-M-y      d.M.y     d-MMM     d/M      d-M
  * @param {string} val date string to parse
- * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (european format) before M/d/y (American).
+ * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (European format) before M/d/y (American).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDate(val, preferEuro) {
@@ -1288,7 +1288,7 @@ function parseDate(val, preferEuro) {
  * This function takes a date and time string and tries to match it to a
  * number of possible date formats to get the value.
  * @param {string} val date string to parse
- * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (european format) before M/d/y (American).
+ * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (European format) before M/d/y (American).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDateTime(val, preferEuro) {
@@ -1318,8 +1318,8 @@ function parseDateTime(val, preferEuro) {
  * @param {string} val date string to parse
  * @param {number|string} format Format definition, if it is a number a predefined format will be try
  * @param {Array.<string>} [dayNames] list of day names
- * @param {Array.<string>} [monthNames] list ofmonth names
- * @param {Array.<string>} [dayDiffNames] listof day diffnames
+ * @param {Array.<string>} [monthNames] list of month names
+ * @param {Array.<string>} [dayDiffNames] list of day diff names
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
@@ -1343,7 +1343,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     }
 
     const tryparse = (val, preferEuro) => {
-console.debug('tryparse ' + util.inspect(preferEuro)); // eslint-disable-line
+console.debug('try parse ' + util.inspect(preferEuro)); // eslint-disable-line
         let res = parseDateTime(val, preferEuro);
         if (res === null) {
             res = parseDate(val, preferEuro);
@@ -1359,14 +1359,14 @@ console.debug('tryparse ' + util.inspect(preferEuro)); // eslint-disable-line
             return new Date(Number(date));
         case 1: // timeparse_ECMA262
             return Date.parse(date);
-        case 2: // various - try different Formats, prefere european formats
+        case 2: // various - try different Formats, prefer European formats
             return tryparse(date, true);
-        case 3: // various - try different Formats, prefere american formats
+        case 3: // various - try different Formats, prefer American formats
             return tryparse(date, false);
         case 4: // timeformat_YYYYMMDDHHMMSS
-            return parseComperableDateFormat(date);
+            return parseComparableDateFormat(date);
         case 5: // timeformat_YYYYMMDD_HHMMSS
-            return parseComperableDateFormat2(date);
+            return parseComparableDateFormat2(date);
         default: {
             return getDateOfText(date);
         }

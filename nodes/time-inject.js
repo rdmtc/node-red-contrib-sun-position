@@ -43,7 +43,7 @@ module.exports = function (RED) {
         if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                return hlp.getFormattedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                 /*
                 format = format || 0;
                 if (isNaN(format)) {
@@ -71,9 +71,9 @@ module.exports = function (RED) {
                         case 9: //timeformat_hour
                             return (Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000) / 3600);
                         case 10: //timeformat_YYYYMMDDHHMMSS
-                            return hlp.getComperableDateFormat(data.value);
+                            return hlp.getComparableDateFormat(data.value);
                         case 11: //timeformat_YYYYMMDD_HHMMSS
-                            return hlp.getComperableDateFormat2(data.value);
+                            return hlp.getComparableDateFormat2(data.value);
                         case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
                             return data.value.toLocaleDateString();
                         case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
@@ -136,6 +136,7 @@ module.exports = function (RED) {
         this.timeDays = config.timeDays;
         this.timeAltDays = config.timeAltDays;
         this.offset = config.offset || config.timeOffset || 0;
+        this.offsetType = config.offsetType || (this.offset === 0) ? 'none' : 'num';
         this.offsetMultiplier = config.offsetMultiplier || config.timeOffsetMultiplier || 60;
 
         this.property = config.property || '';
@@ -143,6 +144,7 @@ module.exports = function (RED) {
         this.timeAlt = config.timeAlt || '';
         this.timeAltType = config.timeAltType || 'none';
         this.timeAltOffset = config.timeAltOffset || 0;
+        this.timeAltOffsetType = config.timeAltOffsetType || (this.timeAltOffset === 0) ? 'none' : 'num';
         this.timeAltOffsetMultiplier = config.timeAltOffsetMultiplier || 60;
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
@@ -170,7 +172,8 @@ module.exports = function (RED) {
             if (node.timeType !== 'none' && node.positionConfig) {
                 // (srcNode, msg, vType, value, offset, next, days)
                 // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset, node.offsetMultiplier, 1);
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset, node.offsetMultiplier, 1, node.timeDays);
+                const nextTimeOffset = node.positionConfig.getFloatProp(node,msg, node.offsetType, node.offset);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, nextTimeOffset, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.error(node.nextTimeData.error);
@@ -188,7 +191,8 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
+                const nextTimeOffset = node.positionConfig.getFloatProp(node,msg, node.timeAltOffsetType, node.timeAltOffset);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, nextTimeOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.error(node.nextTimeAltData.error);
@@ -209,7 +213,7 @@ module.exports = function (RED) {
                 }
 
                 let millis = tsGetScheduleTime(node.nextTime, 10);
-                // node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms');
+                // node.debug('timeout ' + node.nextTime + ' is in ' + milis + 'ms');
                 const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
                     const millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
@@ -264,7 +268,7 @@ module.exports = function (RED) {
 
             if (!isFixedTime && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
-                    // node.debug('retrigger timecalc');
+                    // node.debug('retrigger');
                     doCreateTimeout(node, msg);
                 }, node.recalcTime);
             } else if (isFixedTime && node.intervalObj) {
@@ -319,8 +323,12 @@ module.exports = function (RED) {
                 doCreateTimeout(node, msg);
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
+                if (!node.positionConfig) {
+                    throw new Error('configuration missing!');
+                }
 
-                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, config.payloadOffset, config.payloadOffsetMultiplier);
+                const payloadOffset = node.positionConfig.getFloatProp(node,msg, config.payloadOffsetType, node.payloadOffset);
+                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, payloadOffset, config.payloadOffsetMultiplier);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -329,9 +337,12 @@ module.exports = function (RED) {
                     msg.payload = value;
                 }
 
-                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, config.addPayload1Offset, config.addPayload1OffsetMultiplier, config.addPayload1Days);
-                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, config.addPayload2Offset, config.addPayload2OffsetMultiplier, config.addPayload2Days);
-                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, config.addPayload3Offset, config.addPayload3OffsetMultiplier, config.addPayload3Days);
+                const addPayload1Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload1OffsetType, node.addPayload1Offset);
+                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, addPayload1Offset, config.addPayload1OffsetMultiplier, config.addPayload1Days);
+                const addPayload2Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload2OffsetType, node.addPayload2Offset);
+                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, addPayload2Offset, config.addPayload2OffsetMultiplier, config.addPayload2Days);
+                const addPayload3Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload3OffsetType, config.addPayload3Offset);
+                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, addPayload3Offset, config.addPayload3OffsetMultiplier, config.addPayload3Days);
 
                 node.send(msg);
             } catch (err) {
@@ -356,4 +367,12 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('time-inject', timeInjectNode);
+
+    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
+        const options = {
+            root: __dirname + '/static/',
+            dotfiles: 'deny'
+        };
+        res.sendFile(req.params[0], options);
+    });
 };

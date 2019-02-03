@@ -39,7 +39,7 @@ module.exports = function (RED) {
             // msg, flow, global, str, num, env
             data = RED.util.evaluateNodeProperty(value, type, node, msg);
         }
-        if (data === null || typeof data === undefined) {
+        if (data === null || typeof data === 'undefined') {
             throw new Error('could not evaluate ' + type + '.' + value);
         }
 
@@ -49,39 +49,6 @@ module.exports = function (RED) {
             throw new Error('could not evaluate format of ' + data);
         }
         return hlp.addOffset(result.value, offset, multiplier);
-    }
-
-    function tsGetPropData(node, msg, type, value, format, offset, multiplier, days) {
-        if (type === null || type === 'none' || type === '') {
-            if (value === '' || typeof value === 'undefined') {
-                return Date.now();
-            }
-
-            return value;
-        }
-
-        if (type === 'pdsCalcData') {
-            return node.positionConfig.getSunCalc(msg.ts);
-        }
-
-        if (type === 'pdmCalcData') {
-            return node.positionConfig.getMoonCalc(msg.ts);
-        }
-
-        if (type === 'entered' ||
-            type === 'pdsTime' ||
-            type === 'pdmTime' ||
-            type === 'date'
-        ) {
-            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
-            if (!data.error) {
-                return hlp.getFormatedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-            }
-
-            return data;
-        }
-
-        return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
     function timeCompNode(config) {
@@ -107,9 +74,9 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
                     if (config.result1Type === 'input') {
-                        resObj = hlp.getFormatedDateOut(inputData, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
                     } else {
-                        resObj = tsGetPropData(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
+                        resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }
 
                     node.debug('resObj ' + util.inspect(resObj));

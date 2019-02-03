@@ -516,7 +516,7 @@
             this.startOffsetAltMultiplier = multilpierUpdate(this.startOffsetAltMultiplier, 'startOffsetAltMultiplier');
             this.endOffsetAltMultiplier = multilpierUpdate(this.endOffsetAltMultiplier, 'endOffsetAltMultiplier');
 
-            if (this.statusOut === '' || this.statusOut === undefined) {
+            if (this.statusOut === '' || this.statusOut === 'undefined') {
                 this.statusOut = 3;
                 $('#node-input-statusOut').val(this.statusOut);
             }
@@ -532,7 +532,7 @@
                 icon: 'icons/node-red-contrib-sun-position/inputTypeNone.png',
                 hasValue: false
             };
-            const typeTime = {
+            const typeTimeEntered = {
                 value: 'entered',
                 label: 'timestamp ',
                 icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
@@ -603,14 +603,14 @@
 
             $('#node-input-startTime').typedInput({
                 default: this.startTimeType || 'entered',
-                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
+                types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $('#node-input-startTime').on('change focus focusin focusout', (_type, _value) => {
                 checkMsgOnStartOut(_type, _value);
             });
             $('#node-input-endTime').typedInput({
                 default: this.endTimeType || 'entered',
-                types: [typeTime, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
+                types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
             });
             $('#node-input-endTime').on('change focus focusin focusout', (_type, _value) => {
                 checkMsgOnEndOut(_type, _value);
@@ -618,7 +618,7 @@
             $('#node-input-startTimeAlt').typedInput({
                 default: this.startTimeAltType || 'none',
                 types: [typeTimeNone,
-                    typeTime,
+                    typeTimeEntered,
                     typeTimeSun,
                     typeTimeMoon,
                     'msg',
@@ -639,7 +639,7 @@
             $('#node-input-endTimeAlt').typedInput({
                 default: this.endTimeAltType || 'none',
                 types: [typeTimeNone,
-                    typeTime,
+                    typeTimeEntered,
                     typeTimeSun,
                     typeTimeMoon,
                     'msg',

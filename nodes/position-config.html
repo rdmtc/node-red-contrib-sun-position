@@ -156,7 +156,7 @@
         },
         oneditprepare() {
             if ((this.timezoneOffset === null) ||
-                (typeof this.timezoneOffset === undefined) ||
+                (typeof this.timezoneOffset === 'undefined') ||
                 (this.timezoneOffset === '')) {
                 this.timezoneOffset = ((new Date()).getTimezoneOffset() / -60);
                 $('#node-config-input-timezoneOffset').val(this.timezoneOffset);

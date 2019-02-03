@@ -144,7 +144,8 @@ function getTypes() { // eslint-disable-line no-unused-vars
             value: 'dateEntered',
             label: 'date',
             icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
-            hasValue: true
+            hasValue: true,
+            validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
         TimePredefined: {
             value: 'predefined',
@@ -365,16 +366,22 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
     });
 }
 
-function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
+function appendOptions(node, i18N ,parent, elementName, limit) { // eslint-disable-line no-unused-vars
     const groups = SelectFields[elementName + 'Groups'];
     const elements = SelectFields[elementName];
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-        const group = $('<optgroup/>', {label: node._('time-span.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+        const group = $('<optgroup/>', {label: node._(i18N + '.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-            if (groups[gIndex].id === elements[eIndex].group && (!limit || limit(elements[eIndex].id))) {
-                group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-span.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+            if (groups[gIndex].id === elements[eIndex].group) {
+                if (limit) {
+                    if (limit(elements[eIndex].id)) {
+                        group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                    }
+                } else {
+                    group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                }
             }
         }
     }
@@ -388,12 +395,54 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
         typeField: $('#node-input-' + data.typeProp),
         types: data.types
     });
-    if (data.onChange) {
-        tIField.on('change', data.onChange);
-    }
     if (data.width) {
         tIField.typedInput('width', data.width);
     }
+    if (data.onChange) {
+        tIField.on('change', data.onChange);
+    }
     return tIField;
+}
+
+// ************************************************************************************************
+function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
+    // console.log('node=' + node + ' i18N=' + i18N + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+    const $inputSelect = $('#node-input-' + inputSelectName);
+    const $inputBox = $('#node-input-' + inputBoxName);
+    $inputSelect.attr('base-width', width);
+    $inputSelect.attr('linked-input', inputBoxName);
+    $inputSelect.attr('i18N-name', i18N);
+
+    appendOptions(node, i18N, $inputSelect, optionElementName);
+    autocomplete($('#node-input-' + inputBoxName), dataList);
+
+    $inputSelect.on('change', (_type, _value) => {
+        // const $inputSelect = $( this ); // $('#node-input-' + inputSelectName);
+        const inputBoxName = $inputSelect.attr('linked-input');
+        let width = Number($inputSelect.attr('base-width'));
+        const $inputBox = $('#node-input-' + inputBoxName);
+
+        if (Number($inputSelect.val()) === 99) {
+            $inputSelect.css({width: '100px'});
+            width = (205 + width);
+            $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
+            $inputBox.show();
+            if (!isNaN($inputBox.val())) {
+                const i18N = $inputSelect.attr('i18N-name');
+                $inputBox.val(node._(i18N + '.timeFormat.default'));
+            }
+        } else {
+            $inputBox.hide();
+            width = (100 + width);
+            $inputSelect.css({width: 'calc(100% - ' + width + 'px)'});
+        }
+    });
+    if (value && isNaN(value)) {
+        $inputSelect.val(99);
+        $inputBox.val(value);
+    } else {
+        $inputSelect.val(Number(value));
+    }
+    $inputSelect.change();
 }
 // #endregion functions

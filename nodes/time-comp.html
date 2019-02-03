@@ -290,7 +290,7 @@
             result1Value: {
                 value: '',
                 validate(v) {
-                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1ValueType: {
@@ -300,14 +300,18 @@
                 value: 0,
                 required: false,
                 validate(v) {
-                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined);
+                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: false,
                 validate(v) {
-                    return (RED.validators.number()(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === undefined || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none');
+                    return (RED.validators.number()(v) ||
+                        $('#node-input-result1').typedInput('type') === 'none' ||
+                        this.result1Type === 'undefined' ||
+                        $('#node-input-result1OffsetType').typedInput('type') === 'none' ||
+                        this.result1OffsetType === 'none');
                 }
             },
             result1OffsetType: {
