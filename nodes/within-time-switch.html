@@ -332,7 +332,7 @@
             startTimeAlt: {
                 value: '',
                 required: false,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.typedInput('startTimeAltType')(v) || ($(
                         '#node-input-propertyStart').typedInput(
                         'type') === 'none');
@@ -344,7 +344,7 @@
             startOffsetAlt: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyStart').typedInput('type') === 'none') ||
                     ($('#node-input-startTimeAlt').typedInput('type') === 'none');
@@ -353,7 +353,7 @@
             startOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyStart').typedInput('type') === 'none') ||
                     ($('#node-input-startTimeAlt').typedInput('type') === 'none');
@@ -370,7 +370,7 @@
             endTimeAlt: {
                 value: '',
                 required: false,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
                         'type') === 'none');
                 }
@@ -381,7 +381,7 @@
             endOffsetAlt: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');
@@ -390,7 +390,7 @@
             endOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');

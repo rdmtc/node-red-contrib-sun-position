@@ -22,10 +22,6 @@ const SelectFields = {
         {id: 16, group: 'default', label: 'Month'},
         {id: 17, group: 'default', label: 'Year'},
         {id: 18, group: 'spec', label: 'Day of Week'}
-    ], operatorTypesShort: [
-        {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
-        {selection: /^(11,)?12,13,14$/, label: 'T'},
-        {selection: /^15,16(,17)?(,18)?$/, label: 'D'}
     ], outputTSFormatsGroups: [
         {id: 'time', label: 'timestamp (number)'},
         {id: 'timeRounded', label: 'timestamp rounded (number)'},
@@ -107,6 +103,10 @@ function getOperator(nr) { // eslint-disable-line no-unused-vars
 
 function getMultiplier(nr) { // eslint-disable-line no-unused-vars
     return SelectFields.multiplier[nr];
+}
+
+function getParseFormats(nr) { // eslint-disable-line no-unused-vars
+    return SelectFields.parseFormats[nr];
 }
 
 function getTypes() { // eslint-disable-line no-unused-vars
@@ -329,6 +329,15 @@ $.fn.getCursorPosition = function () {
     }
 };
 
+function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-vars
+    if (data[id] === null || typeof data[id] === 'undefined') {
+        // let idHtml = "#node-input-" + id;
+        // data[id] = newVal;
+        $('#node-input-' + id).val(newVal);
+        // console.log('not initialized value !! "' + id + '" = "' + newVal + '" - ' + data[id]); // eslint-disable-line
+    }
+}
+
 function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-vars
     const dataList = autocompleteFormats[dataListID];
     // don't navigate away from the field on tab when selecting an item
@@ -388,23 +397,52 @@ function appendOptions(node, i18N ,parent, elementName, limit) { // eslint-disab
 }
 
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
-    const tIField = $('#node-input-' + data.valueProp);
-    $('#node-input-' + data.typeProp).val(node[data.typeProp]);
-    tIField.typedInput({
-        default: node[data.valueProp] || data.defaultType,
-        typeField: $('#node-input-' + data.typeProp),
+    const tInputField = $('#node-input-' + data.valueProp);
+    const typeField = $('#node-input-' + data.typeProp);
+    if (typeof node[data.typeProp] !== 'undefined') {
+        if (node[data.typeProp] === null ||
+            typeof node[data.typeProp] === 'undefined') {
+            node[data.typeProp] = data.defaultType;
+            typeField.val(data.defaultType);
+        } else {
+            typeField.val(node[data.typeProp]);
+        }
+    }
+    if (typeof node[data.valueProp] !== 'undefined') {
+        if (node[data.valueProp] === null ||
+            typeof node[data.valueProp] === 'undefined') {
+            node[data.valueProp] = data.defaultValue;
+            tInputField.val(node[data.defaultValue]);
+        } else {
+            tInputField.val(node[data.valueProp]);
+        }
+    }
+    tInputField.typedInput({
+        typeField: typeField,
         types: data.types
     });
     if (data.width) {
-        tIField.typedInput('width', data.width);
+        tInputField.typedInput('width', data.width);
     }
     if (data.onChange) {
-        tIField.on('change', data.onChange);
+        tInputField.on('change', data.onChange);
     }
-    return tIField;
+    return tInputField;
+}
+
+function initDaysCheckbox(node, id) { // eslint-disable-line no-unused-vars
+    if (node[id] === '*' || typeof node[id] === 'undefined') {
+        $('#time-inject-' + id + ' input[type=checkbox]').prop('checked', true);
+    } else {
+        $('#time-inject-' + id + ' input[type=checkbox]').removeAttr('checked');
+        node[id].split(',').forEach(v => {
+            $('#time-inject-' + id + ' [value=' + v + ']').prop('checked', true);
+        });
+    }
 }
 
 // ************************************************************************************************
+
 function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
     // console.log('node=' + node + ' i18N=' + i18N + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     const $inputSelect = $('#node-input-' + inputSelectName);
@@ -445,4 +483,112 @@ function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optio
     }
     $inputSelect.change();
 }
+// ************************************************************************************************
+
+function addLabel(row, forEl, symb, text) { // eslint-disable-line no-unused-vars
+    const lbl = $('<label class="' + forEl + '-lbl"/>').attr('for', forEl).appendTo(row);
+    if (symb) {
+        lbl.append('<i class= "' + symb + '" >');
+    }
+    if (text) {
+        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; */">' + text + '</span>');
+        lbl.append(span);
+        lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
+    } else {
+        lbl.attr('style', 'margin-left: 5px; width:20px');
+    }
+    return lbl;
+}
+
+function getMultiselectText(val, length, types) { // eslint-disable-line no-unused-vars
+    for (let index = 0; index < types.length; index++) {
+        if (types[index].selection.test(val)) {
+            return types[index].label;
+        }
+    }
+    if (length > 0) {
+        return length;
+    }
+    return 'NA';
+}
+
+function setMultiselect(value, field, types) { // eslint-disable-line no-unused-vars
+    if (value === '*' || typeof value === 'undefined') {
+        field.find('#option-checkboxes input[type=checkbox]').prop('checked', true);
+        field.find('.multiselect-option').text(getMultiselectText('*', 99, types));
+    } else {
+        field.find('#option-checkboxes input[type=checkbox]').removeAttr('checked');
+        const elm = value.split(',');
+        elm.forEach(v => {
+            field.find('#option-checkboxes [value=' + v + ']').prop('checked', true);
+        });
+        field.find('.multiselect-option').text(getMultiselectText(value, elm.length, types));
+    }
+}
+
+function multiselect(node, parent, elementName, id) { // eslint-disable-line no-unused-vars
+    const types = SelectFields[elementName + 'Short'];
+    const getSelection = function getCBText(parent) {
+        const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
+        const elements = value.map((_, el) => { return $(el).val(); }).get();
+        parent.find('.multiselect-option').text(getMultiselectText(elements.join(','), elements.length, types));
+    };
+    const multiselect = $('<div/>', {class: 'multiselect', id}).appendTo(parent);
+    const selectbox = $('<div/>', {
+        class: 'selectBox',
+        html: $('<select/>', {
+            id: 'multiselect-select',
+            class: 'multiselect-select',
+            html: $('<option></option>', {
+                id: 'multiselect-option',
+                class: 'multiselect-option'
+            }).text('x')
+        })
+    }).appendTo(multiselect);
+    $('<div/>', {class: 'overSelect'}).appendTo(selectbox);
+    const list = $('<div/>', {
+        id: 'option-checkboxes',
+        class: 'option-checkboxes'
+    }).appendTo(multiselect);
+    list.attr('expanded', 'false');
+    const groups = SelectFields[elementName + 'Groups'];
+    const groupLength = groups.length;
+    const elements = SelectFields[elementName];
+    const elementsLength = elements.length;
+    for (let gIndex = 0; gIndex < groupLength; gIndex++) {
+        list.append($('<label></label>', {
+            class: 'header',
+            html: node._('time-comp.' + elementName + 'Groups.' + gIndex)
+        }));
+        for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
+            if (groups[gIndex].id === elements[eIndex].group) {
+                list.append($('<label></label>', {
+                    for: id + '-' + elements[eIndex].id,
+                    html: [$('<input>', {
+                        class: id + '-checkbox',
+                        type: 'checkbox',
+                        value: elements[eIndex].id,
+                        id: id + '-' + elements[eIndex].id
+                    }).on('change', _event => {
+                        getSelection(multiselect);
+                    }), node._('time-comp.' + elementName + '.' + eIndex)]
+                }));
+            // elements[eIndex].label
+            }
+        }
+    }
+    selectbox.on('click', _event => {
+        const checkboxes = parent.find('.option-checkboxes');
+        const expanded = (checkboxes.attr('expanded') === 'true');
+        if (!expanded) {
+            checkboxes.css('display', 'block');
+            checkboxes.attr('expanded', 'true');
+        } else {
+            checkboxes.css('display', 'none');
+            checkboxes.attr('expanded', 'false');
+        }
+    });
+    return multiselect;
+}
+
 // #endregion functions

@@ -5,21 +5,21 @@
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row time-input">
+  <div class="form-row block-noindent time-input">
       <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
-      <input type="text" id="node-input-input" style="width:70%">
+      <input type="text" id="node-input-input">
       <input type="hidden" id="node-input-inputType">
   </div>
-  <div class="form-row time-row-inputFormat hidden">
+  <div class="form-row block-indent1 time-row-inputFormat hidden">
       <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
-      <select style="width:70%" id="node-input-inputFormatsel">
-      <input type="text" id="node-input-inputFormat" style="width:50%; margin-left: 5px;">
+      <select id="node-input-inputFormatsel">
+      <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
   </div>
-  <div class="form-row time-row-inputOffset hidden">
+  <div class="form-row block-indent1 time-row-inputOffset hidden">
       <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
       <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.offset">
       <input type="hidden" id="node-input-inputOffsetType">
-      <select style="width:100px" id="node-input-inputOffsetMultiplier">
+      <select id="node-input-inputOffsetMultiplier" class="node-input-multiplier">
       </select>
   </div>
   <hr>
@@ -35,28 +35,28 @@
           <option value="true" data-i18n="time-comp.label.checkall"></option>
       </select>
   </div>
-  <hr class="time-comp-result">
-  <div class="form-row time-result1">
+  <hr>
+  <div class="form-row block-noindent time-result1">
       <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-comp.label.result1"></span></label>
-      <input type="text" id="node-input-result1" style="width:70%">
+      <input type="text" id="node-input-result1" class="row-full-width">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row time-result1Value hidden">
+  <div class="form-row block-indent1 time-result1Value hidden">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
-      <input type="text" id="node-input-result1Value" style="width:70%">
+      <input type="text" id="node-input-result1Value">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row time-row-result1Format hidden">
+  <div class="form-row block-indent2 time-row-result1Format hidden">
       <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
-      <select style="width:70%" id="node-input-result1FormatSel">
+      <select id="node-input-result1FormatSel">
       </select>
-      <input type="text" id="node-input-result1Format" style="width:50%; margin-left: 5px;">
+      <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row time-row-result1Offset hidden">
+  <div class="form-row block-indent2 time-row-result1Offset hidden">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
       <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.offset">
       <input type="hidden" id="node-input-result1OffsetType">
-      <select style="width:100px" id="node-input-result1OffsetMultiplier">
+      <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
       </select>
   </div>
   <hr>
@@ -66,6 +66,39 @@
   </div>
 </script>
 <style>
+        hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
     .node-input-rule-operator {
         width: 60px;
         margin-left: 5px;
@@ -75,12 +108,10 @@
         margin-left: 5px;
     }
     .node-input-rule-operandFormatIp {
-        width:0px;
         margin-left: 5px;
         text-align: left;
     }
     .node-input-rule-operandFormatSel {
-        width:70px;
         margin-left: 5px;
         text-align: left;
     };
@@ -88,15 +119,16 @@
         margin-left: 5px;
     }
     .node-input-rule-multiplier {
-        width:100px;
+        width: 100px;
+        margin-left: 5px;
+    }
+    .node-input-multiplier {
+        width: 125px;
         margin-left: 5px;
     }
     .node-input-rule-property {
         margin-left: 5px;
         width:70px
-    }
-    .time-comp-count {
-        width: 40px !important;
     }
     .multiselect {
         width: 60px;
@@ -252,14 +284,16 @@
             inputFormat: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return (v !== '');
                 }
             },
             inputOffset: {
                 value: 0,
                 required: true,
-                validate: RED.validators.number() || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none'
+                validate: (v) => {
+                    return RED.validators.typedInput('inputOffsetType')(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
+                }
             },
             inputOffsetType: {
                 value: 'none'
@@ -267,7 +301,9 @@
             inputOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: RED.validators.number() || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none'
+                validate: (v) => {
+                    return RED.validators.number()(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
+                }
             },
             // #endregion input
             // #region rules
@@ -289,7 +325,7 @@
             },
             result1Value: {
                 value: '',
-                validate(v) {
+                validate: (v) => {
                     return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
@@ -299,19 +335,19 @@
             result1Format: {
                 value: 0,
                 required: false,
-                validate(v) {
+                validate: (v) => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: false,
-                validate(v) {
-                    return (RED.validators.number()(v) ||
+                validate: (v) => {
+                    return RED.validators.typedInput('result1OffsetType')(v) ||
                         $('#node-input-result1').typedInput('type') === 'none' ||
                         this.result1Type === 'undefined' ||
                         $('#node-input-result1OffsetType').typedInput('type') === 'none' ||
-                        this.result1OffsetType === 'none');
+                        this.result1OffsetType === 'none';
                 }
             },
             result1OffsetType: {
@@ -319,8 +355,10 @@
             },
             result1OffsetMultiplier: {
                 value: 60000,
-                required: false,
-                validate: RED.validators.number() || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none'
+                required: true,
+                validate: (v) => {
+                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
+                }
             }
             // #endregion result1
         },
@@ -372,702 +410,334 @@
         align: 'left',
         oneditprepare() {
             const node = this;
-            // #region definition
-            const SelectFields = {
-                operatorsGroups: [
-                    {id: 'cmp', label: 'compate Timestamp'}
-                ],
-                operators: [
-                    {id: 1, group: 'cmp', label: '==', text: 'equal'},
-                    {id: 2, group: 'cmp', label: '!=', text: 'unequal'},
-                    {id: 3, group: 'cmp', label: '>', text: 'greater'},
-                    {id: 4, group: 'cmp', label: '>=', text: 'greater or equal'},
-                    {id: 5, group: 'cmp', label: '<', text: 'lesser'},
-                    {id: 6, group: 'cmp', label: '<=', text: 'lesser or equal'}
-                ], operatorTypesGroups: [
-                    {id: 'std', label: 'include into compare'},
-                    {id: 'spec', label: 'special'}
-                ], operatorTypes: [
-                    {id: 11, group: 'std', label: 'Milliseconds'},
-                    {id: 12, group: 'std', label: 'Seconds'},
-                    {id: 13, group: 'std', label: 'Minutes'},
-                    {id: 14, group: 'std', label: 'Hours'},
-                    {id: 15, group: 'std', label: 'Day of Month'},
-                    {id: 16, group: 'std', label: 'Month'},
-                    {id: 17, group: 'std', label: 'Year'},
-                    {id: 18, group: 'spec', label: 'Day of Week'}
-                ], operatorTypesShort: [
+            const setup = function(node) {
+                /* global getOperator getMultiplier getParseFormats getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
+                const types = getTypes();
+                const operatorTypesShort = [
                     {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
                     {selection: /^(11,)?12,13,14$/, label: 'T'},
-                    {selection: /^15,16(,17)?(,18)?$/, label: 'D'}
-                ], outputFormatsGroups: [
-                    {id: 'number', label: 'Number'},
-                    {id: 'string', label: 'Text (string)'},
-                    {id: 'time', label: 'time (number) since emit'},
-                    {id: 'dayofweek', label: 'day of week'},
-                    {id: 'other', label: 'Other'}
-                ], outputFormats: [
-                    {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
-                    {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS'},
-                    {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS'},
-                    {id: 1, group: 'string', name: 'ECMA262', label: 'ECMA-262', add: 'standard JSON Date representation'},
-                    {id: 2, group: 'string', name: 'local', label: 'local date and time'},
-                    {id: 14, group: 'string', name: 'localLong', label: 'local date and time enh.'},
-                    {id: 3, group: 'string', name: 'localTime', label: 'local time'},
-                    {id: 13, group: 'string', name: 'localTimeLong', label: 'ocal time enh.'},
-                    {id: 12, group: 'string', name: 'localDate', label: 'local date'},
-                    {id: 15, group: 'string', name: 'localDateLong', label: 'local date long'},
-                    {id: 4, group: 'string', name: 'UTC', label: 'UTC date and time'},
-                    {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
-                    {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
-                    {id: 7, group: 'time', name: 'sec', label: 'seconds'},
-                    {id: 8, group: 'time', name: 'min', label: 'minutes'},
-                    {id: 9, group: 'time', name: 'hour', label: 'hours'},
-                    {id: 16, group: 'dayofweek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
-                    {id: 17, group: 'dayofweek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
-                    {id: -1, group: 'other', name: 'object', label: 'as object'},
-                    {id: 99, group: 'other', name: 'free definition', label: 'Other'}
-                ], parseFormatsGroups: [
-                    {id: 'number', label: 'Number'},
-                    {id: 'string', label: 'Text (string)'},
-                    {id: 'other', label: 'Other'}
-                ], parseFormats: [
-                    {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
-                    {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-                    {id: 2, group: 'string', label: 'various - try different Formats, prefere european formats', add: 'will try different formats, prefere european formats'},
-                    {id: 3, group: 'string', label: 'various - try different Formats, prefere american formats', add: 'will try different formats, prefere european formats'},
-                    {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
-                    {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
-                    {id: 99, group: 'other', label: 'free definition', add: 'xxx'}
-                ], multiplierGroups: [
-                    {id: 'std', label: 'Standard'},
-                    {id: 'other', label: 'Special'}
-                ], multiplier: [
-                    {id: 1, group: 'std', label: 'milliseconds'},
-                    {id: 1000, group: 'std', label: 'seconds'},
-                    {id: 60000, group: 'std', label: 'minutes'},
-                    {id: 3600000, group: 'std', label: 'hours'},
-                    {id: 86400000, group: 'std', label: 'days'},
-                    {id: 604800000, group: 'other', label: 'weeks'},
-                    {id: -1, group: 'other', label: 'month'},
-                    {id: -2, group: 'other', label: 'year'}
-                ]
-            };
-            const typeUnlimited = {
-                value: 'none',
-                label: 'no limitation',
-                // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
-                hasValue: false
-            };
-            const typeUndefined = {
-                value: 'none',
-                label: 'not used',
-                // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
-                hasValue: false
-            };
-            const typeMsgPayload = {
-                value: 'msgPayload',
-                label: 'msg.payload',
-                hasValue: false
-            };
-            const typeMsgTs = {
-                value: 'msgTs',
-                label: 'msg.ts',
-                hasValue: false
-            };
-            const typeTimeEntered = {
-                value: 'entered',
-                label: 'time (current day)',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
-                hasValue: true,
-                validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
-            };
-            const typeDateEntered = {
-                value: 'dateEntered',
-                label: 'date',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
-                hasValue: true
-            };
-            /*
-            const typeTimePedefined = {
-                value: 'predefined',
-                label: 'time (current day)',
-                options: ['midnight (current day)', 'noon (current day)', 'last this month (0:00)']
-            }; */
-            const typeTimeSun = {
-                value: 'pdsTime',
-                label: 'sun time ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
-                options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
-                    'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
-                    'civilDusk', 'blueHourDuskEnd', 'amateurDusk', 'astronomicalDusk', 'nadir']
-            };
-            const typeTimeMoon = {
-                value: 'pdmTime',
-                label: 'moon time ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
-                options: ['rise', 'set']
-            };
-            const typeSunCalc = {
-                value: 'pdsCalcData',
-                label: 'sun caclucaltion',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
-                hasValue: false
-            };
-            const typeMoonCalc = {
-                value: 'pdmCalcData',
-                label: 'moon caclucaltion',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
-                hasValue: false
-            };
-            const dateParseFormat = [
-                {label: 'yy   Year (2 digits)', value: 'yy'},
-                {label: 'yyyy Year (4 digits)', value: 'yyyy'},
-                {label: 'M    Month (1 digit)', value: 'M'},
-                {label: 'MM   Month (2 digits)', value: 'MM'},
-                {label: 'MMM  Month (name or abbr.)', value: 'MMM'},
-                {label: 'NNN  Month (abbr.)', value: 'NNN'},
-                {label: 'd    Day of Month (1 digit)', value: 'd'},
-                {label: 'dd   Day of Month (2 digits)', value: 'dd'},
-                {label: 'E    Day of Week (abbr)', value: 'E'},
-                {label: 'EE   Day of Week (name)', value: 'EE'},
-                {label: 'h    Hour (1 digit 1-12)', value: 'h'},
-                {label: 'hh   Hour (2 digits 1-12)', value: 'hh'},
-                {label: 'H    Hour (1 digit 0-23)', value: 'H'},
-                {label: 'HH   Hour (2 digits 0-23)', value: 'HH'},
-                {label: 'K    Hour (1 digit 0-11)', value: 'K'},
-                {label: 'KK   Hour (2 digits 0-11)', value: 'KK'},
-                {label: 'k    Hour (1 digit 1-24)', value: 'k'},
-                {label: 'kk   Hour (2 digits 1-24)', value: 'kk'},
-                {label: 'm    Minute (1 digit)', value: 'm'},
-                {label: 'mm   Minute (2 digits)', value: 'mm'},
-                {label: 's    Second (1 digit)', value: 's'},
-                {label: 'ss   Second (2 digits)', value: 'ss'},
-                {label: 'll   Milliseconds (2 digits)', value: 'll'},
-                {label: 'lll  Milliseconds (3 digits)', value: 'lll'},
-                {label: 't    AM/PM (1 digit)', value: 't'},
-                {label: 'tt   AM/PM (2 digits)', value: 'tt'}];
-            const dateOutFormat = [{label: 'yyyy Year (4 digits)', value: 'yyyy'},
-                {label: 'yy   Year (2 digits)', value: 'yy'},
-                {label: 'M    Month (1 digit)', value: 'M'},
-                {label: 'MM   Month (2 digits)', value: 'MM'},
-                {label: 'MMM  Month (abbr.)', value: 'MMM'},
-                {label: 'NNN  Month (name)', value: 'NNN'},
-                {label: 'd    Day of Month (1 digit)', value: 'd'},
-                {label: 'dd   Day of Month (2 digits)', value: 'dd'},
-                {label: 'E    Day of Week (abbr)', value: 'E'},
-                {label: 'EE   Day of Week (name)', value: 'EE'},
-                {label: 'h    Hour (1-12)', value: 'h'},
-                {label: 'hh   Hour (2 digits 01-12)', value: 'hh'},
-                {label: 'H    Hour (0-23)', value: 'H'},
-                {label: 'HH   Hour (2 digits 00-23)', value: 'HH'},
-                {label: 'K    Hour (0-11)', value: 'K'},
-                {label: 'KK   Hour (2 digits 00-11)', value: 'KK'},
-                {label: 'k    Hour (1-24)', value: 'k'},
-                {label: 'kk   Hour (2 digits 01-24)', value: 'kk'},
-                {label: 'm    Minute (0-59)', value: 'm'},
-                {label: 'mm   Minute (2 digits 00-59)', value: 'mm'},
-                {label: 's    Second (0-59)', value: 's'},
-                {label: 'ss   Second (2 digits 00-59)', value: 'ss'},
-                {label: 'l    Milliseconds (0-999)', value: 'l'},
-                {label: 'll   Milliseconds (2 digits 00-99)', value: 'll'},
-                {label: 'lll  Milliseconds (3 digits 000-999)', value: 'lll'},
-                {label: 't    AM/PM (1 digit - Lowercase)', value: 't'},
-                {label: 'tt   AM/PM (2 digits - Lowercase)', value: 'tt'},
-                {label: 'T    AM/PM (1 digit - Uppercase)', value: 'T'},
-                {label: 'TT   AM/PM (2 digits - Uppercase)', value: 'TT'},
-                {label: 'Z    timezone (abbr.)', value: 'Z'},
-                {label: 'o    timezone offset (abbr.)', value: 'o'},
-                {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'},
-                {label: 'x    Day difference', value: 'x'},
-                {label: 'xx   Day difference (name)', value: 'xx'}];
-            // #endregion definitions
-            // #region functions
-            $.fn.getCursorPosition = function () {
-                const input = this.get(0);
-                if (!input) {
-                    return;
-                } // No (input) element found
-
-                if ('selectionStart' in input) {
-                    // Standard-compliant browsers
-                    return input.selectionStart;
-                }
-                if (document.selection) {
-                    // IE
-                    input.focus();
-                    const sel = document.selection.createRange();
-                    const selLen = document.selection.createRange().text.length;
-                    sel.moveStart('character', -input.value.length);
-                    return sel.text.length - selLen;
-                }
-            };
-            function addLabel(row, forEl, symb, text) {
-                const lbl = $('<label class="' + forEl + '-lbl"/>').attr('for', forEl).appendTo(row);
-                if (symb) {
-                    lbl.append('<i class= "' + symb + '" >');
-                }
-
-                if (text) {
-                    const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; */">' + text + '</span>');
-                    lbl.append(span);
-                    lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
-                } else {
-                    lbl.attr('style', 'margin-left: 5px; width:20px');
-                }
-
-                return lbl;
-            }
-
-            function getMultiselectText(val, length, types) {
-                for (let index = 0; index < types.length; index++) {
-                    if (types[index].selection.test(val)) {
-                        return types[index].label;
-                    }
-                }
-                if (length > 0) {
-                    return length;
-                }
-                return 'NA';
-            }
-
-            function setMultiselect(value, field, types) {
-                if (value === '*' || typeof value === 'undefined') {
-                    field.find('#option-checkboxes input[type=checkbox]').prop('checked', true);
-                    field.find('.multiselect-option').text(getMultiselectText('*', 99, types));
-                } else {
-                    field.find('#option-checkboxes input[type=checkbox]').removeAttr('checked');
-                    const elm = value.split(',');
-                    elm.forEach(v => {
-                        field.find('#option-checkboxes [value=' + v + ']').prop('checked', true);
-                    });
-                    field.find('.multiselect-option').text(getMultiselectText(value, elm.length, types));
-                }
-            }
-
-            function multiselect(parent, elementName, id) {
-                const types = SelectFields[elementName + 'Short'];
-
-                const getSelection = function getCBText(parent) {
-                    const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
-                    const elements = value.map((_, el) => { return $(el).val(); }).get();
-                    parent.find('.multiselect-option').text(getMultiselectText(elements.join(','), elements.length, types));
-                };
-
-                const multiselect = $('<div/>', {class: 'multiselect', id}).appendTo(parent);
-
-                const selectbox = $('<div/>', {
-                    class: 'selectBox',
-                    html: $('<select/>', {
-                        id: 'multiselect-select',
-                        class: 'multiselect-select',
-                        html: $('<option></option>', {
-                            id: 'multiselect-option',
-                            class: 'multiselect-option'
-                        }).text('x')
-                    })
-                }).appendTo(multiselect);
-                $('<div/>', {class: 'overSelect'}).appendTo(selectbox);
-
-                const list = $('<div/>', {
-                    id: 'option-checkboxes',
-                    class: 'option-checkboxes'
-                }).appendTo(multiselect);
-                list.attr('expanded', 'false');
-
-                const groups = SelectFields[elementName + 'Groups'];
-                const groupLength = groups.length;
-                const elements = SelectFields[elementName];
-                const elementsLength = elements.length;
-
-                for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    list.append($('<label></label>', {
-                        class: 'header',
-                        html: node._('time-comp.' + elementName + 'Groups.' + gIndex)
-                    }));
-                    for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-                        if (groups[gIndex].id === elements[eIndex].group) {
-                            list.append($('<label></label>', {
-                                for: id + '-' + elements[eIndex].id,
-                                html: [$('<input>', {
-                                    class: id + '-checkbox',
-                                    type: 'checkbox',
-                                    value: elements[eIndex].id,
-                                    id: id + '-' + elements[eIndex].id
-                                }).on('change', _event => {
-                                    getSelection(multiselect);
-                                }), node._('time-comp.' + elementName + '.' + eIndex)]
-                            }));
-                        // elements[eIndex].label
-                        }
-                    }
-                }
-
-                selectbox.on('click', _event => {
-                    const checkboxes = parent.find('.option-checkboxes');
-                    const expanded = (checkboxes.attr('expanded') === 'true');
-                    if (!expanded) {
-                        checkboxes.css('display', 'block');
-                        checkboxes.attr('expanded', 'true');
-                    } else {
-                        checkboxes.css('display', 'none');
-                        checkboxes.attr('expanded', 'false');
-                    }
-                });
-
-                return multiselect;
-            }
-
-            function autocomplete(inputBox, dataList) {
-            // don't navigate away from the field on tab when selecting an item
-                inputBox.on('keydown', function (event) {
-                    if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete('instance') && $(this).autocomplete('instance').menu.active) {
-                        event.preventDefault();
-                    }
-                }).autocomplete({
-                    minLength: 0,
-                    source(request, response) {
-                        if (inputBox.getCursorPosition() < request.term.length) {
-                            return;
-                        }
-
-                        // delegate back to autocomplete, but extract the last term
-                        const term = request.term.split(/\W+/).pop();
-                        const result = dataList.filter(x => x.value.startsWith(term));
-                        response(result);
-                    },
-                    focus() {
-                        // prevent value inserted on focus
-                        return false;
-                    },
-                    select(event, ui) {
-                        const terms = this.value.split(/\W+/);
-                        // remove the current input
-                        terms.pop();
-                        // add the selected item
-                        terms.push(ui.item.value);
-                        // add placeholder to get the comma-and-space at the end
-                        terms.push('');
-                        this.value = terms.join(' ');
-                        return false;
-                    }
-                });
-            }
-
-            function appendOptions(parent, elementName) {
-                const groups = SelectFields[elementName + 'Groups'];
-                const elements = SelectFields[elementName];
-                const groupLength = groups.length;
-                const elementsLength = elements.length;
-                for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-                    const group = $('<optgroup/>', {label: node._('time-comp.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
-                    for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
-                        if (groups[gIndex].id === elements[eIndex].group) {
-                            group.append($('<option></option>').val(elements[eIndex].id).text(node._('time-comp.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
-                        }
-                    }
-                }
-            }
-            // #endregion functions
-            // #region input
-            $('#node-input-inputType').val(node.inputType);
-            $('#node-input-input').typedInput({
-                default: node.inputType || typeMsgPayload.value,
-                typeField: $('#node-input-inputType'),
-                types: [typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env']
-            });
-            $('#node-input-input').on('change', (_type, _value) => {
-                const opType = $('#node-input-input').typedInput('type');
-                if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                    $('.time-row-inputFormat').hide();
-                    $('.time-row-inputOffset').show();
-                } else if (opType === typeDateEntered.value || opType === 'msg' || opType === typeMsgPayload.value || opType === typeMsgTs.value || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                    $('.time-row-inputFormat').show();
-                    $('.time-row-inputOffset').show();
-                } else {
-                    $('.time-row-inputFormat').hide();
-                    $('.time-row-inputOffset').hide();
-                }
-            });
-            const inputFormatSelField = $('#node-input-inputFormatsel');
-            appendOptions(inputFormatSelField, 'parseFormats');
-            autocomplete($('#node-input-inputFormat'), dateParseFormat);
-            inputFormatSelField.on('change', (_type, _value) => {
-                const inputFormatIpField = $('#node-input-inputFormat');
-                const inputFormatSelField = $('#node-input-inputFormatsel');
-                if (Number(inputFormatSelField.val()) === 99) {
-                    inputFormatIpField.show();
-                    $('#node-input-inputFormat').css({width: '40%'});
-                    inputFormatSelField.css({width: '30%'});
-                    if (!isNaN(inputFormatIpField.val())) {
-                        inputFormatIpField.val(node._('time-comp.timeFormat.default'));
-                    }
-                } else {
-                    inputFormatIpField.hide();
-                    inputFormatSelField.css({width: '70%'});
-                }
-            });
-            if (isNaN(node.inputFormat)) {
-                inputFormatSelField.val(99);
-            } else {
-                inputFormatSelField.val(Number(node.inputFormat));
-            }
-
-            inputFormatSelField.change();
-            const inputMultiplierField = $('#node-input-inputOffsetMultiplier');
-            appendOptions(inputMultiplierField, 'multiplier');
-            inputMultiplierField.val(node.inputOffsetMultiplier);
-            // #endregion input
-            // #region rule-container
-            function resizeRule(rule) {
-                const newWidth = rule.width() - 10;
-                // const operatorField = rule.find('.node-input-rule-operator');
-                const operandField = rule.find('.node-input-rule-operand');
-                const formatSelField = rule.find('.node-input-rule-operandFormatSel');
-                const formatIpField = rule.find('.node-input-rule-operandFormatIp');
-                const offsetField = rule.find('.node-input-rule-offset');
-                const multipierField = rule.find('.node-input-rule-multipier');
-                const propertyField = rule.find('.node-input-rule-property');
-                const propertyLblSpanField = rule.find('.node-input-rule-property-span');
-                const propertyLblField = rule.find('.node-input-rule-property-lbl');
-                const lblWidth = 25;
-                // row1
-                const operatorWidth = 120;
-                operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
-                // row2
-                let formatWidth = (newWidth - lblWidth - 18);
-                if (Number(formatSelField.val()) === 99) {
-                    formatIpField.show();
-                    formatWidth = Math.floor(formatWidth / 3);
-                    formatSelField.width(formatWidth - 5);
-                    formatIpField.width((formatWidth * 2) - 10);
-                } else {
-                    formatIpField.hide();
-                    // formatIpField.width(0);
-                    formatSelField.width(formatWidth);
-                }
-
-                // row3
-                const multiplierWidth = 100;
-                multipierField.width(multiplierWidth);
-                offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
-                // row4
-                const lblwidth = propertyLblSpanField.width() + 25;
-                propertyField.typedInput('width', (newWidth - lblwidth - 10));
-                propertyLblField.width(lblwidth);
-            }
-
-            $('#node-input-rule-container').css('min-height', '250px').css('min-width', '300px').editableList({
-                addItem(containerRow, containerIndex, data) {
-                    containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                    const row = $('<div/>').appendTo(containerRow);
-                    const row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                    const row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                    const row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                    // row1
-                    // operator
-                    const operatorField = $('<select/>', {
-                        class: 'node-input-rule-operator',
-                        id: 'node-input-rule-operator' + containerIndex
-                    }).appendTo(row);
-                    appendOptions(operatorField, 'operators');
-                    const operatorTypeField = multiselect(row, 'operatorTypes', 'node-input-rule-operatorType-' + containerIndex);
-
-                    addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
-                    const operandField = $('<input/>', {
-                        class: 'node-input-rule-operand',
-                        id: 'node-input-rule-operand' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row).typedInput({
-                        default: 'str',
-                        types: ['msg', 'flow', 'global', 'date', 'str', 'num', typeTimeSun, typeTimeMoon, 'env', 'jsonata']
-                    });
-                    const finalspan = $('<span/>', {
-                        style: 'float: right; margin-top: 6px;'
-                    }).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-                    // row2
-                    const operandSelFieldName = 'node-input-rule-operandFormatSel';
-                    addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
-                    const formatSelField = $('<select/>', {
-                        class: operandSelFieldName,
-                        id: operandSelFieldName + containerIndex
-                    }).appendTo(row2);
-                    appendOptions(formatSelField, 'parseFormats');
-                    const formatIpField = $('<input/>', {
-                        class: 'node-input-rule-operandFormatIp',
-                        id: 'node-input-rule-operandFormatIp' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row2);
-                    formatSelField.change(() => {
-                        resizeRule(containerRow);
-                    });
-                    // row3
-                    addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
-                    const offsetField = $('<input/>', {
-                        class: 'wg-offset-spinner node-input-rule-offset',
-                        id: 'node-input-rule-offset' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row3).typedInput({
-                        default: typeUndefined.value,
-                        types: [typeUndefined, 'num', 'msg', 'flow', 'global']
-                    });
-                    const multiplierField = $('<select/>', {
-                        class: 'node-input-rule-multiplier',
-                        id: 'node-input-rule-multiplier' + containerIndex
-                    }).appendTo(row3);
-                    appendOptions(multiplierField, 'multiplier');
-                    // row4
-                    addLabel(row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
-                    const propertyField = $('<input/>', {
-                        class: 'node-input-rule-property',
-                        id: 'node-input-rule-property' + containerIndex,
-                        type: 'text'
-                    }).appendTo(row4).typedInput({
-                        default: typeUnlimited.value,
-                        types: [typeUnlimited, 'msg', 'flow', 'global', 'env']
-                    });
-                    // changes
-                    operandField.change(() => {
-                        operandField.show();
-                        const opType = operandField.typedInput('type');
-                        if (opType === typeTimeEntered.value || opType === typeTimeSun.value || opType === typeTimeMoon.value || opType === 'date') {
-                            row2.hide(); // format
-                            row3.show(); // offset
-                            row4.show(); // limit
-                        } else if (opType === typeDateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                            row2.show(); // format
-                            row3.show(); // offset
-                            row4.show(); // limit
+                    {selection: /^15,16(,17)?(,18)?$/, label: 'D'} ];
+                // #region input
+                setupTInput(node, {
+                    typeProp: 'inputType',
+                    valueProp: 'input',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.inputType || types.MsgPayload.value,
+                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, 'env'],
+                    onChange: (_type, _value) => {
+                        const opType = $('#node-input-input').typedInput('type');
+                        if (opType === types.TimeEntered.value ||
+                            opType === types.TimeSun.value ||
+                            opType === types.TimeMoon.value ||
+                            opType === 'date') {
+                            $('.time-row-inputFormat').hide();
+                            $('.time-row-inputOffset').show();
+                        } else if (opType === types.DateEntered.value ||
+                                    opType === 'msg' ||
+                                    opType === types.MsgPayload.value ||
+                                    opType === types.MsgTs.value ||
+                                    opType === 'flow' ||
+                                    opType === 'global' ||
+                                    opType === 'str' ||
+                                    opType === 'num' ||
+                                    opType === 'env') {
+                            $('.time-row-inputFormat').show();
+                            $('.time-row-inputOffset').show();
                         } else {
-                            row2.hide(); // format
-                            row3.hide(); // offset
-                            row4.show(); // limit
+                            $('.time-row-inputFormat').hide();
+                            $('.time-row-inputOffset').hide();
                         }
-                    });
-                    // setting defaultValues
-                    // console.log(data);
-                    operatorField.val(data.operator || SelectFields.operators[0].id);
-                    setMultiselect(data.operatorType, operatorTypeField, SelectFields.operatorTypesShort);
-                    operandField.typedInput('type', data.operandType || 'str');
-                    operandField.typedInput('value', data.operandValue || '');
-                    formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
-                    formatSelField.val(data.formatSelection || SelectFields.parseFormats[0].id);
-                    offsetField.typedInput('type', data.offsetType || typeUndefined.value);
-                    offsetField.typedInput('value', data.offsetValue || '');
-                    multiplierField.val(data.multiplier || SelectFields.multiplier[0].id);
-                    propertyField.typedInput('type', data.propertyType || typeUnlimited.value);
-                    propertyField.typedInput('value', data.propertyValue || '');
-                    resizeRule(containerRow);
-                    autocomplete(formatIpField, dateParseFormat);
-                },
-                sortItems(rules) {
-                    rules = $('#node-input-rule-container').editableList('items');
-                    rules.each(function (i) {
-                        $(this).find('.node-input-rule-index').html(i + 1);
-                    });
-                },
-                resizeItem: resizeRule,
-                sortable: true,
-                removable: true
-            });
-            if (node.rules) {
-                for (let i = 0; i < node.rules.length; i++) {
-                    const rule = node.rules[i];
-                    $('#node-input-rule-container').editableList('addItem', rule);
-                }
-            }
-            // #endregion rule-container
-            // #region result1
-            $('#node-input-result1Type').val(node.result1Type);
-            $('#node-input-result1').typedInput({
-                default: node.result1Type || typeUndefined.value,
-                typeField: $('#node-input-result1Type'),
-                types: [typeUndefined, typeMsgPayload, typeMsgTs, 'msg', 'flow', 'global']
-            });
-            $('#node-input-result1ValueType').val(node.result1ValueType);
-            $('#node-input-result1Value').typedInput({
-                default: node.result1ValueType || 'input',
-                typeField: $('#node-input-result1ValueType'),
-                types: [{value: 'input', label: 'Input value', hasValue: false},
-                    'date',
-                    typeTimeEntered,
-                    typeTimeSun,
-                    typeTimeMoon,
-                    'flow',
-                    'global',
-                    'str',
-                    'num',
-                    'bool',
-                    'json',
-                    'bin',
-                    'env',
-                    'jsonata',
-                    typeSunCalc,
-                    typeMoonCalc]
-            });
-            $('#node-input-result1').on('change', (_type, _value) => {
-                if ($('#node-input-result1').typedInput('type') !== typeUndefined.value) {
-                    $('.time-result1Value').show();
-                    const plVType = $('#node-input-result1Value').typedInput('type');
-                    if (plVType === typeTimeEntered.value || plVType === typeTimeSun.value || plVType === typeTimeMoon.value || plVType === 'date') {
-                        $('.time-row-result1Format').show();
-                        $('.time-row-result1Offset').show();
-                    } else if (plVType === 'input') {
-                        $('.time-row-result1Format').show();
-                        $('.time-row-result1Offset').hide();
+                    }
+                }).change();
+
+                initCombobox(node, 'time-comp', 'inputFormatsel', 'inputFormat', 'dateParseFormat', 'parseFormats', node.inputFormat, 20);
+
+                const inputMultiplierField = $('#node-input-inputOffsetMultiplier');
+                appendOptions(node, 'time-comp', inputMultiplierField, 'multiplier');
+                inputMultiplierField.val(node.inputOffsetMultiplier);
+                setupTInput(node, {
+                    typeProp: 'inputOffsetType',
+                    valueProp: 'inputOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-inputOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-inputOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-inputOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+
+                // #endregion input
+                // #region rule-container
+                function resizeRule(rule) {
+                    const newWidth = rule.width() - 10;
+                    // const operatorField = rule.find('.node-input-rule-operator');
+                    const operandField = rule.find('.node-input-rule-operand');
+                    const formatSelField = rule.find('.node-input-rule-operandFormatSel');
+                    const formatIpField = rule.find('.node-input-rule-operandFormatIp');
+                    const offsetField = rule.find('.node-input-rule-offset');
+                    const multipierField = rule.find('.node-input-rule-multipier');
+                    const propertyField = rule.find('.node-input-rule-property');
+                    const propertyLblSpanField = rule.find('.node-input-rule-property-span');
+                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
+                    const lblWidth = 25;
+                    // row1
+                    const operatorWidth = 120;
+                    operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
+                    // row2
+                    let formatWidth = (newWidth - lblWidth - 18);
+                    if (Number(formatSelField.val()) === 99) {
+                        formatIpField.show();
+                        formatWidth = Math.floor(formatWidth / 3);
+                        formatSelField.width(formatWidth - 5);
+                        formatIpField.width((formatWidth * 2) - 10);
                     } else {
-                        $('.time-row-result1Format').hide();
-                        $('.time-row-result1Offset').hide();
+                        formatIpField.hide();
+                        // formatIpField.width(0);
+                        formatSelField.width(formatWidth);
                     }
-                } else {
-                    $('.time-result1Value').hide();
-                    $('.time-row-result1Format').hide();
-                    $('.time-row-result1Offset').hide();
+
+                    // row3
+                    const multiplierWidth = 100;
+                    multipierField.width(multiplierWidth);
+                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
+                    // row4
+                    const lblwidth = propertyLblSpanField.width() + 25;
+                    propertyField.typedInput('width', (newWidth - lblwidth - 10));
+                    propertyLblField.width(lblwidth);
                 }
-            });
-            $('#node-input-result1Value').on('change', (_type, _value) => {
-                $('#node-input-result1').change();
-            });
-            /********************************************************/
-            const resultFormatSelField = $('#node-input-result1FormatSel');
-            appendOptions(resultFormatSelField, 'outputFormats');
-            resultFormatSelField.on('change', (_type, _value) => {
-                const resultFormatIpField = $('#node-input-result1Format');
-                const resultFormatSelField = $('#node-input-result1FormatSel');
-                if (Number(resultFormatSelField.val()) === 99) {
-                    resultFormatIpField.show();
-                    resultFormatIpField.css({width: '40%'});
-                    resultFormatSelField.css({width: '30%'});
-                    if (!isNaN(resultFormatIpField.val())) {
-                        resultFormatIpField.val(node._('time-comp.timeFormat.default'));
+
+                function resizeContainer() {
+                    const editorRow = $('.node-input-rule-container-row ol');
+                    const height =  editorRow.outerHeight(true);
+
+                    const rows = $('#node-input-rule-container').editableList('items');
+                    if (rows.size() > 0) {
+                        $('#node-input-rule-container').editableList('height', height + 40);
+                    } else {
+                        $('#node-input-rule-container').editableList('height', 20);
                     }
-                } else {
-                    resultFormatIpField.hide();
-                    resultFormatSelField.css({width: '70%'});
                 }
-            });
-            if (isNaN(node.result1Format)) {
-                resultFormatSelField.val(99);
-            } else {
-                resultFormatSelField.val(Number(node.result1Format));
-            }
 
-            resultFormatSelField.change();
-            const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
-            appendOptions(resultMultiplierField, 'multiplier');
-            resultMultiplierField.val(node.result1OffsetMultiplier);
-            autocomplete($('#node-input-result1Format'), dateOutFormat);
-            // #endregion result1
-            // #region spinner
-            $('.wg-offset-spinner').spinner({max: 1439, min: -1439});
-            // #endregion spinner
+                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
+                    addItem(containerRow, containerIndex, data) {
+                        containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                        const row = $('<div/>').appendTo(containerRow);
+                        const row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        const row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        const row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        // row1
+                        // operator
+                        const operatorField = $('<select/>', {
+                            class: 'node-input-rule-operator',
+                            id: 'node-input-rule-operator' + containerIndex
+                        }).appendTo(row);
+                        appendOptions(node, 'time-comp', operatorField, 'operators');
+                        const operatorTypeField = multiselect(node, row, 'operatorTypes', 'node-input-rule-operatorType-' + containerIndex);
 
-            $('#node-input-time').change();
-            $('#node-input-property').change();
-            $('#node-input-payload').change();
-            $('#node-input-input').change();
-            $('#node-input-result1').change();
+                        addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
+                        const operandField = $('<input/>', {
+                            class: 'node-input-rule-operand',
+                            id: 'node-input-rule-operand' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row).typedInput({
+                            default: 'str',
+                            types: ['msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, 'env', 'jsonata']
+                        });
+                        const finalspan = $('<span/>', {
+                            style: 'float: right; margin-top: 6px;'
+                        }).appendTo(row);
+                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
+                        // row2
+                        const operandSelFieldName = 'node-input-rule-operandFormatSel';
+                        addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
+                        const formatSelField = $('<select/>', {
+                            class: operandSelFieldName,
+                            id: operandSelFieldName + containerIndex
+                        }).appendTo(row2);
+                        appendOptions(node, 'time-comp', formatSelField, 'parseFormats');
+                        const formatIpField = $('<input/>', {
+                            class: 'node-input-rule-operandFormatIp',
+                            id: 'node-input-rule-operandFormatIp' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2);
+                        formatSelField.change(() => {
+                            resizeRule(containerRow);
+                        });
+                        // row3
+                        addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
+                        const offsetField = $('<input/>', {
+                            class: 'wg-offset-spinner node-input-rule-offset',
+                            id: 'node-input-rule-offset' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row3).typedInput({
+                            default: types.Undefined.value,
+                            types: [types.Undefined, 'num', 'msg', 'flow', 'global']
+                        });
+                        const multiplierField = $('<select/>', {
+                            class: 'node-input-rule-multiplier',
+                            id: 'node-input-rule-multiplier' + containerIndex
+                        }).appendTo(row3);
+                        appendOptions(node, 'time-comp', multiplierField, 'multiplier');
+                        // row4
+                        addLabel(row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
+                        const propertyField = $('<input/>', {
+                            class: 'node-input-rule-property',
+                            id: 'node-input-rule-property' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row4).typedInput({
+                            default: types.Unlimited.value,
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
+                        });
+                        // changes
+                        operandField.change(() => {
+                            operandField.show();
+                            const opType = operandField.typedInput('type');
+                            if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date') {
+                                row2.hide(); // format
+                                row3.show(); // offset
+                                row4.show(); // limit
+                            } else if (opType === types.DateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                                row2.show(); // format
+                                row3.show(); // offset
+                                row4.show(); // limit
+                            } else {
+                                row2.hide(); // format
+                                row3.hide(); // offset
+                                row4.show(); // limit
+                            }
+                        });
+                        // setting defaultValues
+                        operatorField.val(data.operator || getOperator(0).id);
+                        setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
+                        operandField.typedInput('type', data.operandType || 'str');
+                        operandField.typedInput('value', data.operandValue || '');
+                        formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
+                        formatSelField.val(data.formatSelection || getParseFormats(0).id);
+                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        offsetField.typedInput('value', data.offsetValue || '');
+                        multiplierField.val(data.multiplier || getMultiplier(0).id);
+                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
+                        propertyField.typedInput('value', data.propertyValue || '');
+                        resizeRule(containerRow);
+                        autocomplete(formatIpField, 'dateParseFormat');
+                        resizeContainer();
+                    },
+                    sortItems(rules) {
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 1);
+                        });
+                    },
+                    resizeItem: resizeRule,
+                    sortable: true,
+                    removable: true,
+                    removeItem: resizeContainer
+                });
+
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        $('#node-input-rule-container').editableList('addItem', rule);
+                    }
+                }
+                // #endregion rule-container
+                // #region result1
+                setupTInput(node, {
+                    typeProp: 'result1Type',
+                    valueProp: 'result1',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
+                            $('.time-result1Value').show();
+                            const plVType = $('#node-input-result1Value').typedInput('type');
+                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === 'date' || plVType === types.DateEntered.value) {
+                                $('.time-row-result1Offset').show();
+                                $('.time-row-result1Format').show();
+                            } else if (plVType === 'input') {
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1Format').show();
+                            } else {
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1Format').hide();
+                            }
+                        } else {
+                            $('.time-result1Value').hide();
+                            $('.time-row-result1Offset').hide();
+                            $('.time-row-result1Format').hide();
+                        }
+                        $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
+                    }
+                });
+                setupTInput(node, {
+                    typeProp: 'result1ValueType',
+                    valueProp: 'result1Value',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'timespan',
+                    types: [
+                        {value: 'input', label: 'Input value', hasValue: false},
+                        'date',
+                        types.TimeEntered,
+                        types.DateEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        'flow',
+                        'global',
+                        'str',
+                        'num',
+                        'bool',
+                        'json',
+                        'bin',
+                        'env',
+                        'jsonata',
+                        types.SunCalc,
+                        types.MoonCalc
+                    ],
+                    onChange: (_type, _value) => { $('#node-input-result1').change(); }
+                }).change();
+                /********************************************************/
+                initCombobox(node, 'time-comp', 'result1FormatSel', 'result1Format', 'dateOutFormat', 'outputFormats', node.result1Format, 30);
+                /********************************************************/
+                const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
+                appendOptions(node, 'time-comp', resultMultiplierField, 'multiplier');
+                resultMultiplierField.val(node.result1OffsetMultiplier);
+                setupTInput(node, {
+                    typeProp: 'result1OffsetType',
+                    valueProp: 'result1Offset',
+                    width: 'calc(100% - 265px)',
+                    defaultType: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-result1Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-result1OffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-result1OffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion result1
+                // #region spinner
+                $('.wg-offset-spinner').spinner({max: 1439, min: -1439});
+                // #endregion spinner
+            }; // setup
+
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    // console.log( _data ); // Data returned
+                    setup(node);
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
         },
         oneditsave() {
             function getMultiSelStr(value) {
@@ -1119,16 +789,5 @@
             node.result2Type = $('#node-input-result2').typedInput('type');
             node.result2ValueType = $('#node-input-result2Value').typedInput('type');
         // console.log($("#node-input-outputs").val());
-        },
-        oneditresize(size) {
-            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-            let height = size.height;
-            for (let i = 0; i < rows.size(); i++) {
-                height -= $(rows[i]).outerHeight(true);
-            }
-
-            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-            $('#node-input-rule-container').editableList('height', height);
         }
     });</script>

@@ -247,14 +247,14 @@
             operand1Format: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand1Offset: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
                 }
             },
@@ -264,7 +264,7 @@
             operand1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
                 }
             },
@@ -272,7 +272,7 @@
             // #region operand2
             operand2: {
                 value: '',
-                validate: RED.validators.typedInput('inputType')
+                validate: RED.validators.typedInput('operand2Type')
             },
             operand2Type: {
                 value: 'msg'
@@ -280,14 +280,14 @@
             operand2Format: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand2Offset: {
                 value: 0,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
                 }
             },
@@ -297,7 +297,7 @@
             operand2OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
                 }
             },
@@ -327,7 +327,7 @@
             },
             result1Value: {
                 value: '',
-                validate(v) {
+                validate: (v) => {
                     return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
@@ -337,22 +337,22 @@
             result1TSFormat: {
                 value: 1,
                 required: false,
-                validate(v) {
+                validate: (v) => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Format: {
                 value: 0,
                 required: false,
-                validate(v) {
+                validate: (v) => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: true,
-                validate(v) {
-                    return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
+                validate: (v) => {
+                    return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             },
             result1OffsetType: {
@@ -361,7 +361,7 @@
             result1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             }
@@ -528,7 +528,19 @@
                     operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 20));
                 }
 
-                $('#node-input-rule-container').css('min-height', '150px').css('min-width', '200px').editableList({
+                function resizeContainer() {
+                    const editorRow = $('.node-input-rule-container-row ol');
+                    const height =  editorRow.outerHeight(true);
+
+                    const rows = $('#node-input-rule-container').editableList('items');
+                    if (rows.size() > 0) {
+                        $('#node-input-rule-container').editableList('height', height + 40);
+                    } else {
+                        $('#node-input-rule-container').editableList('height', 20);
+                    }
+                }
+
+                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '200px').editableList({
                     addItem(containerRow, containerIndex, data) {
                         containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                         const row = $('<div/>').appendTo(containerRow);
@@ -564,6 +576,7 @@
                         operandField.typedInput('value', data.operandValue || '');
                         multiplierField.val(data.multiplier || getMultiplier(0).id);
                         resizeRule(containerRow);
+                        resizeContainer();
                     },
                     sortItems(rules) {
                         rules = $('#node-input-rule-container').editableList('items');
@@ -573,7 +586,8 @@
                     },
                     resizeItem: resizeRule,
                     sortable: true,
-                    removable: true
+                    removable: true,
+                    removeItem: resizeContainer
                 });
                 if (node.rules) {
                     for (let i = 0; i < node.rules.length; i++) {
@@ -736,19 +750,5 @@
             node.result2Type = $('#node-input-result2').typedInput('type');
             node.result2ValueType = $('#node-input-result2Value').typedInput('type');
         // console.log($("#node-input-outputs").val());
-        },
-        oneditresize(size) {
-            try {
-                const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-                let height = size.height;
-                for (let i = 0; i < rows.size(); i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-                height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-                $('#node-input-rule-container').editableList('height', height);
-            } catch (err) {
-                // console.log(err); // for debuging, later ignore
-            }
         }
     });</script>

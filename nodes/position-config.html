@@ -120,7 +120,7 @@
                 type: 'text',
                 value: '',
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     const n = Number(v);
                     return ((n >= -180) && (n <= 180));
                 }
@@ -129,7 +129,7 @@
                 type: 'text',
                 value: '',
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     const n = Number(v);
                     return ((n >= -90) && (n <= 90));
                 }
@@ -143,7 +143,7 @@
             angleType: {
                 value: 'deg',
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     return (v === 'rad' || v === 'deg');
                 }
             },

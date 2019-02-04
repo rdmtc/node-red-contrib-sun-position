@@ -644,7 +644,7 @@ module.exports = function (RED) {
                 type: 'text',
                 value: '',
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     const n = Number(v);
                     return ((n >= -180) && (n <= 180));
                 }
@@ -653,7 +653,7 @@ module.exports = function (RED) {
                 type: 'text',
                 value: '',
                 required: true,
-                validate(v) {
+                validate: (v) => {
                     const n = Number(v);
                     return ((n >= -90) && (n <= 90));
                 }
