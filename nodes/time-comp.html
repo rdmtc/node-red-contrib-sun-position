@@ -422,17 +422,18 @@
                     valueProp: 'input',
                     width: 'calc(100% - 110px)',
                     defaultType: node.inputType || types.MsgPayload.value,
-                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, 'env'],
+                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.DateEntered, types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-input').typedInput('type');
-                        if (opType === types.TimeEntered.value ||
+                        if (opType === 'date' ||
+                            opType === types.TimeEntered.value ||
+                            opType === types.DateEntered.value ||
                             opType === types.TimeSun.value ||
                             opType === types.TimeMoon.value ||
-                            opType === 'date') {
+                            opType === types.DayOfMonth) {
                             $('.time-row-inputFormat').hide();
                             $('.time-row-inputOffset').show();
-                        } else if (opType === types.DateEntered.value ||
-                                    opType === 'msg' ||
+                        } else if (opType === 'msg' ||
                                     opType === types.MsgPayload.value ||
                                     opType === types.MsgTs.value ||
                                     opType === 'flow' ||
@@ -656,7 +657,12 @@
                         if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
                             $('.time-result1Value').show();
                             const plVType = $('#node-input-result1Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === 'date' || plVType === types.DateEntered.value) {
+                            if (plVType === 'date' ||
+                                plVType === types.TimeEntered.value ||
+                                plVType === types.DateEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value ||
+                                plVType === types.DayOfMonth) {
                                 $('.time-row-result1Offset').show();
                                 $('.time-row-result1Format').show();
                             } else if (plVType === 'input') {
@@ -686,6 +692,7 @@
                         types.DateEntered,
                         types.TimeSun,
                         types.TimeMoon,
+                        types.DayOfMonth,
                         'flow',
                         'global',
                         'str',

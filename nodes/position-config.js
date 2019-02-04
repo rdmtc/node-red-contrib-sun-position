@@ -177,10 +177,12 @@ module.exports = function (RED) {
             this.getFloatProp = (_srcNode, msg, type, value) => {
                 let data;
                 // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
-                if (type === 'msgPayload') {
+                if (type === '' || type === 'none') {
+                    return 0;
+                } else if (type === 'msgPayload') {
                     data = msg.payload;
                 } else {
-                    data = RED.util.evaluateNodeProperty(value, type, node, msg);
+                    data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                 }
                 if (data === null || typeof data === 'undefined') {
                     throw new Error('could not evaluate ' + type + '.' + value);
@@ -195,7 +197,7 @@ module.exports = function (RED) {
             this.getOutDataProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
                 let result = null;
                 if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
-                    return Date.now().getTime();
+                    return hlp.getFormattedDateOut(Date.now(), format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                 } else if (vType === 'msgPayload') {
                     return msg.payload;
                 } else if (vType === 'msgTs') {
@@ -212,63 +214,16 @@ module.exports = function (RED) {
                         result = node.getMoonTime(Date.now(), value, offset, multiplier);
                     }
                     if (result && result.value && !result.error) {
-                        result = hlp.addOffset(result.value, offset, multiplier);
                         return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                     }
                     return null;
-                } else if (vType === 'entered' ||
-                            vType === 'date') {
-                    if (vType === 'entered') {
-                        result = hlp.getTimeOfText(String(value), Date.now());
-                    } else if (vType === 'dayOfMonth') {
-                        result = new Date();
-                        switch (value) {
-                            case 'first Monday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),1);
-                                break;
-                            case 'first Tuesday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),2);
-                                break;
-                            case 'first Wednesday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),3);
-                                break;
-                            case 'first Thursday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),4);
-                                break;
-                            case 'first Friday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),5);
-                                break;
-                            case 'first Saturday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),6);
-                                break;
-                            case 'first Sunday':
-                                result = hlp.getFirstDayOfMonth(result.getFullYear(),result.getMonth(),0);
-                                break;
-                            case 'last Monday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),1);
-                                break;
-                            case 'last Tuesday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),2);
-                                break;
-                            case 'last Wednesday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),3);
-                                break;
-                            case 'last Thursday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),4);
-                                break;
-                            case 'last Friday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),5);
-                                break;
-                            case 'last Saturday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),6);
-                                break;
-                            case 'last Sunday':
-                                result = hlp.getLastDayOfMonth(result.getFullYear(),result.getMonth(),0);
-                                break;
-                        }
-                    } else {
-                        result = Date.now();
-                    }
+                } else if (vType === 'entered' || vType === 'dateEntered') {
+                    result = hlp.getDateOfText(String(value));
+                    result = hlp.addOffset(result, offset, multiplier);
+                    return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                } else if (vType === 'dayOfMonth') {
+                    result = new Date();
+                    result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
                     if (result !== null && typeof result !== 'undefined') {
                         result = hlp.addOffset(result, offset, multiplier);
                         return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
@@ -280,56 +235,13 @@ module.exports = function (RED) {
 
             this.getDateFromProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
                 let result = null;
-                if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
+                if (vType === null || vType === 'none' || vType === '') {
                     return Date.now();
                 } else if (vType === 'date') {
                     return hlp.addOffset(Date.now(), offset, multiplier);
                 } else if (vType === 'dayOfMonth') {
                     let d = new Date();
-                    switch (value) {
-                        case 'first Monday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),1);
-                            break;
-                        case 'first Tuesday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),2);
-                            break;
-                        case 'first Wednesday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),3);
-                            break;
-                        case 'first Thursday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),4);
-                            break;
-                        case 'first Friday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),5);
-                            break;
-                        case 'first Saturday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),6);
-                            break;
-                        case 'first Sunday':
-                            d = hlp.getFirstDayOfMonth(d.getFullYear(),d.getMonth(),0);
-                            break;
-                        case 'last Monday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),1);
-                            break;
-                        case 'last Tuesday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),2);
-                            break;
-                        case 'last Wednesday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),3);
-                            break;
-                        case 'last Thursday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),4);
-                            break;
-                        case 'last Friday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),5);
-                            break;
-                        case 'last Saturday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),6);
-                            break;
-                        case 'last Sunday':
-                            d = hlp.getLastDayOfMonth(d.getFullYear(),d.getMonth(),0);
-                            break;
-                    }
+                    d = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
                     return hlp.addOffset(d, offset, multiplier);
                 } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                     if (vType === 'pdsTime') {
@@ -345,8 +257,9 @@ module.exports = function (RED) {
                         return result.value;
                     }
                     throw new Error('could not evaluate ' + vType + '.' + value + ' - ' + result.error);
-                } else if (vType === 'entered') {
-                    result = value;
+                } else if (vType === 'entered' || vType === 'dateEntered') {
+                    result = hlp.getDateOfText(String(value));
+                    return hlp.addOffset(result, offset, multiplier);
                 } else if (vType === 'msgPayload') {
                     result = msg.payload;
                 } else if (vType === 'msgTs') {
@@ -377,7 +290,7 @@ module.exports = function (RED) {
                     if (vType === '' || vType === 'none' || days === '') {
                         // nix
                     } else if (vType === 'date') {
-                        result.value = hlp.normalizeDate(now, offset, multiplier);
+                        result.value = hlp.normalizeDate(now, offset, multiplier, next, days);
                         result.fix = true;
                     } else if (vType === 'entered') {
                         result.value = hlp.getTimeOfText(String(value), now);
@@ -547,19 +460,6 @@ module.exports = function (RED) {
         } catch (err) {
             hlp.handleError(this,  RED._('position-config.errors.error-text'), err, RED._('position-config.errors.error-title'));
         }
-
-        /**************************************************************************************************************/
-        // sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
-        // {id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path}
-        /*
-        function sendDebug(msg) {
-            // don't put blank errors in sidebar (but do add to logs)
-            //if ((msg.msg === "") && (msg.hasOwnProperty("level")) && (msg.level === 20)) { return; }
-            msg = RED.util.encodeObject(msg, {
-                maxLength: debuglength
-            });
-            RED.comms.publish("debug", msg);
-        } /* */
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
             // node.debug('sunTimesRefresh - calculate sun times');

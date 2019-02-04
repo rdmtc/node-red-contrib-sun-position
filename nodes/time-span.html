@@ -421,11 +421,15 @@
                     types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.DateEntered, types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-operand1').typedInput('type');
-                        if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date' || opType === types.DateEntered.value) {
+                        if (opType === 'date' ||
+                            opType === types.TimeEntered.value ||
+                            opType === types.DateEntered.value ||
+                            opType === types.TimeSun.value ||
+                            opType === types.TimeMoon.value ||
+                            opType === types.DayOfMonth) {
                             $('.time-row-operand1Format').hide();
                             $('.time-row-operand1Offset').show();
-                        } else if (opType === types.DateEntered.value ||
-                                    opType === 'msg' ||
+                        } else if (opType === 'msg' ||
                                     opType === types.MsgPayload.value ||
                                     opType === types.MsgTs.value ||
                                     opType === 'flow' ||
@@ -472,11 +476,15 @@
                     types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.DateEntered, types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-operand2').typedInput('type');
-                        if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date' || opType === types.DateEntered.value) {
+                        if (opType === 'date' ||
+                            opType === types.TimeEntered.value ||
+                            opType === types.DateEntered.value ||
+                            opType === types.TimeSun.value ||
+                            opType === types.TimeMoon.value ||
+                            opType === types.DayOfMonth) {
                             $('.time-row-operand2Format').hide();
                             $('.time-row-operand2Offset').show();
-                        } else if (opType === types.DateEntered.value ||
-                                    opType === 'msg' ||
+                        } else if (opType === 'msg' ||
                                     opType === types.MsgPayload.value ||
                                     opType === types.MsgTs.value ||
                                     opType === 'flow' ||

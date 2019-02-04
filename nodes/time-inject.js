@@ -23,95 +23,55 @@ module.exports = function (RED) {
         return millis;
     }
 
-    function tsGetPropData(node, msg, type, value, format, offset, multiplier, days) {
+    function tsGetPropData(node, msg, type, value, format, offset, offsetType, multiplier, days) {
         if (type === null || type === 'none' || type === '' || (typeof type === 'undefined')) {
             if (value === '' || (typeof value === 'undefined')) {
-                return Date.now();
+                const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
+                const result = hlp.addOffset(Date.now(), offsetX, multiplier);
+                return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
             }
-
             return value;
-        }
-
-        if (type === 'pdsCalcData') {
+        } else if (type === 'pdsCalcData') {
             return node.positionConfig.getSunCalc(msg.ts);
-        }
-
-        if (type === 'pdmCalcData') {
+        } else if (type === 'pdmCalcData') {
             return node.positionConfig.getMoonCalc(msg.ts);
-        }
-
-        if (type === 'entered' || type === 'pdsTime' || type === 'pdmTime' || type === 'date') {
-            const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
-            if (!data.error) {
-                return hlp.getFormattedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-                /*
-                format = format || 0;
-                if (isNaN(format)) {
-                    return hlp.formatDate(data.value, '' + format, false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-                } else {
-                    switch (Number(format)) {
-                        case 0: //timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
-                            return data.value.getTime();
-                        case 1: //timeformat_ECMA262 - date as string ECMA-262
-                            return data.value;
-                        case 2: //timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
-                            return data.value.toLocaleString();
-                        case 3: //timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
-                            return data.value.toLocaleTimeString();
-                        case 4: //timeformat_UTC
-                            return data.value.toUTCString();
-                        case 5: //timeformat_ISO
-                            return data.value.toISOString();
-                        case 6: //timeformat_ms
-                            return tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined);
-                        case 7: //timeformat_sec
-                            return Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000);
-                        case 8: //timeformat_min
-                            return (Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000) / 60);
-                        case 9: //timeformat_hour
-                            return (Math.round(tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined) / 1000) / 3600);
-                        case 10: //timeformat_YYYYMMDDHHMMSS
-                            return hlp.getComparableDateFormat(data.value);
-                        case 11: //timeformat_YYYYMMDD_HHMMSS
-                            return hlp.getComparableDateFormat2(data.value);
-                        case 12: //timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
-                            return data.value.toLocaleDateString();
-                        case 13: //timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
-                            return data.value.toTimeString();
-                        case 14: //timeformat_localLong       - Wed Dec 26 2018 23:44:12 GMT+0100 (Mitteleuropäische Normalzeit)
-                            return data.value.toString();
-                        case 15: //timeformat_localDateLong       - Wed Dec 26 2018
-                            return data.value.toDateString();
-                        case 16: //timeformat_weekday           - Montag, 22.12.
-                            return hlp.formatDate(data.value, 'dddd, d.m.', false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-                        case 17: //timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-                            return hlp.formatDate(data.value, 'xx, d.m.', false, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-                    }
-                    const obj = data;
-                    obj.name = value;
-                    obj.offset = offset;
-                    obj.allowedDays = days;
-                    obj.ts = data.value.getTime();
-                    obj.timeUTCStr = data.value.toUTCString();
-                    obj.timeISOStr = data.value.toISOString();
-                    obj.timeLocaleStr = data.value.toLocaleString();
-                    obj.timeLocaleTimeStr = data.value.toLocaleTimeString();
-                    const delay = tsGetScheduleTime(data.value, (type === 'date') ? 10 : undefined);
-                    obj.delay = delay;
-                    obj.delaySec = Math.round(delay / 1000);
-                    return obj;
-                } */
+        } else if (type === 'msgPayload') {
+            return msg.payload;
+        } else if (type === 'msgTs') {
+            return msg.ts;
+        } else if ((type === 'pdsTime') ||
+                    (type === 'pdmTime')) {
+            let result;
+            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
+            if (type === 'pdsTime') { // sun
+                result = node.getSunTime(Date.now(), value, offsetX, multiplier, days);
+            } else if (type === 'pdmTime') { // moon
+                result = node.getMoonTime(Date.now(), value, offsetX, multiplier, days);
             }
-
-            return data;
+            if (result && result.value && !result.error) {
+                return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+            }
+            return null;
+        } else if (type === 'entered' || type === 'dateEntered') {
+            let result = hlp.getDateOfText(String(value));
+            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
+            result = hlp.normalizeDate(result, offsetX, multiplier, 1, days);
+            return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+        } else if (type === 'dayOfMonth') {
+            let result = new Date();
+            result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
+            if (result !== null && typeof result !== 'undefined') {
+                result = hlp.addOffset(result, offset, multiplier);
+                return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+            }
+            return null;
         }
-
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     }
 
-    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, multiplier, days) {
+    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days) {
         if (type !== 'none' && name) {
-            const res = tsGetPropData(node, msg, valueType, value, format, offset, multiplier, days);
+            const res = tsGetPropData(node, msg, valueType, value, format, offset, offsetType, multiplier, days);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
@@ -327,8 +287,7 @@ module.exports = function (RED) {
                     throw new Error('configuration missing!');
                 }
 
-                const payloadOffset = node.positionConfig.getFloatProp(node,msg, config.payloadOffsetType, node.payloadOffset);
-                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, payloadOffset, config.payloadOffsetMultiplier);
+                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -337,12 +296,12 @@ module.exports = function (RED) {
                     msg.payload = value;
                 }
 
-                const addPayload1Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload1OffsetType, node.addPayload1Offset);
-                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value, config.addPayload1Format, addPayload1Offset, config.addPayload1OffsetMultiplier, config.addPayload1Days);
-                const addPayload2Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload2OffsetType, node.addPayload2Offset);
-                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value, config.addPayload2Format, addPayload2Offset, config.addPayload2OffsetMultiplier, config.addPayload2Days);
-                const addPayload3Offset = node.positionConfig.getFloatProp(node,msg, config.addPayload3OffsetType, config.addPayload3Offset);
-                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value, config.addPayload3Format, addPayload3Offset, config.addPayload3OffsetMultiplier, config.addPayload3Days);
+                tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value,
+                    config.addPayload1Format, config.addPayload1Offset, config.addPayload1OffsetType, config.addPayload1OffsetMultiplier, config.addPayload1Days);
+                tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value,
+                    config.addPayload2Format, config.addPayload2Offset, config.addPayload2OffsetType, config.addPayload2OffsetMultiplier, config.addPayload2Days);
+                tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value,
+                    config.addPayload3Format, config.addPayload3Offset, config.addPayload3OffsetType, config.addPayload3OffsetMultiplier, config.addPayload3Days);
 
                 node.send(msg);
             } catch (err) {

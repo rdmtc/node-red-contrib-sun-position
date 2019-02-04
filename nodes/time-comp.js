@@ -11,46 +11,6 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 module.exports = function (RED) {
     'use strict';
 
-    function tsGetOperandData(node, msg, type, value, format, offset, multiplier) {
-        let result = {};
-        if (type === null || type === 'none' || type === '') {
-            return Date.now();
-        }
-
-        if (type === 'entered' ||
-            type === 'pdsTime' ||
-            type === 'pdmTime' ||
-            type === 'date'
-        ) {
-            result = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier);
-            if (result === null) {
-                throw new Error('could not evaluate ' + type + '.' + value);
-            } else if (result.error) {
-                throw new Error('error on getting operand: ' + result.error);
-            }
-            return result.value;
-        }
-        let data;
-        if (type === 'msgPayload') {
-            data = msg.payload;
-        } else if (type === 'msgTs') {
-            data = msg.ts;
-        } else {
-            // msg, flow, global, str, num, env
-            data = RED.util.evaluateNodeProperty(value, type, node, msg);
-        }
-        if (data === null || typeof data === 'undefined') {
-            throw new Error('could not evaluate ' + type + '.' + value);
-        }
-
-        result.value = hlp.parseDateFromFormat(data, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
-
-        if (result.value === 'Invalid Date' || isNaN(result.value) || result.value === null) {
-            throw new Error('could not evaluate format of ' + data);
-        }
-        return hlp.addOffset(result.value, offset, multiplier);
-    }
-
     function timeCompNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -69,7 +29,8 @@ module.exports = function (RED) {
                     throw new Error('Configuration is missing!!');
                 }
 
-                const inputData = tsGetOperandData(this, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetMultiplier);
+                const offset1 = this.positionConfig.getFloatProp(node,msg,config.inputOffsetType, config.inputOffset);
+                const inputData = this.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, offset1, config.inputOffsetMultiplier);
 
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
@@ -109,7 +70,7 @@ module.exports = function (RED) {
                     }
 
                     if (operatorValid) {
-                        const ruleoperand = tsGetOperandData(this, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetType, rule.offsetValue, rule.multiplier);
+                        const ruleoperand = this.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, rule.multiplier);
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
                         node.debug('operatorType ' + util.inspect(rule.operatorType));

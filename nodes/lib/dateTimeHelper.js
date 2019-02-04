@@ -12,6 +12,7 @@ module.exports = {
     days_of_a_year,
     getFirstDayOfMonth,
     getLastDayOfMonth,
+    getSpecialDayOfMonth,
     getComparableDateFormat,
     parseComparableDateFormat,
     getComparableDateFormat2,
@@ -182,6 +183,47 @@ function getLastDayOfMonth(year, month, dayOfWeek) {
         d.setDate(d.getDate() - 1);
     }
     return d;
+}
+
+/**
+ * get a date for the special day in the given month
+ * @param {number} year year to check
+ * @param {number} month month to check
+ * @param {number} dayName  Name of the special day
+ * @returns {Date} last day of given month or null
+ */
+function getSpecialDayOfMonth(year, month, dayName) {
+    switch (dayName) {
+        case 'first Monday':
+            return getFirstDayOfMonth(year, month, 1);
+        case 'first Tuesday':
+            return getFirstDayOfMonth(year, month, 2);
+        case 'first Wednesday':
+            return getFirstDayOfMonth(year, month, 3);
+        case 'first Thursday':
+            return getFirstDayOfMonth(year, month, 4);
+        case 'first Friday':
+            return getFirstDayOfMonth(year, month, 5);
+        case 'first Saturday':
+            return getFirstDayOfMonth(year, month, 6);
+        case 'first Sunday':
+            return getFirstDayOfMonth(year, month, 0);
+        case 'last Monday':
+            return getLastDayOfMonth(year, month, 1);
+        case 'last Tuesday':
+            return getLastDayOfMonth(year, month, 2);
+        case 'last Wednesday':
+            return getLastDayOfMonth(year, month, 3);
+        case 'last Thursday':
+            return getLastDayOfMonth(year, month, 4);
+        case 'last Friday':
+            return getLastDayOfMonth(year, month, 5);
+        case 'last Saturday':
+            return getLastDayOfMonth(year, month, 6);
+        case 'last Sunday':
+            return getLastDayOfMonth(year, month, 0);
+    }
+    return null;
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -420,8 +462,10 @@ function getTimeOfText(t, date) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  */
 function getDateOfText(dt) {
-    if (dt === null) {
-        throw new Error('Could not evaluate as a valid Date or time. Value is null!');
+    if (dt === null || typeof dt === 'undefined') {
+        throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
+    } else if (dt === '') {
+        return new Date();
     }
 
     if (typeof dt === 'object') {
