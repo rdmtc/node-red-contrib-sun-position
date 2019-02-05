@@ -32,7 +32,9 @@
             "no-response": "no response from server",
             "failed": "inject failed, see log for details",
             "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large"
+            "toolong": "Interval too large",
+            "longitude-missing": "Longitude is missing!",
+            "latitude-missing": "Latitude is missing!"
         },
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",

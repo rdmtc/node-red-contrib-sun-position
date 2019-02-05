@@ -74,8 +74,8 @@ module.exports = function (RED) {
         try {
             // this.debug('load position-config ' + n.name);
             this.name = n.name;
-            this.longitude = n.longitude || this.credentials.longitude;
-            this.latitude = n.latitude || this.credentials.latitude;
+            this.longitude = parseFloat(this.credentials.posLongitude || n.longitude);
+            this.latitude = parseFloat(this.credentials.posLatitude || n.latitude);
             this.angleType = n.angleType;
             this.tzOffset = (n.timezoneOffset * -60) || 0;
             // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
@@ -86,8 +86,15 @@ module.exports = function (RED) {
             this.lastMoonCalc = {
                 ts: 0
             };
-
             const node = this;
+
+            console.log(n.longitude);
+            console.log(n.latitude);
+            console.log(this.credentials.posLongitude);
+            console.log(this.credentials.posLatitude);
+            console.log(node.longitude);
+            console.log(node.latitude);
+
 
             /*
             this.getSunTimes = () => {
@@ -99,7 +106,7 @@ module.exports = function (RED) {
             }
             */
             this.getSunTime = (now, value, offset, multiplier, next, days) => {
-                // node.debug('getSunTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                // node.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
                 let result = sunTimesCheck(node, now);
                 result = Object.assign(result, node.sunTimesToday[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -115,8 +122,8 @@ module.exports = function (RED) {
                 }
 
                 if (days && (days !== '*') && (days !== '')) {
+                    // node.debug('move days ' + days + ' result=' + util.inspect(result));
                     const dayx = hlp.calcDayOffset(days, result.value.getDay());
-                    // node.debug('move day ' + dayx);
                     if (dayx > 0) {
                         const date = result.value.addDays(dayx);
                         // let times = sunCalc.getTimes(date, node.latitude, node.longitude);
@@ -279,7 +286,7 @@ module.exports = function (RED) {
             };
 
             this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
-                // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
                 const now = new Date();
                 let result = {
                     value: null,
@@ -462,6 +469,12 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         function sunTimesRefresh(node, today, tomorrow, dayId) {
+            if (isNaN(node.longitude)) {
+                throw new Error(RED._('position-config.errors.longitude-missing'));
+            }
+            if (isNaN(node.latitude)) {
+                throw new Error(RED._('position-config.errors.latitude-missing'));
+            }
             // node.debug('sunTimesRefresh - calculate sun times');
             node.sunTimesToday = sunCalc.getTimes(today, node.latitude, node.longitude);
             node.sunTimesTomorow = sunCalc.getTimes(tomorrow, node.latitude, node.longitude);
@@ -484,6 +497,12 @@ module.exports = function (RED) {
         }
 
         function moonTimesRefresh(node, today, tomorrow, dayId) {
+            if (isNaN(node.longitude)) {
+                throw new Error(RED._('position-config.errors.longitude-missing'));
+            }
+            if (isNaN(node.latitude)) {
+                throw new Error(RED._('position-config.errors.latitude-missing'));
+            }
             // node.debug('moonTimesRefresh - calculate moon times');
             node.moonTimesToday = sunCalc.getMoonTimes(today, node.latitude, node.longitude, true);
             if (!node.moonTimesToday.alwaysUp) {
@@ -540,18 +559,16 @@ module.exports = function (RED) {
 
     RED.nodes.registerType('position-config', positionConfigurationNode, {
         credentials: {
-            longitude: {
+            posLongitude: {
                 type: 'text',
-                value: '',
                 required: true,
                 validate: (v) => {
                     const n = Number(v);
                     return ((n >= -180) && (n <= 180));
                 }
             },
-            latitude: {
+            posLatitude: {
                 type: 'text',
-                value: '',
                 required: true,
                 validate: (v) => {
                     const n = Number(v);

@@ -114,6 +114,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // calculates sun position for a given date and latitude/longitude
 
     SunCalc.getPosition = function (date, lat, lng) {
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
+
         const lw = rad * -lng;
 
         const phi = rad * lat;
@@ -192,22 +199,22 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // calculates sun times for a given date and latitude/longitude
 
     SunCalc.getTimes = function (date, lat, lng) {
-        const lw = rad * -lng;
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
 
+        const lw = rad * -lng;
         const phi = rad * lat;
 
         const d = toDays(date);
-
         const n = julianCycle(d, lw);
-
         const ds = approxTransit(0, lw, n);
-
         const M = solarMeanAnomaly(ds);
-
         const L = eclipticLongitude(M);
-
         const dec = declination(L, 0);
-
         const Jnoon = solarTransitJ(ds, M, L);
 
         const result = {

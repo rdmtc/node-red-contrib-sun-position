@@ -117,7 +117,7 @@ module.exports = function (RED) {
         this.nextTimeAltData = null;
         const node = this;
 
-        function doCreateTimeout(node, msg) {
+        function doCreateTimeout(node, msg, _onInit) {
             let errorStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
@@ -156,6 +156,7 @@ module.exports = function (RED) {
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.error(node.nextTimeAltData.error);
+                    node.debug(util.inspect(node.nextTimeAltData));
                     // console.log('2');
                     node.nextTimeAlt = null;
                     isFixedTime = false;
@@ -165,9 +166,8 @@ module.exports = function (RED) {
                 }
             }
 
-            if (node.nextTime && !errorStatus) {
+            if ((node.nextTime !== null) && (errorStatus !== '')) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
-                    // node.debug(node.nextTime);
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
                     return;
                 }
@@ -206,7 +206,7 @@ module.exports = function (RED) {
 
                         if (needsRecalc) {
                             try {
-                                doCreateTimeout(node, msg);
+                                doCreateTimeout(node, msg, false);
                             } catch (err) {
                                 hlp.handleError(node, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
                             }
@@ -229,7 +229,7 @@ module.exports = function (RED) {
             if (!isFixedTime && !node.intervalObj) {
                 node.intervalObj = setInterval(() => {
                     // node.debug('retrigger');
-                    doCreateTimeout(node, msg);
+                    doCreateTimeout(node, msg, false);
                 }, node.recalcTime);
             } else if (isFixedTime && node.intervalObj) {
                 clearInterval(node.intervalObj);
@@ -280,7 +280,7 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                doCreateTimeout(node, msg);
+                doCreateTimeout(node, msg, false);
                 node.debug('input ' + util.inspect(msg));
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
@@ -309,19 +309,43 @@ module.exports = function (RED) {
             }
         });
 
-        try {
-            if (config.once) {
+        node.status({});
+        if (config.once) {
+            try {
+                node.status({
+                    fill: 'yellow',
+                    shape: 'ring',
+                    text: RED._('time-inject.message.onceDelay', { seconds: (config.onceDelay || 0.1)})
+                });
+
                 config.onceTimeout = setTimeout(() => {
                     node.emit('input', {
                         type: 'once'
                     });
-                    doCreateTimeout(node, undefined);
+                    doCreateTimeout(node, undefined, false);
                 }, (config.onceDelay || 0.1) * 1000);
-            } else {
-                doCreateTimeout(node, undefined);
+            } catch (err) {
+                hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
             }
+            return;
+        }
+
+        try {
+            doCreateTimeout(node, undefined, true);
         } catch (err) {
-            hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+            // if an error occured, will retry in 10 minutes. This will prevent errors on initialisation.
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('time-inject.errors.error-retry', err)
+            });
+            setTimeout(() => {
+                try {
+                    doCreateTimeout(node, undefined, false);
+                } catch (err) {
+                    hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                }
+            }, 600000); // 10 minuten
         }
     }
 

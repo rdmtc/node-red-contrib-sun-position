@@ -76,7 +76,8 @@
             "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
             "not-deployed": "node not deployed",
             "no-response": "no response from server",
-            "unexpected": "unexpected error (__status__) __message__"
+            "unexpected": "unexpected error (__status__) __message__",
+            "retry_error": "error '__message__', retry in 10min"
         }
     }
 }

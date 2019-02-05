@@ -362,7 +362,6 @@ function calcDayOffset(days, daystart) {
             break;
         }
     }
-
     return dayx;
 }
 

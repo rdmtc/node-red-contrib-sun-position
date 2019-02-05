@@ -1,12 +1,14 @@
 <script type="text/x-red" data-template-name="position-config">
     <div class="form-row">
-        <label for="node-config-input-longitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
-        <input type="text" id="node-config-input-longitude" data-i18n="[placeholder]position-config.placeholder.longitude">
+        <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
+        <input type="text" id="node-config-input-posLongitude" data-i18n="[placeholder]position-config.placeholder.longitude">
+        <input type="text" id="node-config-input-longitude" hidden>
     </div>
 
     <div class="form-row">
-        <label for="node-config-input-latitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
-        <input type="text" id="node-config-input-latitude" data-i18n="[placeholder]position-config.placeholder.latitude">
+        <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
+        <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
+        <input type="text" id="node-config-input-latitude" hidden>
     </div>
 
     <div class="form-row">
@@ -116,27 +118,35 @@
     RED.nodes.registerType('position-config', {
         category: 'config',
         credentials: {
-            longitude: {
+            posLongitude: {
                 type: 'text',
                 value: '',
                 required: true,
                 validate: (v) => {
                     const n = Number(v);
-                    return ((n >= -180) && (n <= 180));
+                    return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
                 }
             },
-            latitude: {
+            posLatitude: {
                 type: 'text',
                 value: '',
                 required: true,
                 validate: (v) => {
                     const n = Number(v);
-                    return ((n >= -90) && (n <= 90));
+                    return RED.validators.number()(v) && ((n >= -90) && (n <= 90));
                 }
             }
         },
         defaults: {
             name: {
+                value: '',
+                required: false
+            },
+            longitude: {
+                value: '',
+                required: false
+            },
+            latitude: {
                 value: '',
                 required: false
             },
@@ -151,33 +161,80 @@
                 value: null
             }
         },
-        label() {
+        label: () => {
             return this.name || 'default-position';
         },
-        oneditprepare() {
+        oneditprepare: () => {
             if ((this.timezoneOffset === null) ||
                 (typeof this.timezoneOffset === 'undefined') ||
                 (this.timezoneOffset === '')) {
                 this.timezoneOffset = ((new Date()).getTimezoneOffset() / -60);
                 $('#node-config-input-timezoneOffset').val(this.timezoneOffset);
             }
+            const latField = $('#node-config-input-posLatitude');
+            const lonField = $('#node-config-input-posLongitude');
 
-            $('#node-config-input-latitude').spinner({
+            latField.spinner({
                 step: 0.00001,
                 numberFormat: 'n'
             });
-            $('#node-config-input-longitude').spinner({
+            lonField.spinner({
                 step: 0.00001,
                 numberFormat: 'n'
             });
-            if (($('#node-config-input-latitude').val() === '') && ($('#node-config-input-longitude').val() ===
-                '')) {
+
+            if (lonField.val() === '' || isNaN(lonField.val())) {
+                if (this.credentials.latitude !== '' && isNaN(this.credentials.latitude)) {
+                    lonField.val(Number(this.credentials.latitude));
+                } else if (this.latitude !== '' && isNaN(this.latitude)) {
+                    lonField.val(Number(this.latitude));
+                } else {
+                    lonField.val('');
+                }
+            }
+
+            if (latField.val() === ''|| isNaN(latField.val())) {
+                if (this.credentials.longitude !== '' && isNaN(this.credentials.longitude)) {
+                    latField.val(Number(this.credentials.longitude));
+                } else if (this.longitude !== '' && isNaN(this.longitude)) {
+                    latField.val(Number(this.longitude));
+                } else {
+                    latField.val('');
+                }
+            }
+
+            if ((latField.val() === '') && (lonField.val() === '')) {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(position => {
-                        $('#node-config-input-latitude').val(Number(position.coords.latitude.toFixed(5)));
-                        $('#node-config-input-longitude').val(Number(position.coords.longitude.toFixed(5)));
+                        latField.val(Number(position.coords.latitude.toFixed(5)));
+                        lonField.val(Number(position.coords.longitude.toFixed(5)));
                     });
                 }
             }
+        },
+        oneditsave: () => {
+            /*
+            this.latitude = '';
+            this.longitude = '';
+            let longitude= $('#node-config-input-longitude').val();
+            longitude = parseFloat(longitude.trim());
+            if (isNaN(longitude)) {
+                $('#node-config-input-posLongitude').val('');
+            } else  {
+                $('#node-config-input-posLongitude').val(longitude);
+            }
+            $('#node-config-input-longitude').val(0);
+
+            let latitude= $('#node-config-input-longitude').val();
+            latitude = parseFloat(latitude.trim());
+            if (isNaN(latitude)) {
+                $('#node-config-input-posLatitude').val('');
+            } else  {
+                $('#node-config-input-posLatitude').val(latitude);
+            }
+            $('#node-config-input-latitude').val(0);
+            /* */
+            $('#node-config-input-latitude').val(0);
+            $('#node-config-input-longitude').val(0);
         }
     });</script>

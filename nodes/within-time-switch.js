@@ -39,7 +39,7 @@ module.exports = function (RED) {
         }
     }
 
-    function calcWithinTimes(node, msg, config) {
+    function calcWithinTimes(node, msg, config, _onInit) {
         // node.debug('calcWithinTimes');
         const result = {
             start: {},
@@ -155,7 +155,7 @@ module.exports = function (RED) {
                 // this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
                 // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
-                const result = calcWithinTimes(this, msg, config);
+                const result = calcWithinTimes(this, msg, config, false);
                 let now = new Date();
 
                 if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
@@ -212,10 +212,23 @@ module.exports = function (RED) {
 
         try {
             node.status({});
-            const result = calcWithinTimes(this, null, config);
+            const result = calcWithinTimes(this, null, config, true);
             setstate(this, result, (config.statusOut || 3));
         } catch (err) {
-            hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+            // if an error occured, will retry in 10 minutes. This will prevent errors on initialisation.
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('within-time-switch..errors.error-retry', err)
+            });
+            setTimeout(() => {
+                try {
+                    const result = calcWithinTimes(this, null, config, true);
+                    setstate(this, result, (config.statusOut || 3));
+                } catch (err) {
+                    hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+                }
+            }, 600000); // 10 minuten
         }
     }
 
