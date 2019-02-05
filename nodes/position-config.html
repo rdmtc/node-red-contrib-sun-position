@@ -2,14 +2,17 @@
     <div class="form-row">
         <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
         <input type="text" id="node-config-input-posLongitude" data-i18n="[placeholder]position-config.placeholder.longitude">
-        <input type="text" id="node-config-input-longitude" hidden>
+        <input  type="hidden" id="node-config-input-longitude">
+        <input  type="hidden" id="node-config-input-isValide">
     </div>
 
     <div class="form-row">
         <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
         <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
-        <input type="text" id="node-config-input-latitude" hidden>
+        <input  type="hidden" id="node-config-input-latitude">
     </div>
+
+    <div class="form-row form-tips" data-i18n="[html]time-inject.tips.config"></div>
 
     <div class="form-row">
         <label for="node-config-input-angleType"><i class="fa fa-angle-left"></i> <span data-i18n="position-config.label.angleType"></span></label>
@@ -142,6 +145,13 @@
                 value: '',
                 required: false
             },
+            isValide: {
+                value: false,
+                required: true,
+                validate: (v) => {
+                    return (v === true) || (v === 'true');
+                }
+            },
             longitude: {
                 value: '',
                 required: false
@@ -161,10 +171,10 @@
                 value: null
             }
         },
-        label: () => {
-            return this.name || 'default-position';
+        label() {
+            return this.name || 'timeControl';
         },
-        oneditprepare: () => {
+        oneditprepare() {
             if ((this.timezoneOffset === null) ||
                 (typeof this.timezoneOffset === 'undefined') ||
                 (this.timezoneOffset === '')) {
@@ -173,6 +183,19 @@
             }
             const latField = $('#node-config-input-posLatitude');
             const lonField = $('#node-config-input-posLongitude');
+            const latOldVal = parseFloat($('#node-config-input-latitude').val());
+            const lonOldVal = parseFloat($('#node-config-input-longitude').val());
+            let latVal = parseFloat(latField.val());
+            let lonVal = parseFloat(lonField.val());
+
+            const coordChanged = (_type, _value) => {
+                const lat = $('#node-config-input-posLatitude').val();
+                const lon = $('#node-config-input-posLongitude').val();
+                const isValid = !isNaN(lat) && !isNaN(lon);
+                $('#node-config-input-isValide').val(isValid);
+            };
+            latField.on('change', coordChanged);
+            lonField.on('change', coordChanged);
 
             latField.spinner({
                 step: 0.00001,
@@ -183,27 +206,25 @@
                 numberFormat: 'n'
             });
 
-            if (lonField.val() === '' || isNaN(lonField.val())) {
-                if (this.credentials.latitude !== '' && isNaN(this.credentials.latitude)) {
-                    lonField.val(Number(this.credentials.latitude));
-                } else if (this.latitude !== '' && isNaN(this.latitude)) {
-                    lonField.val(Number(this.latitude));
-                } else {
-                    lonField.val('');
-                }
-            }
-
-            if (latField.val() === ''|| isNaN(latField.val())) {
-                if (this.credentials.longitude !== '' && isNaN(this.credentials.longitude)) {
-                    latField.val(Number(this.credentials.longitude));
-                } else if (this.longitude !== '' && isNaN(this.longitude)) {
-                    latField.val(Number(this.longitude));
+            if (latField.val() === '' || isNaN(latVal)) {
+                if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
+                    latField.val(latOldVal);
                 } else {
                     latField.val('');
                 }
+                latVal = parseFloat(latField.val());
             }
 
-            if ((latField.val() === '') && (lonField.val() === '')) {
+            if (lonField.val() === '' || isNaN(lonVal)) {
+                if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
+                    lonField.val(lonOldVal);
+                } else {
+                    lonField.val('');
+                }
+                lonVal = parseFloat(lonField.val());
+            }
+            if (((latField.val() === '') || isNaN(latVal) || (latVal === 0)) &&
+                ((lonField.val() === '') || isNaN(lonVal) || (lonVal === 0))) {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(position => {
                         latField.val(Number(position.coords.latitude.toFixed(5)));
@@ -212,7 +233,7 @@
                 }
             }
         },
-        oneditsave: () => {
+        oneditsave() {
             /*
             this.latitude = '';
             this.longitude = '';

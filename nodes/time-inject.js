@@ -333,7 +333,7 @@ module.exports = function (RED) {
         try {
             doCreateTimeout(node, undefined, true);
         } catch (err) {
-            // if an error occured, will retry in 10 minutes. This will prevent errors on initialisation.
+            // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
             node.status({
                 fill: 'red',
                 shape: 'ring',
@@ -345,7 +345,7 @@ module.exports = function (RED) {
                 } catch (err) {
                     hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
                 }
-            }, 600000); // 10 minuten
+            }, 600000); // 10 Minuten
         }
     }
 

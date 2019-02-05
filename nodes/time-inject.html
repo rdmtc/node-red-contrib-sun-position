@@ -62,10 +62,12 @@
   <div class="form-row time-inject-row-alt hidden">
       <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
       <input type="text" id="node-input-property"/>
+      <input type="hidden" id="node-input-propertyType">
   </div>
   <div class="form-row block-indent1 time-inject-row-timeAlt hidden">
       <label for="node-input-timeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeAlt"></span></label>
       <input type="text" id="node-input-timeAlt"/>
+      <input type="hidden" id="node-input-timeAltType">
   </div>
   <div class="form-row block-indent1 time-inject-row-timeAltOffset hidden">
       <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
@@ -510,8 +512,7 @@
         outputs: 1,
         defaults: {
             name: {
-                value: '',
-                required: false
+                value: ''
             },
             positionConfig: {
                 value: '',
@@ -530,10 +531,7 @@
             },
             payloadOffset: {
                 value: 0,
-                required: true,
-                validate: (v) => {
-                    return RED.validators.typedInput('payloadOffsetType')(v) || $('#node-input-payloadOffsetType').typedInput('type') === 'none' || this.payloadOffsetType === 'none';
-                }
+                validate: RED.validators.typedInput('payloadOffsetType')
             },
             payloadOffsetType: {
                 value: 'none'
@@ -557,13 +555,9 @@
             },
             offset: {
                 value: 0,
-                required: false,
                 validate: (v) => {
                     return (
-                        typeof v === 'undefined' ||
                         RED.validators.typedInput('offsetType')(v) ||
-                        $('#node-input-offsetType').typedInput('type') === 'none' ||
-                        this.offsetType === 'none' ||
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
                             this.timeType === 'none')
@@ -575,7 +569,7 @@
             },
             offsetMultiplier: {
                 value: 60000,
-                required: false,
+                required: true,
                 validate: (v) => {
                     return (
                         typeof v === 'undefined' ||
@@ -623,13 +617,10 @@
             },
             timeAltOffset: {
                 value: 0,
-                required: true,
                 validate: (v) => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('timeAltOffsetType')(v) ||
-                        $('#node-input-timeAltOffsetType').typedInput('type') === 'none' ||
-                        this.timeAltOffsetType === 'none' ||
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
                             this.timeType === 'none') ||
@@ -695,12 +686,10 @@
                 value: 'date'
             },
             addPayload1Format: {
-                value: 0,
-                required: false
+                value: 0
             },
             addPayload1Offset: {
                 value: 0,
-                required: false,
                 validate: (v) => {
                     return (
                         RED.validators.typedInput('addPayload1OffsetType')(v) ||
@@ -716,7 +705,7 @@
             },
             addPayload1OffsetMultiplier: {
                 value: 60000,
-                required: false,
+                required: true,
                 validate: (v) => {
                     return (
                         RED.validators.number()(v) ||
@@ -751,17 +740,13 @@
                 value: 'date'
             },
             addPayload2Format: {
-                value: 0,
-                required: false
+                value: 0
             },
             addPayload2Offset: {
                 value: 0,
-                required: false,
                 validate: (v) => {
                     return (
                         RED.validators.typedInput('addPayload2OffsetType')(v) ||
-                        $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload2OffsetType === 'none' ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
                         this.addPayload2Type === 'undefined'
                     );
@@ -772,7 +757,7 @@
             },
             addPayload2OffsetMultiplier: {
                 value: 60000,
-                required: false,
+                required: true,
                 validate: (v) => {
                     return (
                         RED.validators.number()(v) ||
@@ -807,17 +792,13 @@
                 value: 'date'
             },
             addPayload3Format: {
-                value: 0,
-                required: false
+                value: 0
             },
             addPayload3Offset: {
                 value: 0,
-                required: false,
                 validate: (v) => {
                     return (
                         RED.validators.typedInput('addPayload3OffsetType')(v) ||
-                        $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload3OffsetType === 'none' ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
                         this.addPayload3Type === 'undefined'
                     );
@@ -828,7 +809,7 @@
             },
             addPayload3OffsetMultiplier: {
                 value: 60000,
-                required: false,
+                required: true,
                 validate: (v) => {
                     return (
                         RED.validators.number()(v) ||
@@ -1527,6 +1508,7 @@
                     $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                 });
                 // #endregion onceDelay
+                console.log(node);
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')

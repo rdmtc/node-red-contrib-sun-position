@@ -12,7 +12,7 @@
             "name": "Name"
         },
         "tips": {
-            "moonPosControl" : "If a message arrives through the Input the calculated position of the moon will be always send to the first output. If additionally specifyd upper and lower limits for the moon radiation and the azimuth is inside the defined limits the incomming message will send to the associated output."
+            "moonPosControl" : "If a message arrives through the Input the calculated position of the moon will be always send to the first output. If additionally specified upper and lower limits for the moon radiation and the azimuth is inside the defined limits the incoming message will send to the associated output."
         }
     }
 }

@@ -87,14 +87,14 @@ module.exports = function (RED) {
                 ts: 0
             };
             const node = this;
-
-            console.log(n.longitude);
-            console.log(n.latitude);
-            console.log(this.credentials.posLongitude);
-            console.log(this.credentials.posLatitude);
-            console.log(node.longitude);
-            console.log(node.latitude);
-
+            /*
+            console.log(hlp.getNodeId(node) +' old lon '+n.longitude);
+            console.log(hlp.getNodeId(node) +' old lat '+n.latitude);
+            console.log(hlp.getNodeId(node) +' new lon '+this.credentials.posLongitude);
+            console.log(hlp.getNodeId(node) +' new lat '+this.credentials.posLatitude);
+            console.log(hlp.getNodeId(node) +' result lon '+node.longitude);
+            console.log(hlp.getNodeId(node) +' result lat '+node.latitude);
+*/
 
             /*
             this.getSunTimes = () => {
@@ -559,22 +559,8 @@ module.exports = function (RED) {
 
     RED.nodes.registerType('position-config', positionConfigurationNode, {
         credentials: {
-            posLongitude: {
-                type: 'text',
-                required: true,
-                validate: (v) => {
-                    const n = Number(v);
-                    return ((n >= -180) && (n <= 180));
-                }
-            },
-            posLatitude: {
-                type: 'text',
-                required: true,
-                validate: (v) => {
-                    const n = Number(v);
-                    return ((n >= -90) && (n <= 90));
-                }
-            }
+            posLongitude: {type: 'text' },
+            posLatitude: { type: 'text' }
         }
     });
 };
