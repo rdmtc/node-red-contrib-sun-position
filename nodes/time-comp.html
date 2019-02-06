@@ -537,7 +537,7 @@
                             id: 'node-input-rule-operator' + containerIndex
                         }).appendTo(row);
                         appendOptions(node, 'time-comp', operatorField, 'operators');
-                        const operatorTypeField = multiselect(node, row, 'operatorTypes', 'node-input-rule-operatorType-' + containerIndex);
+                        const operatorTypeField = multiselect(node, row, 'operatorTypes', 'time-comp.operatorTypes','node-input-rule-operatorType-' + containerIndex);
 
                         addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
                         const operandField = $('<input/>', {

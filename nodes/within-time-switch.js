@@ -11,14 +11,32 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 module.exports = function (RED) {
     'use strict';
 
-    function setstate(node, result, status, statusObj) {
+    function setstate(node, result, status, statusObj, _onInit) {
         if (status > 255) {
-            return result;
+            return false;
         }
 
         if (result.start.error) {
+            if (_onInit === true) {
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('within-time-switch..errors.error-init', result.start.error)
+                });
+                node.warn(RED._('within-time-switch..errors.warn-init', result.start.error));
+                return true;
+            }
             hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : result.start.error}), undefined, result.start.error);
         } else if (result.end.error) {
+            if (_onInit === true) {
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('within-time-switch..errors.error-init', result.end.error)
+                });
+                node.warn(RED._('within-time-switch..errors.warn-init', result.end.error));
+                return true;
+            }
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : result.end.error}), undefined, result.end.error);
         } else if ((status & 2) && statusObj) {
             node.status(statusObj);
@@ -37,9 +55,10 @@ module.exports = function (RED) {
                 text: 'status not available'
             }); */
         }
+        return false;
     }
 
-    function calcWithinTimes(node, msg, config, _onInit) {
+    function calcWithinTimes(node, msg, config) {
         // node.debug('calcWithinTimes');
         const result = {
             start: {},
@@ -155,7 +174,7 @@ module.exports = function (RED) {
                 // this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
                 // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
-                const result = calcWithinTimes(this, msg, config, false);
+                const result = calcWithinTimes(this, msg, config);
                 let now = new Date();
 
                 if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
@@ -181,7 +200,7 @@ module.exports = function (RED) {
                             fill: 'green',
                             shape: 'ring',
                             text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
-                        });
+                        }, false);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
@@ -192,7 +211,7 @@ module.exports = function (RED) {
                         fill: 'green',
                         shape: 'dot',
                         text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
-                    });
+                    }, false);
                     checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                     return null;
                 }
@@ -203,7 +222,7 @@ module.exports = function (RED) {
                     fill: 'yellow',
                     shape: 'dot',
                     text: '⛔' + result.startSuffix + now.toLocaleString() + result.endSuffix
-                });
+                }, false);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
                 hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
@@ -212,23 +231,21 @@ module.exports = function (RED) {
 
         try {
             node.status({});
-            const result = calcWithinTimes(this, null, config, true);
-            setstate(this, result, (config.statusOut || 3));
+            const result = calcWithinTimes(this, null, config);
+            // if an error occured, will retry in 6 minutes. This will prevent errors on initialisation.
+            if (setstate(this, result, (config.statusOut || 3), null, true)) {
+                node.debug('node is in initialisation, retrigger time calculation in 6 min');
+                setTimeout(() => {
+                    try {
+                        const result = calcWithinTimes(this, null, config);
+                        setstate(this, result, (config.statusOut || 3));
+                    } catch (err) {
+                        hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+                    }
+                }, 360000); // 6 Minuten
+            }
         } catch (err) {
-            // if an error occured, will retry in 10 minutes. This will prevent errors on initialisation.
-            node.status({
-                fill: 'red',
-                shape: 'ring',
-                text: RED._('within-time-switch..errors.error-retry', err)
-            });
-            setTimeout(() => {
-                try {
-                    const result = calcWithinTimes(this, null, config, true);
-                    setstate(this, result, (config.statusOut || 3));
-                } catch (err) {
-                    hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
-                }
-            }, 600000); // 10 minuten
+            hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
         }
     }
 

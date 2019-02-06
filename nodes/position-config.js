@@ -184,10 +184,12 @@ module.exports = function (RED) {
             this.getFloatProp = (_srcNode, msg, type, value) => {
                 let data;
                 // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
-                if (type === '' || type === 'none') {
+                if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
                     return 0;
                 } else if (type === 'msgPayload') {
                     data = msg.payload;
+                } else if (type === 'msgValue') {
+                    data = msg.value;
                 } else {
                     data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                 }

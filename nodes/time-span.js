@@ -258,7 +258,7 @@ module.exports = function (RED) {
             throw new Error('could not evaluate ' + type + '.' + value);
         }
 
-        result.value = hlp.parseDateFromFormat(data, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
+        result.value = hlp.parseDateFromFormat(data, format, RED._('time-span.days'), RED._('time-span.month'), RED._('time-span.dayDiffNames'));
 
         if (result.value === 'Invalid Date' || isNaN(result.value) || result.value === null) {
             throw new Error('could not evaluate format of ' + data);
@@ -288,7 +288,7 @@ module.exports = function (RED) {
             type === 'date') {
             const data = node.positionConfig.getTimeProp(node, msg, type, value, offset, multiplier, 1, days);
             if (!data.error) {
-                return hlp.getFormattedDateOut(data.value, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                return hlp.getFormattedDateOut(data.value, format, RED._('time-span.days'), RED._('time-span.month'), RED._('time-span.dayDiffNames'));
             }
             return data;
         }
@@ -339,9 +339,9 @@ node.debug('resObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.ins
                     if (config.result1ValueType === 'timespan') {
                         resObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
                     } else if (config.result1ValueType === 'operand1') {
-                        resObj = hlp.getFormattedDateOut(operand1, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(operand1, config.result1Format, RED._('time-span.days'), RED._('time-span.month'), RED._('time-span.dayDiffNames'));
                     } else if (config.result1ValueType === 'operand2') {
-                        resObj = hlp.getFormattedDateOut(operand2, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(operand2, config.result1Format, RED._('time-span.days'), RED._('time-span.month'), RED._('time-span.dayDiffNames'));
                     } else {
                         const resOffset = this.positionConfig.getFloatProp(node,msg,config.result1OffsetType, config.result1Offset);
                         resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, resOffset, config.result1Multiplier);

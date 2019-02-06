@@ -35,7 +35,7 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none' && config.result1Value) {
                     let resObj = null;
                     if (config.result1Type === 'input') {
-                        resObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
+                        resObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
                     } else {
                         resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }

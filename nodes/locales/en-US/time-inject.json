@@ -177,7 +177,8 @@
             "failed": "inject failed, see log for details",
             "failed2": "Inject failed: __error__",
             "toolong": "Interval too large",
-            "retry_error": "error '__message__', retry in 10min"
+            "error-init": "error '__message__', retry in __time__",
+            "warn-init": "warning '__message__', retry in __time__"
         }
     }
 }

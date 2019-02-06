@@ -531,7 +531,13 @@
             },
             payloadOffset: {
                 value: 0,
-                validate: RED.validators.typedInput('payloadOffsetType')
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.payloadOffsetType === 'undefined') ||
+                        RED.validators.typedInput('payloadOffsetType')(v)
+                    );
+                }
             },
             payloadOffsetType: {
                 value: 'none'
@@ -557,6 +563,8 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.offsetType === 'undefined') ||
                         RED.validators.typedInput('offsetType')(v) ||
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
@@ -587,6 +595,8 @@
                 required: false,
                 validate: (v) => {
                     return (
+                        typeof v === 'undefined' ||
+                        typeof this.propertyType === 'undefined' ||
                         RED.validators.typedInput('propertyType')(v) ||
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
@@ -606,6 +616,7 @@
                         ($('#node-input-timeType').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
                             this.timeType === 'none') ||
+                        typeof this.propertyType === 'undefined' ||
                         ($('#node-input-propertyType').length ?
                             $('#node-input-property').typedInput('type') === 'none' :
                             this.propertyType === 'none')
@@ -620,10 +631,12 @@
                 validate: (v) => {
                     return (
                         typeof v === 'undefined' ||
+                        (typeof this.timeAltOffsetType === 'undefined') ||
                         RED.validators.typedInput('timeAltOffsetType')(v) ||
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
                             this.timeType === 'none') ||
+                        typeof this.propertyType === 'undefined' ||
                         ($('#node-input-propertyType').length ?
                             $('#node-input-property').typedInput('type') === 'none' :
                             this.propertyType === 'none')
@@ -645,6 +658,7 @@
                         ($('#node-input-time').length ?
                             $('#node-input-time').typedInput('type') === 'none' :
                             this.timeType === 'none') ||
+                        typeof this.propertyType === 'undefined' ||
                         ($('#node-input-propertyType').length ?
                             $('#node-input-property').typedInput('type') === 'none' :
                             this.propertyType === 'none')
@@ -667,7 +681,13 @@
             },
             addPayload1: {
                 value: '',
-                validate: RED.validators.typedInput('addPayload1Type')
+                validate: (v) => {
+                    return (
+                        typeof this.addPayload1Type === 'undefined' ||
+                        typeof v === 'undefined' ||
+                        RED.validators.typedInput('addPayload1Type')(v)
+                    );
+                }
             },
             addPayload1Type: {
                 value: 'none'
@@ -678,7 +698,7 @@
                     return (
                         RED.validators.typedInput('addPayload1ValueType')(v) ||
                         $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        this.addPayload1Type === 'undefined'
+                        typeof this.addPayload1Type === 'undefined'
                     );
                 }
             },
@@ -692,11 +712,13 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.addPayload1OffsetType === 'undefined') ||
                         RED.validators.typedInput('addPayload1OffsetType')(v) ||
                         $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
                         this.addPayload1OffsetType === 'none' ||
                         $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        this.addPayload1Type === 'undefined'
+                        typeof this.addPayload1Type === 'undefined'
                     );
                 }
             },
@@ -712,7 +734,7 @@
                         $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
                         this.addPayload1OffsetType === 'none' ||
                         $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        this.addPayload1Type === 'undefined'
+                        typeof this.addPayload1Type === 'undefined'
                     );
                 }
             },
@@ -721,7 +743,13 @@
             },
             addPayload2: {
                 value: '',
-                validate: RED.validators.typedInput('addPayload2Type')
+                validate: (v) => {
+                    return (
+                        typeof this.addPayload2Type === 'undefined' ||
+                        typeof v === 'undefined' ||
+                        RED.validators.typedInput('addPayload2Type')(v)
+                    );
+                }
             },
             addPayload2Type: {
                 value: 'none'
@@ -732,7 +760,7 @@
                     return (
                         RED.validators.typedInput('addPayload2ValueType')(v) ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        this.addPayload2Type === 'undefined'
+                        typeof this.addPayload2Type === 'undefined'
                     );
                 }
             },
@@ -746,9 +774,11 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.addPayload2OffsetType === 'undefined') ||
                         RED.validators.typedInput('addPayload2OffsetType')(v) ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        this.addPayload2Type === 'undefined'
+                        typeof this.addPayload2Type === 'undefined'
                     );
                 }
             },
@@ -764,7 +794,7 @@
                         $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
                         this.addPayload2OffsetType === 'none' ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        this.addPayload2Type === 'undefined'
+                        typeof this.addPayload2Type === 'undefined'
                     );
                 }
             },
@@ -773,7 +803,13 @@
             },
             addPayload3: {
                 value: '',
-                validate: RED.validators.typedInput('addPayload3Type')
+                validate: (v) => {
+                    return (
+                        typeof this.addPayload3Type === 'undefined' ||
+                        typeof v === 'undefined' ||
+                        RED.validators.typedInput('addPayload3Type')(v)
+                    );
+                }
             },
             addPayload3Type: {
                 value: 'none'
@@ -784,7 +820,7 @@
                     return (
                         RED.validators.typedInput('addPayload3ValueType')(v) ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        this.addPayload3Type === 'undefined'
+                        typeof this.addPayload3Type === 'undefined'
                     );
                 }
             },
@@ -798,9 +834,11 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.addPayload3OffsetType === 'undefined') ||
                         RED.validators.typedInput('addPayload3OffsetType')(v) ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        this.addPayload3Type === 'undefined'
+                        typeof this.addPayload3Type === 'undefined'
                     );
                 }
             },
@@ -816,7 +854,7 @@
                         $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
                         this.addPayload3OffsetType === 'none' ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        this.addPayload3Type === 'undefined'
+                        typeof this.addPayload3Type === 'undefined'
                     );
                 }
             },
@@ -1016,14 +1054,17 @@
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, 'time-inject', field, 'multiplier', (id) => (id > 0));
-                    if (mp === 1) {
-                        mp = 1000;
-                    } else if (mp === 60) {
+                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
-                    } else if (mp === 3600) {
-                        mp = 3600000;
-                    } else if (mp === null || typeof mp === 'undefined' || mp === '' || mp === 0) {
-                        mp = 60000;
+                    } else {
+                        mp = parseFloat(mp);
+                        if (mp === 1) {
+                            mp = 1000;
+                        } else if (mp === 60) {
+                            mp = 60000;
+                        } else if (mp === 3600) {
+                            mp = 3600000;
+                        }
                     }
                     field.val(mp);
                     return mp;
@@ -1191,7 +1232,7 @@
                     }
                 }).change();
 
-                initDaysCheckbox(node, 'addPayload1Days');
+                initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
 
                 initCombobox(node, 'time-inject', 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
@@ -1286,7 +1327,7 @@
                     }
                 }).change();
 
-                initDaysCheckbox(node, 'addPayload2Days');
+                initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
 
                 initCombobox(node, 'time-inject', 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
@@ -1376,7 +1417,7 @@
                     }
                 }).change();
 
-                initDaysCheckbox(node, 'addPayload3Days');
+                initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
 
                 initCombobox(node, 'time-inject', 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
@@ -1421,7 +1462,7 @@
                     }
                 }).change();
 
-                initDaysCheckbox(node, 'timeDays');
+                initDaysCheckbox('#time-inject-timeDays', node.timeDays);
 
                 node.offsetMultiplier = multilpierUpdate(node.offsetMultiplier, 'offsetMultiplier');
                 setupTInput(node, {
@@ -1483,7 +1524,7 @@
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env']
                 }).change();
 
-                initDaysCheckbox(node, 'timeAltDays');
+                initDaysCheckbox('#time-inject-timeAltDays', node.timeAltDays);
 
                 node.timeAltOffsetMultiplier = multilpierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
                 setupTInput(node, {
@@ -1508,7 +1549,7 @@
                     $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                 });
                 // #endregion onceDelay
-                console.log(node);
+                // console.log(node);
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')

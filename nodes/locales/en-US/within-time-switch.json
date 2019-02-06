@@ -77,7 +77,8 @@
             "not-deployed": "node not deployed",
             "no-response": "no response from server",
             "unexpected": "unexpected error (__status__) __message__",
-            "retry_error": "error '__message__', retry in 10min"
+            "error-init": "error '__message__', retry in 6min",
+            "warn-init": "warning '__message__', retry in 6min"
         }
     }
 }

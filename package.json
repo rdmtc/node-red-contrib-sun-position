@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.2.0-alpha",
+  "version": "0.2.0-alpha.1",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -50,7 +50,8 @@
     "lintfix": "eslint --fix \"./**/*.js\" \"./**/*.html\"",
     "lint": "eslint \"./**/*.js\" \"./**/*.html\"",
     "predev": "npm i -g",
-    "dev": "node-red -v"
+    "dev": "node-red -v",
+    "prepublishOnly": "eslint \"./**/*.js\" \"./**/*.html\""
   },
   "repository": {
     "type": "git",

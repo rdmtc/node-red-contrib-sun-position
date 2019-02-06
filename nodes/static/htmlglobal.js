@@ -430,13 +430,18 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     return tInputField;
 }
 
-function initDaysCheckbox(node, id) { // eslint-disable-line no-unused-vars
-    if (node[id] === '*' || typeof node[id] === 'undefined') {
-        $('#time-inject-' + id + ' input[type=checkbox]').prop('checked', true);
+/**
+ * sets a checkbox matrix
+ * @param {string} element name of the element as jQuery element name
+ * @param {string} val value of the element
+ */
+function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
+    if (val === '*' || typeof val === 'undefined') {
+        $(element + ' input[type=checkbox]').prop('checked', true);
     } else {
-        $('#time-inject-' + id + ' input[type=checkbox]').removeAttr('checked');
-        node[id].split(',').forEach(v => {
-            $('#time-inject-' + id + ' [value=' + v + ']').prop('checked', true);
+        $(element + ' input[type=checkbox]').removeAttr('checked');
+        val.split(',').forEach(v => {
+            $(element + ' [value=' + v + ']').prop('checked', true);
         });
     }
 }
@@ -526,7 +531,15 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
     }
 }
 
-function multiselect(node, parent, elementName, id) { // eslint-disable-line no-unused-vars
+/**
+ * adds a multiselect combobox to the form
+ * @param {*} node Node Red Source Node
+ * @param {*} parent Parent jQuery Element to add multiselect
+ * @param {*} elementName Name of the element in the node, e.g. 'operatorTypes'
+ * @param {*} i18N i18N element name, e.g. 'time-comp.operatorTypes'
+ * @param {*} id element id, e.g. 'node-input-rule-operatorType-1'
+ */
+function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
     const types = SelectFields[elementName + 'Short'];
     const getSelection = function getCBText(parent) {
         const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
@@ -558,7 +571,7 @@ function multiselect(node, parent, elementName, id) { // eslint-disable-line no-
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
         list.append($('<label></label>', {
             class: 'header',
-            html: node._('time-comp.' + elementName + 'Groups.' + gIndex)
+            html: node._(i18N + 'Groups.' + gIndex)
         }));
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
@@ -571,7 +584,7 @@ function multiselect(node, parent, elementName, id) { // eslint-disable-line no-
                         id: id + '-' + elements[eIndex].id
                     }).on('change', _event => {
                         getSelection(multiselect);
-                    }), node._('time-comp.' + elementName + '.' + eIndex)]
+                    }), node._(i18N + '.' + eIndex)]
                 }));
             // elements[eIndex].label
             }

@@ -117,7 +117,22 @@ module.exports = function (RED) {
         this.nextTimeAltData = null;
         const node = this;
 
-        function doCreateTimeout(node, msg, _onInit) {
+        function retriggerOnInit(node, errorStatus, errorMesage) {
+            node.warn(RED._('time-inject.errors.warn-init', { message: errorMesage, time: 6}));
+            setTimeout(() => {
+                try {
+                    doCreateTimeout(node);
+                } catch (err) {
+                    hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                }
+            }, 360000); // 6 Minuten
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('time-inject.errors.error-init', { message: errorStatus, time: '6min'})
+            });
+        }
+        function doCreateTimeout(node, _onInit) {
             let errorStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
@@ -132,48 +147,52 @@ module.exports = function (RED) {
             if (node.timeType !== 'none' && node.positionConfig) {
                 // (srcNode, msg, vType, value, offset, next, days)
                 // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset, node.offsetMultiplier, 1);
-                const nextTimeOffset = node.positionConfig.getFloatProp(node,msg, node.offsetType, node.offset);
+                const nextTimeOffset = node.positionConfig.getFloatProp(node, undefined, node.offsetType, node.offset);
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, nextTimeOffset, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
-                    node.error(node.nextTimeData.error);
-                    node.debug(util.inspect(node.nextTimeData));
-                    // console.log('1');
                     node.nextTime = null;
                     isFixedTime = false;
+                    if (_onInit === true) {
+                        retriggerOnInit(node, errorStatus, node.nextTimeData.error);
+                        return;
+                    }
+                    node.error(node.nextTimeData.error);
+                    node.debug('nextTimeData ' + util.inspect(node.nextTimeData));
                 } else {
                     node.nextTime = node.nextTimeData.value;
                     isFixedTime = node.nextTimeData.fix;
                 }
             }
-            // console.log(util.inspect(node.nextTimeData));
 
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                const nextTimeOffset = node.positionConfig.getFloatProp(node,msg, node.timeAltOffsetType, node.timeAltOffset);
+                const nextTimeOffset = node.positionConfig.getFloatProp(node, undefined, node.timeAltOffsetType, node.timeAltOffset);
                 node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, nextTimeOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
-                    node.error(node.nextTimeAltData.error);
-                    node.debug(util.inspect(node.nextTimeAltData));
-                    // console.log('2');
                     node.nextTimeAlt = null;
                     isFixedTime = false;
+                    if (_onInit === true) {
+                        retriggerOnInit(node, errorStatus, node.nextTimeAltData.error);
+                        return;
+                    }
+                    node.error(node.nextTimeAltData.error);
+                    node.debug('nextTimeAltData: ' + util.inspect(node.nextTimeAltData));
                 } else {
                     node.nextTimeAlt = node.nextTimeAltData.value;
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
 
-            if ((node.nextTime !== null) && (errorStatus !== '')) {
+            if ((node.nextTime !== null) && (errorStatus === '')) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
                     return;
                 }
 
                 let millis = tsGetScheduleTime(node.nextTime, 10);
-                // node.debug('timeout ' + node.nextTime + ' is in ' + milis + 'ms');
                 const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
                     const millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
@@ -183,6 +202,7 @@ module.exports = function (RED) {
                     }
                 }
 
+                // node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
                 node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
                     const msg = {
                         type: 'start',
@@ -206,11 +226,11 @@ module.exports = function (RED) {
 
                         if (needsRecalc) {
                             try {
-                                doCreateTimeout(node, msg, false);
+                                node.debug('needsRecalc');
+                                doCreateTimeout(node);
                             } catch (err) {
                                 hlp.handleError(node, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
                             }
-
                             return;
                         }
                     }
@@ -220,28 +240,32 @@ module.exports = function (RED) {
                     } else if (node.nextTimeData) {
                         msg.timeData = node.nextTimeData;
                     }
-
-                    // node.debug('redo doCreateTimeout');
                     node.emit('input', msg);
                 }, millis, isAlt, isAltFirst);
             }
 
-            if (!isFixedTime && !node.intervalObj) {
+            if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
                 node.intervalObj = setInterval(() => {
-                    // node.debug('retrigger');
-                    doCreateTimeout(node, msg, false);
+                    node.debug('retriggered');
+                    doCreateTimeout(node);
                 }, node.recalcTime);
             } else if (isFixedTime && node.intervalObj) {
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
             }
 
-            if (errorStatus) {
+            if ((errorStatus !== '')) {
+                if (_onInit === true) {
+                    retriggerOnInit(node, errorStatus, errorStatus);
+                    return;
+                }
+
                 node.status({
                     fill: 'red',
                     shape: 'dot',
-                    text: errorStatus + ((node.intervalObj) ? ' 🖩' : '')
+                    text: errorStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
+            // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({
@@ -280,8 +304,8 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                doCreateTimeout(node, msg, false);
                 node.debug('input ' + util.inspect(msg));
+                doCreateTimeout(node);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
@@ -322,7 +346,7 @@ module.exports = function (RED) {
                     node.emit('input', {
                         type: 'once'
                     });
-                    doCreateTimeout(node, undefined, false);
+                    doCreateTimeout(node);
                 }, (config.onceDelay || 0.1) * 1000);
             } catch (err) {
                 hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
@@ -331,21 +355,9 @@ module.exports = function (RED) {
         }
 
         try {
-            doCreateTimeout(node, undefined, true);
+            doCreateTimeout(node, true);
         } catch (err) {
-            // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
-            node.status({
-                fill: 'red',
-                shape: 'ring',
-                text: RED._('time-inject.errors.error-retry', err)
-            });
-            setTimeout(() => {
-                try {
-                    doCreateTimeout(node, undefined, false);
-                } catch (err) {
-                    hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
-                }
-            }, 600000); // 10 Minuten
+            hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
         }
     }
 
