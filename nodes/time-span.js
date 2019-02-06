@@ -295,7 +295,7 @@ module.exports = function (RED) {
         return RED.util.evaluateNodeProperty(value, type, node, msg);
     } /* */
 
-    function timeCalcNode(config) {
+    function timeSpanNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
@@ -316,14 +316,14 @@ module.exports = function (RED) {
             }
 
             try {
-                const offset1 = this.positionConfig.getFloatProp(node,msg,config.operand1OffsetType, config.operand1Offset);
-                const operand1 = this.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, offset1, config.operand1OffsetMultiplier);
+                const offset1 = node.positionConfig.getFloatProp(node,msg,config.operand1OffsetType, config.operand1Offset);
+                const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, offset1, config.operand1OffsetMultiplier);
 node.debug('operand1 ' + util.inspect(operand1)); // eslint-disable-line
                 if (operand1 === null) {
                     return null;
                 }
-                const offset2 = this.positionConfig.getFloatProp(node,msg,config.operand2OffsetType, config.operand2Offset);
-                const operand2 = this.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, offset2, config.operand2OffsetMultiplier);
+                const offset2 = node.positionConfig.getFloatProp(node,msg,config.operand2OffsetType, config.operand2Offset);
+                const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, offset2, config.operand2OffsetMultiplier);
 node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
                 if (operand2 === null) {
                     return null;
@@ -343,8 +343,8 @@ node.debug('resObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.ins
                     } else if (config.result1ValueType === 'operand2') {
                         resObj = hlp.getFormattedDateOut(operand2, config.result1Format, RED._('time-span.days'), RED._('time-span.month'), RED._('time-span.dayDiffNames'));
                     } else {
-                        const resOffset = this.positionConfig.getFloatProp(node,msg,config.result1OffsetType, config.result1Offset);
-                        resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, resOffset, config.result1Multiplier);
+                        const resOffset = node.positionConfig.getFloatProp(node,msg,config.result1OffsetType, config.result1Offset);
+                        resObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, resOffset, config.result1Multiplier);
                     }
                     // to
 node.debug('resObj1 ' + util.inspect(resObj)); // eslint-disable-line
@@ -360,7 +360,7 @@ node.debug('resObj2 ' + util.inspect(resObj)); // eslint-disable-line
                     if (resObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resObj.error) {
-                        this.error('error on getting result: ' + resObj.error);
+                        node.error('error on getting result: ' + resObj.error);
                     } else if (config.result1Type === 'msg' || config.result1Type === 'msgProperty') {
                         RED.util.setMessageProperty(msg, config.result1, resObj);
                     } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
@@ -377,7 +377,7 @@ node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
                     const rule = rules[i];
 node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     try {
-                        let ruleoperand = this.positionConfig.getFloatProp(this, msg, rule.operandType, rule.operandValue);
+                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue);
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
@@ -416,7 +416,7 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                             resObj.push(null);
                         }
                     } catch (err) {
-                        hlp.handleError(this, RED._('time-calc.errors.error-text'), err, RED._('time-calc.errors.error-title'));
+                        hlp.handleError(node, RED._('time-span.errors.error-text'), err, RED._('time-span.errors.error-title'));
                         resObj.push(null);
                         continue;
                     }
@@ -429,20 +429,20 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 
                 resObj.push(msg);
 node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
-                this.send(resObj);
+                node.send(resObj);
             } catch (err) {
-                hlp.handleError(this, RED._('time-calc.errors.error-text'), err, RED._('time-calc.errors.error-title'));
+                hlp.handleError(node, RED._('time-span.errors.error-text'), err, RED._('time-span.errors.error-title'));
             }
         });
     }
 
-    RED.nodes.registerType('time-span', timeCalcNode);
+    RED.nodes.registerType('time-span', timeSpanNode);
 
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
+    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (_req,_res) => {
         const options = {
             root: __dirname + '/static/',
             dotfiles: 'deny'
         };
-        res.sendFile(req.params[0], options);
+        _res.sendFile(_req.params[0], options);
     });
 };

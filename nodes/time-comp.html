@@ -422,7 +422,20 @@
                     valueProp: 'input',
                     width: 'calc(100% - 110px)',
                     defaultType: node.inputType || types.MsgPayload.value,
-                    types: [types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global', 'date', 'str', 'num', types.DateEntered, types.TimeSun, types.TimeMoon, types.DayOfMonth, 'env'],
+                    types: [
+                        types.MsgPayload,
+                        types.MsgTs,
+                        'msg',
+                        'flow',
+                        'global',
+                        'date',
+                        'num',
+                        types.DateEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        types.DayOfMonth,
+                        'env'
+                    ],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-input').typedInput('type');
                         if (opType === 'date' ||
@@ -546,7 +559,18 @@
                             type: 'text'
                         }).appendTo(row).typedInput({
                             default: 'str',
-                            types: ['msg', 'flow', 'global', 'date', 'str', 'num', types.TimeSun, types.TimeMoon, 'env', 'jsonata']
+                            types: [
+                                'msg',
+                                'flow',
+                                'global',
+                                'date',
+                                'num',
+                                types.DateEntered,
+                                types.TimeSun,
+                                types.TimeMoon,
+                                types.DayOfMonth,
+                                'env'
+                            ]
                         });
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'

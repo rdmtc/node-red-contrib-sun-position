@@ -447,17 +447,15 @@
         if (v.length > l) {
             return v.substring(0, l - 3) + '...';
         }
-
         return v;
     }
 
     function getValueLabel(t, v, l) {
         l = l || 15;
-        if (t === 'string' || t === 'str') {
+        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
             if (v === '') {
                 return v;
             }
-
             return '"' + clipValueLength(v, l) + '"';
         }
 
@@ -1112,8 +1110,10 @@
                     types: [
                         'date',
                         types.TimeEntered,
+                        types.DateEntered,
                         types.TimeSun,
                         types.TimeMoon,
+                        types.DayOfMonth,
                         'flow',
                         'global',
                         'str',
@@ -1211,6 +1211,7 @@
                     types: [
                         'date',
                         types.TimeEntered,
+                        types.DateEntered,
                         types.TimeSun,
                         types.TimeMoon,
                         types.DayOfMonth,

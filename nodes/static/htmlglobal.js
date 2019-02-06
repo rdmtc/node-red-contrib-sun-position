@@ -148,7 +148,7 @@ function getTypes() { // eslint-disable-line no-unused-vars
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
         TimePredefined: {
-            value: 'predefined',
+            value: 'TimePredefined',
             label: 'time (current day)',
             options: ['midnight (current day)', 'noon (current day)']
         },

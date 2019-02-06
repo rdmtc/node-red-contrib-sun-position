@@ -642,24 +642,12 @@ The formats are:
 
 ## TODO
 
-- [ ] change icon size to 40x60 <https://github.com/node-red/node-red.github.io/pull/39>
-- [ ] add posibility to select input/output timezone
-  - [ ] select auto ad get info from getTimezoneOffset
+- [ ] add possibility to select input/output timezone
+  - [ ] select auto add get info from getTimezoneOffset
   - [ ] solve problem of dst
-- [x] time Span
-  - [x] zeitraum zwischen 2 zeitpunkten ausrechnen
-  - [x] die möglichkeit statt Zeitpunkt - Zeitraum auszugeben auch sowas wie Zeitpunkt - Zeitraum > Limit true/false rauszugeben
-  - [ ] offset für Input als Typed Input mit Wahl des offset: NA, num, msg, flow, global
-  - [ ] als Input 1. Des Monats, letzter Tag des Monats, Monatsmitte, erster+ letzter Mo, Di, Mi, Do, Fr, Sa, So im Monat
 - [ ] within-time
-  - [ ] add Payload hinzufügen wie bei time inject - um beispielsweise dem Message Objekt mehr Infos hinzuzufügen
-  - [ ] als Start und Ende Midnight hinzufügen
-  - [ ] offset als Typed Input mit Wahl des offset: NA, num, msg, flow, global
-- [ ] Time Inject
-  - [ ] Midnight als auswahl für Zeit hinzufügen
-  - [ ] offset als Typed Input mit Wahl des offset: NA, num, msg, flow, global
-- [ ] time-comp
-  - [ ] vergleicht mit 1. Des Monats, letzter Tag des Monats, Monatsmitte, erster+ letzter Mo, Di, Mi, Do, Fr, Sa, So im Monat
+  - [ ] add result like other nodes
+  - [ ] remove status configuration, always show start and end
   - [ ] offset als Typed Input mit Wahl des offset: NA, num, msg, flow, global
 
 ## Bugs and Feedback

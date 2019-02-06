@@ -19,50 +19,60 @@ module.exports = function (RED) {
         const node = this;
 
         this.on('input', msg => {
+node.debug('config ' + util.inspect(config)); // eslint-disable-line
+node.debug('on input - msg ' + util.inspect(msg)); // eslint-disable-line
+            if (node.positionConfig === null ||
+                config.operator === null ||
+                config.inputType === null) {
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: 'Configuration is missing!!'
+                });
+                throw new Error('Configuration is missing!!');
+            }
+
+
             try {
-                node.debug('input ' + util.inspect(msg));
-                if (
-                    node.positionConfig === null ||
-                    config.operator === null ||
-                    config.inputType === null
-                ) {
-                    throw new Error('Configuration is missing!!');
-                }
+                node.debug('emit ' + util.inspect(msg));
+                const offset1 = node.positionConfig.getFloatProp(node,msg,config.inputOffsetType, config.inputOffset);
+                const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, offset1, config.inputOffsetMultiplier);
+                node.debug('inputData ' + util.inspect(inputData));
 
-                const offset1 = this.positionConfig.getFloatProp(node,msg,config.inputOffsetType, config.inputOffset);
-                const inputData = this.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, offset1, config.inputOffsetMultiplier);
-
-                if (config.result1Type !== 'none' && config.result1Value) {
-                    let resObj = null;
+                if (config.result1Type !== 'none') {
+                    let resultObj = null;
                     if (config.result1Type === 'input') {
-                        resObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
+                        resultObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
                     } else {
-                        resObj = this.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }
 
-                    node.debug('resObj ' + util.inspect(resObj));
-                    if (resObj === null) {
+node.debug('resultObj ' + util.inspect(resultObj)); // eslint-disable-line
+                    if (resultObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
-                    } else if (resObj.error) {
-                        this.error('error on getting result: ' + resObj.error);
+                    } else if (resultObj.error) {
+                        node.error('error on getting result: ' + resultObj.error);
                     } else if (config.result1Type === 'msgPayload') {
-                        msg.payload = resObj;
+                        msg.payload = resultObj;
                     } else if (config.result1Type === 'msgTs') {
-                        msg.ts = resObj;
+                        msg.ts = resultObj;
+                    } else if (config.result1Type === 'msgValue') {
+                        msg.value = resultObj;
                     } else if (config.result1Type === 'msg') {
-                        RED.util.setMessageProperty(msg, config.result1Value, resObj, true);
+                        RED.util.setMessageProperty(msg, config.result1Value, resultObj, true);
                     } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
                         const contextKey = RED.util.parseContextStore(config.result1Value);
-                        node.context()[config.result1Type].set(contextKey.key, resObj, contextKey.store);
+                        node.context()[config.result1Type].set(contextKey.key, resultObj, contextKey.store);
                     }
                 }
 
-                node.debug('input ' + util.inspect(inputData));
-                const resObj = null;
+node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
+                const resObj = [];
                 const rules = config.rules;
                 const rulesLength = rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
+node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
@@ -70,7 +80,7 @@ module.exports = function (RED) {
                     }
 
                     if (operatorValid) {
-                        const ruleoperand = this.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, rule.multiplier);
+                        const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, rule.multiplier);
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
                         node.debug('operatorType ' + util.inspect(rule.operatorType));
@@ -189,16 +199,17 @@ module.exports = function (RED) {
                 }
 
                 resObj.push(msg);
-                return resObj;
+node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
+                node.send(resObj);
             } catch (err) {
-                hlp.handleError(this, RED._('time-comp.errors.error-text'), err, RED._('time-comp.errors.error-title'));
+                hlp.handleError(node, RED._('time-comp.errors.error-text'), err, RED._('time-comp.errors.error-title'));
             }
         });
     }
 
     RED.nodes.registerType('time-comp', timeCompNode);
 
-    RED.httpAdmin.get('/sun-position/js/*', (_req,_res) => {
+    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (_req,_res) => {
         const options = {
             root: __dirname + '/static/',
             dotfiles: 'deny'

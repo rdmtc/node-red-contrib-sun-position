@@ -58,7 +58,7 @@ module.exports = function (RED) {
             } catch (err) {
                 hlp.handleError(this, 'Exception occurred on sun-position', err, 'internal error');
             }
-            // this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
+            // this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'URL' and 'content type' or the 'message' and 'language'!!");
             // this.status({fill:"red",shape:"dot",text:"error - input parameter"});
         });
 

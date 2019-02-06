@@ -13,14 +13,14 @@ module.exports = function (RED) {
 
     function tsGetScheduleTime(time, limit) {
         const now = new Date();
-        let millis = time.getTime() - now.getTime();
+        let milis = time.getTime() - now.getTime();
         if (limit) {
-            while (millis < limit) {
-                millis += 86400000; // 24h
+            while (milis < limit) {
+                milis += 86400000; // 24h
             }
         }
 
-        return millis;
+        return milis;
     }
 
     function tsGetPropData(node, msg, type, value, format, offset, offsetType, multiplier, days) {
@@ -192,17 +192,17 @@ module.exports = function (RED) {
                     return;
                 }
 
-                let millis = tsGetScheduleTime(node.nextTime, 10);
+                let milis = tsGetScheduleTime(node.nextTime, 10);
                 const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
-                    const millisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
-                    if (millisAlt < millis) {
-                        millis = millisAlt;
+                    const milisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
+                    if (milisAlt < milis) {
+                        milis = milisAlt;
                         isAltFirst = true;
                     }
                 }
 
-                // node.debug('timeout ' + node.nextTime + ' is in ' + millis + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
+                // node.debug('timeout ' + node.nextTime + ' is in ' + milis + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
                 node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
                     const msg = {
                         type: 'start',
@@ -241,7 +241,7 @@ module.exports = function (RED) {
                         msg.timeData = node.nextTimeData;
                     }
                     node.emit('input', msg);
-                }, millis, isAlt, isAltFirst);
+                }, milis, isAlt, isAltFirst);
             }
 
             if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {

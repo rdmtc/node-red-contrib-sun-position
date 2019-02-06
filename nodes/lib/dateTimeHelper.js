@@ -376,7 +376,7 @@ function calcDayOffset(days, daystart) {
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
 function normalizeDate(d, offset, multiplier, next, days) {
-    // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
@@ -409,7 +409,7 @@ function normalizeDate(d, offset, multiplier, next, days) {
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
 function normalizeDateUTC(d, offset, multiplier, next, days) {
-    // console.debug('normalizeDateUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days);
+    console.debug('normalizeDateUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
@@ -439,7 +439,7 @@ function normalizeDateUTC(d, offset, multiplier, next, days) {
  * @return {Date} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date) {
-    // console.debug('getTimeOfText t=' + t + ' date=' + date);
+    console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
@@ -461,6 +461,7 @@ function getTimeOfText(t, date) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  */
 function getDateOfText(dt) {
+    console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
@@ -918,7 +919,7 @@ function getTimeDiff(time1, time2, limit) {
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
-    // console.log('getFormattedDateOut ' + date + ' --> ' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    console.log('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (isNaN(format)) {
         return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
@@ -1087,7 +1088,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @returns {Date|null} a Date object or **null** if pattern does not match.
  */
 function getDateFromFormat(val, format) {
-    // console.log('getDateFromFormat ' + val + ' --> ' + format); // eslint-disable-line
+    // console.log('getDateFromFormat val=' + val + ' --> format=' + format); // eslint-disable-line
     val = String(val);
     format = String(format);
     const now = new Date();
@@ -1320,6 +1321,7 @@ function _parseArray(val, listToCheck) {
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDate(val, preferEuro) {
+    console.debug('parseDate val=' + val + ' - preferEuro=' + preferEuro); // eslint-disable-line
     let res = _parseArray(val, dateFormat.parseDates.general);
     if (res !== null) { return res; }
     res = _parseArray(val, (preferEuro) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
@@ -1335,6 +1337,7 @@ function parseDate(val, preferEuro) {
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDateTime(val, preferEuro) {
+    console.debug('parseDateTime val=' + val + ' - preferEuro=' + preferEuro); // eslint-disable-line
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
             for (let j = 0; j < lst2.length; j++) {
@@ -1366,7 +1369,8 @@ function parseDateTime(val, preferEuro) {
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
-    console.debug('parseDateFromFormat ' + util.inspect(date) + ' - ' + util.inspect(format) + 'dayNames'); // eslint-disable-line
+    console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + ' dayNames'); // eslint-disable-line
+    // console.log('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
