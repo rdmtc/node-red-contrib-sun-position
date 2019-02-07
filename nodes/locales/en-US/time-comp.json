@@ -7,6 +7,7 @@
             "comp": "comp",
             "name": "Name",
             "position": "Position",
+            "positionConfig": "configuration",
             "input": "Input",
             "inputFormat": "parse format",
             "inputOffset": "Offset",
@@ -112,16 +113,17 @@
         "parseFormatsGroups": [
             "Number",
             "Text (string)",
-            "Text free"
+            "Other"
         ],
         "parseFormats": [
             "milliseconds - UNIX timestamp",
             "ECMA-262 - JSON Date representation",
-            "various - try different Formats, prefere european formats",
-            "various - try different Formats, prefere american formats",
+            "try different text Formats, prefer day first like d/M/y",
+            "try different text Formats, prefer month first like M/d/y",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "Other - free definition"
+            "try different various Formats (object, number, text)",
+            "free text format definition"
         ],
         "multiplierGroups": [
             "Standard",
@@ -136,64 +138,6 @@
             "weeks",
             "month",
             "year"
-        ],
-        "days": [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sun",
-            "Mon",
-            "Tue",
-            "Wed",
-            "Thu",
-            "Fri",
-            "Sat"
-        ],
-        "month": [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
-        ],
-        "dayDiffNames": [
-            "1 week ago",
-            "6 days ago",
-            "5 days ago",
-            "4 days ago",
-            "3 days ago",
-            "2 days ago",
-            "Yesterday",
-            "Today",
-            "Tomorrow",
-            "day after tomorrow",
-            "in 3 days",
-            "in 4 days",
-            "in 5 days",
-            "in 6 days"
         ],
         "placeholder": {
             "position": "Position",
@@ -231,7 +175,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on time-comp",
+            "error-text": "Exception occurred on time-comp",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",

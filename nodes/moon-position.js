@@ -57,7 +57,13 @@ module.exports = function (RED) {
                 });
                 return null;
             } catch (err) {
-                hlp.handleError(this, 'Exception occurred on moon-position', err, 'internal error');
+                node.error(err.message);
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: 'internal error'
+                });
             }
             // this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'url' and 'content type' or the 'message' and 'language'!!");
             // this.status({fill:"red",shape:"dot",text:"error - input parameter"});

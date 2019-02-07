@@ -73,13 +73,6 @@
             "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend", "Sonntag",
             "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
         ],
-    "month": [
-        "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    ],
-    "dayDiffNames": [
-        "Yesterday", "Today", "Tomorrow", "day after tomorrow"
-    ],
         "placeholder": {
             "position": "Position",
             "name": "Name",

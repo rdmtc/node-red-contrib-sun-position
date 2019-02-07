@@ -1,6 +1,6 @@
 <script type="text/x-red" data-template-name="time-comp">
   <div class="form-row">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-comp.label.position"></span></label>
+    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-comp.label.positionConfig"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
@@ -223,6 +223,9 @@
         }
         if (t === 'msgTs') {
             return 'msg.ts';
+        }
+        if (t === 'msgValue') {
+            return 'msg.value';
         }
 
         if (t === 'flow' || t === 'global') {

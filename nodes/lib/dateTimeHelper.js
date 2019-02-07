@@ -460,7 +460,7 @@ function getTimeOfText(t, date) {
  * @param {any} dt number or text which contains a date or a time
  * @return {Date} the parsed date object, throws an error if can not parsed
  */
-function getDateOfText(dt) {
+function getDateOfText(dt, preferMonthFirst) {
     console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
@@ -512,14 +512,14 @@ function getDateOfText(dt) {
     }
 
     if (typeof dt === 'string') {
-        let res = parseDateTime(dt, true);
-        if (res === null) {
-            res = parseDate(dt, true);
-        }
-        if (res === null) {
-            res = _parseArray(dt, dateFormat.parseTimes);
-        }
-        return res;
+        let res = parseDateTime(dt, preferMonthFirst);
+        if (res !== null) { return res; }
+        res = parseDate(dt, preferMonthFirst);
+        if (res !== null) { return res; }
+        res = _parseArray(dt, dateFormat.parseTimes);
+        if (res !== null) { return res; }
+        res = Date.parse(dt);
+        if (!isNaN(res)) { return res; }
     }
     throw new Error('could not evaluate ' + String(dt) + ' as a valid Date or time.');
 }
@@ -741,9 +741,9 @@ dateFormat.masks = {
 };
 
 dateFormat.parseDates = {
-    general : ['y-M-d', 'MMM d, y', 'MMM d,y', 'y-MMM-d', 'd-MMM-y', 'MMM d'],
-    monthFirst : ['M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'M-d'],
-    dateFirst : ['d/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M']
+    monthFirst : ['MMM d, y', 'MMM d,y', 'M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'MMM d', 'M-d'],
+    dateFirst : ['d-MMM-y', 'd/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M', 'd MMM'],
+    general : ['y-M-d', 'y-MMM-d']
 };
 
 dateFormat.parseTimes = ['hh:mm:ss:lt', 'hh:mm:ss.lt', 'hh:mm:sst', 'hh:mmt', 'HH:mm:ss:l', 'HH:mm:ss.l', 'HH:mm:ss', 'HH:mm', 'h:mm:ss TT Z', 'h:mm:ss TT', 'h:mm TT'];
@@ -964,7 +964,12 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
             return formatDate(date, 'xx, d.m.', false, dayNames, monthNames, dayDiffNames);
     }
 
-    const delay = (date.getTime() - (new Date()).getTime());
+    const now = new Date();
+    console.log('date='+util.inspect(date)); // eslint-disable-line
+    console.log('now='+util.inspect(now)); // eslint-disable-line
+
+    const delay = (date.getTime() - now.getTime());
+    console.log('delay='+util.inspect(delay)); // eslint-disable-line
     return {
         date,
         ts: date.getTime(),
@@ -1034,7 +1039,7 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
 //                      Nov 20, 00
 //  "M/d/yy"   matches: 01/20/00
 //                      9/2/00
-//  "MMM dd, yyyy hh:mm:ssa" matches: "January 01, 2000 12:30:45AM"
+//  "MMM dd, yyyy hh:mm:sst" matches: "January 01, 2000 12:30:45AM"
 // ------------------------------------------------------------------
 
 // ------------------------------------------------------------------
@@ -1289,7 +1294,12 @@ function getDateFromFormat(val, format) {
     } else if (hh > 11 && ampm === 'AM') {
         hh -= 12;
     }
-    // console.log(year, month, date, hh, mm, ss, ll); // eslint-disable-line
+
+    const newdate = new Date(year, month - 1, date, hh, mm, ss, ll);
+    console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll} newdate=${newdate}`); // eslint-disable-line
+    return newdate.getTime();
+
+console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll}`); // eslint-disable-line
     return new Date(year, month - 1, date, hh, mm, ss, ll);
 }
 
@@ -1317,27 +1327,27 @@ function _parseArray(val, listToCheck) {
  * M/d/y   M-d-y      M.d.y     MMM-d     M/d      M-d
  * d/M/y   d-M-y      d.M.y     d-MMM     d/M      d-M
  * @param {string} val date string to parse
- * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (European format) before M/d/y (American).
+ * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function parseDate(val, preferEuro) {
-    console.debug('parseDate val=' + val + ' - preferEuro=' + preferEuro); // eslint-disable-line
-    let res = _parseArray(val, dateFormat.parseDates.general);
+function parseDate(val, preferMonthFirst) {
+    console.debug('parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+    let res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
     if (res !== null) { return res; }
-    res = _parseArray(val, (preferEuro) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
+    res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
     if (res !== null) { return res; }
-    return _parseArray(val, (preferEuro) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
+    return _parseArray(val, dateFormat.parseDates.general);
 }
 
 /**
  * This function takes a date and time string and tries to match it to a
  * number of possible date formats to get the value.
  * @param {string} val date string to parse
- * @param {boolean} [preferEuro] if **true** the method to search for formats like d/M/y (European format) before M/d/y (American).
+ * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function parseDateTime(val, preferEuro) {
-    console.debug('parseDateTime val=' + val + ' - preferEuro=' + preferEuro); // eslint-disable-line
+function parseDateTime(val, preferMonthFirst) {
+    console.debug('parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
             for (let j = 0; j < lst2.length; j++) {
@@ -1348,14 +1358,14 @@ function parseDateTime(val, preferEuro) {
     }
 
     let checkList = [dateFormat.masks.isoDateTime];
-    checkList = mix(dateFormat.parseDates.general, dateFormat.parseTimes, checkList);
-    if (preferEuro) {
-        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
+    if (preferMonthFirst) {
         checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
     } else {
-        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
         checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
     }
+    checkList = mix(dateFormat.parseDates.general, dateFormat.parseTimes, checkList);
     return _parseArray(val, checkList);
 }
 
@@ -1366,7 +1376,7 @@ function parseDateTime(val, preferEuro) {
  * @param {Array.<string>} [dayNames] list of day names
  * @param {Array.<string>} [monthNames] list of month names
  * @param {Array.<string>} [dayDiffNames] list of day diff names
- * @returns {Date|null} a Date object or **null** if no patterns match.
+ * @returns {Date} a Date object or throws an error if no patterns match.
  */
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + ' dayNames'); // eslint-disable-line
@@ -1385,37 +1395,54 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
 
     format = format || 0;
 
+    let res = null;
     if (isNaN(format)) { // timeparse_TextOther
-        return getDateFromFormat(date, format);
-    }
-
-    const tryparse = (val, preferEuro) => {
-console.debug('try parse ' + util.inspect(preferEuro)); // eslint-disable-line
-        let res = parseDateTime(val, preferEuro);
-        if (res === null) {
-            res = parseDate(val, preferEuro);
-        }
-        if (res === null) {
+        res = getDateFromFormat(date, format);
+    } else {
+        const tryparse = (val, preferMonthFirst) => {
+console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+            let res = parseDateTime(val, preferMonthFirst);
+            if (res !== null) { return res; }
+            res = parseDate(val, preferMonthFirst);
+            if (res !== null) { return res; }
             res = _parseArray(val, dateFormat.parseTimes);
-        }
-        return res;
-    };
+            if (res !== null) { return res; }
+console.debug(`try parse last try res=${res}`); // eslint-disable-line
+            res = Date.parse(val);
+            if (isNaN(res)) {
+                return null;
+            }
+            return new Date(res);
+        };
 
-    switch (Number(format)) {
-        case 0: // UNIX Timestamp
-            return new Date(Number(date));
-        case 1: // timeparse_ECMA262
-            return Date.parse(date);
-        case 2: // various - try different Formats, prefer European formats
-            return tryparse(date, true);
-        case 3: // various - try different Formats, prefer American formats
-            return tryparse(date, false);
-        case 4: // timeformat_YYYYMMDDHHMMSS
-            return parseComparableDateFormat(date);
-        case 5: // timeformat_YYYYMMDD_HHMMSS
-            return parseComparableDateFormat2(date);
-        default: {
-            return getDateOfText(date);
+
+        switch (Number(format)) {
+            case 0: // UNIX Timestamp
+                res = new Date(Number(date));
+                break;
+            case 1: // timeparse_ECMA262
+                res = Date.parse(date);
+                break;
+            case 2: // various - try different Formats, prefer day first like d/M/y (e.g. European format)
+                res = tryparse(date, false);
+                break;
+            case 3: // various - try different Formats, prefer month first like M/d/y (e.g. American format)
+                res = tryparse(date, true);
+                break;
+            case 4: // timeformat_YYYYMMDDHHMMSS
+                res = parseComparableDateFormat(date);
+                break;
+            case 5: // timeformat_YYYYMMDD_HHMMSS
+                res = parseComparableDateFormat2(date);
+                break;
+            default: {
+                res = getDateOfText(date);
+                break;
+            }
         }
     }
+    if (res === 'Invalid Date' || isNaN(res) || res === null) {
+        throw new Error('could not evaluate format of ' + date + ' (' + format+')');
+    }
+    return res;
 }

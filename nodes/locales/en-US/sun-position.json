@@ -2,6 +2,8 @@
     "sun-position": {
         "label": {
             "position" : "Position",
+            "positionConfig": "configuration",
+            "config": "configuration",
             "topic" :"Topic",
             "between":"between",
             "and":"and",

@@ -13,69 +13,30 @@ module.exports = function (RED) {
 
     function tsGetScheduleTime(time, limit) {
         const now = new Date();
-        let milis = time.getTime() - now.getTime();
+        let millisec = time.getTime() - now.getTime();
         if (limit) {
-            while (milis < limit) {
-                milis += 86400000; // 24h
+            while (millisec < limit) {
+                millisec += 86400000; // 24h
             }
         }
 
-        return milis;
-    }
-
-    function tsGetPropData(node, msg, type, value, format, offset, offsetType, multiplier, days) {
-        if (type === null || type === 'none' || type === '' || (typeof type === 'undefined')) {
-            if (value === '' || (typeof value === 'undefined')) {
-                const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
-                const result = hlp.addOffset(Date.now(), offsetX, multiplier);
-                return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-            }
-            return value;
-        } else if (type === 'pdsCalcData') {
-            return node.positionConfig.getSunCalc(msg.ts);
-        } else if (type === 'pdmCalcData') {
-            return node.positionConfig.getMoonCalc(msg.ts);
-        } else if (type === 'msgPayload') {
-            return msg.payload;
-        } else if (type === 'msgTs') {
-            return msg.ts;
-        } else if ((type === 'pdsTime') ||
-                    (type === 'pdmTime')) {
-            let result;
-            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
-            if (type === 'pdsTime') { // sun
-                result = node.getSunTime(Date.now(), value, offsetX, multiplier, days);
-            } else if (type === 'pdmTime') { // moon
-                result = node.getMoonTime(Date.now(), value, offsetX, multiplier, days);
-            }
-            if (result && result.value && !result.error) {
-                return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-            }
-            return null;
-        } else if (type === 'entered' || type === 'dateEntered') {
-            let result = hlp.getDateOfText(String(value));
-            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
-            result = hlp.normalizeDate(result, offsetX, multiplier, 1, days);
-            return hlp.getFormattedDateOut(result, format, RED._('time-inject.days'), RED._('time-inject.month'), RED._('time-inject.dayDiffNames'));
-        } else if (type === 'dayOfMonth') {
-            let result = new Date();
-            result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
-            if (result !== null && typeof result !== 'undefined') {
-                result = hlp.addOffset(result, offset, multiplier);
-                return hlp.getFormattedDateOut(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
-            }
-            return null;
-        }
-        return RED.util.evaluateNodeProperty(value, type, node, msg);
+        return millisec;
     }
 
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days) {
         if (type !== 'none' && name) {
-            const res = tsGetPropData(node, msg, valueType, value, format, offset, offsetType, multiplier, days);
+            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
+            const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offsetX, multiplier, days);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
                 this.error('error on getting additional payload 1: ' + res.error);
+            } else if (type === 'msgPayload') {
+                msg.payload = res;
+            } else if (type === 'msgTs') {
+                msg.ts = res;
+            } else if (type === 'msgValue') {
+                msg.value = res;
             } else if (type === 'msg' || type === 'msgProperty') {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {
@@ -123,7 +84,13 @@ module.exports = function (RED) {
                 try {
                     doCreateTimeout(node);
                 } catch (err) {
-                    hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                    node.error(err.message);
+                    node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    node.status({
+                        fill: 'red',
+                        shape: 'ring',
+                        text: RED._('time-inject.errors.error-title')
+                    });
                 }
             }, 360000); // 6 Minuten
             node.status({
@@ -192,17 +159,17 @@ module.exports = function (RED) {
                     return;
                 }
 
-                let milis = tsGetScheduleTime(node.nextTime, 10);
+                let millisec = tsGetScheduleTime(node.nextTime, 10);
                 const isAlt = (node.nextTimeAlt);
                 if (isAlt) {
-                    const milisAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
-                    if (milisAlt < milis) {
-                        milis = milisAlt;
+                    const millisecAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
+                    if (millisecAlt < millisec) {
+                        millisec = millisecAlt;
                         isAltFirst = true;
                     }
                 }
 
-                // node.debug('timeout ' + node.nextTime + ' is in ' + milis + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
+                // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
                 node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
                     const msg = {
                         type: 'start',
@@ -229,7 +196,13 @@ module.exports = function (RED) {
                                 node.debug('needsRecalc');
                                 doCreateTimeout(node);
                             } catch (err) {
-                                hlp.handleError(node, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                                node.error(err.message);
+                                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                                node.status({
+                                    fill: 'red',
+                                    shape: 'ring',
+                                    text: RED._('time-inject.errors.error-title')
+                                });
                             }
                             return;
                         }
@@ -241,7 +214,7 @@ module.exports = function (RED) {
                         msg.timeData = node.nextTimeData;
                     }
                     node.emit('input', msg);
-                }, milis, isAlt, isAltFirst);
+                }, millisec, isAlt, isAltFirst);
             }
 
             if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
@@ -311,7 +284,8 @@ module.exports = function (RED) {
                     throw new Error('configuration missing!');
                 }
 
-                const value = tsGetPropData(this, msg, config.payloadType, config.payload, config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier);
+                const offsetX = this.positionConfig.getFloatProp(node, node.payloadOffset, config.payloadOffsetType);
+                const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, offsetX, config.payloadOffsetMultiplier);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -329,7 +303,13 @@ module.exports = function (RED) {
 
                 node.send(msg);
             } catch (err) {
-                hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                node.error(err.message);
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('time-inject.errors.error-title')
+                });
             }
         });
 
@@ -349,7 +329,13 @@ module.exports = function (RED) {
                     doCreateTimeout(node);
                 }, (config.onceDelay || 0.1) * 1000);
             } catch (err) {
-                hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+                node.error(err.message);
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('time-inject.errors.error-title')
+                });
             }
             return;
         }
@@ -357,7 +343,13 @@ module.exports = function (RED) {
         try {
             doCreateTimeout(node, true);
         } catch (err) {
-            hlp.handleError(this, RED._('time-inject.errors.error-text'), err, RED._('time-inject.errors.error-title'));
+            node.error(err.message);
+            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('time-inject.errors.error-title')
+            });
         }
     }
 

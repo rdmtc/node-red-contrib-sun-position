@@ -77,11 +77,12 @@ const SelectFields = {
     ], parseFormats: [
         {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
         {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-        {id: 2, group: 'string', label: 'various - try different Formats, prefer European formats', add: 'will try different formats, prefer European formats'},
-        {id: 3, group: 'string', label: 'various - try different Formats, prefer American formats', add: 'will try different formats, prefer American formats'},
+        {id: 2, group: 'string', label: 'try different text Formats, prefer day first like d/M/y (e.g. European format)', add: 'will try different formats, prefer European formats'},
+        {id: 3, group: 'string', label: 'try different text Formats, prefer month first like M/d/y (e.g. American format)', add: 'will try different formats, prefer American formats'},
         {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
         {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
-        {id: 99, group: 'other', label: 'free definition', add: 'xxx'}
+        {id: 98, group: 'other', label: 'various - try different Formats (object, number, text)', add: 'xxx'},
+        {id: 99, group: 'other', label: 'text - free definition', add: 'xxx'}
     ], multiplierGroups: [
         {id: 'default', label: 'Standard'},
         {id: 'other', label: 'Special'}
@@ -131,6 +132,16 @@ function getTypes() { // eslint-disable-line no-unused-vars
         MsgTs: {
             value: 'msgTs',
             label: 'msg.ts',
+            hasValue: false
+        },
+        MsgLc: {
+            value: 'msgLc',
+            label: 'msg.lc',
+            hasValue: false
+        },
+        MsgValue: {
+            value: 'msgValue',
+            label: 'msg.value',
             hasValue: false
         },
         TimeEntered: {
@@ -532,7 +543,7 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
 }
 
 /**
- * adds a multiselect combobox to the form
+ * adds a multiselect combo box to the form
  * @param {*} node Node Red Source Node
  * @param {*} parent Parent jQuery Element to add multiselect
  * @param {*} elementName Name of the element in the node, e.g. 'operatorTypes'
@@ -603,5 +614,3 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     });
     return multiselect;
 }
-
-// #endregion functions

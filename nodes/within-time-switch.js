@@ -225,7 +225,13 @@ module.exports = function (RED) {
                 }, false);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
-                hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+                node.error(err.message);
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('within-time-switch.errors.error-title')
+                });
             }
         });
 
@@ -240,12 +246,24 @@ module.exports = function (RED) {
                         const result = calcWithinTimes(this, null, config);
                         setstate(this, result, (config.statusOut || 3));
                     } catch (err) {
-                        hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+                        node.error(err.message);
+                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.status({
+                            fill: 'red',
+                            shape: 'ring',
+                            text: RED._('within-time-switch.errors.error-title')
+                        });
                     }
                 }, 360000); // 6 Minuten
             }
         } catch (err) {
-            hlp.handleError(this, RED._('within-time-switch.errors.error-text'), err, RED._('within-time-switch.errors.error-title'));
+            node.error(err.message);
+            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('within-time-switch.errors.error-title')
+            });
         }
     }
 

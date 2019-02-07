@@ -20,7 +20,7 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
 node.debug('config ' + util.inspect(config)); // eslint-disable-line
-node.debug('on input - msg ' + util.inspect(msg)); // eslint-disable-line
+node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
             if (node.positionConfig === null ||
                 config.operator === null ||
                 config.inputType === null) {
@@ -34,15 +34,14 @@ node.debug('on input - msg ' + util.inspect(msg)); // eslint-disable-line
 
 
             try {
-                node.debug('emit ' + util.inspect(msg));
                 const offset1 = node.positionConfig.getFloatProp(node,msg,config.inputOffsetType, config.inputOffset);
                 const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, offset1, config.inputOffsetMultiplier);
-                node.debug('inputData ' + util.inspect(inputData));
+node.debug('inputData ' + util.inspect(inputData)); // eslint-disable-line
 
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
-                    if (config.result1Type === 'input') {
-                        resultObj = hlp.getFormattedDateOut(inputData, config.result1Format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
+                    if (config.result1ValueType === 'input') {
+                        resultObj =  node.positionConfig.formatOutDate(inputData, config.result1Format);
                     } else {
                         resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
                     }
@@ -202,7 +201,13 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
                 node.send(resObj);
             } catch (err) {
-                hlp.handleError(node, RED._('time-comp.errors.error-text'), err, RED._('time-comp.errors.error-title'));
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text:  RED._('time-comp.errors.error-title')
+                });
+                throw err;
             }
         });
     }

@@ -2,6 +2,7 @@
     "within-time-switch": {
         "label": {
             "position": "Position",
+            "positionConfig": "configuration",
             "name": "Name",
             "topic": "Topic",
             "addTimes": "alternate start or end time",
@@ -59,14 +60,14 @@
             "Sunday"
         ],
         "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have differend start/end times for holidays or other special days."
+            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days."
         },
         "notification": {
             "success": "Successfully injected: __label__"
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on withinTimeSwitch",
+            "error-text": "Exception occurred on withinTimeSwitch",
             "error-start-time": "Error get start time: __message__",
             "error-end-time": "Error get end time: __message__",
             "error-title": "internal error",
