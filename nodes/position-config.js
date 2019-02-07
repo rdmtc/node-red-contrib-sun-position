@@ -106,7 +106,7 @@ module.exports = function (RED) {
             }
             */
             this.getSunTime = (now, value, offset, multiplier, next, days) => {
-                // node.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+                node.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
                 let result = sunTimesCheck(node, now);
                 result = Object.assign(result, node.sunTimesToday[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -148,7 +148,7 @@ module.exports = function (RED) {
             };
 
             this.getMoonTime = (now, value, offset, multiplier, next, days) => {
-                // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+                node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
                 const result = moonTimesCheck(node, now);
                 // node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
                 result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset, multiplier);
@@ -182,6 +182,7 @@ module.exports = function (RED) {
             };
 
             this.getFloatProp = (_srcNode, msg, type, value) => {
+                _srcNode.debug('getFloatProp type='+type+' value='+value);
                 let data;
                 // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
                 if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
@@ -203,7 +204,8 @@ module.exports = function (RED) {
                 return data;
             };
 
-            this.getOutDataProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
+            this.getOutDataProp = (_srcNode, msg, vType, value, format, offset, multiplier) => {
+                _srcNode.debug('getOutDataProp type='+vType+' value='+value+' format='+format+' offset='+offset+' multiplier='+multiplier);
                 let result = null;
                 if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
                     return hlp.getFormattedDateOut(Date.now(), format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
@@ -239,10 +241,11 @@ module.exports = function (RED) {
                     }
                     return null;
                 }
-                return RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+                return RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
             };
 
-            this.getDateFromProp = (srcNode, msg, vType, value, format, offset, multiplier) => {
+            this.getDateFromProp = (_srcNode, msg, vType, value, format, offset, multiplier) => {
+                _srcNode.debug('getDateFromProp type='+vType+' value='+value+' format='+format+' offset='+offset+' multiplier='+multiplier);
                 let result = null;
                 if (vType === null || vType === 'none' || vType === '') {
                     return Date.now();
@@ -275,11 +278,11 @@ module.exports = function (RED) {
                     result = msg.ts;
                 } else {
                     // msg, flow, global, str, num, env
-                    result = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+                    result = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
                 }
                 if (result !== null && typeof result !== 'undefined') {
                     result = hlp.parseDateFromFormat(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
-                    if (result.value === 'Invalid Date' || isNaN(result.value) || result.value === null) {
+                    if (result === 'Invalid Date' || isNaN(result) || result === null) {
                         throw new Error('could not evaluate format of ' + result);
                     }
                     return hlp.addOffset(result, offset, multiplier);
@@ -287,8 +290,8 @@ module.exports = function (RED) {
                 throw new Error('could not evaluate ' + vType + '.' + value);
             };
 
-            this.getTimeProp = (srcNode, msg, vType, value, offset, multiplier, next, days) => {
-                // node.debug('getTimeProp ' + hlp.getNodeId(srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            this.getTimeProp = (_srcNode, msg, vType, value, offset, multiplier, next, days) => {
+                node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
                 const now = new Date();
                 let result = {
                     value: null,
@@ -318,7 +321,7 @@ module.exports = function (RED) {
                     } else {
                         // can handle context, json, jsonata, env, ...
                         result.fix = (vType === 'json'); // is not a fixed time if can be changed
-                        const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
+                        const res = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
                         if (res) {
                             result.value = hlp.getDateOfText(res);
                             result.value = hlp.normalizeDate(result.value, offset, multiplier, next, days);

@@ -232,9 +232,9 @@ module.exports = function (RED) {
         try {
             node.status({});
             const result = calcWithinTimes(this, null, config);
-            // if an error occured, will retry in 6 minutes. This will prevent errors on initialisation.
+            // if an error occurred, will retry in 6 minutes. This will prevent errors on initialization.
             if (setstate(this, result, (config.statusOut || 3), null, true)) {
-                node.debug('node is in initialisation, retrigger time calculation in 6 min');
+                node.debug('node is in initialization, retrigger time calculation in 6 min');
                 setTimeout(() => {
                     try {
                         const result = calcWithinTimes(this, null, config);
