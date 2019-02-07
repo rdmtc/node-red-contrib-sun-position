@@ -104,7 +104,7 @@ The node calculates the current sun position on any input message.
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
-- **position container** here you can define multiple lower and upepr limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
+- **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 - **Name** name of the Node
 
 #### Node Input
@@ -180,7 +180,7 @@ The Input is for triggering the calculation. If limits are defined the input mes
 }
 ```
 
-- **second output** to **... output** if limits for azimuth are defined the incomming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
+- **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
 
 ### moon-position
 
@@ -198,7 +198,7 @@ The node calculates the current sun position on any input message.
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
-- **position container** here you can define multiple lower and upepr limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
+- **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 - **Name** name of the Node
 
 #### moon-position - Node Output
@@ -260,11 +260,11 @@ The node calculates the current sun position on any input message.
 }
 ```
 
-- **second output** to **... output** if limits for azimuth are defined the incomming message will send to this output. It adds a `msg.payload.posChanged` property of type _boolean_ which is true if the limit has changed since the last azimuth calculation.
+- **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.payload.posChanged` property of type _boolean_ which is true if the limit has changed since the last azimuth calculation.
 
 ### time-inject
 
-Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.
+Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message payload can be a variety of types, including strings, JavaScript objects, the current time or the current sun or moon position.
 
 ![time-inject](images/time-inject-example.png?raw=true)
 
@@ -280,22 +280,22 @@ Injects a message into a flow either manually or at timestamps which can also de
 - **Payload** defines the payload of the message object send to the output
 - **Topic** defines the topic of the send message
 - **Time** An optional property that can be [configured](#times-definitions) when the inject node should emit a message on that timestamp.
-- **Offset** An optional property which is only available if an time is choosen. The offset can be a positive or negative and defines a time offset to the choosen time.
-- **Days** An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.
+- **Offset** An optional property which is only available if an time is chosen. The offset can be a positive or negative and defines a time offset to the chosen time.
+- **Days** An optional property which is only available if an time is chosen. There can be defined on which days a msg should be emitted.
 
-- **Property** _optional_ here can be defined a context property which must be of tyxpe boolean. If this property is true alternate time will be used.
+- **Property** _optional_ here can be defined a context property which must be of type boolean. If this property is true alternate time will be used.
 - **Alternate time** _optional_ defines an alternate start time which will be used if the property is true. This can be used for different times for example of holidays/weekend.
 
-- **Additional Inject on Start** If this checkbox is set the inject node dcan emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be usefull for initializing any flow.
+- **Additional Inject on Start** If this checkbox is set the inject node can emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be useful for initializing any flow.
 
 - **Set additional** With this selection you can
   - set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
-  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherfor the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message oprperty as __on time__ with the seconds until sunrise.
+  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise.
     - **set additional timestamp**:
       ![time-inject](images/time-inject-settings-addProp1.png?raw=true)
     - **set additional sun timestamp**:
       ![time-inject](images/time-inject-settings-addProp2.png?raw=true)
-    - **possible formates of timestamp output**
+    - **possible formats of timestamp output**
       - number - milliseconds UNIX timestamp
       - string - ECMA-262
       - string - local date and time
@@ -349,22 +349,22 @@ A simple node that routes messages depending on the time. If the current time fa
   - **End time** alternate end time
   - **End Offset** offset for the alternate end time
 - **Status** here can be adjusted which status should be displayed under the node.
-  - this has the following posibilities:
-    - **none** - no status will be displayed - **only errors** - if an error occures it will be displayed
+  - this has the following possibilities:
+    - **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
       ![within-time-status-error](images/within-time-status-error.png?raw=true)
     - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
       ![within-time-status-time](images/within-time-status-time.png?raw=true)
     - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
       ![within-time-status-error](images/within-time-status-message-block.png?raw=true)
-      if the message was pass throught the timestamp of this message will be shown.
+      if the message was pass through the timestamp of this message will be shown.
       ![within-time-status-send](images/within-time-status-message-send.png?raw=true)
-    - **time limits or last message** - on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.
+    - **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
 - **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 - **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
 ### time-comp
 
-A enhanced node for time format change and time comparision.
+A enhanced node for time format change and time comparison.
 
 ![time-comp](images/time-comp-example.png?raw=true)
 
@@ -386,16 +386,16 @@ A simple node that routes messages depending on the time. If the current time fa
   - **Offset** allows to define a positive or negative offset to the given **Input Time**.
 - **compare with** here can be defined various definitions of times to which the input time should be compared.
   - **operator** Drop down to define operator
-  - **compare type** allows to define whoat parts of the timestring shoudl be compared. Default is a comparision of the complete timestamp. But it is possible to only compare a pat like the only the year.
+  - **compare type** allows to define what parts of the time string should be compared. Default is a comparison of the complete timestamp. But it is possible to only compare a pat like the only the year.
   - **time** defines where the time to which should be compared comes from
   - **parse format** defines the format for the time to compare, more information see [input parse formats](#input-parse-formats).
   - **Offset** allows to define a positive or negative offset to the given time.
-  - **limitation** here it is possible to additionally define a parameter. if defined this comparision will only be made if this parameter has the value "true".
+  - **limitation** here it is possible to additionally define a parameter. if defined this comparison will only be made if this parameter has the value "true".
 - **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
 
 ### time-span
 
-A enhanced node for time span calculation and time span comparision.
+A enhanced node for time span calculation and time span comparison.
 
 ![time-span](images/time-span-example.png?raw=true)
 
@@ -419,13 +419,13 @@ A simple node that routes messages depending on the time. If the current time fa
   - **parse format** defines the format for the second input parameter, more information see [input parse formats](#input-parse-formats).
   - **Offset** allows to define a positive or negative offset to the given **Input 2 Time**.
 - **compare with** here can be defined various time spams to which the time span between timestamp of input 1 and input 2 should be compared.
-  - **operator** Drop down to define operator for comparision
+  - **operator** Drop down to define operator for comparison
   - **time** defines a number to which should be the timespan be compared
   - **time type** the unit of the given time
-- **result** ** as result of an incomming message, data could be written to that destination. This could be a message property, a flow or a global context.
+- **result** ** as result of an incoming message, data could be written to that destination. This could be a message property, a flow or a global context.
   - **result value** defines the value which should be written to the result destination. Could be the timestamp, one of the Input times or any other time/data. For timestamp or times the output format or maybe an offset could be defined.
 
-Without defining any comparision, the node allows by only defining inputs and result a simply timespan calculation.
+Without defining any comparison, the node allows by only defining inputs and result a simply timespan calculation.
 
 ### Times definitions
 
@@ -442,7 +442,7 @@ manual timestamps can be entered as one of the following formats:
 
 #### sun times
 
-following Sun times can be choosen:
+following Sun times can be chosen:
 
 | Time                | Description                                                              | SunBH |
 | ------------------- | ------------------------------------------------------------------------ | ----- |
@@ -483,7 +483,7 @@ This is not an official definition, this is happend when the Sun is 15° below t
 
 ###### alternate properties
 
-The following time parameters are exists in the output for backwart compatibility. These are equal to parameters in the table above:
+The following time parameters are exists in the output for backward compatibility. These are equal to parameters in the table above:
 
 | time parameter | is equal to        |
 | -------------- | ------------------ |
@@ -537,7 +537,7 @@ The formats are:
  Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
  Month        | NNN (abbr.)        |
  Day of Month | dd (2 digits)      | d (1 or 2 digits)
- Day of Week  | EE (name)          | E (abbr)
+ Day of Week  | EE (name)          | E (abbr.)
  Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
  Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
  Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
@@ -549,7 +549,7 @@ The formats are:
 
 ### output timestamp formats
 
-For timestamp outputs some nodes has the ability to define the format of the timestamp. Therfore different pre defined formates exists or a free format definition.
+For timestamp outputs some nodes has the ability to define the format of the timestamp. Therefore different pre defined formats exists or a free format definition.
 
 The formats are:
 
@@ -557,13 +557,13 @@ The formats are:
 - **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
 - **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
 - **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
-- **local** is the javascript output of date.toLocaleString()
-- **localLong** is the javascript output of date.toString()
-- **localTime** is the javascript output of date.toLocaleTimeString()
-- **localTimeLong** is the javascript output of date.toTimeString()
-- **localDate** is the javascript output of date.toLocaleDateString()
-- **localDateLong** is the javascript output of date.toDateString()
-- **UTC** is the javascript output of date.toUTCString()
+- **local** is the java script output of date.toLocaleString()
+- **localLong** is the java script output of date.toString()
+- **localTime** is the java script output of date.toLocaleTimeString()
+- **localTimeLong** is the java script output of date.toTimeString()
+- **localDate** is the java script output of date.toLocaleDateString()
+- **localDateLong** is the java script output of date.toDateString()
+- **UTC** is the java script output of date.toUTCString()
 - **ISO** YYYY-MM-DDTHH:mm:ss.sssZ (output of date.toISOString())
 - **ms** the time in milliseconds between output and timestamp
 - **sec** the time in seconds between output and timestamp
@@ -571,13 +571,13 @@ The formats are:
 - **hour** the time in hours between output and timestamp
 - **Day Name** the timestamps day in the format Monday, 22.12.
 - **Day in relative** the timestamps day in relative to output time in the format Today, 22.12.
-- **object** gived back an object for the timestamp with the following properties:
-  - **date** Javascript Date object
+- **object** gives back an object for the timestamp with the following properties:
+  - **date** Java script Date object
   - **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
-  - **timeUTCStr** string representation of the TIme in UTC format
-  - **timeISOStr** string representation of the TIme in ISO format
-  - **timeLocaleStr** the javascript output of date.toLocaleString()
-  - **timeLocaleTimeStr** the javascript output of date.toLocaleTimeString()
+  - **timeUTCStr** string representation of the Time in UTC format
+  - **timeISOStr** string representation of the Time in ISO format
+  - **timeLocaleStr** the java script output of date.toLocaleString()
+  - **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
   - **delay** the time in milliseconds between output and timestamp
   - **delaySec** the time in seconds between output and timestamp
 - **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
@@ -608,7 +608,11 @@ The formats are:
 |mm|Minutes; leading zero for single-digit minutes.|
 |s|Seconds; no leading zero for single-digit seconds.|
 |ss|Seconds; leading zero for single-digit seconds.|
-|l or L|Milliseconds. l gives 3 digits. L gives 2 digits.|
+|l|Milliseconds; no leading zeros for single-digit|
+|ll|Milliseconds; 1 leading zero for single-digit; no for 3 digits|
+|lll|Milliseconds; 2 leading zero for single-digit; 2 for 2 digits|
+|L|Milliseconds divided by 100 round to 0; no leading zero|
+|LL|Milliseconds divided by 10 round to 0; leading zero for single-digit|
 |t|Lowercase, single-character time marker string: a or p.|
 |tt|Lowercase, two-character time marker string: am or pm.|
 |T|Uppercase, single-character time marker string: A or P.|
@@ -623,19 +627,19 @@ The formats are:
 
 ### output timespan formats
 
-For timespan output the calc-timespan node has the ability to define the format of the timespan. Therfore different pre defined formates exists or a free format definition.
+For timespan output the calc-timespan node has the ability to define the format of the timespan. Therefore different pre defined formats exists or a free format definition.
 
 The formats are:
 
 - **ms** timespan im milliseconds (integer value)
-- **sec**, **min**,..., **month**, **years** timespan as a floating point number or as a integer number of the the choosen unit.
-- **object** gived back an object for the timespan with the following properties:
-  - **date** Javascript Date object
+- **sec**, **min**,..., **month**, **years** timespan as a floating point number or as a integer number of the the chosen unit.
+- **object** gives back an object for the timespan with the following properties:
+  - **date** Java script Date object
   - **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
-  - **timeUTCStr** string representation of the TIme in UTC format
-  - **timeISOStr** string representation of the TIme in ISO format
-  - **timeLocaleStr** the javascript output of date.toLocaleString()
-  - **timeLocaleTimeStr** the javascript output of date.toLocaleTimeString()
+  - **timeUTCStr** string representation of the Time in UTC format
+  - **timeISOStr** string representation of the Time in ISO format
+  - **timeLocaleStr** the java script output of date.toLocaleString()
+  - **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
   - **delay** the time in milliseconds between output and timestamp
   - **delaySec** the time in seconds between output and timestamp
 - **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
@@ -644,7 +648,7 @@ The formats are:
 
 - [ ] add possibility to select input/output timezone
   - [ ] select auto add get info from getTimezoneOffset
-  - [ ] solve problem of dst
+  - [ ] solve problem of DST
 - [ ] within-time
   - [ ] add result like other nodes
   - [ ] remove status configuration, always show start and end

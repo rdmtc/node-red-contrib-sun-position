@@ -199,6 +199,9 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 
                 resObj.push(msg);
 node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
+                node.status({
+                    text: inputData.toISOString()
+                });
                 node.send(resObj);
             } catch (err) {
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));

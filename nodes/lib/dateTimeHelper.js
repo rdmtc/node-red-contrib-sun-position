@@ -594,7 +594,7 @@ const dateFormat = (function () {
         const H = date[_ + 'Hours'](); // 0-23
         const m = date[_ + 'Minutes']();
         const s = date[_ + 'Seconds']();
-        const L = date[_ + 'Milliseconds']();
+        const l = date[_ + 'Milliseconds']();
         const o = utc ? 0 : date.getTimezoneOffset();
 
         const flags = {
@@ -623,10 +623,12 @@ const dateFormat = (function () {
             mm: pad(m),
             s,
             ss: pad(s),
-            lll: pad(L, 3),
-            ll: pad(Math.round(L / 10)),
-            l: L,
-            L: pad(L > 99 ? Math.round(L / 10) : L),
+            l,
+            ll: pad(l),
+            lll: pad(l, 3),
+            L: Math.round(l / 100),
+            LL: pad(Math.round(l / 10)),
+            LLL: pad(l, 3),
             t: H < 12 ? 'a' : 'p',
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
@@ -636,86 +638,6 @@ const dateFormat = (function () {
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
             x: dayDiff,
             xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
-        };
-
-        return mask.replace(token, $0 => {
-            return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
-        });
-    };
-})();
-
-dateFormat.timeSpan = (function () {
-    const token = /t?[dhHkKms]{1,2}|t?l{1,3}|[tT]{1,2}|S|L|"[^"]*"|'[^']*'/g;
-
-    const pad = function (val, len) {
-        val = String(val);
-        len = len || 2;
-        while (val.length < len) {
-            val = '0' + val;
-        }
-
-        return val;
-    };
-
-    return function (timespan, mask) {
-        const perSecond = 1000;
-        const perMinute = 60000;
-        const perHour = 3600000;
-        const perDay = 86400000;
-
-        const tl = timespan;
-        const ts = timespan / perSecond;
-        const tm = timespan / perMinute;
-        const tH = timespan / perHour;
-        const td = timespan / perDay;
-
-        const L = timespan % 1000;
-        const s = Math.floor(timespan / perSecond) % 60;
-        const m = Math.floor(timespan / perMinute) % 60;
-        const H = Math.floor(timespan / perHour) % 60;
-        const d = Math.floor(timespan / perDay) % 24;
-
-        const flags = {
-            d,
-            dd: pad(d),
-            td,
-            tdd: pad(td),
-            h: H % 12 || 12,
-            hh: pad(H % 12 || 12),
-            th: tH % 12 || 12,
-            thh: pad(tH % 12 || 12),
-            H, // 0-23
-            HH: pad(H), // 00-23
-            tH, // 0-23
-            tHH: pad(tH), // 00-23
-            k: (H % 12 || 12) - 1,
-            kk: pad((H % 12 || 12) - 1),
-            tk: (tH % 12 || 12) - 1,
-            tkk: pad((tH % 12 || 12) - 1),
-            K: H + 1, // 1-24
-            KK: pad(H + 1), // 01-24
-            tK: tH + 1,
-            tKK: pad(tH + 1),
-            m,
-            mm: pad(m),
-            tm,
-            tmm: pad(tm),
-            s,
-            ss: pad(s),
-            ts,
-            tss: pad(ts),
-            lll: pad(L, 3),
-            ll: pad(Math.round(L / 10)),
-            l: L,
-            tlll: pad(tl, 3),
-            tll: pad(Math.round(tl / 10)),
-            tl,
-            L: pad(L > 99 ? Math.round(L / 10) : L),
-            t: H < 12 ? 'a' : 'p',
-            tt: H < 12 ? 'am' : 'pm',
-            T: H < 12 ? 'A' : 'P',
-            TT: H < 12 ? 'AM' : 'PM',
-            S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10]
         };
 
         return mask.replace(token, $0 => {
@@ -746,7 +668,7 @@ dateFormat.parseDates = {
     general : ['y-M-d', 'y-MMM-d']
 };
 
-dateFormat.parseTimes = ['hh:mm:ss:lt', 'hh:mm:ss.lt', 'hh:mm:sst', 'hh:mmt', 'HH:mm:ss:l', 'HH:mm:ss.l', 'HH:mm:ss', 'HH:mm', 'h:mm:ss TT Z', 'h:mm:ss TT', 'h:mm TT'];
+dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h:m:s.t', 'H:m:s:l', 'H:m:s.l', 'H:m:s', 'H:m', 'h:m:s t Z', 'H:m:s Z'];
 
 dateFormat.i18n = {
     dayNames: [
@@ -799,28 +721,31 @@ dateFormat.i18n = {
 dateFormat.parse = [
     {label: 'Year yy (2 digits)', value: 'yy'},
     {label: 'Year yyyy (4 digits)', value: 'yyyy'},
-    {label: 'Month M (1 digit)', value: 'M'},
+    {label: 'Month M (1/2 digit)', value: 'M'},
     {label: 'Month MM (2 digits)', value: 'MM'},
     {label: 'Month MMM (name or abbr.)', value: 'MMM'},
     {label: 'Month NNN (abbr.)', value: 'NNN'},
-    {label: 'Day of Month d (1 digit)', value: 'd'},
+    {label: 'Day of Month d (1/2 digit)', value: 'd'},
     {label: 'Day of Month dd (2 digits)', value: 'dd'},
     {label: 'Day of Week E (abbr.)', value: 'E'},
     {label: 'Day of Week EE (name)', value: 'EE'},
-    {label: 'Hour h (1 digit 1-12)', value: 'h'},
+    {label: 'Hour h (1/2 digit 1-12)', value: 'h'},
     {label: 'Hour hh (2 digits 1-12)', value: 'hh'},
-    {label: 'Hour H (1 digit 0-23)', value: 'H'},
+    {label: 'Hour H (1/2 digit 0-23)', value: 'H'},
     {label: 'Hour HH (2 digits 0-23)', value: 'HH'},
-    {label: 'Hour K (1 digit 0-11)', value: 'K'},
+    {label: 'Hour K (1/2 digit 0-11)', value: 'K'},
     {label: 'Hour KK (2 digits 0-11)', value: 'KK'},
-    {label: 'Hour k (1 digit 1-24)', value: 'k'},
+    {label: 'Hour k (1/2 digit 1-24)', value: 'k'},
     {label: 'Hour kk (2 digits 1-24)', value: 'kk'},
-    {label: 'Minute m (1 digit)', value: 'm'},
+    {label: 'Minute m (1/2 digit)', value: 'm'},
     {label: 'Minute mm (2 digits)', value: 'mm'},
-    {label: 'Second s (1 digit)', value: 's'},
+    {label: 'Second s (1/2 digit)', value: 's'},
     {label: 'Second ss (2 digits)', value: 'ss'},
-    {label: 'Milliseconds ll (2 digits)', value: 'll'},
+    {label: 'Milliseconds l (1-3 digits)', value: 'l'},
+    {label: 'Milliseconds ll (2/3 digits)', value: 'll'},
     {label: 'Milliseconds lll (3 digits)', value: 'lll'},
+    {label: 'Milliseconds L (1 digit rounded)', value: 'L'},
+    {label: 'Milliseconds LL (2 digits rounded)', value: 'LL'},
     {label: 'AM/PM t (1 digit)', value: 't'},
     {label: 'AM/PM tt (2 digits)', value: 'tt'}
 ];
@@ -848,8 +773,10 @@ dateFormat.format = [
     {label: 'Second s (0-59)', value: 's'},
     {label: 'Second ss (2 digits 00-59)', value: 'ss'},
     {label: 'Milliseconds l (0-999)', value: 'l'},
-    {label: 'Milliseconds ll (2 digits 00-99)', value: 'll'},
+    {label: 'Milliseconds ll (2/3 digits 00-999)', value: 'll'},
     {label: 'Milliseconds lll (3 digits 000-999)', value: 'lll'},
+    {label: 'Milliseconds L (round to 1 digit 0-9)', value: 'L'},
+    {label: 'Milliseconds LL (round to 2 digits 00-99)', value: 'LL'},
     {label: 'AM/PM t (1 digit - Lowercase)', value: 't'},
     {label: 'AM/PM tt (2 digits - Lowercase)', value: 'tt'},
     {label: 'AM/PM T (1 digit - Uppercase)', value: 'T'},
@@ -1099,8 +1026,6 @@ function getDateFromFormat(val, format) {
     const now = new Date();
     let i_val = 0;
     let i_format = 0;
-    let c = '';
-    let token = '';
     let x; let y;
     let year = now.getFullYear();
     let month = now.getMonth() + 1;
@@ -1113,8 +1038,8 @@ function getDateFromFormat(val, format) {
 
     while (i_format < format.length) {
         // Get next token from format string
-        c = format.charAt(i_format);
-        token = '';
+        const c = format.charAt(i_format);
+        let token = '';
         while ((format.charAt(i_format) === c) && (i_format < format.length)) {
             token += format.charAt(i_format++);
         }
@@ -1181,42 +1106,36 @@ function getDateFromFormat(val, format) {
             if (month === null || (month < 1) || (month > 12)) {
                 return null;
             }
-
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || (date < 1) || (date > 31)) {
                 return null;
             }
-
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 12)) {
                 return null;
             }
-
             i_val += hh.length;
         } else if (token === 'HH' || token === 'H') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 23)) {
                 return null;
             }
-
             i_val += hh.length;
         } else if (token === 'kk' || token === 'k') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 0) || (hh > 11)) {
                 return null;
             }
-
             i_val += hh.length;
         } else if (token === 'KK' || token === 'K') {
             hh = _getInt(val, i_val, token.length, 2);
             if (hh === null || (hh < 1) || (hh > 24)) {
                 return null;
             }
-
             i_val += hh.length;
             hh--;
         } else if (token === 'mm' || token === 'm') {
@@ -1224,23 +1143,26 @@ function getDateFromFormat(val, format) {
             if (mm === null || (mm < 0) || (mm > 59)) {
                 return null;
             }
-
             i_val += mm.length;
         } else if (token === 'ss' || token === 's') {
             ss = _getInt(val, i_val, token.length, 2);
             if (ss === null || (ss < 0) || (ss > 59)) {
                 return null;
             }
-
             i_val += ss.length;
-        } else if (token === 'lll' || token === 'll' || token === 'l' || token === 'L') {
+        } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
             ll = _getInt(val, i_val, token.length, 3);
             if (ll === null || (ll < 0) || (ll > 999)) {
                 return null;
             }
-
             i_val += ll.length;
-        } else if ((token === 'tt') || (token === 't') || (token === 'TT') || (token === 'T')) {
+            if ( token === 'L' && ll < 10) {
+                ll = ll * 100;
+            }
+            if ( token === 'LL' && ll < 100) {
+                ll = ll * 10;
+            }
+        } else if ((token.toLowerCase() === 'tt') || (token.toLowerCase() === 't')) {
             if (val.substring(i_val, i_val + 2).toLowerCase() === 'am') {
                 ampm = 'AM';
                 i_val += 2;
@@ -1294,10 +1216,6 @@ function getDateFromFormat(val, format) {
     } else if (hh > 11 && ampm === 'AM') {
         hh -= 12;
     }
-
-    const newdate = new Date(year, month - 1, date, hh, mm, ss, ll);
-    console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll} newdate=${newdate}`); // eslint-disable-line
-    return newdate.getTime();
 
 console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll}`); // eslint-disable-line
     return new Date(year, month - 1, date, hh, mm, ss, ll);

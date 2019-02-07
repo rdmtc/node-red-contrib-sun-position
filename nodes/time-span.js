@@ -69,7 +69,7 @@ function formatTS(d1, d2, format) {
     const td = Math.floor(timeSpan / perDay);
     const tw = Math.floor(timeSpan / perWeek);
 
-    const L = timeSpan % 1000;
+    const l = timeSpan % 1000;
     const s = Math.floor(timeSpan / perSecond) % 60;
     const m = Math.floor(timeSpan / perMinute) % 60;
     const H = Math.floor(timeSpan / perHour) % 24;
@@ -112,13 +112,15 @@ function formatTS(d1, d2, format) {
         ss: pad(s),
         ts,
         tss: pad(ts),
-        lll: pad(L, 3),
-        ll: pad(Math.round(L / 10)),
-        l: L,
-        tlll: pad(tl, 3),
-        tll: pad(Math.round(tl / 10)),
+        l,
+        ll: pad(l),
+        lll: pad(l, 3),
+        L: Math.round(l / 100),
+        LL: pad(Math.round(l / 10)),
+        LLL: pad(l, 3),
         tl,
-        L: pad(L > 99 ? Math.round(L / 10) : L),
+        tll: pad(Math.round(tl / 10)),
+        tlll: pad(tl, 3),
         t: H < 12 ? 'a' : 'p',
         tt: H < 12 ? 'am' : 'pm',
         T: H < 12 ? 'A' : 'P',
@@ -362,6 +364,10 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 
                 resObj.push(msg);
 node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
+                node.status({
+                    text: (operand1.getTime() - operand2.getTime()) / 1000 + 's'
+                });
+
                 node.send(resObj);
             } catch (err) {
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
