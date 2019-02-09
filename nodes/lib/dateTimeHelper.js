@@ -8,29 +8,16 @@ module.exports = {
     isTrue,
     isFalse,
     handleError,
-    isLeapYear,
-    days_of_a_year,
-    getFirstDayOfMonth,
-    getLastDayOfMonth,
     getSpecialDayOfMonth,
-    getComparableDateFormat,
-    parseComparableDateFormat,
-    getComparableDateFormat2,
-    parseComparableDateFormat2,
-    getTimeDiff,
     checkLimits,
     addOffset,
     calcDayOffset,
     normalizeDate,
-    normalizeDateUTC,
     getTimeOfText,
     getDateOfText,
     getTimeNumber,
     getNodeId,
-    formatDate,
     getFormattedDateOut,
-    parseDate,
-    parseDateTime,
     parseDateFromFormat
 };
 
@@ -65,24 +52,6 @@ function isFalse(val) {
 }
 /*******************************************************************************************************/
 /**
- * get the number of days in a year
- * @param {number} year year to get info
- * @returns {number} number of days in given year
- */
-function days_of_a_year(year) {
-    return isLeapYear(year) ? 366 : 365;
-}
-
-/**
- * indicates if a year is a leap year
- * @param {*} year year to check
- * @returns {bool} *true* if the given year is a leap year
- */
-function isLeapYear(year) {
-    return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0);
-}
-/*******************************************************************************************************/
-/**
  * gives a ID of a node
  * @param {any} node a node
  * @returns {string} id of the given node
@@ -105,7 +74,7 @@ function pad2(n) { // always returns a string
  * @param {Date} date - Date to format
  * @return {string} number in Format YYYYMMDDHHMMSS
  */
-function getComparableDateFormat(date) {
+function _getComparableDateFormat(date) {
     return Number(date.getFullYear() +
         pad2(date.getMonth() + 1) +
         pad2(date.getDate()) +
@@ -159,7 +128,7 @@ function handleError(node, messageText, err, stateText) {
  * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} first day of given month
  */
-function getFirstDayOfMonth(year, month, dayOfWeek) {
+function _getFirstDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month, 1);
     dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
@@ -175,7 +144,7 @@ function getFirstDayOfMonth(year, month, dayOfWeek) {
  * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} last day of given month
  */
-function getLastDayOfMonth(year, month, dayOfWeek) {
+function _getLastDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month+1, 0);
     dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
@@ -194,33 +163,33 @@ function getLastDayOfMonth(year, month, dayOfWeek) {
 function getSpecialDayOfMonth(year, month, dayName) {
     switch (dayName) {
         case 'first Monday':
-            return getFirstDayOfMonth(year, month, 1);
+            return _getFirstDayOfMonth(year, month, 1);
         case 'first Tuesday':
-            return getFirstDayOfMonth(year, month, 2);
+            return _getFirstDayOfMonth(year, month, 2);
         case 'first Wednesday':
-            return getFirstDayOfMonth(year, month, 3);
+            return _getFirstDayOfMonth(year, month, 3);
         case 'first Thursday':
-            return getFirstDayOfMonth(year, month, 4);
+            return _getFirstDayOfMonth(year, month, 4);
         case 'first Friday':
-            return getFirstDayOfMonth(year, month, 5);
+            return _getFirstDayOfMonth(year, month, 5);
         case 'first Saturday':
-            return getFirstDayOfMonth(year, month, 6);
+            return _getFirstDayOfMonth(year, month, 6);
         case 'first Sunday':
-            return getFirstDayOfMonth(year, month, 0);
+            return _getFirstDayOfMonth(year, month, 0);
         case 'last Monday':
-            return getLastDayOfMonth(year, month, 1);
+            return _getLastDayOfMonth(year, month, 1);
         case 'last Tuesday':
-            return getLastDayOfMonth(year, month, 2);
+            return _getLastDayOfMonth(year, month, 2);
         case 'last Wednesday':
-            return getLastDayOfMonth(year, month, 3);
+            return _getLastDayOfMonth(year, month, 3);
         case 'last Thursday':
-            return getLastDayOfMonth(year, month, 4);
+            return _getLastDayOfMonth(year, month, 4);
         case 'last Friday':
-            return getLastDayOfMonth(year, month, 5);
+            return _getLastDayOfMonth(year, month, 5);
         case 'last Saturday':
-            return getLastDayOfMonth(year, month, 6);
+            return _getLastDayOfMonth(year, month, 6);
         case 'last Sunday':
-            return getLastDayOfMonth(year, month, 0);
+            return _getLastDayOfMonth(year, month, 0);
     }
     return null;
 }
@@ -232,7 +201,7 @@ function getSpecialDayOfMonth(year, month, dayName) {
  * @param {number} date - number or string in Format YYYYMMDDHHMMSS
  * @return {Date} date of the number
  */
-function parseComparableDateFormat(date) {
+function _parseComparableDateFormat(date) {
     date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
@@ -250,7 +219,7 @@ function parseComparableDateFormat(date) {
  * @param {Date} date - Date to format
  * @return {string} number in Format YYYYMMDD.HHMMSS
  */
-function getComparableDateFormat2(date) {
+function _getComparableDateFormat2(date) {
     return Number(date.getFullYear() +
         pad2(date.getMonth() + 1) +
         pad2(date.getDate()) + '.' +
@@ -265,7 +234,7 @@ function getComparableDateFormat2(date) {
  * @param {number} date - number or string in Format YYYYMMDD.HHMMSS or YYYYMMDDTHHMMSS
  * @return {Date} date of the number
  */
-function parseComparableDateFormat2(date) {
+function _parseComparableDateFormat2(date) {
     date = String(date);
     const year = date.substr(0, 4);
     const month = date.substr(4, 2);
@@ -399,39 +368,6 @@ function normalizeDate(d, offset, multiplier, next, days) {
 
 /*******************************************************************************************************/
 /**
- * normalize date by adding offset, get only the next valid date, etc...
- * @param {Date} d input Date to normalize
- * @param {number} offset offset to add tot he Date object
- * @param {number} multiplier multiplier for the offset
- * @param {number} next If date is less then today this number of days will be added to the date
- * @param {Array.<number>} days array of allowed days
- * @return {Date} a normalized date moved tot the future to fulfill all conditions
- */
-function normalizeDateUTC(d, offset, multiplier, next, days) {
-    console.debug('normalizeDateUTC d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
-    d = addOffset(d, offset, multiplier);
-    if (next && !isNaN(next)) {
-        const now = new Date();
-        d.setUTCMilliseconds(0);
-        now.setUTCMilliseconds(600); // security
-        const cmp = now.getTime();
-        if (d.getTime() <= cmp) {
-            d.setUTCDate(d.getUTCDate() + Number(next));
-        }
-    }
-
-    if (days && (days !== '*') && (days !== '')) {
-        const dayx = calcDayOffset(days, d.getUTCDay());
-        if (dayx > 0) {
-            d.setUTCDate(d.getUTCDate() + dayx);
-        }
-    }
-
-    return d;
-}
-
-/*******************************************************************************************************/
-/**
  * parses a string which contains only a time to a Date object of today
  * @param {string} t text representation of a time
  * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
@@ -511,9 +447,9 @@ function getDateOfText(dt, preferMonthFirst) {
     }
 
     if (typeof dt === 'string') {
-        let res = parseDateTime(dt, preferMonthFirst);
+        let res = _parseDateTime(dt, preferMonthFirst);
         if (res !== null) { return res; }
-        res = parseDate(dt, preferMonthFirst);
+        res = _parseDate(dt, preferMonthFirst);
         if (res !== null) { return res; }
         res = _parseArray(dt, dateFormat.parseTimes);
         if (res !== null) { return res; }
@@ -797,7 +733,7 @@ dateFormat.format = [
  * @param  {Array.<string>} [dayDiffNames]   -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
  * @return {string}   date as depending on the given Format
  */
-function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
+function _formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
@@ -814,28 +750,6 @@ function formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
 }
 
 /**
- * gives the difference between two times in Milliseconds
- * @param  {Date}    time1       -  JavaScript Date object
- * @param  {Date}    [time2]     -  JavaScript Date object, if not defined, now will be used
- * @param  {Number}  [limit]     -  limit in milliseconds. If defined and result is less then limit, result will be always a positive value.
- * @return {Number}   returns a number, string or object depending on the given Format
- */
-function getTimeDiff(time1, time2, limit) {
-    if (!time2) {
-        time2 = new Date();
-    }
-
-    let millis = time1.getTime() - time2.getTime();
-    if (limit) {
-        while (millis < limit) {
-            millis += 86400000; // 24h
-        }
-    }
-
-    return millis;
-}
-
-/**
  * pre defined formats of a given date
  * @param  {Date}            date            -  JavaScript Date to format
  * @param  {string}          [format]        -  format of the date
@@ -848,7 +762,7 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
     console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (isNaN(format)) {
-        return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
+        return _formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
     }
 
     switch (Number(format)) {
@@ -873,9 +787,9 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 9: // timeformat_hour
             return (Math.round((date.getTime() - (new Date()).getTime()) / 1000) / 3600);
         case 10: // timeformat_YYYYMMDDHHMMSS
-            return getComparableDateFormat(date);
+            return _getComparableDateFormat(date);
         case 11: // timeformat_YYYYMMDD_HHMMSS
-            return getComparableDateFormat2(date);
+            return _getComparableDateFormat2(date);
         case 12: // timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
             return date.toLocaleDateString();
         case 13: // timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
@@ -885,9 +799,9 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 15: // timeformat_localDateLong       - Wed Dec 26 2018
             return date.toDateString();
         case 16: // timeformat_weekday           - Montag, 22.12.
-            return formatDate(date, 'dddd, d.m.', false, dayNames, monthNames, dayDiffNames);
+            return _formatDate(date, 'dddd, d.m.', false, dayNames, monthNames, dayDiffNames);
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-            return formatDate(date, 'xx, d.m.', false, dayNames, monthNames, dayDiffNames);
+            return _formatDate(date, 'xx, d.m.', false, dayNames, monthNames, dayDiffNames);
     }
 
     const now = new Date();
@@ -1236,21 +1150,10 @@ function _parseArray(val, listToCheck) {
  * @param {string} str string to check
  * @returns boolean if it is a valid integer
  */
-function _isNormalInteger(str) {
-    const n = Math.floor(Number(str));
-    return n !== Infinity && String(n) === str && n >= 0;
-}
-
-/**
- * check if a string is an integer
- * @param {string} str string to check
- * @returns boolean if it is a valid integer
- */
 function _isTimestamp(str) {
     const n = Math.floor(Number(str));
     return n !== Infinity && String(n) === str && n > 946684800000;
 }
-
 
 /**
  * This function takes a date string and tries to match it to a
@@ -1263,8 +1166,8 @@ function _isTimestamp(str) {
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function parseDate(val, preferMonthFirst) {
-    console.debug('parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+function _parseDate(val, preferMonthFirst) {
+    console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     let res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
     if (res !== null) { return res; }
     res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
@@ -1279,8 +1182,8 @@ function parseDate(val, preferMonthFirst) {
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function parseDateTime(val, preferMonthFirst) {
-    console.debug('parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+function _parseDateTime(val, preferMonthFirst) {
+    console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
             for (let j = 0; j < lst2.length; j++) {
@@ -1334,9 +1237,9 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
     } else {
         const tryparse = (val, preferMonthFirst) => {
 console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
-            let res = parseDateTime(val, preferMonthFirst);
+            let res = _parseDateTime(val, preferMonthFirst);
             if (res !== null) { return res; }
-            res = parseDate(val, preferMonthFirst);
+            res = _parseDate(val, preferMonthFirst);
             if (res !== null) { return res; }
             res = _parseArray(val, dateFormat.parseTimes);
             if (res !== null) { return res; }
@@ -1367,10 +1270,10 @@ console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMo
                 res = tryparse(date, true);
                 break;
             case 4: // timeformat_YYYYMMDDHHMMSS
-                res = parseComparableDateFormat(date);
+                res = _parseComparableDateFormat(date);
                 break;
             case 5: // timeformat_YYYYMMDD_HHMMSS
-                res = parseComparableDateFormat2(date);
+                res = _parseComparableDateFormat2(date);
                 break;
             default: {
                 res = getDateOfText(date);
