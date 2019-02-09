@@ -111,7 +111,6 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                // (srcNode, msg, vType, value, offset, next, days)
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset, node.offsetType, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
@@ -132,6 +131,7 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
+                // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
                 node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset, node.timeAltOffsetType, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
@@ -273,7 +273,7 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
-                node.debug('input ' + util.inspect(msg));
+                node.debug('input ');
                 doCreateTimeout(node);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
