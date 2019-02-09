@@ -434,7 +434,11 @@
                 }
 
                 if (type === 'date') {
-                    return this._('within-time-switch.label.timestamp') + suffix;
+                    return this._('time-inject.label.timestamp') + suffix;
+                }
+
+                if (type === 'dateSpecific') {
+                    return this._('time-inject.label.timestamp') + '+' + suffix;
                 }
 
                 const v = getValueLabel(type, value, maxLength);

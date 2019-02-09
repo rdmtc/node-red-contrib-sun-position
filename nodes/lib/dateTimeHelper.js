@@ -88,7 +88,6 @@ function isLeapYear(year) {
  * @returns {string} id of the given node
  */
 function getNodeId(node) {
-    // node.debug(node.debug(util.inspect(srcNode, Object.getOwnPropertyNames(srcNode))));
     return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
 }
 /*******************************************************************************************************/
@@ -461,7 +460,7 @@ function getTimeOfText(t, date) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  */
 function getDateOfText(dt, preferMonthFirst) {
-    console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
+    // console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
@@ -846,7 +845,7 @@ function getTimeDiff(time1, time2, limit) {
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
-    console.log('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (isNaN(format)) {
         return formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
@@ -892,11 +891,7 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
     }
 
     const now = new Date();
-    console.log('date='+util.inspect(date)); // eslint-disable-line
-    console.log('now='+util.inspect(now)); // eslint-disable-line
-
     const delay = (date.getTime() - now.getTime());
-    console.log('delay='+util.inspect(delay)); // eslint-disable-line
     return {
         date,
         ts: date.getTime(),
@@ -1216,8 +1211,7 @@ function getDateFromFormat(val, format) {
     } else if (hh > 11 && ampm === 'AM') {
         hh -= 12;
     }
-
-console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll}`); // eslint-disable-line
+    // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll}`); // eslint-disable-line
     return new Date(year, month - 1, date, hh, mm, ss, ll);
 }
 
@@ -1236,6 +1230,27 @@ function _parseArray(val, listToCheck) {
     }
     return null;
 }
+
+/**
+ * check if a string is an integer
+ * @param {string} str string to check
+ * @returns boolean if it is a valid integer
+ */
+function _isNormalInteger(str) {
+    const n = Math.floor(Number(str));
+    return n !== Infinity && String(n) === str && n >= 0;
+}
+
+/**
+ * check if a string is an integer
+ * @param {string} str string to check
+ * @returns boolean if it is a valid integer
+ */
+function _isTimestamp(str) {
+    const n = Math.floor(Number(str));
+    return n !== Infinity && String(n) === str && n > 946684800000;
+}
+
 
 /**
  * This function takes a date string and tries to match it to a
@@ -1325,14 +1340,18 @@ console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMo
             if (res !== null) { return res; }
             res = _parseArray(val, dateFormat.parseTimes);
             if (res !== null) { return res; }
-console.debug(`try parse last try res=${res}`); // eslint-disable-line
             res = Date.parse(val);
-            if (isNaN(res)) {
-                return null;
+            if (!isNaN(res)) {
+                return new Date(res);
             }
-            return new Date(res);
+            if (!isNaN(val) && _isTimestamp(val)) {
+                const dto = new Date(val);
+                if (dto !== 'Invalid Date' && !isNaN(dto)) {
+                    return dto;
+                }
+            }
+            return null;
         };
-
 
         switch (Number(format)) {
             case 0: // UNIX Timestamp
@@ -1359,6 +1378,7 @@ console.debug(`try parse last try res=${res}`); // eslint-disable-line
             }
         }
     }
+    console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
     if (res === 'Invalid Date' || isNaN(res) || res === null) {
         throw new Error('could not evaluate format of ' + date + ' (' + format+')');
     }

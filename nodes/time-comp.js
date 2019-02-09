@@ -34,8 +34,7 @@ node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
 
 
             try {
-                const offset1 = node.positionConfig.getFloatProp(node,msg,config.inputOffsetType, config.inputOffset);
-                const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, offset1, config.inputOffsetMultiplier);
+                const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetType, config.inputOffsetMultiplier);
 node.debug('inputData ' + util.inspect(inputData)); // eslint-disable-line
 
                 if (config.result1Type !== 'none') {
@@ -43,7 +42,7 @@ node.debug('inputData ' + util.inspect(inputData)); // eslint-disable-line
                     if (config.result1ValueType === 'input') {
                         resultObj =  node.positionConfig.formatOutDate(inputData, config.result1Format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1Multiplier);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
 
 node.debug('resultObj ' + util.inspect(resultObj)); // eslint-disable-line
@@ -79,7 +78,7 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     }
 
                     if (operatorValid) {
-                        const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, rule.multiplier);
+                        const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
                         node.debug('operatorType ' + util.inspect(rule.operatorType));

@@ -426,7 +426,7 @@
                         'msg',
                         'flow',
                         'global',
-                        'date',
+                        types.DateSpecific,
                         'num',
                         types.DateEntered,
                         types.TimeSun,
@@ -436,12 +436,12 @@
                     ],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-operand1').typedInput('type');
-                        if (opType === 'date' ||
+                        if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
                             opType === types.TimeSun.value ||
                             opType === types.TimeMoon.value ||
-                            opType === types.DayOfMonth) {
+                            opType === types.DayOfMonth.value) {
                             $('.time-row-operand1Format').hide();
                             $('.time-row-operand1Offset').show();
                         } else if (opType === 'msg' ||
@@ -494,7 +494,7 @@
                         'msg',
                         'flow',
                         'global',
-                        'date',
+                        types.DateSpecific,
                         'num',
                         types.DateEntered,
                         types.TimeSun,
@@ -504,12 +504,12 @@
                     ],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-operand2').typedInput('type');
-                        if (opType === 'date' ||
+                        if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
                             opType === types.TimeSun.value ||
                             opType === types.TimeMoon.value ||
-                            opType === types.DayOfMonth) {
+                            opType === types.DayOfMonth.value) {
                             $('.time-row-operand2Format').hide();
                             $('.time-row-operand2Offset').show();
                         } else if (opType === 'msg' ||
@@ -606,7 +606,6 @@
                         }).appendTo(row);
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
                         // setting defaultValues
-                        // console.log(data);
                         operatorField.val(data.operator || getOperator(0).id);
                         operandField.typedInput('type', data.operandType || 'num');
                         operandField.typedInput('value', data.operandValue || '');
@@ -640,13 +639,10 @@
                     defaultType: types.Undefined.value,
                     types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
                     onChange: (_type, _value) => {
-                        console.log('node-input-result1 change ' + $('#node-input-result1').typedInput('type')); // eslint-disable-line
                         if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
                             $('.time-result1Value').show();
                             const plVType = $('#node-input-result1Value').typedInput('type');
-                            console.log('plVType= ' + plVType); // eslint-disable-line
-
-                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === 'date' || plVType === types.DateEntered.value) {
+                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === types.DateSpecific.value || plVType === types.DateEntered.value) {
                                 $('.time-row-result1Offset').show();
                                 $('.time-row-result1TSFormat').hide();
                                 $('.time-row-result1Format').show();
@@ -684,6 +680,7 @@
                         {value: 'operand1', label: 'Input 1 value', hasValue: false},
                         {value: 'operand2', label: 'Input 2 value', hasValue: false},
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,

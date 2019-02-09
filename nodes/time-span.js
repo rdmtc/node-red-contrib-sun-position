@@ -247,14 +247,12 @@ node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
             }
 
             try {
-                const offset1 = node.positionConfig.getFloatProp(node,msg,config.operand1OffsetType, config.operand1Offset);
-                const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, offset1, config.operand1OffsetMultiplier);
+                const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetType, config.operand1OffsetMultiplier);
 node.debug('operand1 ' + util.inspect(operand1)); // eslint-disable-line
                 if (operand1 === null) {
                     return null;
                 }
-                const offset2 = node.positionConfig.getFloatProp(node,msg,config.operand2OffsetType, config.operand2Offset);
-                const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, offset2, config.operand2OffsetMultiplier);
+                const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetType, config.operand2OffsetMultiplier);
 node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
                 if (operand2 === null) {
                     return null;
@@ -274,8 +272,7 @@ node.debug('resultObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.
                     } else if (config.result1ValueType === 'operand2') {
                         resultObj = node.positionConfig.formatOutDate(operand2, config.result1Format);
                     } else {
-                        const resOffset = node.positionConfig.getFloatProp(node,msg,config.result1OffsetType, config.result1Offset);
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, resOffset, config.result1Multiplier);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
                     // to
 node.debug('resultObj1 ' + util.inspect(resultObj)); // eslint-disable-line

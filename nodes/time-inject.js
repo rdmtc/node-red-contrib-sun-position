@@ -25,8 +25,7 @@ module.exports = function (RED) {
 
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days) {
         if (type !== 'none' && name) {
-            const offsetX = this.positionConfig.getFloatProp(node,offsetType, offset);
-            const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offsetX, multiplier, days);
+            const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, days);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
@@ -113,9 +112,7 @@ module.exports = function (RED) {
 
             if (node.timeType !== 'none' && node.positionConfig) {
                 // (srcNode, msg, vType, value, offset, next, days)
-                // node.nextTime = hlp.getTimeProp(node, node.timeType, node.time, node.offset, node.offsetMultiplier, 1);
-                const nextTimeOffset = node.positionConfig.getFloatProp(node, undefined, node.offsetType, node.offset);
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, nextTimeOffset, node.offsetMultiplier, 1, node.timeDays);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset, node.offsetType, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextTime = null;
@@ -135,8 +132,7 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                const nextTimeOffset = node.positionConfig.getFloatProp(node, undefined, node.timeAltOffsetType, node.timeAltOffset);
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, nextTimeOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset, node.timeAltOffsetType, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.nextTimeAlt = null;
@@ -283,9 +279,7 @@ module.exports = function (RED) {
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-
-                const offsetX = this.positionConfig.getFloatProp(node, node.payloadOffset, config.payloadOffsetType);
-                const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, offsetX, config.payloadOffsetMultiplier);
+                const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -314,8 +308,8 @@ module.exports = function (RED) {
         });
 
         node.status({});
-        if (config.once) {
-            try {
+        try {
+            if (config.once) {
                 node.status({
                     fill: 'yellow',
                     shape: 'ring',
@@ -328,19 +322,8 @@ module.exports = function (RED) {
                     });
                     doCreateTimeout(node);
                 }, (config.onceDelay || 0.1) * 1000);
-            } catch (err) {
-                node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('time-inject.errors.error-title')
-                });
+                return;
             }
-            return;
-        }
-
-        try {
             doCreateTimeout(node, true);
         } catch (err) {
             node.error(err.message);

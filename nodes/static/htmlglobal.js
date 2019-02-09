@@ -124,6 +124,12 @@ function getTypes() { // eslint-disable-line no-unused-vars
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
+        DateSpecific: {
+            value: 'dateSpecific',
+            label: 'timestamp enhanced',
+            // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
+            hasValue: false
+        },
         MsgPayload: {
             value: 'msgPayload',
             label: 'msg.payload',
@@ -454,7 +460,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
  * @param {string} val value of the element
  */
 function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
-    if (val === '*' || typeof val === 'undefined') {
+    if (val === '*' || typeof val === 'undefined' || val === null || val === '') {
         $(element + ' input[type=checkbox]').prop('checked', true);
     } else {
         $(element + ' input[type=checkbox]').removeAttr('checked');

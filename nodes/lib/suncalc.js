@@ -260,7 +260,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             const time = sunTimesAlternate[i];
             result[time[0]] = result[time[1]];
         }
-        // console.log(util.inspect(result));
 
         return result;
     };

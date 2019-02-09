@@ -555,7 +555,8 @@
                 value: 'none'
             },
             timeDays: {
-                value: '*'
+                value: '*',
+                required: true
             },
             offset: {
                 value: 0,
@@ -737,7 +738,8 @@
                 }
             },
             addPayload1Days: {
-                value: '*'
+                value: '*',
+                required: true
             },
             addPayload2: {
                 value: '',
@@ -797,7 +799,8 @@
                 }
             },
             addPayload2Days: {
-                value: '*'
+                value: '*',
+                required: true
             },
             addPayload3: {
                 value: '',
@@ -857,7 +860,8 @@
                 }
             },
             addPayload3Days: {
-                value: '*'
+                value: '*',
+                required: true
             },
             recalcTime: {
                 value: 2,
@@ -944,6 +948,10 @@
 
                 if (type === 'date') {
                     return this._('time-inject.label.timestamp') + suffix;
+                }
+
+                if (type === 'dateSpecific') {
+                    return this._('time-inject.label.timestamp') + '+' + suffix;
                 }
 
                 const v = getValueLabel(type, value, maxLength);
@@ -1109,6 +1117,7 @@
                     defaultType: 'date',
                     types: [
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,
@@ -1128,10 +1137,10 @@
                     ],
                     onChange: (_type, _value) => {
                         const plVType = $('#node-input-payload').typedInput('type');
-                        if (plVType === 'entered' || plVType === 'pdsTime' || plVType === 'pdmTime') {
-                            $('.time-inject-row-payloadTimeFormat').show();
-                            $('.time-inject-row-payloadOffset').show();
-                        } else if (plVType === 'date') {
+                        if (plVType ===  types.TimeEntered.value ||
+                            plVType === types.TimeSun.value ||
+                            plVType === types.TimeMoon.value ||
+                            plVType === types.DateSpecific.value) {
                             $('.time-inject-row-payloadTimeFormat').show();
                             $('.time-inject-row-payloadOffset').show();
                         } else {
@@ -1180,9 +1189,9 @@
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === 'date' ||
+                            } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth) {
+                                       plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').hide();
@@ -1210,6 +1219,7 @@
                     defaultValue: '',
                     types: [
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,
@@ -1275,9 +1285,9 @@
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === 'date' ||
+                            } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth) {
+                                       plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').hide();
@@ -1306,6 +1316,7 @@
                     defaultValue: '',
                     types: [
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.TimeSun,
                         types.TimeMoon,
@@ -1369,9 +1380,9 @@
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === 'date' ||
+                            } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth) {
+                                       plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
                                 $('.time-inject-row-addPayload1days').hide();
@@ -1397,6 +1408,7 @@
                     defaultValue: '',
                     types: [
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.TimeSun,
                         types.TimeMoon,
@@ -1462,7 +1474,6 @@
                         $('#node-input-property').change();
                     }
                 }).change();
-
                 initDaysCheckbox('#time-inject-timeDays', node.timeDays);
 
                 node.offsetMultiplier = multilpierUpdate(node.offsetMultiplier, 'offsetMultiplier');
@@ -1550,7 +1561,6 @@
                     $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                 });
                 // #endregion onceDelay
-                // console.log(node);
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')
@@ -1581,11 +1591,9 @@
                 if (days.length === 7) { return '*'; }
                 return days.join(',');
             }
-
             // this.payloadType = $("#node-input-payload").typedInput("type");
             // this.timeType = $("#node-input-time").typedInput("type");
             this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
-
             // this.propertyType = $("#node-input-property").typedInput("type");
             // this.timeAltType = $("#node-input-timeAlt").typedInput("type");
             this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
@@ -1636,7 +1644,7 @@
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
-                if (this.payloadType === 'date') {
+                if (this.payloadType === 'date' || this.payloadType === 'dateSpecific') {
                     label = this._('time-inject.label.timestamp');
                 }
 

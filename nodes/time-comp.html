@@ -431,7 +431,7 @@
                         'msg',
                         'flow',
                         'global',
-                        'date',
+                        types.DateSpecific,
                         'num',
                         types.DateEntered,
                         types.TimeSun,
@@ -441,12 +441,12 @@
                     ],
                     onChange: (_type, _value) => {
                         const opType = $('#node-input-input').typedInput('type');
-                        if (opType === 'date' ||
+                        if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
                             opType === types.TimeSun.value ||
                             opType === types.TimeMoon.value ||
-                            opType === types.DayOfMonth) {
+                            opType === types.DayOfMonth.value) {
                             $('.time-row-inputFormat').hide();
                             $('.time-row-inputOffset').show();
                         } else if (opType === 'msg' ||
@@ -566,7 +566,7 @@
                                 'msg',
                                 'flow',
                                 'global',
-                                'date',
+                                types.DateSpecific,
                                 'num',
                                 types.DateEntered,
                                 types.TimeSun,
@@ -624,7 +624,7 @@
                         operandField.change(() => {
                             operandField.show();
                             const opType = operandField.typedInput('type');
-                            if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === 'date') {
+                            if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === types.DateSpecific.value) {
                                 row2.hide(); // format
                                 row3.show(); // offset
                                 row4.show(); // limit
@@ -684,12 +684,12 @@
                         if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
                             $('.time-result1Value').show();
                             const plVType = $('#node-input-result1Value').typedInput('type');
-                            if (plVType === 'date' ||
+                            if (plVType === types.DateSpecific.value ||
                                 plVType === types.TimeEntered.value ||
                                 plVType === types.DateEntered.value ||
                                 plVType === types.TimeSun.value ||
                                 plVType === types.TimeMoon.value ||
-                                plVType === types.DayOfMonth) {
+                                plVType === types.DayOfMonth.value) {
                                 $('.time-row-result1Offset').show();
                                 $('.time-row-result1Format').show();
                             } else if (plVType === 'input') {
@@ -715,6 +715,7 @@
                     types: [
                         {value: 'input', label: 'Input value', hasValue: false},
                         'date',
+                        types.DateSpecific,
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,
