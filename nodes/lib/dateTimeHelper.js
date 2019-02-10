@@ -344,7 +344,7 @@ function calcDayOffset(days, daystart) {
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
 function normalizeDate(d, offset, multiplier, next, days) {
-    console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
+    // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
     if (next && !isNaN(next)) {
         const now = new Date();
@@ -374,7 +374,7 @@ function normalizeDate(d, offset, multiplier, next, days) {
  * @return {Date} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date) {
-    console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
+    // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
     if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
