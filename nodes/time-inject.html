@@ -1169,289 +1169,6 @@
                     }
                 }).change();
                 // #endregion payload
-                // #region addPayload1
-                setupTInput(node, {
-                    typeProp: 'addPayload1Type',
-                    valueProp: 'addPayload1',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                    onChange: (_type, _value) => {
-                        const plType = $('#node-input-addPayload1').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload1Value').show();
-                            $('.time-addPayload2').show();
-                            const plVType = $('#node-input-addPayload1Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').hide();
-                            } else {
-                                $('.time-inject-row-addPayload1Format').hide();
-                                $('.time-inject-row-addPayload1Offset').hide();
-                                $('.time-inject-row-addPayload1days').hide();
-                            }
-                        } else {
-                            $('.time-addPayload1Value').hide();
-                            $('.time-inject-row-addPayload1Format').hide();
-                            $('.time-inject-row-addPayload1Offset').hide();
-                            $('.time-inject-row-addPayload1days').hide();
-                            $('.time-addPayload2').hide();
-                        }
-                        $('#node-input-addPayload2').change();
-                    }
-                }).change();
-
-                setupTInput(node, {
-                    typeProp: 'addPayload1ValueType',
-                    valueProp: 'addPayload1Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.MoonCalc
-                    ],
-
-                    onChange: (_type, _value) => {
-                        $('#node-input-addPayload1').change();
-                    }
-                }).change();
-
-                initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
-
-                initCombobox(node, 'time-inject', 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
-
-                node.addPayload1OffsetMultiplier = multilpierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'addPayload1OffsetType',
-                    valueProp: 'addPayload1Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload1Offset === 0 || node.addPayload1Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-addPayload1Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion addPayload1
-                // #region addPayload2
-                setupTInput(node, {
-                    typeProp: 'addPayload2Type',
-                    valueProp: 'addPayload2',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                    onChange: (_type, _value) => {
-                        const plType = $('#node-input-addPayload2').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload2Value').show();
-                            $('.time-addPayload3').show();
-                            const plVType = $('#node-input-addPayload2Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').hide();
-                            } else {
-                                $('.time-inject-row-addPayload2Format').hide();
-                                $('.time-inject-row-addPayload2Offset').hide();
-                                $('.time-inject-row-addPayload2days').hide();
-                            }
-                        } else {
-                            $('.time-addPayload2Value').hide();
-                            $('.time-inject-row-addPayload2Format').hide();
-                            $('.time-inject-row-addPayload2Offset').hide();
-                            $('.time-inject-row-addPayload2days').hide();
-                            $('.time-addPayload3').hide();
-                        }
-
-                        $('#node-input-addPayload3').change();
-                    }
-                }).change();
-
-                setupTInput(node, {
-                    typeProp: 'addPayload2ValueType',
-                    valueProp: 'addPayload2Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.MoonCalc
-                    ],
-
-                    onChange: (_type, _value) => {
-                        $('#node-input-addPayload2').change();
-                    }
-                }).change();
-
-                initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
-
-                initCombobox(node, 'time-inject', 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
-
-                node.addPayload2OffsetMultiplier = multilpierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'addPayload2OffsetType',
-                    valueProp: 'addPayload2Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload2Offset === 0 || node.addPayload2Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-addPayload2Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion addPayload2
-                // #region addPayload3
-                setupTInput(node, {
-                    typeProp: 'addPayload3Type',
-                    valueProp: 'addPayload3',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                    onChange: (_type, _value) => {
-                        const plType = $('#node-input-addPayload3').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload3Value').show();
-                            const plVType = $('#node-input-addPayload3Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').hide();
-                            } else {
-                                $('.time-inject-row-addPayload3Format').hide();
-                                $('.time-inject-row-addPayload3Offset').hide();
-                                $('.time-inject-row-addPayload3days').hide();
-                            }
-                        } else {
-                            $('.time-addPayload3Value').hide();
-                            $('.time-inject-row-addPayload3Format').hide();
-                            $('.time-inject-row-addPayload3Offset').hide();
-                            $('.time-inject-row-addPayload3days').hide();
-                        }
-                    }
-                }).change();
-
-                setupTInput(node, {
-                    typeProp: 'addPayload3ValueType',
-                    valueProp: 'addPayload3Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.MoonCalc
-                    ],
-                    onChange: (_type, _value) => {
-                        $('#node-input-addPayload3').change();
-                    }
-                }).change();
-
-                initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
-
-                initCombobox(node, 'time-inject', 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
-
-                node.addPayload3OffsetMultiplier = multilpierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'addPayload3OffsetType',
-                    valueProp: 'addPayload3Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-addPayload3Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion addPayload3
                 // #region time
                 setupTInput(node, {
                     typeProp: 'timeType',
@@ -1473,7 +1190,7 @@
 
                         $('#node-input-property').change();
                     }
-                }).change();
+                });
                 initDaysCheckbox('#time-inject-timeDays', node.timeDays);
 
                 node.offsetMultiplier = multilpierUpdate(node.offsetMultiplier, 'offsetMultiplier');
@@ -1556,11 +1273,298 @@
                     }
                 }).change();
                 // #endregion timeAlt
+                // #region addPayload1
+                const addPayload1Field = setupTInput(node, {
+                    typeProp: 'addPayload1Type',
+                    valueProp: 'addPayload1',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                    onChange: (_type, _value) => {
+                        const plType = $('#node-input-addPayload1').typedInput('type');
+                        if (plType !== types.Undefined.value) {
+                            $('.time-addPayload1Value').show();
+                            $('.time-addPayload2').show();
+                            const plVType = $('#node-input-addPayload1Value').typedInput('type');
+                            if (plVType === types.TimeEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').show();
+                            } else if (plVType === types.DateSpecific.value ||
+                                       plVType === types.DateEntered.value ||
+                                       plVType === types.DayOfMonth.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').hide();
+                            } else {
+                                $('.time-inject-row-addPayload1Format').hide();
+                                $('.time-inject-row-addPayload1Offset').hide();
+                                $('.time-inject-row-addPayload1days').hide();
+                            }
+                        } else {
+                            $('.time-addPayload1Value').hide();
+                            $('.time-inject-row-addPayload1Format').hide();
+                            $('.time-inject-row-addPayload1Offset').hide();
+                            $('.time-inject-row-addPayload1days').hide();
+                            $('.time-addPayload2').hide();
+                        }
+                        $('#node-input-addPayload2').change();
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'addPayload1ValueType',
+                    valueProp: 'addPayload1Value',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'date',
+                    defaultValue: '',
+                    types: [
+                        'date',
+                        types.DateSpecific,
+                        types.TimeEntered,
+                        types.DateEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        types.DayOfMonth,
+                        'flow',
+                        'global',
+                        'str',
+                        'num',
+                        'bool',
+                        'json',
+                        'bin',
+                        'env',
+                        'jsonata',
+                        types.SunCalc,
+                        types.MoonCalc
+                    ],
+
+                    onChange: (_type, _value) => {
+                        $('#node-input-addPayload1').change();
+                    }
+                });
+
+                initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
+
+                initCombobox(node, 'time-inject', 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
+
+                node.addPayload1OffsetMultiplier = multilpierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
+
+                setupTInput(node, {
+                    typeProp: 'addPayload1OffsetType',
+                    valueProp: 'addPayload1Offset',
+                    width: 'calc(100% - 265px)',
+                    defaultType: (node.addPayload1Offset === 0 || node.addPayload1Offset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-addPayload1Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion addPayload1
+                // #region addPayload2
+                const addPayload2Field = setupTInput(node, {
+                    typeProp: 'addPayload2Type',
+                    valueProp: 'addPayload2',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                    onChange: (_type, _value) => {
+                        const plType = $('#node-input-addPayload2').typedInput('type');
+                        if (plType !== types.Undefined.value) {
+                            $('.time-addPayload2Value').show();
+                            $('.time-addPayload3').show();
+                            const plVType = $('#node-input-addPayload2Value').typedInput('type');
+                            if (plVType === types.TimeEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').show();
+                            } else if (plVType === types.DateSpecific.value ||
+                                       plVType === types.DateEntered.value ||
+                                       plVType === types.DayOfMonth.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').hide();
+                            } else {
+                                $('.time-inject-row-addPayload2Format').hide();
+                                $('.time-inject-row-addPayload2Offset').hide();
+                                $('.time-inject-row-addPayload2days').hide();
+                            }
+                        } else {
+                            $('.time-addPayload2Value').hide();
+                            $('.time-inject-row-addPayload2Format').hide();
+                            $('.time-inject-row-addPayload2Offset').hide();
+                            $('.time-inject-row-addPayload2days').hide();
+                            $('.time-addPayload3').hide();
+                        }
+
+                        $('#node-input-addPayload3').change();
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'addPayload2ValueType',
+                    valueProp: 'addPayload2Value',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'date',
+                    defaultValue: '',
+                    types: [
+                        'date',
+                        types.DateSpecific,
+                        types.TimeEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        types.DayOfMonth,
+                        'flow',
+                        'global',
+                        'str',
+                        'num',
+                        'bool',
+                        'json',
+                        'bin',
+                        'env',
+                        'jsonata',
+                        types.SunCalc,
+                        types.MoonCalc
+                    ],
+
+                    onChange: (_type, _value) => {
+                        $('#node-input-addPayload2').change();
+                    }
+                });
+
+                initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
+
+                initCombobox(node, 'time-inject', 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
+
+                node.addPayload2OffsetMultiplier = multilpierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'addPayload2OffsetType',
+                    valueProp: 'addPayload2Offset',
+                    width: 'calc(100% - 265px)',
+                    defaultType: (node.addPayload2Offset === 0 || node.addPayload2Offset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-addPayload2Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion addPayload2
+                // #region addPayload3
+                const addPayload3Field = setupTInput(node, {
+                    typeProp: 'addPayload3Type',
+                    valueProp: 'addPayload3',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                    onChange: (_type, _value) => {
+                        const plType = $('#node-input-addPayload3').typedInput('type');
+                        if (plType !== types.Undefined.value) {
+                            $('.time-addPayload3Value').show();
+                            const plVType = $('#node-input-addPayload3Value').typedInput('type');
+                            if (plVType === types.TimeEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').show();
+                            } else if (plVType === types.DateSpecific.value ||
+                                       plVType === types.DateEntered.value ||
+                                       plVType === types.DayOfMonth.value) {
+                                $('.time-inject-row-addPayload1Format').show();
+                                $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1days').hide();
+                            } else {
+                                $('.time-inject-row-addPayload3Format').hide();
+                                $('.time-inject-row-addPayload3Offset').hide();
+                                $('.time-inject-row-addPayload3days').hide();
+                            }
+                        } else {
+                            $('.time-addPayload3Value').hide();
+                            $('.time-inject-row-addPayload3Format').hide();
+                            $('.time-inject-row-addPayload3Offset').hide();
+                            $('.time-inject-row-addPayload3days').hide();
+                        }
+                    }
+                }).change();
+
+                setupTInput(node, {
+                    typeProp: 'addPayload3ValueType',
+                    valueProp: 'addPayload3Value',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'date',
+                    defaultValue: '',
+                    types: [
+                        'date',
+                        types.DateSpecific,
+                        types.TimeEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        types.DayOfMonth,
+                        'flow',
+                        'global',
+                        'str',
+                        'num',
+                        'bool',
+                        'json',
+                        'bin',
+                        'env',
+                        'jsonata',
+                        types.SunCalc,
+                        types.MoonCalc
+                    ],
+                    onChange: (_type, _value) => {
+                        $('#node-input-addPayload3').change();
+                    }
+                });
+
+                initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
+
+                initCombobox(node, 'time-inject', 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
+
+                node.addPayload3OffsetMultiplier = multilpierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'addPayload3OffsetType',
+                    valueProp: 'addPayload3Offset',
+                    width: 'calc(100% - 265px)',
+                    defaultType: (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-addPayload3Offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion addPayload3
                 // #region onceDelay
                 $('#node-input-once').change(() => {
                     $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                 });
                 // #endregion onceDelay
+                addPayload1Field.change();
+                addPayload2Field.change();
+                addPayload3Field.change();
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')
