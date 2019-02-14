@@ -450,58 +450,6 @@
         return v;
     }
 
-    function getValueLabel(t, v, l) {
-        l = l || 15;
-        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
-            if (v === '') {
-                return v;
-            }
-            return '"' + clipValueLength(v, l) + '"';
-        }
-
-        if (t === 'num' || t === 'bool') {
-            if (v === '') {
-                return v;
-            }
-
-            return String(v);
-        }
-
-        if (t === 'msg') {
-            return t + '.' + clipValueLength(v, l);
-        }
-
-        if (t === 'flow' || t === 'global') {
-            const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l);
-        }
-
-        if (t === 'pdsCalcData') {
-            return '{sun position}';
-        }
-
-        if (t === 'pdmCalcData') {
-            return '{moon position}';
-        }
-
-        if (t === 'pdsTime') {
-            const res = v
-                .replace('astronomical', 'astro-')
-                .replace('nautical', 'naut-')
-                .replace('civil', '')
-                .replace('amateur', 'amat-')
-                .replace('blueHour', 'blHr-')
-                .replace('goldenHour', 'goHr-');
-            return clipValueLength(res, l);
-        }
-
-        if (t === 'pdmTime') {
-            return 'moon' + v;
-        }
-
-        return clipValueLength(v, l);
-    }
-
     RED.nodes.registerType('time-inject', {
         category: 'time and astro',
         color: '#a6bbcf',
@@ -919,6 +867,7 @@
             }
 
             const getId = (type, value, offset, maxLength) => {
+                maxLength = maxLength || 15;
                 let suffix = '';
                 if (offset && offset > 0) {
                     suffix = '↷';
@@ -927,16 +876,16 @@
                 }
 
                 if (type === 'jsonata') {
-                    if (value.length < 15) {
+                    if (value.length < maxLength) {
                         return value + suffix;
                     }
 
-                    return this._('time-inject.label.jsonata');
+                    return this._('time-inject.label.jsonata') + suffix;
                 }
 
                 if (type === 'json') {
-                    if (value.length < 15) {
-                        return value + suffix;
+                    if (value.length < maxLength) {
+                        return  value + suffix;
                     }
 
                     return this._('time-inject.label.json') + suffix;
@@ -954,12 +903,57 @@
                     return this._('time-inject.label.timestamp') + '+' + suffix;
                 }
 
-                const v = getValueLabel(type, value, maxLength);
-                if (v === '') {
+                if (type === 'string' || type === 'str' || type === 'DayOfMonth') {
+                    if (value === '') {
+                        return value + suffix;
+                    }
+                    return '"' + clipValueLength(value, maxLength) + '"' + suffix;
+                }
+
+                if (type === 'num' || type === 'bool') {
+                    if (value === '') {
+                        return '0' + suffix;
+                    }
+                    return String(value) + suffix;
+                }
+
+                if (type === 'msg') {
+                    return type + '.' + clipValueLength(value, maxLength) + suffix;
+                }
+
+                if (type === 'flow' || type === 'global') {
+                    const result = RED.utils.parseContextKey(value);
+                    return type + '.' + clipValueLength(result.key, maxLength) + suffix;
+                }
+
+                if (type === 'pdsCalcData') {
+                    return '{sun position}' + suffix;
+                }
+
+                if (type === 'pdmCalcData') {
+                    return '{moon position}' + suffix;
+                }
+
+                if (type === 'pdsTime') {
+                    const res = value
+                        .replace('astronomical', 'astro-')
+                        .replace('nautical', 'naut-')
+                        .replace('civil', '')
+                        .replace('amateur', 'amat-')
+                        .replace('blueHour', 'blHr-')
+                        .replace('goldenHour', 'goHr-');
+                    return clipValueLength(res, maxLength) + suffix;
+                }
+
+                if (type === 'pdmTime') {
+                    return 'moon' + value + suffix;
+                }
+
+                if (value === '') {
                     return this._('time-inject.label.blank');
                 }
 
-                return v + suffix;
+                return clipValueLength(value, maxLength) + suffix;
             };
 
             const getTimeId = () => {

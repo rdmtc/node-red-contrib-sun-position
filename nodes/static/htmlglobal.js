@@ -502,6 +502,7 @@ function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optio
             $inputBox.hide();
             width = (100 + width);
             $inputSelect.css({width: 'calc(100% - ' + width + 'px)'});
+            $inputBox.val($inputSelect.val());
         }
     });
     if (value && isNaN(value)) {

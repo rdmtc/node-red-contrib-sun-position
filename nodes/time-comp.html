@@ -203,46 +203,77 @@
         return v;
     }
 
-    function getValueLabel(t, v, l) {
+    function getValueLabel(t, v, offset, l) {
         l = l || 15;
-        if (t === 'string' || t === 'str') {
-            if (v === '') { return v; }
-            return '"' + clipValueLength(v, l) + '"';
+        let suffix = '';
+        if (offset && offset > 0) {
+            suffix = '↷';
+        } else if (offset && offset < 0) {
+            suffix = '↶';
+        }
+
+        if (t === 'jsonata') {
+            if (v.length < l) {
+                return v + suffix;
+            }
+            return 'json expr.' + suffix; // this._('time-inject.label.jsonata');
+        }
+
+        if (t === 'json') {
+            if (v.length < l) {
+                return  v + suffix;
+            }
+
+            return 'json' + suffix; // this._('time-inject.label.json') + suffix;
+        }
+
+        if (t === 'bin') {
+            return 'binary' + suffix; // this._('time-inject.label.binary') + suffix;
+        }
+
+        if (t === 'date') {
+            return 'timestamp' + suffix; // this._('time-inject.label.timestamp') + suffix;
+        }
+
+        if (t === 'dateSpecific') {
+            return 'timestamp+' + suffix; // this._('time-inject.label.timestamp') + '+' + suffix;
+        }
+
+        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
+            if (v === '') {
+                return v + suffix;
+            }
+            return '"' + clipValueLength(v, l) + '"' + suffix;
         }
 
         if (t === 'num' || t === 'bool') {
-            if (v === '') { return v; }
-            return String(v);
+            if (v === '') {
+                return '0' + suffix;
+            }
+            return String(v) + suffix;
         }
 
         if (t === 'msg') {
-            return t + '.' + clipValueLength(v, l);
+            return t + '.' + clipValueLength(v, l) + suffix;
         }
-        if (t === 'msgPayload') {
-            return 'msg.payload';
-        }
-        if (t === 'msgTs') {
-            return 'msg.ts';
-        }
-        if (t === 'msgValue') {
-            return 'msg.value';
-        }
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgValue') { return 'msg.value'; }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l);
+            return t + '.' + clipValueLength(result.key, l) + suffix;
         }
-        if (t === 'input') {
-            return 'input data';
-        }
+        if (t === 'input') { return 'input data'; }
 
         if (t === 'pdsCalcData') {
-            return '{sun position}';
+            return '{sun position}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
-            return '{moon position}';
+            return '{moon position}' + suffix;
         }
+
 
         if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
@@ -250,10 +281,14 @@
         }
 
         if (t === 'pdmTime') {
-            return 'moon' + v;
+            return 'moon' + v + suffix;
         }
 
-        return clipValueLength(v, l);
+        if (v === '') {
+            return this._('time-inject.label.blank');
+        }
+
+        return clipValueLength(v, l) + suffix;
     }
 
     RED.nodes.registerType('time-comp', {
