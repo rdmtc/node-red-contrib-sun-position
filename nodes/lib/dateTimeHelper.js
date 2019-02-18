@@ -1214,8 +1214,7 @@ function _parseDateTime(val, preferMonthFirst) {
  * @returns {Date} a Date object or throws an error if no patterns match.
  */
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
-    console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + ' dayNames'); // eslint-disable-line
-    // console.log('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    // console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
         dateFormat.i18n.dayNames = dayNames;
     }
