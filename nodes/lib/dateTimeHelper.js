@@ -758,8 +758,12 @@ function _formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
-    console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
+    if (!(date instanceof Date)) {
+        date = Date(date);
+    }
+
     if (isNaN(format)) {
         return _formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
     }
@@ -768,7 +772,7 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 0: // timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
             return date.getTime();
         case 1: // timeformat_ECMA262 - date as string ECMA-262
-            return date;
+            return String(date);
         case 2: // timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
             return date.toLocaleString();
         case 3: // timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
@@ -808,12 +812,14 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
     return {
         date,
         ts: date.getTime(),
+        dateStr: String(date),
         timeUTCStr: date.toUTCString(),
         timeISOStr: date.toISOString(),
         timeLocaleStr: date.toLocaleString(),
         timeLocaleTimeStr: date.toLocaleTimeString(),
         delay,
-        delaySec: Math.round(delay / 1000)
+        delaySec: Math.round(delay / 1000),
+        lc: now.getTime()
     };
 }
 // ===================================================================

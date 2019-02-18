@@ -152,7 +152,7 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeEntered: {
             value: 'entered',
-            label: 'time (current day)',
+            label: 'time (next)',
             icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
             hasValue: true,
             validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
@@ -166,8 +166,8 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimePredefined: {
             value: 'TimePredefined',
-            label: 'time (current day)',
-            options: ['midnight (current day)', 'noon (current day)']
+            label: 'fixed times',
+            options: ['next midnight', 'next noon']
         },
         DayOfMonth: {
             value: 'DayOfMonth',

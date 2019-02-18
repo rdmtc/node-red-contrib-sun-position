@@ -1381,15 +1381,15 @@
                             if (plVType === types.TimeEntered.value ||
                                 plVType === types.TimeSun.value ||
                                 plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').show();
+                                $('.time-inject-row-addPayload2Format').show();
+                                $('.time-inject-row-addPayload2Offset').show();
+                                $('.time-inject-row-addPayload2days').show();
                             } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
                                        plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').hide();
+                                $('.time-inject-row-addPayload2Format').show();
+                                $('.time-inject-row-addPayload2Offset').show();
+                                $('.time-inject-row-addPayload2days').hide();
                             } else {
                                 $('.time-inject-row-addPayload2Format').hide();
                                 $('.time-inject-row-addPayload2Offset').hide();
@@ -1476,15 +1476,15 @@
                             if (plVType === types.TimeEntered.value ||
                                 plVType === types.TimeSun.value ||
                                 plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').show();
+                                $('.time-inject-row-addPayload3Format').show();
+                                $('.time-inject-row-addPayload3Offset').show();
+                                $('.time-inject-row-addPayload3days').show();
                             } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
                                        plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1days').hide();
+                                $('.time-inject-row-addPayload3Format').show();
+                                $('.time-inject-row-addPayload3Offset').show();
+                                $('.time-inject-row-addPayload3days').hide();
                             } else {
                                 $('.time-inject-row-addPayload3Format').hide();
                                 $('.time-inject-row-addPayload3Offset').hide();
@@ -1497,7 +1497,7 @@
                             $('.time-inject-row-addPayload3days').hide();
                         }
                     }
-                }).change();
+                });
 
                 setupTInput(node, {
                     typeProp: 'addPayload3ValueType',

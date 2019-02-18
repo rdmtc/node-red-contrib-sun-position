@@ -132,7 +132,7 @@ module.exports = function (RED) {
                 } else if (next > 1) {
                     const date = (new Date()).addDays(next);
                     const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
-                    result.value = hlp.addOffset(new Date(new Date(times[value])), offset, multiplier);
+                    result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
                     // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                 }
             }
@@ -142,7 +142,7 @@ module.exports = function (RED) {
                 if (dayx > 0) {
                     const date = (new Date()).addDays(dayx);
                     const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
-                    result.value = hlp.addOffset(new Date(new Date(times[value])), offset, multiplier);
+                    result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
                     // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                 } else if (dayx < 0) {
                     result.error = 'No valid day of week found!';
@@ -249,7 +249,7 @@ module.exports = function (RED) {
             let result = null;
             try {
                 if (vType === null || vType === 'none' || vType === '') {
-                    return (new Date());
+                    return new Date();
                 } else if (vType === 'date') {
                     return new Date();
                 } else if (vType === 'dateSpecific') {
@@ -316,7 +316,7 @@ module.exports = function (RED) {
                 } else if (vType === '' || vType === 'none' || days === '') {
                     result.error = 'wrong type "' + vType + '"="' + value+'"';
                 } else if (vType === 'date') {
-                    result.value = (new Date());
+                    result.value = new Date();
                     result.fix = true;
                 } else if (vType === 'dateSpecific') {
                     const offsetX = node.getFloatProp(node, msg, offsetType, offset);
@@ -364,7 +364,7 @@ module.exports = function (RED) {
                 if (!result.error) {
                     result.error = 'Can not get time for ' + vType + '=' + value;
                 }
-                result.value = (new Date());
+                result.value = new Date();
             }
 
             // node.debug('getTimeProp result' + util.inspect(result));
