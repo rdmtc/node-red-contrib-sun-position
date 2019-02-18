@@ -26,6 +26,7 @@ module.exports = function (RED) {
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days) {
         if (type !== 'none' && name) {
             const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, days);
+            // node.debug('getOutDataProp result is:' + util.inspect(res));
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {

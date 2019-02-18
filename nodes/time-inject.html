@@ -1164,7 +1164,7 @@
                 }).change();
                 // #endregion payload
                 // #region time
-                setupTInput(node, {
+                const timeTypeField = setupTInput(node, {
                     typeProp: 'timeType',
                     valueProp: 'time',
                     width: 'calc(100% - 110px)',
@@ -1206,7 +1206,7 @@
                 }).change();
                 // #endregion time
                 // #region property
-                setupTInput(node, {
+                const propertyTypeField = setupTInput(node, {
                     typeProp: 'propertyType',
                     valueProp: 'property',
                     width: 'calc(100% - 110px)',
@@ -1233,7 +1233,7 @@
                             $('#time-inject-recalcTime').val('');
                         }
                     }
-                }).change();
+                });
 
                 initCombobox(node, 'time-inject', 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
                 // #endregion property
@@ -1556,6 +1556,8 @@
                     $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                 });
                 // #endregion onceDelay
+                timeTypeField.change();
+                propertyTypeField.change();
                 addPayload1Field.change();
                 addPayload2Field.change();
                 addPayload3Field.change();

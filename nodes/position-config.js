@@ -87,7 +87,7 @@ module.exports = function (RED) {
         };
         const node = this;
         this.getSunTime = (now, value, offset, multiplier, next, days) => {
-            node.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            // node.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = sunTimesCheck(node, now);
             result = Object.assign(result, node.sunTimesToday[value]);
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -121,7 +121,7 @@ module.exports = function (RED) {
         };
 
         this.getMoonTime = (now, value, offset, multiplier, next, days) => {
-            node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+            // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = moonTimesCheck(node, now);
             // node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
             result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset, multiplier);
@@ -155,7 +155,7 @@ module.exports = function (RED) {
         };
 
         this.getFloatProp = (_srcNode, msg, type, value) => {
-            _srcNode.debug('getFloatProp type='+type+' value='+value);
+            // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data;
             // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
@@ -229,7 +229,7 @@ module.exports = function (RED) {
             } else if (vType === 'entered' || vType === 'dateEntered') {
                 result = hlp.getDateOfText(String(value));
                 const offsetX = node.getFloatProp(node, msg, offsetType, offset);
-                result = hlp.normalizeDate((new Date()), offsetX, multiplier, undefined, days);
+                result = hlp.normalizeDate(result, offsetX, multiplier, undefined, days);
                 return node.formatOutDate(result, format);
             } else if (vType === 'dayOfMonth') {
                 result = new Date();

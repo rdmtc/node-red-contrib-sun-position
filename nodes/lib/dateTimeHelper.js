@@ -362,7 +362,6 @@ function normalizeDate(d, offset, multiplier, next, days) {
             d.setDate(d.getDate() + dayx);
         }
     }
-
     return d;
 }
 
@@ -1167,7 +1166,7 @@ function _isTimestamp(str) {
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function _parseDate(val, preferMonthFirst) {
-    console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+    // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     let res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
     if (res !== null) { return res; }
     res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
@@ -1183,7 +1182,7 @@ function _parseDate(val, preferMonthFirst) {
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
 function _parseDateTime(val, preferMonthFirst) {
-    console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+    // console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
             for (let j = 0; j < lst2.length; j++) {
@@ -1236,7 +1235,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
         res = getDateFromFormat(date, format);
     } else {
         const tryparse = (val, preferMonthFirst) => {
-console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+            // console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
             let res = _parseDateTime(val, preferMonthFirst);
             if (res !== null) { return res; }
             res = _parseDate(val, preferMonthFirst);
@@ -1281,7 +1280,7 @@ console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMo
             }
         }
     }
-    console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
+    // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
     if (res === 'Invalid Date' || isNaN(res) || res === null) {
         throw new Error('could not evaluate format of ' + date + ' (' + format+')');
     }
