@@ -54,6 +54,8 @@ node.debug('resultObj ' + util.inspect(resultObj)); // eslint-disable-line
                         msg.payload = resultObj;
                     } else if (config.result1Type === 'msgTs') {
                         msg.ts = resultObj;
+                    } else if (config.result1Type === 'msgLc') {
+                        msg.lc = resultObj;
                     } else if (config.result1Type === 'msgValue') {
                         msg.value = resultObj;
                     } else if (config.result1Type === 'msg') {

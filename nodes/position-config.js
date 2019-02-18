@@ -208,6 +208,8 @@ module.exports = function (RED) {
                 return msg.payload;
             } else if (vType === 'msgTs') {
                 return msg.ts;
+            } else if (vType === 'msgLc') {
+                return msg.lc;
             } else if (vType === 'msgValue') {
                 return msg.value;
             } else if (vType === 'pdsCalcData') {
@@ -283,6 +285,8 @@ module.exports = function (RED) {
                     result = msg.payload;
                 } else if (vType === 'msgTs') {
                     result = msg.ts;
+                } else if (vType === 'msgLc') {
+                    return msg.lc;
                 } else if (vType === 'msgValue') {
                     result = msg.value;
                 } else {

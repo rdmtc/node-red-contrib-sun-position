@@ -285,9 +285,11 @@ node.debug('resultObj2 ' + util.inspect(resultObj)); // eslint-disable-line
                         msg.payload = resultObj;
                     } else if (config.result1Type === 'msgTs') {
                         msg.ts = resultObj;
+                    } else if (config.result1Type === 'msgLc') {
+                        msg.lc = resultObj;
                     } else if (config.result1Type === 'msgValue') {
                         msg.value = resultObj;
-                    } else if (config.result1Type === 'msg' || config.result1Type === 'msgProperty') {
+                    } else if (config.result1Type === 'msg') {
                         RED.util.setMessageProperty(msg, config.result1, resultObj);
                     } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
                         const contextKey = RED.util.parseContextStore(config.result1);

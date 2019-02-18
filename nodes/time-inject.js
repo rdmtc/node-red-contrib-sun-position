@@ -35,9 +35,11 @@ module.exports = function (RED) {
                 msg.payload = res;
             } else if (type === 'msgTs') {
                 msg.ts = res;
+            } else if (type === 'msgLc') {
+                msg.lc = res;
             } else if (type === 'msgValue') {
                 msg.value = res;
-            } else if (type === 'msg' || type === 'msgProperty') {
+            } else if (type === 'msg') {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {
                 const contextKey = RED.util.parseContextStore(name);
