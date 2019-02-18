@@ -150,6 +150,21 @@ function getTypes() { // eslint-disable-line no-unused-vars
             label: 'msg.value',
             hasValue: false
         },
+        MsgDelay: {
+            value: 'msgDelay',
+            label: 'msg.delay',
+            hasValue: false
+        },
+        MsgOnTime: {
+            value: 'msgOnTime',
+            label: 'msg.onTime',
+            hasValue: false
+        },
+        MsgRampTime: {
+            value: 'msgRampTime',
+            label: 'msg.rampTime',
+            hasValue: false
+        },
         TimeEntered: {
             value: 'entered',
             label: 'time (next)',

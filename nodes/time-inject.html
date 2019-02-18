@@ -861,9 +861,8 @@
             }
 
             let result = '';
-            let prefix = '';
             if (this.once) {
-                prefix += ' ¹';
+                result += '¹';
             }
 
             const getId = (type, value, offset, maxLength) => {
@@ -1004,41 +1003,29 @@
                 }
 
                 const part1 = getId(this.timeType, this.time, this.offset);
-                if (
-                    this.propertyType !== 'none' &&
-      this.propertyType !== '' &&
-      this.timeAlt
-                ) {
-                    return (
-                        part1 +
-        '/' +
-        getId(this.timeAltType, this.timeAlt, this.timeAltOffset) +
-        suffix
-                    );
+                if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
+                    return (part1 + '/' + getId(this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
                 }
 
                 return part1 + suffix;
             };
 
             if (this.timeType === 'none' || this.timeType === '') {
-                return this._('time-inject.label.inject');
-            }
-
-            const timeTxt = getTimeId();
-            if (timeTxt.length > 24) {
-                result += timeTxt + ' =...';
+                result += getId(this.payloadType, this.payload, 'undefined', 12);
             } else {
-                result +=
-        timeTxt +
-        ' = ' +
-        getId(this.payloadType, this.payload, 'undefined', 12);
+                const timeTxt = getTimeId();
+                if (timeTxt.length > 24) {
+                    result += timeTxt + ' =...';
+                } else {
+                    result += timeTxt + ' = ' + getId(this.payloadType, this.payload, 'undefined', 12);
+                }
             }
 
             if (this.topic && this.topic.length + result.length <= 32) {
-                return this.topic + ':' + prefix + result;
+                return this.topic + ':' + result;
             }
 
-            return prefix + result;
+            return result;
         },
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
@@ -1268,13 +1255,17 @@
                 }).change();
                 // #endregion timeAlt
                 // #region addPayload1
+                if (node.addPayload1Type === types.MsgPayload.value) {
+                    node.addPayload1Type = 'msg';
+                    node.addPayload1 = 'payload';
+                }
                 const addPayload1Field = setupTInput(node, {
                     typeProp: 'addPayload1Type',
                     valueProp: 'addPayload1',
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, types.MsgValue, 'msg', 'flow', 'global'],
+                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
                     onChange: (_type, _value) => {
                         const plType = $('#node-input-addPayload1').typedInput('type');
                         if (plType !== types.Undefined.value) {
@@ -1365,13 +1356,17 @@
                 }).change();
                 // #endregion addPayload1
                 // #region addPayload2
+                if (node.addPayload2Type === types.MsgPayload.value) {
+                    node.addPayload2Type = 'msg';
+                    node.addPayload2 = 'payload';
+                }
                 const addPayload2Field = setupTInput(node, {
                     typeProp: 'addPayload2Type',
                     valueProp: 'addPayload2',
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, types.MsgValue, 'msg', 'flow', 'global'],
+                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
                     onChange: (_type, _value) => {
                         const plType = $('#node-input-addPayload2').typedInput('type');
                         if (plType !== types.Undefined.value) {
@@ -1461,13 +1456,17 @@
                 }).change();
                 // #endregion addPayload2
                 // #region addPayload3
+                if (node.addPayload3Type === types.MsgPayload.value) {
+                    node.addPayload3Type = 'msg';
+                    node.addPayload3 = 'payload';
+                }
                 const addPayload3Field = setupTInput(node, {
                     typeProp: 'addPayload3Type',
                     valueProp: 'addPayload3',
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, types.MsgValue, 'msg', 'flow', 'global'],
+                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
                     onChange: (_type, _value) => {
                         const plType = $('#node-input-addPayload3').typedInput('type');
                         if (plType !== types.Undefined.value) {

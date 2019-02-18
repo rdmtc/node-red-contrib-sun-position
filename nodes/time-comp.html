@@ -462,9 +462,10 @@
                     width: 'calc(100% - 110px)',
                     defaultType: node.inputType || types.MsgPayload.value,
                     types: [
+                        'msg',
                         types.MsgPayload,
                         types.MsgTs,
-                        'msg',
+                        types.MsgLc,
                         'flow',
                         'global',
                         types.DateSpecific,
