@@ -5,6 +5,7 @@
             "positionConfig": "configuration",
             "config": "configuration",
             "topic" :"Topic",
+            "azimuthpos":"azimuth position",
             "between":"between",
             "and":"and",
             "name": "Name"

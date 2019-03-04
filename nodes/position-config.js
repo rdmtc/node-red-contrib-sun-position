@@ -394,6 +394,9 @@ module.exports = function (RED) {
                 }
             }
 
+            var azimuthDegrees = 180 + 180 / Math.PI * sunPos.azimuth;
+            var altitudeDegrees = 180 / Math.PI * sunPos.altitude; // elevation = altitude
+
             const sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             const result = {
                 ts: date.getTime(),
@@ -401,8 +404,12 @@ module.exports = function (RED) {
                 latitude: node.latitude,
                 longitude: node.longitude,
                 angleType: node.angleType,
-                azimuth: (node.angleType === 'deg') ? 180 + 180 / Math.PI * sunPos.azimuth : sunPos.azimuth,
-                altitude: (node.angleType === 'deg') ? 180 / Math.PI * sunPos.altitude : sunPos.altitude // elevation = altitude
+                azimuth: (node.angleType === 'deg') ? azimuthDegrees : sunPos.azimuth,
+                altitude: (node.angleType === 'deg') ? altitudeDegrees : sunPos.altitude, // elevation = altitude
+                altitudeDegrees: altitudeDegrees,
+                azimuthDegrees: azimuthDegrees,
+                altitudeRadians: sunPos.altitude,
+                azimuthRadians: sunPos.azimuth
             };
             sunTimesCheck(node);
             result.times = node.sunTimesToday;
