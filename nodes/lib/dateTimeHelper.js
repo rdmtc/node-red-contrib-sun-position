@@ -293,6 +293,9 @@ function checkLimits(num, low, high) {
  * @return {Date}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
+    if (d.value) { d = d.value; }
+    if (!(d instanceof Date)) { d = Date(d); }
+
     if (offset && !isNaN(offset) && offset !== 0) {
         if (offset !== 0 && multiplier > 0) {
             return new Date(d.getTime() + offset * multiplier);
@@ -760,9 +763,8 @@ function _formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
 function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
-    if (!(date instanceof Date)) {
-        date = Date(date);
-    }
+    if (date.value) { date = date.value; }
+    if (!(date instanceof Date)) { date = Date(date); }
 
     if (isNaN(format)) {
         return _formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);

@@ -189,7 +189,7 @@ module.exports = function (RED) {
         };
 
         this.getOutDataProp = (_srcNode, msg, vType, value, format, offset, offsetType, multiplier, days) => {
-            _srcNode.debug('getOutDataProp type='+vType+' value='+value+' format='+format+' offset='+offset+' offset='+offsetType+' multiplier='+multiplier);
+            // _srcNode.debug('getOutDataProp type='+vType+' value='+value+' format='+format+' offset='+offset+' offset='+offsetType+' multiplier='+multiplier);
             let result = null;
             if (vType === null || vType === 'none' || vType === '' || (typeof vType === 'undefined')) {
                 if (value === '' || (typeof value === 'undefined')) {
@@ -225,7 +225,7 @@ module.exports = function (RED) {
                     result = node.getMoonTime((new Date()), value, offsetX, multiplier, undefined, days);
                 }
                 if (result && result.value && !result.error) {
-                    return node.formatOutDate(result, format);
+                    return node.formatOutDate(result.value, format);
                 }
                 return null;
             } else if (vType === 'entered' || vType === 'dateEntered') {
@@ -247,7 +247,7 @@ module.exports = function (RED) {
         };
 
         this.getDateFromProp = (_srcNode, msg, vType, value, format, offset, offsetType, multiplier) => {
-            _srcNode.debug('getDateFromProp type='+vType+' value='+value+' format='+format+' offset='+offset+ ' offsetType=' + offsetType +' multiplier='+multiplier);
+            // _srcNode.debug('getDateFromProp type='+vType+' value='+value+' format='+format+' offset='+offset+ ' offsetType=' + offsetType +' multiplier='+multiplier);
             let result = null;
             try {
                 if (vType === null || vType === 'none' || vType === '') {
@@ -308,7 +308,7 @@ module.exports = function (RED) {
         };
 
         this.getTimeProp = (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) => {
-            node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            // node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
                 error: null,
