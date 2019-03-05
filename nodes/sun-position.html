@@ -14,6 +14,30 @@
         <ol id="node-input-rule-container"></ol>
     </div>
     <hr>
+    <div class="form-row block-noindent">
+        <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
+        <input type="text" id="node-input-start" />
+        <input type="hidden" id="node-input-startType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-startOffset hidden">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"></input>
+        <input type="hidden" id="node-input-startOffsetType">
+        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-noindent">
+        <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
+        <input type="text" id="node-input-end" />
+        <input type="hidden" id="node-input-endType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-endOffset hidden">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"></input>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
+    <hr>
     <!-- By convention, most nodes have a 'name' property. The following div -->
     <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
@@ -24,6 +48,45 @@
         <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
     </div>
 </script>
+<style>
+    hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        margin-left: 5px;
+    }
+</style>
 
 <script type="text/x-red" data-help-name="sun-position">
     <h3>About</h3>
@@ -200,6 +263,84 @@
             },
             outputs: {
                 value: 1
+            },
+            start: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('startType')
+            },
+            startType: {
+                value: 'none'
+            },
+            startOffset: {
+                value: 0,
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetType')(v) ||
+                        ($('#node-input-start').length ?
+                            $('#node-input-start').typedInput('type') === 'none' :
+                            this.startType === 'none')
+                    );
+                }
+            },
+            startOffsetType: {
+                value: 'none'
+            },
+            startOffsetMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        $('#node-input-startOffsetType').typedInput('type') === 'none' ||
+                        this.startOffsetType === 'none' ||
+                        ($('#node-input-start').length ?
+                            $('#node-input-start').typedInput('type') === 'none' :
+                            this.startType === 'none')
+                    );
+                }
+            },
+            end: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('startType')
+            },
+            endType: {
+                value: 'none'
+            },
+            endOffset: {
+                value: 0,
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.endOffsetType === 'undefined') ||
+                        RED.validators.typedInput('endOffsetType')(v) ||
+                        ($('#node-input-end').length ?
+                            $('#node-input-end').typedInput('type') === 'none' :
+                            this.endType === 'none')
+                    );
+                }
+            },
+            endOffsetType: {
+                value: 'none'
+            },
+            endOffsetMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        $('#node-input-endOffsetType').typedInput('type') === 'none' ||
+                        this.endOffsetType === 'none' ||
+                        ($('#node-input-end').length ?
+                            $('#node-input-end').typedInput('type') === 'none' :
+                            this.endType === 'none')
+                    );
+                }
             }
         },
         outputLabels(index) {
@@ -229,134 +370,240 @@
         paletteLabel: 'sun-position',
         oneditprepare() {
             const node = this;
-
-            const outputCount = $('#node-input-outputs').val('{}');
-
-            const btwnLabel = node._('sun-position.label.between');
-            const andLabel = node._('sun-position.label.and');
-
-            function resizeRule(rule) {
-                const newWidth = rule.width();
-                const btwnField1 = rule.find('.node-input-rule-btwn-value');
-                const btwnField2 = rule.find('.node-input-rule-btwn-value2');
-                const editwidth = (newWidth / 2);
-                btwnField1.typedInput('width', (editwidth - 70));
-                btwnField2.typedInput('width', (editwidth - 70));
-            }
-
-            $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
-                addItem(container, i, opt) {
-                    container.css({
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap'
-                    });
-                    if (!opt.hasOwnProperty('r')) {
-                        opt.r = {};
+            const setup = function(node) {
+                /* global getTypes appendOptions setupTInput */
+                const types = getTypes();
+                // #region initialize
+                function multilpierUpdate(mp, name) {
+                    const field = $('#node-input-' + name);
+                    appendOptions(node, 'sun-position', field, 'multiplier', (id) => (id > 0));
+                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                        mp = 60000;
                     }
+                    field.val(mp);
+                    return mp;
+                }
 
-                    if (!opt.hasOwnProperty('i')) {
-                        opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
+                // #region start
+                const startTypeField = setupTInput(node, {
+                    typeProp: 'startType',
+                    valueProp: 'start',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
+                            $('.sun-position-row-startOffset').hide();
+                        } else {
+                            $('.sun-position-row-startOffset').show();
+                        }
+
+                        $('#node-input-property').change();
                     }
-
-                    const rule = opt.r;
-                    const row = $('<div/>').appendTo(container);
-                    /* const row3 = $('<div/>', {
-                        style: 'padding-top: 5px;'
-                    }).appendTo(container); */
-
-                    /* validate: function (v) {
-                        var n = Number(v);
-                        return ((n >= 0) && (n <= 360));
-                    } */
-
-                    $('<span/>', {
-                        class: 'node-input-rule-btwn-label'
-                    }).text(' ' + btwnLabel + ' ').appendTo(row);
-                    const btwnValueField = $('<input/>', {
-                        class: 'node-input-rule-btwn-value',
-                        type: 'text',
-                        style: 'margin-left: 5px;'
-                    }).appendTo(row).typedInput({
-                        default: 'num',
-                        types: ['msg', 'flow', 'global', 'num', 'env']
-                    });
-                    $('<span/>', {
-                        class: 'node-input-rule-btwn-label'
-                    }).text(' ' + andLabel + ' ').appendTo(row);
-                    const btwnValue2Field = $('<input/>', {
-                        class: 'node-input-rule-btwn-value2',
-                        type: 'text',
-                        style: 'margin-left:2px;'
-                    }).appendTo(row).typedInput({
-                        default: 'num',
-                        types: ['msg', 'flow', 'global', 'num', 'env']
-                    });
-
-                    const finalspan = $('<span/>', {
-                        style: 'float: right;margin-top: 6px;'
-                    }).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
-                '</span> ');
-
-                    resizeRule(container);
-                    btwnValueField.typedInput('value', rule.valueLow);
-                    btwnValueField.typedInput('type', rule.valueLowType || 'num');
-                    btwnValue2Field.typedInput('value', rule.valueHigh);
-                    btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
-
-                    // {"0":0,"1":-1,"2":-1,"3":-1}
-                    // {"0":0}
-                    const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                    currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
-                    currentOutputs.m = i + 1;
-                    // console.log(currentOutputs);
-                    outputCount.val(JSON.stringify(currentOutputs));
-                },
-                removeItem(opt) {
-                    const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
-                    if (opt.hasOwnProperty('i')) {
-                        currentOutputs[opt.i] = -1;
-                    } else {
-                        delete currentOutputs[opt._i];
-                    }
-
-                    const rules = $('#node-input-rule-container').editableList('items');
-                    rules.each(function (i) {
-                        $(this).find('.node-input-rule-index').html(i + 2);
-                        const data = $(this).data('data');
-                        currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
-                    });
-                    currentOutputs.m = rules.length;
-                    // console.log(currentOutputs);
-                    // console.log(rules);
-                    outputCount.val(JSON.stringify(currentOutputs));
-                },
-                resizeItem: resizeRule,
-                sortItems(rules) {
-                    const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                    rules = $('#node-input-rule-container').editableList('items');
-                    rules.each(function (i) {
-                        $(this).find('.node-input-rule-index').html(i + 2);
-                        const data = $(this).data('data');
-                        currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
-                    });
-                    currentOutputs.m = rules.length;
-                    // console.log(currentOutputs);
-                    // console.log(rules);
-                    outputCount.val(JSON.stringify(currentOutputs));
-                },
-                sortable: true,
-                removable: true
-            });
-
-            for (let i = 0; i < node.rules.length; i++) {
-                const rule = node.rules[i];
-                $('#node-input-rule-container').editableList('addItem', {
-                    r: rule,
-                    i,
-                    l: node.rules.length
                 });
-            }
+
+                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'startOffsetType',
+                    valueProp: 'startOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-startOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                startTypeField.change();
+                // #endregion start
+
+                // #region end
+                const endTypeField = setupTInput(node, {
+                    typeProp: 'endType',
+                    valueProp: 'end',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
+                            $('.sun-position-row-endOffset').hide();
+                        } else {
+                            $('.sun-position-row-endOffset').show();
+                        }
+
+                        $('#node-input-property').change();
+                    }
+                });
+
+                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'endOffsetType',
+                    valueProp: 'endOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-endOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                endTypeField.change();
+                // #endregion end
+                const outputCount = $('#node-input-outputs').val('{}');
+
+                const btwnLabel = node._('sun-position.label.between');
+                const andLabel = node._('sun-position.label.and');
+
+                function resizeRule(rule) {
+                    const newWidth = rule.width();
+                    const btwnField1 = rule.find('.node-input-rule-btwn-value');
+                    const btwnField2 = rule.find('.node-input-rule-btwn-value2');
+                    const editwidth = (newWidth / 2);
+                    btwnField1.typedInput('width', (editwidth - 70));
+                    btwnField2.typedInput('width', (editwidth - 70));
+                }
+
+                $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
+                    addItem(container, i, opt) {
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap'
+                        });
+                        if (!opt.hasOwnProperty('r')) {
+                            opt.r = {};
+                        }
+
+                        if (!opt.hasOwnProperty('i')) {
+                            opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
+                        }
+
+                        const rule = opt.r;
+                        const row = $('<div/>').appendTo(container);
+                        /* const row3 = $('<div/>', {
+                            style: 'padding-top: 5px;'
+                        }).appendTo(container); */
+
+                        /* validate: function (v) {
+                            var n = Number(v);
+                            return ((n >= 0) && (n <= 360));
+                        } */
+
+                        $('<span/>', {
+                            class: 'node-input-rule-btwn-label'
+                        }).text(' ' + btwnLabel + ' ').appendTo(row);
+                        const btwnValueField = $('<input/>', {
+                            class: 'node-input-rule-btwn-value',
+                            type: 'text',
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row).typedInput({
+                            default: 'num',
+                            types: ['msg', 'flow', 'global', 'num', 'env']
+                        });
+                        $('<span/>', {
+                            class: 'node-input-rule-btwn-label'
+                        }).text(' ' + andLabel + ' ').appendTo(row);
+                        const btwnValue2Field = $('<input/>', {
+                            class: 'node-input-rule-btwn-value2',
+                            type: 'text',
+                            style: 'margin-left:2px;'
+                        }).appendTo(row).typedInput({
+                            default: 'num',
+                            types: ['msg', 'flow', 'global', 'num', 'env']
+                        });
+
+                        const finalspan = $('<span/>', {
+                            style: 'float: right;margin-top: 6px;'
+                        }).appendTo(row);
+                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
+                    '</span> ');
+
+                        resizeRule(container);
+                        btwnValueField.typedInput('value', rule.valueLow);
+                        btwnValueField.typedInput('type', rule.valueLowType || 'num');
+                        btwnValue2Field.typedInput('value', rule.valueHigh);
+                        btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
+
+                        // {"0":0,"1":-1,"2":-1,"3":-1}
+                        // {"0":0}
+                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                        currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
+                        currentOutputs.m = i + 1;
+                        // console.log(currentOutputs);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    removeItem(opt) {
+                        const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
+                        if (opt.hasOwnProperty('i')) {
+                            currentOutputs[opt.i] = -1;
+                        } else {
+                            delete currentOutputs[opt._i];
+                        }
+
+                        const rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 2);
+                            const data = $(this).data('data');
+                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
+                        });
+                        currentOutputs.m = rules.length;
+                        // console.log(currentOutputs);
+                        // console.log(rules);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    resizeItem: resizeRule,
+                    sortItems(rules) {
+                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 2);
+                            const data = $(this).data('data');
+                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
+                        });
+                        currentOutputs.m = rules.length;
+                        // console.log(currentOutputs);
+                        // console.log(rules);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    sortable: true,
+                    removable: true
+                });
+
+                for (let i = 0; i < node.rules.length; i++) {
+                    const rule = node.rules[i];
+                    $('#node-input-rule-container').editableList('addItem', {
+                        r: rule,
+                        i,
+                        l: node.rules.length
+                    });
+                }
+            }; // setup
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
         },
         oneditsave() {
             const rules = $('#node-input-rule-container').editableList('items');

@@ -8,14 +8,35 @@
             "azimuthpos":"azimuth position",
             "between":"between",
             "and":"and",
-            "name": "Name"
+            "name": "Name",
+            "start": "Start",
+            "startOffset":"Start Offset",
+            "end": "End",
+            "endOffset":"Start Offset"
         },
         "placeholder": {
             "position" : "Position",
-            "name": "Name"
+            "name": "Name",
+            "startOffset": 0,
+            "endOffset": 0
         },
         "tips": {
-            "sunPosControl" : "If a message arrives through the Input the calculated position of the sun will be always send to the first output. If additionally specifyd upper and lower limits for the solar radiation and the azimuth is inside the defined limits the incomming message will send to the associated output."
-        }
+            "sunPosControl" : "If a message arrives through the Input the calculated position of the sun will be always send to the first output. If additionally specified upper and lower limits for the solar radiation and the azimuth is inside the defined limits the incoming message will send to the associated output.",
+            "config": "This configuration is used to add a sunInSky property of the message emitted to the first output. This can be used to work with node-red-contrib-blindcontroller nodes"
+        },
+        "multiplierGroups": [
+            "Standard",
+            "Special"
+        ],
+        "multiplier": [
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "weeks",
+            "month",
+            "year"
+        ]
     }
 }
