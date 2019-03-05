@@ -308,7 +308,7 @@ module.exports = function (RED) {
         };
 
         this.getTimeProp = (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) => {
-            // node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
                 error: null,
@@ -394,10 +394,10 @@ module.exports = function (RED) {
                 }
             }
 
+            const sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             const azimuthDegrees = 180 + 180 / Math.PI * sunPos.azimuth;
             const altitudeDegrees = 180 / Math.PI * sunPos.altitude; // elevation = altitude
 
-            const sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             const result = {
                 ts: date.getTime(),
                 lastUpdate: date,

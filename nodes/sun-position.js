@@ -30,6 +30,7 @@ module.exports = function (RED) {
 
         this.on('input', function (msg) {
             try {
+                let errorStatus = '';
                 let now = new Date();
                 if (typeof msg.time !== 'undefined') {
                     now = new Date(msg.time);
@@ -50,18 +51,34 @@ module.exports = function (RED) {
 
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
-
                 if (node.startType !== 'none') {
-                    ports[0].startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffset, node.startOffsetType, node.startOffsetMultiplier).getTime();
+                    let startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffset, node.startOffsetType, node.startOffsetMultiplier);
+                    node.debug('startTime: ' + util.inspect(startTime));
+                    if (startTime.error) {
+                        errorStatus = 'could not evaluate start time';
+                        node.error(startTime.error);
+                        node.debug('startTime: ' + util.inspect(startTime));
+                    } else {
+                        ports[0].payload.startTime = startTime.value.getTime();
+                    }
                 }
 
                 if (node.endType !== 'none') {
-                    ports[0].endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffset, node.endOffsetType, node.endOffsetMultiplier).getTime();
+                    let endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffset, node.endOffsetType, node.endOffsetMultiplier);
+                    node.debug('endTime: ' + util.inspect(endTime));
+                    if (endTime.error) {
+                        errorStatus = 'could not evaluate end time';
+                        node.error(endTime.error);
+                        node.debug('endTime: ' + util.inspect(endTime));
+                    } else {
+                        ports[0].payload.endTime = endTime.value.getTime();
+                    }
                 }
+
                 let statusSunInSky = false;
-                if (ports[0].startTime && ports[0].endTime) {
+                if (ports[0].payload.startTime && ports[0].payload.endTime) {
                     const nowMillis = now.getTime();
-                    ports[0].sunInSky = nowMillis > ports[0].startTime && nowMillis < ports[0].endTime;
+                    ports[0].payload.sunInSky = nowMillis > ports[0].payload.startTime && nowMillis < ports[0].payload.endTime;
                     statusSunInSky = true;
                 }
 
@@ -75,28 +92,35 @@ module.exports = function (RED) {
                     ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
                         ports[i + 1] = RED.util.cloneMessage(msg);
+                        ports[i + 1].payload.sunPos = chk;
+                        ports[i + 1].payload.posChanged = chg;
                         ports[i + 1].posChanged = chg;
-                        ports[i + 1].sunInSky = chk;
                     }
                 }
 
                 node.azimuthPos = ports[0].payload.pos;
                 this.send(ports);
 
-                if (statusSunInSky) {
+                if (errorStatus) {
+                    this.status({
+                        fill:   'red',
+                        shape:  'dot',
+                        text:   errorStatus
+                    });
+                } else if (statusSunInSky) {
                     if (ports[0].sunInSky === true) {
                         node.status({
                             fill:   'yellow',
                             shape:  'dot',
-                            text:   new Date(ports[0].startTime).toLocaleTimeString() + ' - ' +
-                                    new Date(ports[0].endTime).toLocaleTimeString()
+                            text:   new Date(ports[0].payload.startTime).toLocaleTimeString() + ' - ' +
+                                    new Date(ports[0].payload.endTime).toLocaleTimeString()
                         });
                     } else {
                         node.status({
                             fill:   'blue',
                             shape:  'dot',
-                            text:   new Date(ports[0].startTime).toLocaleTimeString() + ' - ' +
-                                    new Date(ports[0].endTime).toLocaleTimeString()
+                            text:   new Date(ports[0].payload.startTime).toLocaleTimeString() + ' - ' +
+                                    new Date(ports[0].payload.endTime).toLocaleTimeString()
                         });
                     }
                 } else {

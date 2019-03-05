@@ -90,7 +90,7 @@ The nodes are designed to be accurate to seconds. This means it was designed to 
 
 ### sun-position
 
-The node calculates the current sun position on any input message.
+The node calculates the current sun position on any input message. This node is compatible to [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller).
 
 ![sun-position](images/sun-position-example.png?raw=true)
 
@@ -138,6 +138,9 @@ The Input is for triggering the calculation. If limits are defined the input mes
     - `msg.payload.times.nadir` nadir (darkest moment of the night, sun is in the lowest position)
   - `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
   - `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
+  - `msg.payload.startTime` if a start time is defined the start timestamp (inclusive of offset).
+  - `msg.payload.endTime` if a end time is defined the end timestamp (inclusive of offset).
+  - `msg.payload.sunInSky` if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.
 
 ```json
 {
