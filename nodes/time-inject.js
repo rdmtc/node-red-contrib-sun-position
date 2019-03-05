@@ -65,7 +65,8 @@ module.exports = function (RED) {
         this.timeDays = config.timeDays;
         this.timeAltDays = config.timeAltDays;
         this.offset = config.offset || config.timeOffset || 0;
-        this.offsetType = config.offsetType || (this.offset === 0) ? 'none' : 'num';
+        this.offsetType = config.offsetType;
+        if (!this.offsetType) { this.offsetType = ((this.offset === 0) ? 'none' : 'num'); }
         this.offsetMultiplier = config.offsetMultiplier || config.timeOffsetMultiplier || 60;
 
         this.property = config.property || '';
@@ -73,7 +74,8 @@ module.exports = function (RED) {
         this.timeAlt = config.timeAlt || '';
         this.timeAltType = config.timeAltType || 'none';
         this.timeAltOffset = config.timeAltOffset || 0;
-        this.timeAltOffsetType = config.timeAltOffsetType || (this.timeAltOffset === 0) ? 'none' : 'num';
+        this.timeAltOffsetType = config.timeAltOffsetType;
+        if (!this.timeAltOffsetType) { this.timeAltOffsetType = ((this.timeAltOffset === 0) ? 'none' : 'num'); }
         this.timeAltOffsetMultiplier = config.timeAltOffsetMultiplier || 60;
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
