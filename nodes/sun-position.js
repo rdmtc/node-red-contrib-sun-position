@@ -52,7 +52,7 @@ module.exports = function (RED) {
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
                 if (node.startType !== 'none') {
-                    let startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffset, node.startOffsetType, node.startOffsetMultiplier);
+                    const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffset, node.startOffsetType, node.startOffsetMultiplier);
                     node.debug('startTime: ' + util.inspect(startTime));
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
@@ -64,7 +64,7 @@ module.exports = function (RED) {
                 }
 
                 if (node.endType !== 'none') {
-                    let endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffset, node.endOffsetType, node.endOffsetMultiplier);
+                    const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffset, node.endOffsetType, node.endOffsetMultiplier);
                     node.debug('endTime: ' + util.inspect(endTime));
                     if (endTime.error) {
                         errorStatus = 'could not evaluate end time';
@@ -75,11 +75,9 @@ module.exports = function (RED) {
                     }
                 }
 
-                let statusSunInSky = false;
                 if (ports[0].payload.startTime && ports[0].payload.endTime) {
                     const nowMillis = now.getTime();
                     ports[0].payload.sunInSky = nowMillis > ports[0].payload.startTime && nowMillis < ports[0].payload.endTime;
-                    statusSunInSky = true;
                 }
 
                 for (let i = 0; i < this.rules.length; i += 1) {
@@ -107,8 +105,8 @@ module.exports = function (RED) {
                         shape:  'dot',
                         text:   errorStatus
                     });
-                } else if (statusSunInSky) {
-                    if (ports[0].sunInSky === true) {
+                } else if (ports[0].payload.startTime && ports[0].payload.endTime) {
+                    if (ports[0].payload.sunInSky === true) {
                         node.status({
                             fill:   'yellow',
                             shape:  'dot',
