@@ -394,8 +394,8 @@ module.exports = function (RED) {
                 }
             }
 
-            var azimuthDegrees = 180 + 180 / Math.PI * sunPos.azimuth;
-            var altitudeDegrees = 180 / Math.PI * sunPos.altitude; // elevation = altitude
+            const azimuthDegrees = 180 + 180 / Math.PI * sunPos.azimuth;
+            const altitudeDegrees = 180 / Math.PI * sunPos.altitude; // elevation = altitude
 
             const sunPos = sunCalc.getPosition(date, node.latitude, node.longitude);
             const result = {
