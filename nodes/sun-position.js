@@ -40,7 +40,7 @@ module.exports = function (RED) {
                 }
                 const ports = new Array(this.rules.length);
                 ports[0] = {
-                    payload: this.positionConfig.getSunCalc(msg.ts),
+                    payload: this.positionConfig.getSunCalc(now),
                     topic: this.topic
                 };
                 if (!ports[0].payload.azimuth) {

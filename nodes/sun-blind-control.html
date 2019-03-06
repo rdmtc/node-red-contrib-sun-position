@@ -1,0 +1,742 @@
+<script type="text/x-red" data-template-name="sun-position">
+    <div class="form-row">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.position"></span></label>
+        <input type="text" id="node-input-positionConfig">
+        <input type="hidden" id="node-input-outputs"/>
+    </div>
+    <div class="form-row time-topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.topic"></span></label>
+        <input type="text" id="node-input-topic">
+    </div>
+    <hr>
+    <div class="form-row node-input-rule-container-row">
+        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.azimuthpos"></span></label>
+        <ol id="node-input-rule-container"></ol>
+    </div>
+    <hr>
+    <div class="form-row block-noindent">
+        <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
+        <input type="text" id="node-input-start" />
+        <input type="hidden" id="node-input-startType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-startOffset hidden">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"></input>
+        <input type="hidden" id="node-input-startOffsetType">
+        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-noindent">
+        <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
+        <input type="text" id="node-input-end" />
+        <input type="hidden" id="node-input-endType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-endOffset hidden">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"></input>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
+    <hr>
+    <!-- By convention, most nodes have a 'name' property. The following div -->
+    <!-- provides the necessary field. Should always be the last option      -->
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+    </div>
+    <div class="form-tips">
+        <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        margin-left: 5px;
+    }
+</style>
+
+<script type="text/x-red" data-help-name="sun-position">
+    <h3>About</h3>
+    <p>Gets the position of the sun</p>
+
+    <h3>Inputs</h3>
+
+    The message is only for trigger the calculation. If limits are defined the input message will send to the output associated to the limit.
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>first output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">object</span></dt>
+                 <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+         <li>second and following outputs
+                <dl class="message-properties">
+                    <dt>payload </dt>
+                    <dd>same as the incomming message, which will send to this output.</dd>
+                    <dt>posChanged <span class="property-type">boolean</span></dt>
+                    <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
+                </dl>
+            </li>
+     </ol>
+     <h3>payload output properties</h3>
+     <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the sun position relative to the given coordinates.</dd>
+
+            <dt>altitude <span class="property-type">number</span></dt>
+            <dd> the altitude (elevation) of the sun position relative to the given coordinates.</dd>
+
+            <dt>times <span class="property-type">object</span></dt>
+            <dd>
+                the sun times as object
+                <dt>times.sunrise <span class="property-type">Date</span></dt>
+                <dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.astronomicalDawn <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
+                <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDawnStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
+                <dt>msg.payload.times.civilDawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDawnEnd <span class="property-type">Date</span></dt><dd>blue Hour end</dd>
+                <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
+                <dt>msg.payload.times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
+                <dt>msg.payload.times.goldenHourStart <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
+                <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDuskStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
+                <dt>msg.payload.times.civilDusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDuskEnd <span class="property-type">Date</span></dt><dd>blue hour end</dd>
+                <dt>msg.payload.times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk end (evening astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDusk <span class="property-type">Date</span></dt><dd>amateur astronomical dusk (sun at 12° after sunrise)</dd>
+                <dt>msg.payload.times.astronomicalDusk <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
+                <dt>msg.payload.times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
+            </dd>
+            <dt>pos <span class="property-type">array of boolean</span></dt>
+            <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
+            <dt>posChanged <span class="property-type">boolean</span></dt>
+            <dd> boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.</dd>
+            <dt>startTime <span class="property-type">boolean</span></dt>
+            <dd> if a start time is defined the start timestamp (inclusive of offset)..</dd>
+            <dt>endTime <span class="property-type">boolean</span></dt>
+            <dd> if a end time is defined the end timestamp (inclusive of offset).</dd>
+            <dt>sunInSky <span class="property-type">boolean</span></dt>
+            <dd> if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.</dd>
+        </dl>
+        Example of the first output
+        <pre>
+{
+    "lastUpdate": "2018-11-11T11:11:11.111Z",
+    "latitude": "18.473782",
+    "longitude": "-34.357051",
+    "angleType": "deg",
+    "azimuth": 117.72942647370792,
+    "altitude": 20.984193272523992,
+    "times": {
+        "solarNoon":"2018-12-10T10:59:14.814Z",
+        "nadir":"2018-12-10T22:59:14.814Z",
+        "sunrise":"2018-12-10T06:58:55.584Z",
+        "sunset":"2018-12-10T14:59:34.044Z",
+        "sunriseEnd":"2018-12-10T07:03:12.232Z",
+        "sunsetStart":"2018-12-10T14:55:17.395Z",
+        "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",
+        "blueHourDuskStart":"2018-12-10T15:24:06.743Z",
+        "civilDawn":"2018-12-10T06:19:31.249Z",
+        "civilDusk":"2018-12-10T15:38:58.379Z",
+        "blueHourDawnStart":"2018-12-10T06:05:03.443Z",
+        "blueHourDuskEnd":"2018-12-10T15:53:26.185Z",
+        "nauticalDawn":"2018-12-10T05:37:04.859Z",
+        "nauticalDusk":"2018-12-10T16:21:24.768Z",
+        "amateurDawn":"2018-12-10T05:16:44.832Z",
+        "amateurDusk":"2018-12-10T16:41:44.795Z",
+        "astronomicalDawn":"2018-12-10T04:56:49.931Z",
+        "astronomicalDusk":"2018-12-10T17:01:39.696Z",
+        "goldenHourEnd":"2018-12-10T07:58:28.541Z",
+        "goldenHourStart":"2018-12-10T14:00:01.086Z",
+        "dawn":"2018-12-10T06:19:31.249Z",
+        "dusk":"2018-12-10T15:38:58.379Z",
+        "nightEnd":"2018-12-10T04:56:49.931Z",
+        "night":"2018-12-10T17:01:39.696Z",
+        "nightStart":"2018-12-10T17:01:39.696Z",
+        "goldenHour":"2018-12-10T14:00:01.086Z"
+    },
+    "pos": [],
+    "posChanged": false
+}</pre>
+     <h3>Tips</h3>
+     <p>For home automation it can be useful to define the lower and higher position for example of the sun for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+    </ul>
+    With friendly support by <b>agag</b>.
+</script>
+
+<!-- Finally, the node type is registered along with all of its properties   -->
+<!-- The example below shows a small subset of the properties that can be set-->
+<script type="text/javascript">
+    function clipValueLength(v) {
+        if (v.length > 15) {
+            return v.substring(0, 15) + '...';
+        }
+
+        return v;
+    }
+
+    function prop2name(key) {
+        const result = RED.utils.parseContextKey(key);
+        return result.key;
+    }
+
+    function getValueLabel(t, v) {
+        if (t === 'str') {
+            return '"' + clipValueLength(v) + '"';
+        }
+
+        if (t === 'msg') {
+            return t + '.' + clipValueLength(v);
+        }
+
+        if (t === 'flow' || t === 'global') {
+            return t + '.' + clipValueLength(prop2name(v));
+        }
+
+        return clipValueLength(v);
+    }
+
+    RED.nodes.registerType('sun-blind-control', {
+        category: 'time and astro',
+        color: '#FFCC66',
+        icon: 'blind.png', // saved in  icons/myicon.png - myicon.png
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1,
+        defaults: {
+            name: {
+                value: '',
+                required: false
+            },
+            positionConfig: {
+                value: '',
+                type: 'position-config',
+                required: true
+            },
+            windowTop:  {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            windowBottom:  {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            windowOrientation: {
+                value:"",
+                required:true,
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 360));
+                }
+            },
+            windowOrientationPOffset: {
+                value:"",
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            windowOrientationNOffset: {
+                value:"",
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            sunDepth: {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            altitudethreshold: {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                return (v == "" || ((n >= 0) && (n <= 90)));
+                                   }
+                                  },
+            increment:            {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                return ((n > 0) && (n <= 100) && (100%n == 0));
+                                   }
+                                  },
+            maxopen:              {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            maxclosed:            {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0) && (n >= this.maxopen)));
+                                   }
+                                  },
+            temperaturethreshold: {value:""},
+            temperaturethresholdposition:
+                                  {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            cloudsthreshold:      {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                return (v == "" || ((n >= 0) && (n <= 1)));
+                                   }
+                                  },
+            cloudsthresholdposition:
+                                  {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            nightposition:        {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            expiryperiod:         {value:"", required:false,
+                                   validate: function(v) {
+                var n = Number(v);
+                return (v == "" || n >= 0);
+                                   }
+                                  },
+
+
+            start: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('startType')
+            },
+            startType: {
+                value: 'none'
+            },
+            startOffset: {
+                value: 0,
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetType')(v) ||
+                        ($('#node-input-start').length ?
+                            $('#node-input-start').typedInput('type') === 'none' :
+                            this.startType === 'none')
+                    );
+                }
+            },
+            startOffsetType: {
+                value: 'none'
+            },
+            startOffsetMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        $('#node-input-startOffsetType').typedInput('type') === 'none' ||
+                        this.startOffsetType === 'none' ||
+                        ($('#node-input-start').length ?
+                            $('#node-input-start').typedInput('type') === 'none' :
+                            this.startType === 'none')
+                    );
+                }
+            },
+            end: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('startType')
+            },
+            endType: {
+                value: 'none'
+            },
+            endOffset: {
+                value: 0,
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.endOffsetType === 'undefined') ||
+                        RED.validators.typedInput('endOffsetType')(v) ||
+                        ($('#node-input-end').length ?
+                            $('#node-input-end').typedInput('type') === 'none' :
+                            this.endType === 'none')
+                    );
+                }
+            },
+            endOffsetType: {
+                value: 'none'
+            },
+            endOffsetMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return (
+                        typeof v === 'undefined' ||
+                        RED.validators.number()(v) ||
+                        $('#node-input-endOffsetType').typedInput('type') === 'none' ||
+                        this.endOffsetType === 'none' ||
+                        ($('#node-input-end').length ?
+                            $('#node-input-end').typedInput('type') === 'none' :
+                            this.endType === 'none')
+                    );
+                }
+            }
+        },
+        outputLabels(index) {
+            if (index === 0) {
+                return ((this.topic) ? this.topic + ':' : '') + 'sun-position';
+            }
+
+            const rule = this.rules[index - 1];
+            if (rule) {
+                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType,
+                    rule.valueHigh);
+            }
+        },
+        label() {
+            if (this.name) {
+                return this.name;
+            }
+            const result = 'sun-position';
+            if (this.topic && (this.topic.length + result.length <= 32)) {
+                return this.topic + ':' + result;
+            }
+            return result;
+        },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+        },
+        paletteLabel: 'sun-position',
+        oneditprepare() {
+            const node = this;
+            const setup = function(node) {
+                /* global getTypes appendOptions setupTInput */
+                const types = getTypes();
+                // #region initialize
+                function multilpierUpdate(mp, name) {
+                    const field = $('#node-input-' + name);
+                    appendOptions(node, 'sun-position', field, 'multiplier', (id) => (id > 0));
+                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                        mp = 60000;
+                    }
+                    field.val(mp);
+                    return mp;
+                }
+
+                // #region start
+                const startTypeField = setupTInput(node, {
+                    typeProp: 'startType',
+                    valueProp: 'start',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
+                            $('.sun-position-row-startOffset').hide();
+                        } else {
+                            $('.sun-position-row-startOffset').show();
+                        }
+
+                        $('#node-input-property').change();
+                    }
+                });
+
+                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'startOffsetType',
+                    valueProp: 'startOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-startOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                startTypeField.change();
+                // #endregion start
+
+                // #region end
+                const endTypeField = setupTInput(node, {
+                    typeProp: 'endType',
+                    valueProp: 'end',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
+                            $('.sun-position-row-endOffset').hide();
+                        } else {
+                            $('.sun-position-row-endOffset').show();
+                        }
+
+                        $('#node-input-property').change();
+                    }
+                });
+
+                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'endOffsetType',
+                    valueProp: 'endOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-endOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                endTypeField.change();
+                // #endregion end
+                const outputCount = $('#node-input-outputs').val('{}');
+
+                const btwnLabel = node._('sun-position.label.between');
+                const andLabel = node._('sun-position.label.and');
+
+                function resizeRule(rule) {
+                    const newWidth = rule.width();
+                    const btwnField1 = rule.find('.node-input-rule-btwn-value');
+                    const btwnField2 = rule.find('.node-input-rule-btwn-value2');
+                    const editwidth = (newWidth / 2);
+                    btwnField1.typedInput('width', (editwidth - 70));
+                    btwnField2.typedInput('width', (editwidth - 70));
+                }
+
+                $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
+                    addItem(container, i, opt) {
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap'
+                        });
+                        if (!opt.hasOwnProperty('r')) {
+                            opt.r = {};
+                        }
+
+                        if (!opt.hasOwnProperty('i')) {
+                            opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
+                        }
+
+                        const rule = opt.r;
+                        const row = $('<div/>').appendTo(container);
+                        /* const row3 = $('<div/>', {
+                            style: 'padding-top: 5px;'
+                        }).appendTo(container); */
+
+                        /* validate: function (v) {
+                            var n = Number(v);
+                            return ((n >= 0) && (n <= 360));
+                        } */
+
+                        $('<span/>', {
+                            class: 'node-input-rule-btwn-label'
+                        }).text(' ' + btwnLabel + ' ').appendTo(row);
+                        const btwnValueField = $('<input/>', {
+                            class: 'node-input-rule-btwn-value',
+                            type: 'text',
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row).typedInput({
+                            default: 'num',
+                            types: ['msg', 'flow', 'global', 'num', 'env']
+                        });
+                        $('<span/>', {
+                            class: 'node-input-rule-btwn-label'
+                        }).text(' ' + andLabel + ' ').appendTo(row);
+                        const btwnValue2Field = $('<input/>', {
+                            class: 'node-input-rule-btwn-value2',
+                            type: 'text',
+                            style: 'margin-left:2px;'
+                        }).appendTo(row).typedInput({
+                            default: 'num',
+                            types: ['msg', 'flow', 'global', 'num', 'env']
+                        });
+
+                        const finalspan = $('<span/>', {
+                            style: 'float: right;margin-top: 6px;'
+                        }).appendTo(row);
+                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
+                    '</span> ');
+
+                        resizeRule(container);
+                        btwnValueField.typedInput('value', rule.valueLow);
+                        btwnValueField.typedInput('type', rule.valueLowType || 'num');
+                        btwnValue2Field.typedInput('value', rule.valueHigh);
+                        btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
+
+                        // {"0":0,"1":-1,"2":-1,"3":-1}
+                        // {"0":0}
+                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                        currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
+                        currentOutputs.m = i + 1;
+                        // console.log(currentOutputs);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    removeItem(opt) {
+                        const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
+                        if (opt.hasOwnProperty('i')) {
+                            currentOutputs[opt.i] = -1;
+                        } else {
+                            delete currentOutputs[opt._i];
+                        }
+
+                        const rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 2);
+                            const data = $(this).data('data');
+                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
+                        });
+                        currentOutputs.m = rules.length;
+                        // console.log(currentOutputs);
+                        // console.log(rules);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    resizeItem: resizeRule,
+                    sortItems(rules) {
+                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 2);
+                            const data = $(this).data('data');
+                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
+                        });
+                        currentOutputs.m = rules.length;
+                        // console.log(currentOutputs);
+                        // console.log(rules);
+                        outputCount.val(JSON.stringify(currentOutputs));
+                    },
+                    sortable: true,
+                    removable: true
+                });
+
+                for (let i = 0; i < node.rules.length; i++) {
+                    const rule = node.rules[i];
+                    $('#node-input-rule-container').editableList('addItem', {
+                        r: rule,
+                        i,
+                        l: node.rules.length
+                    });
+                }
+            }; // setup
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
+        },
+        oneditsave() {
+            const rules = $('#node-input-rule-container').editableList('items');
+            const node = this;
+
+            node.rules = [];
+            rules.each(function ( _i ) {
+                // const ruleData = $(this).data('data');
+                const rule = $(this);
+                const r = {};
+                r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
+                r.valueLowType = rule.find('.node-input-rule-btwn-value').typedInput('type');
+                r.valueHigh = rule.find('.node-input-rule-btwn-value2').typedInput('value');
+                r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
+                node.rules.push(r);
+            });
+            node.propertyType = $('#node-input-property').typedInput('type');
+            // var outputCount = $("#node-input-outputs").val(); //"{}"
+
+            const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
+            currentOutputs.m = rules.length;
+            // console.log(currentOutputs);
+            // console.log(rules);
+            $('#node-input-outputs').val(JSON.stringify(currentOutputs));
+        // outputCount.val(JSON.stringify(currentOutputs));
+        },
+        oneditresize(size) {
+            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+            let height = size.height;
+            for (let i = 0; i < rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+
+            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
+            height -= 50;
+            $('#node-input-rule-container').editableList('height', height);
+        }
+    });</script>
