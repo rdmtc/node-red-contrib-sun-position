@@ -6,34 +6,15 @@
             "longitude": "Longitude",
             "angleType": "angle type",
             "timezoneOffset": "TZ Offset",
-            "west": "West side azimuth limit",
-            "westLow": "low",
-            "westHigh": "high",
-            "south": "South side azimuth limit",
-            "southLow": "low",
-            "southHigh": "high",
-            "east": "East side azimuth limit",
-            "eastLow": "low",
-            "eastHigh": "high",
-            "north": "North side azimuth limit",
-            "northLow": "low",
-            "northHigh": "high",
             "name": "Name",
             "property": "Property",
-            "minutes": "minutes"
+            "minutes": "minuten"
         },
         "placeholder": {
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
-            "westLow": "20",
-            "westHigh": "160",
-            "southLow": "100",
-            "southHigh": "260",
-            "eastLow": "190",
-            "eastHigh": "350",
-            "northLow": "280",
-            "northHigh": "360",
+            "timezoneOffset": "0",
             "name": "Name"
         },
         "tips": {
@@ -42,7 +23,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on position-configuration",
+            "error-text": "Exception occured on position-configuration",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",
@@ -52,7 +33,33 @@
             "no-response": "no response from server",
             "failed": "inject failed, see log for details",
             "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large"
-        }
+            "toolong": "Interval too large",
+            "longitude-missing": "Longitude is missing!",
+            "latitude-missing": "Latitude is missing!"
+        },
+        "days": [
+            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+        ],
+        "month": [
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        "dayDiffNames": [
+            "1 week ago",
+            "6 days ago",
+            "5 days ago",
+            "4 days ago",
+            "3 days ago",
+            "2 days ago",
+            "Yesterday",
+            "Today",
+            "Tomorrow",
+            "day after tomorrow",
+            "in 3 days",
+            "in 4 days",
+            "in 5 days",
+            "in 6 days"
+        ]
     }
 }

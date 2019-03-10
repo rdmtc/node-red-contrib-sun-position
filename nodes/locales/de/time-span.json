@@ -1,57 +1,69 @@
 {
-    "time-inject": {
+    "time-span": {
         "label": {
-            "time-inject": "time-inject",
-            "inject": "inject",
-            "position": "Position",
-            "positionConfig": "Konfiguration",
+            "time-span": "time-span",
+            "compare": "compare",
+            "span": "span",
+            "calc": "calc",
             "name": "Name",
-            "property": "Property",
-            "time": "Zeit",
-            "offset": "Offset",
-            "payloadOffset": "Offset",
-            "timeAlt": "Alternate time",
-            "timeAltoffset": "Offset",
-            "payloadTimeFormat": "Format",
-            "addPayload1": "set",
-            "addPayload2": "(2) set",
-            "addPayload3": "(3) set",
-            "addPayload1Value": "value",
-            "addPayload2Value": "value",
-            "addPayload3Value": "value",
-            "addPayload1Format": "time format",
-            "addPayload2Format": "time format",
-            "addPayload3Format": "time format",
-            "recalcTime": "Neuber.",
+            "position": "Position",
+            "positionConfig": "configuration",
+            "operand1": "Input 1",
+            "operand1Format": "parse format",
+            "operand1Offset": "Offset",
+            "operand2": "Input 2",
+            "operand2Format": "parse format",
+            "operand2Offset": "Offset",
+            "operator":"calculation",
+            "operatorContainer": "compare timespan between Inputs",
+            "onlyif": "only if",
+            "checkall": "stopping after first match (if)",
+            "stopfirst": "checking all rules",
+            "nothing": "nothing",
+            "result1": "result",
+            "result1Value": "value",
+            "result1TSFormat": "output format",
+            "result1Format": "output format",
+            "result1Offset": "Offset",
             "payload": "Payload",
             "topic": "Topic",
-            "seconds": "Sekunden",
-            "minutes": "Minuten",
-            "hours": "Stunden",
-            "timeformat": "time format",
-            "on": "nur",
-            "none": "nichts",
-            "stopped": "gestoppt",
-            "timestamp": "Zeit Stempel",
+            "none": "none",
+            "stopped": "stopped",
+            "timestamp": "timestamp",
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",
             "blank": "\"\"",
-            "5minutes": "aller 5 Minuten",
-            "10minutes": "aller 10 Minuten",
-            "15minutes": "aller 15 Minuten",
-            "30minutes": "aller 30 Minuten",
-            "1hour": "aller Stunde",
-            "2hours": "aller 2 Stunden",
-            "4hours": "aller 4 Stunden",
-            "6hours": "aller 6 Stunden",
-            "12hours": "aller 12 Stunden",
-            "24hours": "aller 24 Stunden",
-            "once": "zusätzlich",
-            "onstart": "Inject bei start ",
-            "onceDelay": "Sekunden",
-            "success": "Flow erfolgreich gestartet: __label__"
+            "success": "Successfully injected: __label__"
         },
+        "multiselectLbl": {
+            "operatorTypes": "include into compare"
+        },
+        "operatorsGroups": [
+            "complete Timestamp"
+        ],
+        "operators": [
+            "==     (equal)",
+            "!=     (unequal)",
+            ">      (greater)",
+            ">=     (greater or equal)",
+            "<      (lesser)",
+            "<=     (lesser or equal)"
+        ],
+        "operatorTypesGroups": [
+            "include into compare",
+            "special"
+        ],
+        "operatorTypes": [
+            "Milliseconds",
+            "Seconds",
+            "Minutes",
+            "Hours",
+            "Day of Month",
+            "Month",
+            "Year",
+            "Day of Week"
+        ],
         "outputFormatsGroups": [
             "Number",
             "Text (string)",
@@ -103,11 +115,12 @@
             "object",
             "other"
         ],
-        "multiplierGroups": [
-            "Standard",
-            "Special"
+        "outputTSFormatsGroups": [
+            "timestamp  (number)",
+            "timestamp rounded (number)",
+            "Text"
         ],
-        "multiplier": [
+        "outputTSFormats": [
             "milliseconds",
             "seconds",
             "minutes",
@@ -115,11 +128,44 @@
             "days",
             "weeks",
             "month",
-            "year"
+            "years",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "weeks",
+            "month",
+            "years",
+            "Other (free defined)"
         ],
-        "days": [
-            "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend",
-            "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"
+        "parseFormatsGroups": [
+            "Number",
+            "Text (string)",
+            "Other"
+        ],
+        "parseFormats": [
+            "milliseconds - UNIX timestamp",
+            "ECMA-262 - JSON Date representation",
+            "try different text Formats, prefer day first d/M/y",
+            "try different text Formats, prefer month first M/d/y",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "try different various Formats (object, number, text)",
+            "free text format definition"
+        ],
+        "multiplierGroups": [
+            "Standard",
+            "Spezial"
+        ],
+        "multiplier": [
+            "Millisekunden",
+            "Sekunden",
+            "Minuten",
+            "Stunden",
+            "Tage",
+            "Wochen",
+            "Monate",
+            "Jahre"
         ],
         "placeholder": {
             "position": "Position",
@@ -136,18 +182,18 @@
             "timeAltOffset": "0"
         },
         "timeFormat": {
-            "default": "ddd dd mmm yyyy HH:MM:ss",
+            "default": "ddd MMM dd yyyy HH:mm:ss",
             "shortDate": "m/d/yy",
-            "mediumDate": "d mmm, yyyy",
-            "longDate": "d mmmm, yyyy",
-            "fullDate": "dddd, d mmmm, yyyy",
-            "shortTime": "h:MM TT",
-            "mediumTime": "h:MM:ss TT",
-            "longTime": "h:MM:ss TT Z",
-            "isoDate": "yyyy-mm-dd",
+            "mediumDate": "MMM d, yyyy",
+            "longDate": "MMMM d, yyyy",
+            "fullDate": "dddd, MMMM d, yyyy",
+            "shortTime": "h:mm TT",
+            "mediumTime": "h:mm:ss TT",
+            "longTime": "h:mm:ss TT Z",
+            "isoDate": "yyyy-MM-dd",
             "isoTime": "HH:MM:ss",
-            "isoDateTime": "yyyy-mm-dd'T'HH:MM:ss",
-            "isoUtcDateTime": "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
+            "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
         },
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",
@@ -155,12 +201,9 @@
             "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done.",
             "addPayload": "With the additional message properties you can send the message with define up to 3 additional properties with enhanced settings. Especial there can be defined timestamps in relation to the message send timestamp."
         },
-        "message": {
-            "onceDelay": "delay __seconds__s"
-        },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on time-inject",
+            "error-text": "Exception occurred on time-span",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",
@@ -170,9 +213,7 @@
             "no-response": "no response from server",
             "failed": "inject failed, see log for details",
             "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large",
-            "error-init": "error '__message__', retry in __time__",
-            "warn-init": "warning '__message__', retry in __time__"
+            "toolong": "Interval too large"
         }
     }
 }
