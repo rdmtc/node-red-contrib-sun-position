@@ -4,11 +4,11 @@
             "position": "Position",
             "latitude": "Latitude",
             "longitude": "Longitude",
-            "angleType": "angle type",
-            "timezoneOffset": "TZ Offset",
+            "angleType": "Winkel Typ",
+            "timezoneOffset": "Zeitzone",
             "name": "Name",
             "property": "Property",
-            "minutes": "minuten"
+            "minutes": "Minuten"
         },
         "placeholder": {
             "latitude": "51.025",
@@ -23,7 +23,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on position-configuration",
+            "error-text": "Exception occurred on position-configuration",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",

@@ -10,7 +10,7 @@
             "time": "Zeit",
             "offset": "Offset",
             "payloadOffset": "Offset",
-            "timeAlt": "Alternate time",
+            "timeAlt": "Alternative Zeit",
             "timeAltoffset": "Offset",
             "payloadTimeFormat": "Format",
             "addPayload1": "set",
