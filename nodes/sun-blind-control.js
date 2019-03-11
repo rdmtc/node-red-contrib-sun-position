@@ -11,7 +11,7 @@ const util = require('util');
 /*
    * Function to calculate the appropriate blind position based on the
    * altitude of the sun, characteristics of the window, with the target of
-   * restricting or maximising the extent to which direct sunlight enters
+   * restricting or maximizing the extent to which direct sunlight enters
    * the room.
    *
    * The function works in two modes, Summer and Winter.  In Summer mode, it
@@ -36,7 +36,7 @@ const util = require('util');
    *   fully open position.
    *
    * In winter mode, the calculation is based on whether the sun is in
-   * window and whether it is suffiently overcast.  If the sun is in the
+   * window and whether it is sufficiently overcast.  If the sun is in the
    * window, it will be opened to a configured Open position unless it is
    * overcast it which case it will be closed.  If the sun is not in the
    * window, it is closed to a configured Closed position.
