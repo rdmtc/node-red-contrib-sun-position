@@ -246,7 +246,7 @@
         color: '#FFCC66',
         icon: 'blind.png', // saved in  icons/myicon.png - myicon.png
         inputs: 1, // set the number of inputs - only 0 or 1
-        outputs: 1,
+        outputs: 2, //1. Object, 2. nur zahl der Öffnung der Jalousie
         defaults: {
             name: {
                 value: '',
@@ -257,110 +257,33 @@
                 type: 'position-config',
                 required: true
             },
-            windowTop:  {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
-            },
-            windowBottom:  {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
-            },
-            windowOrientation: {
-                value:"",
-                required:true,
+            maxopen: {
+                value: 100,
                 validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 360));
+                    var n = Number(v);
+                    var i = Number(this.increment);
+                    return ((n >= 0) && (n <= 100) && (n%i == 0));
                 }
             },
-            windowOrientationPOffset: {
-                value:"",
+            maxclosed: {
+                value: 0,
                 validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
+                    var n = Number(v);
+                    var i = Number(this.increment);
+                    return ((n >= 0) && (n <= 100) && (n%i == 0) && (n <= this.maxopen));
                 }
             },
-            windowOrientationNOffset: {
-                value:"",
-                validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
+            startOpen: {
+                value: "",
+                validate: (v) => {
+                    var n = Number(v);
+                    var i = Number(this.increment);
+                    return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0) && (n <= this.maxopen)));
                 }
             },
-            sunDepth: {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
+            startOpenType: {
+                value: 'maxopen'
             },
-            altitudethreshold: {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                return (v == "" || ((n >= 0) && (n <= 90)));
-                                   }
-                                  },
-            increment:            {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                return ((n > 0) && (n <= 100) && (100%n == 0));
-                                   }
-                                  },
-            maxopen:              {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            maxclosed:            {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0) && (n >= this.maxopen)));
-                                   }
-                                  },
-            temperaturethreshold: {value:""},
-            temperaturethresholdposition:
-                                  {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            cloudsthreshold:      {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                return (v == "" || ((n >= 0) && (n <= 1)));
-                                   }
-                                  },
-            cloudsthresholdposition:
-                                  {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            nightposition:        {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            expiryperiod:         {value:"", required:false,
-                                   validate: function(v) {
-                var n = Number(v);
-                return (v == "" || n >= 0);
-                                   }
-                                  },
-
-
             start: {
                 value: '',
                 required: false,
@@ -438,7 +361,95 @@
                             this.endType === 'none')
                     );
                 }
-            }
+            },
+            windowTop:  {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            windowBottom:  {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            windowOrientation: {
+                value:"",
+                required:true,
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 360));
+                }
+            },
+            windowOrientationPOffset: {
+                value:"",
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            windowOrientationNOffset: {
+                value:"",
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            sunDepth: {
+                value:"",
+                required:true,
+                validate:RED.validators.number()
+            },
+            altitudethreshold: {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                return (v == "" || ((n >= 0) && (n <= 90)));
+                                   }
+                                  },
+            increment:            {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                return ((n > 0) && (n <= 100) && (100%n == 0));
+                                   }
+                                  },
+            temperaturethreshold: {value:""},
+            temperaturethresholdposition:
+                                  {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            cloudsthreshold:      {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                return (v == "" || ((n >= 0) && (n <= 1)));
+                                   }
+                                  },
+            cloudsthresholdposition:
+                                  {value:"",
+                                   required:false,
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            nightposition:        {value:"",
+                                   validate: function (v) {
+                var n = Number(v);
+                var i = Number(this.increment);
+                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
+                                   }
+                                  },
+            expiryperiod:         {value:"", required:false,
+                                   validate: function(v) {
+                var n = Number(v);
+                return (v == "" || n >= 0);
+                                   }
+                                  }
         },
         outputLabels(index) {
             if (index === 0) {

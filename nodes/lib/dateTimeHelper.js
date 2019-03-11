@@ -8,6 +8,7 @@ module.exports = {
     isTrue,
     isFalse,
     handleError,
+    chkValueFilled,
     getSpecialDayOfMonth,
     checkLimits,
     addOffset,
@@ -118,6 +119,17 @@ function handleError(node, messageText, err, stateText) {
         console.trace();
         /* eslint-enable no-console */
     }
+}
+
+/*******************************************************************************************************/
+/**
+ * check if a value is filled or returns default value
+ * @param {any} val to check for undefined, null, empty
+ * @param {any} defaultVal default value to use
+ * @returns {any} result to use if value is undefined, null or empty string
+ */
+function chkValueFilled(val, defaultVal) {
+    return ((typeof val === 'undefined') || (val === '') || (val === null)) ? defaultVal : val;
 }
 
 /*******************************************************************************************************/

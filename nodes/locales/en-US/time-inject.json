@@ -160,7 +160,7 @@
         },
         "errors": {
             "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on time-inject",
+            "error-text": "Exception occurred on time-inject",
             "error-title": "internal error",
             "unexpected": "unexpected error (__status__) __message__",
             "invalid-property-type": "Invalid Property Type: __type__",

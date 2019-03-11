@@ -86,16 +86,20 @@
     }
   },
   "dependencies": {
-    "util": ">=0.10.0"
+    "util": ">=0.8.0"
   },
   "devDependencies": {
     "camo-purge": "^1.0.2",
     "eslint": "^5.15.1",
-    "eslint-plugin-html": "^5.0.3",
-    "eslint-plugin-jsdoc": "^4.1.1"
+    "eslint-plugin-html": "^5.0.3"
   },
-  "devDependencies-disabled": {
-    "eslint-plugin-jsdoc": "^4.1.0"
+  "disabledSettings": {
+    "devDependencies-disabled": {
+      "eslint-plugin-jsdoc": "^4.1.0"
+    },
+    "plugins-disabled": [
+      "jsdoc"
+    ]
   },
   "eslintConfig": {
     "env": {
@@ -106,8 +110,7 @@
       "jquery": true
     },
     "plugins": [
-      "html",
-      "jsdoc"
+      "html"
     ],
     "extends": "eslint:recommended",
     "settings": {
