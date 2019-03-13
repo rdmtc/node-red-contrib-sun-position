@@ -1,0 +1,127 @@
+<script type="text/x-red" data-help-name="time-inject">
+  <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
+  payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+      <dt>payload<span class="property-type">various</span></dt>
+      <dd>The configured payload of the message.</dd>
+      <dt class="optional">topic <span class="property-type">string</span></dt>
+      <dd>An optional property that can be configured in the node.</dd>
+      <dt class="optional">time <span class="property-type">time</span></dt>
+      <dd>An optional property that can be configured when the inject node should emit a message on that timestamp.</dd>
+      <dt class="optional">offset <span class="property-type">number</span></dt>
+      <dd>An optional property which is only available if an time is choosen. The offset can be a positive or negative and defines a time offset to the choosen time.</dd>
+      <dt class="optional">day select <span class="property-type">number</span></dt>
+      <dd>An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.</dd>
+  </dl>
+  <h3>Details</h3>
+  <p>The Time-Inject node can initiate a flow with a specific payload value.
+  The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
+  <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
+  <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
+  inject at specified time stamp in a daily interval which can be set directly or by using the suncalc module to generate an output at various sunrise, sunset, moonrise or moonset times based on a specified location.</p>
+  <p><b>Note</b>: The next timestamp will be calculated if a timestamp is reached, settings are changed or the inject node is manual triggered. For a given timestamp (or an alternate timestamp) through a flow or global context a recalculation time could be defined. Then planned emit time then is recalculated every end of this interval. Changes to the contexts then only lead to a change of the planned emit time if a recalculation is done!</p>
+  <p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
+
+  <h3>Sun times:</h3>
+  <p>
+    <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td><code>astronomicalDawn</code></td>
+        <td>night ends (morning astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>amateurDawn</code></td>
+        <td>amateur astronomical dawn (sun at 12° before sunrise)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDawn</code></td>
+        <td>nautical dawn (morning nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourDawnStart</code></td>
+        <td>blue Hour start (time for special photography photos starts)</td>
+        </tr>
+        <tr>
+        <td><code>civilDawn</code></td>
+        <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourDawnEnd</code></td>
+        <td>blue Hour end (time for special photography photos end)</td>
+        </tr>
+        <tr>
+        <td><code>sunrise</code></td>
+        <td>sunrise (top edge of the sun appears on the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunriseEnd</code></td>
+        <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHourEnd</code></td>
+        <td>morning golden hour (soft light, best time for photography) ends</td>
+        </tr>
+        <tr>
+        <td><code>solarNoon</code></td>
+        <td>solar noon (sun is in the highest position)</td>
+        </tr>
+        <tr>
+        <td><code>goldenHourStart</code></td>
+        <td>evening golden hour starts</td>
+        </tr>
+        <tr>
+        <td><code>sunsetStart</code></td>
+        <td>sunset starts (bottom edge of the sun touches the horizon)</td>
+        </tr>
+        <tr>
+        <td><code>sunset</code></td>
+        <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourDuskStart</code></td>
+        <td>blue Hour start (time for special photography photos starts)</td>
+        </tr>
+        <tr>
+        <td><code>civilDusk</code></td>
+        <td>dusk (evening nautical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>blueHourDuskEnd</code></td>
+        <td>blue Hour end (time for special photography photos end)</td>
+        </tr>
+        <tr>
+        <td><code>nauticalDusk</code></td>
+        <td>nautical dusk end (evening astronomical twilight starts)</td>
+        </tr>
+        <tr>
+        <td><code>amateurDusk</code></td>
+        <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
+        </tr>
+        <tr>
+        <td><code>astronomicalDusk</code></td>
+        <td>night starts (dark enough for astronomical observations)</td>
+        </tr>
+        <tr>
+        <td><code>nadir</code></td>
+        <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
+        </tr>
+        </tbody>
+        </table>
+  </p>
+  <p>It can also be configured to inject once each time the flows are started.</p>
+  <h3>References</h3>
+  <ul>
+      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+      <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+  </ul>
+  With friendly support by <b>agag</b>.
+</script>

@@ -414,21 +414,21 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
     });
 }
 
-function appendOptions(node, i18N ,parent, elementName, limit) { // eslint-disable-line no-unused-vars
+function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
     const groups = SelectFields[elementName + 'Groups'];
     const elements = SelectFields[elementName];
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-        const group = $('<optgroup/>', {label: node._(i18N + '.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+        const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:common.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (limit) {
                     if (limit(elements[eIndex].id)) {
-                        group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                        group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                     }
                 } else {
-                    group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                    group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                 }
             }
         }
@@ -487,15 +487,14 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 
 // ************************************************************************************************
 
-function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
+function initCombobox(node, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
     // console.log('node=' + node + ' i18N=' + i18N + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     const $inputSelect = $('#node-input-' + inputSelectName);
     const $inputBox = $('#node-input-' + inputBoxName);
     $inputSelect.attr('base-width', width);
     $inputSelect.attr('linked-input', inputBoxName);
-    $inputSelect.attr('i18N-name', i18N);
 
-    appendOptions(node, i18N, $inputSelect, optionElementName);
+    appendOptions(node, $inputSelect, optionElementName);
     autocomplete($('#node-input-' + inputBoxName), dataList);
 
     $inputSelect.on('change', (_type, _value) => {
@@ -510,8 +509,7 @@ function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optio
             $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
             $inputBox.show();
             if (!isNaN($inputBox.val())) {
-                const i18N = $inputSelect.attr('i18N-name');
-                $inputBox.val(node._(i18N + '.timeFormat.default'));
+                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
             }
         } else {
             $inputBox.hide();

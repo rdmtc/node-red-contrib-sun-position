@@ -3,11 +3,6 @@
         "label": {
             "time-comp": "time-comp",
             "compare": "compare",
-            "calc": "calc",
-            "comp": "comp",
-            "name": "Name",
-            "position": "Position",
-            "positionConfig": "configuration",
             "input": "Input",
             "inputFormat": "parse format",
             "inputOffset": "Offset",
@@ -15,130 +10,11 @@
             "onlyif": "only if",
             "checkall": "stopping after first match (if)",
             "stopfirst": "checking all rules",
-            "nothing": "nothing",
             "result1": "result",
             "result1Value": "value",
             "result1Format": "output format",
-            "result1Offset": "Offset",
-            "payload": "Payload",
-            "topic": "Topic",
-            "none": "none",
-            "stopped": "stopped",
-            "timestamp": "timestamp",
-            "binary": "binary",
-            "json": "json",
-            "jsonata": "json expr.",
-            "blank": "\"\"",
-            "success": "Successfully injected: __label__"
+            "result1Offset": "Offset"
         },
-        "multiselectLbl": {
-            "operatorTypes": "include into compare"
-        },
-        "operatorsGroups": [
-            "complete Timestamp"
-        ],
-        "operators": [
-            "==  (equal)",
-            "!=  (unequal)",
-            ">   (greater)",
-            ">=  (greater or equal)",
-            "<   (lesser)",
-            "<=  (lesser or equal)"
-        ],
-        "operatorTypesGroups": [
-            "include into compare",
-            "special"
-        ],
-        "operatorTypes": [
-            "Milliseconds",
-            "Seconds",
-            "Minutes",
-            "Hours",
-            "Day of Month",
-            "Month",
-            "Year",
-            "Day of Week"
-        ],
-        "outputFormatsGroups": [
-            "Number",
-            "Text (string)",
-            "time (number) since emit",
-            "day of week",
-            "Text free"
-        ],
-        "outputFormats": [
-            "milliseconds UNIX timestamp",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD.HHMMSS",
-            "ECMA-262",
-            "local date and time",
-            "local date and time enh.",
-            "local time",
-            "local time enh.",
-            "local date",
-            "local date long",
-            "UTC date and time",
-            "ISO date and time",
-            "milliseconds",
-            "seconds",
-            "minutes",
-            "hours",
-            "Day Name, e.g. Monday, 22.12.",
-            "Day in relative, e.g. Today, 22.12.",
-            "as object",
-            "Other"
-        ],
-        "outputFormatsName": [
-            "UNIX",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD_HHMMSS",
-            "ECMA262",
-            "local",
-            "localLong",
-            "localTime",
-            "localTimeLong",
-            "localDate",
-            "localDateLong",
-            "UTC",
-            "ISO",
-            "ms",
-            "sec",
-            "min",
-            "hour",
-            "ISO",
-            "ISO",
-            "object",
-            "other"
-        ],
-        "parseFormatsGroups": [
-            "Number",
-            "Text (string)",
-            "Other"
-        ],
-        "parseFormats": [
-            "milliseconds - UNIX timestamp",
-            "ECMA-262 - JSON Date representation",
-            "try different text Formats, prefer day first like d/M/y",
-            "try different text Formats, prefer month first like M/d/y",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD.HHMMSS",
-            "try different various Formats (object, number, text)",
-            "free text format definition"
-        ],
-        "multiplierGroups": [
-            "Standard",
-            "Special"
-        ],
-        "multiplier": [
-            "milliseconds",
-            "seconds",
-            "minutes",
-            "hours",
-            "days",
-            "weeks",
-            "month",
-            "year"
-        ],
         "placeholder": {
             "position": "Position",
             "name": "Name",
@@ -152,20 +28,6 @@
             "offset": "0",
             "timeAlt": "18:15",
             "timeAltOffset": "0"
-        },
-        "timeFormat": {
-            "default": "ddd MMM dd yyyy HH:mm:ss",
-            "shortDate": "m/d/yy",
-            "mediumDate": "MMM d, yyyy",
-            "longDate": "MMMM d, yyyy",
-            "fullDate": "dddd, MMMM d, yyyy",
-            "shortTime": "h:mm TT",
-            "mediumTime": "h:mm:ss TT",
-            "longTime": "h:mm:ss TT Z",
-            "isoDate": "yyyy-MM-dd",
-            "isoTime": "HH:MM:ss",
-            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
-            "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
         },
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",

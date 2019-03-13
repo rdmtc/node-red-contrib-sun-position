@@ -1,13 +1,13 @@
 <script type="text/x-red" data-template-name="time-inject">
-  <div class="form-row">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-inject.label.positionConfig"></span></label>
-    <input type="text" id="node-input-positionConfig">
-  </div>
+    <div class="form-row">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
   <hr>
   <div class="form-row block-noindent time-payload">
-      <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="time-inject.label.payload"></span></label>
-      <input type="text" id="node-input-payload">
-      <input type="hidden" id="node-input-payloadType">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="node-red:common.label.payload"></span></label>
+        <input type="text" id="node-input-payload">
+        <input type="hidden" id="node-input-payloadType">
   </div>
   <div class="form-row block-indent1 time-inject-row-payloadOffset hidden">
         <label for="node-input-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.payloadOffset"></span></label>
@@ -16,13 +16,13 @@
         <select id="node-input-payloadOffsetMultiplier" class="node-input-multiplier"></select>
   </div>
   <div class="form-row block-indent1 time-inject-row-payloadTimeFormat hidden">
-        <label for="node-input-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.payloadTimeFormat"></span></label>
+        <label for="node-input-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.payloadFormat"></span></label>
         <select id="node-input-payloadTimeFormatsel">
         </select>
         <input type="text" id="node-input-payloadTimeFormat">
   </div>
   <div class="form-row block-noindent time-topic">
-      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="time-inject.label.topic"></span></label>
+      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
       <input type="text" id="node-input-topic">
   </div>
   <hr>
@@ -32,7 +32,7 @@
       <input type="hidden" id="node-input-timeType">
   </div>
   <div class="form-row block-indent1 time-inject-row-offset hidden">
-      <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.offset"></span></label>
+      <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
       <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.offset"></input>
       <input type="hidden" id="node-input-offsetType">
       <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
@@ -130,7 +130,7 @@
       <input type="text" id="node-input-addPayload1Format">
   </div>
   <div class="form-row block-indent2 time-inject-row-addPayload1Offset hidden">
-      <label for="node-input-addPayload1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.offset"></span></label>
+      <label for="node-input-addPayload1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload1Offset"></span></label>
       <input id="node-input-addPayload1Offset" data-i18n="[placeholder]time-inject.placeholder.offset"></input>
       <input type="hidden" id="node-input-addPayload1OffsetType">
       <select id="node-input-addPayload1OffsetMultiplier" class="node-input-multiplier"></select>
@@ -173,7 +173,7 @@
     <input type="text" id="node-input-addPayload2Format">
   </div>
   <div class="form-row block-indent2 time-inject-row-addPayload2Offset hidden">
-        <label for="node-input-addPayload2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.offset"></span></label>
+        <label for="node-input-addPayload2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload2Offset"></span></label>
         <input id="node-input-addPayload2Offset" data-i18n="[placeholder]time-inject.placeholder.offset"></input>
         <input type="hidden" id="node-input-addPayload2OffsetType">
         <select id="node-input-addPayload2OffsetMultiplier" class="node-input-multiplier"></select>
@@ -215,7 +215,7 @@
       <input type="text" id="node-input-addPayload3Format" >
   </div>
   <div class="form-row block-indent2 time-inject-row-addPayload3Offset hidden">
-      <label for="node-input-addPayload3Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.offset"></span></label>
+      <label for="node-input-addPayload3Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload3Offset"></span></label>
       <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.offset"></input>
       <input type="hidden" id="node-input-addPayload3OffsetType">
       <select id="node-input-addPayload3OffsetMultiplier" class="node-input-multiplier"></select>
@@ -243,8 +243,8 @@
   <div class="form-row form-tips time-inject-addPayload" data-i18n="[html]time-inject.tips.addPayload"></div>
   <hr>
   <div class="form-row">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-inject.label.name"></span></label>
-      <input type="text" id="node-input-name" data-i18n="[placeholder]time-inject.placeholder.name">
+      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
   </div>
 </script>
 <style>
@@ -313,134 +313,6 @@
         vertical-align: baseline;
     }
 </style>
-
-<script type="text/x-red" data-help-name="time-inject">
-  <p>Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message
-  payload can be a variety of types, including strings, JavaScript objects, the current time or the cuttent sun or moon position.</p>
-  <h3>Outputs</h3>
-  <dl class="message-properties">
-      <dt>payload<span class="property-type">various</span></dt>
-      <dd>The configured payload of the message.</dd>
-      <dt class="optional">topic <span class="property-type">string</span></dt>
-      <dd>An optional property that can be configured in the node.</dd>
-      <dt class="optional">time <span class="property-type">time</span></dt>
-      <dd>An optional property that can be configured when the inject node should emit a message on that timestamp.</dd>
-      <dt class="optional">offset <span class="property-type">number</span></dt>
-      <dd>An optional property which is only available if an time is choosen. The offset can be a positive or negative and defines a time offset to the choosen time.</dd>
-      <dt class="optional">day select <span class="property-type">number</span></dt>
-      <dd>An optional property which is only available if an time is choosen. There can be defined on which days a msg should be emited.</dd>
-  </dl>
-  <h3>Details</h3>
-  <p>The Time-Inject node can initiate a flow with a specific payload value.
-  The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
-  <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
-  <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
-  inject at specified time stamp in a daily interval which can be set directly or by using the suncalc module to generate an output at various sunrise, sunset, moonrise or moonset times based on a specified location.</p>
-  <p><b>Note</b>: The next timestamp will be calculated if a timestamp is reached, settings are changed or the inject node is manual triggered. For a given timestamp (or an alternate timestamp) through a flow or global context a recalculation time could be defined. Then planned emit time then is recalculated every end of this interval. Changes to the contexts then only lead to a change of the planned emit time if a recalculation is done!</p>
-  <p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
-
-  <h3>Sun times:</h3>
-  <p>
-    <table>
-        <thead>
-        <tr>
-        <th>Time</th>
-        <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td><code>astronomicalDawn</code></td>
-        <td>night ends (morning astronomical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>amateurDawn</code></td>
-        <td>amateur astronomical dawn (sun at 12° before sunrise)</td>
-        </tr>
-        <tr>
-        <td><code>nauticalDawn</code></td>
-        <td>nautical dawn (morning nautical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDawnStart</code></td>
-        <td>blue Hour start (time for special photography photos starts)</td>
-        </tr>
-        <tr>
-        <td><code>civilDawn</code></td>
-        <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDawnEnd</code></td>
-        <td>blue Hour end (time for special photography photos end)</td>
-        </tr>
-        <tr>
-        <td><code>sunrise</code></td>
-        <td>sunrise (top edge of the sun appears on the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>sunriseEnd</code></td>
-        <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>goldenHourEnd</code></td>
-        <td>morning golden hour (soft light, best time for photography) ends</td>
-        </tr>
-        <tr>
-        <td><code>solarNoon</code></td>
-        <td>solar noon (sun is in the highest position)</td>
-        </tr>
-        <tr>
-        <td><code>goldenHourStart</code></td>
-        <td>evening golden hour starts</td>
-        </tr>
-        <tr>
-        <td><code>sunsetStart</code></td>
-        <td>sunset starts (bottom edge of the sun touches the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>sunset</code></td>
-        <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDuskStart</code></td>
-        <td>blue Hour start (time for special photography photos starts)</td>
-        </tr>
-        <tr>
-        <td><code>civilDusk</code></td>
-        <td>dusk (evening nautical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDuskEnd</code></td>
-        <td>blue Hour end (time for special photography photos end)</td>
-        </tr>
-        <tr>
-        <td><code>nauticalDusk</code></td>
-        <td>nautical dusk end (evening astronomical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>amateurDusk</code></td>
-        <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
-        </tr>
-        <tr>
-        <td><code>astronomicalDusk</code></td>
-        <td>night starts (dark enough for astronomical observations)</td>
-        </tr>
-        <tr>
-        <td><code>nadir</code></td>
-        <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
-        </tr>
-        </tbody>
-        </table>
-  </p>
-  <p>It can also be configured to inject once each time the flows are started.</p>
-  <h3>References</h3>
-  <ul>
-      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
-      <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
-      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
-  </ul>
-  With friendly support by <b>agag</b>.
-</script>
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
@@ -879,7 +751,7 @@
                         return value + suffix;
                     }
 
-                    return this._('time-inject.label.jsonata') + suffix;
+                    return this._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
                 }
 
                 if (type === 'json') {
@@ -887,24 +759,24 @@
                         return  value + suffix;
                     }
 
-                    return this._('time-inject.label.json') + suffix;
+                    return this._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
                 }
 
                 if (type === 'bin') {
-                    return this._('time-inject.label.binary') + suffix;
+                    return this._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
                 }
 
                 if (type === 'date') {
-                    return this._('time-inject.label.timestamp') + suffix;
+                    return this._('node-red:inject.timestamp') + suffix;
                 }
 
                 if (type === 'dateSpecific') {
-                    return this._('time-inject.label.timestamp') + '+' + suffix;
+                    return this._('node-red:inject.timestamp') + '+' + suffix;
                 }
 
                 if (type === 'string' || type === 'str' || type === 'DayOfMonth') {
                     if (value === '') {
-                        return value + suffix;
+                        return this._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix;
                     }
                     return '"' + clipValueLength(value, maxLength) + '"' + suffix;
                 }
@@ -949,7 +821,7 @@
                 }
 
                 if (value === '') {
-                    return this._('time-inject.label.blank');
+                    return this._('node-red-contrib-sun-position/position-config:common.label.blank');
                 }
 
                 return clipValueLength(value, maxLength) + suffix;
@@ -1040,7 +912,7 @@
                 // #region initialize
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, 'time-inject', field, 'multiplier', (id) => (id > 0));
+                    appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     } else {
@@ -1130,7 +1002,7 @@
                         }
                     }
                 }).change();
-                initCombobox(node, 'time-inject', 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
+                initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
                 node.payloadOffsetMultiplier = multilpierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
                 setupTInput(node, {
@@ -1222,7 +1094,7 @@
                     }
                 });
 
-                initCombobox(node, 'time-inject', 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
+                initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
                 // #endregion property
                 // #region timeAlt
                 setupTInput(node, {
@@ -1334,7 +1206,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
 
-                initCombobox(node, 'time-inject', 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
+                initCombobox(node, 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
                 node.addPayload1OffsetMultiplier = multilpierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
 
@@ -1435,7 +1307,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
 
-                initCombobox(node, 'time-inject', 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
+                initCombobox(node, 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
                 node.addPayload2OffsetMultiplier = multilpierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
                 setupTInput(node, {
@@ -1530,7 +1402,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
 
-                initCombobox(node, 'time-inject', 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
+                initCombobox(node, 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
                 node.addPayload3OffsetMultiplier = multilpierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
                 setupTInput(node, {
@@ -1622,79 +1494,48 @@
             }
         },
         button: {
-            enabled() {
+            enabled: function() {
                 return !this.changed;
             },
-            onclick() {
+            onclick: function() {
                 if (this.changed) {
-                    return RED.notify(
-                        RED._('notification.warning', { message: RED._('notification.warnings.undeployedChanges') }), 'warning');
+                    return RED.notify(RED._('node-red:notification.warning', { message: RED._('node-red:notification.warnings.undeployedChanges') }), 'warning');
                 }
 
                 let payload = this.payload;
-                if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
-                if (this.payloadType === 'flow' || this.payloadType === 'global') {
+                if ((this.payloadType === 'flow') ||
+                    (this.payloadType === 'global')) {
                     const key = RED.utils.parseContextKey(payload);
                     payload = this.payloadType + '.' + key.key;
                 }
 
+                if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
+                let label = this._def.label.call(this);
+                /*
                 let label = clipValueLength(this.name || payload, 30);
-                label = label
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
                 if (this.payloadType === 'date' || this.payloadType === 'dateSpecific') {
-                    label = this._('time-inject.label.timestamp');
+                    label = this._('node-red:inject.timestamp');
                 }
-
                 if (this.payloadType === 'none') {
-                    label = this._('time-inject.label.blank');
-                }
-
+                    label = this._('node-red-contrib-sun-position/position-config:common.label.blank');
+                } */
+                label = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 const node = this;
                 $.ajax({
                     url: 'inject/' + this.id,
                     type: 'POST',
-                    success(_resp) {
-                        RED.notify(
-                            node._('time-inject.label.success', {
-                                label
-                            }),
-                            'success'
-                        );
+                    success: function(_resp) {
+                        RED.notify(node._('node-red:inject.success',{label:label}),{type:'success',id:'inject'});
                     },
-                    error(jqXHR, textStatus, _errorThrown) {
+                    error: function(jqXHR, textStatus, _errorThrown) {
                         if (jqXHR.status === 404) {
-                            RED.notify(
-                                RED._('time-inject.errors.error', {
-                                    message: RED._('time-inject.errors.not-deployed')
-                                }),
-                                'error'
-                            );
+                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
                         } else if (jqXHR.status === 500) {
-                            RED.notify(
-                                RED._('time-inject.errors.error', {
-                                    message: RED._('time-inject.errors.failed')
-                                }),
-                                'error'
-                            );
+                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:inject.errors.failed')}),'error');
                         } else if (jqXHR.status === 0) {
-                            RED.notify(
-                                RED._('time-inject.errors.error', {
-                                    message: RED._('time-inject.errors.no-response')
-                                }),
-                                'error'
-                            );
+                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.no-response')}),'error');
                         } else {
-                            RED.notify(
-                                RED._('time-inject.errors.error', {
-                                    message: RED._('time-inject.errors.unexpected', {
-                                        status: jqXHR.status,
-                                        message: textStatus
-                                    })
-                                }),
-                                'error'
-                            );
+                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.unexpected',{status:jqXHR.status,message:textStatus})}),'error');
                         }
                     }
                 });
