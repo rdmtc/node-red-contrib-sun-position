@@ -317,7 +317,7 @@ module.exports = function (RED) {
             try {
                 if (days === '') {
                     result.error = 'No valid Days given!';
-                } else if (vType === '' || vType === 'none' || days === '') {
+                } else if (vType === '' || vType === 'none') {
                     result.error = 'wrong type "' + vType + '"="' + value+'"';
                 } else if (vType === 'date') {
                     result.value = new Date();
@@ -510,7 +510,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('position-config.errors.error-title')
+                text: RED._('errors.error-title')
             });
             throw err;
         }

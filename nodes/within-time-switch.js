@@ -21,9 +21,9 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch..errors.error-init', result.start.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.start.error)
                 });
-                node.warn(RED._('within-time-switch..errors.warn-init', result.start.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.start.error));
                 return true;
             }
             hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : result.start.error}), undefined, result.start.error);
@@ -32,9 +32,9 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch..errors.error-init', result.end.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.end.error)
                 });
-                node.warn(RED._('within-time-switch..errors.warn-init', result.end.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.end.error));
                 return true;
             }
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : result.end.error}), undefined, result.end.error);
@@ -230,7 +230,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch.errors.error-title')
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
         });
@@ -251,7 +251,7 @@ module.exports = function (RED) {
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('within-time-switch.errors.error-title')
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
                 }, 360000); // 6 Minuten
@@ -262,7 +262,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('within-time-switch.errors.error-title')
+                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
             });
         }
     }

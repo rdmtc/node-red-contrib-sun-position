@@ -747,18 +747,12 @@
                 }
 
                 if (type === 'jsonata') {
-                    if (value.length < maxLength) {
-                        return value + suffix;
-                    }
-
+                    if (value.length < maxLength) { return value + suffix; }
                     return this._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
                 }
 
                 if (type === 'json') {
-                    if (value.length < maxLength) {
-                        return  value + suffix;
-                    }
-
+                    if (value.length < maxLength) { return  value + suffix; }
                     return this._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
                 }
 
@@ -767,11 +761,11 @@
                 }
 
                 if (type === 'date') {
-                    return this._('node-red:inject.timestamp') + suffix;
+                    return this._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
                 }
 
                 if (type === 'dateSpecific') {
-                    return this._('node-red:inject.timestamp') + '+' + suffix;
+                    return this._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
                 }
 
                 if (type === 'string' || type === 'str' || type === 'DayOfMonth') {

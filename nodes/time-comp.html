@@ -599,7 +599,7 @@
                             id: 'node-input-rule-operand' + containerIndex,
                             type: 'text'
                         }).appendTo(row).typedInput({
-                            default: 'str',
+                            default: types.DateEntered.value,
                             types: [
                                 'msg',
                                 'flow',
@@ -613,6 +613,7 @@
                                 'env'
                             ]
                         });
+
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
                         }).appendTo(row);
@@ -679,8 +680,8 @@
                         // setting defaultValues
                         operatorField.val(data.operator || getOperator(0).id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-                        operandField.typedInput('type', data.operandType || 'str');
-                        operandField.typedInput('value', data.operandValue || '');
+                        operandField.typedInput('type', (data.operandType || types.DateEntered.value));
+                        operandField.typedInput('value', (data.operandValue || ''));
                         formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
                         formatSelField.val(data.formatSelection || getParseFormats(0).id);
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);

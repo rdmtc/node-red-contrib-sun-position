@@ -1,10 +1,6 @@
 {
     "within-time-switch": {
         "label": {
-            "position": "Position",
-            "positionConfig": "configuration",
-            "name": "Name",
-            "topic": "Topic",
             "addTimes": "alternate start or end time",
             "propertyStart": "Alt. Start on",
             "startTime": "Start time",
@@ -38,8 +34,6 @@
             "blank": "\"\""
         },
         "placeholder": {
-            "position": "Position",
-            "name": "Name",
             "property": "Property",
             "startTime": "7:40",
             "startOffset": "0",
@@ -59,27 +53,11 @@
             "Saturday",
             "Sunday"
         ],
-        "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days."
-        },
-        "notification": {
-            "success": "Successfully injected: __label__"
-        },
         "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on withinTimeSwitch",
             "error-start-time": "Error get start time: __message__",
             "error-end-time": "Error get end time: __message__",
-            "error-title": "internal error",
             "invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
             "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "unexpected": "unexpected error (__status__) __message__",
-            "error-init": "error '__message__', retry in 6min",
-            "warn-init": "warning '__message__', retry in 6min"
         }
     }
 }

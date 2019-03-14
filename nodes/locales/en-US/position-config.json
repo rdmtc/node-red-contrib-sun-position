@@ -5,6 +5,7 @@
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",
+            "timestamp":"timestamp",
             "blank": "\"\"",
             "nothing": "nothing"
         },
@@ -156,18 +157,11 @@
             "isoTime": "HH:MM:ss",
             "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
             "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
-        },
-        "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on time-inject",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server"
         }
+    },
+    "errors": {
+        "error": "<strong>Error</strong>: __message__",
+        "error-title": "internal error"
     },
     "position-config": {
         "label": {
@@ -190,22 +184,6 @@
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
-        },
-        "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on position-configuration",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "failed": "inject failed, see log for details",
-            "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large",
-            "longitude-missing": "Longitude is missing!",
-            "latitude-missing": "Latitude is missing!"
         },
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -230,6 +208,10 @@
             "in 4 days",
             "in 5 days",
             "in 6 days"
-        ]
+        ],
+        "errors": {
+            "longitude-missing": "Longitude is missing!",
+            "latitude-missing": "Latitude is missing!"
+        }
     }
 }

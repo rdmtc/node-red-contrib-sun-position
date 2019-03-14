@@ -34,20 +34,6 @@
             "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
             "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done.",
             "addPayload": "With the additional message properties you can send the message with define up to 3 additional properties with enhanced settings. Especial there can be defined timestamps in relation to the message send timestamp."
-        },
-        "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on time-comp",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "failed": "inject failed, see log for details",
-            "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large"
         }
     }
 }

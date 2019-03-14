@@ -209,7 +209,7 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text:  RED._('time-comp.errors.error-title')
+                    text:  RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
                 throw err;
             }

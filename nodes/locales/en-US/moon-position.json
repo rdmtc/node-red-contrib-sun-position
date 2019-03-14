@@ -1,14 +1,8 @@
 {
     "moon-position": {
         "label": {
-            "position" : "Position",
-            "topic" :"Topic",
             "between":"between",
             "and":"and",
-            "name": "Name"
-        },
-        "placeholder": {
-            "position" : "Position",
             "name": "Name"
         },
         "tips": {

@@ -185,7 +185,7 @@ module.exports = function (RED) {
                                 node.status({
                                     fill: 'red',
                                     shape: 'ring',
-                                    text: RED._('time-inject.errors.error-title')
+                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                                 });
                             }
                             return { state:'recalc', done: true };
@@ -287,7 +287,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('time-inject.errors.error-title')
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
         });
@@ -313,7 +313,7 @@ module.exports = function (RED) {
             const createTO = doCreateTimeout(node, true);
             if (createTO.done !== true) {
                 if (createTO.errorMsg) {
-                    node.warn(RED._('time-inject.errors.warn-init', { message: createTO.errorMsg, time: 6}));
+                    node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
                 }
                 setTimeout(() => {
                     try {
@@ -324,14 +324,14 @@ module.exports = function (RED) {
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('time-inject.errors.error-title')
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
                 }, 360000); // 6 Minuten
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('time-inject.errors.error-init', { message: createTO.statusMsg, time: '6min'})
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
                 });
             }
         } catch (err) {
@@ -340,7 +340,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('time-inject.errors.error-title')
+                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
             });
         }
     }
