@@ -161,7 +161,7 @@
         return v;
     }
 
-    function getValueLabel(t, v, offset, l) {
+    function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
         let suffix = '';
         if (offset && offset > 0) {
@@ -175,7 +175,7 @@
                 return v + suffix;
             }
 
-            return this._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
         }
 
         if (t === 'json') {
@@ -183,19 +183,19 @@
                 return  v + suffix;
             }
 
-            return this._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
         }
 
         if (t === 'bin') {
-            return this._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
         }
 
         if (t === 'date') {
-            return this._('node-red:inject.timestamp') + suffix;
+            return node._('node-red:inject.timestamp') + suffix;
         }
 
         if (t === 'dateSpecific') {
-            return this._('node-red:inject.timestamp') + '+' + suffix;
+            return node._('node-red:inject.timestamp') + '+' + suffix;
         }
 
         if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
@@ -247,7 +247,7 @@
         }
 
         if (v === '') {
-            return this._('node-red-contrib-sun-position/position-config:common.label.blank');
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
         }
 
         return clipValueLength(v, l) + suffix;
@@ -407,7 +407,7 @@
             if (this.rules.length) {
                 const rule = this.rules[index];
                 if (rule) {
-                    return rule.operatorText + ' ' + getValueLabel(rule.operandType, rule.operandValue);
+                    return rule.operatorText + ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
                 }
                 if (this.checkall === 'true') {
                     return 'always';
@@ -423,17 +423,17 @@
                 return this.name;
             }
             if (!this.rules || this.rules.length <= 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2;
             } else if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
-                const cmp = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
+                const cmp = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
                 return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
             } else if (this.rules && this.rules.length > 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
             }
             return this._('time-span.label.time-span');

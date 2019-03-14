@@ -57,7 +57,7 @@
             "error-start-time": "Error get start time: __message__",
             "error-end-time": "Error get end time: __message__",
             "invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
-            "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
+            "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__"
         }
     }
 }

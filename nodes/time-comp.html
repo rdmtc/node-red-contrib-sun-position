@@ -203,7 +203,7 @@
         return v;
     }
 
-    function getValueLabel(t, v, offset, l) {
+    function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
         let suffix = '';
         if (offset && offset > 0) {
@@ -406,9 +406,9 @@
             if (this.rules.length) {
                 const rule = this.rules[index];
                 if (rule) {
-                    label = rule.operatorText +  ' ' + getValueLabel(rule.operandType, rule.operandValue);
+                    label = rule.operatorText +  ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
                     if (rule.propertyType !== 'none') {
-                        label += ' only if ' + getValueLabel(rule.propertyType, rule.propertyValue) + ' is true';
+                        label += ' only if ' + getValueLabel(this, rule.propertyType, rule.propertyValue) + ' is true';
                     }
                     return label;
                 }
@@ -426,18 +426,18 @@
                 return this.name;
             }
             if (!this.rules || this.rules.length <= 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
+                const op1 = getValueLabel(this, this.inputType, this.input);
                 return op1;
             }
 
             if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
-                const op2 = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
+                const op1 = getValueLabel(this, this.inputType, this.input);
+                const op2 = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
                 return op1 + this.rules[0].operatorText + op2;
             }
 
             if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.inputType, this.input);
+                const op1 = getValueLabel(this, this.inputType, this.input);
                 return op1 + ' ' + this._('time-comp.label.compare');
             }
             return this._('time-comp.label.time-comp');

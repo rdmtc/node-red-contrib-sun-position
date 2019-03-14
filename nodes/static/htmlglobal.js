@@ -415,7 +415,7 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 }
 
 function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
-    //console.log('appendOptions elementName='+ elementName + ' limit='+limit);
+    // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
     const groups = SelectFields[elementName + 'Groups'];
     const elements = SelectFields[elementName];
     const groupLength = groups.length;
@@ -467,6 +467,9 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     if (data.onChange) {
         tInputField.on('change', data.onChange);
     }
+    if (data.onFocus) {
+        tInputField.on('change focus focusin focusout', data.onFocus);
+    }
     return tInputField;
 }
 
@@ -478,7 +481,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
 function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
     if (val === '*' || typeof val === 'undefined' || val === null) {
         $(element + ' input[type=checkbox]').prop('checked', true);
-    } else if (val === '' || typeof val === 'none') {
+    } else if (val === '' || val === 'none') {
         $(element + ' input[type=checkbox]').removeAttr('checked');
     } else {
         $(element + ' input[type=checkbox]').removeAttr('checked');
@@ -491,7 +494,7 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 // ************************************************************************************************
 
 function initCombobox(node, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
-    //console.log('initCombobox node=' + node + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+    // console.log('initCombobox node=' + node + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     const $inputSelect = $('#node-input-' + inputSelectName);
     const $inputBox = $('#node-input-' + inputBoxName);
     $inputSelect.attr('base-width', width);
