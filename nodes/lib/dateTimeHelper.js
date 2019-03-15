@@ -507,8 +507,6 @@ const dateFormat = (function () {
     // Regexes and supporting functions are cached through closure
     return function (date, mask, utc) {
         const dF = dateFormat;
-        console.log(dF.i18n);
-
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
             mask = date;
@@ -626,15 +624,11 @@ dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function initializeParser(dayNames, monthNames, dayDiffNames) {
-    console.log('----------------------------');
-    console.log(dayNames);
     dateFormat.i18n = {
         dayNames : dayNames,
         monthNames : monthNames,
         dayDiffNames : dayDiffNames
     };
-    console.log(dateFormat.i18n);
-    console.log('----------------------------');
 }
 
 dateFormat.parse = [
