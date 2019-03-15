@@ -31,8 +31,8 @@
   </div>
   <div class="form-row">
       <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-          <option value="false" data-i18n="time-comp.label.stopfirst"></option>
-          <option value="true" data-i18n="time-comp.label.checkall"></option>
+          <option value="false" data-i18n="node-red-contrib-sun-position/position-config:common.label.stopfirst"></option>
+          <option value="true" data-i18n="node-red-contrib-sun-position/position-config:common.label.checkall"></option>
       </select>
   </div>
   <hr>
@@ -197,9 +197,8 @@
 <script type="text/javascript">
     function clipValueLength(v, l) {
         if (v.length > l) {
-            return v.substring(0, l - 3) + '...';
+            return v.substring(0, (l - 3)) + '...';
         }
-
         return v;
     }
 
@@ -213,60 +212,50 @@
         }
 
         if (t === 'jsonata') {
-            if (v.length < l) {
-                return v + suffix;
-            }
-
-            return this._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+            if (v.length < l) { return v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
         }
 
         if (t === 'json') {
-            if (v.length < l) {
-                return  v + suffix;
-            }
-
-            return this._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+            if (v.length < l) { return  v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
         }
 
         if (t === 'bin') {
-            return this._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
         }
 
         if (t === 'date') {
-            return this._('node-red:inject.timestamp') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
         }
 
         if (t === 'dateSpecific') {
-            return this._('node-red:inject.timestamp') + '+' + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
         }
 
         if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
-            if (v === '') {
-                return v + suffix;
-            }
+            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
             return '"' + clipValueLength(v, l) + '"' + suffix;
         }
 
-        if (t === 'num' || t === 'bool') {
-            if (v === '') {
-                return '0' + suffix;
-            }
+        if (t === 'num') {
+            if (v === '') { return '0' + suffix; }
+            return String(v) + suffix;
+        }
+
+        if (t === 'bool') {
+            if (v === '') { return 'false' + suffix; }
             return String(v) + suffix;
         }
 
         if (t === 'msg') {
             return t + '.' + clipValueLength(v, l) + suffix;
         }
-        if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgTs') { return 'msg.ts'; }
-        if (t === 'msgLc') { return 'msg.lc'; }
-        if (t === 'msgValue') { return 'msg.value'; }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
             return t + '.' + clipValueLength(result.key, l) + suffix;
         }
-        if (t === 'input') { return 'input data'; }
 
         if (t === 'pdsCalcData') {
             return '{sun position}' + suffix;
@@ -276,18 +265,23 @@
             return '{moon position}' + suffix;
         }
 
-
         if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
-            return clipValueLength(res, l);
+            return clipValueLength(res, l) + suffix;
         }
 
         if (t === 'pdmTime') {
             return 'moon' + v + suffix;
         }
 
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgLc') { return 'msg.lc'; }
+        if (t === 'msgValue') { return 'msg.value'; }
+        if (t === 'input') { return 'input data'; }
+
         if (v === '') {
-            return this._('node-red-contrib-sun-position/position-config:common.label.blank');
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
         }
 
         return clipValueLength(v, l) + suffix;
@@ -451,7 +445,7 @@
             const node = this;
             const setup = function(node) {
                 /* global getOperator getMultiplier getParseFormats getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
-                const types = getTypes();
+                const types = getTypes(node);
                 const operatorTypesShort = [
                     {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
                     {selection: /^(11,)?12,13,14$/, label: 'T'},

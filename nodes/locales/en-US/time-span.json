@@ -11,7 +11,6 @@
             "operand2Offset": "Offset",
             "operator":"calculation",
             "operatorContainer": "compare timespan between Inputs",
-            "stopfirst": "checking all rules",
             "result1": "result",
             "result1Value": "value",
             "result1TSFormat": "output format",

@@ -1,7 +1,6 @@
 {
     "time-inject": {
         "label": {
-            "positionConfig": "configuration",
             "property": "Property",
             "time": "Time",
             "timeOffset": "Offset",

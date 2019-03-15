@@ -354,4 +354,19 @@ module.exports = function (RED) {
         };
         res.sendFile(req.params[0], options);
     });
+
+    RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
+        const node = RED.nodes.getNode(req.params.id);
+        if (node !== null) {
+            try {
+                node.receive();
+                res.sendStatus(200);
+            } catch(err) {
+                res.sendStatus(500);
+                node.error(RED._('node-red:inject.failed',{error:err.toString()}));
+            }
+        } else {
+            res.sendStatus(404);
+        }
+    });
 };

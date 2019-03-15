@@ -7,7 +7,22 @@
             "jsonata": "json expr.",
             "timestamp":"timestamp",
             "blank": "\"\"",
-            "nothing": "nothing"
+            "nothing": "nothing",
+            "checkall": "stopping after first match (if)",
+            "stopfirst": "checking all rules"
+        },
+        "types": {
+            "unlimited":"no limitation",
+            "undefined":"not used",
+            "datespecific":"timestamp enhanced",
+            "timeentered":"time (next)",
+            "dateentered":"date",
+            "timepredefined":"fixed times",
+            "dayofmonth":"day of month",
+            "timesun":"sun time",
+            "timemoon":"moon time",
+            "suncalc":"sun calculation",
+            "mooncalc":"moon calculation"
         },
         "multiselectLbl": {
             "operatorTypes": "include into compare"
@@ -48,7 +63,7 @@
             "milliseconds UNIX timestamp",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "ECMA-262",
+            "ECMA-262 - JSON Date representation",
             "local date and time",
             "local date and time enh.",
             "local time",
@@ -89,7 +104,7 @@
             "other"
         ],
         "outputTSFormatsGroups": [
-            "timestamp  (number)",
+            "timestamp (number)",
             "timestamp rounded (number)",
             "Text"
         ],
@@ -102,13 +117,13 @@
             "weeks",
             "month",
             "years",
-            "seconds",
-            "minutes",
-            "hours",
-            "days",
-            "weeks",
-            "month",
-            "years",
+            "seconds rounded",
+            "minutes rounded",
+            "hours rounded",
+            "days rounded",
+            "weeks rounded",
+            "month rounded",
+            "years rounded",
             "Other (free defined)"
         ],
         "parseFormatsGroups": [
@@ -144,6 +159,26 @@
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
         ],
+        "month": [
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        "dayDiffNames": [
+            "1 week ago",
+            "6 days ago",
+            "5 days ago",
+            "4 days ago",
+            "3 days ago",
+            "2 days ago",
+            "Yesterday",
+            "Today",
+            "Tomorrow",
+            "day after tomorrow",
+            "in 3 days",
+            "in 4 days",
+            "in 5 days",
+            "in 6 days"
+        ],
         "timeFormat": {
             "default": "ddd MMM dd yyyy HH:mm:ss",
             "shortDate": "m/d/yy",
@@ -161,7 +196,9 @@
     },
     "errors": {
         "error": "<strong>Error</strong>: __message__",
-        "error-title": "internal error"
+        "error-title": "internal error",
+        "error-init": "error '__message__', retry in __time__",
+        "warn-init": "warning '__message__', retry in __time__"
     },
     "position-config": {
         "label": {
@@ -185,30 +222,6 @@
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         },
-        "days": [
-            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-        ],
-        "month": [
-            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ],
-        "dayDiffNames": [
-            "1 week ago",
-            "6 days ago",
-            "5 days ago",
-            "4 days ago",
-            "3 days ago",
-            "2 days ago",
-            "Yesterday",
-            "Today",
-            "Tomorrow",
-            "day after tomorrow",
-            "in 3 days",
-            "in 4 days",
-            "in 5 days",
-            "in 6 days"
-        ],
         "errors": {
             "longitude-missing": "Longitude is missing!",
             "latitude-missing": "Latitude is missing!"

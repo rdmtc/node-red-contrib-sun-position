@@ -378,7 +378,7 @@
             const node = this;
             const setup = function(node) {
                 /* global getTypes appendOptions setupTInput */
-                const types = getTypes();
+                const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);

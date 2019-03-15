@@ -8,8 +8,6 @@
             "inputOffset": "Offset",
             "operatorContainer": "compare with",
             "onlyif": "only if",
-            "checkall": "stopping after first match (if)",
-            "stopfirst": "checking all rules",
             "result1": "result",
             "result1Value": "value",
             "result1Format": "output format",

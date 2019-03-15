@@ -136,49 +136,91 @@
         if (v.length > l) {
             return v.substring(0, (l - 3)) + '...';
         }
-
         return v;
     }
 
-    function getValueLabel(t, v, l) {
+    function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
-        if (t === 'string' || t === 'str') {
-            if (v === '') { return v; }
-            return '"' + clipValueLength(v, l) + '"';
+        let suffix = '';
+        if (offset && offset > 0) {
+            suffix = '↷';
+        } else if (offset && offset < 0) {
+            suffix = '↶';
         }
 
-        if (t === 'num' || t === 'bool') {
-            if (v === '') { return v; }
-            return String(v);
+        if (t === 'jsonata') {
+            if (v.length < l) { return v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+        }
+
+        if (t === 'json') {
+            if (v.length < l) { return  v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+        }
+
+        if (t === 'bin') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+        }
+
+        if (t === 'date') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+        }
+
+        if (t === 'dateSpecific') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+        }
+
+        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
+            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+            return '"' + clipValueLength(v, l) + '"' + suffix;
+        }
+
+        if (t === 'num') {
+            if (v === '') { return '0' + suffix; }
+            return String(v) + suffix;
+        }
+
+        if (t === 'bool') {
+            if (v === '') { return 'false' + suffix; }
+            return String(v) + suffix;
         }
 
         if (t === 'msg') {
-            return t + '.' + clipValueLength(v, l);
+            return t + '.' + clipValueLength(v, l) + suffix;
         }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l);
+            return t + '.' + clipValueLength(result.key, l) + suffix;
         }
 
         if (t === 'pdsCalcData') {
-            return '{sun position}';
+            return '{sun position}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
-            return '{moon position}';
+            return '{moon position}' + suffix;
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace(
-                'amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
-            return clipValueLength(res, l);
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            return clipValueLength(res, l) + suffix;
         }
 
         if (t === 'pdmTime') {
-            return 'moon' + v;
+            return 'moon' + v + suffix;
         }
-        return clipValueLength(v, l);
+
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgLc') { return 'msg.lc'; }
+        if (t === 'msgValue') { return 'msg.value'; }
+
+        if (v === '') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+        }
+
+        return clipValueLength(v, l) + suffix;
     }
 
     RED.nodes.registerType('within-time-switch', {
@@ -351,55 +393,12 @@
         },
         outputLabels: ['within time', 'out of time'],
         label() {
-            const getId = (type, value, offset, maxLength) => {
-                let suffix = '';
-                if (offset && offset > 0) {
-                    suffix = '↷';
-                } else if (offset && offset < 0) {
-                    suffix = '↶';
-                }
-
-                if (type === 'jsonata') {
-                    if (value.length < maxLength) { return value + suffix; }
-                    return this._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-                }
-
-                if (type === 'json') {
-                    if (value.length < maxLength) { return  value + suffix; }
-                    return this._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-                }
-
-                if (type === 'bin') {
-                    return this._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-                }
-
-                if (type === 'date') {
-                    return this._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-                }
-
-                if (type === 'dateSpecific') {
-                    return this._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-                }
-
-                if (type === 'string' || type === 'str' || type === 'DayOfMonth') {
-                    if (value === '') {
-                        return this._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix;
-                    }
-                    return '"' + clipValueLength(value, maxLength) + '"' + suffix;
-                }
-
-                const v = getValueLabel(type, value, maxLength);
-                if (v === '') { return this._('node-red-contrib-sun-position/position-config:common.label.blank'); }
-
-                return v + suffix;
-            };
-
             const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                 if (property !== 'none' && property !== '' && value2) {
-                    return getId(type1, value1, offset1, 12) + '/' + getId(type2, value2, offset2, 12);
+                    return getValueLabel(this, type1, value1, offset1, 12) + '/' + getValueLabel(this, type2, value2, offset2, 12);
                 }
 
-                return getId(type1, value1, undefined, 12);
+                return getValueLabel(this, type1, value1, undefined, 12);
             };
 
             if (this.name) {
@@ -425,12 +424,10 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                console.log('start setup');
                 /* global getTypes appendOptions setupTInput */
-                const types = getTypes();
+                const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
-                    console.log('multilpierUpdate');
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
@@ -448,51 +445,8 @@
                     field.val(mp);
                     return mp;
                 }
-
-                const checkMsgOnStartOut = (_type, _value) => {
-                    console.log('checkMsgOnStartOut');
-
-                    const plVType = $('#node-input-startTime').typedInput('type');
-                    const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
-                    if (plVType ===  'msg' ||
-                        plVType === 'flow' ||
-                        plVType === 'global' ||
-                        plVTypeAlt === 'msg' ||
-                        plVTypeAlt === 'flow' ||
-                        plVTypeAlt === 'global') {
-                        $('.msg-start-out-row').hide();
-                    } else {
-                        $('.msg-start-out-row').show();
-                    }
-                    /*
-                    const valStart = $('#node-input-startTime').typedInput('type');
-                    const valStartAlt = $('#node-input-startTimeAlt').typedInput('type');
-                    const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
-
-                    if (vals.indexOf(valStart) >= 0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=
-                        0)) {
-                        $('.msg-start-out-row').show();
-                    } else {
-                        $('.msg-start-out-row').hide();
-                    }
-                    */
-                };
-
-                const checkMsgOnEndOut = (_type, _value) => {
-                    const valEnd = $('#node-input-endTime').typedInput('type');
-                    const valEndAlt = $('#node-input-endTimeAlt').typedInput('type');
-                    const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
-
-                    if (vals.indexOf(valEnd) >= 0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >= 0)) {
-                        $('.msg-end-out-row').show();
-                    } else {
-                        $('.msg-end-out-row').hide();
-                    }
-                };
                 // #endregion initialize
                 // #region timeStart
-                console.log('startTimeTypeField');
-
                 const startTimeTypeField = setupTInput(node, {
                     typeProp: 'startTimeType',
                     valueProp: 'startTime',
@@ -500,7 +454,20 @@
                     defaultType: node.startTimeType || types.TimeEntered.value,
                     defaultValue: node.startTime || '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus: checkMsgOnStartOut
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-startTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
+                        if (plVType ===  'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
+                            $('.msg-start-out-row').hide();
+                        } else {
+                            $('.msg-start-out-row').show();
+                        }
+                    }
                 });
 
                 node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
@@ -522,7 +489,6 @@
                 }).change();
                 // #endregion timeStart
                 // #region timeEnd
-                console.log('timeEnd');
                 const endTimeTypeField = setupTInput(node, {
                     typeProp: 'endTimeType',
                     valueProp: 'endTime',
@@ -530,7 +496,20 @@
                     defaultType: node.endTimeType || types.TimeEntered.value,
                     defaultValue: node.endTime || '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus: checkMsgOnEndOut
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-endTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
+                        if (plVType ===  'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
+                            $('.msg-end-out-row').hide();
+                        } else {
+                            $('.msg-end-out-row').show();
+                        }
+                    }
                 });
 
                 node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
@@ -552,7 +531,6 @@
                 }).change();
                 // #endregion timeEnd
                 // #region propertyStart
-                console.log('propertyStart');
                 const propertyStartTypeField = setupTInput(node, {
                     typeProp: 'propertyStartType',
                     valueProp: 'propertyStart',
@@ -572,36 +550,22 @@
                     }
                 });
                 // #endregion propertyStart
-                // #region propertyEnd
-                console.log('propertyEnd');
-                const propertyEndTypeField = setupTInput(node, {
-                    typeProp: 'propertyEndType',
-                    valueProp: 'propertyEnd',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.propertyEndType  || types.Undefined.value,
-                    defaultValue: node.propertyEndValue || '' ,
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
-                        if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
-                            $('.alternate-time-end').hide();
-                            $('.alternate-time-end-offset').hide();
-                        } else {
-                            $('.alternate-time-end').show();
-                        }
-
-                        $('#node-input-endTimeAlt').change();
-                    }
-                });
-                // #endregion propertyEnd
                 // #region timeAltStart
-                console.log('timeAltStart');
                 setupTInput(node, {
                     typeProp: 'startTimeAltType',
                     valueProp: 'startTimeAlt',
                     width: 'calc(100% - 110px)',
                     defaultType: 'entered',
                     defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env']
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
                 }).change();
 
                 node.startTimeAltOffsetMultiplier = multilpierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
@@ -622,15 +586,43 @@
                     }
                 }).change();
                 // #endregion timeAltStart
+
+                // #region propertyEnd
+                const propertyEndTypeField = setupTInput(node, {
+                    typeProp: 'propertyEndType',
+                    valueProp: 'propertyEnd',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.propertyEndType  || types.Undefined.value,
+                    defaultValue: node.propertyEndValue || '' ,
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
+                            $('.alternate-time-end').hide();
+                            $('.alternate-time-end-offset').hide();
+                        } else {
+                            $('.alternate-time-end').show();
+                        }
+
+                        $('#node-input-endTimeAlt').change();
+                    }
+                });
+                // #endregion propertyEnd
                 // #region timeAltEnd
-                console.log('timeAltEnd');
                 setupTInput(node, {
                     typeProp: 'endTimeAltType',
                     valueProp: 'endTimeAlt',
                     width: 'calc(100% - 110px)',
                     defaultType: 'entered',
                     defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env']
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
                 }).change();
 
                 node.endTimeAltOffsetMultiplier = multilpierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
@@ -651,159 +643,6 @@
                     }
                 }).change();
                 // #endregion timeAltEnd
-
-                /*
-                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
-                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
-                node.startOffsetAltMultiplier = multilpierUpdate(node.startOffsetAltMultiplier, 'startOffsetAltMultiplier');
-                node.endOffsetAltMultiplier = multilpierUpdate(node.endOffsetAltMultiplier, 'endOffsetAltMultiplier');
-
-                if (node.statusOut === '' || node.statusOut === 'undefined') {
-                    node.statusOut = 3;
-                    $('#node-input-statusOut').val(node.statusOut);
-                }
-
-                $('.wt-offset-time').spinner({
-                    max: 1439,
-                    min: -1439
-                });
-
-                const typeTimeNone = {
-                    value: 'none',
-                    label: 'not used ',
-                    icon: 'icons/node-red-contrib-sun-position/inputTypeNone.png',
-                    hasValue: false
-                };
-                const typeTimeEntered = {
-                    value: 'entered',
-                    label: 'timestamp ',
-                    icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
-                    hasValue: true,
-                    validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
-                };
-                const typeTimeSun = {
-                    value: 'pdsTime',
-                    label: 'sun ',
-                    icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
-                    options: [
-                        'astronomicalDawn',
-                        'amateurDawn',
-                        'nauticalDawn',
-                        'blueHourDawnStart',
-                        'civilDawn',
-                        'blueHourDawnEnd',
-                        'sunrise',
-                        'sunriseEnd',
-                        'goldenHourEnd',
-                        'solarNoon',
-                        'goldenHourStart',
-                        'sunsetStart',
-                        'sunset',
-                        'blueHourDuskStart',
-                        'civilDusk',
-                        'blueHourDuskEnd',
-                        'amateurDusk',
-                        'astronomicalDusk',
-                        'nadir'
-                    ]
-                };
-                const typeTimeMoon = {
-                    value: 'pdmTime',
-                    label: 'moon ',
-                    icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
-                    options: ['rise', 'set']
-                };
-
-                $('#node-input-propertyStart').typedInput({
-                    default: node.propertyStartType || 'none',
-                    types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
-                });
-                $('#node-input-propertyEnd').typedInput({
-                    default: node.propertyEndType || 'none',
-                    types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
-                });
-                $('#node-input-propertyStart').on('change', (_type, _value) => {
-                    if ($('#node-input-propertyStart').typedInput('type') === 'none') {
-                        $('.alternate-time-start').hide();
-                        $('.alternate-time-start-offset').hide();
-                    } else {
-                        $('.alternate-time-start').show();
-                    }
-
-                    $('#node-input-startTimeAlt').change();
-                });
-                $('#node-input-propertyEnd').on('change', (_type, _value) => {
-                    if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
-                        $('.alternate-time-end').hide();
-                        $('.alternate-time-end-offset').hide();
-                    } else {
-                        $('.alternate-time-end').show();
-                    }
-
-                    $('#node-input-endTimeAlt').change();
-                });
-
-                $('#node-input-startTime').typedInput({
-                    default: node.startTimeType || 'entered',
-                    types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
-                });
-                $('#node-input-startTime').on('change focus focusin focusout', (_type, _value) => {
-                    checkMsgOnStartOut(_type, _value);
-                });
-                $('#node-input-endTime').typedInput({
-                    default: node.endTimeType || 'entered',
-                    types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
-                });
-                $('#node-input-endTime').on('change focus focusin focusout', (_type, _value) => {
-                    checkMsgOnEndOut(_type, _value);
-                });
-                $('#node-input-startTimeAlt').typedInput({
-                    default: node.startTimeAltType || 'none',
-                    types: [typeTimeNone,
-                        typeTimeEntered,
-                        typeTimeSun,
-                        typeTimeMoon,
-                        'msg',
-                        'flow',
-                        'global',
-                        'env']
-                });
-                $('#node-input-startTimeAlt').on('change focus focusin focusout', (_type, _value) => {
-                    if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                        $('.alternate-time-start-offset').hide();
-                    } else {
-                        $('.alternate-time-start-offset').show();
-                    }
-
-                    checkMsgOnStartOut();
-                });
-                $('#node-input-endTimeAlt').typedInput({
-                    default: node.endTimeAltType || 'none',
-                    types: [typeTimeNone,
-                        typeTimeEntered,
-                        typeTimeSun,
-                        typeTimeMoon,
-                        'msg',
-                        'flow',
-                        'global',
-                        'env']
-                });
-                $('#node-input-endTimeAlt').on('change focus focusin focusout', (_type, _value) => {
-                    if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
-                ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
-                        $('.alternate-time-end-offset').hide();
-                    } else {
-                        $('.alternate-time-end-offset').show();
-                    }
-
-                    checkMsgOnEndOut();
-                });
-                */
-                // $('#node-input-propertyStart').change();
-                // $('#node-input-propertyEnd').change();
-
-                console.log('trigger changes');
                 startTimeTypeField.change();
                 endTimeTypeField.change();
                 propertyStartTypeField.change();

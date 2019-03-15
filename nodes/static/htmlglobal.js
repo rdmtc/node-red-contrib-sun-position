@@ -110,23 +110,23 @@ function getParseFormats(nr) { // eslint-disable-line no-unused-vars
     return SelectFields.parseFormats[nr];
 }
 
-function getTypes() { // eslint-disable-line no-unused-vars
+function getTypes(node) { // eslint-disable-line no-unused-vars
     return {
         Unlimited: {
             value: 'none',
-            label: 'no limitation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.unlimited','no limitation'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         Undefined: {
             value: 'none',
-            label: 'not used',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.undefined','not used'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         DateSpecific: {
             value: 'dateSpecific',
-            label: 'timestamp enhanced',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific','timestamp enhanced'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
@@ -167,26 +167,26 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeEntered: {
             value: 'entered',
-            label: 'time (next)',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
             hasValue: true,
             validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
         },
         DateEntered: {
             value: 'dateEntered',
-            label: 'date',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.dateentered','date'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
             hasValue: true,
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
         TimePredefined: {
             value: 'TimePredefined',
-            label: 'fixed times',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timepredefined','fixed times'),
             options: ['next midnight', 'next noon']
         },
         DayOfMonth: {
             value: 'DayOfMonth',
-            label: 'day of month',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.dayofmonth','day of month'),
             options: [
                 'first Monday',
                 'first Tuesday',
@@ -206,7 +206,7 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeSun: {
             value: 'pdsTime',
-            label: 'sun time ',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
                 'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
@@ -214,19 +214,19 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeMoon: {
             value: 'pdmTime',
-            label: 'moon time ',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
             options: ['rise', 'set']
         },
         SunCalc: {
             value: 'pdsCalcData',
-            label: 'sun calculation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.suncalc','sun calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
             hasValue: false
         },
         MoonCalc: {
             value: 'pdmCalcData',
-            label: 'moon calculation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
             hasValue: false
         }

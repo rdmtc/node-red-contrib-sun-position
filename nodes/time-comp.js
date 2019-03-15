@@ -19,8 +19,6 @@ module.exports = function (RED) {
         const node = this;
 
         this.on('input', msg => {
-node.debug('config ' + util.inspect(config)); // eslint-disable-line
-node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
             if (node.positionConfig === null ||
                 config.operator === null ||
                 config.inputType === null) {
@@ -32,11 +30,8 @@ node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
                 throw new Error('Configuration is missing!!');
             }
 
-
             try {
                 const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetType, config.inputOffsetMultiplier);
-node.debug('inputData ' + util.inspect(inputData)); // eslint-disable-line
-
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
                     if (config.result1ValueType === 'input') {
@@ -45,7 +40,6 @@ node.debug('inputData ' + util.inspect(inputData)); // eslint-disable-line
                         resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
 
-node.debug('resultObj ' + util.inspect(resultObj)); // eslint-disable-line
                     if (resultObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {
@@ -66,13 +60,11 @@ node.debug('resultObj ' + util.inspect(resultObj)); // eslint-disable-line
                     }
                 }
 
-node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
                 const resObj = [];
                 const rules = config.rules;
                 const rulesLength = rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
-node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
@@ -81,9 +73,10 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
 
                     if (operatorValid) {
                         const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
+                        /*
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType));
+                        node.debug('operatorType ' + util.inspect(rule.operatorType)); */
 
                         let compare = null;
                         switch (rule.operator) {
@@ -199,7 +192,6 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                 }
 
                 resObj.push(msg);
-node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
                 node.status({
                     text: inputData.toISOString()
                 });

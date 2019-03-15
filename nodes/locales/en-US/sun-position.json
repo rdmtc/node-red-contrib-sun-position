@@ -1,8 +1,6 @@
 {
     "sun-position": {
         "label": {
-            "config": "configuration",
-            "topic" :"Topic",
             "azimuthpos":"azimuth position",
             "between":"between",
             "and":"and",

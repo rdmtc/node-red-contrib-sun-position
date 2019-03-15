@@ -21,17 +21,7 @@
             "lastMsgOnStartOut": "resend start",
             "lastMsgOnStartOutTxt": "next start additionally emit the last message arrived out of time",
             "lastMsgOnEndOut": "resend end",
-            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time",
-            "seconds": "seconds",
-            "minutes": "minutes",
-            "hours": "hours",
-            "on": "on",
-            "none": "none",
-            "timestamp": "timestamp",
-            "binary": "binary",
-            "json": "json",
-            "jsonata": "json expr.",
-            "blank": "\"\""
+            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time"
         },
         "placeholder": {
             "property": "Property",
@@ -44,16 +34,7 @@
             "endTimeAlt": "18:15",
             "endOffsetAlt": "0"
         },
-        "days": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ],
-        "errors": {
+       "errors": {
             "error-start-time": "Error get start time: __message__",
             "error-end-time": "Error get end time: __message__",
             "invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
