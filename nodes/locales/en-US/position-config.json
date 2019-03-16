@@ -197,8 +197,8 @@
     "errors": {
         "error": "<strong>Error</strong>: __message__",
         "error-title": "internal error",
-        "error-init": "error '__message__', retry in __time__",
-        "warn-init": "warning '__message__', retry in __time__"
+        "error-init": "error '__message__', retry in __time__min",
+        "warn-init": "warning '__message__', retry in __time__min"
     },
     "position-config": {
         "label": {

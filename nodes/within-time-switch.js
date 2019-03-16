@@ -10,6 +10,13 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
+    function getDate(value, def) {
+        const dto = new Date(value);
+        if (dto !== 'Invalid Date' && !isNaN(dto)) {
+            return dto;
+        }
+        return def;
+    }
 
     function setstate(node, result, status, statusObj, _onInit) {
         if (status > 255) {
@@ -103,20 +110,20 @@ module.exports = function (RED) {
 
         if (result.altStartTime && config.startTimeAltType !== 'none') {
             // node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt, 'num', config.startOffsetAltMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt, config.startOffsetAltType, config.startOffsetAltMultiplier);
             result.startSuffix = '⎇ ';
         } else {
             // node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffset, 'num', config.startOffsetMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffset, config.startOffsetType, config.startOffsetMultiplier);
         }
 
         if (result.altEndTime && config.endTimeAltType !== 'none') {
             // node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt, 'num', config.endOffsetAltMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt, config.endOffsetAltType, config.endOffsetAltMultiplier);
             result.endSuffix = ' ⎇';
         } else {
             // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffset, 'num', config.endOffsetMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffset, config.endOffsetType, config.endOffsetMultiplier);
         }
 
         // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
@@ -176,12 +183,14 @@ module.exports = function (RED) {
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
                 const result = calcWithinTimes(this, msg, config);
                 let now = new Date();
-
-                if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
-                    const dto = new Date(msg.ts);
-                    if (dto !== 'Invalid Date' && !isNaN(dto)) {
-                        now = dto;
-                    }
+                if (config.tsCompare === '1') {
+                    now = getDate(msg.ts, now);
+                } else if (config.tsCompare === '2') {
+                    now = getDate(msg.lc, now);
+                } else if (config.tsCompare === '3') {
+                    now = getDate(msg.time, now);
+                } else if (config.tsCompare === '4') {
+                    now = getDate(msg.value, now);
                 }
 
                 if (!result.start.value || !result.end.value) {

@@ -86,6 +86,17 @@
         <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
     </div>
     <hr>
+    <div class="form-row compare-row">
+        <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
+        <select id="node-input-tsCompare" style="width:70%;" >
+            <option value="0" data-i18n="within-time-switch.label.now"></option>
+            <option value="1" data-i18n="within-time-switch.label.msgts"></option>
+            <option value="2" data-i18n="within-time-switch.label.msglc"></option>
+            <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
+            <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
+        </select>
+    </div>
+    <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
@@ -377,6 +388,9 @@
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                 }
+            },
+            tsCompare: {
+                value: ''
             },
             statusOut: {
                 value: 3,

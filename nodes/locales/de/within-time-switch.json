@@ -21,7 +21,8 @@
             "lastMsgOnStartOut": "resend start",
             "lastMsgOnStartOutTxt": "next start additionally emit the last message arrived out of time",
             "lastMsgOnEndOut": "resend end",
-            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time"
+            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time",
+            "compareTime":"Vergleichs Basis"
         },
         "placeholder": {
             "property": "Property",

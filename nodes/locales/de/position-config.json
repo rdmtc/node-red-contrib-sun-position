@@ -183,8 +183,8 @@
     "errors": {
         "error": "<strong>Fehler</strong>: __message__",
         "error-title": "interner Fehler",
-        "error-init": "Fehler '__message__', wiederhole in __time__",
-        "warn-init": "Warnung '__message__', wiederhole in __time__"
+        "error-init": "Fehler '__message__', wiederhole in __time__min",
+        "warn-init": "Warnung '__message__', wiederhole in __time__min"
     },
     "position-config": {
         "label": {
