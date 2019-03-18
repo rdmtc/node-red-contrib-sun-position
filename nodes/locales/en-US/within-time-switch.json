@@ -27,7 +27,8 @@
             "msgts":"msg.ts",
             "msglc":"msg.lc",
             "msgtime":"msg.time",
-            "msgvalue":"msg.value"
+            "msgvalue":"msg.value",
+            "showEnhSettings":"Enhanced settings"
         },
         "placeholder": {
             "property": "Property",
@@ -39,6 +40,9 @@
             "startOffsetAlt": "0",
             "endTimeAlt": "18:15",
             "endOffsetAlt": "0"
+        },
+        "tips": {
+            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days."
         },
        "errors": {
             "error-start-time": "Error get start time: __message__",

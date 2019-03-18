@@ -183,14 +183,23 @@ module.exports = function (RED) {
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
                 const result = calcWithinTimes(this, msg, config);
                 let now = new Date();
-                if (config.tsCompare === '1') {
-                    now = getDate(msg.ts, now);
-                } else if (config.tsCompare === '2') {
-                    now = getDate(msg.lc, now);
-                } else if (config.tsCompare === '3') {
-                    now = getDate(msg.time, now);
-                } else if (config.tsCompare === '4') {
-                    now = getDate(msg.value, now);
+                switch (config.tsCompare) {
+                    case '1':
+                        node.debug('compare time to msg.ts = ' + msg.ts);
+                        now = getDate(msg.ts, now);
+                        break;
+                    case '2':
+                        node.debug('compare time to msg.lc = ' + msg.ts);
+                        now = getDate(msg.lc, now);
+                        break;
+                    case '3':
+                        node.debug('compare time to msg.time = ' + msg.ts);
+                        now = getDate(msg.time, now);
+                        break;
+                    case '4':
+                        node.debug('compare time to msg.value = ' + msg.ts);
+                        now = getDate(msg.value, now);
+                        break;
                 }
 
                 if (!result.start.value || !result.end.value) {

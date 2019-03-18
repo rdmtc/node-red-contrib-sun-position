@@ -65,36 +65,40 @@
         <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
-    <div class="form-row debug-row">
-        <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
-        <select id="node-input-statusOut"  style="width:70%;" >
-            <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
-            <option value="1" data-i18n="within-time-switch.label.statusTime"></option>
-            <option value="2" data-i18n="within-time-switch.label.statusSend"></option>
-            <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
-            <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
-        </select>
+    <div class="form-row">
+        <a href="#" class="enhanced-row-toggle"><span data-i18n="within-time-switch.label.showEnhSettings"></span></a>
     </div>
-    <div class="form-row msg-start-out-row">
-        <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
-        <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
-    </div>
-    <div class="form-row msg-end-out-row">
-        <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
-        <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
-    </div>
-    <hr>
-    <div class="form-row compare-row">
-        <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
-        <select id="node-input-tsCompare" style="width:70%;" >
-            <option value="0" data-i18n="within-time-switch.label.now"></option>
-            <option value="1" data-i18n="within-time-switch.label.msgts"></option>
-            <option value="2" data-i18n="within-time-switch.label.msglc"></option>
-            <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
-            <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
-        </select>
+    <div class="form-row enhanced-row hidden">
+            <div class="form-row compare-row">
+                <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
+                <select id="node-input-tsCompare" style="width:70%;" >
+                    <option value="0" data-i18n="within-time-switch.label.now"></option>
+                    <option value="1" data-i18n="within-time-switch.label.msgts"></option>
+                    <option value="2" data-i18n="within-time-switch.label.msglc"></option>
+                    <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
+                    <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
+                </select>
+            </div>
+            <div class="form-row debug-row">
+            <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
+            <select id="node-input-statusOut"  style="width:70%;" >
+                <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
+                <option value="1" data-i18n="within-time-switch.label.statusTime"></option>
+                <option value="2" data-i18n="within-time-switch.label.statusSend"></option>
+                <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
+                <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
+            </select>
+        </div>
+        <div class="form-row msg-start-out-row">
+            <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
+        </div>
+        <div class="form-row msg-end-out-row">
+            <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
+        </div>
     </div>
     <hr>
     <div class="form-row">
@@ -390,7 +394,7 @@
                 }
             },
             tsCompare: {
-                value: ''
+                value: '0'
             },
             statusOut: {
                 value: 3,
@@ -436,9 +440,13 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare() {
+            $('.enhanced-row-toggle').on('click', () => {
+                $('.enhanced-row').toggle(); // .hide();
+            });
+
             const node = this;
             const setup = function(node) {
-                /* global getTypes appendOptions setupTInput */
+                /* global getTypes appendOptions setupTInput initializeValue */
                 const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
@@ -600,7 +608,6 @@
                     }
                 }).change();
                 // #endregion timeAltStart
-
                 // #region propertyEnd
                 const propertyEndTypeField = setupTInput(node, {
                     typeProp: 'propertyEndType',
@@ -657,6 +664,38 @@
                     }
                 }).change();
                 // #endregion timeAltEnd
+                // #region Enhanced settings
+                initializeValue(node, 'tsCompare', 0);
+                initializeValue(node, 'statusOut', 3);
+                const chkVal = (name, val) => {
+                    console.log(name + ' compare to ' + val + ' - ' +
+                    (node[name] === null) ||
+                            (typeof node[name] === 'undefined') ||
+                            ($('#node-input-' + name).val() === val) ||
+                            (parseFloat($('#node-input-' + name).val()) === val));
+                    console.log(node[name]);
+                    console.log(typeof node[name]);
+                    console.log($('#node-input-' + name).val());
+                    console.log($('#node-input-' + name).is(':checked'));
+                    console.log(parseFloat($('#node-input-' + name).val()));
+                    return (node[name] === null) ||
+                            (typeof node[name] === 'undefined') ||
+                            ($('#node-input-' + name).val() === val) ||
+                            ($('#node-input-' + name).is(':checked') === val) ||
+                            (parseFloat($('#node-input-' + name).val()) === val);
+                };
+
+                if (chkVal('lastMsgOnStartOut', false) &&
+                    chkVal('lastMsgOnEndOut', false) &&
+                    chkVal('statusOut', 3) &&
+                    chkVal('tsCompare', 0)) {
+                    console.log('hide');
+                    $('.enhanced-row').hide();
+                } else {
+                    console.log('show');
+                    $('.enhanced-row').show();
+                }
+                // #endregion Enhanced settings
                 startTimeTypeField.change();
                 endTimeTypeField.change();
                 propertyStartTypeField.change();
