@@ -10,12 +10,36 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
-    function getDate(value, def) {
-        const dto = new Date(value);
+    function getDate(comparetype, msg, node) {
+        let id = '';
+        let value = '';
+        switch (comparetype) {
+            case '1':
+                id = 'msg.ts';
+                value = msg.ts;
+                break;
+            case '2':
+                id = 'msg.lc';
+                value = msg.lc;
+                break;
+            case '3':
+                id = 'msg.time';
+                value = msg.time;
+                break;
+            case '4':
+                id = 'msg.value';
+                value = msg.value;
+                break;
+            default:
+                return new Date();
+        }
+        node.debug('compare time to ' + id + ' = "' + value + '"');
+        const dto = new Date(msg.ts);
         if (dto !== 'Invalid Date' && !isNaN(dto)) {
             return dto;
         }
-        return def;
+        node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
+        return new Date();
     }
 
     function setstate(node, result, status, statusObj, _onInit) {
@@ -182,25 +206,7 @@ module.exports = function (RED) {
                 // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
                 const result = calcWithinTimes(this, msg, config);
-                let now = new Date();
-                switch (config.tsCompare) {
-                    case '1':
-                        node.debug('compare time to msg.ts = ' + msg.ts);
-                        now = getDate(msg.ts, now);
-                        break;
-                    case '2':
-                        node.debug('compare time to msg.lc = ' + msg.ts);
-                        now = getDate(msg.lc, now);
-                        break;
-                    case '3':
-                        node.debug('compare time to msg.time = ' + msg.ts);
-                        now = getDate(msg.time, now);
-                        break;
-                    case '4':
-                        node.debug('compare time to msg.value = ' + msg.ts);
-                        now = getDate(msg.value, now);
-                        break;
-                }
+                const now = getDate(config.tsCompare, msg, node);
 
                 if (!result.start.value || !result.end.value) {
                     throw new Error('Error can not calc time!');
