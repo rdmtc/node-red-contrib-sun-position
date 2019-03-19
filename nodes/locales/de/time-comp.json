@@ -1,0 +1,17 @@
+{
+    "time-comp": {
+        "label": {
+            "time-comp": "time-comp",
+            "compare": "vergleich",
+            "input": "Input",
+            "inputFormat": "parse format",
+            "inputOffset": "Offset",
+            "operatorContainer": "vergleich mit",
+            "onlyif": "nur wenn",
+            "result1": "Ergebnis",
+            "result1Value": "Wert",
+            "result1Format": "Ausgabeformat",
+            "result1Offset": "Offset"
+        }
+    }
+}

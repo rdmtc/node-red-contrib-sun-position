@@ -1,58 +1,209 @@
 {
+    "common": {
+        "label": {
+            "positionConfig": "Konfiguration",
+            "binary": "binär",
+            "json": "json",
+            "jsonata": "json Ausdr.",
+            "timestamp": "Zeitmarke",
+            "blank": "\"\"",
+            "nothing": "nichts",
+            "checkall" : "Alle Regeln überprüfen",
+            "stopfirst" : "Nach erster Übereinstimmung stoppen (if)"
+        },
+        "types": {
+            "unlimited":"keine Limitierung",
+            "undefined":"nicht verwendet",
+            "datespecific":"Zeitmarke (erweitert)",
+            "timeentered":"Zeit (next)",
+            "dateentered":"Datum",
+            "timepredefined":"feste Zeit",
+            "dayofmonth":"Monatstag",
+            "timesun":"Sonnenstands zeit",
+            "timemoon":"Mond-Zeit",
+            "suncalc":"Sonnenposition",
+            "mooncalc":"Mondposition"
+        },
+        "multiselectLbl": {
+            "operatorTypes": "in Vergleich einbeziehen"
+        },
+        "operatorsGroups": [
+            "kompletter Zeitstempel"
+        ],
+        "operators": [
+            "==     (gleich)",
+            "!=     (ungleich)",
+            ">      (größer)",
+            ">=     (größer or gleich)",
+            "<      (kleiner)",
+            "<=     (kleiner or gleich)"
+        ],
+        "operatorTypesGroups": [
+            "in Vergleich einbezogen",
+            "speziell"
+        ],
+        "operatorTypes": [
+            "Millisekunden",
+            "Sekunden",
+            "Minuten",
+            "Stunden",
+            "Tag",
+            "Monat",
+            "Jahr",
+            "Wochentag"
+        ],
+        "outputFormatsGroups": [
+            "Zahl",
+            "Text",
+            "Zeit (Zahl) seit since emit",
+            "Wochentag",
+            "freier Text"
+        ],
+        "outputFormats": [
+            "Millisekunden UNIX-Zeit",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "ECMA-262",
+            "lokale Datum und Zeit",
+            "lokale Datum und Zeit erweitert",
+            "lokale Zeit",
+            "lokale Zeit enh.",
+            "lokales Datum",
+            "lokales Datum lang",
+            "UTC Datum und Zeit",
+            "ISO Datum und Zeit",
+            "Millisekunden",
+            "Sekunden",
+            "Minuten",
+            "Stunden",
+            "Tag Name, Bsp. Montag, 22.12.",
+            "Tag relativ, Bsp. Heute, 22.12.",
+            "als Objekt",
+            "Anderes"
+        ],
+        "outputFormatsName": [
+            "UNIX",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD_HHMMSS",
+            "ECMA262",
+            "local",
+            "localLong",
+            "localTime",
+            "localTimeLong",
+            "localDate",
+            "localDateLong",
+            "UTC",
+            "ISO",
+            "ms",
+            "sec",
+            "min",
+            "hour",
+            "ISO",
+            "ISO",
+            "object",
+            "other"
+        ],
+        "outputTSFormatsGroups": [
+            "Zeitmarke (Zahl)",
+            "Zeitmarke gerundet (Zahl)",
+            "Text"
+        ],
+        "outputTSFormats": [
+            "Millisekunden",
+            "Sekunden",
+            "Minuten",
+            "Stunden",
+            "Tage",
+            "Wochen",
+            "Monate",
+            "Jahre",
+            "Sekunden gerundet",
+            "Minuten gerundet",
+            "Stunden gerundet",
+            "Tage gerundet",
+            "Wochen gerundet",
+            "Monate gerundet",
+            "Jahre gerundet",
+            "Anderes (frei definierbar)"
+        ],
+        "parseFormatsGroups": [
+            "Zahl",
+            "Text",
+            "Anderes"
+        ],
+        "parseFormats": [
+            "Millisekunden UNIX-Zeit",
+            "ECMA-262 - JSON Date",
+            "try different text Formats, prefer day first like d/M/y",
+            "try different text Formats, prefer month first like M/d/y",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "try different various Formats (object, number, text)",
+            "frei definierbares Text format"
+        ],
+        "multiplierGroups": [
+            "Standard",
+            "Spezial"
+        ],
+        "multiplier": [
+            "Millisekunden",
+            "Sekunden",
+            "Minuten",
+            "Stunden",
+            "Tage",
+            "Wochen",
+            "Monate",
+            "Jahre"
+        ],
+        "days": [
+            "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend",
+            "So", "Mo", "Die", "Mi", "Do", "Fr", "Sa"
+        ],
+        "month": [
+            "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember",
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        "dayDiffNames": [
+            "vor 1 Woche",
+            "vor 6 Tagen",
+            "vor 5 Tagen",
+            "vor 4 Tagen",
+            "vor 3 Tagen",
+            "vor 2 Tagen",
+            "Gestern",
+            "Heute",
+            "Morgen",
+            "Übermorgen",
+            "in 3 Tagen",
+            "in 4 Tagen",
+            "in 5 Tagen",
+            "in 6 Tagen"
+        ]
+    },
+    "errors": {
+        "error": "<strong>Fehler</strong>: __message__",
+        "error-title": "interner Fehler",
+        "error-init": "Fehler '__message__', wiederhole in __time__min",
+        "warn-init": "Warnung '__message__', wiederhole in __time__min"
+    },
     "position-config": {
         "label": {
             "position": "Position",
             "latitude": "Latitude",
             "longitude": "Longitude",
-            "angleType": "angle type",
-            "timezoneOffset": "TZ Offset",
-            "west": "West side azimuth limit",
-            "westLow": "low",
-            "westHigh": "high",
-            "south": "South side azimuth limit",
-            "southLow": "low",
-            "southHigh": "high",
-            "east": "East side azimuth limit",
-            "eastLow": "low",
-            "eastHigh": "high",
-            "north": "North side azimuth limit",
-            "northLow": "low",
-            "northHigh": "high",
+            "angleType": "Winkel Typ",
+            "timezoneOffset": "Zeitzone",
             "name": "Name",
             "property": "Property",
-            "minutes": "minutes"
-        },
-        "placeholder": {
-            "latitude": "51.025",
-            "longitude": "-1.4",
-            "angleType": "deg",
-            "westLow": "20",
-            "westHigh": "160",
-            "southLow": "100",
-            "southHigh": "260",
-            "eastLow": "190",
-            "eastHigh": "350",
-            "northLow": "280",
-            "northHigh": "360",
-            "name": "Name"
+            "minutes": "Minuten"
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         },
         "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on position-configuration",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "failed": "inject failed, see log for details",
-            "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large"
+            "longitude-missing": "Longitude is missing!",
+            "latitude-missing": "Latitude is missing!"
         }
     }
 }

@@ -1,0 +1,113 @@
+<script type="text/x-red" data-help-name="moon-position">
+    <h3>About</h3>
+    <p>Gets the position of the moon</p>
+
+    <h3>Inputs</h3>
+
+    The message is only for trigger the calculation. If limits are defined the input message will send to the output associated to the limit.
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>first output
+             <dl class="message-properties">
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+         <li>second and following outputs
+                <dl class="message-properties">
+                    <dt>payload </dt>
+                    <dd>same as the incomming message, which will send to this output.</dd>
+                    <dt>posChanged <span class="property-type">boolean</span></dt>
+                    <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
+                </dl>
+            </li>
+     </ol>
+    <h3>payload output properties</h3>
+    <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the moon position relative to the given coordinates.</dd>
+
+            <dt>altitude <span class="property-type">number</span></dt>
+            <dd> the altitude (elevation) of the moon position relative to the given coordinates.</dd>
+
+            <dt>distance <span class="property-type">number</span></dt>
+            <dd> the current distance of the moon to the given coordinates.</dd>
+
+            - `msg.payload.distance` the distance of the moon.
+            - `msg.payload.parallacticAngle` the parallacticAngle of the moon.
+            - `msg.payload.illumination` the illumination of the moon as object.
+
+            <dt>parallacticAngle <span class="property-type">number</span></dt>
+            <dd> the current parallacticAngle of the moon to the given coordinates.</dd>
+
+            <dt>illumination <span class="property-type">object</span></dt>
+            <dd>
+                the moon illumination as object
+                <dt>illumination.angle <span class="property-type">number</span></dt><dd> the current illumination angle of the moon to the given coordinates</dd>
+                <dt>illumination.fraction <span class="property-type">number</span></dt><dd> the current illumination fraction of the moon to the given coordinates</dd>
+                <dt>illumination.zenithAngle <span class="property-type">number</span></dt><dd> the current illumination zenithAngle of the moon to the given coordinates</dd>
+                <dt>illumination.phase <span class="property-type">object</span></dt><dd> illumination phase of the moon as object</dd>
+                <dt>illumination.phase.value <span class="property-type">number</span></dt><dd> the current phase of the moon in percent, where 0%/100% is New Moon, from 0% to 50% is growing, 50% is Full Moon and >50% is decreasing.</dd>
+                <dt>illumination.phase.angle <span class="property-type">object</span></dt><dd> the current phase angle of the moon</dd>
+                <dt>illumination.phase.emoji <span class="property-type">object</span></dt><dd> the emoji of the current phase of the moon</dd>
+                <dt>illumination.phase.code <span class="property-type">object</span></dt><dd> the code of the emoji for the current phase of the moon</dd>
+                <dt>illumination.phase.name <span class="property-type">object</span></dt><dd> the name of the current phase of the moon</dd>
+            </dd>
+
+            <dt>times <span class="property-type">object</span></dt>
+            <dd>
+                the moon times as object
+                <dt>times.rise <span class="property-type">Date</span></dt><dd> the moon rise time</dd>
+                <dt>times.set <span class="property-type">Date</span></dt><dd> the moon set time</dd>
+                <dt>times.alwaysUp <span class="property-type">boolean</span></dt><dd>is *true* if the moon is always up</dd>
+                <dt>times.alwaysDown <span class="property-type">boolean</span></dt><dd>is *true* if the moon is always down</dd>
+            </dd>
+            <dt>pos <span class="property-type">array of boolean</span></dt>
+            <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
+            <dt>posChanged <span class="property-type">boolean</span></dt>
+            <dd> boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.</dd>
+        </dl>
+        Example of the first output
+        <pre>
+{
+    "lastUpdate": "2018-11-11T11:11:11.111Z",
+    "latitude": "18.473782",
+    "longitude": "-34.357051",
+    "angleType": "deg",
+    "azimuth": 108.71205459404247,
+    "altitude": -9.578482237780767,
+    "distance": 400811.8001636167,
+    "parallacticAngle": -73.92702172116152,
+    "illumination": {
+        "angle": -94.27663428960696,
+        "fraction": 0.14981886026806135,
+        "phase": {
+            "emoji": "🌒",
+            "code": ":waxing_crescent_moon:",
+            "name": "Waxing Crescent",
+            "weight": 6.3825,
+            "value": 0.12651089732280724,
+            "angle": 45.54392303621061
+        },
+        "zenithAngle": -20.349612568445437
+    },
+    "times": {
+        "rise": "2018-11-11T11:44:22.877Z",
+        "set": "2018-11-11T23:10:07.389Z",
+        "alwaysUp": false,
+        "alwaysDown": false
+    },
+    "pos": [],
+    "posChanged": false
+}</pre>
+     <h3>Tips</h3>
+     <p>For home automation it can be useful to define the lower and higher position for example of the moon for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
+     <h3>References</h3>
+     <ul>
+         <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+         <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+         <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+     </ul>
+     With friendly support by <b>agag</b>.
+</script>

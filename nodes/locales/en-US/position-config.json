@@ -1,41 +1,160 @@
 {
-    "position-config": {
+    "common": {
         "label": {
-            "position": "Position",
-            "latitude": "Latitude",
-            "longitude": "Longitude",
-            "angleType": "angle type",
-            "timezoneOffset": "TZ Offset",
-            "name": "Name",
-            "property": "Property",
-            "minutes": "minutes"
+            "positionConfig": "configuration",
+            "binary": "binary",
+            "json": "json",
+            "jsonata": "json expr.",
+            "timestamp":"timestamp",
+            "blank": "\"\"",
+            "nothing": "nothing",
+            "checkall": "stopping after first match (if)",
+            "stopfirst": "checking all rules"
         },
-        "placeholder": {
-            "latitude": "51.025",
-            "longitude": "-1.4",
-            "angleType": "deg",
-            "timezoneOffset": "0",
-            "name": "Name"
+        "types": {
+            "unlimited":"no limitation",
+            "undefined":"not used",
+            "datespecific":"timestamp enhanced",
+            "timeentered":"time (next)",
+            "dateentered":"date",
+            "timepredefined":"fixed times",
+            "dayofmonth":"day of month",
+            "timesun":"sun time",
+            "timemoon":"moon time",
+            "suncalc":"sun calculation",
+            "mooncalc":"moon calculation"
         },
-        "tips": {
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+        "multiselectLbl": {
+            "operatorTypes": "include into compare"
         },
-        "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occured on position-configuration",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "failed": "inject failed, see log for details",
-            "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large",
-            "longitude-missing": "Longitude is missing!",
-            "latitude-missing": "Latitude is missing!"
-        },
+        "operatorsGroups": [
+            "complete Timestamp"
+        ],
+        "operators": [
+            "==     (equal)",
+            "!=     (unequal)",
+            ">      (greater)",
+            ">=     (greater or equal)",
+            "<      (lesser)",
+            "<=     (lesser or equal)"
+        ],
+        "operatorTypesGroups": [
+            "include into compare",
+            "special"
+        ],
+        "operatorTypes": [
+            "Milliseconds",
+            "Seconds",
+            "Minutes",
+            "Hours",
+            "Day of Month",
+            "Month",
+            "Year",
+            "Day of Week"
+        ],
+        "outputFormatsGroups": [
+            "Number",
+            "Text (string)",
+            "time (number) since emit",
+            "day of week",
+            "Text free"
+        ],
+        "outputFormats": [
+            "milliseconds UNIX timestamp",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "ECMA-262 - JSON Date representation",
+            "local date and time",
+            "local date and time enh.",
+            "local time",
+            "local time enh.",
+            "local date",
+            "local date long",
+            "UTC date and time",
+            "ISO date and time",
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "Day Name, e.g. Monday, 22.12.",
+            "Day in relative, e.g. Today, 22.12.",
+            "as object",
+            "Other"
+        ],
+        "outputFormatsName": [
+            "UNIX",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD_HHMMSS",
+            "ECMA262",
+            "local",
+            "localLong",
+            "localTime",
+            "localTimeLong",
+            "localDate",
+            "localDateLong",
+            "UTC",
+            "ISO",
+            "ms",
+            "sec",
+            "min",
+            "hour",
+            "ISO",
+            "ISO",
+            "object",
+            "other"
+        ],
+        "outputTSFormatsGroups": [
+            "timestamp (number)",
+            "timestamp rounded (number)",
+            "Text"
+        ],
+        "outputTSFormats": [
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "weeks",
+            "month",
+            "years",
+            "seconds rounded",
+            "minutes rounded",
+            "hours rounded",
+            "days rounded",
+            "weeks rounded",
+            "month rounded",
+            "years rounded",
+            "Other (free defined)"
+        ],
+        "parseFormatsGroups": [
+            "Number",
+            "Text (string)",
+            "Other"
+        ],
+        "parseFormats": [
+            "milliseconds - UNIX timestamp",
+            "ECMA-262 - JSON Date representation",
+            "try different text Formats, prefer day first like d/M/y",
+            "try different text Formats, prefer month first like M/d/y",
+            "YYYYMMDDHHMMSS",
+            "YYYYMMDD.HHMMSS",
+            "try different various Formats (object, number, text)",
+            "free text format definition"
+        ],
+        "multiplierGroups": [
+            "Standard",
+            "Special"
+        ],
+        "multiplier": [
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "weeks",
+            "month",
+            "year"
+        ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -59,6 +178,53 @@
             "in 4 days",
             "in 5 days",
             "in 6 days"
-        ]
+        ],
+        "timeFormat": {
+            "default": "ddd MMM dd yyyy HH:mm:ss",
+            "shortDate": "m/d/yy",
+            "mediumDate": "MMM d, yyyy",
+            "longDate": "MMMM d, yyyy",
+            "fullDate": "dddd, MMMM d, yyyy",
+            "shortTime": "h:mm TT",
+            "mediumTime": "h:mm:ss TT",
+            "longTime": "h:mm:ss TT Z",
+            "isoDate": "yyyy-MM-dd",
+            "isoTime": "HH:MM:ss",
+            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
+            "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
+        }
+    },
+    "errors": {
+        "error": "<strong>Error</strong>: __message__",
+        "error-title": "internal error",
+        "error-init": "error '__message__', retry in __time__min",
+        "warn-init": "warning '__message__', retry in __time__min"
+    },
+    "position-config": {
+        "label": {
+            "position": "Position",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "angleType": "angle type",
+            "timezoneOffset": "TZ Offset",
+            "name": "Name",
+            "property": "Property",
+            "minutes": "minutes"
+        },
+        "placeholder": {
+            "latitude": "51.025",
+            "longitude": "-1.4",
+            "angleType": "deg",
+            "timezoneOffset": "0",
+            "name": "Name"
+        },
+        "tips": {
+            "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
+            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+        },
+        "errors": {
+            "longitude-missing": "Longitude is missing!",
+            "latitude-missing": "Latitude is missing!"
+        }
     }
 }
