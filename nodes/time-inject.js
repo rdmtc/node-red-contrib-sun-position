@@ -88,27 +88,6 @@ module.exports = function (RED) {
         this.nextTimeAltData = null;
         const node = this;
 
-        function retriggerOnInit(node, errorStatus, errorMesage) {
-            node.warn(RED._('time-inject.errors.warn-init', { message: errorMesage, time: 6}));
-            setTimeout(() => {
-                try {
-                    doCreateTimeout(node);
-                } catch (err) {
-                    node.error(err.message);
-                    node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                    node.status({
-                        fill: 'red',
-                        shape: 'ring',
-                        text: RED._('time-inject.errors.error-title')
-                    });
-                }
-            }, 360000); // 6 Minuten
-            node.status({
-                fill: 'red',
-                shape: 'ring',
-                text: RED._('time-inject.errors.error-init', { message: errorStatus, time: '6min'})
-            });
-        }
         function doCreateTimeout(node, _onInit) {
             let errorStatus = '';
             let isAltFirst = false;
@@ -128,8 +107,7 @@ module.exports = function (RED) {
                     node.nextTime = null;
                     isFixedTime = false;
                     if (_onInit === true) {
-                        retriggerOnInit(node, errorStatus, node.nextTimeData.error);
-                        return;
+                        return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeData.error};
                     }
                     node.error(node.nextTimeData.error);
                     node.debug('nextTimeData ' + util.inspect(node.nextTimeData));
@@ -149,8 +127,7 @@ module.exports = function (RED) {
                     node.nextTimeAlt = null;
                     isFixedTime = false;
                     if (_onInit === true) {
-                        retriggerOnInit(node, errorStatus, node.nextTimeAltData.error);
-                        return;
+                        return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeAltData.error};
                     }
                     node.error(node.nextTimeAltData.error);
                     node.debug('nextTimeAltData: ' + util.inspect(node.nextTimeAltData));
@@ -163,7 +140,7 @@ module.exports = function (RED) {
             if ((node.nextTime !== null) && (errorStatus === '')) {
                 if (!(node.nextTime instanceof Date) || node.nextTime === 'Invalid Date' || isNaN(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
-                    return;
+                    return { state:'error', done: false, statusMsg: 'internal error!', errorMsg: 'Invalid time format'};
                 }
 
                 let millisec = tsGetScheduleTime(node.nextTime, 10);
@@ -208,10 +185,10 @@ module.exports = function (RED) {
                                 node.status({
                                     fill: 'red',
                                     shape: 'ring',
-                                    text: RED._('time-inject.errors.error-title')
+                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                                 });
                             }
-                            return;
+                            return { state:'recalc', done: true };
                         }
                     }
 
@@ -235,16 +212,12 @@ module.exports = function (RED) {
             }
 
             if ((errorStatus !== '')) {
-                if (_onInit === true) {
-                    retriggerOnInit(node, errorStatus, errorStatus);
-                    return;
-                }
-
                 node.status({
                     fill: 'red',
                     shape: 'dot',
                     text: errorStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
+                return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
             // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
@@ -269,6 +242,7 @@ module.exports = function (RED) {
             } else {
                 node.status({});
             }
+            return { state:'ok', done: true };
         }
 
         this.on('close', () => {
@@ -284,6 +258,7 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
+                msg._srcid = node.id;
                 node.debug('input ');
                 doCreateTimeout(node);
                 msg.topic = config.topic;
@@ -313,7 +288,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('time-inject.errors.error-title')
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
         });
@@ -335,14 +310,38 @@ module.exports = function (RED) {
                 }, (config.onceDelay || 0.1) * 1000);
                 return;
             }
-            doCreateTimeout(node, true);
+
+            const createTO = doCreateTimeout(node, true);
+            if (createTO.done !== true) {
+                if (createTO.errorMsg) {
+                    node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
+                }
+                setTimeout(() => {
+                    try {
+                        doCreateTimeout(node);
+                    } catch (err) {
+                        node.error(err.message);
+                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.status({
+                            fill: 'red',
+                            shape: 'ring',
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                        });
+                    }
+                }, 360000); // 6 Minuten
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
+                });
+            }
         } catch (err) {
             node.error(err.message);
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('time-inject.errors.error-title')
+                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
             });
         }
     }
@@ -355,5 +354,20 @@ module.exports = function (RED) {
             dotfiles: 'deny'
         };
         res.sendFile(req.params[0], options);
+    });
+
+    RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
+        const node = RED.nodes.getNode(req.params.id);
+        if (node !== null) {
+            try {
+                node.receive();
+                res.sendStatus(200);
+            } catch(err) {
+                res.sendStatus(500);
+                node.error(RED._('node-red:inject.failed',{error:err.toString()}));
+            }
+        } else {
+            res.sendStatus(404);
+        }
     });
 };

@@ -1,126 +1,32 @@
 {
     "time-inject": {
         "label": {
-            "time-inject": "time-inject",
-            "inject": "inject",
-            "position": "Position",
-            "positionConfig": "configuration",
-            "name": "Name",
             "property": "Property",
             "time": "Time",
-            "offset": "Offset",
-            "payloadOffset": "Offset",
+            "timeOffset": "Offset",
             "timeAlt": "Alternate time",
             "timeAltOffset": "Offset",
-            "payloadTimeFormat": "Format",
+            "payloadOffset": "Offset",
+            "payloadFormat": "Format",
             "addPayload1": "set",
             "addPayload2": "(2) set",
             "addPayload3": "(3) set",
             "addPayload1Value": "value",
             "addPayload2Value": "value",
             "addPayload3Value": "value",
+            "addPayload1Offset": "Offset",
+            "addPayload2Offset": "Offset",
+            "addPayload3Offset": "Offset",
             "addPayload1Format": "time format",
             "addPayload2Format": "time format",
             "addPayload3Format": "time format",
             "recalcTime": "Reclac.",
-            "payload": "Payload",
-            "topic": "Topic",
-            "seconds": "seconds",
-            "minutes": "minutes",
             "hours": "hours",
-            "timeformat": "time format",
             "on": "on",
-            "none": "none",
-            "stopped": "stopped",
-            "timestamp": "timestamp",
-            "binary": "binary",
-            "json": "json",
-            "jsonata": "json expr.",
-            "blank": "\"\"",
-            "5minutes": "every 5 minutes",
-            "10minutes": "every 10 minutes",
-            "15minutes": "every 15 minutes",
-            "30minutes": "every 30 minutes",
-            "1hour": "every hour",
-            "2hours": "every 2 hour",
-            "4hours": "every 4 hour",
-            "6hours": "every 6 hour",
-            "12hours": "every 12 hour",
-            "24hours": "every 24 hour",
             "once": "additional",
             "onstart": "Inject on start ",
-            "onceDelay": "seconds",
-            "success": "Successfully injected: __label__"
+            "onceDelay": "seconds"
         },
-        "outputFormatsGroups": [
-            "Number",
-            "Text (string)",
-            "time (number) since emit",
-            "day of week",
-            "Text free"
-        ],
-        "outputFormats": [
-            "milliseconds UNIX timestamp",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD.HHMMSS",
-            "ECMA-262",
-            "local date and time",
-            "local date and time enh.",
-            "local time",
-            "local time enh.",
-            "local date",
-            "local date long",
-            "UTC date and time",
-            "ISO date and time",
-            "milliseconds",
-            "seconds",
-            "minutes",
-            "hours",
-            "Day Name, e.g. Monday, 22.12.",
-            "Day in relative, e.g. Today, 22.12.",
-            "as object",
-            "Other"
-        ],
-        "outputFormatsName": [
-            "UNIX",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD_HHMMSS",
-            "ECMA262",
-            "local",
-            "localLong",
-            "localTime",
-            "localTimeLong",
-            "localDate",
-            "localDateLong",
-            "UTC",
-            "ISO",
-            "ms",
-            "sec",
-            "min",
-            "hour",
-            "ISO",
-            "ISO",
-            "object",
-            "other"
-        ],
-        "multiplierGroups": [
-            "Standard",
-            "Special"
-        ],
-        "multiplier": [
-            "milliseconds",
-            "seconds",
-            "minutes",
-            "hours",
-            "days",
-            "weeks",
-            "month",
-            "year"
-        ],
-        "days": [
-            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-        ],
         "placeholder": {
             "position": "Position",
             "name": "Name",
@@ -135,20 +41,6 @@
             "timeAlt": "18:15",
             "timeAltOffset": "0"
         },
-        "timeFormat": {
-            "default": "ddd MMM dd yyyy HH:mm:ss",
-            "shortDate": "m/d/yy",
-            "mediumDate": "MMM d, yyyy",
-            "longDate": "MMMM d, yyyy",
-            "fullDate": "dddd, MMMM d, yyyy",
-            "shortTime": "h:mm TT",
-            "mediumTime": "h:mm:ss TT",
-            "longTime": "h:mm:ss TT Z",
-            "isoDate": "yyyy-MM-dd",
-            "isoTime": "HH:MM:ss",
-            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
-            "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
-        },
         "tips": {
             "config": "If time is set to 'not used' the inject node can only used manually or once!",
             "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
@@ -158,6 +50,7 @@
         "message": {
             "onceDelay": "delay __seconds__s"
         },
+<<<<<<< HEAD
         "errors": {
             "error": "<strong>Error</strong>: __message__",
             "error-text": "Exception occurred on time-inject",
@@ -173,6 +66,10 @@
             "toolong": "Interval too large",
             "error-init": "error '__message__', retry in __time__",
             "warn-init": "warning '__message__', retry in __time__"
+=======
+        "errors":{
+            "invalid-property-type": "Invalid Property Type: __type__"
+>>>>>>> i18n
         }
     }
 }

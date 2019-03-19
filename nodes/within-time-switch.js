@@ -10,6 +10,37 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
+    function getDate(comparetype, msg, node) {
+        let id = '';
+        let value = '';
+        switch (comparetype) {
+            case '1':
+                id = 'msg.ts';
+                value = msg.ts;
+                break;
+            case '2':
+                id = 'msg.lc';
+                value = msg.lc;
+                break;
+            case '3':
+                id = 'msg.time';
+                value = msg.time;
+                break;
+            case '4':
+                id = 'msg.value';
+                value = msg.value;
+                break;
+            default:
+                return new Date();
+        }
+        node.debug('compare time to ' + id + ' = "' + value + '"');
+        const dto = new Date(msg.ts);
+        if (dto !== 'Invalid Date' && !isNaN(dto)) {
+            return dto;
+        }
+        node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
+        return new Date();
+    }
 
     function setstate(node, result, status, statusObj, _onInit) {
         if (status > 255) {
@@ -21,9 +52,9 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch..errors.error-init', result.start.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.start.error)
                 });
-                node.warn(RED._('within-time-switch..errors.warn-init', result.start.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.start.error));
                 return true;
             }
             hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : result.start.error}), undefined, result.start.error);
@@ -32,9 +63,9 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch..errors.error-init', result.end.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.end.error)
                 });
-                node.warn(RED._('within-time-switch..errors.warn-init', result.end.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.end.error));
                 return true;
             }
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : result.end.error}), undefined, result.end.error);
@@ -103,20 +134,20 @@ module.exports = function (RED) {
 
         if (result.altStartTime && config.startTimeAltType !== 'none') {
             // node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt, 'num', config.startOffsetAltMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAlt, config.startOffsetAltType, config.startOffsetAltMultiplier);
             result.startSuffix = '⎇ ';
         } else {
             // node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffset, 'num', config.startOffsetMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffset, config.startOffsetType, config.startOffsetMultiplier);
         }
 
         if (result.altEndTime && config.endTimeAltType !== 'none') {
             // node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt, 'num', config.endOffsetAltMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAlt, config.endOffsetAltType, config.endOffsetAltMultiplier);
             result.endSuffix = ' ⎇';
         } else {
             // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffset, 'num', config.endOffsetMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffset, config.endOffsetType, config.endOffsetMultiplier);
         }
 
         // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
@@ -175,14 +206,7 @@ module.exports = function (RED) {
                 // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
                 const result = calcWithinTimes(this, msg, config);
-                let now = new Date();
-
-                if ((typeof msg.ts === 'string') || (msg.ts instanceof Date)) {
-                    const dto = new Date(msg.ts);
-                    if (dto !== 'Invalid Date' && !isNaN(dto)) {
-                        now = dto;
-                    }
-                }
+                const now = getDate(config.tsCompare, msg, node);
 
                 if (!result.start.value || !result.end.value) {
                     throw new Error('Error can not calc time!');
@@ -230,7 +254,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('within-time-switch.errors.error-title')
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
         });
@@ -251,7 +275,7 @@ module.exports = function (RED) {
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('within-time-switch.errors.error-title')
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
                 }, 360000); // 6 Minuten
@@ -262,7 +286,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('within-time-switch.errors.error-title')
+                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
             });
         }
     }

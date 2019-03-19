@@ -1,6 +1,6 @@
 <script type="text/x-red" data-template-name="time-span">
   <div class="form-row">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="time-span.label.positionConfig"></span></label>
+    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
@@ -47,8 +47,8 @@
   </div>
   <div class="form-row">
       <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-          <option value="false" data-i18n="time-span.label.stopfirst"></option>
-          <option value="true" data-i18n="time-span.label.checkall"></option>
+          <option value="false" data-i18n="node-red-contrib-sun-position/position-config:common.label.stopfirst"></option>
+          <option value="true" data-i18n="node-red-contrib-sun-position/position-config:common.label.checkall"></option>
       </select>
   </div>
   <hr>
@@ -83,7 +83,7 @@
   </div>
   <hr>
   <div class="form-row">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="time-span.label.name"></span></label>
+      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
       <input type="text" id="node-input-name" data-i18n="[placeholder]time-span.placeholder.name">
   </div>
 </script>
@@ -138,30 +138,16 @@
         margin-left: 5px;
     }
 </style>
-<script type="text/x-red" data-help-name="time-span"> <p>A enhanced node for time format change and time comparision.</p>
-    <h3>Input</h3>
-        <p>When a message arrives through the Input a timestamp out of the message objet or a global or flow context store could be parsed into a timestamp.</p>
-    <h3>Outputs</h3>
-        <p>Outputs the Input message, where the posibility exists to change a property of the input message (or a global/flow context). If a time conversation is done the input message would be output to the according output where the timestamp is matching.</p>
-  <h3>References</h3>
-  Enhanced documentation can be found in the following locations:
-  <ul>
-      <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
-      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
-      <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
-  </ul>
-  With friendly support by <b>agag</b>.
-</script>
+
 <script type="text/javascript">
     function clipValueLength(v, l) {
         if (v.length > l) {
-            return v.substring(0, l - 3) + '...';
+            return v.substring(0, (l - 3)) + '...';
         }
-
         return v;
     }
 
-    function getValueLabel(t, v, offset, l) {
+    function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
         let suffix = '';
         if (offset && offset > 0) {
@@ -171,61 +157,50 @@
         }
 
         if (t === 'jsonata') {
-            if (v.length < l) {
-                return v + suffix;
-            }
-            return 'json expr.' + suffix; // this._('time-inject.label.jsonata');
+            if (v.length < l) { return v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
         }
 
         if (t === 'json') {
-            if (v.length < l) {
-                return  v + suffix;
-            }
-
-            return 'json' + suffix; // this._('time-inject.label.json') + suffix;
+            if (v.length < l) { return  v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
         }
 
         if (t === 'bin') {
-            return 'binary' + suffix; // this._('time-inject.label.binary') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
         }
 
         if (t === 'date') {
-            return 'timestamp' + suffix; // this._('time-inject.label.timestamp') + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
         }
 
         if (t === 'dateSpecific') {
-            return 'timestamp+' + suffix; // this._('time-inject.label.timestamp') + '+' + suffix;
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
         }
 
         if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
-            if (v === '') {
-                return v + suffix;
-            }
+            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
             return '"' + clipValueLength(v, l) + '"' + suffix;
         }
 
-        if (t === 'num' || t === 'bool') {
-            if (v === '') {
-                return '0' + suffix;
-            }
+        if (t === 'num') {
+            if (v === '') { return '0' + suffix; }
+            return String(v) + suffix;
+        }
+
+        if (t === 'bool') {
+            if (v === '') { return 'false' + suffix; }
             return String(v) + suffix;
         }
 
         if (t === 'msg') {
             return t + '.' + clipValueLength(v, l) + suffix;
         }
-        if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgTs') { return 'msg.ts'; }
-        if (t === 'msgLc') { return 'msg.lc'; }
-        if (t === 'msgValue') { return 'msg.value'; }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
             return t + '.' + clipValueLength(result.key, l) + suffix;
         }
-        if (t === 'timespan') { return 'timespan'; }
-        if (t === 'operand1') { return 'operand1 data'; }
-        if (t === 'operand2') { return 'operand2 data'; }
 
         if (t === 'pdsCalcData') {
             return '{sun position}' + suffix;
@@ -235,18 +210,25 @@
             return '{moon position}' + suffix;
         }
 
-
         if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
-            return clipValueLength(res, l);
+            return clipValueLength(res, l) + suffix;
         }
 
         if (t === 'pdmTime') {
             return 'moon' + v + suffix;
         }
 
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgLc') { return 'msg.lc'; }
+        if (t === 'msgValue') { return 'msg.value'; }
+        if (t === 'timespan') { return 'timespan'; }
+        if (t === 'operand1') { return 'operand1 data'; }
+        if (t === 'operand2') { return 'operand2 data'; }
+
         if (v === '') {
-            return this._('time-inject.label.blank');
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
         }
 
         return clipValueLength(v, l) + suffix;
@@ -406,7 +388,7 @@
             if (this.rules.length) {
                 const rule = this.rules[index];
                 if (rule) {
-                    return rule.operatorText + ' ' + getValueLabel(rule.operandType, rule.operandValue);
+                    return rule.operatorText + ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
                 }
                 if (this.checkall === 'true') {
                     return 'always';
@@ -422,17 +404,17 @@
                 return this.name;
             }
             if (!this.rules || this.rules.length <= 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2;
             } else if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
-                const cmp = getValueLabel(this.rules[0].operandType, this.rules[0].operandValue);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
+                const cmp = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
                 return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
             } else if (this.rules && this.rules.length > 1) {
-                const op1 = getValueLabel(this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this.operand2Type, this.operand2);
+                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
                 return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
             }
             return this._('time-span.label.time-span');
@@ -446,7 +428,7 @@
             const node = this;
             const setup = function(node) {
                 /* global getOperator getMultiplier getTypes appendOptions setupTInput initCombobox */
-                const types = getTypes();
+                const types = getTypes(node);
                 // #region operand1
                 setupTInput(node, {
                     typeProp: 'operand1Type',
@@ -496,10 +478,10 @@
                     }
                 }).change();
 
-                initCombobox(node, 'time-span', 'operand1Formatsel', 'operand1Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+                initCombobox(node, 'operand1Formatsel', 'operand1Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
                 const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
-                appendOptions(node, 'time-span', operand1MultiplierField, 'multiplier');
+                appendOptions(node, operand1MultiplierField, 'multiplier');
                 operand1MultiplierField.val(node.operand1OffsetMultiplier);
                 setupTInput(node, {
                     typeProp: 'operand1OffsetType',
@@ -566,10 +548,10 @@
                     }
                 }).change();
 
-                initCombobox(node, 'time-span', 'operand2Formatsel', 'operand2Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+                initCombobox(node, 'operand2Formatsel', 'operand2Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
                 const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
-                appendOptions(node, 'time-span', operand2MultiplierField, 'multiplier');
+                appendOptions(node, operand2MultiplierField, 'multiplier');
                 operand2MultiplierField.val(node.operand2OffsetMultiplier);
                 setupTInput(node, {
                     typeProp: 'operand2OffsetType',
@@ -623,7 +605,7 @@
                             class: 'node-input-rule-operator',
                             id: 'node-input-rule-operator' + containerIndex
                         }).appendTo(row);
-                        appendOptions(node, 'time-span', operatorField, 'operators');
+                        appendOptions(node, operatorField, 'operators');
 
                         const operandField = $('<input/>', {
                             class: 'node-input-rule-operand',
@@ -637,7 +619,7 @@
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row);
-                        appendOptions(node, 'time-span', multiplierField, 'multiplier', (id) => (id > 0) );
+                        appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0) );
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
                         }).appendTo(row);
@@ -737,12 +719,12 @@
                     onChange: (_type, _value) => { $('#node-input-result1').change(); }
                 }).change();
                 /********************************************************/
-                initCombobox(node, 'time-span', 'result1TSFormatSel', 'result1TSFormat', 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
+                initCombobox(node, 'result1TSFormatSel', 'result1TSFormat', 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
                 /********************************************************/
-                initCombobox(node, 'time-span', 'result1FormatSel', 'result1Format', 'dateOutFormat', 'outputFormats', node.result1Format, 30);
+                initCombobox(node, 'result1FormatSel', 'result1Format', 'dateOutFormat', 'outputFormats', node.result1Format, 30);
                 /********************************************************/
                 const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
-                appendOptions(node, 'time-span', resultMultiplierField, 'multiplier');
+                appendOptions(node, resultMultiplierField, 'multiplier');
                 resultMultiplierField.val(node.result1OffsetMultiplier);
                 setupTInput(node, {
                     typeProp: 'result1OffsetType',

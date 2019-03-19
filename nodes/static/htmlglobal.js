@@ -110,23 +110,23 @@ function getParseFormats(nr) { // eslint-disable-line no-unused-vars
     return SelectFields.parseFormats[nr];
 }
 
-function getTypes() { // eslint-disable-line no-unused-vars
+function getTypes(node) { // eslint-disable-line no-unused-vars
     return {
         Unlimited: {
             value: 'none',
-            label: 'no limitation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.unlimited','no limitation'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         Undefined: {
             value: 'none',
-            label: 'not used',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.undefined','not used'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         DateSpecific: {
             value: 'dateSpecific',
-            label: 'timestamp enhanced',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific','timestamp enhanced'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
@@ -167,26 +167,26 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeEntered: {
             value: 'entered',
-            label: 'time (next)',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
             hasValue: true,
             validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
         },
         DateEntered: {
             value: 'dateEntered',
-            label: 'date',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.dateentered','date'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
             hasValue: true,
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
         TimePredefined: {
             value: 'TimePredefined',
-            label: 'fixed times',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timepredefined','fixed times'),
             options: ['next midnight', 'next noon']
         },
         DayOfMonth: {
             value: 'DayOfMonth',
-            label: 'day of month',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.dayofmonth','day of month'),
             options: [
                 'first Monday',
                 'first Tuesday',
@@ -206,7 +206,7 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeSun: {
             value: 'pdsTime',
-            label: 'sun time ',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
                 'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
@@ -214,19 +214,19 @@ function getTypes() { // eslint-disable-line no-unused-vars
         },
         TimeMoon: {
             value: 'pdmTime',
-            label: 'moon time ',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
             options: ['rise', 'set']
         },
         SunCalc: {
             value: 'pdsCalcData',
-            label: 'sun calculation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.suncalc','sun calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
             hasValue: false
         },
         MoonCalc: {
             value: 'pdmCalcData',
-            label: 'moon calculation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
             hasValue: false
         }
@@ -414,21 +414,22 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
     });
 }
 
-function appendOptions(node, i18N ,parent, elementName, limit) { // eslint-disable-line no-unused-vars
+function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
+    // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
     const groups = SelectFields[elementName + 'Groups'];
     const elements = SelectFields[elementName];
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-        const group = $('<optgroup/>', {label: node._(i18N + '.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+        const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:common.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (limit) {
                     if (limit(elements[eIndex].id)) {
-                        group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                        group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                     }
                 } else {
-                    group.append($('<option></option>').val(elements[eIndex].id).text(node._(i18N + '.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                    group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                 }
             }
         }
@@ -466,6 +467,9 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     if (data.onChange) {
         tInputField.on('change', data.onChange);
     }
+    if (data.onFocus) {
+        tInputField.on('change focus focusin focusout', data.onFocus);
+    }
     return tInputField;
 }
 
@@ -475,8 +479,10 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
  * @param {string} val value of the element
  */
 function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
-    if (val === '*' || typeof val === 'undefined' || val === null || val === '') {
+    if (val === '*' || typeof val === 'undefined' || val === null) {
         $(element + ' input[type=checkbox]').prop('checked', true);
+    } else if (val === '' || val === 'none') {
+        $(element + ' input[type=checkbox]').removeAttr('checked');
     } else {
         $(element + ' input[type=checkbox]').removeAttr('checked');
         val.split(',').forEach(v => {
@@ -487,15 +493,14 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 
 // ************************************************************************************************
 
-function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
-    // console.log('node=' + node + ' i18N=' + i18N + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+function initCombobox(node, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
+    // console.log('initCombobox node=' + node + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     const $inputSelect = $('#node-input-' + inputSelectName);
     const $inputBox = $('#node-input-' + inputBoxName);
     $inputSelect.attr('base-width', width);
     $inputSelect.attr('linked-input', inputBoxName);
-    $inputSelect.attr('i18N-name', i18N);
 
-    appendOptions(node, i18N, $inputSelect, optionElementName);
+    appendOptions(node, $inputSelect, optionElementName);
     autocomplete($('#node-input-' + inputBoxName), dataList);
 
     $inputSelect.on('change', (_type, _value) => {
@@ -510,8 +515,7 @@ function initCombobox(node, i18N, inputSelectName, inputBoxName, dataList, optio
             $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
             $inputBox.show();
             if (!isNaN($inputBox.val())) {
-                const i18N = $inputSelect.attr('i18N-name');
-                $inputBox.val(node._(i18N + '.timeFormat.default'));
+                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
             }
         } else {
             $inputBox.hide();
