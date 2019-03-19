@@ -449,7 +449,7 @@
                 /* global getTypes appendOptions setupTInput initializeValue */
                 const types = getTypes(node);
                 // #region initialize
-                function multilpierUpdate(mp, name) {
+                function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
@@ -492,7 +492,7 @@
                     }
                 });
 
-                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'startOffsetType',
                     valueProp: 'startOffset',
@@ -534,7 +534,7 @@
                     }
                 });
 
-                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'endOffsetType',
                     valueProp: 'endOffset',
@@ -590,7 +590,7 @@
                     }
                 }).change();
 
-                node.startTimeAltOffsetMultiplier = multilpierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
+                node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'startTimeAltOffsetType',
                     valueProp: 'startTimeAltOffset',
@@ -646,7 +646,7 @@
                     }
                 }).change();
 
-                node.endTimeAltOffsetMultiplier = multilpierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
+                node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'endTimeAltOffsetType',
                     valueProp: 'endTimeAltOffset',
@@ -712,7 +712,7 @@
                         console.log(err.stack); // eslint-disable-line
                     }
                 })
-                .fail((jqxhr, settings, exception) => {
+                .fail((_jqxhr, settings, exception) => {
                     console.log("failed to load htmlglobal.js"); // eslint-disable-line
                     console.log(exception); // eslint-disable-line
                     console.log(exception.stack); // eslint-disable-line

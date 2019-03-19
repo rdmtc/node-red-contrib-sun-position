@@ -120,7 +120,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         Undefined: {
             value: 'none',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.undefined','not used'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.undefined'),
+            // label: node._('node-red-contrib-sun-position/position-config:common.types.undefined','not used'),
             // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
