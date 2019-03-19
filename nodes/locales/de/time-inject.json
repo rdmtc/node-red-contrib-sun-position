@@ -42,10 +42,10 @@
             "timeAltOffset": "0"
         },
         "tips": {
-            "config": "If time is set to 'not used' the inject node can only used manually or once!",
-            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
-            "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done.",
-            "addPayload": "With the additional message properties you can send the message with define up to 3 additional properties with enhanced settings. Especial there can be defined timestamps in relation to the message send timestamp."
+            "config": "Wenn die Zeit auf 'nicht verwendet' eingestellt ist, kann die Time-Inject-Node nur manuell oder einmal bei Start triggern!",
+            "addTimes": "Alternative Zeit: Wenn die angegebene Eigenschaft den Wert 'true' besitzt, wird anstatt zur normal angegebenen zeit zum angegebenem alternativen Zeitpunkt getriggert. Dies ist nützlich, um an Feiertagen oder anderen besonderen Tagen zu einem anderen Zeitpunkt einen Flow zu triggern.",
+            "recalc": "Wenn der Zeitstempel durch einen flow oder global context definiert ist, führen Änderungen an den Werten nicht unmittelbar zu einer Änderung der geplanten Trigger-Zeit, sondern immer nur wenn eine Neuberechnung durchgeführt wird. Hiermit kann eine reguläre Neuberechnung eingestellt werden.",
+            "addPayload": "Mit diesen zusätzlichen Eigenschaften können Sie bis zu 3 zusätzliche Werte zum Trigger Zeitpunkt in der Nachricht,im Flow oder globalen Kontext setzen. Das kann nützlich sein um beispielsweise einen extra Zeitstempel in Bezug auf den Zeitpunkt des Triggers der Nachricht zu definieren. So kann beispielsweise beim Einschalten gleich der Ausschaltzeitpunkt mitgegeben werden."
         },
         "message": {
             "onceDelay": "verzögert um __seconds__s"

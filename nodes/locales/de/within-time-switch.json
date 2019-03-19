@@ -19,9 +19,9 @@
             "statusTime": "Begin und Ende",
             "statusTimeOrSend": "Begin und Ende oder letzte Nachricht",
             "lastMsgOnStartOut": "resend start",
-            "lastMsgOnStartOutTxt": "next start additionally emit the last message arrived out of time",
+            "lastMsgOnStartOutTxt": "Beim nächsten Start-Zeitpunkt wird die letzte Nachricht welche außerhalb der Zeit empfangen wurde ausgesendet.",
             "lastMsgOnEndOut": "resend end",
-            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time",
+            "lastMsgOnEndOutTxt": "Zum nächsten Ende wird die letzte Nachricht welche innerhalb der Zeit angekommen ist ausgesendet",
             "compareTime":"Vergleichs Basis"
         },
         "placeholder": {
@@ -34,6 +34,9 @@
             "startOffsetAlt": "0",
             "endTimeAlt": "18:15",
             "endOffsetAlt": "0"
+        },
+        "tips": {
+            "addTimes": "Hier können alternative Zeiten für Start / Ende definiert werden. Wenn die angegebene Eigenschaft \"true\" ist, werden die alternativen Start- und Endzeiten anstelle der normalen verwendet. Dies kann verwendet werden, um unterschiedliche Start- / Endzeiten für Feiertage oder andere spezielle Tage festzulegen."
         },
         "errors": {
             "error-start-time": "Error get start time: __message__",

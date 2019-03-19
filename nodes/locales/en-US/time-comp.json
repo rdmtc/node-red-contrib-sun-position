@@ -26,12 +26,6 @@
             "offset": "0",
             "timeAlt": "18:15",
             "timeAltOffset": "0"
-        },
-        "tips": {
-            "config": "If time is set to 'not used' the inject node can only used manually or once!",
-            "addTimes": "Here can be defined alternate time. If the given property is true the alternate time will be used instead the normal time. This can be used to have different time for holidays or other special days.",
-            "recalc": "If the timestamp is given through a flow or global context, changes to these contexts only lead to a change of the planned emit time if a recalculation is done.",
-            "addPayload": "With the additional message properties you can send the message with define up to 3 additional properties with enhanced settings. Especial there can be defined timestamps in relation to the message send timestamp."
         }
     }
 }
