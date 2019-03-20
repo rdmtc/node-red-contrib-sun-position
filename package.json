@@ -90,8 +90,7 @@
   },
   "devDependencies": {
     "camo-purge": "^1.0.2",
-<<<<<<< HEAD
-    "eslint": "^5.15.1",
+    "eslint": "^5.15.3",
     "eslint-plugin-html": "^5.0.3"
   },
   "disabledSettings": {
@@ -101,10 +100,6 @@
     "plugins-disabled": [
       "jsdoc"
     ]
-=======
-    "eslint": "^5.12.0",
-    "eslint-plugin-html": "^5.0.0"
->>>>>>> i18n
   },
   "eslintConfig": {
     "env": {
