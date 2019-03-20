@@ -184,10 +184,6 @@ module.exports = function (RED) {
             return data;
         };
 
-        this.formatOutDate = (date, format) => {
-            return hlp.getFormattedDateOut(date, format, RED._('time-comp.days'), RED._('time-comp.month'), RED._('time-comp.dayDiffNames'));
-        };
-
         this.getOutDataProp = (_srcNode, msg, vType, value, format, offset, offsetType, multiplier, days) => {
             // _srcNode.debug('getOutDataProp type='+vType+' value='+value+' format='+format+' offset='+offset+' offset='+offsetType+' multiplier='+multiplier);
             let result = null;
@@ -195,7 +191,7 @@ module.exports = function (RED) {
                 if (value === '' || (typeof value === 'undefined')) {
                     const offsetX = node.getFloatProp(node, msg, offsetType, offset);
                     result = hlp.addOffset((new Date()), offsetX, multiplier);
-                    return node.formatOutDate(result, format);
+                    return hlp.getFormattedDateOut(result, format);
                 }
                 return value;
             } else if (vType === 'date') {
@@ -203,7 +199,7 @@ module.exports = function (RED) {
             } else if (vType === 'dateSpecific') {
                 const offsetX = node.getFloatProp(node, msg, offsetType, offset);
                 result = hlp.addOffset((new Date()), offsetX, multiplier);
-                return node.formatOutDate(result, format);
+                return hlp.getFormattedDateOut(result, format);
             } else if (vType === 'msgPayload') {
                 return msg.payload;
             } else if (vType === 'msgTs') {
@@ -225,21 +221,21 @@ module.exports = function (RED) {
                     result = node.getMoonTime((new Date()), value, offsetX, multiplier, undefined, days);
                 }
                 if (result && result.value && !result.error) {
-                    return node.formatOutDate(result.value, format);
+                    return hlp.getFormattedDateOut(result.value, format);
                 }
                 return null;
             } else if (vType === 'entered' || vType === 'dateEntered') {
                 result = hlp.getDateOfText(String(value));
                 const offsetX = node.getFloatProp(node, msg, offsetType, offset);
                 result = hlp.normalizeDate(result, offsetX, multiplier, undefined, days);
-                return node.formatOutDate(result, format);
+                return hlp.getFormattedDateOut(result, format);
             } else if (vType === 'dayOfMonth') {
                 result = new Date();
                 result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
                 if (result !== null && typeof result !== 'undefined') {
                     const offsetX = node.getFloatProp(node, msg, offsetType, offset);
                     result = hlp.addOffset(result, offsetX, multiplier);
-                    return node.formatOutDate(result, format);
+                    return hlp.getFormattedDateOut(result, format);
                 }
                 return null;
             }
@@ -308,7 +304,7 @@ module.exports = function (RED) {
         };
 
         this.getTimeProp = (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) => {
-            node.debug('getTimeProp ' + hlp.getNodeId(_srcNode) + ' vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            node.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
                 error: null,
@@ -317,7 +313,7 @@ module.exports = function (RED) {
             try {
                 if (days === '') {
                     result.error = 'No valid Days given!';
-                } else if (vType === '' || vType === 'none' || days === '') {
+                } else if (vType === '' || vType === 'none') {
                     result.error = 'wrong type "' + vType + '"="' + value+'"';
                 } else if (vType === 'date') {
                     result.value = new Date();
@@ -504,13 +500,19 @@ module.exports = function (RED) {
 
         /**************************************************************************************************************/
         try {
-            initTimes(this);
+            node.debug('initialize');
+            const today = new Date();
+            const dayId = getUTCDayId(today);
+            const tomorrow = today.addDays(1);
+            sunTimesRefresh(node, today, tomorrow, dayId);
+            moonTimesRefresh(node, today, tomorrow, dayId);
+            hlp.initializeParser(RED._('common.days', { returnObjects: true}), RED._('common.month', { returnObjects: true}), RED._('common.dayDiffNames', { returnObjects: true}));
         } catch (err) {
-            this.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
             node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: RED._('position-config.errors.error-title')
+                text: RED._('errors.error-title')
             });
             throw err;
         }
@@ -589,14 +591,6 @@ module.exports = function (RED) {
                 calcDate: dateb,
                 dayId: day_id
             };
-        }
-
-        function initTimes(node) {
-            const today = new Date();
-            const dayId = getUTCDayId(today);
-            const tomorrow = today.addDays(1);
-            sunTimesRefresh(node, today, tomorrow, dayId);
-            moonTimesRefresh(node, today, tomorrow, dayId);
         }
 
         function getUTCDayId(d) {

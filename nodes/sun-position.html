@@ -1,11 +1,11 @@
 <script type="text/x-red" data-template-name="sun-position">
     <div class="form-row">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.position"></span></label>
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
         <input type="hidden" id="node-input-outputs"/>
     </div>
     <div class="form-row time-topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.topic"></span></label>
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
         <input type="text" id="node-input-topic">
     </div>
     <hr>
@@ -41,8 +41,8 @@
     <!-- By convention, most nodes have a 'name' property. The following div -->
     <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-tips">
         <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
@@ -87,127 +87,6 @@
         margin-left: 5px;
     }
 </style>
-
-<script type="text/x-red" data-help-name="sun-position">
-    <h3>About</h3>
-    <p>Gets the position of the sun</p>
-
-    <h3>Inputs</h3>
-
-    The message is only for trigger the calculation. If limits are defined the input message will send to the output associated to the limit.
-
- <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>first output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">object</span></dt>
-                 <dd>gives an object with the following described below</dd>
-             </dl>
-         </li>
-         <li>second and following outputs
-                <dl class="message-properties">
-                    <dt>payload </dt>
-                    <dd>same as the incomming message, which will send to this output.</dd>
-                    <dt>posChanged <span class="property-type">boolean</span></dt>
-                    <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
-                </dl>
-            </li>
-     </ol>
-     <h3>payload output properties</h3>
-     <dl class="message-properties">
-            <dt>azimuth <span class="property-type">number</span></dt>
-            <dd> the azimuth of the sun position relative to the given coordinates.</dd>
-
-            <dt>altitude <span class="property-type">number</span></dt>
-            <dd> the altitude (elevation) of the sun position relative to the given coordinates.</dd>
-
-            <dt>times <span class="property-type">object</span></dt>
-            <dd>
-                the sun times as object
-                <dt>times.sunrise <span class="property-type">Date</span></dt>
-                <dd>sunrise (top edge of the sun appears on the horizon)</dd>
-                <dt>msg.payload.times.astronomicalDawn <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
-                <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
-                <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
-                <dt>msg.payload.times.blueHourDawnStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
-                <dt>msg.payload.times.civilDawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
-                <dt>msg.payload.times.blueHourDawnEnd <span class="property-type">Date</span></dt><dd>blue Hour end</dd>
-                <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
-                <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
-                <dt>msg.payload.times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
-                <dt>msg.payload.times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
-                <dt>msg.payload.times.goldenHourStart <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
-                <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
-                <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
-                <dt>msg.payload.times.blueHourDuskStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
-                <dt>msg.payload.times.civilDusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
-                <dt>msg.payload.times.blueHourDuskEnd <span class="property-type">Date</span></dt><dd>blue hour end</dd>
-                <dt>msg.payload.times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk end (evening astronomical twilight starts)</dd>
-                <dt>msg.payload.times.amateurDusk <span class="property-type">Date</span></dt><dd>amateur astronomical dusk (sun at 12° after sunrise)</dd>
-                <dt>msg.payload.times.astronomicalDusk <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
-                <dt>msg.payload.times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
-            </dd>
-            <dt>pos <span class="property-type">array of boolean</span></dt>
-            <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
-            <dt>posChanged <span class="property-type">boolean</span></dt>
-            <dd> boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.</dd>
-            <dt>startTime <span class="property-type">boolean</span></dt>
-            <dd> if a start time is defined the start timestamp (inclusive of offset)..</dd>
-            <dt>endTime <span class="property-type">boolean</span></dt>
-            <dd> if a end time is defined the end timestamp (inclusive of offset).</dd>
-            <dt>sunInSky <span class="property-type">boolean</span></dt>
-            <dd> if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.</dd>
-        </dl>
-        Example of the first output
-        <pre>
-{
-    "lastUpdate": "2018-11-11T11:11:11.111Z",
-    "latitude": "18.473782",
-    "longitude": "-34.357051",
-    "angleType": "deg",
-    "azimuth": 117.72942647370792,
-    "altitude": 20.984193272523992,
-    "times": {
-        "solarNoon":"2018-12-10T10:59:14.814Z",
-        "nadir":"2018-12-10T22:59:14.814Z",
-        "sunrise":"2018-12-10T06:58:55.584Z",
-        "sunset":"2018-12-10T14:59:34.044Z",
-        "sunriseEnd":"2018-12-10T07:03:12.232Z",
-        "sunsetStart":"2018-12-10T14:55:17.395Z",
-        "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",
-        "blueHourDuskStart":"2018-12-10T15:24:06.743Z",
-        "civilDawn":"2018-12-10T06:19:31.249Z",
-        "civilDusk":"2018-12-10T15:38:58.379Z",
-        "blueHourDawnStart":"2018-12-10T06:05:03.443Z",
-        "blueHourDuskEnd":"2018-12-10T15:53:26.185Z",
-        "nauticalDawn":"2018-12-10T05:37:04.859Z",
-        "nauticalDusk":"2018-12-10T16:21:24.768Z",
-        "amateurDawn":"2018-12-10T05:16:44.832Z",
-        "amateurDusk":"2018-12-10T16:41:44.795Z",
-        "astronomicalDawn":"2018-12-10T04:56:49.931Z",
-        "astronomicalDusk":"2018-12-10T17:01:39.696Z",
-        "goldenHourEnd":"2018-12-10T07:58:28.541Z",
-        "goldenHourStart":"2018-12-10T14:00:01.086Z",
-        "dawn":"2018-12-10T06:19:31.249Z",
-        "dusk":"2018-12-10T15:38:58.379Z",
-        "nightEnd":"2018-12-10T04:56:49.931Z",
-        "night":"2018-12-10T17:01:39.696Z",
-        "nightStart":"2018-12-10T17:01:39.696Z",
-        "goldenHour":"2018-12-10T14:00:01.086Z"
-    },
-    "pos": [],
-    "posChanged": false
-}</pre>
-     <h3>Tips</h3>
-     <p>For home automation it can be useful to define the lower and higher position for example of the sun for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
-        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
-    </ul>
-    With friendly support by <b>agag</b>.
-</script>
 
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
@@ -378,11 +257,11 @@
             const node = this;
             const setup = function(node) {
                 /* global getTypes appendOptions setupTInput */
-                const types = getTypes();
+                const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, 'sun-position', field, 'multiplier', (id) => (id > 0));
+                    appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     }

@@ -1,272 +1,241 @@
 <script type="text/x-red" data-template-name="within-time-switch">
     <div class="form-row">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="within-time-switch.label.positionConfig"></span></label>
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
     </div>
     <hr>
-    <div class="form-row">
+    <div class="form-row block-noindent">
         <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
-        <input type="text" id="node-input-startTime" style="width: 70%"/>
+        <input type="text" id="node-input-startTime" />
+        <input type="hidden" id="node-input-startTimeType">
     </div>
-    <div class="form-row time-row">
-        <label for="node-input-startOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
-        <input id="node-input-startOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
-        <select style="width:100px" id="node-input-startOffsetMultiplier">
-            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
-        </select>
+    <div class="form-row block-indent1 within-time-switch-row-startOffset">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]within-time-switch.placeholder.startOffset"></input>
+        <input type="hidden" id="node-input-startOffsetType">
+        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row">
+
+    <div class="form-row block-noindent">
         <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" style="width: 70%"/>
+        <input type="text" id="node-input-endTime" />
+        <input type="hidden" id="node-input-endTimeType">
     </div>
-    <div class="form-row time-row">
-        <label for="node-input-endOffset"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
-        <input id="node-input-endOffset" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
-        <select style="width:100px" id="node-input-endOffsetMultiplier">
-            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
-        </select>
+    <div class="form-row block-indent1 within-time-switch-row-endOffset">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"></input>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
     <div class="form-tips">
         <span data-i18n="[html]within-time-switch.tips.addTimes"></span>&nbsp;
     </div>
     <div class="form-row"/>
-    <div class="form-row">
-        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
-        <input type="text" id="node-input-propertyStart" style="width: 70%"/>
+    <div class="form-row alternate-property-start">
+        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
+        <input type="text" id="node-input-propertyStart"/>
+        <input type="hidden" id="node-input-propertyStartType">
     </div>
-    <div class="form-row alternate-time-start hidden">
+    <div class="form-row block-indent1 alternate-time-start hidden">
         <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
-        <input type="text" id="node-input-startTimeAlt" style="width: 70%"/>
+        <input type="text" id="node-input-startTimeAlt"/>
+        <input type="hidden" id="node-input-startTimeAltType">
     </div>
-    <div class="form-row alternate-time-start-offset hidden">
-        <label for="node-input-startOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
-        <input id="node-input-startOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.startOffset">
-        <select style="width:100px" id="node-input-startOffsetAltMultiplier">
-            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
-        </select>
+    <div class="form-row block-indent1 alternate-time-start-offset hidden">
+        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
+        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"></input>
+        <input type="hidden" id="node-input-startTimeAltOffsetType">
+        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row">
-        <label ><i class="fa fa-tag"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
-        <input type="text" id="node-input-propertyEnd" style="width: 70%"/>
+    <div class="form-row alternate-property-end">
+        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
+        <input type="text" id="node-input-propertyEnd"/>
+        <input type="hidden" id="node-input-propertyEndType">
     </div>
-    <div class="form-row alternate-time-end hidden">
+    <div class="form-row block-indent1 alternate-time-end hidden">
         <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
-        <input type="text" id="node-input-endTimeAlt" style="width: 70%"/>
+        <input type="text" id="node-input-endTimeAlt"/>
+        <input type="hidden" id="node-input-endTimeAltType">
     </div>
-    <div class="form-row alternate-time-end-offset hidden">
-        <label for="node-input-endOffsetAlt"><i class="fa fa-arrows-h"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
-        <input id="node-input-endOffsetAlt" class="wt-offset-time" data-i18n="[placeholder]within-time-switch.placeholder.endOffset">
-        <select style="width:100px" id="node-input-endOffsetAltMultiplier">
-            <option value="1000" data-i18n="within-time-switch.label.seconds"></option>
-            <option value="60000" data-i18n="within-time-switch.label.minutes"></option>
-            <option value="3600000" data-i18n="within-time-switch.label.hours"></option>
-        </select>
-    </div>
-    <hr>
-    <div class="form-row debug-row">
-        <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
-        <select id="node-input-statusOut"  style="width:70%;" >
-            <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
-            <option value="1" data-i18n="within-time-switch.label.statusTime"></option>
-            <option value="2" data-i18n="within-time-switch.label.statusSend"></option>
-            <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
-            <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
-        </select>
-    </div>
-    <div class="form-row msg-start-out-row">
-        <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
-        <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
-    </div>
-    <div class="form-row msg-end-out-row">
-        <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
-        <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
+    <div class="form-row block-indent1 alternate-time-end-offset hidden">
+        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
+        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"></input>
+        <input type="hidden" id="node-input-endTimeAltOffsetType">
+        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="within-time-switch.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]within-time-switch.placeholder.name">
+        <a href="#" class="enhanced-row-toggle"><span data-i18n="within-time-switch.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row hidden">
+            <div class="form-row compare-row">
+                <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
+                <select id="node-input-tsCompare" style="width:70%;" >
+                    <option value="0" data-i18n="within-time-switch.label.now"></option>
+                    <option value="1" data-i18n="within-time-switch.label.msgts"></option>
+                    <option value="2" data-i18n="within-time-switch.label.msglc"></option>
+                    <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
+                    <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
+                </select>
+            </div>
+            <div class="form-row debug-row">
+            <label for="node-input-statusOut"><i class="fa fa-bug"></i> <span data-i18n="within-time-switch.label.statusOut"></span></label>
+            <select id="node-input-statusOut"  style="width:70%;" >
+                <option value="0" data-i18n="within-time-switch.label.statusOnlyError"></option>
+                <option value="1" data-i18n="within-time-switch.label.statusTime"></option>
+                <option value="2" data-i18n="within-time-switch.label.statusSend"></option>
+                <option value="3" data-i18n="within-time-switch.label.statusTimeOrSend"></option>
+                <option value="256" data-i18n="within-time-switch.label.statusNone"></option>
+            </select>
+        </div>
+        <div class="form-row msg-start-out-row">
+            <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
+        </div>
+        <div class="form-row msg-end-out-row">
+            <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
+        </div>
+    </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
 </script>
-
-<script type="text/x-red" data-help-name="within-time-switch">
-    <p>A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.</p>
-
-    <h3>Settings</h3>
-        <dl class="message-properties"><dt>Position</dt><dd>defines the current position</dd></dl>
-        <dl class="message-properties"><dt>Start time</dt><dd>defines the start time of the time range with with different [configuration possibilities](#times-definitions)</dd></dl>
-        <dl class="message-properties"><dt>Start Offset</dt><dd>allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.</dd></dl>
-        <dl class="message-properties"><dt>End time</dt><dd>defines the end time of the time range with with different [configuration possibilities](#times-definitions)</dd></dl>
-        <dl class="message-properties"><dt>End Offset</dt><dd>allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.</dd></dl>
-        <dl class="message-properties"><dt>Property</dt><dd>_optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.</dd></dl>
-        <dl class="message-properties"><dt>Alternate start time</dt><dd>_optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.</dd></dl>
-        <dl class="message-properties"><dt>Start time</dt><dd>alternate start time</dd></dl>
-        <dl class="message-properties"><dt>End Offset</dt><dd>offset for the alternate start time</dd></dl>
-        <dl class="message-properties"><dt>Alternate end time</dt><dd>_optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.</dd></dl>
-        <dl class="message-properties"><dt>End time</dt><dd>alternate end time</dd></dl>
-        <dl class="message-properties"><dt>Offset</dt><dd>offset for the alternate end time</dd></dl>
-        <dl class="message-properties"><dt>Status</dt><dd>here can be adjusted which status should be displayed under the node.</dd></dl>
-        <dl class="message-properties"><dt>time limits or last message</dt><dd>- on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.</dd></dl>
-        <dl class="message-properties"><dt>resend start</dt><dd>If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.</dd></dl>
-        <dl class="message-properties"><dt>resend end</dt><dd>If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.</dd></dl>
-
-    <h3>Time definitions</h3>
-    <p>The time definitions has different configuration possibilities.</p>
-    <table>
-        <thead>
-        <tr>
-        <th>Time</th>
-        <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td><code>astronomicalDawn</code></td>
-        <td>night ends (morning astronomical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>amateurDawn</code></td>
-        <td>amateur astronomical dawn (sun at 12° before sunrise)</td>
-        </tr>
-        <tr>
-        <td><code>nauticalDawn</code></td>
-        <td>nautical dawn (morning nautical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDawnStart</code></td>
-        <td>blue Hour start (time for special photography photos starts)</td>
-        </tr>
-        <tr>
-        <td><code>civilDawn</code></td>
-        <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDawnEnd</code></td>
-        <td>blue Hour end (time for special photography photos end)</td>
-        </tr>
-        <tr>
-        <td><code>sunrise</code></td>
-        <td>sunrise (top edge of the sun appears on the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>sunriseEnd</code></td>
-        <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>goldenHourEnd</code></td>
-        <td>morning golden hour (soft light, best time for photography) ends</td>
-        </tr>
-        <tr>
-        <td><code>solarNoon</code></td>
-        <td>solar noon (sun is in the highest position)</td>
-        </tr>
-        <tr>
-        <td><code>goldenHourStart</code></td>
-        <td>evening golden hour starts</td>
-        </tr>
-        <tr>
-        <td><code>sunsetStart</code></td>
-        <td>sunset starts (bottom edge of the sun touches the horizon)</td>
-        </tr>
-        <tr>
-        <td><code>sunset</code></td>
-        <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDuskStart</code></td>
-        <td>blue Hour start (time for special photography photos starts)</td>
-        </tr>
-        <tr>
-        <td><code>civilDusk</code></td>
-        <td>dusk (evening nautical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>blueHourDuskEnd</code></td>
-        <td>blue Hour end (time for special photography photos end)</td>
-        </tr>
-        <tr>
-        <td><code>nauticalDusk</code></td>
-        <td>nautical dusk end (evening astronomical twilight starts)</td>
-        </tr>
-        <tr>
-        <td><code>amateurDusk</code></td>
-        <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
-        </tr>
-        <tr>
-        <td><code>astronomicalDusk</code></td>
-        <td>night starts (dark enough for astronomical observations)</td>
-        </tr>
-        <tr>
-        <td><code>nadir</code></td>
-        <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
-        </tr>
-        </tbody>
-        </table>
-            <h3>References</h3>
-           <ul>
-               <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
-               <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
-               <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
-           </ul>
-           With friendly support by <b>agag</b>.
-</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        margin-left: 5px;
+    }
+</style>
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
         if (v.length > l) {
             return v.substring(0, (l - 3)) + '...';
         }
-
         return v;
     }
 
-    function getValueLabel(t, v, l) {
+    function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
-        if (t === 'string' || t === 'str') {
-            if (v === '') { return v; }
-            return '"' + clipValueLength(v, l) + '"';
+        let suffix = '';
+        if (offset && offset > 0) {
+            suffix = '↷';
+        } else if (offset && offset < 0) {
+            suffix = '↶';
         }
 
-        if (t === 'num' || t === 'bool') {
-            if (v === '') { return v; }
-            return String(v);
+        if (t === 'jsonata') {
+            if (v.length < l) { return v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+        }
+
+        if (t === 'json') {
+            if (v.length < l) { return  v + suffix; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+        }
+
+        if (t === 'bin') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+        }
+
+        if (t === 'date') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+        }
+
+        if (t === 'dateSpecific') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+        }
+
+        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
+            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+            return '"' + clipValueLength(v, l) + '"' + suffix;
+        }
+
+        if (t === 'num') {
+            if (v === '') { return '0' + suffix; }
+            return String(v) + suffix;
+        }
+
+        if (t === 'bool') {
+            if (v === '') { return 'false' + suffix; }
+            return String(v) + suffix;
         }
 
         if (t === 'msg') {
-            return t + '.' + clipValueLength(v, l);
+            return t + '.' + clipValueLength(v, l) + suffix;
         }
 
         if (t === 'flow' || t === 'global') {
             const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l);
+            return t + '.' + clipValueLength(result.key, l) + suffix;
         }
 
         if (t === 'pdsCalcData') {
-            return '{sun position}';
+            return '{sun position}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
-            return '{moon position}';
+            return '{moon position}' + suffix;
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace(
-                'amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
-            return clipValueLength(res, l);
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            return clipValueLength(res, l) + suffix;
         }
 
         if (t === 'pdmTime') {
-            return 'moon' + v;
+            return 'moon' + v + suffix;
         }
-        return clipValueLength(v, l);
+
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgLc') { return 'msg.lc'; }
+        if (t === 'msgValue') { return 'msg.value'; }
+
+        if (v === '') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+        }
+
+        return clipValueLength(v, l) + suffix;
     }
 
     RED.nodes.registerType('within-time-switch', {
@@ -295,8 +264,16 @@
             },
             startOffset: {
                 value: 0,
-                required: true,
-                validate: RED.validators.number()
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetType')(v)
+                    );
+                }
+            },
+            startOffsetType: {
+                value: 'none'
             },
             startOffsetMultiplier: {
                 value: 60000,
@@ -313,8 +290,16 @@
             },
             endOffset: {
                 value: 0,
-                required: true,
-                validate: RED.validators.number()
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.endOffsetType === 'undefined') ||
+                        RED.validators.typedInput('endOffsetType')(v)
+                    );
+                }
+            },
+            endOffsetType: {
+                value: 'none'
             },
             endOffsetMultiplier: {
                 value: 60000,
@@ -343,12 +328,18 @@
             },
             startOffsetAlt: {
                 value: 0,
-                required: true,
                 validate: (v) => {
-                    return RED.validators.number()(v) ||
-                    ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                    ($('#node-input-startTimeAlt').typedInput('type') === 'none');
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetAltType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetAltType')(v) ||
+                        ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
+                    );
                 }
+            },
+            startOffsetAltType: {
+                value: 'none'
             },
             startOffsetAltMultiplier: {
                 value: 60000,
@@ -380,12 +371,18 @@
             },
             endOffsetAlt: {
                 value: 0,
-                required: true,
                 validate: (v) => {
-                    return RED.validators.number()(v) ||
-                    ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                    ($('#node-input-endTimeAlt').typedInput('type') === 'none');
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetAltType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetAltType')(v) ||
+                        ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
+                    );
                 }
+            },
+            endOffsetAltType: {
+                value: 'none'
             },
             endOffsetAltMultiplier: {
                 value: 60000,
@@ -395,6 +392,9 @@
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                 }
+            },
+            tsCompare: {
+                value: '0'
             },
             statusOut: {
                 value: 3,
@@ -411,48 +411,12 @@
         },
         outputLabels: ['within time', 'out of time'],
         label() {
-            const getId = (type, value, offset, maxLength) => {
-                let suffix = '';
-                if (offset && offset > 0) {
-                    suffix = '↷';
-                } else if (offset && offset < 0) {
-                    suffix = '↶';
-                }
-
-                if (type === 'jsonata') {
-                    if (value.length < 15) { return value + suffix; }
-                    return this._('within-time-switch.label.jsonata');
-                }
-
-                if (type === 'json') {
-                    if (value.length < 15) { return value + suffix; }
-                    return this._('within-time-switch.label.json') + suffix;
-                }
-
-                if (type === 'bin') {
-                    return this._('within-time-switch.label.binary') + suffix;
-                }
-
-                if (type === 'date') {
-                    return this._('time-inject.label.timestamp') + suffix;
-                }
-
-                if (type === 'dateSpecific') {
-                    return this._('time-inject.label.timestamp') + '+' + suffix;
-                }
-
-                const v = getValueLabel(type, value, maxLength);
-                if (v === '') { return this._('within-time-switch.label.blank'); }
-
-                return v + suffix;
-            };
-
             const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                 if (property !== 'none' && property !== '' && value2) {
-                    return getId(type1, value1, offset1, 12) + '/' + getId(type2, value2, offset2, 12);
+                    return getValueLabel(this, type1, value1, offset1, 12) + '/' + getValueLabel(this, type2, value2, offset2, 12);
                 }
 
-                return getId(type1, value1, undefined, 12);
+                return getValueLabel(this, type1, value1, undefined, 12);
             };
 
             if (this.name) {
@@ -476,195 +440,271 @@
         paletteLabel: 'within-time',
         align: 'left',
         oneditprepare() {
-            function checkMsgOnStartOut() {
-                const valStart = $('#node-input-startTime').typedInput('type');
-                const valStartAlt = $('#node-input-startTimeAlt').typedInput('type');
-                const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
+            $('.enhanced-row-toggle').on('click', () => {
+                $('.enhanced-row').toggle(); // .hide();
+            });
 
-                if (vals.indexOf(valStart) >= 0 && (valStartAlt === 'none' || vals.indexOf(valStartAlt) >=
-                    0)) {
-                    $('.msg-start-out-row').show();
+            const node = this;
+            const setup = function(node) {
+                /* global getTypes appendOptions setupTInput initializeValue */
+                const types = getTypes(node);
+                // #region initialize
+                function multiplierUpdate(mp, name) {
+                    const field = $('#node-input-' + name);
+                    appendOptions(node, field, 'multiplier', (id) => (id > 0));
+                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                        mp = 60000;
+                    } else {
+                        mp = parseFloat(mp);
+                        if (mp === 1) {
+                            mp = 1000;
+                        } else if (mp === 60) {
+                            mp = 60000;
+                        } else if (mp === 3600) {
+                            mp = 3600000;
+                        }
+                    }
+                    field.val(mp);
+                    return mp;
+                }
+                // #endregion initialize
+                // #region timeStart
+                const startTimeTypeField = setupTInput(node, {
+                    typeProp: 'startTimeType',
+                    valueProp: 'startTime',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.startTimeType || types.TimeEntered.value,
+                    defaultValue: node.startTime || '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-startTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
+                        if (plVType ===  'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
+                            $('.msg-start-out-row').hide();
+                        } else {
+                            $('.msg-start-out-row').show();
+                        }
+                    }
+                });
+
+                node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'startOffsetType',
+                    valueProp: 'startOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-startOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-startOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion timeStart
+                // #region timeEnd
+                const endTimeTypeField = setupTInput(node, {
+                    typeProp: 'endTimeType',
+                    valueProp: 'endTime',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.endTimeType || types.TimeEntered.value,
+                    defaultValue: node.endTime || '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-endTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
+                        if (plVType ===  'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
+                            $('.msg-end-out-row').hide();
+                        } else {
+                            $('.msg-end-out-row').show();
+                        }
+                    }
+                });
+
+                node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'endOffsetType',
+                    valueProp: 'endOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-endOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-endOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion timeEnd
+                // #region propertyStart
+                const propertyStartTypeField = setupTInput(node, {
+                    typeProp: 'propertyStartType',
+                    valueProp: 'propertyStart',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.propertyStartType  || types.Undefined.value,
+                    defaultValue: node.propertyStartValue || '' ,
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-propertyStart').typedInput('type') === 'none') {
+                            $('.alternate-time-start').hide();
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start').show();
+                        }
+
+                        $('#node-input-startTimeAlt').change();
+                    }
+                });
+                // #endregion propertyStart
+                // #region timeAltStart
+                setupTInput(node, {
+                    typeProp: 'startTimeAltType',
+                    valueProp: 'startTimeAlt',
+                    width: 'calc(100% - 110px)',
+                    defaultType: 'entered',
+                    defaultValue: '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
+                }).change();
+
+                node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'startTimeAltOffsetType',
+                    valueProp: 'startTimeAltOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-startTimeAltOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion timeAltStart
+                // #region propertyEnd
+                const propertyEndTypeField = setupTInput(node, {
+                    typeProp: 'propertyEndType',
+                    valueProp: 'propertyEnd',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.propertyEndType  || types.Undefined.value,
+                    defaultValue: node.propertyEndValue || '' ,
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
+                            $('.alternate-time-end').hide();
+                            $('.alternate-time-end-offset').hide();
+                        } else {
+                            $('.alternate-time-end').show();
+                        }
+
+                        $('#node-input-endTimeAlt').change();
+                    }
+                });
+                // #endregion propertyEnd
+                // #region timeAltEnd
+                setupTInput(node, {
+                    typeProp: 'endTimeAltType',
+                    valueProp: 'endTimeAlt',
+                    width: 'calc(100% - 110px)',
+                    defaultType: 'entered',
+                    defaultValue: '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
+                }).change();
+
+                node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
+                setupTInput(node, {
+                    typeProp: 'endTimeAltOffsetType',
+                    valueProp: 'endTimeAltOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-endTimeAltOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                }).change();
+                // #endregion timeAltEnd
+                // #region Enhanced settings
+                initializeValue(node, 'tsCompare', 0);
+                initializeValue(node, 'statusOut', 3);
+                const chkVal = (name, val) => {
+                    return (node[name] === null) ||
+                            (typeof node[name] === 'undefined') ||
+                            ($('#node-input-' + name).val() === val) ||
+                            ($('#node-input-' + name).is(':checked') === val) ||
+                            (parseFloat($('#node-input-' + name).val()) === val);
+                };
+
+                if (chkVal('lastMsgOnStartOut', false) &&
+                    chkVal('lastMsgOnEndOut', false) &&
+                    chkVal('statusOut', 3) &&
+                    chkVal('tsCompare', 0)) {
+                    $('.enhanced-row').hide();
                 } else {
-                    $('.msg-start-out-row').hide();
+                    $('.enhanced-row').show();
                 }
-            }
+                // #endregion Enhanced settings
+                startTimeTypeField.change();
+                endTimeTypeField.change();
+                propertyStartTypeField.change();
+                propertyEndTypeField.change();
+            }; // setup
 
-            function checkMsgOnEndOut() {
-                const valEnd = $('#node-input-endTime').typedInput('type');
-                const valEndAlt = $('#node-input-endTimeAlt').typedInput('type');
-                const vals = ',entered,pdsTime,pdmTime,flow,global,jsonata,env,';
-
-                if (vals.indexOf(valEnd) >= 0 && (valEndAlt === 'none' || vals.indexOf(valEndAlt) >= 0)) {
-                    $('.msg-end-out-row').show();
-                } else {
-                    $('.msg-end-out-row').hide();
-                }
-            }
-
-            function multilpierUpdate(mp, name) {
-                if (mp=== 1) {
-                    $('node-input-' + name).val(1000);
-                    return 1000;
-                } else if (mp === 60) {
-                    $('node-input-' + name).val(60000);
-                    return 60000;
-                } else if (mp === 3600) {
-                    $('node-input-' + name).val(3600000);
-                    return 3600000;
-                }
-                return mp;
-            }
-
-            this.startOffsetMultiplier = multilpierUpdate(this.startOffsetMultiplier, 'startOffsetMultiplier');
-            this.endOffsetMultiplier = multilpierUpdate(this.endOffsetMultiplier, 'endOffsetMultiplier');
-            this.startOffsetAltMultiplier = multilpierUpdate(this.startOffsetAltMultiplier, 'startOffsetAltMultiplier');
-            this.endOffsetAltMultiplier = multilpierUpdate(this.endOffsetAltMultiplier, 'endOffsetAltMultiplier');
-
-            if (this.statusOut === '' || this.statusOut === 'undefined') {
-                this.statusOut = 3;
-                $('#node-input-statusOut').val(this.statusOut);
-            }
-
-            $('.wt-offset-time').spinner({
-                max: 1439,
-                min: -1439
-            });
-
-            const typeTimeNone = {
-                value: 'none',
-                label: 'not used ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeNone.png',
-                hasValue: false
-            };
-            const typeTimeEntered = {
-                value: 'entered',
-                label: 'timestamp ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
-                hasValue: true,
-                validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
-            };
-            const typeTimeSun = {
-                value: 'pdsTime',
-                label: 'sun ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
-                options: [
-                    'astronomicalDawn',
-                    'amateurDawn',
-                    'nauticalDawn',
-                    'blueHourDawnStart',
-                    'civilDawn',
-                    'blueHourDawnEnd',
-                    'sunrise',
-                    'sunriseEnd',
-                    'goldenHourEnd',
-                    'solarNoon',
-                    'goldenHourStart',
-                    'sunsetStart',
-                    'sunset',
-                    'blueHourDuskStart',
-                    'civilDusk',
-                    'blueHourDuskEnd',
-                    'amateurDusk',
-                    'astronomicalDusk',
-                    'nadir'
-                ]
-            };
-            const typeTimeMoon = {
-                value: 'pdmTime',
-                label: 'moon ',
-                icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
-                options: ['rise', 'set']
-            };
-
-            $('#node-input-propertyStart').typedInput({
-                default: this.propertyStartType || 'none',
-                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
-            });
-            $('#node-input-propertyEnd').typedInput({
-                default: this.propertyEndType || 'none',
-                types: [typeTimeNone, 'msg', 'flow', 'global', 'jsonata', 'env']
-            });
-            $('#node-input-propertyStart').on('change', (_type, _value) => {
-                if ($('#node-input-propertyStart').typedInput('type') === 'none') {
-                    $('.alternate-time-start').hide();
-                    $('.alternate-time-start-offset').hide();
-                } else {
-                    $('.alternate-time-start').show();
-                }
-
-                $('#node-input-startTimeAlt').change();
-            });
-            $('#node-input-propertyEnd').on('change', (_type, _value) => {
-                if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
-                    $('.alternate-time-end').hide();
-                    $('.alternate-time-end-offset').hide();
-                } else {
-                    $('.alternate-time-end').show();
-                }
-
-                $('#node-input-endTimeAlt').change();
-            });
-
-            $('#node-input-startTime').typedInput({
-                default: this.startTimeType || 'entered',
-                types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
-            });
-            $('#node-input-startTime').on('change focus focusin focusout', (_type, _value) => {
-                checkMsgOnStartOut(_type, _value);
-            });
-            $('#node-input-endTime').typedInput({
-                default: this.endTimeType || 'entered',
-                types: [typeTimeEntered, typeTimeSun, typeTimeMoon, 'msg', 'flow', 'global', 'env']
-            });
-            $('#node-input-endTime').on('change focus focusin focusout', (_type, _value) => {
-                checkMsgOnEndOut(_type, _value);
-            });
-            $('#node-input-startTimeAlt').typedInput({
-                default: this.startTimeAltType || 'none',
-                types: [typeTimeNone,
-                    typeTimeEntered,
-                    typeTimeSun,
-                    typeTimeMoon,
-                    'msg',
-                    'flow',
-                    'global',
-                    'env']
-            });
-            $('#node-input-startTimeAlt').on('change focus focusin focusout', (_type, _value) => {
-                if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                    $('.alternate-time-start-offset').hide();
-                } else {
-                    $('.alternate-time-start-offset').show();
-                }
-
-                checkMsgOnStartOut();
-            });
-            $('#node-input-endTimeAlt').typedInput({
-                default: this.endTimeAltType || 'none',
-                types: [typeTimeNone,
-                    typeTimeEntered,
-                    typeTimeSun,
-                    typeTimeMoon,
-                    'msg',
-                    'flow',
-                    'global',
-                    'env']
-            });
-            $('#node-input-endTimeAlt').on('change focus focusin focusout', (_type, _value) => {
-                if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
-            ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
-                    $('.alternate-time-end-offset').hide();
-                } else {
-                    $('.alternate-time-end-offset').show();
-                }
-
-                checkMsgOnEndOut();
-            });
-            // $("#node-input-startTimeAlt").change();
-            // $("#node-input-endTimeAlt").change();
-            $('#node-input-propertyStart').change();
-            $('#node-input-propertyEnd').change();
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((_jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
         },
         oneditsave() {
             this.propertyStartType = $('#node-input-propertyStart').typedInput('type');

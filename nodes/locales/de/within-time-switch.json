@@ -1,10 +1,6 @@
 {
     "within-time-switch": {
         "label": {
-            "position": "Position",
-            "positionConfig": "Konfiguration",
-            "name": "Name",
-            "topic": "Topic",
             "addTimes": "alternative Start- oder End-Zeit",
             "propertyStart": "Alt. Start",
             "startTime": "Start",
@@ -17,29 +13,18 @@
             "endOffset": "Offset",
             "endOffsetAlt": "Offset",
             "statusOut": "Status",
-            "statusNone": "none",
-            "statusOnlyError": "only errors",
-            "statusSend": "last message",
-            "statusTime": "time limits",
-            "statusTimeOrSend": "time limits or last message",
+            "statusNone": "nichts",
+            "statusOnlyError": "nur Fehler",
+            "statusSend": "letzte Nachricht",
+            "statusTime": "Begin und Ende",
+            "statusTimeOrSend": "Begin und Ende oder letzte Nachricht",
             "lastMsgOnStartOut": "resend start",
-            "lastMsgOnStartOutTxt": "next start additionally emit the last message arrived out of time",
+            "lastMsgOnStartOutTxt": "Beim nächsten Start-Zeitpunkt wird die letzte Nachricht welche außerhalb der Zeit empfangen wurde ausgesendet.",
             "lastMsgOnEndOut": "resend end",
-            "lastMsgOnEndOutTxt": "next end additionally emit the last message arrived in time",
-            "seconds": "Sekunden",
-            "minutes": "Minuten",
-            "hours": "Stunden",
-            "on": "on",
-            "none": "none",
-            "timestamp": "timestamp",
-            "binary": "binary",
-            "json": "json",
-            "jsonata": "json expr.",
-            "blank": "\"\""
+            "lastMsgOnEndOutTxt": "Zum nächsten Ende wird die letzte Nachricht welche innerhalb der Zeit angekommen ist ausgesendet",
+            "compareTime":"Vergleichs Basis"
         },
         "placeholder": {
-            "position": "Position",
-            "name": "Name",
             "property": "Property",
             "startTime": "7:40",
             "startOffset": "0",
@@ -50,30 +35,14 @@
             "endTimeAlt": "18:15",
             "endOffsetAlt": "0"
         },
-        "days": [
-            "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend", "Sonntag"
-        ],
         "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days."
-        },
-        "notification": {
-            "success": "Successfully injected: __label__"
+            "addTimes": "Hier können alternative Zeiten für Start / Ende definiert werden. Wenn die angegebene Eigenschaft \"true\" ist, werden die alternativen Start- und Endzeiten anstelle der normalen verwendet. Dies kann verwendet werden, um unterschiedliche Start- / Endzeiten für Feiertage oder andere spezielle Tage festzulegen."
         },
         "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on withinTimeSwitch",
             "error-start-time": "Error get start time: __message__",
             "error-end-time": "Error get end time: __message__",
-            "error-title": "internal error",
             "invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
-            "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
-            "unexpected": "unexpected error (__status__) __message__",
-            "error-init": "error '__message__', retry in 6min",
-            "warn-init": "warning '__message__', retry in 6min"
+            "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__"
         }
     }
 }

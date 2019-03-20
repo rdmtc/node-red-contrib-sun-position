@@ -1,0 +1,122 @@
+
+<script type="text/x-red" data-help-name="within-time-switch">
+  <p>A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.</p>
+
+  <h3>Settings</h3>
+      <dl class="message-properties"><dt>Position</dt><dd>defines the current position</dd></dl>
+      <dl class="message-properties"><dt>Start time</dt><dd>defines the start time of the time range with with different [configuration possibilities](#times-definitions)</dd></dl>
+      <dl class="message-properties"><dt>Start Offset</dt><dd>allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.</dd></dl>
+      <dl class="message-properties"><dt>End time</dt><dd>defines the end time of the time range with with different [configuration possibilities](#times-definitions)</dd></dl>
+      <dl class="message-properties"><dt>End Offset</dt><dd>allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.</dd></dl>
+      <dl class="message-properties"><dt>Property</dt><dd>_optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.</dd></dl>
+      <dl class="message-properties"><dt>Alternate start time</dt><dd>_optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.</dd></dl>
+      <dl class="message-properties"><dt>Start time</dt><dd>alternate start time</dd></dl>
+      <dl class="message-properties"><dt>End Offset</dt><dd>offset for the alternate start time</dd></dl>
+      <dl class="message-properties"><dt>Alternate end time</dt><dd>_optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.</dd></dl>
+      <dl class="message-properties"><dt>End time</dt><dd>alternate end time</dd></dl>
+      <dl class="message-properties"><dt>Offset</dt><dd>offset for the alternate end time</dd></dl>
+      <dl class="message-properties"><dt>Status</dt><dd>here can be adjusted which status should be displayed under the node.</dd></dl>
+      <dl class="message-properties"><dt>time limits or last message</dt><dd>- on deploy/start until a message arrives the same behaviour as `time limits` options, otherwise the `last message` status display.</dd></dl>
+      <dl class="message-properties"><dt>resend start</dt><dd>If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.</dd></dl>
+      <dl class="message-properties"><dt>resend end</dt><dd>If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.</dd></dl>
+
+  <h3>Time definitions</h3>
+  <p>The time definitions has different configuration possibilities.</p>
+  <table>
+      <thead>
+      <tr>
+      <th>Time</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>astronomicalDawn</code></td>
+      <td>night ends (morning astronomical twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>amateurDawn</code></td>
+      <td>amateur astronomical dawn (sun at 12° before sunrise)</td>
+      </tr>
+      <tr>
+      <td><code>nauticalDawn</code></td>
+      <td>nautical dawn (morning nautical twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>blueHourDawnStart</code></td>
+      <td>blue Hour start (time for special photography photos starts)</td>
+      </tr>
+      <tr>
+      <td><code>civilDawn</code></td>
+      <td>dawn (morning nautical twilight ends, morning civil twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>blueHourDawnEnd</code></td>
+      <td>blue Hour end (time for special photography photos end)</td>
+      </tr>
+      <tr>
+      <td><code>sunrise</code></td>
+      <td>sunrise (top edge of the sun appears on the horizon)</td>
+      </tr>
+      <tr>
+      <td><code>sunriseEnd</code></td>
+      <td>sunrise ends (bottom edge of the sun touches the horizon)</td>
+      </tr>
+      <tr>
+      <td><code>goldenHourEnd</code></td>
+      <td>morning golden hour (soft light, best time for photography) ends</td>
+      </tr>
+      <tr>
+      <td><code>solarNoon</code></td>
+      <td>solar noon (sun is in the highest position)</td>
+      </tr>
+      <tr>
+      <td><code>goldenHourStart</code></td>
+      <td>evening golden hour starts</td>
+      </tr>
+      <tr>
+      <td><code>sunsetStart</code></td>
+      <td>sunset starts (bottom edge of the sun touches the horizon)</td>
+      </tr>
+      <tr>
+      <td><code>sunset</code></td>
+      <td>sunset (sun disappears below the horizon, evening civil twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>blueHourDuskStart</code></td>
+      <td>blue Hour start (time for special photography photos starts)</td>
+      </tr>
+      <tr>
+      <td><code>civilDusk</code></td>
+      <td>dusk (evening nautical twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>blueHourDuskEnd</code></td>
+      <td>blue Hour end (time for special photography photos end)</td>
+      </tr>
+      <tr>
+      <td><code>nauticalDusk</code></td>
+      <td>nautical dusk end (evening astronomical twilight starts)</td>
+      </tr>
+      <tr>
+      <td><code>amateurDusk</code></td>
+      <td>amateur astronomical dusk (sun at 12° after sunrise)</td>
+      </tr>
+      <tr>
+      <td><code>astronomicalDusk</code></td>
+      <td>night starts (dark enough for astronomical observations)</td>
+      </tr>
+      <tr>
+      <td><code>nadir</code></td>
+      <td>nadir (darkest moment of the night, sun is in the lowest position)</td>
+      </tr>
+      </tbody>
+      </table>
+          <h3>References</h3>
+         <ul>
+             <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+             <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+             <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+         </ul>
+         With friendly support by <b>agag</b>.
+</script>

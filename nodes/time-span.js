@@ -233,8 +233,6 @@ module.exports = function (RED) {
         const node = this;
 
         this.on('input', msg => {
-node.debug('config ' + util.inspect(config)); // eslint-disable-line
-node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
             if (node.positionConfig === null ||
                 config.operand1Type === null ||
                 config.operand2Type === null) {
@@ -248,12 +246,10 @@ node.debug('emit - msg ' + util.inspect(msg)); // eslint-disable-line
 
             try {
                 const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetType, config.operand1OffsetMultiplier);
-node.debug('operand1 ' + util.inspect(operand1)); // eslint-disable-line
                 if (operand1 === null) {
                     return null;
                 }
                 const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetType, config.operand2OffsetMultiplier);
-node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
                 if (operand2 === null) {
                     return null;
                 }
@@ -264,7 +260,6 @@ node.debug('operand2 ' + util.inspect(operand2)); // eslint-disable-line
 
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
-node.debug('resultObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.inspect(config.result1Format)); // eslint-disable-line
                     if (config.result1ValueType === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
                     } else if (config.result1ValueType === 'operand1') {
@@ -275,8 +270,7 @@ node.debug('resultObj1 ' + util.inspect(config.result1ValueType) + ' + ' + util.
                         resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
                     // to
-node.debug('resultObj1 ' + util.inspect(resultObj)); // eslint-disable-line
-node.debug('resultObj2 ' + util.inspect(resultObj)); // eslint-disable-line
+
                     if (resultObj === null) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {
@@ -297,22 +291,20 @@ node.debug('resultObj2 ' + util.inspect(resultObj)); // eslint-disable-line
                     }
                 }
 
-node.debug('msg ' + util.inspect(msg)); // eslint-disable-line
                 const resObj = [];
                 const rules = config.rules;
                 const rulesLength = rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
-node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                     try {
                         let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue);
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
-
+                        /*
                         node.debug('operand ' + util.inspect(ruleoperand));
                         node.debug('operator ' + util.inspect(rule.operator));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType));
+                        node.debug('operatorType ' + util.inspect(rule.operatorType)); */
 
                         let result = false;
                         switch (rule.operator) {
@@ -362,7 +354,6 @@ node.debug('checking rule ' + util.inspect(rule)); // eslint-disable-line
                 }
 
                 resObj.push(msg);
-node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
                 node.status({
                     text: (operand1.getTime() - operand2.getTime()) / 1000 + 's'
                 });
@@ -373,7 +364,7 @@ node.debug('result object ' + util.inspect(resObj)); // eslint-disable-line
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text:  RED._('time-span.errors.error-title')
+                    text:  RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
                 throw err;
             }

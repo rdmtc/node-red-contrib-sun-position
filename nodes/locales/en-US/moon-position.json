@@ -1,15 +1,8 @@
 {
     "moon-position": {
         "label": {
-            "position" : "Position",
-            "topic" :"Topic",
             "between":"between",
-            "and":"and",
-            "name": "Name"
-        },
-        "placeholder": {
-            "position" : "Position",
-            "name": "Name"
+            "and":"and"
         },
         "tips": {
             "moonPosControl" : "If a message arrives through the Input the calculated position of the moon will be always send to the first output. If additionally specified upper and lower limits for the moon radiation and the azimuth is inside the defined limits the incoming message will send to the associated output."

@@ -17,6 +17,7 @@ module.exports = {
     getDateOfText,
     getTimeNumber,
     getNodeId,
+    initializeParser,
     getFormattedDateOut,
     parseDateFromFormat
 };
@@ -480,6 +481,12 @@ function getDateOfText(dt, preferMonthFirst) {
 
 // Regexes and supporting functions are cached through closure
 
+/**
+ * Formate a date to the given Format string
+ * @param  {Date} date -  JavaScript Date to format
+ * @param  {string} mask -  mask of the date
+ * @return {string}   date as depending on the given Format
+ */
 const dateFormat = (function () {
     const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LoSZ]|"[^"]*"|'[^']*'/g;
 
@@ -500,7 +507,6 @@ const dateFormat = (function () {
     // Regexes and supporting functions are cached through closure
     return function (date, mask, utc) {
         const dF = dateFormat;
-
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
             mask = date;
@@ -574,7 +580,7 @@ const dateFormat = (function () {
             o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
             x: dayDiff,
-            xx: ((dayDiff >= -7) && (dayDiff <= dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames(dayDiff + 7) : dF.i18n.dayNames[D]
+            xx: ((dayDiff >= -7) && ((dayDiff + 7) < dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames[dayDiff + 7] : dF.i18n.dayNames[D]
         };
 
         return mask.replace(token, $0 => {
@@ -607,53 +613,23 @@ dateFormat.parseDates = {
 
 dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h:m:s.t', 'H:m:s:l', 'H:m:s.l', 'H:m:s', 'H:m', 'h:m:s t Z', 'H:m:s Z'];
 
-dateFormat.i18n = {
-    dayNames: [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sun',
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat'
-    ],
-    monthNames: [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec'
-    ],
-    dayDiffNames: [
-        '1 week ago', '6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today', 'Tomorrow', 'day after tomorrow', 'in 3 days', 'in 4 days', 'in 5 days', 'in 6 days'
-    ]
-};
+/**
+ * pre defined formats of a given date
+ * @param  {Date}            date            -  JavaScript Date to format
+ * @param  {string}          [format]        -  format of the date
+ * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
+ * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
+ * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
+ * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
+ * @return {any}   returns a number, string or object depending on the given Format
+ */
+function initializeParser(dayNames, monthNames, dayDiffNames) {
+    dateFormat.i18n = {
+        dayNames : dayNames,
+        monthNames : monthNames,
+        dayDiffNames : dayDiffNames
+    };
+}
 
 dateFormat.parse = [
     {label: 'Year yy (2 digits)', value: 'yy'},
@@ -726,48 +702,23 @@ dateFormat.format = [
 ];
 
 /**
- * Formate a date to the given Format string
- * @param  {Date} date -  JavaScript Date to format
- * @param  {string} mask -  mask of the date
- * @param  {bool} utc - indicates if the formatted date should be in utc or not
- * @param  {Array.<string>} [dayNames]       -  Array of day Names long and short ["Sunday", "Monday", ..., "Mo", "Tu", ...]
- * @param  {Array.<string>} [monthNames]     -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
- * @param  {Array.<string>} [dayDiffNames]   -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
- * @return {string}   date as depending on the given Format
- */
-function _formatDate(date, mask, utc, dayNames, monthNames, dayDiffNames) {
-    if (dayNames) {
-        dateFormat.i18n.dayNames = dayNames;
-    }
-
-    if (monthNames) {
-        dateFormat.i18n.monthNames = monthNames;
-    }
-
-    if (dayDiffNames) {
-        dateFormat.i18n.dayDiffNames = dayDiffNames;
-    }
-
-    return dateFormat(date, mask, utc);
-}
-
-/**
  * pre defined formats of a given date
  * @param  {Date}            date            -  JavaScript Date to format
  * @param  {string}          [format]        -  format of the date
  * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
  * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
  * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
+ * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
+function getFormattedDateOut(date, format, utc) {
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     format = format || 0;
     if (date.value) { date = date.value; }
     if (!(date instanceof Date)) { date = Date(date); }
 
     if (isNaN(format)) {
-        return _formatDate(date, String(format), false, dayNames, monthNames, dayDiffNames);
+        return dateFormat(date, String(format), utc);
     }
 
     switch (Number(format)) {
@@ -804,9 +755,9 @@ function getFormattedDateOut(date, format, dayNames, monthNames, dayDiffNames) {
         case 15: // timeformat_localDateLong       - Wed Dec 26 2018
             return date.toDateString();
         case 16: // timeformat_weekday           - Montag, 22.12.
-            return _formatDate(date, 'dddd, d.m.', false, dayNames, monthNames, dayDiffNames);
+            return  dateFormat(date, 'dddd, d.M.', utc);
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-            return _formatDate(date, 'xx, d.m.', false, dayNames, monthNames, dayDiffNames);
+            return  dateFormat(date, 'xx, d.M.', utc);
     }
 
     const now = new Date();
@@ -946,10 +897,10 @@ function getDateFromFormat(val, format) {
     let year = now.getFullYear();
     let month = now.getMonth() + 1;
     let date = now.getDate();
-    let hh = now.getHours();
-    let mm = now.getMinutes();
-    let ss = now.getSeconds();
-    let ll = now.getMilliseconds();
+    let hour = now.getHours();
+    let min = now.getMinutes();
+    let sec = now.getSeconds();
+    let misec = now.getMilliseconds();
     let ampm = '';
 
     while (i_format < format.length) {
@@ -1030,53 +981,53 @@ function getDateFromFormat(val, format) {
             }
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
-            hh = _getInt(val, i_val, token.length, 2);
-            if (hh === null || (hh < 1) || (hh > 12)) {
+            hour = _getInt(val, i_val, token.length, 2);
+            if (hour === null || (hour < 1) || (hour > 12)) {
                 return null;
             }
-            i_val += hh.length;
+            i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
-            hh = _getInt(val, i_val, token.length, 2);
-            if (hh === null || (hh < 0) || (hh > 23)) {
+            hour = _getInt(val, i_val, token.length, 2);
+            if (hour === null || (hour < 0) || (hour > 23)) {
                 return null;
             }
-            i_val += hh.length;
+            i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
-            hh = _getInt(val, i_val, token.length, 2);
-            if (hh === null || (hh < 0) || (hh > 11)) {
+            hour = _getInt(val, i_val, token.length, 2);
+            if (hour === null || (hour < 0) || (hour > 11)) {
                 return null;
             }
-            i_val += hh.length;
+            i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
-            hh = _getInt(val, i_val, token.length, 2);
-            if (hh === null || (hh < 1) || (hh > 24)) {
+            hour = _getInt(val, i_val, token.length, 2);
+            if (hour === null || (hour < 1) || (hour > 24)) {
                 return null;
             }
-            i_val += hh.length;
-            hh--;
+            i_val += hour.length;
+            hour--;
         } else if (token === 'mm' || token === 'm') {
-            mm = _getInt(val, i_val, token.length, 2);
-            if (mm === null || (mm < 0) || (mm > 59)) {
+            min = _getInt(val, i_val, token.length, 2);
+            if (min === null || (min < 0) || (min > 59)) {
                 return null;
             }
-            i_val += mm.length;
+            i_val += min.length;
         } else if (token === 'ss' || token === 's') {
-            ss = _getInt(val, i_val, token.length, 2);
-            if (ss === null || (ss < 0) || (ss > 59)) {
+            sec = _getInt(val, i_val, token.length, 2);
+            if (sec === null || (sec < 0) || (sec > 59)) {
                 return null;
             }
-            i_val += ss.length;
+            i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
-            ll = _getInt(val, i_val, token.length, 3);
-            if (ll === null || (ll < 0) || (ll > 999)) {
+            misec = _getInt(val, i_val, token.length, 3);
+            if (misec === null || (misec < 0) || (misec > 999)) {
                 return null;
             }
-            i_val += ll.length;
-            if ( token === 'L' && ll < 10) {
-                ll = ll * 100;
+            i_val += misec.length;
+            if ( token === 'L' && misec < 10) {
+                misec = misec * 100;
             }
-            if ( token === 'LL' && ll < 100) {
-                ll = ll * 10;
+            if ( token === 'LL' && misec < 100) {
+                misec = misec * 10;
             }
         } else if ((token.toLowerCase() === 'tt') || (token.toLowerCase() === 't')) {
             if (val.substring(i_val, i_val + 2).toLowerCase() === 'am') {
@@ -1127,13 +1078,13 @@ function getDateFromFormat(val, format) {
     }
 
     // Correct hours value
-    if (hh < 12 && ampm === 'PM') {
-        hh = hh - 0 + 12;
-    } else if (hh > 11 && ampm === 'AM') {
-        hh -= 12;
+    if (hour < 12 && ampm === 'PM') {
+        hour = hour - 0 + 12;
+    } else if (hour > 11 && ampm === 'AM') {
+        hour -= 12;
     }
-    // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hh=${hh} mm=${mm} ss=${ss} ll=${ll}`); // eslint-disable-line
-    return new Date(year, month - 1, date, hh, mm, ss, ll);
+    // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec}`); // eslint-disable-line
+    return new Date(year, month - 1, date, hour, min, sec, misec);
 }
 
 /**
