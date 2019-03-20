@@ -668,16 +668,6 @@
                 initializeValue(node, 'tsCompare', 0);
                 initializeValue(node, 'statusOut', 3);
                 const chkVal = (name, val) => {
-                    console.log(name + ' compare to ' + val + ' - ' +
-                    (node[name] === null) ||
-                            (typeof node[name] === 'undefined') ||
-                            ($('#node-input-' + name).val() === val) ||
-                            (parseFloat($('#node-input-' + name).val()) === val));
-                    console.log(node[name]);
-                    console.log(typeof node[name]);
-                    console.log($('#node-input-' + name).val());
-                    console.log($('#node-input-' + name).is(':checked'));
-                    console.log(parseFloat($('#node-input-' + name).val()));
                     return (node[name] === null) ||
                             (typeof node[name] === 'undefined') ||
                             ($('#node-input-' + name).val() === val) ||
@@ -689,10 +679,8 @@
                     chkVal('lastMsgOnEndOut', false) &&
                     chkVal('statusOut', 3) &&
                     chkVal('tsCompare', 0)) {
-                    console.log('hide');
                     $('.enhanced-row').hide();
                 } else {
-                    console.log('show');
                     $('.enhanced-row').show();
                 }
                 // #endregion Enhanced settings
