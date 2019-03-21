@@ -90,9 +90,12 @@ module.exports = function (RED) {
                     ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
                         ports[i + 1] = RED.util.cloneMessage(msg);
-                        ports[i + 1].payload.sunPos = chk;
-                        ports[i + 1].payload.posChanged = chg;
+                        ports[i + 1].sunPos = chk;
                         ports[i + 1].posChanged = chg;
+                        if (typeof ports[i + 1].payload === 'object') {
+                            ports[i + 1].payload.sunPos = chk;
+                            ports[i + 1].payload.posChanged = chg;
+                        }
                     }
                 }
 
