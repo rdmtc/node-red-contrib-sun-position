@@ -266,22 +266,20 @@ function getTimeNumber(date) {
  * @return {bool}  **true** if the number is inside given limits, at least one limit must be validate, otherwise returns **false**
  */
 function checkLimits(num, low, high) {
+    // console.debug('checkLimits num=' + num + ' low=' + low + ' high=' + high); // eslint-disable-line
     if (typeof low !== 'undefined' && low !== '' && !isNaN(low) && low >= 0) {
         if (typeof high !== 'undefined' && high !== '' && !isNaN(high) && high >= 0) {
             if (high > low) {
                 return (num > low) && (num < high);
             }
-
             return (num > low) || (num < high);
         }
-
         return (num > low);
     }
 
     if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
         return (num < high);
     }
-
     return false;
 }
 

@@ -92,10 +92,7 @@ module.exports = function (RED) {
                         ports[i + 1] = RED.util.cloneMessage(msg);
                         ports[i + 1].sunPos = chk;
                         ports[i + 1].posChanged = chg;
-                        if (typeof ports[i + 1].payload === 'object') {
-                            ports[i + 1].payload.sunPos = chk;
-                            ports[i + 1].payload.posChanged = chg;
-                        }
+                        ports[i + 1].azimuth = ports[0].payload.azimuth;
                     }
                 }
 
@@ -146,29 +143,14 @@ module.exports = function (RED) {
         });
 
         function getNumProp(srcNode, msg, vType, value) {
-            // srcNode.debug('getNumProp vType=' + vType + ' value=' + value);
-            const now = new Date();
-            let result = -1;
-            if (vType === '' || vType === 'none') {
-                // nix
-            } else if (vType === 'num') {
-                result = Number(now);
-            } else {
-                try {
-                    // evaluateNodeProperty(value, type, srcNode, msg, callback)
-                    const res = RED.util.evaluateNodeProperty(value, vType, srcNode, msg);
-                    if (res && !isNaN(res)) {
-                        result = Number(now);
-                    } else {
-                        srcNode.error('could not evaluate ' + vType + '.' + value);
-                    }
-                } catch (err) {
-                    srcNode.error('could not evaluate ' + vType + '.' + value + ': ' + err.message);
-                    srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            try {
+                if (vType === 'none') {
+                    return undefined;
                 }
+                return node.positionConfig.getFloatProp(node, msg, vType, value);
+            } catch (err) {
+                return undefined;
             }
-
-            return result;
         }
     }
 

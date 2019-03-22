@@ -1,10 +1,9 @@
 {
     "sun-position": {
         "label": {
-            "azimuthpos":"azimuth position",
+            "azimuthpos":"azimuth Position",
             "between":"between",
             "and":"and",
-            "name": "Name",
             "start": "Start",
             "startOffset":"Start Offset",
             "end": "End",
