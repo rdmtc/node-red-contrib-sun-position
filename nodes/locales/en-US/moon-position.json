@@ -1,6 +1,7 @@
 {
     "moon-position": {
         "label": {
+            "azimuthpos":"azimuth Position",
             "between":"between",
             "and":"and"
         },
