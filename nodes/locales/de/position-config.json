@@ -12,17 +12,17 @@
             "stopfirst" : "Nach erster Übereinstimmung stoppen (if)"
         },
         "types": {
-            "unlimited":"keine Limitierung",
-            "undefined":"nicht verwendet",
-            "datespecific":"Zeitmarke (erweitert)",
-            "timeentered":"Zeit (next)",
-            "dateentered":"Datum",
-            "timepredefined":"feste Zeit",
-            "dayofmonth":"Monatstag",
-            "timesun":"Sonnenstands zeit",
-            "timemoon":"Mond-Zeit",
-            "suncalc":"Sonnenposition",
-            "mooncalc":"Mondposition"
+            "unlimited": "keine Limitierung",
+            "undefined": "nicht verwendet",
+            "datespecific": "Zeitmarke (erweitert)",
+            "timeentered": "Uhrzeit (nächste)",
+            "dateentered": "Datum (Zeitpunkt)",
+            "timepredefined": "Uhrzeit speziell",
+            "dayofmonth": "Spezieller Monatstag",
+            "timesun": "Uhrzeit Sonnenstand",
+            "timemoon": "Uhrzeit Mond Auf/Untergang",
+            "suncalc": "Sonnenposition",
+            "mooncalc": "Mondposition"
         },
         "multiselectLbl": {
             "operatorTypes": "in Vergleich einbeziehen"
