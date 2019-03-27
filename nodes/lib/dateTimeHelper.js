@@ -7,8 +7,11 @@ const util = require('util');
 module.exports = {
     isTrue,
     isFalse,
+    countDecimals,
     handleError,
     chkValueFilled,
+    getMsgBoolValue,
+    getMsgNumberValue,
     getSpecialDayOfMonth,
     checkLimits,
     addOffset,
@@ -51,6 +54,14 @@ function isTrue(val) {
 function isFalse(val) {
     val = (val+'').toLowerCase();
     return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
+}
+
+/**
+ * count the number of decimals of a number
+ * @param {*} value number to check
+ */
+function countDecimals(value) {
+    return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
 }
 /*******************************************************************************************************/
 /**
@@ -132,7 +143,6 @@ function handleError(node, messageText, err, stateText) {
 function chkValueFilled(val, defaultVal) {
     return ((typeof val === 'undefined') || (val === '') || (val === null)) ? defaultVal : val;
 }
-
 /*******************************************************************************************************/
 /**
  * get a date for the first day of week in the given month
@@ -295,6 +305,56 @@ function checkLimits(num, low, high) {
     }
 
     return false;
+}
+
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgNumberValue(msg, id, name) {
+    if (typeof msg.payload[id] !== 'undefined') {
+        const res = parseFloat(msg.payload[id]);
+        if (!isNaN(res)) {
+            return res;
+        }
+    }
+    if (typeof msg[id] !== 'undefined') {
+        const res = parseFloat(msg[id]);
+        if (!isNaN(res)) {
+            return res;
+        }
+    }
+
+    if ((typeof msg.topic === 'string') && (typeof name === 'string') && (String(msg.topic).toLocaleLowerCase.indexOf(name) > -1)) {
+        const res = parseFloat(msg.payload);
+        if (!isNaN(res)) {
+            return res;
+        }
+    }
+    return NaN;
+}
+
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgBoolValue(msg, id, name, def) {
+    if ((typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
+        return isTrue(msg.payload[id]);
+    }
+    if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
+        return isTrue(msg[id]);
+    }
+
+    if ((typeof msg.topic === 'string') &&
+        (typeof name === 'string') &&
+        ((typeof msg.payload === 'string') || (typeof msg.payload === 'number')) &&
+        (String(msg.topic).toLocaleLowerCase.indexOf(name) > -1)) {
+        return isTrue(msg.payload);
+    }
+    return def;
 }
 
 /*******************************************************************************************************/

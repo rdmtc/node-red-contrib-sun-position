@@ -1,0 +1,85 @@
+{
+	"blind-control": {
+		"label": {
+			"window":"window",
+			"windowTop": "window top",
+			"windowBottom": "window bottom",
+			"windowAngle":"orientation",
+			"windowAngleOffsetStart": "offset start",
+			"windowAngleOffsetEnd": "offset end",
+			"blindIncrement": "Increment",
+			"blindOpenPos": "open position (max)",
+			"blindClosedPos": "closed position (min)",
+			"blindNightPos": "night position",
+			"blindPosOverwriteExpire": "overwrite expire",
+			"addTimes": "alternate start or end time",
+			"propertyStart": "Alt. Start on",
+			"startTime": "Start time",
+			"startTimeAlt": "Start time",
+			"propertyEnd": "Alt. End on",
+			"endTime": "End time",
+			"endTimeAlt": "End time",
+			"startOffset": "Offset",
+			"startOffsetAlt": "Offset",
+			"endOffset": "Offset",
+			"endOffsetAlt": "Offset",
+			"compareTime": "base time",
+			"now": "date.now",
+			"msgts": "msg.ts",
+			"msglc": "msg.lc",
+			"msgtime": "msg.time",
+			"msgvalue": "msg.value",
+			"sunControlActive":"sun control active",
+			"sunControlActiveText": "restrict sunlight",
+			"sunFloorLength": "Depth",
+			"sunMinAltitude": "Altitude Threshold",
+			"notVisiblePos":"not in window pos",
+			"tempThreshold": "temperature threshold position",
+			"tempBlindPos": "blind position",
+			"cloudThreshold": "Cloud Threshold",
+			"cloudBlindPos": "blind position"
+		},
+		"placeholder": {
+			"property": "Property",
+			"startTime": "7:40",
+			"startOffset": "0",
+			"endTime": "18:15",
+			"endOffset": "0",
+			"startTimeAlt": "7:40",
+			"startOffsetAlt": "0",
+			"endTimeAlt": "18:15",
+			"endOffsetAlt": "0"
+		},
+		"tips": {
+			"addTimes": "..."
+		},
+		"reasonCodes": {
+			"alarm": "position is overwritten, no expire",
+			"overwrite": "position is overwritten",
+			"night": "night position",
+			"sunMinAltitude": "sun below minimum altitude",
+			"sunNotInWin": "Sun not in window",
+			"sunCtrl": "sun control",
+			"cloudExceeded": "Cloud overcast conditions",
+			"tempExceeded": "temp exceeded",
+			"openDef": "in default open position (no sun calc)"
+		},
+		"states": {
+			"alarm": "overwritten",
+			"overwrite": "overwritten, expire",
+			"night": "night",
+			"sunMinAltitude": "min altitude",
+			"sunNotInWin": "no sun",
+			"sunCtrl": "sun control",
+			"cloudExceeded": "cloud",
+			"tempExceeded": "temp",
+			"openDef": "default"
+		},
+		"errors": {
+			"error-start-time": "Error get start time: __message__",
+			"error-end-time": "Error get end time: __message__",
+			"invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
+			"invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__"
+		}
+	}
+}

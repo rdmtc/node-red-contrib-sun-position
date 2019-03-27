@@ -10,31 +10,19 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     'use strict';
 
     // shortcuts for easier to read formulas
-
     const PI = Math.PI;
-
     const sin = Math.sin;
-
     const cos = Math.cos;
-
     const tan = Math.tan;
-
     const asin = Math.asin;
-
     const atan = Math.atan2;
-
     const acos = Math.acos;
-
     const rad = PI / 180;
-
     // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
-
     // date/time constants and conversions
 
     const dayMs = 1000 * 60 * 60 * 24;
-
     const J1970 = 2440588;
-
     const J2000 = 2451545;
 
     function toJulian(date) {
@@ -82,9 +70,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
         return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
     }
-
     // general sun calculations
-
     function solarMeanAnomaly(d) {
         return rad * (357.5291 + 0.98560028 * d);
     }
@@ -92,15 +78,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     function eclipticLongitude(M) {
         const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
         // equation of center
-
         const P = rad * 102.9372; // perihelion of the Earth
-
         return M + C + P + PI;
     }
 
     function sunCoords(d) {
         const M = solarMeanAnomaly(d);
-
         const L = eclipticLongitude(M);
 
         return {
@@ -122,15 +105,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
 
         const lw = rad * -lng;
-
         const phi = rad * lat;
-
         const d = toDays(date);
-
         const c = sunCoords(d);
-
         const H = siderealTime(d, lw) - c.ra;
-
         return {
             azimuth: azimuth(H, phi, c.dec),
             altitude: altitude(H, phi, c.dec)

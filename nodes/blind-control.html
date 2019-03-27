@@ -1,51 +1,165 @@
-<script type="text/x-red" data-template-name="sun-position">
+<script type="text/x-red" data-template-name="blind-control">
     <div class="form-row">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="sun-position.label.position"></span></label>
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="blind-control.label.position"></span></label>
         <input type="text" id="node-input-positionConfig">
         <input type="hidden" id="node-input-outputs"/>
     </div>
-    <div class="form-row time-topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.topic"></span></label>
-        <input type="text" id="node-input-topic">
+    <hr>
+    <!-- window ######################################################################## -->
+    <div class="form-row">
+        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
+        <input type="number" id="node-input-windowTop" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
+        <input type="number" id="node-input-windowBottom" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-windowAngle"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngle"></span></label>
+        <input type="number" id="node-input-windowAngle" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-windowAngleOffsetStart"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngleOffsetStart"></span></label>
+        <input type="number" id="node-input-windowAngleOffsetStart" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-windowAngleOffsetEnd"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngleOffsetEnd"></span></label>
+        <input type="number" id="node-input-windowAngleOffsetEnd" >
     </div>
     <hr>
-    <div class="form-row node-input-rule-container-row">
-        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.azimuthpos"></span></label>
-        <ol id="node-input-rule-container"></ol>
+    <!-- #region blind ######################################################################## -->
+    <div class="form-row">
+        <label for="node-input-blindIncrement"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
+        <input type="number" id="node-input-blindIncrement" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-blindOpenPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
+        <input type="number" id="node-input-blindOpenPos" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-blindClosedPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
+        <input type="number" id="node-input-blindClosedPos" >
+    </div>
+    <div class="form-row">
+        <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
+        <input type="number" id="node-input-blindPosOverwriteExpire" >
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
+    <!-- #region time ######################################################################## -->
+    <div class="form-row">
+        <label for="node-input-blindNightPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindNightPos"></span></label>
+        <input type="number" id="node-input-blindNightPos" >
+    </div>
     <div class="form-row block-noindent">
-        <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
-        <input type="text" id="node-input-start" />
-        <input type="hidden" id="node-input-startType">
+        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
+        <input type="text" id="node-input-startTime" />
+        <input type="hidden" id="node-input-startTimeType">
     </div>
-    <div class="form-row block-indent1 sun-position-row-startOffset hidden">
-        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
-        <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"></input>
+    <div class="form-row block-indent1 within-time-switch-row-startOffset">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]within-time-switch.placeholder.startOffset"></input>
         <input type="hidden" id="node-input-startOffsetType">
         <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
+
     <div class="form-row block-noindent">
-        <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
-        <input type="text" id="node-input-end" />
-        <input type="hidden" id="node-input-endType">
+        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
+        <input type="text" id="node-input-endTime" />
+        <input type="hidden" id="node-input-endTimeType">
     </div>
-    <div class="form-row block-indent1 sun-position-row-endOffset hidden">
-        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
-        <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"></input>
+    <div class="form-row block-indent1 within-time-switch-row-endOffset">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"></input>
         <input type="hidden" id="node-input-endOffsetType">
         <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
     <hr>
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
+    <div class="form-tips">
+        <span data-i18n="[html]within-time-switch.tips.addTimes"></span>&nbsp;
+    </div>
+    <div class="form-row"/>
+    <div class="form-row alternate-property-start">
+        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
+        <input type="text" id="node-input-propertyStart"/>
+        <input type="hidden" id="node-input-propertyStartType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-start hidden">
+        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
+        <input type="text" id="node-input-startTimeAlt"/>
+        <input type="hidden" id="node-input-startTimeAltType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-start-offset hidden">
+        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
+        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"></input>
+        <input type="hidden" id="node-input-startTimeAltOffsetType">
+        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row alternate-property-end">
+        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
+        <input type="text" id="node-input-propertyEnd"/>
+        <input type="hidden" id="node-input-propertyEndType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-end hidden">
+        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
+        <input type="text" id="node-input-endTimeAlt"/>
+        <input type="hidden" id="node-input-endTimeAltType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-end-offset hidden">
+        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
+        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"></input>
+        <input type="hidden" id="node-input-endTimeAltOffsetType">
+        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <!-- #region sun ######################################################################## -->
+    <div class="form-row block-noindent">
+      <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.sunControlActive"></span></label>
+      <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
+      <span data-i18n="time-inject.label.sunControlActiveText"></span>&nbsp;
+    </div>
+    <div class="form-row block-indent1">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="number" id="node-input-sunFloorLength" >
+    </div>
+    <div class="form-row block-indent1">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="number" id="node-input-sunMinAltitude" >
+    </div>
+    <div class="form-row block-noindent">
+        <label for="node-input-notVisiblePos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.notVisiblePos"></span></label>
+        <input type="number" id="node-input-notVisiblePos" >
+    </div>
+    <hr>
+    <!-- #region weather ######################################################################## -->
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="sun-position.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]sun-position.placeholder.name">
+        <label for="node-input-tempThreshold"><i class="fa fa-tachometer"></i> <span data-i18n="blindcontroller.label.tempThreshold"></span></label>
+        <input type="number" id="node-input-tempThreshold">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tempBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blindcontroller.label.tempBlindPos"></span></label>
+        <input type="number" id="node-input-tempBlindPos">
+    </div>
+    <div class="form-row">
+        <label for="node-input-cloudThreshold"><i class="fa fa-cloud"></i> <span data-i18n="blindcontroller.label.cloudThreshold"></span></label>
+        <input type="number" id="node-input-cloudThreshold">
+    </div>
+    <div class="form-row">
+        <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blindcontroller.label.cloudBlindPos"></span></label>
+        <input type="number" id="node-input-cloudBlindPos">
+    </div>
+    <hr>
+    <!-- #region End ######################################################################## -->
+    <div class="form-row time-topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.topic"></span></label>
+        <input type="text" id="node-input-topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]blind-control.placeholder.name">
     </div>
     <div class="form-tips">
-        <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
+        <span data-i18n="blind-control.tips.sunPosControl"></span>&nbsp;
     </div>
 </script>
 <style>
@@ -88,7 +202,7 @@
     }
 </style>
 
-<script type="text/x-red" data-help-name="sun-position">
+<script type="text/x-red" data-help-name="blind-control">
     <h3>About</h3>
     <p>Gets the position of the sun</p>
 
@@ -241,14 +355,18 @@
         return clipValueLength(v);
     }
 
-    RED.nodes.registerType('sun-blind-control', {
+    RED.nodes.registerType('blind-control', {
         category: 'time and astro',
         color: '#FFCC66',
         icon: 'blind.png', // saved in  icons/myicon.png - myicon.png
         inputs: 1, // set the number of inputs - only 0 or 1
-        outputs: 2, //1. Object, 2. nur zahl der Öffnung der Jalousie
+        outputs: 2, // 1. Object, 2. nur zahl der Öffnung der Jalousie
         defaults: {
             name: {
+                value: '',
+                required: false
+            },
+            topic: {
                 value: '',
                 required: false
             },
@@ -257,40 +375,96 @@
                 type: 'position-config',
                 required: true
             },
-            maxopen: {
-                value: 100,
-                validate: function (v) {
-                    var n = Number(v);
-                    var i = Number(this.increment);
-                    return ((n >= 0) && (n <= 100) && (n%i == 0));
-                }
-            },
-            maxclosed: {
-                value: 0,
-                validate: function (v) {
-                    var n = Number(v);
-                    var i = Number(this.increment);
-                    return ((n >= 0) && (n <= 100) && (n%i == 0) && (n <= this.maxopen));
-                }
-            },
-            startOpen: {
-                value: "",
-                validate: (v) => {
-                    var n = Number(v);
-                    var i = Number(this.increment);
-                    return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0) && (n <= this.maxopen)));
-                }
-            },
-            startOpenType: {
-                value: 'maxopen'
-            },
-            start: {
+            // #region window settings
+            windowTop: {
                 value: '',
-                required: false,
-                validate: RED.validators.typedInput('startType')
+                required: true,
+                validate: RED.validators.number()
             },
-            startType: {
-                value: 'none'
+            windowBottom: {
+                value: '',
+                required: true,
+                validate: RED.validators.number()
+            },
+            windowAngle: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 360));
+                }
+            },
+            windowAngleOffsetStart: {
+                value: '',
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            windowAngleOffsetEnd: {
+                value: '',
+                validate: function (v) {
+                    const n = Number(v);
+                    return ((n >= 0) && (n <= 90));
+                }
+            },
+            // #endregion window settings
+            // #region blind settings
+            blindIncrement: {
+                value: 1,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (n < this.blindOpenPos) && (n > this.blindClosedPos);
+                }
+            },
+            blindOpenPos: {
+                value: 100,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (n > this.blindClosedPos) && (Number.isInteger(n / this.blindIncrement));
+                }
+            },
+            blindClosedPos: {
+                value: 0,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (n < this.blindOpenPos) && (Number.isInteger(n / this.blindIncrement));
+                }
+            },
+            blindNightPos: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v==='') ||
+                        ((n <= this.blindOpenPos) &&
+                         (n >= this.blindClosedPos) &&
+                         (Number.isInteger(n / this.blindIncrement)));
+                }
+            },
+            blindPosOverwriteExpire: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') || (n >= 10000);
+                }
+            },
+            blindPosOverwriteExpireMultiplier: {
+                value: 60000,
+                required: true,
+                validate: RED.validators.number()
+            },
+            // #endregion blind settings
+            // #region time settings
+            startTime: {
+                value: '',
+                required: true,
+                validate: RED.validators.typedInput('startTimeType')
+            },
+            startTimeType: {
+                value: 'entered'
             },
             startOffset: {
                 value: 0,
@@ -298,10 +472,7 @@
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetType')(v) ||
-                        ($('#node-input-start').length ?
-                            $('#node-input-start').typedInput('type') === 'none' :
-                            this.startType === 'none')
+                        RED.validators.typedInput('startOffsetType')(v)
                     );
                 }
             },
@@ -311,25 +482,15 @@
             startOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.number()(v) ||
-                        $('#node-input-startOffsetType').typedInput('type') === 'none' ||
-                        this.startOffsetType === 'none' ||
-                        ($('#node-input-start').length ?
-                            $('#node-input-start').typedInput('type') === 'none' :
-                            this.startType === 'none')
-                    );
-                }
+                validate: RED.validators.number()
             },
-            end: {
+            endTime: {
                 value: '',
-                required: false,
-                validate: RED.validators.typedInput('startType')
+                required: true,
+                validate: RED.validators.typedInput('endTimeType')
             },
-            endType: {
-                value: 'none'
+            endTimeType: {
+                value: 'entered'
             },
             endOffset: {
                 value: 0,
@@ -337,10 +498,7 @@
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
-                        RED.validators.typedInput('endOffsetType')(v) ||
-                        ($('#node-input-end').length ?
-                            $('#node-input-end').typedInput('type') === 'none' :
-                            this.endType === 'none')
+                        RED.validators.typedInput('endOffsetType')(v)
                     );
                 }
             },
@@ -350,110 +508,157 @@
             endOffsetMultiplier: {
                 value: 60000,
                 required: true,
+                validate: RED.validators.number()
+            },
+            propertyStart: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('propertyStartType')
+            },
+            propertyStartType: {
+                value: 'none'
+            },
+            startTimeAlt: {
+                value: '',
+                required: false,
+                validate: (v) => {
+                    return RED.validators.typedInput('startTimeAltType')(v) || ($(
+                        '#node-input-propertyStart').typedInput('type') === 'none');
+                }
+            },
+            startTimeAltType: {
+                value: 'none'
+            },
+            startOffsetAlt: {
+                value: 0,
                 validate: (v) => {
                     return (
-                        typeof v === 'undefined' ||
-                        RED.validators.number()(v) ||
-                        $('#node-input-endOffsetType').typedInput('type') === 'none' ||
-                        this.endOffsetType === 'none' ||
-                        ($('#node-input-end').length ?
-                            $('#node-input-end').typedInput('type') === 'none' :
-                            this.endType === 'none')
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetAltType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetAltType')(v) ||
+                        ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
                     );
                 }
             },
-            windowTop:  {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
+            startOffsetAltType: {
+                value: 'none'
             },
-            windowBottom:  {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
-            },
-            windowOrientation: {
-                value:"",
-                required:true,
-                validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 360));
+            startOffsetAltMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return RED.validators.number()(v) ||
+                        ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                        ($('#node-input-startTimeAlt').typedInput('type') === 'none');
                 }
             },
-            windowOrientationPOffset: {
-                value:"",
-                validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
+            propertyEnd: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('propertyEndType')
+            },
+            propertyEndType: {
+                value: 'none'
+            },
+            endTimeAlt: {
+                value: '',
+                required: false,
+                validate: (v) => {
+                    return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
+                        'type') === 'none');
                 }
             },
-            windowOrientationNOffset: {
-                value:"",
-                validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
+            endTimeAltType: {
+                value: 'none'
+            },
+            endOffsetAlt: {
+                value: 0,
+                validate: (v) => {
+                    return (
+                        (typeof v === 'undefined') ||
+                        (typeof this.startOffsetAltType === 'undefined') ||
+                        RED.validators.typedInput('startOffsetAltType')(v) ||
+                        ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
+                    );
                 }
             },
-            sunDepth: {
-                value:"",
-                required:true,
-                validate:RED.validators.number()
+            endOffsetAltType: {
+                value: 'none'
             },
-            altitudethreshold: {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                return (v == "" || ((n >= 0) && (n <= 90)));
-                                   }
-                                  },
-            increment:            {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                return ((n > 0) && (n <= 100) && (100%n == 0));
-                                   }
-                                  },
-            temperaturethreshold: {value:""},
-            temperaturethresholdposition:
-                                  {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            cloudsthreshold:      {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                return (v == "" || ((n >= 0) && (n <= 1)));
-                                   }
-                                  },
-            cloudsthresholdposition:
-                                  {value:"",
-                                   required:false,
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            nightposition:        {value:"",
-                                   validate: function (v) {
-                var n = Number(v);
-                var i = Number(this.increment);
-                return (v == "" || ((n >= 0) && (n <= 100) && (n%i == 0)));
-                                   }
-                                  },
-            expiryperiod:         {value:"", required:false,
-                                   validate: function(v) {
-                var n = Number(v);
-                return (v == "" || n >= 0);
-                                   }
-                                  }
+            endOffsetAltMultiplier: {
+                value: 60000,
+                required: true,
+                validate: (v) => {
+                    return RED.validators.number()(v) ||
+                        ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                        ($('#node-input-endTimeAlt').typedInput('type') === 'none');
+                }
+            },
+            tsCompare: {
+                value: '0'
+            },
+            // #endregion time settings
+            // #region sun settings
+            sunControlActive: {
+                value: true,
+                required: true,
+                validate: function(v) {
+                    return (v === true || v === false);
+                }
+            },
+            sunFloorLength: {
+                value: 0,
+                validate: RED.validators.number()
+            },
+            sunMinAltitude: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '' || ((n >= 0) && (n <= 90)));
+                }
+            },
+            notVisiblePos: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') ||
+                        ((n <= this.blindOpenPos) &&
+                            (n >= this.blindClosedPos) &&
+                            (Number.isInteger(n / this.blindIncrement)));
+                }
+            },
+            // #endregion sun settings
+            // #region weather settings
+            tempThreshold: { value: '' },
+            tempBlindPos: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') ||
+                            ((n < this.blindOpenPos) &&
+                            (n > this.blindClosedPos) &&
+                            (Number.isInteger(n / this.blindIncrement)));
+                }
+            },
+            cloudThreshold: { value: '' },
+            cloudBlindPos: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') ||
+                        ((n < this.blindOpenPos) &&
+                            (n > this.blindClosedPos) &&
+                            (Number.isInteger(n / this.blindIncrement)));
+                }
+            }
+            // #endregion weather settings
         },
         outputLabels(index) {
             if (index === 0) {
-                return ((this.topic) ? this.topic + ':' : '') + 'sun-position';
+                return ((this.topic) ? this.topic + ':' : '') + 'blind-control';
             }
 
             const rule = this.rules[index - 1];
@@ -466,7 +671,7 @@
             if (this.name) {
                 return this.name;
             }
-            const result = 'sun-position';
+            const result = 'blind-control';
             if (this.topic && (this.topic.length + result.length <= 32)) {
                 return this.topic + ':' + result;
             }
@@ -475,7 +680,7 @@
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
         },
-        paletteLabel: 'sun-position',
+        paletteLabel: 'blind-control',
         oneditprepare() {
             const node = this;
             const setup = function(node) {
@@ -484,7 +689,7 @@
                 // #region initialize
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, 'sun-position', field, 'multiplier', (id) => (id > 0));
+                    appendOptions(node, 'blind-control', field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     }
@@ -502,9 +707,9 @@
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
                     onChange: (_type, _value) => {
                         if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
-                            $('.sun-position-row-startOffset').hide();
+                            $('.blind-control-row-startOffset').hide();
                         } else {
-                            $('.sun-position-row-startOffset').show();
+                            $('.blind-control-row-startOffset').show();
                         }
 
                         $('#node-input-property').change();
@@ -541,9 +746,9 @@
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
                     onChange: (_type, _value) => {
                         if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
-                            $('.sun-position-row-endOffset').hide();
+                            $('.blind-control-row-endOffset').hide();
                         } else {
-                            $('.sun-position-row-endOffset').show();
+                            $('.blind-control-row-endOffset').show();
                         }
 
                         $('#node-input-property').change();
@@ -571,8 +776,8 @@
                 // #endregion end
                 const outputCount = $('#node-input-outputs').val('{}');
 
-                const btwnLabel = node._('sun-position.label.between');
-                const andLabel = node._('sun-position.label.and');
+                const btwnLabel = node._('blind-control.label.between');
+                const andLabel = node._('blind-control.label.and');
 
                 function resizeRule(rule) {
                     const newWidth = rule.width();
