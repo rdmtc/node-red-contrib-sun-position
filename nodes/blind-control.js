@@ -190,10 +190,7 @@ module.exports = function (RED) {
         }
 
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
-        if (isNaN(expire)) {
-            expire = hlp.getMsgNumberValue(msg, 'blindPositionExpiry', 'posTime');
-        }
-        if (isNaN(expire)) {
+        if (isNaN(expire) || expire < 500) {
             expire = node.blindData.overwrite.expireDuration;
         } else {
             needOverwrite = true;
@@ -207,17 +204,15 @@ module.exports = function (RED) {
             node.blindData.position = newPos;
             node.blindData.overwrite.active = true;
             const prio = hlp.getMsgBoolValue(msg, 'prio', 'priority', false);
-            if (prio) {
+            if (prio || (expire < 500)) {
                 node.blindData.overwrite.expireNever = true;
                 node.reason.Code = 2;
                 node.reason.State = RED._('blind-control.states.overwritePrio');
                 node.reason.Description = RED._('blind-control.reasons.overwritePrio');
             } else {
-                if (expire < 500) {
-                    expire = 500;
-                }
                 node.blindData.overwrite.expires = (now + expire);
                 node.blindData.overwrite.expireDate = new Date(now + expire);
+                node.debug('expires in ' + expire + 'ms = ' + node.blindData.overwrite.expireDate);
                 if (node.timeOutObj) {
                     blindPosOverwriteReset(node);
                 }
@@ -228,7 +223,9 @@ module.exports = function (RED) {
                 }, expire);
                 node.reason.Code = 3;
                 node.reason.State = RED._('blind-control.states.overwrite');
-                node.reason.Description = RED._('blind-control.reasons.overwrite');
+                node.reason.Description = RED._('blind-control.reasons.overwrite', {
+                    time: node.blindData.overwrite.expireDate.toISOString()
+                });
             }
             return true;
         }
@@ -408,7 +405,7 @@ module.exports = function (RED) {
             noSunPos: Number(hlp.chkValueFilled(config.blindPosSunNotInWindow, (hlp.chkValueFilled(config.blindOpenPos, 100)))),
             overwrite : {
                 active: false,
-                expireDuration: Number(hlp.chkValueFilled(config.blindPosOverwriteExpire, 0)),
+                expireDuration: Number(hlp.chkValueFilled(config.blindPosOverwriteExpire, 0)) * Number(hlp.chkValueFilled(config.blindPosOverwriteExpireMultiplier, 60000)),
                 alarm: false,
                 onDay: hlp.chkValueFilled(config.blindPosOverwriteExpireDay, false),
                 onNight: hlp.chkValueFilled(config.blindPosOverwriteExpireNight, false)

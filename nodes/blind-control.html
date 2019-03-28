@@ -494,7 +494,7 @@
                 value: '',
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (v === '') || (n >= 10000);
+                    return (v === '') || ((n * this.blindPosOverwriteExpireMultiplier) >= 500);
                 }
             },
             blindPosOverwriteExpireMultiplier: {

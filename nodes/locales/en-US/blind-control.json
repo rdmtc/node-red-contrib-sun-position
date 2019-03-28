@@ -82,7 +82,7 @@
 		"reasons": {
 			"overwriteAlarm": "position is overwritten by alarm",
 			"overwritePrio": "position is overwritten by priority, no expire",
-			"overwrite": "position is overwritten",
+			"overwrite": "position is overwritten, will expire __time__",
 			"night": "night position",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
@@ -93,7 +93,7 @@
 		},
 		"states": {
 			"overwriteAlarm": "overwritten, alarm",
-			"overwritePrio": "overwritten, prio",
+			"overwritePrio": "overwritten, until reset",
 			"overwrite": "overwritten, expire",
 			"night": "night",
 			"sunMinAltitude": "min altitude",
