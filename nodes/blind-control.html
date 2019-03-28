@@ -474,7 +474,7 @@
                 value: '',
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (v==='') ||
+                    return (v === '') ||
                         ((n <= this.blindOpenPos) &&
                          (n >= this.blindClosedPos) &&
                          (Number.isInteger(n / this.blindIncrement)));
@@ -553,7 +553,6 @@
             },
             endTime: {
                 value: '',
-                required: true,
                 validate: (v) => {
                     return (
                         (this.blindPosNight === '') ||
@@ -806,16 +805,6 @@
                 // #region time
                 const blindPosNightField = $('#node-input-blindPosNight');
                 blindPosNightField.on('change focus focusin focusout', (_type, _value) => {
-                    if (chkVal('blindPosNight', '')) {
-                        $('.blind-control-row-time').hide();
-                        $('.form-row-blindPosOverwriteExpireDay').hide();
-                        $('.form-row-blindPosOverwriteExpireNight').hide();
-                    } else {
-                        $('.blind-control-row-time').show();
-                        $('.form-row-blindPosOverwriteExpireDay').show();
-                        $('.form-row-blindPosOverwriteExpireNight').show();
-                    }
-
                     startTimeTypeField.change();
                     endTimeTypeField.change();
                     propertyStartTypeField.change();
@@ -827,6 +816,16 @@
                     endTimeAltField.change();
                     endTimeAltField.change();
                     endTimeAltOffsetField.change();
+
+                    if (chkVal('blindPosNight', '')) {
+                        $('.blind-control-row-time').hide();
+                        $('.form-row-blindPosOverwriteExpireDay').hide();
+                        $('.form-row-blindPosOverwriteExpireNight').hide();
+                    } else {
+                        $('.blind-control-row-time').show();
+                        $('.form-row-blindPosOverwriteExpireDay').show();
+                        $('.form-row-blindPosOverwriteExpireNight').show();
+                    }
                 });
                 // #region timeStart
                 const startTimeTypeField = setupTInput(node, {

@@ -79,8 +79,9 @@
 		"tips": {
 			"addTimes": "..."
 		},
-		"reasonCodes": {
-			"alarm": "position is overwritten, no expire",
+		"reasons": {
+			"overwriteAlarm": "position is overwritten by alarm",
+			"overwritePrio": "position is overwritten by priority, no expire",
 			"overwrite": "position is overwritten",
 			"night": "night position",
 			"sunMinAltitude": "sun below minimum altitude",
@@ -91,7 +92,8 @@
 			"openDef": "in default open position (no sun calc)"
 		},
 		"states": {
-			"alarm": "overwritten",
+			"overwriteAlarm": "overwritten, alarm",
+			"overwritePrio": "overwritten, prio",
 			"overwrite": "overwritten, expire",
 			"night": "night",
 			"sunMinAltitude": "min altitude",
@@ -105,7 +107,8 @@
 			"error-start-time": "Error get start time: __message__",
 			"error-end-time": "Error get end time: __message__",
 			"invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
-			"invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__"
+			"invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
+			"invalid-blind-position": "Given Blind-Position __pos__ is not a valid Position!"
 		}
 	}
 }

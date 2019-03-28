@@ -15,12 +15,15 @@ const util = require('util');
  */
 function validPosition_(node, position) {
     if (isNaN(position)) {
+        node.debug('Position: "' + position + '" is NaN!');
         return false;
     }
-    if (position > node.blindData.closedPos) {
+    if (position < node.blindData.closedPos) {
+        node.debug('Position: "' + position + '" < ' + node.blindData.closedPos);
         return false;
     }
-    if (node.blindData.position < node.blindData.openPos) {
+    if (node.blindData.position > node.blindData.openPos) {
+        node.debug('Position: "' + position + '" > ' + node.blindData.openPos);
         return false;
     }
     if (Number.isInteger(node.blindData.openPos) &&
@@ -28,6 +31,7 @@ function validPosition_(node, position) {
         Number.isInteger(node.blindData.increment) &&
         ((position % node.blindData.increment !== 0) ||
         !Number.isInteger(position) )) {
+        node.debug('Position invalid "' + position + '" > ' + node.blindData.openPos);
         return false;
     }
     return Number.isInteger(position / node.blindData.increment);
@@ -55,7 +59,7 @@ function checkWeather_(node, msg) {
    * @param {*} msg the message object
    * @param {*} node the current node object
    */
-function getNow_(compareType, msg, node) {
+function getNow_(node, msg, compareType) {
     let id = '';
     let value = '';
     switch (compareType) {
@@ -134,36 +138,47 @@ module.exports = function (RED) {
     'use strict';
     function blindPosOverwriteReset(node) {
         if (node.blindData.overwrite.expires >= 0) {
-            node.blindData.overwrite.expires = 0;
+            delete node.blindData.overwrite.expires;
+            delete node.blindData.overwrite.expireNever;
+            delete node.blindData.overwrite.expireDate;
             node.blindData.overwrite.active = false;
         }
+        if (node.timeOutObj) {
+            clearTimeout(node.timeOutObj);
+            node.timeOutObj = null;
+        }
     }
-
 
     /**
       *
       */
     function checkBlindPosOverwrite(node, msg) {
+        if (hlp.getMsgBoolValue(msg, 'alarm', 'alarm', false)) {
+            blindPosOverwriteReset(node);
+            node.blindData.overwrite.expireNever = true;
+            node.blindData.overwrite.active = true;
+            node.reason.Code = 1;
+            node.reason.State = RED._('blind-control.states.overwriteAlarm');
+            node.reason.Description = RED._('blind-control.reasons.overwriteAlarm');
+            node.blindData.position = node.blindData.openPos;
+            return true;
+        }
+
         if (hlp.getMsgBoolValue(msg, 'reset', 'reset', false)) {
             blindPosOverwriteReset(node);
         }
 
-        if (hlp.getMsgBoolValue(msg, 'alarm', 'alarm', false)) {
-            node.blindData.overwrite.expires = -1;
-            node.blindData.overwrite.active = true;
-            node.blindData.reasonCode = 1;
-            node.blindData.reasonState = RED._('blindcontroller.states.alarm');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.alarm');
-            node.blindData.position = node.blindData.openPos;
-        }
-
-        if (node.blindData.overwrite.active && (node.blindData.overwrite.expires === -1)) {
-            return true;
-        }
         const now = node.time.now.getTime();
-        node.blindData.overwrite.active = (node.blindData.overwrite.expires > now);
-        let needOverwrite = false;
+        if (node.blindData.overwrite.active) {
+            if (node.blindData.overwrite.expireNever) {
+                return true;
+            }
+            if (!node.blindData.overwrite.expires || (node.blindData.overwrite.expires > now)) {
+                blindPosOverwriteReset(node);
+            }
+        }
 
+        let needOverwrite = false;
         let newPos = hlp.getMsgNumberValue(msg, 'blindPosition', 'manual');
         if (isNaN(newPos)) {
             newPos = hlp.getMsgNumberValue(msg, 'position', 'overwrite');
@@ -173,6 +188,7 @@ module.exports = function (RED) {
         } else {
             needOverwrite = true;
         }
+
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (isNaN(expire)) {
             expire = hlp.getMsgNumberValue(msg, 'blindPositionExpiry', 'posTime');
@@ -184,23 +200,36 @@ module.exports = function (RED) {
         }
 
         if (needOverwrite) {
-            if (!validPosition_(newPos)) {
-                node.error('Given Blind-Position "' + newPos + '" is not a valid Position!');
+            if (!validPosition_(node, newPos)) {
+                node.error(RED._('invalid-blind-position', { pos: newPos }));
                 return false;
             }
-            if (expire === -1) {
-                node.blindData.overwrite.expires = -1;
+            node.blindData.position = newPos;
+            node.blindData.overwrite.active = true;
+            const prio = hlp.getMsgBoolValue(msg, 'prio', 'priority', false);
+            if (prio) {
+                node.blindData.overwrite.expireNever = true;
+                node.reason.Code = 2;
+                node.reason.State = RED._('blind-control.states.overwritePrio');
+                node.reason.Description = RED._('blind-control.reasons.overwritePrio');
             } else {
                 if (expire < 500) {
                     expire = 500;
                 }
                 node.blindData.overwrite.expires = (now + expire);
+                node.blindData.overwrite.expireDate = new Date(now + expire);
+                if (node.timeOutObj) {
+                    blindPosOverwriteReset(node);
+                }
+                node.timeOutObj = setTimeout(() => {
+                    node.debug('overwrites expires');
+                    blindPosOverwriteReset(node);
+                    node.emit('retrigger', msg);
+                }, expire);
+                node.reason.Code = 3;
+                node.reason.State = RED._('blind-control.states.overwrite');
+                node.reason.Description = RED._('blind-control.reasons.overwrite');
             }
-            node.blindData.position = newPos;
-            node.blindData.overwrite.active = true;
-            node.blindData.reasonCode = 2;
-            node.blindData.reasonState = RED._('blindcontroller.states.overwrite');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.overwrite');
             return true;
         }
         return false;
@@ -218,19 +247,19 @@ module.exports = function (RED) {
     function calcBlindPosition(node, sunPosition) {
         if (!sunPosition.isDay) {
             node.blindData.position = node.blindData.nightpos;
-            node.blindData.reasonCode = 3;
-            node.blindData.reasonState = RED._('blindcontroller.states.night');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.night');
+            node.reason.Code = 4;
+            node.reason.State = RED._('blind-control.states.night');
+            node.reason.Description = RED._('blind-control.reasons.night');
         } else if (node.tempData.nok) {
             node.blindData.position = node.tempData.blindPos;
-            node.blindData.reasonCode = 8;
-            node.blindData.reasonState = RED._('blindcontroller.states.tempExceeded');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.tempExceeded');
+            node.reason.Code = 9;
+            node.reason.State = RED._('blind-control.states.tempExceeded');
+            node.reason.Description = RED._('blind-control.reasons.tempExceeded');
         } else if (!sunPosition.InWindow) {
             node.blindData.position = node.blindData.noSunPos;
-            node.blindData.reasonCode = 5;
-            node.blindData.reasonState = RED._('blindcontroller.states.sunNotInWin');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.sunNotInWin');
+            node.reason.Code = 6;
+            node.reason.State = RED._('blind-control.states.sunNotInWin');
+            node.reason.Description = RED._('blind-control.reasons.sunNotInWin');
         } else if (node.sunData.active) {
             if (((node.sunData.minAltitude && sunPosition.altitudeDegrees >= node.sunData.minAltitude) ||
                 !node.sunData.minAltitude) && !node.cloudData.nok) {
@@ -246,29 +275,29 @@ module.exports = function (RED) {
                         node.blindData.position = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
                     }
                 }
-                node.blindData.reasonCode = 6;
-                node.blindData.reasonState = RED._('blindcontroller.states.sunCtrl');
-                node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.sunCtrl');
+                node.reason.Code = 7;
+                node.reason.State = RED._('blind-control.states.sunCtrl');
+                node.reason.Description = RED._('blind-control.reasons.sunCtrl');
             } else if (node.sunData.minAltitude && sunPosition.altitudeDegrees < node.sunData.minAltitude) {
-                node.blindData.reasonCode = 4;
-                node.blindData.reasonState = RED._('blindcontroller.states.sunMinAltitude');
-                node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.sunMinAltitude');
+                node.reason.Code = 5;
+                node.reason.State = RED._('blind-control.states.sunMinAltitude');
+                node.reason.Description = RED._('blind-control.reasons.sunMinAltitude');
             } else if (node.cloudData.nok) {
                 node.blindData.position = node.cloudData.threshold;
-                node.blindData.reasonCode = 7;
-                node.blindData.reasonState = RED._('blindcontroller.states.cloudExceeded');
-                node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.cloudExceeded');
+                node.reason.Code = 8;
+                node.reason.State = RED._('blind-control.states.cloudExceeded');
+                node.reason.Description = RED._('blind-control.reasons.cloudExceeded');
             }
         } else if (node.cloudData.nok) {
             node.blindData.position = node.cloudData.threshold;
-            node.blindData.reasonCode = 7;
-            node.blindData.reasonState = RED._('blindcontroller.states.cloudExceeded');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.cloudExceeded');
+            node.reason.Code = 8;
+            node.reason.State = RED._('blind-control.states.cloudExceeded');
+            node.reason.Description = RED._('blind-control.reasons.cloudExceeded');
         } else {
             node.blindData.position = node.blindData.openPos;
-            node.blindData.reasonCode = 8;
-            node.blindData.reasonState = RED._('blindcontroller.states.openDef');
-            node.blindData.reasonDescription = RED._('blindcontroller.reasonCodes.openDef');
+            node.reason.Code = 10;
+            node.reason.State = RED._('blind-control.states.openDef');
+            node.reason.Description = RED._('blind-control.reasons.openDef');
         }
 
         if (node.blindData.position > node.blindData.closedPos) {
@@ -287,7 +316,7 @@ module.exports = function (RED) {
        */
     function calcTimes(node, msg, config) {
         node.time = {
-            now: getNow_(config.tsCompare, msg, node),
+            now: getNow_(node, msg, config.tsCompare),
             start: {},
             end: {},
             altStartTime: false,
@@ -340,6 +369,11 @@ module.exports = function (RED) {
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        this.reason = {
+            Code : 0,
+            State: '',
+            Description: ''
+        };
         // Retrieve the config node
         this.windowSettings = {
             /** The Height of the window */
@@ -374,7 +408,6 @@ module.exports = function (RED) {
             noSunPos: Number(hlp.chkValueFilled(config.blindPosSunNotInWindow, (hlp.chkValueFilled(config.blindOpenPos, 100)))),
             overwrite : {
                 active: false,
-                expires: 0,
                 expireDuration: Number(hlp.chkValueFilled(config.blindPosOverwriteExpire, 0)),
                 alarm: false,
                 onDay: hlp.chkValueFilled(config.blindPosOverwriteExpireDay, false),
@@ -401,6 +434,7 @@ module.exports = function (RED) {
 
         this.on('input', function (msg) {
             try {
+                msg.reason = node.reason;
                 // calc times:
                 calcTimes(this, msg, config);
                 // check if the message contains any weather data
@@ -408,10 +442,10 @@ module.exports = function (RED) {
 
                 const previous = {
                     position: node.blindData.position,
-                    reasonCode: node.blindData.reasonCode
+                    reasonCode: node.reason.Code
                 };
                 // check for manual overwrite
-                if (checkBlindPosOverwrite(this,msg)) {
+                if (checkBlindPosOverwrite(this, msg)) {
                     // calc sun position:
                     const sunPosition = getSunPosition_(this);
                     msg.sunPosition = sunPosition;
@@ -431,11 +465,10 @@ module.exports = function (RED) {
                     if (!node.blindData.overwrite.active) {
                         calcBlindPosition(node, sunPosition);
                     }
-
                 }
 
                 if (node.blindData.position !== previous.position ||
-                    node.blindData.reasonCode !== previous.reasonCode) {
+                    node.reason.Code !== previous.reasonCode) {
                     msg.payload = node.blindData.position;
                     msg.blind = node.blindData;
                     msg.temp = node.tempData;
@@ -446,11 +479,11 @@ module.exports = function (RED) {
                     node.send(msg);
 
                     node.status({
-                        fill: (node.blindData.reasonCode < 3) ? 'blue' :
-                            ((node.blindData.reasonCode === 3) ? 'grey' :
-                                ((node.blindData.reasonCode >= 7) ? 'green' : 'yellow')),
+                        fill: (node.reason.Code <= 3) ? 'blue' :
+                            ((node.reason.Code === 4) ? 'grey' :
+                                ((node.reason.Code >= 8) ? 'green' : 'yellow')),
                         shape: node.blindData.position === node.blindData.openPos ? 'dot' : 'ring',
-                        text: node.blindData.position + ' - ' + node.blindData.reasonState + ' (' + node.blindData.reasonCode + ')'
+                        text: node.blindData.position + ' - ' + node.reason.State + ' (' + node.reason.Code + ')'
                     });
                 }
                 return null;
