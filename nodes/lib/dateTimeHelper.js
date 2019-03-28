@@ -10,10 +10,12 @@ module.exports = {
     countDecimals,
     handleError,
     chkValueFilled,
+    checkLimits,
     getMsgBoolValue,
     getMsgNumberValue,
     getSpecialDayOfMonth,
-    checkLimits,
+    getStdTimezoneOffset,
+    isDSTObserved,
     addOffset,
     calcDayOffset,
     normalizeDate,
@@ -326,7 +328,7 @@ function getMsgNumberValue(msg, id, name) {
         }
     }
 
-    if ((typeof msg.topic === 'string') && (typeof name === 'string') && (String(msg.topic).toLocaleLowerCase.indexOf(name) > -1)) {
+    if ((typeof msg.topic === 'string') && (typeof name === 'string') && (String(msg.topic).toLowerCase().indexOf(name) > -1)) {
         const res = parseFloat(msg.payload);
         if (!isNaN(res)) {
             return res;
@@ -351,12 +353,24 @@ function getMsgBoolValue(msg, id, name, def) {
     if ((typeof msg.topic === 'string') &&
         (typeof name === 'string') &&
         ((typeof msg.payload === 'string') || (typeof msg.payload === 'number')) &&
-        (String(msg.topic).toLocaleLowerCase.indexOf(name) > -1)) {
+        (String(msg.topic).toLowerCase().indexOf(name) > -1)) {
         return isTrue(msg.payload);
     }
     return def;
 }
 
+/*******************************************************************************************************/
+function getStdTimezoneOffset(d) {
+    d = d || new Date();
+    const jan = new Date(d.getFullYear(),0,1);
+    const jul = new Date(d.getFullYear(), 6, 1);
+    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+
+function isDSTObserved(d) {
+    d = d || new Date();
+    return d.getTimezoneOffset() < getStdTimezoneOffset(d);
+}
 /*******************************************************************************************************/
 /**
  * adds an offset to a given Date object

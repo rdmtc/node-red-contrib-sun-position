@@ -1,162 +1,198 @@
 <script type="text/x-red" data-template-name="blind-control">
     <div class="form-row">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="blind-control.label.position"></span></label>
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
-        <input type="hidden" id="node-input-outputs"/>
     </div>
     <hr>
     <!-- window ######################################################################## -->
-    <div class="form-row">
+    <div class="form-row block-noindent">
+        <span data-i18n="[html]blind-control.label.windowText"></span>&nbsp;
+    </div>
+    <div class="form-row block-indent1">
         <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
-        <input type="number" id="node-input-windowTop" >
+        <input type="number" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
     </div>
-    <div class="form-row">
+    <div class="form-row block-indent1">
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
-        <input type="number" id="node-input-windowBottom" >
+        <input type="number" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
     </div>
-    <div class="form-row">
-        <label for="node-input-windowAngle"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngle"></span></label>
-        <input type="number" id="node-input-windowAngle" >
+    <div class="form-row block-noindent">
+        <span data-i18n="[html]blind-control.label.windowAngleText"></span>&nbsp;
     </div>
-    <div class="form-row">
-        <label for="node-input-windowAngleOffsetStart"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngleOffsetStart"></span></label>
-        <input type="number" id="node-input-windowAngleOffsetStart" >
+    <div class="form-row block-indent1">
+        <label for="node-input-windowAngle"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAngle"></span></label>
+        <input type="number" id="node-input-windowAngle" data-i18n="[placeholder]blind-control.placeholder.windowAngle" >
     </div>
-    <div class="form-row">
-        <label for="node-input-windowAngleOffsetEnd"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowAngleOffsetEnd"></span></label>
+    <div class="form-row block-indent2">
+        <label for="node-input-windowAngleOffsetStart"><i class="fa fa-undo"></i> <span data-i18n="blind-control.label.windowAngleOffsetStart"></span></label>
+        <input type="number" id="node-input-windowAngleOffsetStart" data-i18n="[placeholder]blind-control.placeholder.windowAngleOffsetStart" >
+    </div>
+    <div class="form-row block-indent2">
+        <label for="node-input-windowAngleOffsetEnd"><i class="fa fa-repeat"></i> <span data-i18n="blind-control.label.windowAngleOffsetEnd"></span></label>
         <input type="number" id="node-input-windowAngleOffsetEnd" >
     </div>
     <hr>
     <!-- #region blind ######################################################################## -->
-    <div class="form-row">
-        <label for="node-input-blindIncrement"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
-        <input type="number" id="node-input-blindIncrement" >
+    <div class="form-row block-noindent">
+        <span data-i18n="[html]blind-control.label.blindText"></span>&nbsp;
     </div>
-    <div class="form-row">
-        <label for="node-input-blindOpenPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
-        <input type="number" id="node-input-blindOpenPos" >
+    <div class="form-row block-indent1">
+        <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
+        <input type="number" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
     </div>
-    <div class="form-row">
-        <label for="node-input-blindClosedPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
-        <input type="number" id="node-input-blindClosedPos" >
+    <div class="form-row block-indent1">
+        <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
+        <input type="number" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
     </div>
-    <div class="form-row">
-        <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
-        <input type="number" id="node-input-blindPosOverwriteExpire" >
-        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    <div class="form-row block-indent1">
+        <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
+        <input type="number" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
-    <div class="form-row">
-        <label for="node-input-blindNightPos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindNightPos"></span></label>
-        <input type="number" id="node-input-blindNightPos" >
-    </div>
     <div class="form-row block-noindent">
-        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
+        <span data-i18n="[html]blind-control.label.TimeText"></span>&nbsp;
+    </div>
+    <div class="form-row">
+        <label for="node-input-blindPosNight"><i class="fa fa-moon-o"></i> <span data-i18n="blind-control.label.blindPosNight"></span></label>
+        <input type="number" id="node-input-blindPosNight"  data-i18n="[placeholder]blind-control.placeholder.blindPosNight">
+    </div>
+    <div class="form-row blind-control-row-time block-noindent">
+        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.startTime"></span></label>
         <input type="text" id="node-input-startTime" />
         <input type="hidden" id="node-input-startTimeType">
     </div>
-    <div class="form-row block-indent1 within-time-switch-row-startOffset">
-        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
-        <input id="node-input-startOffset" data-i18n="[placeholder]within-time-switch.placeholder.startOffset"></input>
+    <div class="form-row blind-control-row-time block-indent1 blind-control-row-startOffset">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]blind-control.placeholder.startOffset"></input>
         <input type="hidden" id="node-input-startOffsetType">
         <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-
-    <div class="form-row block-noindent">
-        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" />
-        <input type="hidden" id="node-input-endTimeType">
-    </div>
-    <div class="form-row block-indent1 within-time-switch-row-endOffset">
-        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
-        <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"></input>
-        <input type="hidden" id="node-input-endOffsetType">
-        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <hr>
-    <div class="form-tips">
-        <span data-i18n="[html]within-time-switch.tips.addTimes"></span>&nbsp;
-    </div>
-    <div class="form-row"/>
-    <div class="form-row alternate-property-start">
-        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
+    <div class="form-row blind-control-row-time alternate-property-start">
+        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.propertyStart"></span></label>
         <input type="text" id="node-input-propertyStart"/>
         <input type="hidden" id="node-input-propertyStartType">
     </div>
-    <div class="form-row block-indent1 alternate-time-start hidden">
-        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
+    <div class="form-row blind-control-row-time block-indent1 alternate-time-start hidden">
+        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.startTimeAlt"></span></label>
         <input type="text" id="node-input-startTimeAlt"/>
         <input type="hidden" id="node-input-startTimeAltType">
     </div>
-    <div class="form-row block-indent1 alternate-time-start-offset hidden">
-        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
-        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"></input>
+    <div class="form-row blind-control-row-time block-indent1 alternate-time-start-offset hidden">
+        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.startTimeAltOffset"></span></label>
+        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]blind-control.placeholder.startTimeAltOffset"></input>
         <input type="hidden" id="node-input-startTimeAltOffsetType">
         <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row alternate-property-end">
-        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
+
+    <div class="form-row blind-control-row-time block-noindent">
+        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.endTime"></span></label>
+        <input type="text" id="node-input-endTime" />
+        <input type="hidden" id="node-input-endTimeType">
+    </div>
+    <div class="form-row blind-control-row-time block-indent1 blind-control-row-endOffset">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]blind-control.placeholder.endOffset"></input>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row blind-control-row-time alternate-property-end">
+        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.propertyEnd"></span></label>
         <input type="text" id="node-input-propertyEnd"/>
         <input type="hidden" id="node-input-propertyEndType">
     </div>
-    <div class="form-row block-indent1 alternate-time-end hidden">
-        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
+    <div class="form-row blind-control-row-time block-indent1 alternate-time-end hidden">
+        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.endTimeAlt"></span></label>
         <input type="text" id="node-input-endTimeAlt"/>
         <input type="hidden" id="node-input-endTimeAltType">
     </div>
-    <div class="form-row block-indent1 alternate-time-end-offset hidden">
-        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
-        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"></input>
+    <div class="form-row blind-control-row-time block-indent1 alternate-time-end-offset hidden">
+        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.endTimeAltOffset"></span></label>
+        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]blind-control.placeholder.endTimeAltOffset"></input>
         <input type="hidden" id="node-input-endTimeAltOffsetType">
         <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
     <!-- #region sun ######################################################################## -->
     <div class="form-row block-noindent">
-      <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.sunControlActive"></span></label>
-      <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
-      <span data-i18n="time-inject.label.sunControlActiveText"></span>&nbsp;
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="number" id="node-input-sunFloorLength" >
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="number" id="node-input-sunMinAltitude" >
+        <label for="node-input-blindPosSunNotInWindow"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindPosSunNotInWindow"></span></label>
+        <input type="number" id="node-input-blindPosSunNotInWindow" data-i18n="[placeholder]blind-control.placeholder.blindPosSunNotInWindow">
     </div>
     <div class="form-row block-noindent">
-        <label for="node-input-notVisiblePos"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.notVisiblePos"></span></label>
-        <input type="number" id="node-input-notVisiblePos" >
+      <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
+      <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
+      <span data-i18n="blind-control.label.sunControlActiveText"></span>&nbsp;
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="number" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="number" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+    </div>
+    <hr>
+    <!-- #region overwrite blind ######################################################################## -->
+    <div class="form-row block-noindent">
+        <span data-i18n="[html]blind-control.label.blindPosOverwriteText"></span>&nbsp;
+    </div>
+    <div class="form-row block-indent1">
+        <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
+        <input type="number" id="node-input-blindPosOverwriteExpire" data-i18n="[placeholder]blind-control.placeholder.blindPosOverwriteExpire">
+        <select id="node-input-blindPosOverwriteExpireMultiplier" class="node-input-multiplier"></select>
+    </div>
+        <div class="form-row form-row-blindPosOverwriteExpireDay block-indent2">
+        <label for="node-input-blindPosOverwriteExpireDay"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpireDay"></span></label>
+        <input type="checkbox" id="node-input-blindPosOverwriteExpireDay" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="blind-control.label.blindPosOverwriteExpireDayText"></span>&nbsp;
+    </div>
+    <div class="form-row form-row-blindPosOverwriteExpireNight block-indent2">
+        <label for="node-input-blindPosOverwriteExpireNight"><i class="fa fa-moon-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpireNight"></span></label>
+        <input type="checkbox" id="node-input-blindPosOverwriteExpireNight" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="blind-control.label.blindPosOverwriteExpireNightText"></span>&nbsp;
     </div>
     <hr>
     <!-- #region weather ######################################################################## -->
     <div class="form-row">
-        <label for="node-input-tempThreshold"><i class="fa fa-tachometer"></i> <span data-i18n="blindcontroller.label.tempThreshold"></span></label>
-        <input type="number" id="node-input-tempThreshold">
+        <label for="node-input-tempThreshold"><i class="fa fa-tachometer"></i> <span data-i18n="blind-control.label.tempThreshold"></span></label>
+        <input type="number" id="node-input-tempThreshold" data-i18n="[placeholder]blind-control.placeholder.tempThreshold">
     </div>
     <div class="form-row">
-        <label for="node-input-tempBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blindcontroller.label.tempBlindPos"></span></label>
-        <input type="number" id="node-input-tempBlindPos">
+        <label for="node-input-tempBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.tempBlindPos"></span></label>
+        <input type="number" id="node-input-tempBlindPos" data-i18n="[placeholder]blind-control.placeholder.tempBlindPos">
     </div>
     <div class="form-row">
-        <label for="node-input-cloudThreshold"><i class="fa fa-cloud"></i> <span data-i18n="blindcontroller.label.cloudThreshold"></span></label>
-        <input type="number" id="node-input-cloudThreshold">
+        <label for="node-input-cloudThreshold"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
+        <input type="number" id="node-input-cloudThreshold" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
     </div>
     <div class="form-row">
-        <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blindcontroller.label.cloudBlindPos"></span></label>
-        <input type="number" id="node-input-cloudBlindPos">
+        <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
+        <input type="number" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudBlindPos">
     </div>
     <hr>
     <!-- #region End ######################################################################## -->
+    <div class="form-row">
+        <a href="#" class="enhanced-row-toggle"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row hidden">
+        <div class="form-row compare-row">
+            <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
+            <select id="node-input-tsCompare" style="width:70%;" >
+                <option value="0" data-i18n="blind-control.label.now"></option>
+                <option value="1" data-i18n="blind-control.label.msgts"></option>
+                <option value="2" data-i18n="blind-control.label.msglc"></option>
+                <option value="3" data-i18n="blind-control.label.msgtime"></option>
+                <option value="4" data-i18n="blind-control.label.msgvalue"></option>
+            </select>
+        </div>
+    </div>
     <div class="form-row time-topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.topic"></span></label>
-        <input type="text" id="node-input-topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]blind-control.placeholder.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-tips">
         <span data-i18n="blind-control.tips.sunPosControl"></span>&nbsp;
@@ -356,9 +392,9 @@
     }
 
     RED.nodes.registerType('blind-control', {
-        category: 'time and astro',
+        category: 'advanced-input',
         color: '#FFCC66',
-        icon: 'blind.png', // saved in  icons/myicon.png - myicon.png
+        icon: 'blind-white.png', // saved in  icons/myicon.png - myicon.png
         inputs: 1, // set the number of inputs - only 0 or 1
         outputs: 2, // 1. Object, 2. nur zahl der Öffnung der Jalousie
         defaults: {
@@ -434,7 +470,7 @@
                     return (n < this.blindOpenPos) && (Number.isInteger(n / this.blindIncrement));
                 }
             },
-            blindNightPos: {
+            blindPosNight: {
                 value: '',
                 validate: function (v) {
                     const n = parseFloat(v);
@@ -442,6 +478,16 @@
                         ((n <= this.blindOpenPos) &&
                          (n >= this.blindClosedPos) &&
                          (Number.isInteger(n / this.blindIncrement)));
+                }
+            },
+            blindPosSunNotInWindow: {
+                value: '',
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') ||
+                        ((n <= this.blindOpenPos) &&
+                            (n >= this.blindClosedPos) &&
+                            (Number.isInteger(n / this.blindIncrement)));
                 }
             },
             blindPosOverwriteExpire: {
@@ -456,12 +502,31 @@
                 required: true,
                 validate: RED.validators.number()
             },
+            blindPosOverwriteExpireNight: {
+                value: true,
+                required: true,
+                validate: function (v) {
+                    return (v === true || v === false);
+                }
+            },
+            blindPosOverwriteExpireDay: {
+                value: false,
+                required: true,
+                validate: function (v) {
+                    return (v === true || v === false);
+                }
+            },
             // #endregion blind settings
             // #region time settings
             startTime: {
                 value: '',
-                required: true,
-                validate: RED.validators.typedInput('startTimeType')
+                validate: (v) => {
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('startTimeType')(v)
+                    );
+                }
             },
             startTimeType: {
                 value: 'entered'
@@ -470,6 +535,8 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
                         RED.validators.typedInput('startOffsetType')(v)
@@ -487,7 +554,13 @@
             endTime: {
                 value: '',
                 required: true,
-                validate: RED.validators.typedInput('endTimeType')
+                validate: (v) => {
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('endTimeType')(v)
+                    );
+                }
             },
             endTimeType: {
                 value: 'entered'
@@ -496,6 +569,8 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
                         RED.validators.typedInput('endOffsetType')(v)
@@ -513,7 +588,13 @@
             propertyStart: {
                 value: '',
                 required: false,
-                validate: RED.validators.typedInput('propertyStartType')
+                validate: (v) => {
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('propertyStartType')(v)
+                    );
+                }
             },
             propertyStartType: {
                 value: 'none'
@@ -522,8 +603,12 @@
                 value: '',
                 required: false,
                 validate: (v) => {
-                    return RED.validators.typedInput('startTimeAltType')(v) || ($(
-                        '#node-input-propertyStart').typedInput('type') === 'none');
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('startTimeAltType')(v) ||
+                        ($('#node-input-propertyStart').typedInput('type') === 'none')
+                    );
                 }
             },
             startTimeAltType: {
@@ -533,6 +618,8 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
                         RED.validators.typedInput('startOffsetAltType')(v) ||
@@ -548,15 +635,25 @@
                 value: 60000,
                 required: true,
                 validate: (v) => {
-                    return RED.validators.number()(v) ||
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.number()(v) ||
                         ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                        ($('#node-input-startTimeAlt').typedInput('type') === 'none');
+                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
+                    );
                 }
             },
             propertyEnd: {
                 value: '',
                 required: false,
-                validate: RED.validators.typedInput('propertyEndType')
+                validate: (v) => {
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('propertyEnd')(v)
+                    );
+                }
             },
             propertyEndType: {
                 value: 'none'
@@ -565,8 +662,12 @@
                 value: '',
                 required: false,
                 validate: (v) => {
-                    return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
-                        'type') === 'none');
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.typedInput('endTimeAltType')(v) ||
+                        ($('#node-input-propertyEnd').typedInput('type') === 'none')
+                    );
                 }
             },
             endTimeAltType: {
@@ -576,6 +677,8 @@
                 value: 0,
                 validate: (v) => {
                     return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
                         RED.validators.typedInput('startOffsetAltType')(v) ||
@@ -591,9 +694,13 @@
                 value: 60000,
                 required: true,
                 validate: (v) => {
-                    return RED.validators.number()(v) ||
+                    return (
+                        (this.blindPosNight === '') ||
+                        (typeof this.blindPosNight === 'undefined') ||
+                        RED.validators.number()(v) ||
                         ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                        ($('#node-input-endTimeAlt').typedInput('type') === 'none');
+                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
+                    );
                 }
             },
             tsCompare: {
@@ -602,7 +709,7 @@
             // #endregion time settings
             // #region sun settings
             sunControlActive: {
-                value: true,
+                value: false,
                 required: true,
                 validate: function(v) {
                     return (v === true || v === false);
@@ -618,16 +725,6 @@
                 validate: function (v) {
                     const n = parseFloat(v);
                     return (v === '' || ((n >= 0) && (n <= 90)));
-                }
-            },
-            notVisiblePos: {
-                value: '',
-                validate: function (v) {
-                    const n = parseFloat(v);
-                    return (v === '') ||
-                        ((n <= this.blindOpenPos) &&
-                            (n >= this.blindClosedPos) &&
-                            (Number.isInteger(n / this.blindIncrement)));
                 }
             },
             // #endregion sun settings
@@ -685,28 +782,70 @@
             const node = this;
             const setup = function(node) {
                 /* global getTypes appendOptions setupTInput */
-                const types = getTypes();
+                const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, 'blind-control', field, 'multiplier', (id) => (id > 0));
+                    appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     }
                     field.val(mp);
                     return mp;
                 }
+                const chkVal = (name, val) => {
+                    return (node[name] === null) ||
+                        (typeof node[name] === 'undefined') ||
+                        ($('#node-input-' + name).val() === val) ||
+                        ($('#node-input-' + name).is(':checked') === val);
+                };
+                // #endregion initialize
+                // #region blind
+                node.blindPosOverwriteExpireMultiplier = multilpierUpdate(node.blindPosOverwriteExpireMultiplier, 'blindPosOverwriteExpireMultiplier');
+                // #endregion blind
+                // #region time
+                const blindPosNightField = $('#node-input-blindPosNight');
+                blindPosNightField.on('change focus focusin focusout', (_type, _value) => {
+                    if (chkVal('blindPosNight', '')) {
+                        $('.blind-control-row-time').hide();
+                        $('.form-row-blindPosOverwriteExpireDay').hide();
+                        $('.form-row-blindPosOverwriteExpireNight').hide();
+                    } else {
+                        $('.blind-control-row-time').show();
+                        $('.form-row-blindPosOverwriteExpireDay').show();
+                        $('.form-row-blindPosOverwriteExpireNight').show();
+                    }
 
-                // #region start
-                const startTypeField = setupTInput(node, {
-                    typeProp: 'startType',
-                    valueProp: 'start',
+                    startTimeTypeField.change();
+                    endTimeTypeField.change();
+                    propertyStartTypeField.change();
+                    propertyEndTypeField.change();
+                    startOffsetField.change();
+                    endOffsetField.change();
+                    startTimeAltField.change();
+                    startTimeAltOffsetField.change();
+                    endTimeAltField.change();
+                    endTimeAltField.change();
+                    endTimeAltOffsetField.change();
+                });
+                // #region timeStart
+                const startTimeTypeField = setupTInput(node, {
+                    typeProp: 'startTimeType',
+                    valueProp: 'startTime',
                     width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
+                    defaultType: node.startTimeType || types.TimeEntered.value,
+                    defaultValue: node.startTime || '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-startTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
+                        if (plVType === types.Undefined.value ||
+                            plVType === 'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
                             $('.blind-control-row-startOffset').hide();
                         } else {
                             $('.blind-control-row-startOffset').show();
@@ -717,7 +856,7 @@
                 });
 
                 node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
-                setupTInput(node, {
+                const startOffsetField = setupTInput(node, {
                     typeProp: 'startOffsetType',
                     valueProp: 'startOffset',
                     width: 'calc(100% - 255px)',
@@ -732,20 +871,26 @@
                             $('#node-input-startOffsetMultiplier').prop('disabled', false);
                         }
                     }
-                }).change();
-                startTypeField.change();
-                // #endregion start
-
-                // #region end
-                const endTypeField = setupTInput(node, {
-                    typeProp: 'endType',
-                    valueProp: 'end',
+                });
+                // #endregion timeStart
+                // #region timeEnd
+                const endTimeTypeField = setupTInput(node, {
+                    typeProp: 'endTimeType',
+                    valueProp: 'endTime',
                     width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
+                    defaultType: node.endTimeType || types.TimeEntered.value,
+                    defaultValue: node.endTime || '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        const plVType = $('#node-input-endTime').typedInput('type');
+                        const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
+                        if (plVType === types.Undefined.value ||
+                            plVType === 'msg' ||
+                            plVType === 'flow' ||
+                            plVType === 'global' ||
+                            plVTypeAlt === 'msg' ||
+                            plVTypeAlt === 'flow' ||
+                            plVTypeAlt === 'global') {
                             $('.blind-control-row-endOffset').hide();
                         } else {
                             $('.blind-control-row-endOffset').show();
@@ -756,7 +901,7 @@
                 });
 
                 node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
-                setupTInput(node, {
+                const endOffsetField = setupTInput(node, {
                     typeProp: 'endOffsetType',
                     valueProp: 'endOffset',
                     width: 'calc(100% - 255px)',
@@ -771,136 +916,143 @@
                             $('#node-input-endOffsetMultiplier').prop('disabled', false);
                         }
                     }
-                }).change();
-                endTypeField.change();
-                // #endregion end
-                const outputCount = $('#node-input-outputs').val('{}');
-
-                const btwnLabel = node._('blind-control.label.between');
-                const andLabel = node._('blind-control.label.and');
-
-                function resizeRule(rule) {
-                    const newWidth = rule.width();
-                    const btwnField1 = rule.find('.node-input-rule-btwn-value');
-                    const btwnField2 = rule.find('.node-input-rule-btwn-value2');
-                    const editwidth = (newWidth / 2);
-                    btwnField1.typedInput('width', (editwidth - 70));
-                    btwnField2.typedInput('width', (editwidth - 70));
-                }
-
-                $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
-                    addItem(container, i, opt) {
-                        container.css({
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap'
-                        });
-                        if (!opt.hasOwnProperty('r')) {
-                            opt.r = {};
-                        }
-
-                        if (!opt.hasOwnProperty('i')) {
-                            opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
-                        }
-
-                        const rule = opt.r;
-                        const row = $('<div/>').appendTo(container);
-                        /* const row3 = $('<div/>', {
-                            style: 'padding-top: 5px;'
-                        }).appendTo(container); */
-
-                        /* validate: function (v) {
-                            var n = Number(v);
-                            return ((n >= 0) && (n <= 360));
-                        } */
-
-                        $('<span/>', {
-                            class: 'node-input-rule-btwn-label'
-                        }).text(' ' + btwnLabel + ' ').appendTo(row);
-                        const btwnValueField = $('<input/>', {
-                            class: 'node-input-rule-btwn-value',
-                            type: 'text',
-                            style: 'margin-left: 5px;'
-                        }).appendTo(row).typedInput({
-                            default: 'num',
-                            types: ['msg', 'flow', 'global', 'num', 'env']
-                        });
-                        $('<span/>', {
-                            class: 'node-input-rule-btwn-label'
-                        }).text(' ' + andLabel + ' ').appendTo(row);
-                        const btwnValue2Field = $('<input/>', {
-                            class: 'node-input-rule-btwn-value2',
-                            type: 'text',
-                            style: 'margin-left:2px;'
-                        }).appendTo(row).typedInput({
-                            default: 'num',
-                            types: ['msg', 'flow', 'global', 'num', 'env']
-                        });
-
-                        const finalspan = $('<span/>', {
-                            style: 'float: right;margin-top: 6px;'
-                        }).appendTo(row);
-                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
-                    '</span> ');
-
-                        resizeRule(container);
-                        btwnValueField.typedInput('value', rule.valueLow);
-                        btwnValueField.typedInput('type', rule.valueLowType || 'num');
-                        btwnValue2Field.typedInput('value', rule.valueHigh);
-                        btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
-
-                        // {"0":0,"1":-1,"2":-1,"3":-1}
-                        // {"0":0}
-                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                        currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
-                        currentOutputs.m = i + 1;
-                        // console.log(currentOutputs);
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    removeItem(opt) {
-                        const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
-                        if (opt.hasOwnProperty('i')) {
-                            currentOutputs[opt.i] = -1;
+                });
+                // #endregion timeEnd
+                // #region propertyStart
+                const propertyStartTypeField = setupTInput(node, {
+                    typeProp: 'propertyStartType',
+                    valueProp: 'propertyStart',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.propertyStartType || types.Undefined.value,
+                    defaultValue: node.propertyStartValue || '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-propertyStart').typedInput('type') === 'none') {
+                            $('.alternate-time-start').hide();
+                            $('.alternate-time-start-offset').hide();
                         } else {
-                            delete currentOutputs[opt._i];
+                            $('.alternate-time-start').show();
                         }
 
-                        const rules = $('#node-input-rule-container').editableList('items');
-                        rules.each(function (i) {
-                            $(this).find('.node-input-rule-index').html(i + 2);
-                            const data = $(this).data('data');
-                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
-                        });
-                        currentOutputs.m = rules.length;
-                        // console.log(currentOutputs);
-                        // console.log(rules);
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    resizeItem: resizeRule,
-                    sortItems(rules) {
-                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                        rules = $('#node-input-rule-container').editableList('items');
-                        rules.each(function (i) {
-                            $(this).find('.node-input-rule-index').html(i + 2);
-                            const data = $(this).data('data');
-                            currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
-                        });
-                        currentOutputs.m = rules.length;
-                        // console.log(currentOutputs);
-                        // console.log(rules);
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    sortable: true,
-                    removable: true
+                        $('#node-input-startTimeAlt').change();
+                    }
+                });
+                // #endregion propertyStart
+                // #region timeAltStart
+                const startTimeAltField = setupTInput(node, {
+                    typeProp: 'startTimeAltType',
+                    valueProp: 'startTimeAlt',
+                    width: 'calc(100% - 110px)',
+                    defaultType: 'entered',
+                    defaultValue: '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
                 });
 
-                for (let i = 0; i < node.rules.length; i++) {
-                    const rule = node.rules[i];
-                    $('#node-input-rule-container').editableList('addItem', {
-                        r: rule,
-                        i,
-                        l: node.rules.length
-                    });
+                node.startTimeAltOffsetMultiplier = multilpierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
+                const startTimeAltOffsetField = setupTInput(node, {
+                    typeProp: 'startTimeAltOffsetType',
+                    valueProp: 'startTimeAltOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-startTimeAltOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                });
+                // #endregion timeAltStart
+                // #region propertyEnd
+                const propertyEndTypeField = setupTInput(node, {
+                    typeProp: 'propertyEndType',
+                    valueProp: 'propertyEnd',
+                    width: 'calc(100% - 110px)',
+                    defaultType: node.propertyEndType || types.Undefined.value,
+                    defaultValue: node.propertyEndValue || '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
+                            $('.alternate-time-end').hide();
+                            $('.alternate-time-end-offset').hide();
+                        } else {
+                            $('.alternate-time-end').show();
+                        }
+
+                        $('#node-input-endTimeAlt').change();
+                    }
+                });
+                // #endregion propertyEnd
+                // #region timeAltEnd
+                const endTimeAltField = setupTInput(node, {
+                    typeProp: 'endTimeAltType',
+                    valueProp: 'endTimeAlt',
+                    width: 'calc(100% - 110px)',
+                    defaultType: 'entered',
+                    defaultValue: '',
+                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                    onFocus: (_type, _value) => {
+                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                            $('.alternate-time-start-offset').hide();
+                        } else {
+                            $('.alternate-time-start-offset').show();
+                        }
+                    }
+                });
+
+                node.endTimeAltOffsetMultiplier = multilpierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
+                const endTimeAltOffsetField = setupTInput(node, {
+                    typeProp: 'endTimeAltOffsetType',
+                    valueProp: 'endTimeAltOffset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
+                    defaultValue: 0,
+                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                    onChange: (_type, _value) => {
+                        const type = $('#node-input-endTimeAltOffset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
+                        }
+                    }
+                });
+                // #endregion timeAltEnd
+                // #endregion time
+                // #region sun
+                $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
+                    if (chkVal('sunControlActive', false)) {
+                        $('.form-row-sunControlActive').hide();
+                    } else {
+                        $('.form-row-sunControlActive').show();
+                    }
+                });
+                // #endregion sun
+                // #region Enhanced settings
+                $('.enhanced-row-toggle').on('click', () => {
+                    $('.enhanced-row').toggle(); // .hide();
+                });
+
+                if (chkVal('tsCompare', 0)) {
+                    $('.enhanced-row').hide();
+                } else {
+                    $('.enhanced-row').show();
                 }
+                // #endregion Enhanced settings
+                blindPosNightField.change();
+                $('#node-input-sunControlActive').change();
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {
