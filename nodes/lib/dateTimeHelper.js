@@ -314,27 +314,57 @@ function checkLimits(num, low, high) {
  * @param {*} msg message
  * @param {*} name property name
  */
-function getMsgNumberValue(msg, id, name) {
-    if (typeof msg.payload[id] !== 'undefined') {
-        const res = parseFloat(msg.payload[id]);
-        if (!isNaN(res)) {
-            return res;
+function getMsgNumberValue(msg, ids, names, notFound, isFound) {
+    if (ids) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if (typeof msg.payload[id] !== 'undefined') {
+                const res = parseFloat(msg.payload[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        isFound(msg);
+                    }
+                    return res;
+                }
+            }
+            if (typeof msg[id] !== 'undefined') {
+                const res = parseFloat(msg[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        isFound(msg);
+                    }
+                    return res;
+                }
+            }
         }
     }
-    if (typeof msg[id] !== 'undefined') {
-        const res = parseFloat(msg[id]);
-        if (!isNaN(res)) {
-            return res;
-        }
-    }
-
-    if ((typeof msg.topic === 'string') && (typeof name === 'string') && (String(msg.topic).toLowerCase().indexOf(name) > -1)) {
+    // includes
+    if (names && msg.topic) {
         const res = parseFloat(msg.payload);
         if (!isNaN(res)) {
-            return res;
+            if (!Array.isArray(names)) {
+                names = [names];
+            }
+            for (let i = 0; i < names.length; i++) {
+                if (String(msg.topic).toLowerCase().includes(names[i])) {
+                    const res = parseFloat(msg.payload);
+                    if (!isNaN(res)) {
+                        if (typeof isFound === 'function') {
+                            isFound(msg);
+                        }
+                        return res;
+                    }
+                }
+            }
         }
     }
-    return NaN;
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    }
+    return notFound || NaN;
 }
 
 /**
@@ -342,21 +372,45 @@ function getMsgNumberValue(msg, id, name) {
  * @param {*} msg message
  * @param {*} name property name
  */
-function getMsgBoolValue(msg, id, name, def) {
-    if ((typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
-        return isTrue(msg.payload[id]);
-    }
-    if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
-        return isTrue(msg[id]);
+function getMsgBoolValue(msg, ids, names, notFound, isFound) {
+    if (ids) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if ((typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    isFound(msg);
+                }
+                return isTrue(msg.payload[id]);
+            }
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    isFound(msg);
+                }
+                return isTrue(msg[id]);
+            }
+        }
     }
 
-    if ((typeof msg.topic === 'string') &&
-        (typeof name === 'string') &&
-        ((typeof msg.payload === 'string') || (typeof msg.payload === 'number')) &&
-        (String(msg.topic).toLowerCase().indexOf(name) > -1)) {
-        return isTrue(msg.payload);
+    if (names && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
+        if (!Array.isArray(names)) {
+            names = [names];
+        }
+        for (let i = 0; i < names.length; i++) {
+            if (String(msg.topic).toLowerCase().includes(names[i])) {
+                if (typeof isFound === 'function') {
+                    isFound(msg);
+                }
+                return isTrue(msg.payload);
+            }
+        }
     }
-    return def;
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    }
+    return notFound || undefined;
 }
 
 /*******************************************************************************************************/
@@ -407,7 +461,8 @@ function addOffset(d, offset, multiplier) {
 function calcDayOffset(days, daystart) {
     let dayx = 0;
     let daypos = daystart;
-    while (days.indexOf(daypos) === -1) {
+    // while (days.indexOf( ) === -1) {
+    while (!days.includes(daypos)) {
         dayx += 1;
         if ((daystart + dayx) > 6) {
             daystart = (dayx * -1);
@@ -465,7 +520,8 @@ function normalizeDate(d, offset, multiplier, next, days) {
 function getTimeOfText(t, date) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
-    if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+    // if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+    if (t && (!t.includes('.')) && (!t.includes('-'))) {
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
         if (matches) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
@@ -933,7 +989,8 @@ function getFormattedDateOut(date, format, utc) {
 function _isInteger(val) {
     const digits = '1234567890';
     for (let i = 0; i < val.length; i++) {
-        if (digits.indexOf(val.charAt(i)) === -1) {
+        // if (digits.indexOf(val.charAt(i)) === -1) {
+        if (!digits.includes(val.charAt(i))) {
             return false;
         }
     }

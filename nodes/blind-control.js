@@ -179,15 +179,12 @@ module.exports = function (RED) {
         }
 
         let needOverwrite = false;
-        let newPos = hlp.getMsgNumberValue(msg, 'blindPosition', 'manual');
-        if (isNaN(newPos)) {
-            newPos = hlp.getMsgNumberValue(msg, 'position', 'overwrite');
-        }
-        if (isNaN(newPos)) {
-            newPos = node.blindData.position;
-        } else {
+        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position'], ['manual', 'overwrite'], () => {
+            return node.blindData.position;
+        }, () => {
             needOverwrite = true;
-        }
+        });
+        needOverwrite = needOverwrite || (node.blindData.position !== newPos);
 
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (isNaN(expire) || expire < 500) {
