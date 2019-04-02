@@ -50,74 +50,14 @@
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
-    <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.TimeText"></span>&nbsp;
-    </div>
-    <div class="form-row">
-        <label for="node-input-blindPosNight"><i class="fa fa-moon-o"></i> <span data-i18n="blind-control.label.blindPosNight"></span></label>
-        <input type="number" id="node-input-blindPosNight"  data-i18n="[placeholder]blind-control.placeholder.blindPosNight">
-    </div>
-    <div class="form-row blind-control-row-time block-noindent">
-        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.startTime"></span></label>
-        <input type="text" id="node-input-startTime" />
-        <input type="hidden" id="node-input-startTimeType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 blind-control-row-startOffset">
-        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.startOffset"></span></label>
-        <input id="node-input-startOffset" data-i18n="[placeholder]blind-control.placeholder.startOffset"></input>
-        <input type="hidden" id="node-input-startOffsetType">
-        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row blind-control-row-time alternate-property-start">
-        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.propertyStart"></span></label>
-        <input type="text" id="node-input-propertyStart"/>
-        <input type="hidden" id="node-input-propertyStartType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 alternate-time-start hidden">
-        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.startTimeAlt"></span></label>
-        <input type="text" id="node-input-startTimeAlt"/>
-        <input type="hidden" id="node-input-startTimeAltType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 alternate-time-start-offset hidden">
-        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.startTimeAltOffset"></span></label>
-        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]blind-control.placeholder.startTimeAltOffset"></input>
-        <input type="hidden" id="node-input-startTimeAltOffsetType">
-        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-
-    <div class="form-row blind-control-row-time block-noindent">
-        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" />
-        <input type="hidden" id="node-input-endTimeType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 blind-control-row-endOffset">
-        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.endOffset"></span></label>
-        <input id="node-input-endOffset" data-i18n="[placeholder]blind-control.placeholder.endOffset"></input>
-        <input type="hidden" id="node-input-endOffsetType">
-        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row blind-control-row-time alternate-property-end">
-        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.propertyEnd"></span></label>
-        <input type="text" id="node-input-propertyEnd"/>
-        <input type="hidden" id="node-input-propertyEndType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 alternate-time-end hidden">
-        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.endTimeAlt"></span></label>
-        <input type="text" id="node-input-endTimeAlt"/>
-        <input type="hidden" id="node-input-endTimeAltType">
-    </div>
-    <div class="form-row blind-control-row-time block-indent1 alternate-time-end-offset hidden">
-        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.endTimeAltOffset"></span></label>
-        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]blind-control.placeholder.endTimeAltOffset"></input>
-        <input type="hidden" id="node-input-endTimeAltOffsetType">
-        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    <div>
+        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.label.TimeText"></span></span></label>
+        <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+        </div>
     </div>
     <hr>
     <!-- #region sun ######################################################################## -->
-    <div class="form-row block-noindent">
-        <label for="node-input-blindPosSunNotInWindow"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.blindPosSunNotInWindow"></span></label>
-        <input type="number" id="node-input-blindPosSunNotInWindow" data-i18n="[placeholder]blind-control.placeholder.blindPosSunNotInWindow">
-    </div>
     <div class="form-row block-noindent">
       <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
       <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
@@ -140,16 +80,6 @@
         <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
         <input type="number" id="node-input-blindPosOverwriteExpire" data-i18n="[placeholder]blind-control.placeholder.blindPosOverwriteExpire">
         <select id="node-input-blindPosOverwriteExpireMultiplier" class="node-input-multiplier"></select>
-    </div>
-        <div class="form-row form-row-blindPosOverwriteExpireDay block-indent2">
-        <label for="node-input-blindPosOverwriteExpireDay"><i class="fa fa-sun-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpireDay"></span></label>
-        <input type="checkbox" id="node-input-blindPosOverwriteExpireDay" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="blind-control.label.blindPosOverwriteExpireDayText"></span>&nbsp;
-    </div>
-    <div class="form-row form-row-blindPosOverwriteExpireNight block-indent2">
-        <label for="node-input-blindPosOverwriteExpireNight"><i class="fa fa-moon-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpireNight"></span></label>
-        <input type="checkbox" id="node-input-blindPosOverwriteExpireNight" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="blind-control.label.blindPosOverwriteExpireNightText"></span>&nbsp;
     </div>
     <hr>
     <!-- #region weather ######################################################################## -->
@@ -362,35 +292,6 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
-    function clipValueLength(v) {
-        if (v.length > 15) {
-            return v.substring(0, 15) + '...';
-        }
-
-        return v;
-    }
-
-    function prop2name(key) {
-        const result = RED.utils.parseContextKey(key);
-        return result.key;
-    }
-
-    function getValueLabel(t, v) {
-        if (t === 'str') {
-            return '"' + clipValueLength(v) + '"';
-        }
-
-        if (t === 'msg') {
-            return t + '.' + clipValueLength(v);
-        }
-
-        if (t === 'flow' || t === 'global') {
-            return t + '.' + clipValueLength(prop2name(v));
-        }
-
-        return clipValueLength(v);
-    }
-
     RED.nodes.registerType('blind-control', {
         category: 'advanced-input',
         color: '#FFCC66',
@@ -470,26 +371,6 @@
                     return (n < this.blindOpenPos) && (Number.isInteger(n / this.blindIncrement));
                 }
             },
-            blindPosNight: {
-                value: '',
-                validate: function (v) {
-                    const n = parseFloat(v);
-                    return (v === '') ||
-                        ((n <= this.blindOpenPos) &&
-                         (n >= this.blindClosedPos) &&
-                         (Number.isInteger(n / this.blindIncrement)));
-                }
-            },
-            blindPosSunNotInWindow: {
-                value: '',
-                validate: function (v) {
-                    const n = parseFloat(v);
-                    return (v === '') ||
-                        ((n <= this.blindOpenPos) &&
-                            (n >= this.blindClosedPos) &&
-                            (Number.isInteger(n / this.blindIncrement)));
-                }
-            },
             blindPosOverwriteExpire: {
                 value: '',
                 validate: function (v) {
@@ -502,205 +383,10 @@
                 required: true,
                 validate: RED.validators.number()
             },
-            blindPosOverwriteExpireNight: {
-                value: true,
-                required: true,
-                validate: function (v) {
-                    return (v === true || v === false);
-                }
-            },
-            blindPosOverwriteExpireDay: {
-                value: false,
-                required: true,
-                validate: function (v) {
-                    return (v === true || v === false);
-                }
-            },
             // #endregion blind settings
             // #region time settings
-            startTime: {
-                value: '',
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('startTimeType')(v)
-                    );
-                }
-            },
-            startTimeType: {
-                value: 'entered'
-            },
-            startOffset: {
-                value: 0,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetType')(v)
-                    );
-                }
-            },
-            startOffsetType: {
-                value: 'none'
-            },
-            startOffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate: RED.validators.number()
-            },
-            endTime: {
-                value: '',
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('endTimeType')(v)
-                    );
-                }
-            },
-            endTimeType: {
-                value: 'entered'
-            },
-            endOffset: {
-                value: 0,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        (typeof v === 'undefined') ||
-                        (typeof this.endOffsetType === 'undefined') ||
-                        RED.validators.typedInput('endOffsetType')(v)
-                    );
-                }
-            },
-            endOffsetType: {
-                value: 'none'
-            },
-            endOffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate: RED.validators.number()
-            },
-            propertyStart: {
-                value: '',
-                required: false,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('propertyStartType')(v)
-                    );
-                }
-            },
-            propertyStartType: {
-                value: 'none'
-            },
-            startTimeAlt: {
-                value: '',
-                required: false,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('startTimeAltType')(v) ||
-                        ($('#node-input-propertyStart').typedInput('type') === 'none')
-                    );
-                }
-            },
-            startTimeAltType: {
-                value: 'none'
-            },
-            startOffsetAlt: {
-                value: 0,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetAltType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetAltType')(v) ||
-                        ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
-                    );
-                }
-            },
-            startOffsetAltType: {
-                value: 'none'
-            },
-            startOffsetAltMultiplier: {
-                value: 60000,
-                required: true,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.number()(v) ||
-                        ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
-                    );
-                }
-            },
-            propertyEnd: {
-                value: '',
-                required: false,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('propertyEnd')(v)
-                    );
-                }
-            },
-            propertyEndType: {
-                value: 'none'
-            },
-            endTimeAlt: {
-                value: '',
-                required: false,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.typedInput('endTimeAltType')(v) ||
-                        ($('#node-input-propertyEnd').typedInput('type') === 'none')
-                    );
-                }
-            },
-            endTimeAltType: {
-                value: 'none'
-            },
-            endOffsetAlt: {
-                value: 0,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetAltType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetAltType')(v) ||
-                        ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
-                    );
-                }
-            },
-            endOffsetAltType: {
-                value: 'none'
-            },
-            endOffsetAltMultiplier: {
-                value: 60000,
-                required: true,
-                validate: (v) => {
-                    return (
-                        (this.blindPosNight === '') ||
-                        (typeof this.blindPosNight === 'undefined') ||
-                        RED.validators.number()(v) ||
-                        ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
-                    );
-                }
+            rules: {
+                value: {}
             },
             tsCompare: {
                 value: '0'
@@ -754,14 +440,9 @@
         },
         outputLabels(index) {
             if (index === 0) {
-                return ((this.topic) ? this.topic + ':' : '') + 'blind-control';
+                return 'object ';
             }
-
-            const rule = this.rules[index - 1];
-            if (rule) {
-                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType,
-                    rule.valueHigh);
-            }
+            return 'new blind level ';
         },
         label() {
             if (this.name) {
@@ -780,7 +461,7 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getTypes appendOptions setupTInput */
+                /* global getTypes getSelectFields appendOptions setupTInput addLabel */
                 const types = getTypes(node);
                 // #region initialize
                 function multilpierUpdate(mp, name) {
@@ -802,234 +483,170 @@
                 // #region blind
                 node.blindPosOverwriteExpireMultiplier = multilpierUpdate(node.blindPosOverwriteExpireMultiplier, 'blindPosOverwriteExpireMultiplier');
                 // #endregion blind
-                // #region time
-                const blindPosNightField = $('#node-input-blindPosNight');
-                blindPosNightField.on('change focus focusin focusout', (_type, _value) => {
-                    startTimeTypeField.change();
-                    endTimeTypeField.change();
-                    propertyStartTypeField.change();
-                    propertyEndTypeField.change();
-                    startOffsetField.change();
-                    endOffsetField.change();
-                    startTimeAltField.change();
-                    startTimeAltOffsetField.change();
-                    endTimeAltField.change();
-                    endTimeAltField.change();
-                    endTimeAltOffsetField.change();
+                // #region time rule-container
+                console.log('rule-container start');
+                function resizeRule(rule) {
+                    console.log('resizeRule');
+                    const newWidth = rule.width() - 10;
+                    // const operatorField = rule.find('.node-input-rule-operator');
+                    const timeField = rule.find('.node-input-rule-time');
+                    const operandField = rule.find('.node-input-rule-operand');
+                    const levelField = rule.find('.node-input-rule-level');
+                    const offsetField = rule.find('.node-input-rule-offset');
+                    const multipierField = rule.find('.node-input-rule-multipier');
+                    const propertyField = rule.find('.node-input-rule-property');
+                    const propertyLblSpanField = rule.find('.node-input-rule-property-span');
+                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
+                    const lblWidth = 25;
+                    // row1
+                    timeField.typedInput('width', 200);
+                    operandField.typedInput('width', 100);
+                    levelField.typedInput('width', (newWidth - 200 - 100 - lblWidth - 50));
+                    // row2
+                    const multiplierWidth = 125;
+                    multipierField.width(multiplierWidth);
+                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
+                    // row3
+                    const lblwidth = propertyLblSpanField.width() + 25;
+                    propertyField.typedInput('width', (newWidth - lblwidth - 10));
+                    propertyLblField.width(lblwidth);
+                }
 
-                    if (chkVal('blindPosNight', '')) {
-                        $('.blind-control-row-time').hide();
-                        $('.form-row-blindPosOverwriteExpireDay').hide();
-                        $('.form-row-blindPosOverwriteExpireNight').hide();
+                function resizeContainer() {
+                    console.log('resizeContainer');
+                    const editorRow = $('.node-input-rule-container-row ol');
+                    const height = editorRow.outerHeight(true);
+
+                    const rows = $('#node-input-rule-container').editableList('items');
+                    if (rows.size() > 0) {
+                        $('#node-input-rule-container').editableList('height', height + 40);
                     } else {
-                        $('.blind-control-row-time').show();
-                        $('.form-row-blindPosOverwriteExpireDay').show();
-                        $('.form-row-blindPosOverwriteExpireNight').show();
+                        $('#node-input-rule-container').editableList('height', 20);
                     }
-                });
-                // #region timeStart
-                const startTimeTypeField = setupTInput(node, {
-                    typeProp: 'startTimeType',
-                    valueProp: 'startTime',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.startTimeType || types.TimeEntered.value,
-                    defaultValue: node.startTime || '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
-                        const plVType = $('#node-input-startTime').typedInput('type');
-                        const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
-                        if (plVType === types.Undefined.value ||
-                            plVType === 'msg' ||
-                            plVType === 'flow' ||
-                            plVType === 'global' ||
-                            plVTypeAlt === 'msg' ||
-                            plVTypeAlt === 'flow' ||
-                            plVTypeAlt === 'global') {
-                            $('.blind-control-row-startOffset').hide();
-                        } else {
-                            $('.blind-control-row-startOffset').show();
-                        }
+                }
 
-                        $('#node-input-property').change();
-                    }
+                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
+                    addItem(containerRow, containerIndex, data) {
+                        console.log('addItem start');
+                        containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
+                        const row = $('<div/>').appendTo(containerRow);
+                        const row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+                        const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+                        // #region row1
+                        // [start - time] - [min/max/abs] - [blind-level / open / closed]
+                        console.log('row1 start');
+                        addLabel(row, 'node-input-rule-time', 'fa fa-clock-o');
+                        const timeField = $('<input/>', {
+                            class: 'node-input-rule-time',
+                            id: 'node-input-rule-time' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row).typedInput({
+                            default: types.TimeEntered.value,
+                            types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env']
+                        });
+                        const operatorField = $('<select/>', {
+                            class: 'node-input-rule-operator',
+                            id: 'node-input-rule-operator' + containerIndex
+                        }).appendTo(row);
+                        appendOptions(node, operatorField, 'blindOperator');
+                        const levelField = $('<input/>', {
+                            class: 'node-input-rule-level',
+                            id: 'node-input-rule-level' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row).typedInput({
+                            default: types.LevelEntered.value,
+                            types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
+                        });
+                        // #endregion row1
+                        // #region row2
+                        // [offset] - [multiplier]
+                        console.log('row2 start');
+                        addLabel(row2, 'node-input-rule-offset', 'fa fa-plus');
+                        const offsetField = $('<input/>', {
+                            class: 'wg-offset-spinner node-input-rule-offset',
+                            id: 'node-input-rule-offset' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2).typedInput({
+                            default: types.Undefined.value,
+                            types: [types.Undefined, 'num', 'msg', 'flow', 'global']
+                        });
+                        const multiplierField = $('<select/>', {
+                            class: 'node-input-rule-multiplier',
+                            id: 'node-input-rule-multiplier' + containerIndex
+                        }).appendTo(row2);
+                        appendOptions(node, multiplierField, 'multiplier');
+                        // #endregion row2
+                        // #region row3
+                        // [none / Bedingung] - [need reset]
+                        console.log('row3 start');
+                        addLabel(row3, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
+                        const propertyField = $('<input/>', {
+                            class: 'node-input-rule-property',
+                            id: 'node-input-rule-property' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row3).typedInput({
+                            default: types.Unlimited.value,
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
+                        });
+                        // #endregion row 3
+                        // #region initfields
+                        console.log('changes start');
+                        timeField.change(() => {
+                            const opType = timeField.typedInput('type');
+                            if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                                row2.show(); // offset
+                                row3.show(); // limit
+                            } else if (opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                                row2.hide(); // offset
+                                row3.show(); // limit
+                            } else {
+                                row2.hide(); // offset
+                                row3.show(); // limit
+                            }
+                        });
+                        // setting defaultValues
+                        const selFields = getSelectFields();
+                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
+                        timeField.typedInput('value', (data.timeValue || ''));
+                        console.log('defValues b ' + data.operator + ' - ' + selFields.blindOperator[0].id);
+                        operatorField.val(data.operator || selFields.blindOperator[0].id);
+                        console.log('defValues c');
+                        levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
+                        levelField.typedInput('value', (data.levelValue || ''));
+                        console.log('defValues d');
+                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        offsetField.typedInput('value', data.offsetValue || '');
+                        console.log('defValues e');
+                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
+                        console.log('defValues f');
+                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
+                        propertyField.typedInput('value', data.propertyValue || '');
+                        console.log('defValues g');
+                        resizeRule(containerRow);
+                        resizeContainer();
+                        // #endregion initfields
+                        console.log('addItem end');
+                    },
+                    /* sortItems(rules) {
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 1);
+                        });
+                    },  */
+                    resizeItem: resizeRule,
+                    sortable: true,
+                    removable: true,
+                    removeItem: resizeContainer
                 });
-
-                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
-                const startOffsetField = setupTInput(node, {
-                    typeProp: 'startOffsetType',
-                    valueProp: 'startOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-startOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-startOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-startOffsetMultiplier').prop('disabled', false);
-                        }
+                console.log('rule-container set');
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        $('#node-input-rule-container').editableList('addItem', rule);
                     }
-                });
-                // #endregion timeStart
-                // #region timeEnd
-                const endTimeTypeField = setupTInput(node, {
-                    typeProp: 'endTimeType',
-                    valueProp: 'endTime',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.endTimeType || types.TimeEntered.value,
-                    defaultValue: node.endTime || '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
-                        const plVType = $('#node-input-endTime').typedInput('type');
-                        const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
-                        if (plVType === types.Undefined.value ||
-                            plVType === 'msg' ||
-                            plVType === 'flow' ||
-                            plVType === 'global' ||
-                            plVTypeAlt === 'msg' ||
-                            plVTypeAlt === 'flow' ||
-                            plVTypeAlt === 'global') {
-                            $('.blind-control-row-endOffset').hide();
-                        } else {
-                            $('.blind-control-row-endOffset').show();
-                        }
-
-                        $('#node-input-property').change();
-                    }
-                });
-
-                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
-                const endOffsetField = setupTInput(node, {
-                    typeProp: 'endOffsetType',
-                    valueProp: 'endOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-endOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-endOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-endOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                });
-                // #endregion timeEnd
-                // #region propertyStart
-                const propertyStartTypeField = setupTInput(node, {
-                    typeProp: 'propertyStartType',
-                    valueProp: 'propertyStart',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.propertyStartType || types.Undefined.value,
-                    defaultValue: node.propertyStartValue || '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
-                        if ($('#node-input-propertyStart').typedInput('type') === 'none') {
-                            $('.alternate-time-start').hide();
-                            $('.alternate-time-start-offset').hide();
-                        } else {
-                            $('.alternate-time-start').show();
-                        }
-
-                        $('#node-input-startTimeAlt').change();
-                    }
-                });
-                // #endregion propertyStart
-                // #region timeAltStart
-                const startTimeAltField = setupTInput(node, {
-                    typeProp: 'startTimeAltType',
-                    valueProp: 'startTimeAlt',
-                    width: 'calc(100% - 110px)',
-                    defaultType: 'entered',
-                    defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
-                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                            $('.alternate-time-start-offset').hide();
-                        } else {
-                            $('.alternate-time-start-offset').show();
-                        }
-                    }
-                });
-
-                node.startTimeAltOffsetMultiplier = multilpierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
-                const startTimeAltOffsetField = setupTInput(node, {
-                    typeProp: 'startTimeAltOffsetType',
-                    valueProp: 'startTimeAltOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-startTimeAltOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                });
-                // #endregion timeAltStart
-                // #region propertyEnd
-                const propertyEndTypeField = setupTInput(node, {
-                    typeProp: 'propertyEndType',
-                    valueProp: 'propertyEnd',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.propertyEndType || types.Undefined.value,
-                    defaultValue: node.propertyEndValue || '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
-                        if ($('#node-input-propertyEnd').typedInput('type') === 'none') {
-                            $('.alternate-time-end').hide();
-                            $('.alternate-time-end-offset').hide();
-                        } else {
-                            $('.alternate-time-end').show();
-                        }
-
-                        $('#node-input-endTimeAlt').change();
-                    }
-                });
-                // #endregion propertyEnd
-                // #region timeAltEnd
-                const endTimeAltField = setupTInput(node, {
-                    typeProp: 'endTimeAltType',
-                    valueProp: 'endTimeAlt',
-                    width: 'calc(100% - 110px)',
-                    defaultType: 'entered',
-                    defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
-                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                            $('.alternate-time-start-offset').hide();
-                        } else {
-                            $('.alternate-time-start-offset').show();
-                        }
-                    }
-                });
-
-                node.endTimeAltOffsetMultiplier = multilpierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
-                const endTimeAltOffsetField = setupTInput(node, {
-                    typeProp: 'endTimeAltOffsetType',
-                    valueProp: 'endTimeAltOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
-                        const type = $('#node-input-endTimeAltOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                });
-                // #endregion timeAltEnd
-                // #endregion time
+                }
+                console.log('rule-container end');
+                // #endregion time - rule-container
                 // #region sun
                 $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
                     if (chkVal('sunControlActive', false)) {
@@ -1050,7 +667,7 @@
                     $('.enhanced-row').show();
                 }
                 // #endregion Enhanced settings
-                blindPosNightField.change();
+                // blindPosNightField.change();
                 $('#node-input-sunControlActive').change();
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
@@ -1070,29 +687,30 @@
                 });
         },
         oneditsave() {
-            const rules = $('#node-input-rule-container').editableList('items');
             const node = this;
 
+            // #region rule-container
             node.rules = [];
-            rules.each(function ( _i ) {
-                // const ruleData = $(this).data('data');
+            const rules = $('#node-input-rule-container').editableList('items');
+            rules.each(function (_i) {
                 const rule = $(this);
-                const r = {};
-                r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
-                r.valueLowType = rule.find('.node-input-rule-btwn-value').typedInput('type');
-                r.valueHigh = rule.find('.node-input-rule-btwn-value2').typedInput('value');
-                r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
-                node.rules.push(r);
+                const data = {
+                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
+                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
+                    operator: rule.find('.node-input-rule-operator').val(),
+                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
+                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
+                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
+                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
+                    multiplier: rule.find('.node-input-rule-multipier').val(),
+                    propertyType: rule.find('.node-input-rule-property').typedInput('type'),
+                    propertyValue: rule.find('.node-input-rule-property').typedInput('value')
+                };
+                node.rules.push(data);
             });
-            node.propertyType = $('#node-input-property').typedInput('type');
-            // var outputCount = $("#node-input-outputs").val(); //"{}"
-
-            const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
-            currentOutputs.m = rules.length;
-            // console.log(currentOutputs);
-            // console.log(rules);
-            $('#node-input-outputs').val(JSON.stringify(currentOutputs));
-        // outputCount.val(JSON.stringify(currentOutputs));
+            console.log(node.rules);
+            // #endregion result-container
         },
         oneditresize(size) {
             const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');

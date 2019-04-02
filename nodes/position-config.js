@@ -384,7 +384,7 @@ module.exports = function (RED) {
             if ((typeof date === 'undefined') || !(date instanceof Date)) {
                 // node.debug('getSunCalc, no valid date ' + date + ' given');
                 date = new Date();
-                if (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000) {
+                if (this.lastSunCalc && (Math.abs(date.getTime() - this.lastSunCalc.ts) < 4000)) {
                     // node.debug('getSunCalc, time difference since last output to low, do no calculation');
                     return this.lastSunCalc;
                 }
@@ -425,7 +425,7 @@ module.exports = function (RED) {
 
             if ((typeof date === 'undefined') || !(date instanceof Date)) {
                 date = new Date();
-                if (Math.abs(date.getTime() - this.lastMoonCalc.ts) < 3000) {
+                if (this.lastMoonCalc (Math.abs(date.getTime() - this.lastMoonCalc.ts) < 3000)) {
                     return this.lastMoonCalc;
                 }
             }

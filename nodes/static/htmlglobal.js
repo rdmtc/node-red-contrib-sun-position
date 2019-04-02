@@ -95,6 +95,13 @@ const SelectFields = {
         {id: 604800000, group: 'other', label: 'weeks'},
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
+    ], blindOperatorGroups: [
+        { id: 'limit', label: 'Limit' },
+        { id: 'other', label: 'fix' }
+    ], blindOperator: [
+        { id: 1, group: 'limit', label: 'min' },
+        { id: 2, group: 'limit', label: 'max' },
+        { id: 0, group: 'other', label: 'abs' }
     ]
 };
 
@@ -230,8 +237,30 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
             hasValue: false
+        },
+        LevelEntered: {
+            value: 'num',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
+            icon: 'red/images/typedInput/09.png',
+            validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
+        },
+        LevelFix: {
+            value: 'levelFixed',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
+            options: [
+                'open (max)',
+                '~75%',
+                '~50%',
+                '~25%',
+                'closed (min)'
+            ]
         }
     };
+}
+
+function getSelectFields() { // eslint-disable-line no-unused-vars
+    return SelectFields;
 }
 
 const autocompleteFormats = {
@@ -418,7 +447,13 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
     // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
     const groups = SelectFields[elementName + 'Groups'];
+    if (!groups) {
+        throw new Error('no group "' + elementName + 'Groups" in SelectFields found!');
+    }
     const elements = SelectFields[elementName];
+    if (!groups) {
+        throw new Error('no elements "' + elementName + '" in SelectFields found!');
+    }
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {

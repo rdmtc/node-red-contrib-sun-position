@@ -38,6 +38,15 @@ module.exports = function (RED) {
                 if (typeof msg.ts !== 'undefined') {
                     now = new Date(msg.time);
                 }
+                if (!this.positionConfig) {
+                    node.error('Node not properly configured!! Missing position configuration!');
+                    node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'Node not properly configured!!'
+                    });
+                    return null;
+                }
                 const ports = new Array(this.rules.length);
                 ports[0] = {
                     payload: this.positionConfig.getSunCalc(now),
