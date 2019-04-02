@@ -90,6 +90,22 @@ function getNow_(node, msg, compareType) {
     node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
     return new Date();
 }
+
+/******************************************************************************************/
+/**
+ * round a level to the next increment
+ * @param {*} node node data
+ * @param {number} pos position
+ * @return {number} rounded position number
+ */
+function roundPos_(node, pos) {
+    if (Number.isInteger(node.blindData.increment)) {
+        pos = Math.ceil(pos);
+        pos = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
+        return pos;
+    }
+    throw new Error('implementation needed for floating point number rounding to next increment');
+}
 /******************************************************************************************/
 /**
  * calculates the current sun position
@@ -255,11 +271,7 @@ module.exports = function (RED) {
                     } else if (height >= node.windowSettings.top) {
                         node.blindData.position = node.blindData.openPos;
                     } else {
-                        node.blindData.position = 100 * (1 - (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
-                        if (Number.isInteger(node.blindData.increment)) {
-                            node.blindData.position = Math.ceil(node.blindData.position);
-                            node.blindData.position = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
-                        }
+                        node.blindData.position = roundPos_(node, 100 * (1 - (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom)));
                     }
                     node.reason.Code = 7;
                     node.reason.State = RED._('blind-control.states.sunCtrl');
@@ -332,11 +344,11 @@ module.exports = function (RED) {
                         if (rule.levelValue === 'closed (min)') {
                             node.time.level = node.blindData.closedPos;
                         } else if (rule.levelValue === '~75%') {
-                            node.time.level = ((node.blindData.openPos - node.blindData.closedPos) * 0.75) + node.blindData.closedPos;
+                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.75) + node.blindData.closedPos);
                         } else if (rule.levelValue === '~50%') {
-                            node.time.level = ((node.blindData.openPos - node.blindData.closedPos) * 0.5) + node.blindData.closedPos;
+                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.5) + node.blindData.closedPos);
                         } else if (rule.levelValue === '~25%') {
-                            node.time.level = ((node.blindData.openPos - node.blindData.closedPos) * 0.25) + node.blindData.closedPos;
+                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.25) + node.blindData.closedPos);
                         }
                     } else {
                         node.time.level = node.positionConfig.getFloatProp(node, msg, rule.levelType, rule.levelValue);
