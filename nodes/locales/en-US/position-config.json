@@ -22,7 +22,9 @@
             "timesun":"sun time",
             "timemoon":"moon time",
             "suncalc":"sun calculation",
-            "mooncalc":"moon calculation"
+            "mooncalc":"moon calculation",
+            "levelfix":"Level",
+            "levelfree": "Level entered"
         },
         "multiselectLbl": {
             "operatorTypes": "include into compare"
@@ -154,6 +156,15 @@
             "weeks",
             "month",
             "year"
+        ],
+        "blindOperatorGroups": [
+            "limit blind position",
+            "fixed position"
+        ],
+        "blindOperator": [
+            "min",
+            "max",
+            "abs"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",

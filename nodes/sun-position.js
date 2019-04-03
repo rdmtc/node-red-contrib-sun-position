@@ -38,6 +38,15 @@ module.exports = function (RED) {
                 if (typeof msg.ts !== 'undefined') {
                     now = new Date(msg.time);
                 }
+                if (!this.positionConfig) {
+                    node.error('Node not properly configured!! Missing position configuration!');
+                    node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'Node not properly configured!!'
+                    });
+                    return null;
+                }
                 const ports = new Array(this.rules.length);
                 ports[0] = {
                     payload: this.positionConfig.getSunCalc(now),
@@ -122,10 +131,18 @@ module.exports = function (RED) {
                         });
                     }
                 } else {
+                    let fill = 'red';
+                    let text = 'no Data loaded!';
+                    if (ports[0] && ports[0].payload && ports[0].payload.lastUpdate) {
+                        const azimuth = (ports[0].payload.azimuth) ? ports[0].payload.azimuth.toFixed(2) : '?';
+                        const altitude = (ports[0].payload.altitude) ? ports[0].payload.altitude.toFixed(2) : '?';
+                        text = azimuth + '/' + altitude + ' - ' + ports[0].payload.lastUpdate.toLocaleString();
+                        fill = 'grey';
+                    }
                     this.status({
-                        fill:   'grey',
+                        fill: fill,
                         shape:  'dot',
-                        text:   ports[0].payload.azimuth.toFixed(2) + '/' + ports[0].payload.altitude.toFixed(2) + ' - ' + ports[0].payload.lastUpdate.toLocaleString()
+                        text: text
                     });
                 }
                 return null;
