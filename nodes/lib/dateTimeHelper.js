@@ -5,6 +5,7 @@
 const util = require('util');
 
 module.exports = {
+    isBool,
     isTrue,
     isFalse,
     countDecimals,
@@ -38,6 +39,16 @@ module.exports = {
 /*******************************************************************************************************/
 /* simple functions                                                                                    */
 /*******************************************************************************************************/
+
+/**
+ * returns **true** if the parameter value is a valid boolean value for **false** or **true**
+ * @param {*} val a parameter which should be checked if  it is a valid false boolean
+ * @returns {boolean} true if the parameter value is a valid boolean value for for **false** or **true**
+ */
+function isBool(val) {
+    val = (val+'').toLowerCase();
+    return (['true', 'yes', 'on', 'ja', 'false', 'no', 'off', 'nein'].includes(val) || !isNaN(val));
+}
 /**
  * returns **true** if the parameter value is a valid boolean value for **true**
  * @param {*} val a parameter which should be checked if  it is a valid true boolean
@@ -45,7 +56,7 @@ module.exports = {
  */
 function isTrue(val) {
     val = (val+'').toLowerCase();
-    return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
+    return (['true', 'yes', 'on', 'ja'].includes(val) || (!isNaN(val) && (Number(val) > 0)));
 }
 
 /**
@@ -55,7 +66,7 @@ function isTrue(val) {
  */
 function isFalse(val) {
     val = (val+'').toLowerCase();
-    return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
+    return (['false', 'no', 'off', 'nein'].includes(val) || (!isNaN(val) && (Number(val) <= 0)));
 }
 
 /**
@@ -314,7 +325,7 @@ function checkLimits(num, low, high) {
  * @param {*} msg message
  * @param {*} name property name
  */
-function getMsgNumberValue(msg, ids, names, notFound, isFound) {
+function getMsgNumberValue(msg, ids, names, isFound, notFound) {
     if (ids) {
         if (!Array.isArray(ids)) {
             ids = [ids];
@@ -325,7 +336,7 @@ function getMsgNumberValue(msg, ids, names, notFound, isFound) {
                 const res = parseFloat(msg.payload[id]);
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
-                        isFound(msg);
+                        return isFound(res);
                     }
                     return res;
                 }
@@ -334,7 +345,7 @@ function getMsgNumberValue(msg, ids, names, notFound, isFound) {
                 const res = parseFloat(msg[id]);
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
-                        isFound(msg);
+                        return isFound(res);
                     }
                     return res;
                 }
@@ -353,7 +364,7 @@ function getMsgNumberValue(msg, ids, names, notFound, isFound) {
                     const res = parseFloat(msg.payload);
                     if (!isNaN(res)) {
                         if (typeof isFound === 'function') {
-                            isFound(msg);
+                            return isFound(res);
                         }
                         return res;
                     }
@@ -372,7 +383,7 @@ function getMsgNumberValue(msg, ids, names, notFound, isFound) {
  * @param {*} msg message
  * @param {*} name property name
  */
-function getMsgBoolValue(msg, ids, names, notFound, isFound) {
+function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     if (ids) {
         if (!Array.isArray(ids)) {
             ids = [ids];
@@ -381,13 +392,13 @@ function getMsgBoolValue(msg, ids, names, notFound, isFound) {
             const id = ids[i];
             if ((typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    isFound(msg);
+                    return isFound(isTrue(msg.payload[id]));
                 }
                 return isTrue(msg.payload[id]);
             }
             if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    isFound(msg);
+                    return isFound(isTrue(msg[id]));
                 }
                 return isTrue(msg[id]);
             }
@@ -401,7 +412,7 @@ function getMsgBoolValue(msg, ids, names, notFound, isFound) {
         for (let i = 0; i < names.length; i++) {
             if (String(msg.topic).toLowerCase().includes(names[i])) {
                 if (typeof isFound === 'function') {
-                    isFound(msg);
+                    return isFound(isTrue(msg.payload));
                 }
                 return isTrue(msg.payload);
             }
@@ -410,7 +421,7 @@ function getMsgBoolValue(msg, ids, names, notFound, isFound) {
     if (typeof notFound === 'function') {
         return notFound(msg);
     }
-    return notFound || undefined;
+    return notFound || NaN;
 }
 
 /*******************************************************************************************************/

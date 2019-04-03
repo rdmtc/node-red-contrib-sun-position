@@ -372,7 +372,7 @@ module.exports = function (RED) {
         };
 
         /**************************************************************************************************************/
-        this.getSunCalc = date => {
+        this.getSunCalc = (date, noTimes) => {
             if (typeof date === 'string') {
                 // node.debug('getSunCalc for date ' + date);
                 const dto = new Date(date);
@@ -407,6 +407,9 @@ module.exports = function (RED) {
                 altitudeRadians: sunPos.altitude,
                 azimuthRadians: sunPos.azimuth
             };
+            if (noTimes) {
+                return result;
+            }
             sunTimesCheck(node);
             result.times = node.sunTimesToday;
             this.lastSunCalc = result;
@@ -415,7 +418,7 @@ module.exports = function (RED) {
         };
 
         /**************************************************************************************************************/
-        this.getMoonCalc = date => {
+        this.getMoonCalc = (date, noTimes) => {
             if (typeof date === 'string') {
                 const dto = new Date(date);
                 if (dto !== 'Invalid Date' && !isNaN(dto)) {
@@ -450,9 +453,6 @@ module.exports = function (RED) {
                     zenithAngle: (node.angleType === 'deg') ? 180 / Math.PI * (moonIllum.angle - moonPos.parallacticAngle) : moonIllum.angle - moonPos.parallacticAngle
                 }
             };
-            sunTimesCheck(node);
-            result.times = node.moonTimesToday;
-            // getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
 
             if (moonIllum.phase < 0.01) {
                 // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
@@ -482,6 +482,11 @@ module.exports = function (RED) {
 
             result.illumination.phase.value = moonIllum.phase;
             result.illumination.phase.angle = (node.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360;
+
+            if (noTimes) { return result; }
+            sunTimesCheck(node);
+            result.times = node.moonTimesToday;
+            // getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
 
             if (!result.times.alwaysUp) {
                 // true if the moon never rises/sets and is always above the horizon during the day
