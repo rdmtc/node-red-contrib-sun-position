@@ -185,7 +185,7 @@ module.exports = function (RED) {
                 }
             });
 
-        const nowTS = now.getTime();
+        const nowTS = node.time.now.getTime();
         if (node.blindData.overwrite.active) {
             if (node.blindData.overwrite.expireNever) {
                 return true;
@@ -229,8 +229,8 @@ module.exports = function (RED) {
                 node.reason.State = RED._('blind-control.states.overwritePrio');
                 node.reason.Description = RED._('blind-control.reasons.overwritePrio');
             } else {
-                node.blindData.overwrite.expires = (now + expire);
-                node.blindData.overwrite.expireDate = new Date(now + expire);
+                node.blindData.overwrite.expires = (nowTS + expire);
+                node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expires);
                 node.debug('expires in ' + expire + 'ms = ' + node.blindData.overwrite.expireDate);
                 if (node.timeOutObj) {
                     blindPosOverwriteReset(node);
