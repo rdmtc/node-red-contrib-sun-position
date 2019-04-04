@@ -187,7 +187,7 @@
          <li>second and following outputs
                 <dl class="message-properties">
                     <dt>payload </dt>
-                    <dd>same as the incomming message, which will send to this output.</dd>
+                    <dd>same as the incoming message, which will send to this output.</dd>
                     <dt>posChanged <span class="property-type">boolean</span></dt>
                     <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
                 </dl>
@@ -461,10 +461,10 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getTypes getSelectFields appendOptions setupTInput addLabel */
+                /* global getTypes getSelectFields appendOptions addLabel */
                 const types = getTypes(node);
                 // #region initialize
-                function multilpierUpdate(mp, name) {
+                function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
@@ -481,35 +481,38 @@
                 };
                 // #endregion initialize
                 // #region blind
-                node.blindPosOverwriteExpireMultiplier = multilpierUpdate(node.blindPosOverwriteExpireMultiplier, 'blindPosOverwriteExpireMultiplier');
+                node.blindPosOverwriteExpireMultiplier = multiplierUpdate(node.blindPosOverwriteExpireMultiplier, 'blindPosOverwriteExpireMultiplier');
                 // #endregion blind
                 // #region time rule-container
-                console.log('rule-container start');
                 function resizeRule(rule) {
-                    console.log('resizeRule');
                     const newWidth = rule.width() - 10;
-                    // const operatorField = rule.find('.node-input-rule-operator');
                     const timeField = rule.find('.node-input-rule-time');
-                    const operandField = rule.find('.node-input-rule-operand');
-                    const levelField = rule.find('.node-input-rule-level');
-                    const offsetField = rule.find('.node-input-rule-offset');
-                    const multipierField = rule.find('.node-input-rule-multipier');
-                    const propertyField = rule.find('.node-input-rule-property');
-                    const propertyLblSpanField = rule.find('.node-input-rule-property-span');
                     const propertyLblField = rule.find('.node-input-rule-property-lbl');
-                    const lblWidth = 25;
+
+                    const offsetField = rule.find('.node-input-rule-offset');
+                    const multiplierField = rule.find('.node-input-rule-multiplier');
+                    const propertyField = rule.find('.node-input-rule-property');
+
+                    const levelLblField = rule.find('.node-input-rule-level-lbl');
+                    const operatorField = rule.find('.node-input-rule-operator');
+                    const levelField = rule.find('.node-input-rule-level');
+
                     // row1
-                    timeField.typedInput('width', 200);
-                    operandField.typedInput('width', 100);
-                    levelField.typedInput('width', (newWidth - 200 - 100 - lblWidth - 50));
+                    propertyLblField.width('auto');
+                    const lbl1Width = propertyLblField.width();
+                    timeField.typedInput('width', 180);
+                    propertyField.typedInput('width', (newWidth - 180 - lbl1Width - 40));
+                    // propertyLblField.width(lbl1Width);
                     // row2
                     const multiplierWidth = 125;
-                    multipierField.width(multiplierWidth);
-                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
+                    multiplierField.width(multiplierWidth);
+                    offsetField.typedInput('width', (newWidth - multiplierWidth - 50));
                     // row3
-                    const lblwidth = propertyLblSpanField.width() + 25;
-                    propertyField.typedInput('width', (newWidth - lblwidth - 10));
-                    propertyLblField.width(lblwidth);
+                    levelLblField.width('auto');
+                    const lbl2Width = levelLblField.width();
+                    operatorField.width(120);
+                    levelField.typedInput('width', (newWidth - 120 - lbl2Width - 25));
+                    // propertyLblField.width(lbl2Width);
                 }
 
                 function resizeContainer() {
@@ -525,42 +528,37 @@
                     }
                 }
 
-                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
+                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '150px').editableList({
                     addItem(containerRow, containerIndex, data) {
-                        console.log('addItem start');
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
-                        const row = $('<div/>').appendTo(containerRow);
+                        const row1 = $('<div/>').appendTo(containerRow);
                         const row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+
                         // #region row1
-                        // [start - time] - [min/max/abs] - [blind-level / open / closed]
-                        console.log('row1 start');
-                        addLabel(row, 'node-input-rule-time', 'fa fa-clock-o');
+                        // [start - time] - lbl - [none / Bedingung]
+                        addLabel(row1, 'node-input-rule-time', 'fa fa-clock-o');
                         const timeField = $('<input/>', {
                             class: 'node-input-rule-time',
                             id: 'node-input-rule-time' + containerIndex,
                             type: 'text'
-                        }).appendTo(row).typedInput({
+                        }).appendTo(row1).typedInput({
                             default: types.TimeEntered.value,
                             types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env']
                         });
-                        const operatorField = $('<select/>', {
-                            class: 'node-input-rule-operator',
-                            id: 'node-input-rule-operator' + containerIndex
-                        }).appendTo(row);
-                        appendOptions(node, operatorField, 'blindOperator');
-                        const levelField = $('<input/>', {
-                            class: 'node-input-rule-level',
-                            id: 'node-input-rule-level' + containerIndex,
+                        addLabel(row1, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
+                        const propertyField = $('<input/>', {
+                            class: 'node-input-rule-property',
+                            id: 'node-input-rule-property' + containerIndex,
                             type: 'text'
-                        }).appendTo(row).typedInput({
-                            default: types.LevelEntered.value,
-                            types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
+                        }).appendTo(row1).typedInput({
+                            default: types.Unlimited.value,
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
                         });
+
                         // #endregion row1
                         // #region row2
                         // [offset] - [multiplier]
-                        console.log('row2 start');
                         addLabel(row2, 'node-input-rule-offset', 'fa fa-plus');
                         const offsetField = $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
@@ -577,20 +575,23 @@
                         appendOptions(node, multiplierField, 'multiplier');
                         // #endregion row2
                         // #region row3
-                        // [none / Bedingung] - [need reset]
-                        console.log('row3 start');
-                        addLabel(row3, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
-                        const propertyField = $('<input/>', {
-                            class: 'node-input-rule-property',
-                            id: 'node-input-rule-property' + containerIndex,
+                        // [min/max/abs] - [blind-level / open / closed] - [need reset]
+                        addLabel(row3, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
+                        const operatorField = $('<select/>', {
+                            class: 'node-input-rule-operator',
+                            id: 'node-input-rule-operator' + containerIndex
+                        }).appendTo(row3);
+                        appendOptions(node, operatorField, 'blindOperator');
+                        const levelField = $('<input/>', {
+                            class: 'node-input-rule-level',
+                            id: 'node-input-rule-level' + containerIndex,
                             type: 'text'
                         }).appendTo(row3).typedInput({
-                            default: types.Unlimited.value,
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
+                            default: types.LevelEntered.value,
+                            types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
                         // #endregion row 3
-                        // #region initfields
-                        console.log('changes start');
+                        // #region init fields
                         timeField.change(() => {
                             const opType = timeField.typedInput('type');
                             if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
@@ -603,29 +604,23 @@
                                 row2.hide(); // offset
                                 row3.show(); // limit
                             }
+                            resizeContainer();
                         });
                         // setting defaultValues
                         const selFields = getSelectFields();
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        console.log('defValues b ' + data.operator + ' - ' + selFields.blindOperator[0].id);
                         operatorField.val(data.operator || selFields.blindOperator[0].id);
-                        console.log('defValues c');
                         levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
                         levelField.typedInput('value', (data.levelValue || ''));
-                        console.log('defValues d');
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
                         offsetField.typedInput('value', data.offsetValue || '');
-                        console.log('defValues e');
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        console.log('defValues f');
                         propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         propertyField.typedInput('value', data.propertyValue || '');
-                        console.log('defValues g');
                         resizeRule(containerRow);
                         resizeContainer();
-                        // #endregion initfields
-                        console.log('addItem end');
+                        // #endregion init fields
                     },
                     /* sortItems(rules) {
                         rules = $('#node-input-rule-container').editableList('items');
@@ -638,14 +633,12 @@
                     removable: true,
                     removeItem: resizeContainer
                 });
-                console.log('rule-container set');
                 if (node.rules) {
                     for (let i = 0; i < node.rules.length; i++) {
                         const rule = node.rules[i];
                         $('#node-input-rule-container').editableList('addItem', rule);
                     }
                 }
-                console.log('rule-container end');
                 // #endregion time - rule-container
                 // #region sun
                 $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
@@ -703,13 +696,12 @@
                     levelValue: rule.find('.node-input-rule-level').typedInput('value'),
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
-                    multiplier: rule.find('.node-input-rule-multipier').val(),
+                    multiplier: rule.find('.node-input-rule-multiplier').val(),
                     propertyType: rule.find('.node-input-rule-property').typedInput('type'),
                     propertyValue: rule.find('.node-input-rule-property').typedInput('value')
                 };
                 node.rules.push(data);
             });
-            console.log(node.rules);
             // #endregion result-container
         },
         oneditresize(size) {

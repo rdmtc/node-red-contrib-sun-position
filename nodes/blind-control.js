@@ -97,12 +97,13 @@ function getNow_(node, msg, compareType) {
  * @return {number} rounded position number
  */
 function roundPos_(node, pos) {
-    if (Number.isInteger(node.blindData.increment)) {
+    /* if (Number.isInteger(node.blindData.increment)) {
         pos = Math.ceil(pos);
-        pos = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
+        pos = Math.ceil(pos / node.blindData.increment) * node.blindData.increment;
         return pos;
-    }
-    throw new Error('implementation needed for floating point number rounding to next increment');
+    } */
+    pos = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
+    return pos;
 }
 /******************************************************************************************/
 /**
@@ -270,7 +271,7 @@ module.exports = function (RED) {
             node.reason.State = RED._('blind-control.states.tempExceeded');
             node.reason.Description = RED._('blind-control.reasons.tempExceeded');
         } else {
-            const sunPosition = getSunPosition_(this, node.time.now);
+            const sunPosition = getSunPosition_(node, node.time.now);
             msg.sunPosition = sunPosition;
             if (!sunPosition.InWindow) {
                 node.blindData.position = node.time.level;
@@ -439,15 +440,22 @@ module.exports = function (RED) {
             /** percentage 0 - 100 of the sky occluded by clouds */
             clouds : 0
         };
-        this.timeRules = config.rules;
+        this.timeRules = config.rules || [];
         this.time = {};
         const node = this;
 
         this.on('input', function (msg) {
             try {
                 this.debug('input ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
-                this.debug('input ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
-                this.debug('input ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
+                if (!this.positionConfig) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:common.errors.pos-config'));
+                    node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'Node not properly configured!!'
+                    });
+                    return null;
+                }
 
                 msg.reason = node.reason;
                 node.time.now = getNow_(node, msg, config.tsCompare);

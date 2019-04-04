@@ -162,9 +162,9 @@
             "fixed position"
         ],
         "blindOperator": [
-            "min",
-            "max",
-            "abs"
+            "minimum",
+            "maximum",
+            "absolute"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -230,12 +230,14 @@
             "name": "Name"
         },
         "tips": {
-            "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
+            "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         },
         "errors": {
-            "longitude-missing": "Longitude is missing!",
-            "latitude-missing": "Latitude is missing!"
+            "longitude-missing": "Longitude is missing or wrong!",
+            "latitude-missing": "Latitude is missing or wrong!",
+            "coordinates-missing": "Latitude and Longitude is wrong!",
+            "pos-config": "Node not properly configured!! Missing or wrong position configuration!"
         }
     }
 }

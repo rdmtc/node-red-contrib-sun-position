@@ -571,16 +571,16 @@ function initCombobox(node, inputSelectName, inputBoxName, dataList, optionEleme
 // ************************************************************************************************
 
 function addLabel(row, forEl, symb, text) { // eslint-disable-line no-unused-vars
-    const lbl = $('<label class="' + forEl + '-lbl"/>').attr('for', forEl).appendTo(row);
+    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(row);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
     }
     if (text) {
-        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; */">' + text + '</span>');
+        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;*/">' + text + '</span>');
         lbl.append(span);
         lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
     } else {
-        lbl.attr('style', 'margin-left: 5px; width:20px');
+        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:20px');
     }
     return lbl;
 }
