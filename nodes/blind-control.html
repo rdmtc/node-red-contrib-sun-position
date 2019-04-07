@@ -1,7 +1,7 @@
 <script type="text/x-red" data-template-name="blind-control">
-    <div class="form-row">
+    <div class="form-row block-noindent">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" id="node-input-positionConfig">
+        <input type="text" class="row-full-width" id="node-input-positionConfig">
     </div>
     <hr>
     <!-- window ######################################################################## -->
@@ -10,26 +10,22 @@
     </div>
     <div class="form-row block-indent1">
         <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
-        <input type="number" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
+        <input type="text" class="spinner-noLimit" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
     </div>
     <div class="form-row block-indent1">
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
-        <input type="number" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
+        <input type="text" class="spinner-noLimit" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
     </div>
     <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.windowAngleText"></span>&nbsp;
+        <span data-i18n="[html]blind-control.label.windowAzimuthText"></span>&nbsp;
     </div>
     <div class="form-row block-indent1">
-        <label for="node-input-windowAngle"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAngle"></span></label>
-        <input type="number" id="node-input-windowAngle" data-i18n="[placeholder]blind-control.placeholder.windowAngle" >
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <input type="text" class="spinner-angle" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart" >
     </div>
-    <div class="form-row block-indent2">
-        <label for="node-input-windowAngleOffsetStart"><i class="fa fa-undo"></i> <span data-i18n="blind-control.label.windowAngleOffsetStart"></span></label>
-        <input type="number" id="node-input-windowAngleOffsetStart" data-i18n="[placeholder]blind-control.placeholder.windowAngleOffsetStart" >
-    </div>
-    <div class="form-row block-indent2">
-        <label for="node-input-windowAngleOffsetEnd"><i class="fa fa-repeat"></i> <span data-i18n="blind-control.label.windowAngleOffsetEnd"></span></label>
-        <input type="number" id="node-input-windowAngleOffsetEnd" >
+    <div class="form-row block-indent1">
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <input type="text" class="spinner-angle" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd" >
     </div>
     <hr>
     <!-- #region blind ######################################################################## -->
@@ -38,15 +34,15 @@
     </div>
     <div class="form-row block-indent1">
         <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
-        <input type="number" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
+        <input type="text" class="spinner-level" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
     </div>
     <div class="form-row block-indent1">
         <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
-        <input type="number" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
+        <input type="text" class="spinner-level" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
     </div>
     <div class="form-row block-indent1">
         <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
-        <input type="number" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
+        <input type="text" class="spinner-level" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
@@ -65,49 +61,46 @@
     </div>
     <div class="form-row form-row-sunControlActive block-indent1">
         <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="number" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
+        <input type="text" class="spinner-noLimit" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
     </div>
     <div class="form-row form-row-sunControlActive block-indent1">
         <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="number" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+        <input type="text" class="spinner-altitude" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
     </div>
     <hr>
     <!-- #region overwrite blind ######################################################################## -->
     <div class="form-row block-noindent">
         <span data-i18n="[html]blind-control.label.blindPosOverwriteText"></span>&nbsp;
     </div>
-    <div class="form-row block-indent1">
+    <div class="form-row block-indent1-add">
         <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
-        <input type="number" id="node-input-blindPosOverwriteExpire" data-i18n="[placeholder]blind-control.placeholder.blindPosOverwriteExpire">
+        <input type="text" class="spinner-time" id="node-input-blindPosOverwriteExpire" data-i18n="[placeholder]blind-control.placeholder.blindPosOverwriteExpire">
         <select id="node-input-blindPosOverwriteExpireMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
     <!-- #region weather ######################################################################## -->
-    <div class="form-row">
-        <label for="node-input-tempThreshold"><i class="fa fa-tachometer"></i> <span data-i18n="blind-control.label.tempThreshold"></span></label>
-        <input type="number" id="node-input-tempThreshold" data-i18n="[placeholder]blind-control.placeholder.tempThreshold">
+    <div class="form-row block-noindent">
+        <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
+        <input type="text" id="node-input-cloudValue"  data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="hidden" id="node-input-cloudValueType">
     </div>
-    <div class="form-row">
-        <label for="node-input-tempBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.tempBlindPos"></span></label>
-        <input type="number" id="node-input-tempBlindPos" data-i18n="[placeholder]blind-control.placeholder.tempBlindPos">
+    <div class="form-row row-cloudValue block-indent1">
+        <label for="node-input-cloudThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
+        <input type="text" id="node-input-cloudThreshold" class="spinner-noLimit" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
     </div>
-    <div class="form-row">
-        <label for="node-input-cloudThreshold"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
-        <input type="number" id="node-input-cloudThreshold" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
-    </div>
-    <div class="form-row">
+    <div class="form-row row-cloudValue block-indent1">
         <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
-        <input type="number" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudBlindPos">
+        <input type="text" class="spinner-level" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudBlindPos">
     </div>
     <hr>
     <!-- #region End ######################################################################## -->
-    <div class="form-row">
+    <div class="form-row block-noindent">
         <a href="#" class="enhanced-row-toggle"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
     </div>
-    <div class="form-row enhanced-row hidden">
+    <div class="form-row block-noindent enhanced-row hidden">
         <div class="form-row compare-row">
             <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
-            <select id="node-input-tsCompare" style="width:70%;" >
+            <select id="node-input-tsCompare" >
                 <option value="0" data-i18n="blind-control.label.now"></option>
                 <option value="1" data-i18n="blind-control.label.msgts"></option>
                 <option value="2" data-i18n="blind-control.label.msglc"></option>
@@ -116,13 +109,13 @@
             </select>
         </div>
     </div>
-    <div class="form-row time-topic">
+    <div class="form-row block-noindent time-topic">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic">
     </div>
-    <div class="form-row">
+    <div class="form-row block-noindent">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+        <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-tips">
         <span data-i18n="blind-control.tips.sunPosControl"></span>&nbsp;
@@ -138,6 +131,11 @@
         margin-left: 10px;
         width: 100%
     }
+    .input-error {
+        border-color: #d6615f !important;
+        background-color: #ffcccc !important;
+    }
+
     .block-indent2 {
         float: left;
         min-height: 1px;
@@ -161,6 +159,15 @@
     }
     .block-indent2 .ui-spinner {
         width : calc(100% - 265px);
+    }
+    .block-noindent-add .ui-spinner {
+        width : calc(100% - 375px);
+    }
+    .block-indent1-add .ui-spinner {
+        width : calc(100% - 385px);
+    }
+    .block-indent2-add .ui-spinner {
+        width : calc(100% - 395px);
     }
     .node-input-multiplier {
         width: 125px;
@@ -292,12 +299,34 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
+
+    function validateBlindPos(v) {
+        const n = parseFloat(v);
+        let blindOpenPos = $('#node-input-blindOpenPos').val();
+        if (blindOpenPos === undefined) {
+            blindOpenPos = this.blindOpenPos;
+        }
+        let blindClosedPos = $('#node-input-blindClosedPos').val();
+        if (blindClosedPos === undefined) {
+            blindClosedPos = this.blindClosedPos;
+        }
+        let blindIncrement = $('#node-input-blindIncrement').val();
+        if (blindIncrement === undefined) {
+            blindIncrement = this.blindIncrement;
+        }
+        return RED.validators.number(v) &&
+                (v !== '') &&
+                (n < blindOpenPos) &&
+                (n > blindClosedPos) &&
+                Number.isInteger(n / blindIncrement);
+    }
+
     RED.nodes.registerType('blind-control', {
         category: 'advanced-input',
         color: '#FFCC66',
         icon: 'blind-white.png', // saved in  icons/myicon.png - myicon.png
         inputs: 1, // set the number of inputs - only 0 or 1
-        outputs: 2, // 1. Object, 2. nur zahl der Öffnung der Jalousie
+        outputs: 1, // 1. Object, 2. nur zahl der Öffnung der Jalousie
         defaults: {
             name: {
                 value: '',
@@ -323,26 +352,29 @@
                 required: true,
                 validate: RED.validators.number()
             },
-            windowAngle: {
+            windowAzimuthStart: {
                 value: '',
                 required: true,
                 validate: function (v) {
                     const n = Number(v);
-                    return ((n >= 0) && (n <= 360));
+                    let windowAzimuthEnd = $('#node-input-windowAzimuthEnd').val();
+                    if (windowAzimuthEnd === undefined) {
+                        windowAzimuthEnd = this.windowAzimuthEnd;
+                    }
+                    return (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n < windowAzimuthEnd) );
                 }
             },
-            windowAngleOffsetStart: {
+            windowAzimuthEnd: {
                 value: '',
                 validate: function (v) {
                     const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
-                }
-            },
-            windowAngleOffsetEnd: {
-                value: '',
-                validate: function (v) {
-                    const n = Number(v);
-                    return ((n >= 0) && (n <= 90));
+                    let windowAzimuthStart = $('#node-input-windowAzimuthStart').val();
+                    if (windowAzimuthStart === undefined) {
+                        windowAzimuthStart = this.windowAzimuthStart;
+                    }
+                    return (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n > windowAzimuthStart) );
                 }
             },
             // #endregion window settings
@@ -352,7 +384,17 @@
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (n < this.blindOpenPos) && (n > this.blindClosedPos);
+                    let blindOpenPos = $('#node-input-blindOpenPos').val();
+                    if (blindOpenPos === undefined) {
+                        blindOpenPos = this.blindOpenPos;
+                    }
+                    let blindClosedPos = $('#node-input-blindClosedPos').val();
+                    if (blindClosedPos === undefined) {
+                        blindClosedPos = this.blindClosedPos;
+                    }
+                    return (RED.validators.number(v) &&
+                            (n < blindOpenPos) &&
+                            (n > blindClosedPos) );
                 }
             },
             blindOpenPos: {
@@ -360,7 +402,17 @@
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (n > this.blindClosedPos) && (Number.isInteger(n / this.blindIncrement));
+                    let blindClosedPos = $('#node-input-blindClosedPos').val();
+                    if (blindClosedPos === undefined) {
+                        blindClosedPos = this.blindClosedPos;
+                    }
+                    let blindIncrement = $('#node-input-blindIncrement').val();
+                    if (blindIncrement === undefined) {
+                        blindIncrement = this.blindIncrement;
+                    }
+                    return RED.validators.number(v) &&
+                            (Number.isInteger(n / blindIncrement)) &&
+                            (n > blindClosedPos);
                 }
             },
             blindClosedPos: {
@@ -368,14 +420,29 @@
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (n < this.blindOpenPos) && (Number.isInteger(n / this.blindIncrement));
+                    let blindOpenPos = $('#node-input-blindOpenPos').val();
+                    if (blindOpenPos === undefined) {
+                        blindOpenPos = this.blindOpenPos;
+                    }
+                    let blindIncrement = $('#node-input-blindIncrement').val();
+                    if (blindIncrement === undefined) {
+                        blindIncrement = this.blindIncrement;
+                    }
+                    return RED.validators.number(v) &&
+                            (Number.isInteger(n / blindIncrement)) &&
+                            (n < blindOpenPos);
                 }
             },
             blindPosOverwriteExpire: {
                 value: '',
+                required: false,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (v === '') || ((n * this.blindPosOverwriteExpireMultiplier) >= 500);
+                    let blindPosOverwriteExpireMultiplier = $('#node-input-blindPosOverwriteExpireMultiplier').val();
+                    if (blindPosOverwriteExpireMultiplier === undefined) {
+                        blindPosOverwriteExpireMultiplier = this.blindPosOverwriteExpireMultiplier;
+                    }
+                    return (v === '') || (RED.validators.number(v) && ((n * blindPosOverwriteExpireMultiplier) >= 500));
                 }
             },
             blindPosOverwriteExpireMultiplier: {
@@ -402,46 +469,64 @@
             },
             sunFloorLength: {
                 value: 0,
-                validate: RED.validators.number()
+                validate: function (v) {
+                    let sunControlActive = $('#node-input-sunControlActive').val();
+                    if (sunControlActive === undefined) {
+                        sunControlActive = this.sunControlActive;
+                    }
+                    return (sunControlActive === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
             },
             sunMinAltitude: {
                 value: '',
                 required: false,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (v === '' || ((n >= 0) && (n <= 90)));
+                    let sunControlActive = $('#node-input-sunControlActive').val();
+                    if (sunControlActive === undefined) {
+                        sunControlActive = this.sunControlActive;
+                    }
+                    return (sunControlActive === false) ||
+                            (v === '') ||
+                            (RED.validators.number(v) && (n >= 0) && (n <= 90));
                 }
             },
             // #endregion sun settings
             // #region weather settings
-            tempThreshold: { value: '' },
-            tempBlindPos: {
+            cloudValue: {
+                value: '',
+                required: false,
+                validate: RED.validators.typedInput('cloudValueType')
+            },
+            cloudValueType: {
+                value: 'none'
+            },
+            cloudThreshold: {
                 value: '',
                 validate: function (v) {
-                    const n = parseFloat(v);
-                    return (v === '') ||
-                            ((n < this.blindOpenPos) &&
-                            (n > this.blindClosedPos) &&
-                            (Number.isInteger(n / this.blindIncrement)));
+                    let cloudValueType = $('#node-input-cloudValueType').val();
+                    if (cloudValueType === undefined) {
+                        cloudValueType = this.cloudValueType;
+                    }
+                    return (cloudValueType === 'none') ||
+                            ((v !== '') && RED.validators.number(v));
                 }
             },
-            cloudThreshold: { value: '' },
             cloudBlindPos: {
                 value: '',
                 validate: function (v) {
-                    const n = parseFloat(v);
-                    return (v === '') ||
-                        ((n < this.blindOpenPos) &&
-                            (n > this.blindClosedPos) &&
-                            (Number.isInteger(n / this.blindIncrement)));
+                    let cloudValueType = $('#node-input-cloudValueType').val();
+                    if (cloudValueType === undefined) {
+                        cloudValueType = this.cloudValueType;
+                    }
+                    return (cloudValueType === 'none') ||
+                            validateBlindPos(v);
                 }
             }
             // #endregion weather settings
         },
-        outputLabels(index) {
-            if (index === 0) {
-                return 'object ';
-            }
+        outputLabels() {
             return 'new blind level ';
         },
         label() {
@@ -461,8 +546,29 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getTypes getSelectFields appendOptions addLabel */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel */
                 const types = getTypes(node);
+                types.LevelEntered = {
+                    value: 'num',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
+                    icon: 'red/images/typedInput/09.png',
+                    validate: validateBlindPos
+                };
+                types.LevelFix = {
+                    value: 'levelFixed',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
+                    icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
+                    options: [
+                        'open (max)',
+                        '75%',
+                        '66%',
+                        '50%',
+                        '33%',
+                        '25%',
+                        '10%',
+                        'closed (min)'
+                    ]
+                };
                 // #region initialize
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
@@ -528,7 +634,7 @@
                     }
                 }
 
-                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '150px').editableList({
+                $('#node-input-rule-container').css('min-height', '40px').css('min-width', '150px').editableList({
                     addItem(containerRow, containerIndex, data) {
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
                         const row1 = $('<div/>').appendTo(containerRow);
@@ -649,6 +755,26 @@
                     }
                 });
                 // #endregion sun
+                // #region weather
+                const cloudValueField = setupTInput(node, {
+                    typeProp: 'cloudValueType',
+                    valueProp: 'cloudValue',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        const cloudValueType = $('#node-input-cloudValue').typedInput('type');
+                        if ( cloudValueType === types.Undefined.value ) {
+                            $('.row-cloudValue').hide();
+                        } else {
+                            $('.row-cloudValue').show();
+                        }
+                        $('#node-input-cloudThreshold').change();
+                        $('#node-input-cloudBlindPos').change();
+                    }
+                });
+                // # endregion weather
                 // #region Enhanced settings
                 $('.enhanced-row-toggle').on('click', () => {
                     $('.enhanced-row').toggle(); // .hide();
@@ -659,9 +785,31 @@
                 } else {
                     $('.enhanced-row').show();
                 }
+
+                $('.spinner-noLimit').spinner();
+                $('.spinner-angle').spinner({
+                    max: 360,
+                    min: -360,
+                    step: 1
+                });
+                $('.spinner-altitude').spinner({
+                    max: 90,
+                    min: 0,
+                    step: 1
+                });
+                $('.spinner-level').spinner({
+                    max: 100,
+                    min: 0,
+                    step: 0.01,
+                    numberFormat: 'n'
+                });
+                $('.spinner-time').spinner({
+                    max: 1439,
+                    min: 0
+                });
                 // #endregion Enhanced settings
-                // blindPosNightField.change();
                 $('#node-input-sunControlActive').change();
+                cloudValueField.change();
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {

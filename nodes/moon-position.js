@@ -30,11 +30,11 @@ module.exports = function (RED) {
                     now = new Date(msg.time);
                 }
                 if (!this.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:common.errors.pos-config'));
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
-                        text: 'Node not properly configured!!'
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
                     });
                     return null;
                 }

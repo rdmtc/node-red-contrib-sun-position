@@ -14,6 +14,7 @@ const util = require('util');
  * @returns {boolean} true if the position is valid, otherwise false
  */
 function validPosition_(node, position) {
+    node.debug('validPosition_ position='+position);
     if (isNaN(position)) {
         node.debug('Position: "' + position + '" is NaN!');
         return false;
@@ -39,15 +40,22 @@ function validPosition_(node, position) {
 
 /******************************************************************************************/
 function checkWeather_(node, msg) {
-    hlp.getMsgNumberValue(msg, ['maxtemp', 'maxTemp'], 'temp', (maxTemp) => {
-        node.weatherData.maxTemp = maxTemp;
-    });
-    node.tempData.nok = (node.weatherData.maxTemp && node.tempData.threshold) ? node.weatherData.maxTemp > node.tempData.threshold : false;
-
-    hlp.getMsgNumberValue(msg, ['clouds', 'cloud'], 'cloud', (clouds) => {
-        node.weatherData.clouds = clouds;
-    });
-    node.cloudData.nok = (node.weatherData.clouds && node.cloudData.threshold) ? node.weatherData.clouds > node.cloudData.threshold : false;
+    node.debug('checkWeather_');
+    if (!node.cloudData.active) {
+        return;
+    }
+    try {
+        const val = node.positionConfig.getFloatProp(node, msg, node.cloudData.valueType, node.cloudData.value);
+        if (val) {
+            node.cloudData.actValue = val;
+            node.cloudData.inLimit = (node.cloudData.threshold) ? val <= node.cloudData.threshold : true;
+        }
+    } catch (err) {
+        // no Data
+        node.debug('error getting cloudData err=' + util.inspect(err));
+    }
+    msg.cloud = node.cloudData;
+    node.debug('node.cloudData=' + util.inspect(node.cloudData));
 }
 
 /******************************************************************************************/
@@ -58,6 +66,7 @@ function checkWeather_(node, msg) {
    * @param {*} node the current node object
    */
 function getNow_(node, msg, compareType) {
+    node.debug('getNow_');
     let id = '';
     let value = '';
     switch (compareType) {
@@ -91,19 +100,51 @@ function getNow_(node, msg, compareType) {
 
 /******************************************************************************************/
 /**
- * round a level to the next increment
+ * get the absolute position from percentage position
+ * @param {*} node the node settings
+ * @param {*} percentPos the level in percentage
+ */
+function posPrcToAbs_(node, levelPercent) {
+    node.debug(`levelPrcToAbs_ ${levelPercent}`);
+    return posRound_(((node.blindData.openPos - node.blindData.closedPos) * levelPercent) + node.blindData.closedPos);
+}
+/**
+ * round a position to the next increment
  * @param {*} node node data
  * @param {number} pos position
  * @return {number} rounded position number
  */
-function roundPos_(node, pos) {
+function posRound_(node, pos) {
+    node.debug(`levelPrcToAbs_ ${pos} - increment is ${node.blindData.increment}`);
     /* if (Number.isInteger(node.blindData.increment)) {
         pos = Math.ceil(pos);
         pos = Math.ceil(pos / node.blindData.increment) * node.blindData.increment;
         return pos;
     } */
-    pos = Math.ceil(node.blindData.position / node.blindData.increment) * node.blindData.increment;
+    pos = Math.ceil(pos / node.blindData.increment) * node.blindData.increment;
+    node.debug(`levelPrcToAbs_ 2 ${pos}`);
+    if (pos > node.blindData.openPos) {
+        pos = node.blindData.openPos;
+    }
+    if (pos < node.blindData.closedPos) {
+        pos = node.blindData.closedPos;
+    }
+    node.debug(`levelPrcToAbs_ result ${pos}`);
     return pos;
+}
+
+/**
+ * normalizes an angle
+ * @param {number} angle to normalize
+ */
+function angleNorm_(angle) {
+    while (angle < 0) {
+        angle += 360;
+    }
+    while (angle > 360) {
+        angle -= 360;
+    }
+    return angle;
 }
 /******************************************************************************************/
 /**
@@ -116,40 +157,21 @@ function roundPos_(node, pos) {
  */
 function getSunPosition_(node, now) {
     const sunPosition = node.positionConfig.getSunCalc(now);
-    // calc sunInSky:
-    sunPosition.InWindow = false;
-    if ((node.windowSettings.angle - node.windowSettings.angleOffsetStart) < 0) {
-        if ( (360 + node.windowSettings.angle - node.windowSettings.angleOffsetStart <= sunPosition.altitudeDegrees) & (sunPosition.azimuthDegrees <= 360) ||
-              (0 <= sunPosition.azimuthDegrees && sunPosition.azimuthDegrees <= node.windowSettings.angle + node.windowSettings.angleOffsetEnd)
-        ) {
-            sunPosition.inWindow = true;
-        }
-    } else if (node.windowSettings.angle + node.windowSettings.angleOffsetStart > 360) {
-        if ( (0 <= sunPosition.azimuthDegrees) & (sunPosition.azimuthDegrees <= node.windowSettings.angle + node.windowSettings.angleOffsetStart - 360) ||
-            (node.windowSettings.angle - node.windowSettings.angleOffsetEnd <= sunPosition.azimuthDegrees && sunPosition.azimuthDegrees <= 360)
-        ) {
-            sunPosition.inWindow = true;
-        }
-    } else {
-        if ( (node.windowSettings.angle - node.windowSettings.angleOffsetEnd <= sunPosition.azimuthDegrees) &&
-             (sunPosition.azimuthDegrees <= node.windowSettings.angle + node.windowSettings.angleOffsetStart)
-        ) {
-            sunPosition.inWindow = true;
-        }
-    }
+    // node.debug('sunPosition: ' + util.inspect(sunPosition, Object.getOwnPropertyNames(sunPosition)));
+    sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
+                           (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
     return sunPosition;
 }
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
     function blindPosOverwriteReset(node) {
-        if (node.blindData.overwrite.expires >= 0) {
-            node.debug('blindPosOverwriteReset');
-
+        node.debug(`blindPosOverwriteReset expire=${node.blindData.overwrite.expires}`);
+        node.blindData.overwrite.active = false;
+        if (node.blindData.overwrite.expires) {
             delete node.blindData.overwrite.expires;
             delete node.blindData.overwrite.expireNever;
             delete node.blindData.overwrite.expireDate;
-            node.blindData.overwrite.active = false;
         }
         if (node.timeOutObj) {
             node.debug('clearTimeout');
@@ -215,7 +237,7 @@ module.exports = function (RED) {
             });
 
         if (needOverwrite) {
-            node.debug('needOverwrite expire=' + expire + ' newPos=' + newPos);
+            node.debug(`needOverwrite expire=${expire} newPos=${newPos}`);
             if (!validPosition_(node, newPos)) {
                 node.error(RED._('invalid-blind-position', { pos: newPos }));
                 return false;
@@ -223,8 +245,8 @@ module.exports = function (RED) {
             node.blindData.position = newPos;
             node.blindData.overwrite.active = true;
             const prio = hlp.getMsgBoolValue(msg, ['prio', 'priority'], 'priority', undefined, false);
-            if (prio || (expire < 500)) {
-                node.debug('needOverwrite prio=' + prio + ' expire=' + expire);
+            if (prio || (expire < 10)) {
+                node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
                 node.blindData.overwrite.expireNever = true;
                 node.reason.Code = 2;
                 node.reason.State = RED._('blind-control.states.overwritePrio');
@@ -252,6 +274,7 @@ module.exports = function (RED) {
         return false;
     }
 
+    /******************************************************************************************/
     /**
      * calculates for the blind the new position
      * @param {*} node the node data
@@ -265,68 +288,78 @@ module.exports = function (RED) {
             node.reason.State = RED._('blind-control.states.abs');
             node.reason.Description = RED._('blind-control.reasons.abs');
             return;
-        } else if (node.tempData.nok) {
-            node.blindData.position = node.tempData.blindPos;
-            node.reason.Code = 9;
-            node.reason.State = RED._('blind-control.states.tempExceeded');
-            node.reason.Description = RED._('blind-control.reasons.tempExceeded');
-        } else {
-            const sunPosition = getSunPosition_(node, node.time.now);
-            msg.sunPosition = sunPosition;
-            if (!sunPosition.InWindow) {
-                node.blindData.position = node.time.level;
-                node.reason.Code = 6;
-                node.reason.State = RED._('blind-control.states.sunNotInWin');
-                node.reason.Description = RED._('blind-control.reasons.sunNotInWin');
-            } else if (node.sunData.active) {
-                if (((node.sunData.minAltitude && sunPosition.altitudeDegrees >= node.sunData.minAltitude) ||
-                    !node.sunData.minAltitude) && !node.cloudData.nok) {
-                    const height = Math.tan(sunPosition.altitudeRadians) * node.sunData.floorLength;
-                    if (height <= node.windowSettings.bottom) {
-                        node.blindData.position = node.blindData.closedPos;
-                    } else if (height >= node.windowSettings.top) {
-                        node.blindData.position = node.blindData.openPos;
-                    } else {
-                        node.blindData.position = roundPos_(node, 100 * (1 - (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom)));
-                    }
-                    node.reason.Code = 7;
-                    node.reason.State = RED._('blind-control.states.sunCtrl');
-                    node.reason.Description = RED._('blind-control.reasons.sunCtrl');
-                } else if (node.sunData.minAltitude && sunPosition.altitudeDegrees < node.sunData.minAltitude) {
-                    node.reason.Code = 5;
-                    node.reason.State = RED._('blind-control.states.sunMinAltitude');
-                    node.reason.Description = RED._('blind-control.reasons.sunMinAltitude');
-                } else if (node.cloudData.nok) {
-                    node.blindData.position = node.cloudData.threshold;
-                    node.reason.Code = 8;
-                    node.reason.State = RED._('blind-control.states.cloudExceeded');
-                    node.reason.Description = RED._('blind-control.reasons.cloudExceeded');
-                }
-            } else if (node.cloudData.nok) {
-                node.blindData.position = node.cloudData.threshold;
-                node.reason.Code = 8;
-                node.reason.State = RED._('blind-control.states.cloudExceeded');
-                node.reason.Description = RED._('blind-control.reasons.cloudExceeded');
-            } else {
-                node.blindData.position = node.time.level;
-                node.reason.Code = 10;
-                node.reason.State = RED._('blind-control.states.openDef');
-                node.reason.Description = RED._('blind-control.reasons.openDef');
-            }
         }
+
+        const sunPosition = getSunPosition_(node, node.time.now);
+        msg.sunPosition = sunPosition;
+        if (!sunPosition.InWindow) {
+            node.blindData.position = node.time.level;
+            node.reason.Code = 6;
+            node.reason.State = RED._('blind-control.states.sunNotInWin');
+            node.reason.Description = RED._('blind-control.reasons.sunNotInWin');
+            return;
+        }
+        checkWeather_(node, msg);
+
+        if (!sunPosition.InWindow) {
+            node.blindData.position = node.time.level;
+            node.reason.Code = 6;
+            node.reason.State = RED._('blind-control.states.sunNotInWin');
+            node.reason.Description = RED._('blind-control.reasons.sunNotInWin');
+        } else if (node.sunData.active && node.cloudData.inLimit &&
+                    (!node.sunData.minAltitude ||
+                    (sunPosition.altitudeDegrees >= node.sunData.minAltitude))) {
+            node.debug('node.windowSettings: ' + util.inspect(node.windowSettings, Object.getOwnPropertyNames(node.windowSettings)));
+            const height = Math.tan(sunPosition.altitudeRadians) * node.sunData.floorLength;
+            node.debug(`height=${height} - ${sunPosition.altitudeDegrees} - ${node.sunData.floorLength}` );
+            if (height <= node.windowSettings.bottom) {
+                node.debug('set to closed position ' + node.blindData.closedPos);
+                node.blindData.position = node.blindData.closedPos;
+            } else if (height >= node.windowSettings.top) {
+                node.debug('set to closed position ' + node.blindData.openPos);
+                node.blindData.position = node.blindData.openPos;
+            } else {
+                // node.blindData.position = roundPos_(node, 100 * (1 - (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom)));
+                node.blindData.position = posPrcToAbs_(node, (1 - (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom)));
+                node.debug('set to calced position ' + node.blindData.position);
+            }
+            node.reason.Code = 7;
+            node.reason.State = RED._('blind-control.states.sunCtrl');
+            node.reason.Description = RED._('blind-control.reasons.sunCtrl');
+        } else if (node.sunData.active && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
+            node.reason.Code = 5;
+            node.reason.State = RED._('blind-control.states.sunMinAltitude');
+            node.reason.Description = RED._('blind-control.reasons.sunMinAltitude');
+        } else if (!node.cloudData.inLimit) {
+            node.blindData.position = node.cloudData.blindPos;
+            node.reason.Code = 8;
+            node.reason.State = RED._('blind-control.states.cloudExceeded');
+            node.reason.Description = RED._('blind-control.reasons.cloudExceeded');
+        } else {
+            node.blindData.position = node.time.level;
+            node.reason.Code = 10;
+            node.reason.State = RED._('blind-control.states.openDef');
+            node.reason.Description = RED._('blind-control.reasons.openDef');
+        }
+        // }
         if ((node.time.operator === 1) && (node.blindData.position < node.time.level))  {
             // min
+            node.debug(`${node.blindData.position} is below ${node.time.level} (min)`);
             node.blindData.position = node.time.level;
         } else if ((node.time.operator === 2) && (node.blindData.position > node.time.level)) {
             // max
+            node.debug(`${node.blindData.position} is above ${node.time.level} (max)`);
             node.blindData.position = node.time.level;
         }
-        if (node.blindData.position > node.blindData.closedPos) {
+        if (node.blindData.position < node.blindData.closedPos) {
+            node.debug(`${node.blindData.position} is below ${node.blindData.closedPos}`);
             node.blindData.position = node.blindData.closedPos;
         }
-        if (node.blindData.position < node.blindData.openPos) {
+        if (node.blindData.position > node.blindData.openPos) {
+            node.debug(`${node.blindData.position} is above ${node.blindData.closedPos}`);
             node.blindData.position = node.blindData.openPos;
         }
+        node.debug(`calcBlindPosition end pos=${node.blindData.position} reason=${node.reason.Code} description=${node.reason.Description}`);
     }
 
     /**
@@ -336,6 +369,7 @@ module.exports = function (RED) {
        * @param {*} config the configuration object
        */
     function calcTimes(node, msg, config, now) {
+        node.debug('calcTimes');
         const nowNr = hlp.getTimeNumber(now);
         const rulesLength = node.timeRules.length;
         for (let i = 0; i < rulesLength; ++i) {
@@ -356,15 +390,21 @@ module.exports = function (RED) {
                 node.time.switchTimeNr = hlp.getTimeNumber(node.time.switchTime.value);
                 if (node.time.switchTimeNr > nowNr) {
                     node.time.level = node.blindData.openPos;
-                    if (rule.levelType !== 'levelFixed') {
+                    if (rule.levelType === 'levelFixed') {
                         if (rule.levelValue === 'closed (min)') {
                             node.time.level = node.blindData.closedPos;
-                        } else if (rule.levelValue === '~75%') {
-                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.75) + node.blindData.closedPos);
-                        } else if (rule.levelValue === '~50%') {
-                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.5) + node.blindData.closedPos);
-                        } else if (rule.levelValue === '~25%') {
-                            node.time.level = roundPos_(((node.blindData.openPos - node.blindData.closedPos) * 0.25) + node.blindData.closedPos);
+                        } else if (rule.levelValue === '75%') {
+                            node.time.level = posPrcToAbs_(node, 0.75);
+                        } else if (rule.levelValue === '66%') {
+                            node.time.level = posPrcToAbs_(node, 0.66666);
+                        } else if (rule.levelValue === '50%') {
+                            node.time.level = posPrcToAbs_(node, 0.5);
+                        } else if (rule.levelValue === '33%') {
+                            node.time.level = posPrcToAbs_(node, 0.33333);
+                        } else if (rule.levelValue === '25%') {
+                            node.time.level = posPrcToAbs_(node, 0.25);
+                        } else if (rule.levelValue === '10%') {
+                            node.time.level = posPrcToAbs_(node, 0.1);
                         }
                     } else {
                         node.time.level = node.positionConfig.getFloatProp(node, msg, rule.levelType, rule.levelValue);
@@ -395,13 +435,11 @@ module.exports = function (RED) {
             /** The bottom of the window */
             bottom: Number(config.windowBottom),
             /** The top of the window */
-            top: Number(config.windowBottom) + Number(config.windowHeight),
-            /** the orientation to the geographical north */
-            angle: Number(config.windowOrientation),
-            /** an offset for the angle anti-clockwise offset */
-            angleOffsetStart: Number(hlp.chkValueFilled(config.windowAngleOffsetStart, 0)),
+            top: Number(config.windowTop),
+            /** the orientation angle to the geographical north */
+            AzimuthStart: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthStart, 0))),
             /** an offset for the angle clockwise offset */
-            angleOffsetEnd: Number(hlp.chkValueFilled(config.windowAngleOffsetEnd, 0))
+            AzimuthEnd: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthEnd, 0)))
         };
         this.sunData = {
             /** Defines if the sun control is active or not */
@@ -424,21 +462,15 @@ module.exports = function (RED) {
                 alarm: false
             }
         };
-        this.tempData = {
-            threshold: config.tempThreshold,
-            blindPos: Number(hlp.chkValueFilled(config.tempBlindPos, undefined)),
-            ok: true
-        };
         this.cloudData = {
+            active: (typeof config.cloudValueType !== 'undefined') && (config.cloudValueType !== 'none'),
+            value: config.cloudValue || '',
+            valueType: config.cloudValueType || 'none',
+            actValue: 100,
             threshold: config.cloudThreshold,
+            thresholdValue: 100,
             blindPos: Number(hlp.chkValueFilled(config.cloudBlindPos, undefined)),
-            ok: true
-        };
-        this.weatherData = {
-            /** forecast of the max temp of the day */
-            maxTemp : -1,
-            /** percentage 0 - 100 of the sky occluded by clouds */
-            clouds : 0
+            inLimit: true
         };
         this.timeRules = config.rules || [];
         this.time = {};
@@ -448,7 +480,7 @@ module.exports = function (RED) {
             try {
                 this.debug('input ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
                 if (!this.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:common.errors.pos-config'));
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
@@ -461,29 +493,24 @@ module.exports = function (RED) {
                 node.time.now = getNow_(node, msg, config.tsCompare);
                 node.debug('node.time=' + util.inspect(node.time));
                 // check if the message contains any weather data
-                checkWeather_(this, msg);
-                node.debug('node.cloudData=' + util.inspect(node.cloudData));
-                node.debug('node.tempData=' + util.inspect(node.tempData));
-                node.debug('node.weatherData=' + util.inspect(node.weatherData));
 
                 const previous = {
                     position: node.blindData.position,
                     reasonCode: node.reason.Code
                 };
                 // check for manual overwrite
-                if (checkBlindPosOverwrite(this, msg, node.time.now)) {
+                if (!checkBlindPosOverwrite(this, msg, node.time.now)) {
                     // calc times:
                     calcTimes(this, msg, config, node.time.now);
                     // calc sun position:
                     calcBlindPosition(node, msg);
                 }
+                node.debug(`result pos=${node.blindData.position} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.Code} description=${node.reason.Description}`);
 
                 if (node.blindData.position !== previous.position ||
                     node.reason.Code !== previous.reasonCode) {
                     msg.payload = node.blindData.position;
                     msg.blind = node.blindData;
-                    msg.temp = node.tempData;
-                    msg.cloud = node.cloudData;
                     if (config.topic) {
                         msg.topic = config.topic;
                     }

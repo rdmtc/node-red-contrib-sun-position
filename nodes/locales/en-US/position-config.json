@@ -209,7 +209,9 @@
         "error": "<strong>Error</strong>: __message__",
         "error-title": "internal error",
         "error-init": "error '__message__', retry in __time__min",
-        "warn-init": "warning '__message__', retry in __time__min"
+        "warn-init": "warning '__message__', retry in __time__min",
+        "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
+        "pos-config-state": "Node not properly configured!!"
     },
     "position-config": {
         "label": {
@@ -236,8 +238,7 @@
         "errors": {
             "longitude-missing": "Longitude is missing or wrong!",
             "latitude-missing": "Latitude is missing or wrong!",
-            "coordinates-missing": "Latitude and Longitude is wrong!",
-            "pos-config": "Node not properly configured!! Missing or wrong position configuration!"
+            "coordinates-missing": "Latitude and Longitude is wrong!"
         }
     }
 }

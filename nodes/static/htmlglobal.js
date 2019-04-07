@@ -237,24 +237,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
             hasValue: false
-        },
-        LevelEntered: {
-            value: 'num',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
-            icon: 'red/images/typedInput/09.png',
-            validate: /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/
-        },
-        LevelFix: {
-            value: 'levelFixed',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
-            options: [
-                'open (max)',
-                '~75%',
-                '~50%',
-                '~25%',
-                'closed (min)'
-            ]
         }
     };
 }

@@ -82,8 +82,7 @@
       "within-time-switch": "nodes/within-time-switch.js",
       "time-inject": "nodes/time-inject.js",
       "time-comp": "nodes/time-comp.js",
-      "time-span": "nodes/time-span.js",
-      "blind-control": "nodes/blind-control.js"
+      "time-span": "nodes/time-span.js"
     }
   },
   "dependencies": {

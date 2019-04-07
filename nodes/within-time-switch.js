@@ -46,7 +46,6 @@ module.exports = function (RED) {
         if (status > 255) {
             return false;
         }
-
         if (result.start.error) {
             if (_onInit === true) {
                 node.status({
@@ -202,6 +201,15 @@ module.exports = function (RED) {
 
         this.on('input', msg => {
             try {
+                if (!node.positionConfig) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
+                    node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
+                    });
+                    return null;
+                }
                 // this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
                 // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
                 // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
@@ -260,6 +268,15 @@ module.exports = function (RED) {
         });
 
         try {
+            if (!node.positionConfig) {
+                node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
+                node.status({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
+                });
+                return null;
+            }
             node.status({});
             const result = calcWithinTimes(this, null, config);
             // if an error occurred, will retry in 6 minutes. This will prevent errors on initialization.
