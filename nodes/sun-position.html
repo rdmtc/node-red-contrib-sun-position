@@ -235,8 +235,7 @@
 
             const rule = this.rules[index - 1];
             if (rule) {
-                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType,
-                    rule.valueHigh);
+                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType, rule.valueHigh);
             }
         },
         label() {
@@ -268,7 +267,7 @@
                     field.val(mp);
                     return mp;
                 }
-
+                // #endregion initialize
                 // #region start
                 const startTypeField = setupTInput(node, {
                     typeProp: 'startType',
@@ -307,7 +306,6 @@
                 }).change();
                 startTypeField.change();
                 // #endregion start
-
                 // #region end
                 const endTypeField = setupTInput(node, {
                     typeProp: 'endType',
@@ -376,26 +374,20 @@
 
                         const rule = opt.r;
                         const row = $('<div/>').appendTo(container);
-                        /* const row3 = $('<div/>', {
-                            style: 'padding-top: 5px;'
-                        }).appendTo(container); */
-
-                        /* validate: function (v) {
-                            var n = Number(v);
-                            return ((n >= 0) && (n <= 360));
-                        } */
 
                         $('<span/>', {
                             class: 'node-input-rule-btwn-label'
                         }).text(' ' + btwnLabel + ' ').appendTo(row);
+
                         const btwnValueField = $('<input/>', {
                             class: 'node-input-rule-btwn-value',
                             type: 'text',
                             style: 'margin-left: 5px;'
                         }).appendTo(row).typedInput({
                             default: 'num',
-                            types: ['msg', 'flow', 'global', 'num', 'env']
+                            types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
                         });
+
                         $('<span/>', {
                             class: 'node-input-rule-btwn-label'
                         }).text(' ' + andLabel + ' ').appendTo(row);
@@ -405,14 +397,13 @@
                             style: 'margin-left:2px;'
                         }).appendTo(row).typedInput({
                             default: 'num',
-                            types: ['msg', 'flow', 'global', 'num', 'env']
+                            types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
                         });
 
                         const finalspan = $('<span/>', {
                             style: 'float: right;margin-top: 6px;'
                         }).appendTo(row);
-                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) +
-                    '</span> ');
+                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
 
                         resizeRule(container);
                         btwnValueField.typedInput('value', rule.valueLow);
@@ -425,7 +416,6 @@
                         const currentOutputs = JSON.parse(outputCount.val() || '{}');
                         currentOutputs[opt.hasOwnProperty('i') ? opt.i : opt._i] = i;
                         currentOutputs.m = i + 1;
-                        // console.log(currentOutputs);
                         outputCount.val(JSON.stringify(currentOutputs));
                     },
                     removeItem(opt) {
@@ -443,8 +433,6 @@
                             currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                         });
                         currentOutputs.m = rules.length;
-                        // console.log(currentOutputs);
-                        // console.log(rules);
                         outputCount.val(JSON.stringify(currentOutputs));
                     },
                     resizeItem: resizeRule,
@@ -457,8 +445,6 @@
                             currentOutputs[data.hasOwnProperty('i') ? data.i : data._i] = i;
                         });
                         currentOutputs.m = rules.length;
-                        // console.log(currentOutputs);
-                        // console.log(rules);
                         outputCount.val(JSON.stringify(currentOutputs));
                     },
                     sortable: true,
@@ -496,7 +482,6 @@
 
             node.rules = [];
             rules.each(function ( _i ) {
-                // const ruleData = $(this).data('data');
                 const rule = $(this);
                 const r = {};
                 r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
@@ -506,14 +491,10 @@
                 node.rules.push(r);
             });
             node.propertyType = $('#node-input-property').typedInput('type');
-            // var outputCount = $("#node-input-outputs").val(); //"{}"
 
             const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
             currentOutputs.m = rules.length;
-            // console.log(currentOutputs);
-            // console.log(rules);
             $('#node-input-outputs').val(JSON.stringify(currentOutputs));
-        // outputCount.val(JSON.stringify(currentOutputs));
         },
         oneditresize(size) {
             const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
