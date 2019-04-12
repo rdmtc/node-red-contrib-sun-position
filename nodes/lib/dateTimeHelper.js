@@ -326,13 +326,13 @@ function checkLimits(num, low, high) {
  * @param {*} name property name
  */
 function getMsgNumberValue(msg, ids, names, isFound, notFound) {
-    if (ids) {
+    if (ids && msg) {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
         for (let i = 0; i < ids.length; i++) {
             const id = ids[i];
-            if (typeof msg.payload[id] !== 'undefined') {
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined')) {
                 const res = parseFloat(msg.payload[id]);
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
@@ -353,7 +353,7 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
         }
     }
     // includes
-    if (names && msg.topic) {
+    if (names && msg && msg.topic && msg.payload) {
         const res = parseFloat(msg.payload);
         if (!isNaN(res)) {
             if (!Array.isArray(names)) {
@@ -384,13 +384,13 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
  * @param {*} name property name
  */
 function getMsgBoolValue(msg, ids, names, isFound, notFound) {
-    if (ids) {
+    if (ids && msg) {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
         for (let i = 0; i < ids.length; i++) {
             const id = ids[i];
-            if ((typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
                 if (typeof isFound === 'function') {
                     return isFound(isTrue(msg.payload[id]));
                 }
@@ -405,7 +405,7 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
         }
     }
 
-    if (names && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
+    if (names && msg && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
         if (!Array.isArray(names)) {
             names = [names];
         }
@@ -421,7 +421,10 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     if (typeof notFound === 'function') {
         return notFound(msg);
     }
-    return notFound || NaN;
+    if (typeof notFound === 'boolean') {
+        return notFound;
+    }
+    return false;
 }
 
 /*******************************************************************************************************/

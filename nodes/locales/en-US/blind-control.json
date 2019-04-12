@@ -1,7 +1,7 @@
 {
 	"blind-control": {
 		"label": {
-			"windowText": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
+			"windowPosText": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"windowTop": "window top",
 			"windowBottom": "window bottom",
 			"windowAzimuthText": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
@@ -11,10 +11,12 @@
 			"blindIncrement": "Increment",
 			"blindOpenPos": "open position (max)",
 			"blindClosedPos": "closed position (min)",
-			"blindPosOverwriteText": "manual overwrite of the blind position",
-			"blindPosOverwriteExpire": "expire",
+			"blindDefaultPosText":"if none matches the following position will be used",
+			"blindDefaultPos": "default position",
+			"overwriteText": "manual overwrite of the blind position",
+			"overwriteExpire": "expire",
 			"addTimes": "alternate start or end time",
-			"TimeText": "Time control: starting midnight, first matching line will used",
+			"TimeText": "Time control: starting from midnight, the first matching line will used, where time is <b>not used</b> or time is less than <b>now</b> and where property is <b>not used</b> or <em>true</em>",
 			"compareTime": "base time",
 			"onlyIf": "only if",
 			"blindLevel": "Blind level",
@@ -33,7 +35,13 @@
 			"msglc": "msg.lc",
 			"msgtime": "msg.time",
 			"msgvalue": "msg.value",
-			"showEnhSettings": "Enhanced settings"
+			"showEnhSettings": "Enhanced settings",
+			"oncePre": "Interval",
+			"onstart":"nach Start verzögert",
+			"onceDelay":"seconds",
+			"interval":"re-calc interval",
+			"hysteresis":"hysteresis",
+			"endOfDay": "end of day"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -43,13 +51,15 @@
 			"blindIncrement": "0.01 or 1",
 			"blindOpenPos": "100",
 			"blindClosedPos": "0",
-			"blindPosOverwriteExpire": "(opt) the duration a manual setting will remain is place",
+			"blindDefaultPos": "position if no other used",
+			"OverwriteExpire": "(opt) the duration a manual setting will remain is place",
 			"sunFloorLength": "the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
 			"cloudValue": "percentage of sky occluded by clouds",
 			"cloudThreshold": "threshold for set blind position",
 			"cloudBlindPos": "blind position when cloud-value is below threshold",
-
+			"interval":"(opt) recalculation interval",
+			"hysteresis":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"nightposition": "100",
 			"expiryperiod": "120",
@@ -63,34 +73,38 @@
 			"addTimes": "..."
 		},
 		"reasons": {
-			"overwriteAlarm": "position is overwritten by alarm",
 			"overwritePrio": "position is overwritten by priority, no expire",
 			"overwrite": "position is overwritten, will expire __time__",
-			"abs": "fixed position by time",
+			"default": "position is set to default position because no other rule matches",
+			"time": "position by time [rule __rule__] until __text__",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",
 			"cloudExceeded": "Cloud overcast conditions",
 			"tempExceeded": "temp exceeded",
-			"openDef": "in default position by time"
+			"hysteresis": "Position is not changed because not enough time has passed since the last change"
 		},
 		"states": {
-			"overwriteAlarm": "overwritten, alarm",
-			"overwritePrio": "overwritten, until reset",
-			"overwrite": "overwritten, expire",
-			"abs": "time absolute",
+			"overwritePrio": "overwritten",
+			"overwrite": "overwritten till __time__",
+			"default": "default",
+			"time": "by time  [__rule__] until __text__",
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
 			"sunCtrl": "sun control",
 			"cloudExceeded": "cloud",
 			"tempExceeded": "temp",
-			"openDef": "default"
+			"hysteresis": "no change - hysteresis"
 		},
 		"errors": {
+			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",
-			"invalid-propertyStart-type": "Invalid Property Type for alternate start: __type__",
-			"invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
-			"invalid-blind-position": "Given Blind-Position __pos__ is not a valid Position!"
+			"invalid-blind-position": "Given Blind-Position __pos__ is not a valid Position!",
+			"getCloudData": "error getting cloudData: __message__",
+			"getBlindPosData": "error getting blind position: __message__",
+			"getPropertyData": "error getting property data: \"__message__\" skipping time",
+			"intervaltoolong":"The selected interval is too long!!",
+			"hysteresistoolong":"The selected hysteresis is too long!!"
 		}
 	}
 }

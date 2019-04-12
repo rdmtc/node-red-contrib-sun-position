@@ -50,26 +50,9 @@
         "message": {
             "onceDelay": "delay __seconds__s"
         },
-<<<<<<< HEAD
         "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-text": "Exception occurred on time-inject",
-            "error-title": "internal error",
-            "unexpected": "unexpected error (__status__) __message__",
-            "invalid-property-type": "Invalid Property Type: __type__",
-            "invalid-json": "Invalid 'to' JSON property",
-            "invalid-jsonata-expr": "Invalid JSONata expression: __error__",
-            "not-deployed": "node not deployed",
-            "no-response": "no response from server",
             "failed": "inject failed, see log for details",
-            "failed2": "Inject failed: __error__",
-            "toolong": "Interval too large",
-            "error-init": "error '__message__', retry in __time__",
-            "warn-init": "warning '__message__', retry in __time__"
-=======
-        "errors":{
             "invalid-property-type": "Invalid Property Type: __type__"
->>>>>>> i18n
         }
     }
 }

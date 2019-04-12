@@ -4,111 +4,154 @@
         <input type="text" class="row-full-width" id="node-input-positionConfig">
     </div>
     <hr>
-    <!-- window ######################################################################## -->
-    <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.windowText"></span>&nbsp;
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
-        <input type="text" class="spinner-noLimit" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
-        <input type="text" class="spinner-noLimit" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
-    </div>
-    <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.windowAzimuthText"></span>&nbsp;
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
-        <input type="text" class="spinner-angle" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart" >
-    </div>
-    <div class="form-row block-indent1">
-        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
-        <input type="text" class="spinner-angle" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd" >
-    </div>
-    <hr>
     <!-- #region blind ######################################################################## -->
-    <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.blindText"></span>&nbsp;
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.blindText" class="row-full-width"></span>
     </div>
-    <div class="form-row block-indent1">
+    <div class="form-row block-indent1-noadd">
         <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
-        <input type="text" class="spinner-level" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
     </div>
-    <div class="form-row block-indent1">
+    <div class="form-row block-indent1-noadd">
         <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
-        <input type="text" class="spinner-level" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
     </div>
-    <div class="form-row block-indent1">
+    <div class="form-row block-indent1-noadd">
         <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
-        <input type="text" class="spinner-level" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
-    <div>
+    <div  class="form-row-showLater hidden">
         <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.label.TimeText"></span></span></label>
-        <div class="form-row node-input-rule-container-row">
+        <div class="form-row node-input-rule-container-row row-full-width">
         <ol id="node-input-rule-container"></ol>
         </div>
     </div>
-    <hr>
-    <!-- #region sun ######################################################################## -->
-    <div class="form-row block-noindent">
-      <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
-      <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
-      <span data-i18n="blind-control.label.sunControlActiveText"></span>&nbsp;
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.blindDefaultPosText" class="row-full-width"></span>
     </div>
-    <div class="form-row form-row-sunControlActive block-indent1">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="text" class="spinner-noLimit" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="text" class="spinner-altitude" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <label for="node-input-blindDefaultPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindDefaultPos"></span></label>
+        <input type="text" id="node-input-blindDefaultPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindDefaultPos"/>
+        <input type="hidden" id="node-input-blindDefaultPosType">
     </div>
     <hr>
     <!-- #region overwrite blind ######################################################################## -->
-    <div class="form-row block-noindent">
-        <span data-i18n="[html]blind-control.label.blindPosOverwriteText"></span>&nbsp;
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.overwriteText" class="row-full-width"></span>
     </div>
-    <div class="form-row block-indent1-add">
-        <label for="node-input-blindPosOverwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.blindPosOverwriteExpire"></span></label>
-        <input type="text" class="spinner-time" id="node-input-blindPosOverwriteExpire" data-i18n="[placeholder]blind-control.placeholder.blindPosOverwriteExpire">
-        <select id="node-input-blindPosOverwriteExpireMultiplier" class="node-input-multiplier"></select>
+    <div class="form-row row-overwriteValue block-indent1">
+        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
+        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value="">
+        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-overwriteExpire">
     </div>
     <hr>
+    <!-- #region sun ######################################################################## -->
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
+        <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="blind-control.label.sunControlActiveText" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+    </div>
+    <hr>
+    <!-- window ######################################################################## -->
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <span data-i18n="[html]blind-control.label.windowAzimuthText" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <span data-i18n="[html]blind-control.label.windowPosText" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
+    </div>
+    <hr class="form-row-sunControlActive hidden" >
     <!-- #region weather ######################################################################## -->
-    <div class="form-row block-noindent">
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
         <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
-        <input type="text" id="node-input-cloudValue"  data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="text" id="node-input-cloudValue" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
         <input type="hidden" id="node-input-cloudValueType">
     </div>
-    <div class="form-row row-cloudValue block-indent1">
+    <div class="form-row hidden row-cloudValue block-indent1-noadd">
         <label for="node-input-cloudThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
-        <input type="text" id="node-input-cloudThreshold" class="spinner-noLimit" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
+        <input type="text" id="node-input-cloudThreshold" class="spinner-noLimit row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
     </div>
-    <div class="form-row row-cloudValue block-indent1">
+    <div class="form-row hidden row-cloudValue block-indent1">
         <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
-        <input type="text" class="spinner-level" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudBlindPos">
+        <input type="text" id="node-input-cloudBlindPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="hidden" id="node-input-cloudBlindPosType">
+    </div>
+    <hr class="form-row-sunControlActive hidden">
+    <!-- #region Enhanced ######################################################################## -->
+    <div class="form-row block-noindent">
+        <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row block-noindent">
+        <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
+        <select id="node-input-tsCompare" class="row-full-width">
+            <option value="0" data-i18n="blind-control.label.now"></option>
+            <option value="1" data-i18n="blind-control.label.msgts"></option>
+            <option value="2" data-i18n="blind-control.label.msglc"></option>
+            <option value="3" data-i18n="blind-control.label.msgtime"></option>
+            <option value="4" data-i18n="blind-control.label.msgvalue"></option>
+        </select>
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-once">
+        <label for="node-input-once"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.oncePre"></span></label>
+        <div style="display: inline;">
+            <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="blind-control.label.onstart"></span>&nbsp;
+            <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px; height:28px;">&nbsp;
+            <span data-i18n="blind-control.label.onceDelay" style="word-wrap:break-word;"></span>
+        </div>
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-interval">
+        <label for="time-control-interval"><i class="fa fa-repeat"></i> <span data-i18n="blind-control.label.interval"></span></label>
+        <input type="text" class="spinner-time" id="time-control-interval" data-i18n="[placeholder]blind-control.placeholder.interval" value="">
+        <select id="time-control-interval-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-interval">
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-hysteresis">
+        <label for="time-control-hysteresis"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.hysteresis"></span></label>
+        <input type="text" class="spinner-time" id="time-control-hysteresis" data-i18n="[placeholder]blind-control.placeholder.hysteresis" value="">
+        <select id="time-control-hysteresis-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-hysteresis">
     </div>
     <hr>
     <!-- #region End ######################################################################## -->
-    <div class="form-row block-noindent">
-        <a href="#" class="enhanced-row-toggle"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
-    </div>
-    <div class="form-row block-noindent enhanced-row hidden">
-        <div class="form-row compare-row">
-            <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
-            <select id="node-input-tsCompare" >
-                <option value="0" data-i18n="blind-control.label.now"></option>
-                <option value="1" data-i18n="blind-control.label.msgts"></option>
-                <option value="2" data-i18n="blind-control.label.msglc"></option>
-                <option value="3" data-i18n="blind-control.label.msgtime"></option>
-                <option value="4" data-i18n="blind-control.label.msgvalue"></option>
-            </select>
-        </div>
-    </div>
     <div class="form-row block-noindent time-topic">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
         <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic">
@@ -117,8 +160,8 @@
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name">
     </div>
-    <div class="form-tips">
-        <span data-i18n="blind-control.tips.sunPosControl"></span>&nbsp;
+    <div class="form-tips form-row-showLater hidden">
+        <span data-i18n="blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
     </div>
 </script>
 <style>
@@ -131,12 +174,24 @@
         margin-left: 10px;
         width: 100%
     }
+    .block-indent1-noadd {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
     .input-error {
         border-color: #d6615f !important;
         background-color: #ffcccc !important;
     }
 
     .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-indent2-noadd {
         float: left;
         min-height: 1px;
         margin-left: 20px;
@@ -160,14 +215,14 @@
     .block-indent2 .ui-spinner {
         width : calc(100% - 265px);
     }
-    .block-noindent-add .ui-spinner {
-        width : calc(100% - 375px);
+    .block-noindent-noadd .ui-spinner {
+        width : calc(100% - 110px);
     }
-    .block-indent1-add .ui-spinner {
-        width : calc(100% - 385px);
+    .block-indent1-noadd .ui-spinner {
+        width : calc(100% - 120px);
     }
-    .block-indent2-add .ui-spinner {
-        width : calc(100% - 395px);
+    .block-indent2-noadd .ui-spinner {
+        width : calc(100% - 130px);
     }
     .node-input-multiplier {
         width: 125px;
@@ -299,26 +354,21 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
+    function getVal(node,name) {
+        const v = $('#node-input-' + name).val();
+        if (v === undefined) {
+            return node[name];
+        }
+        return v;
+    }
 
-    function validateBlindPos(v) {
+    function validateBlindPos(node, v) {
         const n = parseFloat(v);
-        let blindOpenPos = $('#node-input-blindOpenPos').val();
-        if (blindOpenPos === undefined) {
-            blindOpenPos = this.blindOpenPos;
-        }
-        let blindClosedPos = $('#node-input-blindClosedPos').val();
-        if (blindClosedPos === undefined) {
-            blindClosedPos = this.blindClosedPos;
-        }
-        let blindIncrement = $('#node-input-blindIncrement').val();
-        if (blindIncrement === undefined) {
-            blindIncrement = this.blindIncrement;
-        }
         return RED.validators.number(v) &&
                 (v !== '') &&
-                (n < blindOpenPos) &&
-                (n > blindClosedPos) &&
-                Number.isInteger(n / blindIncrement);
+                (n <= getVal(node, 'blindOpenPos')) &&
+                (n >= getVal(node, 'blindClosedPos')) &&
+                Number.isInteger(n / getVal(node, 'blindIncrement'));
     }
 
     RED.nodes.registerType('blind-control', {
@@ -341,60 +391,15 @@
                 type: 'position-config',
                 required: true
             },
-            // #region window settings
-            windowTop: {
-                value: '',
-                required: true,
-                validate: RED.validators.number()
-            },
-            windowBottom: {
-                value: '',
-                required: true,
-                validate: RED.validators.number()
-            },
-            windowAzimuthStart: {
-                value: '',
-                required: true,
-                validate: function (v) {
-                    const n = Number(v);
-                    let windowAzimuthEnd = $('#node-input-windowAzimuthEnd').val();
-                    if (windowAzimuthEnd === undefined) {
-                        windowAzimuthEnd = this.windowAzimuthEnd;
-                    }
-                    return (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                            (n < windowAzimuthEnd) );
-                }
-            },
-            windowAzimuthEnd: {
-                value: '',
-                validate: function (v) {
-                    const n = Number(v);
-                    let windowAzimuthStart = $('#node-input-windowAzimuthStart').val();
-                    if (windowAzimuthStart === undefined) {
-                        windowAzimuthStart = this.windowAzimuthStart;
-                    }
-                    return (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                            (n > windowAzimuthStart) );
-                }
-            },
-            // #endregion window settings
             // #region blind settings
             blindIncrement: {
                 value: 1,
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    let blindOpenPos = $('#node-input-blindOpenPos').val();
-                    if (blindOpenPos === undefined) {
-                        blindOpenPos = this.blindOpenPos;
-                    }
-                    let blindClosedPos = $('#node-input-blindClosedPos').val();
-                    if (blindClosedPos === undefined) {
-                        blindClosedPos = this.blindClosedPos;
-                    }
                     return (RED.validators.number(v) &&
-                            (n < blindOpenPos) &&
-                            (n > blindClosedPos) );
+                            (n <= getVal(this, 'blindOpenPos')) &&
+                            (n >= getVal(this, 'blindClosedPos')) );
                 }
             },
             blindOpenPos: {
@@ -402,17 +407,9 @@
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    let blindClosedPos = $('#node-input-blindClosedPos').val();
-                    if (blindClosedPos === undefined) {
-                        blindClosedPos = this.blindClosedPos;
-                    }
-                    let blindIncrement = $('#node-input-blindIncrement').val();
-                    if (blindIncrement === undefined) {
-                        blindIncrement = this.blindIncrement;
-                    }
                     return RED.validators.number(v) &&
-                            (Number.isInteger(n / blindIncrement)) &&
-                            (n > blindClosedPos);
+                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                            (n > getVal(this, 'blindClosedPos'));
                 }
             },
             blindClosedPos: {
@@ -420,43 +417,51 @@
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    let blindOpenPos = $('#node-input-blindOpenPos').val();
-                    if (blindOpenPos === undefined) {
-                        blindOpenPos = this.blindOpenPos;
-                    }
-                    let blindIncrement = $('#node-input-blindIncrement').val();
-                    if (blindIncrement === undefined) {
-                        blindIncrement = this.blindIncrement;
-                    }
                     return RED.validators.number(v) &&
-                            (Number.isInteger(n / blindIncrement)) &&
-                            (n < blindOpenPos);
+                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                            (n < getVal(this, 'blindOpenPos'));
                 }
             },
-            blindPosOverwriteExpire: {
+            blindDefaultPos: {
+                value: 'open (max)',
+                validate: RED.validators.typedInput('blindDefaultPosType')
+            },
+            blindDefaultPosType: {
+                value: 'levelFixed'
+            },
+            // #endregion blind settings
+            // #region overwrite settings
+            overwriteExpire: {
                 value: '',
                 required: false,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    let blindPosOverwriteExpireMultiplier = $('#node-input-blindPosOverwriteExpireMultiplier').val();
-                    if (blindPosOverwriteExpireMultiplier === undefined) {
-                        blindPosOverwriteExpireMultiplier = this.blindPosOverwriteExpireMultiplier;
-                    }
-                    return (v === '') || (RED.validators.number(v) && ((n * blindPosOverwriteExpireMultiplier) >= 500));
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                 }
             },
-            blindPosOverwriteExpireMultiplier: {
-                value: 60000,
-                required: true,
-                validate: RED.validators.number()
-            },
-            // #endregion blind settings
+            // #endregion overwrite settings
             // #region time settings
             rules: {
                 value: {}
             },
             tsCompare: {
                 value: '0'
+            },
+            interval: {
+                value:'',
+                validate: function(v) {
+                    const n = parseFloat(v);
+                    return ((v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF)));
+                }
+            },
+            once: { value:false },
+            onceDelay: { value: 0.1 },
+            hysteresis: {
+                value:'',
+                validate: function(v) {
+                    const n = parseFloat(v);
+                    return ((v === '') || (RED.validators.number(v) && (n <= -2147483647) && (n < 0x7FFFFFFF)));
+                }
             },
             // #endregion time settings
             // #region sun settings
@@ -470,11 +475,7 @@
             sunFloorLength: {
                 value: 0,
                 validate: function (v) {
-                    let sunControlActive = $('#node-input-sunControlActive').val();
-                    if (sunControlActive === undefined) {
-                        sunControlActive = this.sunControlActive;
-                    }
-                    return (sunControlActive === false) ||
+                    return (getVal(this, 'sunControlActive') === false) ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
@@ -483,21 +484,57 @@
                 required: false,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    let sunControlActive = $('#node-input-sunControlActive').val();
-                    if (sunControlActive === undefined) {
-                        sunControlActive = this.sunControlActive;
-                    }
-                    return (sunControlActive === false) ||
+                    return (getVal(this, 'sunControlActive') === false) ||
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
                 }
             },
             // #endregion sun settings
+            // #region window settings
+            windowTop: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
+            },
+            windowBottom: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
+            },
+            windowAzimuthStart: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    const n = Number(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n < getVal(this, 'windowAzimuthEnd')) );
+                }
+            },
+            windowAzimuthEnd: {
+                value: '',
+                validate: function (v) {
+                    const n = Number(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n > getVal(this, 'windowAzimuthStart')) );
+                }
+            },
+            // #endregion window settings
             // #region weather settings
             cloudValue: {
                 value: '',
                 required: false,
-                validate: RED.validators.typedInput('cloudValueType')
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            RED.validators.typedInput('cloudValueType')(v);
+                }
             },
             cloudValueType: {
                 value: 'none'
@@ -505,24 +542,21 @@
             cloudThreshold: {
                 value: '',
                 validate: function (v) {
-                    let cloudValueType = $('#node-input-cloudValueType').val();
-                    if (cloudValueType === undefined) {
-                        cloudValueType = this.cloudValueType;
-                    }
-                    return (cloudValueType === 'none') ||
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (getVal(this, 'cloudValueType') === 'none') ||
                             ((v !== '') && RED.validators.number(v));
                 }
             },
             cloudBlindPos: {
-                value: '',
+                value: 'open (max)',
                 validate: function (v) {
-                    let cloudValueType = $('#node-input-cloudValueType').val();
-                    if (cloudValueType === undefined) {
-                        cloudValueType = this.cloudValueType;
-                    }
-                    return (cloudValueType === 'none') ||
-                            validateBlindPos(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (getVal(this, 'cloudValueType') === 'none') ||
+                            RED.validators.typedInput('blindDefaultPosType')(v); // validateBlindPos(this, v);
                 }
+            },
+            cloudBlindPosType: {
+                value: 'levelFixed'
             }
             // #endregion weather settings
         },
@@ -530,14 +564,21 @@
             return 'new blind level ';
         },
         label() {
+            let suffix = '';
+            if (this.once) {
+                suffix = ' ¹';
+            }
+            if ((this.interval && this.interval !== 0) || this.crontab) {
+                suffix = ' ↻';
+            }
             if (this.name) {
-                return this.name;
+                return this.name+suffix;
             }
             const result = 'blind-control';
             if (this.topic && (this.topic.length + result.length <= 32)) {
-                return this.topic + ':' + result;
+                return this.topic + ':' + result+suffix;
             }
-            return result;
+            return result+suffix;
         },
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
@@ -547,12 +588,14 @@
             const node = this;
             const setup = function(node) {
                 /* global getTypes getSelectFields setupTInput appendOptions addLabel */
+                $('.form-row-showLater').show();
+                // #region initialize
                 const types = getTypes(node);
                 types.LevelEntered = {
                     value: 'num',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
                     icon: 'red/images/typedInput/09.png',
-                    validate: validateBlindPos
+                    validate: function(v) { return validateBlindPos(this, v); }
                 };
                 types.LevelFix = {
                     value: 'levelFixed',
@@ -569,15 +612,46 @@
                         'closed (min)'
                     ]
                 };
-                // #region initialize
-                function multiplierUpdate(mp, name) {
-                    const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', (id) => (id > 0));
-                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
-                        mp = 60000;
+                function setMultiplier(node, name, element, validate) {
+                    const c = Number(node[name]);
+                    // console.log(`name=${name} - element=${element} - value=${c}`);
+                    if (node[name] !== '' && !isNaN(c)) {
+                        let r = 1000;
+                        if (c % 3600000 === 0) {
+                            r = 3600000;
+                        } else if (c % 60000 === 0) {
+                            r = 60000;
+                        }
+                        $('#time-control-' + name).val(c/r);
+                        $('#time-control-' + name + '-multiplier').val(r);
+                    } else {
+                        $('#time-control-' + name).val('');
                     }
-                    field.val(mp);
-                    return mp;
+                    $('#time-control-' + name).on('change focus focusout', () => {
+                        const el = $('#time-control-' + name);
+                        let val = el.val();
+                        const mp = $('#time-control-' + name + '-multiplier').val();
+                        if (isNaN(val) || val === '' || val === 0) {
+                            val = '';
+                            $('node-input-' + name).val('');
+                        } else {
+                            val = val * mp;
+                            $('#node-input-' + name).val(val);
+                        }
+
+                        if (typeof validate === 'function') {
+                            if (validate(val)) {
+                                el.removeClass( 'input-error' );
+                            } else {
+                                el.addClass( 'input-error' );
+                            }
+                        }
+                    });
+
+                    $('#time-control-' + name + '-multiplier').change( () => {
+                        $('#time-control-' + name).change();
+                    });
+                    $('#time-control-' + name).change();
                 }
                 const chkVal = (name, val) => {
                     return (node[name] === null) ||
@@ -587,7 +661,19 @@
                 };
                 // #endregion initialize
                 // #region blind
-                node.blindPosOverwriteExpireMultiplier = multiplierUpdate(node.blindPosOverwriteExpireMultiplier, 'blindPosOverwriteExpireMultiplier');
+                setMultiplier(node,'overwriteExpire', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                });
+                setupTInput(node, {
+                    typeProp: 'blindDefaultPosType',
+                    valueProp: 'blindDefaultPos',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: types.LevelFix.options[0],
+                    types: [types.LevelFix, types.LevelEntered]
+                });
+
                 // #endregion blind
                 // #region time rule-container
                 function resizeRule(rule) {
@@ -617,12 +703,11 @@
                     levelLblField.width('auto');
                     const lbl2Width = levelLblField.width();
                     operatorField.width(120);
-                    levelField.typedInput('width', (newWidth - 120 - lbl2Width - 25));
+                    levelField.typedInput('width', (newWidth - 120 - lbl2Width - 30));
                     // propertyLblField.width(lbl2Width);
                 }
 
                 function resizeContainer() {
-                    console.log('resizeContainer');
                     const editorRow = $('.node-input-rule-container-row ol');
                     const height = editorRow.outerHeight(true);
 
@@ -678,14 +763,15 @@
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row2);
-                        appendOptions(node, multiplierField, 'multiplier');
+                        appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0));
                         // #endregion row2
                         // #region row3
                         // [min/max/abs] - [blind-level / open / closed] - [need reset]
                         addLabel(row3, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
                         const operatorField = $('<select/>', {
                             class: 'node-input-rule-operator',
-                            id: 'node-input-rule-operator' + containerIndex
+                            id: 'node-input-rule-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
                         }).appendTo(row3);
                         appendOptions(node, operatorField, 'blindOperator');
                         const levelField = $('<input/>', {
@@ -750,16 +836,18 @@
                 $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
                     if (chkVal('sunControlActive', false)) {
                         $('.form-row-sunControlActive').hide();
+                        $('.row-cloudValue').hide();
                     } else {
                         $('.form-row-sunControlActive').show();
                     }
+                    $('#node-input-cloudValue').change();
                 });
                 // #endregion sun
                 // #region weather
                 const cloudValueField = setupTInput(node, {
                     typeProp: 'cloudValueType',
                     valueProp: 'cloudValue',
-                    width: 'calc(100% - 110px)',
+                    width: 'calc(100% - 120px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
@@ -774,18 +862,16 @@
                         $('#node-input-cloudBlindPos').change();
                     }
                 });
-                // # endregion weather
-                // #region Enhanced settings
-                $('.enhanced-row-toggle').on('click', () => {
-                    $('.enhanced-row').toggle(); // .hide();
+                setupTInput(node, {
+                    typeProp: 'cloudBlindPosType',
+                    valueProp: 'cloudBlindPos',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: types.LevelFix.options[0],
+                    types: [types.LevelFix, types.LevelEntered]
                 });
-
-                if (chkVal('tsCompare', 0)) {
-                    $('.enhanced-row').hide();
-                } else {
-                    $('.enhanced-row').show();
-                }
-
+                // #endregion weather
+                // #region Enhanced settings
                 $('.spinner-noLimit').spinner();
                 $('.spinner-angle').spinner({
                     max: 360,
@@ -805,8 +891,34 @@
                 });
                 $('.spinner-time').spinner({
                     max: 1439,
-                    min: 0
+                    min: 0,
+                    step: 1
                 });
+
+                $('#node-input-once').change(() => {
+                    $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+                });
+                setMultiplier(node,'interval', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                });
+                setMultiplier(node,'hysteresis', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 10) && (n < 0x7FFFFFFF));
+                });
+
+                $('.enhanced-row-toggle').on('click', () => {
+                    $('.enhanced-row').toggle(); // .hide();
+                });
+
+                if (chkVal('tsCompare', '0') &&
+                    (node.interval==='' || chkVal('interval', 0)) &&
+                    (node.hysteresis==='' || chkVal('hysteresis', 0)) &&
+                    chkVal('once', false)) {
+                    $('.enhanced-row').hide();
+                } else {
+                    $('.enhanced-row').show();
+                }
                 // #endregion Enhanced settings
                 $('#node-input-sunControlActive').change();
                 cloudValueField.change();
@@ -850,6 +962,27 @@
                 };
                 node.rules.push(data);
             });
+
+            const overwriteExpire = $('#time-control-overwriteExpire').val();
+            if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
+                $('node-input-overwriteExpire').val('');
+            } else {
+                $('#node-input-overwriteExpire').val(overwriteExpire * $('#time-control-overwriteExpire-multiplier').val());
+            }
+
+            const interval = $('#time-control-interval').val();
+            if (isNaN(interval) || interval === '' || interval === 0) {
+                $('#node-input-interval').val('');
+            } else {
+                $('#node-input-interval').val(interval * $('#time-control-interval-multiplier').val());
+            }
+
+            const hysteresis = $('#time-control-hysteresis').val();
+            if (isNaN(hysteresis) || hysteresis === '' || hysteresis === 0) {
+                $('#node-input-hysteresis').val('');
+            } else {
+                $('#node-input-hysteresis').val(hysteresis * $('#time-control-hysteresis-multiplier').val());
+            }
             // #endregion result-container
         },
         oneditresize(size) {

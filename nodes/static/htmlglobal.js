@@ -92,7 +92,7 @@ const SelectFields = {
         {id: 60000, group: 'default', label: 'minutes'},
         {id: 3600000, group: 'default', label: 'hours'},
         {id: 86400000, group: 'default', label: 'days'},
-        {id: 604800000, group: 'other', label: 'weeks'},
+        //{id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
     ], blindOperatorGroups: [
