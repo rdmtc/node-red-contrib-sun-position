@@ -273,7 +273,7 @@ module.exports = function (RED) {
                 node.timeOutObj = setTimeout(() => {
                     node.debug('timeout overwrites expires');
                     blindPosOverwriteReset(node);
-                    node.emit("input", {});
+                    node.emit('input', {});
                 }, expire);
                 node.reason.Code = 3;
                 node.reason.State = RED._('blind-control.states.overwrite', {
@@ -408,12 +408,12 @@ module.exports = function (RED) {
                     node.reason.Description = RED._('blind-control.reasons.time', node.time);
 
                     if ((node.time.operator === 1) && (node.blindData.position <= node.blindData.openPos))  {
-                        //min
+                        // min
                         node.time.operator = 0;
                         node.blindData.position = node.blindData.openPos;
                     }
                     if ((node.time.operator === 2) && (node.blindData.position >= node.blindData.closedPos))  {
-                        //max
+                        // max
                         node.time.operator = 0;
                         node.blindData.position = node.blindData.closedPos;
                     }
@@ -468,12 +468,10 @@ module.exports = function (RED) {
             isDay: false
         };
         node.windowSettings = {
-            /** The Height of the window */
+            /** The top of the window */
             top: Number(config.windowTop),
             /** The bottom of the window */
             bottom: Number(config.windowBottom),
-            /** The top of the window */
-            top: Number(config.windowTop),
             /** the orientation angle to the geographical north */
             AzimuthStart: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthStart, 0))),
             /** an offset for the angle clockwise offset */
@@ -595,26 +593,26 @@ module.exports = function (RED) {
 
         node.repeaterSetup = function () {
             if (this.interval && !isNaN(this.interval) && this.interval > 200) {
-                this.interval_id = setInterval(function() {
-                    node.emit("input", {});
+                this.interval_id = setInterval(() => {
+                    node.emit('input', {});
                 }, this.interval);
             }
         };
 
         if (this.once) {
-            this.onceTimeout = setTimeout( function() {
-              node.emit("input",{});
-              node.repeaterSetup();
+            this.onceTimeout = setTimeout(() => {
+                node.emit('input',{});
+                node.repeaterSetup();
             }, this.onceDelay);
         } else {
-          node.repeaterSetup();
+            node.repeaterSetup();
         }
 
         sunBlindControlNode.prototype.close = function() {
             if (this.onceTimeout) {
                 clearTimeout(this.onceTimeout);
             }
-            if (this.interval_id != null) {
+            if (this.interval_id !== null) {
                 clearInterval(this.interval_id);
             }
         };
