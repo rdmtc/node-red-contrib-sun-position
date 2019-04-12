@@ -92,9 +92,16 @@ const SelectFields = {
         {id: 60000, group: 'default', label: 'minutes'},
         {id: 3600000, group: 'default', label: 'hours'},
         {id: 86400000, group: 'default', label: 'days'},
-        {id: 604800000, group: 'other', label: 'weeks'},
+        // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
+    ], blindOperatorGroups: [
+        { id: 'limit', label: 'Limit' },
+        { id: 'other', label: 'fix' }
+    ], blindOperator: [
+        { id: 1, group: 'limit', label: 'min' },
+        { id: 2, group: 'limit', label: 'max' },
+        { id: 0, group: 'other', label: 'abs' }
     ]
 };
 
@@ -232,6 +239,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: false
         }
     };
+}
+
+function getSelectFields() { // eslint-disable-line no-unused-vars
+    return SelectFields;
 }
 
 const autocompleteFormats = {
@@ -418,7 +429,13 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
     // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
     const groups = SelectFields[elementName + 'Groups'];
+    if (!groups) {
+        throw new Error('no group "' + elementName + 'Groups" in SelectFields found!');
+    }
     const elements = SelectFields[elementName];
+    if (!groups) {
+        throw new Error('no elements "' + elementName + '" in SelectFields found!');
+    }
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
@@ -536,16 +553,16 @@ function initCombobox(node, inputSelectName, inputBoxName, dataList, optionEleme
 // ************************************************************************************************
 
 function addLabel(row, forEl, symb, text) { // eslint-disable-line no-unused-vars
-    const lbl = $('<label class="' + forEl + '-lbl"/>').attr('for', forEl).appendTo(row);
+    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(row);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
     }
     if (text) {
-        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; */">' + text + '</span>');
+        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;*/">' + text + '</span>');
         lbl.append(span);
         lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
     } else {
-        lbl.attr('style', 'margin-left: 5px; width:20px');
+        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:20px');
     }
     return lbl;
 }

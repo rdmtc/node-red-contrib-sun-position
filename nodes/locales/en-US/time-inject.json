@@ -50,7 +50,8 @@
         "message": {
             "onceDelay": "delay __seconds__s"
         },
-        "errors":{
+        "errors": {
+            "failed": "inject failed, see log for details",
             "invalid-property-type": "Invalid Property Type: __type__"
         }
     }

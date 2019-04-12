@@ -515,7 +515,7 @@
                     const formatSelField = rule.find('.node-input-rule-operandFormatSel');
                     const formatIpField = rule.find('.node-input-rule-operandFormatIp');
                     const offsetField = rule.find('.node-input-rule-offset');
-                    const multipierField = rule.find('.node-input-rule-multipier');
+                    const multiplierField = rule.find('.node-input-rule-multiplier');
                     const propertyField = rule.find('.node-input-rule-property');
                     const propertyLblSpanField = rule.find('.node-input-rule-property-span');
                     const propertyLblField = rule.find('.node-input-rule-property-lbl');
@@ -538,7 +538,7 @@
 
                     // row3
                     const multiplierWidth = 125;
-                    multipierField.width(multiplierWidth);
+                    multiplierField.width(multiplierWidth);
                     offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
                     // row4
                     const lblwidth = propertyLblSpanField.width() + 25;
@@ -820,7 +820,7 @@
                     formatSelection: rule.find('.node-input-rule-operandFormatSel').val(),
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
-                    multiplier: rule.find('.node-input-rule-multipier').val(),
+                    multiplier: rule.find('.node-input-rule-multiplier').val(),
                     propertyType: rule.find('.node-input-rule-property').typedInput('type'),
                     propertyValue: rule.find('.node-input-rule-property').typedInput('value')
                 };

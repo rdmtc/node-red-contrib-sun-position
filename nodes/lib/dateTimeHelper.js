@@ -5,11 +5,18 @@
 const util = require('util');
 
 module.exports = {
+    isBool,
     isTrue,
     isFalse,
+    countDecimals,
     handleError,
-    getSpecialDayOfMonth,
+    chkValueFilled,
     checkLimits,
+    getMsgBoolValue,
+    getMsgNumberValue,
+    getSpecialDayOfMonth,
+    getStdTimezoneOffset,
+    isDSTObserved,
     addOffset,
     calcDayOffset,
     normalizeDate,
@@ -32,6 +39,16 @@ module.exports = {
 /*******************************************************************************************************/
 /* simple functions                                                                                    */
 /*******************************************************************************************************/
+
+/**
+ * returns **true** if the parameter value is a valid boolean value for **false** or **true**
+ * @param {*} val a parameter which should be checked if  it is a valid false boolean
+ * @returns {boolean} true if the parameter value is a valid boolean value for for **false** or **true**
+ */
+function isBool(val) {
+    val = (val+'').toLowerCase();
+    return (['true', 'yes', 'on', 'ja', 'false', 'no', 'off', 'nein'].includes(val) || !isNaN(val));
+}
 /**
  * returns **true** if the parameter value is a valid boolean value for **true**
  * @param {*} val a parameter which should be checked if  it is a valid true boolean
@@ -39,7 +56,7 @@ module.exports = {
  */
 function isTrue(val) {
     val = (val+'').toLowerCase();
-    return (val === 'true' || val === 'yes' || val === 'on' || val === 'ja' || val === '1' || (!isNaN(val) && (Number(val) > 0)));
+    return (['true', 'yes', 'on', 'ja'].includes(val) || (!isNaN(val) && (Number(val) > 0)));
 }
 
 /**
@@ -49,7 +66,15 @@ function isTrue(val) {
  */
 function isFalse(val) {
     val = (val+'').toLowerCase();
-    return (val === 'false' || val === 'no' || val === 'off' || val === 'nein' || val === '0' || (!isNaN(val) && (Number(val) <= 0)));
+    return (['false', 'no', 'off', 'nein'].includes(val) || (!isNaN(val) && (Number(val) <= 0)));
+}
+
+/**
+ * count the number of decimals of a number
+ * @param {*} value number to check
+ */
+function countDecimals(value) {
+    return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
 }
 /*******************************************************************************************************/
 /**
@@ -121,6 +146,16 @@ function handleError(node, messageText, err, stateText) {
     }
 }
 
+/*******************************************************************************************************/
+/**
+ * check if a value is filled or returns default value
+ * @param {any} val to check for undefined, null, empty
+ * @param {any} defaultVal default value to use
+ * @returns {any} result to use if value is undefined, null or empty string
+ */
+function chkValueFilled(val, defaultVal) {
+    return ((typeof val === 'undefined') || (val === '') || (val === null)) ? defaultVal : val;
+}
 /*******************************************************************************************************/
 /**
  * get a date for the first day of week in the given month
@@ -283,6 +318,125 @@ function checkLimits(num, low, high) {
     return false;
 }
 
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgNumberValue(msg, ids, names, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined')) {
+                const res = parseFloat(msg.payload[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
+                    }
+                    return res;
+                }
+            }
+            if (typeof msg[id] !== 'undefined') {
+                const res = parseFloat(msg[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
+                    }
+                    return res;
+                }
+            }
+        }
+    }
+    // includes
+    if (names && msg && msg.topic && msg.payload) {
+        const res = parseFloat(msg.payload);
+        if (!isNaN(res)) {
+            if (!Array.isArray(names)) {
+                names = [names];
+            }
+            for (let i = 0; i < names.length; i++) {
+                if (String(msg.topic).toLowerCase().includes(names[i])) {
+                    const res = parseFloat(msg.payload);
+                    if (!isNaN(res)) {
+                        if (typeof isFound === 'function') {
+                            return isFound(res);
+                        }
+                        return res;
+                    }
+                }
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    }
+    return notFound || NaN;
+}
+
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgBoolValue(msg, ids, names, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    return isFound(isTrue(msg.payload[id]));
+                }
+                return isTrue(msg.payload[id]);
+            }
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    return isFound(isTrue(msg[id]));
+                }
+                return isTrue(msg[id]);
+            }
+        }
+    }
+
+    if (names && msg && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
+        if (!Array.isArray(names)) {
+            names = [names];
+        }
+        for (let i = 0; i < names.length; i++) {
+            if (String(msg.topic).toLowerCase().includes(names[i])) {
+                if (typeof isFound === 'function') {
+                    return isFound(isTrue(msg.payload));
+                }
+                return isTrue(msg.payload);
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    }
+    if (typeof notFound === 'boolean') {
+        return notFound;
+    }
+    return false;
+}
+
+/*******************************************************************************************************/
+function getStdTimezoneOffset(d) {
+    d = d || new Date();
+    const jan = new Date(d.getFullYear(),0,1);
+    const jul = new Date(d.getFullYear(), 6, 1);
+    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+
+function isDSTObserved(d) {
+    d = d || new Date();
+    return d.getTimezoneOffset() < getStdTimezoneOffset(d);
+}
 /*******************************************************************************************************/
 /**
  * adds an offset to a given Date object
@@ -319,7 +473,8 @@ function addOffset(d, offset, multiplier) {
 function calcDayOffset(days, daystart) {
     let dayx = 0;
     let daypos = daystart;
-    while (days.indexOf(daypos) === -1) {
+    // while (days.indexOf( ) === -1) {
+    while (!days.includes(daypos)) {
         dayx += 1;
         if ((daystart + dayx) > 6) {
             daystart = (dayx * -1);
@@ -377,7 +532,8 @@ function normalizeDate(d, offset, multiplier, next, days) {
 function getTimeOfText(t, date) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
-    if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+    // if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
+    if (t && (!t.includes('.')) && (!t.includes('-'))) {
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
         if (matches) {
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
@@ -845,7 +1001,8 @@ function getFormattedDateOut(date, format, utc) {
 function _isInteger(val) {
     const digits = '1234567890';
     for (let i = 0; i < val.length; i++) {
-        if (digits.indexOf(val.charAt(i)) === -1) {
+        // if (digits.indexOf(val.charAt(i)) === -1) {
+        if (!digits.includes(val.charAt(i))) {
             return false;
         }
     }

@@ -22,7 +22,9 @@
             "timesun": "Uhrzeit Sonnenstand",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "suncalc": "Sonnenposition",
-            "mooncalc": "Mondposition"
+            "mooncalc": "Mondposition",
+	    "levelfix": "Position",
+            "levelfree": "Position eingeben"
         },
         "multiselectLbl": {
             "operatorTypes": "in Vergleich einbeziehen"
@@ -155,13 +157,22 @@
             "Monate",
             "Jahre"
         ],
+        "blindOperatorGroups": [
+            "Rollladen Position einschränken",
+            "feste position"
+        ],
+        "blindOperator": [
+            "minimal",
+            "maximal",
+            "absolut"
+        ],
         "days": [
             "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend",
             "So", "Mo", "Die", "Mi", "Do", "Fr", "Sa"
         ],
         "month": [
             "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember",
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            "Jan", "Feb", "März", "Apr", "Mai", "Jun", "Jul", "Aug", "Sept", "Okt", "Nov", "Dez"
         ],
         "dayDiffNames": [
             "vor 1 Woche",
@@ -198,12 +209,13 @@
             "minutes": "Minuten"
         },
         "tips": {
-            "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! On an update from previous version a save and re-deploy is necessary.",
+            "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
         },
         "errors": {
-            "longitude-missing": "Longitude is missing!",
-            "latitude-missing": "Latitude is missing!"
+            "longitude-missing": "Koordinate Longitude fehlt oder ist falsch!",
+            "latitude-missing": "Koordinate Latitude fehlt oder ist falsch!",
+            "coordinates-missing": "Koordinaten Latitude and Longitude ist falsch!"
         }
     }
 }

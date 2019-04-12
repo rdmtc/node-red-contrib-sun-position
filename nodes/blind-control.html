@@ -1,0 +1,1000 @@
+<script type="text/x-red" data-template-name="blind-control">
+    <div class="form-row block-noindent">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" class="row-full-width" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <!-- #region blind ######################################################################## -->
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.blindText" class="row-full-width"></span>
+    </div>
+    <div class="form-row block-indent1-noadd">
+        <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement">
+    </div>
+    <div class="form-row block-indent1-noadd">
+        <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos">
+    </div>
+    <div class="form-row block-indent1-noadd">
+        <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos">
+    </div>
+    <hr>
+    <!-- #region time ######################################################################## -->
+    <div  class="form-row-showLater hidden">
+        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.label.TimeText"></span></span></label>
+        <div class="form-row node-input-rule-container-row row-full-width">
+        <ol id="node-input-rule-container"></ol>
+        </div>
+    </div>
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.blindDefaultPosText" class="row-full-width"></span>
+    </div>
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <label for="node-input-blindDefaultPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindDefaultPos"></span></label>
+        <input type="text" id="node-input-blindDefaultPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindDefaultPos"/>
+        <input type="hidden" id="node-input-blindDefaultPosType">
+    </div>
+    <hr>
+    <!-- #region overwrite blind ######################################################################## -->
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.label.overwriteText" class="row-full-width"></span>
+    </div>
+    <div class="form-row row-overwriteValue block-indent1">
+        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
+        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value="">
+        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-overwriteExpire">
+    </div>
+    <hr>
+    <!-- #region sun ######################################################################## -->
+    <div class="form-row block-noindent form-row-showLater hidden">
+        <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
+        <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="blind-control.label.sunControlActiveText" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+    </div>
+    <hr>
+    <!-- window ######################################################################## -->
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <span data-i18n="[html]blind-control.label.windowAzimuthText" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <span data-i18n="[html]blind-control.label.windowPosText" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
+    </div>
+    <hr class="form-row-sunControlActive hidden" >
+    <!-- #region weather ######################################################################## -->
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
+        <input type="text" id="node-input-cloudValue" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="hidden" id="node-input-cloudValueType">
+    </div>
+    <div class="form-row hidden row-cloudValue block-indent1-noadd">
+        <label for="node-input-cloudThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
+        <input type="text" id="node-input-cloudThreshold" class="spinner-noLimit row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
+    </div>
+    <div class="form-row hidden row-cloudValue block-indent1">
+        <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
+        <input type="text" id="node-input-cloudBlindPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="hidden" id="node-input-cloudBlindPosType">
+    </div>
+    <hr class="form-row-sunControlActive hidden">
+    <!-- #region Enhanced ######################################################################## -->
+    <div class="form-row block-noindent">
+        <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row block-noindent">
+        <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
+        <select id="node-input-tsCompare" class="row-full-width">
+            <option value="0" data-i18n="blind-control.label.now"></option>
+            <option value="1" data-i18n="blind-control.label.msgts"></option>
+            <option value="2" data-i18n="blind-control.label.msglc"></option>
+            <option value="3" data-i18n="blind-control.label.msgtime"></option>
+            <option value="4" data-i18n="blind-control.label.msgvalue"></option>
+        </select>
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-once">
+        <label for="node-input-once"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.oncePre"></span></label>
+        <div style="display: inline;">
+            <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="blind-control.label.onstart"></span>&nbsp;
+            <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px; height:28px;">&nbsp;
+            <span data-i18n="blind-control.label.onceDelay" style="word-wrap:break-word;"></span>
+        </div>
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-interval">
+        <label for="time-control-interval"><i class="fa fa-repeat"></i> <span data-i18n="blind-control.label.interval"></span></label>
+        <input type="text" class="spinner-time" id="time-control-interval" data-i18n="[placeholder]blind-control.placeholder.interval" value="">
+        <select id="time-control-interval-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-interval">
+    </div>
+    <div class="form-row enhanced-row block-noindent" id="node-hysteresis">
+        <label for="time-control-hysteresis"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.hysteresis"></span></label>
+        <input type="text" class="spinner-time" id="time-control-hysteresis" data-i18n="[placeholder]blind-control.placeholder.hysteresis" value="">
+        <select id="time-control-hysteresis-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-hysteresis">
+    </div>
+    <hr>
+    <!-- #region End ######################################################################## -->
+    <div class="form-row block-noindent time-topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic">
+    </div>
+    <div class="form-row block-noindent">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-tips form-row-showLater hidden">
+        <span data-i18n="blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent1-noadd {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .input-error {
+        border-color: #d6615f !important;
+        background-color: #ffcccc !important;
+    }
+
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-indent2-noadd {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .block-noindent-noadd .ui-spinner {
+        width : calc(100% - 110px);
+    }
+    .block-indent1-noadd .ui-spinner {
+        width : calc(100% - 120px);
+    }
+    .block-indent2-noadd .ui-spinner {
+        width : calc(100% - 130px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        margin-left: 5px;
+    }
+</style>
+
+<script type="text/x-red" data-help-name="blind-control">
+    <h3>About</h3>
+    <p>Gets the position of the sun</p>
+
+    <h3>Inputs</h3>
+
+    The message is only for trigger the calculation. If limits are defined the input message will send to the output associated to the limit.
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>first output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">object</span></dt>
+                 <dd>gives an object with the following described below</dd>
+             </dl>
+         </li>
+         <li>second and following outputs
+                <dl class="message-properties">
+                    <dt>payload </dt>
+                    <dd>same as the incoming message, which will send to this output.</dd>
+                    <dt>posChanged <span class="property-type">boolean</span></dt>
+                    <dd>is true if in the previous calculation no message was send to this output, because the azimuth outside the limit.</dd>
+                </dl>
+            </li>
+     </ol>
+     <h3>payload output properties</h3>
+     <dl class="message-properties">
+            <dt>azimuth <span class="property-type">number</span></dt>
+            <dd> the azimuth of the sun position relative to the given coordinates.</dd>
+
+            <dt>altitude <span class="property-type">number</span></dt>
+            <dd> the altitude (elevation) of the sun position relative to the given coordinates.</dd>
+
+            <dt>times <span class="property-type">object</span></dt>
+            <dd>
+                the sun times as object
+                <dt>times.sunrise <span class="property-type">Date</span></dt>
+                <dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.astronomicalDawn <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
+                <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDawnStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
+                <dt>msg.payload.times.civilDawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDawnEnd <span class="property-type">Date</span></dt><dd>blue Hour end</dd>
+                <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.goldenHourEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
+                <dt>msg.payload.times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
+                <dt>msg.payload.times.goldenHourStart <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
+                <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
+                <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDuskStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
+                <dt>msg.payload.times.civilDusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
+                <dt>msg.payload.times.blueHourDuskEnd <span class="property-type">Date</span></dt><dd>blue hour end</dd>
+                <dt>msg.payload.times.nauticalDusk <span class="property-type">Date</span></dt><dd>nautical dusk end (evening astronomical twilight starts)</dd>
+                <dt>msg.payload.times.amateurDusk <span class="property-type">Date</span></dt><dd>amateur astronomical dusk (sun at 12° after sunrise)</dd>
+                <dt>msg.payload.times.astronomicalDusk <span class="property-type">Date</span></dt><dd>night starts (dark enough for astronomical observations)</dd>
+                <dt>msg.payload.times.nadir <span class="property-type">Date</span></dt><dd>nadir (darkest moment of the night, sun is in the lowest position)</dd>
+            </dd>
+            <dt>pos <span class="property-type">array of boolean</span></dt>
+            <dd> array with a boolean of every defined limit of the azimuth, which is <b>true</b> if the azimuth is inside the limit.</dd>
+            <dt>posChanged <span class="property-type">boolean</span></dt>
+            <dd> boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.</dd>
+            <dt>startTime <span class="property-type">boolean</span></dt>
+            <dd> if a start time is defined the start timestamp (inclusive of offset)..</dd>
+            <dt>endTime <span class="property-type">boolean</span></dt>
+            <dd> if a end time is defined the end timestamp (inclusive of offset).</dd>
+            <dt>sunInSky <span class="property-type">boolean</span></dt>
+            <dd> if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.</dd>
+        </dl>
+        Example of the first output
+        <pre>
+{
+    "lastUpdate": "2018-11-11T11:11:11.111Z",
+    "latitude": "18.473782",
+    "longitude": "-34.357051",
+    "angleType": "deg",
+    "azimuth": 117.72942647370792,
+    "altitude": 20.984193272523992,
+    "times": {
+        "solarNoon":"2018-12-10T10:59:14.814Z",
+        "nadir":"2018-12-10T22:59:14.814Z",
+        "sunrise":"2018-12-10T06:58:55.584Z",
+        "sunset":"2018-12-10T14:59:34.044Z",
+        "sunriseEnd":"2018-12-10T07:03:12.232Z",
+        "sunsetStart":"2018-12-10T14:55:17.395Z",
+        "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",
+        "blueHourDuskStart":"2018-12-10T15:24:06.743Z",
+        "civilDawn":"2018-12-10T06:19:31.249Z",
+        "civilDusk":"2018-12-10T15:38:58.379Z",
+        "blueHourDawnStart":"2018-12-10T06:05:03.443Z",
+        "blueHourDuskEnd":"2018-12-10T15:53:26.185Z",
+        "nauticalDawn":"2018-12-10T05:37:04.859Z",
+        "nauticalDusk":"2018-12-10T16:21:24.768Z",
+        "amateurDawn":"2018-12-10T05:16:44.832Z",
+        "amateurDusk":"2018-12-10T16:41:44.795Z",
+        "astronomicalDawn":"2018-12-10T04:56:49.931Z",
+        "astronomicalDusk":"2018-12-10T17:01:39.696Z",
+        "goldenHourEnd":"2018-12-10T07:58:28.541Z",
+        "goldenHourStart":"2018-12-10T14:00:01.086Z",
+        "dawn":"2018-12-10T06:19:31.249Z",
+        "dusk":"2018-12-10T15:38:58.379Z",
+        "nightEnd":"2018-12-10T04:56:49.931Z",
+        "night":"2018-12-10T17:01:39.696Z",
+        "nightStart":"2018-12-10T17:01:39.696Z",
+        "goldenHour":"2018-12-10T14:00:01.086Z"
+    },
+    "pos": [],
+    "posChanged": false
+}</pre>
+     <h3>Tips</h3>
+     <p>For home automation it can be useful to define the lower and higher position for example of the sun for the west side of a house. If this is done, the associated output of this limits, can be used to control the blinds.</p>
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+    </ul>
+    With friendly support by <b>agag</b>.
+</script>
+
+<!-- Finally, the node type is registered along with all of its properties   -->
+<!-- The example below shows a small subset of the properties that can be set-->
+<script type="text/javascript">
+    function getVal(node,name) {
+        const v = $('#node-input-' + name).val();
+        if (v === undefined) {
+            return node[name];
+        }
+        return v;
+    }
+
+    function validateBlindPos(node, v) {
+        const n = parseFloat(v);
+        return RED.validators.number(v) &&
+                (v !== '') &&
+                (n <= getVal(node, 'blindOpenPos')) &&
+                (n >= getVal(node, 'blindClosedPos')) &&
+                Number.isInteger(n / getVal(node, 'blindIncrement'));
+    }
+
+    RED.nodes.registerType('blind-control', {
+        category: 'advanced-input',
+        color: '#FFCC66',
+        icon: 'blind-white.png', // saved in  icons/myicon.png - myicon.png
+        inputs: 1, // set the number of inputs - only 0 or 1
+        outputs: 1, // 1. Object, 2. nur zahl der Öffnung der Jalousie
+        defaults: {
+            name: {
+                value: '',
+                required: false
+            },
+            topic: {
+                value: '',
+                required: false
+            },
+            positionConfig: {
+                value: '',
+                type: 'position-config',
+                required: true
+            },
+            // #region blind settings
+            blindIncrement: {
+                value: 1,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (RED.validators.number(v) &&
+                            (n <= getVal(this, 'blindOpenPos')) &&
+                            (n >= getVal(this, 'blindClosedPos')) );
+                }
+            },
+            blindOpenPos: {
+                value: 100,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return RED.validators.number(v) &&
+                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                            (n > getVal(this, 'blindClosedPos'));
+                }
+            },
+            blindClosedPos: {
+                value: 0,
+                required: true,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return RED.validators.number(v) &&
+                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                            (n < getVal(this, 'blindOpenPos'));
+                }
+            },
+            blindDefaultPos: {
+                value: 'open (max)',
+                validate: RED.validators.typedInput('blindDefaultPosType')
+            },
+            blindDefaultPosType: {
+                value: 'levelFixed'
+            },
+            // #endregion blind settings
+            // #region overwrite settings
+            overwriteExpire: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                }
+            },
+            // #endregion overwrite settings
+            // #region time settings
+            rules: {
+                value: {}
+            },
+            tsCompare: {
+                value: '0'
+            },
+            interval: {
+                value:'',
+                validate: function(v) {
+                    const n = parseFloat(v);
+                    return ((v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF)));
+                }
+            },
+            once: { value:false },
+            onceDelay: { value: 0.1 },
+            hysteresis: {
+                value:'',
+                validate: function(v) {
+                    const n = parseFloat(v);
+                    return ((v === '') || (RED.validators.number(v) && (n <= -2147483647) && (n < 0x7FFFFFFF)));
+                }
+            },
+            // #endregion time settings
+            // #region sun settings
+            sunControlActive: {
+                value: false,
+                required: true,
+                validate: function(v) {
+                    return (v === true || v === false);
+                }
+            },
+            sunFloorLength: {
+                value: 0,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
+            },
+            sunMinAltitude: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v === '') ||
+                            (RED.validators.number(v) && (n >= 0) && (n <= 90));
+                }
+            },
+            // #endregion sun settings
+            // #region window settings
+            windowTop: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
+            },
+            windowBottom: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (v !== '' && RED.validators.number(v));
+                }
+            },
+            windowAzimuthStart: {
+                value: '',
+                required: true,
+                validate: function (v) {
+                    const n = Number(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n < getVal(this, 'windowAzimuthEnd')) );
+                }
+            },
+            windowAzimuthEnd: {
+                value: '',
+                validate: function (v) {
+                    const n = Number(v);
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
+                            (n > getVal(this, 'windowAzimuthStart')) );
+                }
+            },
+            // #endregion window settings
+            // #region weather settings
+            cloudValue: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            RED.validators.typedInput('cloudValueType')(v);
+                }
+            },
+            cloudValueType: {
+                value: 'none'
+            },
+            cloudThreshold: {
+                value: '',
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (getVal(this, 'cloudValueType') === 'none') ||
+                            ((v !== '') && RED.validators.number(v));
+                }
+            },
+            cloudBlindPos: {
+                value: 'open (max)',
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (getVal(this, 'cloudValueType') === 'none') ||
+                            RED.validators.typedInput('blindDefaultPosType')(v); // validateBlindPos(this, v);
+                }
+            },
+            cloudBlindPosType: {
+                value: 'levelFixed'
+            }
+            // #endregion weather settings
+        },
+        outputLabels() {
+            return 'new blind level ';
+        },
+        label() {
+            let suffix = '';
+            if (this.once) {
+                suffix = ' ¹';
+            }
+            if ((this.interval && this.interval !== 0) || this.crontab) {
+                suffix = ' ↻';
+            }
+            if (this.name) {
+                return this.name+suffix;
+            }
+            const result = 'blind-control';
+            if (this.topic && (this.topic.length + result.length <= 32)) {
+                return this.topic + ':' + result+suffix;
+            }
+            return result+suffix;
+        },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+        },
+        paletteLabel: 'blind-control',
+        oneditprepare() {
+            const node = this;
+            const setup = function(node) {
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel */
+                $('.form-row-showLater').show();
+                // #region initialize
+                const types = getTypes(node);
+                types.LevelEntered = {
+                    value: 'num',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
+                    icon: 'red/images/typedInput/09.png',
+                    validate: function(v) { return validateBlindPos(this, v); }
+                };
+                types.LevelFix = {
+                    value: 'levelFixed',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
+                    icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
+                    options: [
+                        'open (max)',
+                        '75%',
+                        '66%',
+                        '50%',
+                        '33%',
+                        '25%',
+                        '10%',
+                        'closed (min)'
+                    ]
+                };
+                function setMultiplier(node, name, element, validate) {
+                    const c = Number(node[name]);
+                    // console.log(`name=${name} - element=${element} - value=${c}`);
+                    if (node[name] !== '' && !isNaN(c)) {
+                        let r = 1000;
+                        if (c % 3600000 === 0) {
+                            r = 3600000;
+                        } else if (c % 60000 === 0) {
+                            r = 60000;
+                        }
+                        $('#time-control-' + name).val(c/r);
+                        $('#time-control-' + name + '-multiplier').val(r);
+                    } else {
+                        $('#time-control-' + name).val('');
+                    }
+                    $('#time-control-' + name).on('change focus focusout', () => {
+                        const el = $('#time-control-' + name);
+                        let val = el.val();
+                        const mp = $('#time-control-' + name + '-multiplier').val();
+                        if (isNaN(val) || val === '' || val === 0) {
+                            val = '';
+                            $('node-input-' + name).val('');
+                        } else {
+                            val = val * mp;
+                            $('#node-input-' + name).val(val);
+                        }
+
+                        if (typeof validate === 'function') {
+                            if (validate(val)) {
+                                el.removeClass( 'input-error' );
+                            } else {
+                                el.addClass( 'input-error' );
+                            }
+                        }
+                    });
+
+                    $('#time-control-' + name + '-multiplier').change( () => {
+                        $('#time-control-' + name).change();
+                    });
+                    $('#time-control-' + name).change();
+                }
+                const chkVal = (name, val) => {
+                    return (node[name] === null) ||
+                        (typeof node[name] === 'undefined') ||
+                        ($('#node-input-' + name).val() === val) ||
+                        ($('#node-input-' + name).is(':checked') === val);
+                };
+                // #endregion initialize
+                // #region blind
+                setMultiplier(node,'overwriteExpire', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                });
+                setupTInput(node, {
+                    typeProp: 'blindDefaultPosType',
+                    valueProp: 'blindDefaultPos',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: types.LevelFix.options[0],
+                    types: [types.LevelFix, types.LevelEntered]
+                });
+
+                // #endregion blind
+                // #region time rule-container
+                function resizeRule(rule) {
+                    const newWidth = rule.width() - 10;
+                    const timeField = rule.find('.node-input-rule-time');
+                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
+
+                    const offsetField = rule.find('.node-input-rule-offset');
+                    const multiplierField = rule.find('.node-input-rule-multiplier');
+                    const propertyField = rule.find('.node-input-rule-property');
+
+                    const levelLblField = rule.find('.node-input-rule-level-lbl');
+                    const operatorField = rule.find('.node-input-rule-operator');
+                    const levelField = rule.find('.node-input-rule-level');
+
+                    // row1
+                    propertyLblField.width('auto');
+                    const lbl1Width = propertyLblField.width();
+                    timeField.typedInput('width', 180);
+                    propertyField.typedInput('width', (newWidth - 180 - lbl1Width - 40));
+                    // propertyLblField.width(lbl1Width);
+                    // row2
+                    const multiplierWidth = 125;
+                    multiplierField.width(multiplierWidth);
+                    offsetField.typedInput('width', (newWidth - multiplierWidth - 50));
+                    // row3
+                    levelLblField.width('auto');
+                    const lbl2Width = levelLblField.width();
+                    operatorField.width(120);
+                    levelField.typedInput('width', (newWidth - 120 - lbl2Width - 30));
+                    // propertyLblField.width(lbl2Width);
+                }
+
+                function resizeContainer() {
+                    const editorRow = $('.node-input-rule-container-row ol');
+                    const height = editorRow.outerHeight(true);
+
+                    const rows = $('#node-input-rule-container').editableList('items');
+                    if (rows.size() > 0) {
+                        $('#node-input-rule-container').editableList('height', height + 40);
+                    } else {
+                        $('#node-input-rule-container').editableList('height', 20);
+                    }
+                }
+
+                $('#node-input-rule-container').css('min-height', '40px').css('min-width', '150px').editableList({
+                    addItem(containerRow, containerIndex, data) {
+                        containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
+                        const row1 = $('<div/>').appendTo(containerRow);
+                        const row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+                        const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+
+                        // #region row1
+                        // [start - time] - lbl - [none / Bedingung]
+                        addLabel(row1, 'node-input-rule-time', 'fa fa-clock-o');
+                        const timeField = $('<input/>', {
+                            class: 'node-input-rule-time',
+                            id: 'node-input-rule-time' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row1).typedInput({
+                            default: types.TimeEntered.value,
+                            types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env']
+                        });
+                        addLabel(row1, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
+                        const propertyField = $('<input/>', {
+                            class: 'node-input-rule-property',
+                            id: 'node-input-rule-property' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row1).typedInput({
+                            default: types.Unlimited.value,
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
+                        });
+
+                        // #endregion row1
+                        // #region row2
+                        // [offset] - [multiplier]
+                        addLabel(row2, 'node-input-rule-offset', 'fa fa-plus');
+                        const offsetField = $('<input/>', {
+                            class: 'wg-offset-spinner node-input-rule-offset',
+                            id: 'node-input-rule-offset' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2).typedInput({
+                            default: types.Undefined.value,
+                            types: [types.Undefined, 'num', 'msg', 'flow', 'global']
+                        });
+                        const multiplierField = $('<select/>', {
+                            class: 'node-input-rule-multiplier',
+                            id: 'node-input-rule-multiplier' + containerIndex
+                        }).appendTo(row2);
+                        appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0));
+                        // #endregion row2
+                        // #region row3
+                        // [min/max/abs] - [blind-level / open / closed] - [need reset]
+                        addLabel(row3, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
+                        const operatorField = $('<select/>', {
+                            class: 'node-input-rule-operator',
+                            id: 'node-input-rule-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row3);
+                        appendOptions(node, operatorField, 'blindOperator');
+                        const levelField = $('<input/>', {
+                            class: 'node-input-rule-level',
+                            id: 'node-input-rule-level' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row3).typedInput({
+                            default: types.LevelEntered.value,
+                            types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
+                        });
+                        // #endregion row 3
+                        // #region init fields
+                        timeField.change(() => {
+                            const opType = timeField.typedInput('type');
+                            if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                                row2.show(); // offset
+                                row3.show(); // limit
+                            } else if (opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                                row2.hide(); // offset
+                                row3.show(); // limit
+                            } else {
+                                row2.hide(); // offset
+                                row3.show(); // limit
+                            }
+                            resizeContainer();
+                        });
+                        // setting defaultValues
+                        const selFields = getSelectFields();
+                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
+                        timeField.typedInput('value', (data.timeValue || ''));
+                        operatorField.val(data.operator || selFields.blindOperator[0].id);
+                        levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
+                        levelField.typedInput('value', (data.levelValue || ''));
+                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        offsetField.typedInput('value', data.offsetValue || '');
+                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
+                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
+                        propertyField.typedInput('value', data.propertyValue || '');
+                        resizeRule(containerRow);
+                        resizeContainer();
+                        // #endregion init fields
+                    },
+                    /* sortItems(rules) {
+                        rules = $('#node-input-rule-container').editableList('items');
+                        rules.each(function (i) {
+                            $(this).find('.node-input-rule-index').html(i + 1);
+                        });
+                    },  */
+                    resizeItem: resizeRule,
+                    sortable: true,
+                    removable: true,
+                    removeItem: resizeContainer
+                });
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        $('#node-input-rule-container').editableList('addItem', rule);
+                    }
+                }
+                // #endregion time - rule-container
+                // #region sun
+                $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
+                    if (chkVal('sunControlActive', false)) {
+                        $('.form-row-sunControlActive').hide();
+                        $('.row-cloudValue').hide();
+                    } else {
+                        $('.form-row-sunControlActive').show();
+                    }
+                    $('#node-input-cloudValue').change();
+                });
+                // #endregion sun
+                // #region weather
+                const cloudValueField = setupTInput(node, {
+                    typeProp: 'cloudValueType',
+                    valueProp: 'cloudValue',
+                    width: 'calc(100% - 120px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        const cloudValueType = $('#node-input-cloudValue').typedInput('type');
+                        if ( cloudValueType === types.Undefined.value ) {
+                            $('.row-cloudValue').hide();
+                        } else {
+                            $('.row-cloudValue').show();
+                        }
+                        $('#node-input-cloudThreshold').change();
+                        $('#node-input-cloudBlindPos').change();
+                    }
+                });
+                setupTInput(node, {
+                    typeProp: 'cloudBlindPosType',
+                    valueProp: 'cloudBlindPos',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: types.LevelFix.options[0],
+                    types: [types.LevelFix, types.LevelEntered]
+                });
+                // #endregion weather
+                // #region Enhanced settings
+                $('.spinner-noLimit').spinner();
+                $('.spinner-angle').spinner({
+                    max: 360,
+                    min: -360,
+                    step: 1
+                });
+                $('.spinner-altitude').spinner({
+                    max: 90,
+                    min: 0,
+                    step: 1
+                });
+                $('.spinner-level').spinner({
+                    max: 100,
+                    min: 0,
+                    step: 0.01,
+                    numberFormat: 'n'
+                });
+                $('.spinner-time').spinner({
+                    max: 1439,
+                    min: 0,
+                    step: 1
+                });
+
+                $('#node-input-once').change(() => {
+                    $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+                });
+                setMultiplier(node,'interval', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                });
+                setMultiplier(node,'hysteresis', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= 10) && (n < 0x7FFFFFFF));
+                });
+
+                $('.enhanced-row-toggle').on('click', () => {
+                    $('.enhanced-row').toggle(); // .hide();
+                });
+
+                if (chkVal('tsCompare', '0') &&
+                    (node.interval==='' || chkVal('interval', 0)) &&
+                    (node.hysteresis==='' || chkVal('hysteresis', 0)) &&
+                    chkVal('once', false)) {
+                    $('.enhanced-row').hide();
+                } else {
+                    $('.enhanced-row').show();
+                }
+                // #endregion Enhanced settings
+                $('#node-input-sunControlActive').change();
+                cloudValueField.change();
+            }; // setup
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
+        },
+        oneditsave() {
+            const node = this;
+
+            // #region rule-container
+            node.rules = [];
+            const rules = $('#node-input-rule-container').editableList('items');
+            rules.each(function (_i) {
+                const rule = $(this);
+                const data = {
+                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
+                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
+                    operator: rule.find('.node-input-rule-operator').val(),
+                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
+                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
+                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
+                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
+                    multiplier: rule.find('.node-input-rule-multiplier').val(),
+                    propertyType: rule.find('.node-input-rule-property').typedInput('type'),
+                    propertyValue: rule.find('.node-input-rule-property').typedInput('value')
+                };
+                node.rules.push(data);
+            });
+
+            const overwriteExpire = $('#time-control-overwriteExpire').val();
+            if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
+                $('node-input-overwriteExpire').val('');
+            } else {
+                $('#node-input-overwriteExpire').val(overwriteExpire * $('#time-control-overwriteExpire-multiplier').val());
+            }
+
+            const interval = $('#time-control-interval').val();
+            if (isNaN(interval) || interval === '' || interval === 0) {
+                $('#node-input-interval').val('');
+            } else {
+                $('#node-input-interval').val(interval * $('#time-control-interval-multiplier').val());
+            }
+
+            const hysteresis = $('#time-control-hysteresis').val();
+            if (isNaN(hysteresis) || hysteresis === '' || hysteresis === 0) {
+                $('#node-input-hysteresis').val('');
+            } else {
+                $('#node-input-hysteresis').val(hysteresis * $('#time-control-hysteresis-multiplier').val());
+            }
+            // #endregion result-container
+        },
+        oneditresize(size) {
+            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+            let height = size.height;
+            for (let i = 0; i < rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+
+            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
+            height -= 50;
+            $('#node-input-rule-container').editableList('height', height);
+        }
+    });</script>

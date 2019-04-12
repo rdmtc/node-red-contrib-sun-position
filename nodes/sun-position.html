@@ -258,7 +258,7 @@
                 /* global getTypes appendOptions setupTInput */
                 const types = getTypes(node);
                 // #region initialize
-                function multilpierUpdate(mp, name) {
+                function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
@@ -287,7 +287,7 @@
                     }
                 });
 
-                node.startOffsetMultiplier = multilpierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'startOffsetType',
                     valueProp: 'startOffset',
@@ -325,7 +325,7 @@
                     }
                 });
 
-                node.endOffsetMultiplier = multilpierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'endOffsetType',
                     valueProp: 'endOffset',

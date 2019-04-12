@@ -900,7 +900,7 @@
                 /* global initializeValue getTypes appendOptions setupTInput initCombobox initDaysCheckbox */
                 const types = getTypes(node);
                 // #region initialize
-                function multilpierUpdate(mp, name) {
+                function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (id) => (id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
@@ -994,7 +994,7 @@
                 }).change();
                 initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
-                node.payloadOffsetMultiplier = multilpierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
+                node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'payloadOffsetType',
                     valueProp: 'payloadOffset',
@@ -1036,7 +1036,7 @@
                 });
                 initDaysCheckbox('#time-inject-timeDays', node.timeDays);
 
-                node.offsetMultiplier = multilpierUpdate(node.offsetMultiplier, 'offsetMultiplier');
+                node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'offsetType',
                     valueProp: 'offset',
@@ -1098,7 +1098,7 @@
 
                 initDaysCheckbox('#time-inject-timeAltDays', node.timeAltDays);
 
-                node.timeAltOffsetMultiplier = multilpierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
+                node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'timeAltOffsetType',
                     valueProp: 'timeAltOffset',
@@ -1198,7 +1198,7 @@
 
                 initCombobox(node, 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
-                node.addPayload1OffsetMultiplier = multilpierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
+                node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
 
                 setupTInput(node, {
                     typeProp: 'addPayload1OffsetType',
@@ -1299,7 +1299,7 @@
 
                 initCombobox(node, 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
-                node.addPayload2OffsetMultiplier = multilpierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
+                node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'addPayload2OffsetType',
                     valueProp: 'addPayload2Offset',
@@ -1394,7 +1394,7 @@
 
                 initCombobox(node, 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
-                node.addPayload3OffsetMultiplier = multilpierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
+                node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
                 setupTInput(node, {
                     typeProp: 'addPayload3OffsetType',
                     valueProp: 'addPayload3Offset',

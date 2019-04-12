@@ -38,11 +38,20 @@ module.exports = function (RED) {
                 if (typeof msg.ts !== 'undefined') {
                     now = new Date(msg.time);
                 }
+                if (!this.positionConfig) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
+                    node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
+                    });
+                    return null;
+                }
                 const ports = new Array(this.rules.length);
-                ports[0] = {
-                    payload: this.positionConfig.getSunCalc(msg.ts),
-                    topic: this.topic
-                };
+
+                ports[0] = RED.util.cloneMessage(msg);
+                ports[0].payload = this.positionConfig.getSunCalc(now);
+                ports[0].topic = this.topic;
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');
                     this.send(ports);
@@ -95,9 +104,7 @@ module.exports = function (RED) {
                         ports[i + 1].azimuth = ports[0].payload.azimuth;
                     }
                 }
-
                 node.azimuthPos = ports[0].payload.pos;
-                this.send(ports);
 
                 if (errorStatus) {
                     this.status({
@@ -122,12 +129,22 @@ module.exports = function (RED) {
                         });
                     }
                 } else {
+                    let fill = 'red';
+                    let text = 'no Data loaded!';
+
+                    if (ports[0] && ports[0].payload && ports[0].payload.lastUpdate) {
+                        const azimuth = (ports[0].payload.azimuth) ? ports[0].payload.azimuth.toFixed(2) : '?';
+                        const altitude = (ports[0].payload.altitude) ? ports[0].payload.altitude.toFixed(2) : '?';
+                        text = azimuth + '/' + altitude + ' - ' + ports[0].payload.lastUpdate.toLocaleString();
+                        fill = 'grey';
+                    }
                     this.status({
-                        fill:   'grey',
+                        fill: fill,
                         shape:  'dot',
-                        text:   ports[0].payload.azimuth.toFixed(2) + '/' + ports[0].payload.altitude.toFixed(2) + ' - ' + ports[0].payload.lastUpdate.toLocaleString()
+                        text: text
                     });
                 }
+                this.send(ports); // Warning change msg object!!
                 return null;
             } catch (err) {
                 node.error(err.message);
@@ -138,8 +155,6 @@ module.exports = function (RED) {
                     text: 'internal error'
                 });
             }
-            // this.error("Input parameter wrong or missing. You need to setup (or give in the input message) the 'URL' and 'content type' or the 'message' and 'language'!!");
-            // this.status({fill:"red",shape:"dot",text:"error - input parameter"});
         });
 
         function getNumProp(srcNode, msg, vType, value) {
