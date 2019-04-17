@@ -1,32 +1,22 @@
 {
 	"blind-control": {
 		"label": {
-			"windowPosText": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"windowTop": "window top",
 			"windowBottom": "window bottom",
-			"windowAzimuthText": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowAzimuthStart":"start",
 			"windowAzimuthEnd": "end",
-			"blindText": "blind settings",
 			"blindIncrement": "Increment",
 			"blindOpenPos": "open position (max)",
 			"blindClosedPos": "closed position (min)",
-			"blindDefaultPosText":"if none matches the following position will be used",
 			"blindDefaultPos": "default position",
-			"overwriteText": "manual overwrite of the blind position",
 			"overwriteExpire": "expire",
 			"addTimes": "alternate start or end time",
-			"TimeText": "Time control: starting from midnight, the first matching line will used, where time is <b>not used</b> or time is less than <b>now</b> and where property is <b>not used</b> or <em>true</em>",
 			"compareTime": "base time",
 			"onlyIf": "only if",
-			"blindLevel": "Blind level",
+			"blindLevel": "blind position",
 			"sunControlActive": "active",
-			"sunControlActiveText": "Restricting the extent to which direct sunlight may shine into the room",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
-			"tempValue": "Temperature",
-			"tempThreshold": "threshold",
-			"tempBlindPos": "blind position",
 			"cloudValue": "Cloud",
 			"cloudThreshold": "Threshold",
 			"cloudBlindPos": "blind position",
@@ -40,8 +30,9 @@
 			"onstart":"nach Start verzögert",
 			"onceDelay":"seconds",
 			"interval":"re-calc interval",
-			"hysteresis":"hysteresis",
-			"endOfDay": "end of day"
+			"smoothTime":"smoothTime",
+			"from": "from",
+			"until": "until"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -59,15 +50,23 @@
 			"cloudThreshold": "threshold for set blind position",
 			"cloudBlindPos": "blind position when cloud-value is below threshold",
 			"interval":"(opt) recalculation interval",
-			"hysteresis":"(opt) prevents changes due to sun in the given time",
+			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
-			"nightposition": "100",
 			"expiryperiod": "120",
 			"property": "Property",
 			"startOffset": "0",
 			"endOffset": "0",
 			"startOffsetAlt": "0",
 			"endOffsetAlt": "0"
+		},
+		"text": {
+			"blind": "blind settings",
+			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or <em>true</em>. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
+			"blindDefaultPos":"if no definition matches the following position will be used",
+			"overwrite": "manual overwrite of the blind position",
+			"sunControlActive": "Restricting the extent to which direct sunlight may shine into the room",
+			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
+			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind"
 		},
 		"tips": {
 			"addTimes": "..."
@@ -76,35 +75,33 @@
 			"overwritePrio": "position is overwritten by priority, no expire",
 			"overwrite": "position is overwritten, will expire __time__",
 			"default": "position is set to default position because no other rule matches",
-			"time": "position by time [rule __rule__] until __text__",
+			"time": "position by time [rule __rule__] __text__",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",
 			"cloudExceeded": "Cloud overcast conditions",
-			"tempExceeded": "temp exceeded",
-			"hysteresis": "Position is not changed because not enough time has passed since the last change"
+			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)"
 		},
 		"states": {
 			"overwritePrio": "overwritten",
 			"overwrite": "overwritten till __time__",
 			"default": "default",
-			"time": "by time  [__rule__] until __text__",
+			"time": "by time  [__pos__] __text__",
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
 			"sunCtrl": "sun control",
 			"cloudExceeded": "cloud",
-			"tempExceeded": "temp",
-			"hysteresis": "no change - hysteresis"
+			"smooth": "block change to __pos__"
 		},
 		"errors": {
 			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",
-			"invalid-blind-position": "Given Blind-Position __pos__ is not a valid Position!",
+			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
 			"getCloudData": "error getting cloudData: __message__",
-			"getBlindPosData": "error getting blind position: __message__",
+			"getBlindPosData": "error getting blind level: __message__",
 			"getPropertyData": "error getting property data: \"__message__\" skipping time",
 			"intervaltoolong":"The selected interval is too long!!",
-			"hysteresistoolong":"The selected hysteresis is too long!!"
+			"smoothTimeToolong":"The selected smooth is too long!!"
 		}
 	}
 }

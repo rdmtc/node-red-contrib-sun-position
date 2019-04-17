@@ -71,7 +71,6 @@ module.exports = function (RED) {
 
     function positionConfigurationNode(n) {
         RED.nodes.createNode(this, n);
-        // this.debug('load position-config ' + n.name);
         this.name = n.name;
         this.longitude = parseFloat(this.credentials.posLongitude || n.longitude);
         this.latitude = parseFloat(this.credentials.posLatitude || n.latitude);
@@ -125,7 +124,6 @@ module.exports = function (RED) {
         this.getMoonTime = (now, value, offset, multiplier, next, days) => {
             // node.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = moonTimesCheck(node, now);
-            // node.debug('Moon Times today =' + util.inspect(node.moonTimesToday));
             result.value = hlp.addOffset(new Date(node.moonTimesToday[value]), offset, multiplier);
             if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                 if (next === 1) {
@@ -147,7 +145,6 @@ module.exports = function (RED) {
                     const date = (new Date()).addDays(dayx);
                     const times = sunCalc.getMoonTimes(date, node.latitude, node.longitude, true);
                     result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
-                    // node.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                 } else if (dayx < 0) {
                     result.error = 'No valid day of week found!';
                     // node.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
@@ -160,8 +157,7 @@ module.exports = function (RED) {
 
         this.getFloatProp = (_srcNode, msg, type, value) => {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
-            let data;
-            // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
+            let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = value;
             } else if (type === '' || typeof type === 'undefined' || type === null) {
@@ -308,7 +304,7 @@ module.exports = function (RED) {
         };
 
         this.getTimeProp = (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) => {
-            node.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            // node.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
                 error: null,
@@ -379,7 +375,7 @@ module.exports = function (RED) {
         this.getSunCalc = (date, noTimes) => {
             // node.debug(`getSunCalc for date="${date}" noTimes="${noTimes}"`);
             if (typeof date === 'string') {
-                node.debug('getSunCalc for date ' + date);
+                // node.debug('getSunCalc for date ' + date);
                 const dto = new Date(date);
                 if (dto !== 'Invalid Date' && !isNaN(dto)) {
                     date = dto;

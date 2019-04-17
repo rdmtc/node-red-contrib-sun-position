@@ -6,7 +6,7 @@
     <hr>
     <!-- #region blind ######################################################################## -->
     <div class="form-row block-noindent form-row-showLater hidden">
-        <span data-i18n="[html]blind-control.label.blindText" class="row-full-width"></span>
+        <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span>
     </div>
     <div class="form-row block-indent1-noadd">
         <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
@@ -23,13 +23,13 @@
     <hr>
     <!-- #region time ######################################################################## -->
     <div  class="form-row-showLater hidden">
-        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.label.TimeText"></span></span></label>
+        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
         <div class="form-row node-input-rule-container-row row-full-width">
         <ol id="node-input-rule-container"></ol>
         </div>
     </div>
     <div class="form-row block-noindent form-row-showLater hidden">
-        <span data-i18n="[html]blind-control.label.blindDefaultPosText" class="row-full-width"></span>
+        <span data-i18n="[html]blind-control.text.blindDefaultPos" class="row-full-width"></span>
     </div>
     <div class="form-row block-noindent form-row-showLater hidden">
         <label for="node-input-blindDefaultPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindDefaultPos"></span></label>
@@ -39,7 +39,7 @@
     <hr>
     <!-- #region overwrite blind ######################################################################## -->
     <div class="form-row block-noindent form-row-showLater hidden">
-        <span data-i18n="[html]blind-control.label.overwriteText" class="row-full-width"></span>
+        <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span>
     </div>
     <div class="form-row row-overwriteValue block-indent1">
         <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
@@ -56,7 +56,7 @@
     <div class="form-row block-noindent form-row-showLater hidden">
         <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
         <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="blind-control.label.sunControlActiveText" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]blind-control.text.sunControlActive" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
         <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
@@ -69,7 +69,7 @@
     <hr>
     <!-- window ######################################################################## -->
     <div class="form-row form-row-sunControlActive hidden block-noindent">
-        <span data-i18n="[html]blind-control.label.windowAzimuthText" class="row-full-width" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
         <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
@@ -80,7 +80,7 @@
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd" >
     </div>
     <div class="form-row form-row-sunControlActive hidden block-noindent">
-        <span data-i18n="[html]blind-control.label.windowPosText" class="row-full-width" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
         <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
@@ -140,15 +140,15 @@
         </select>
         <input type="hidden" id="node-input-interval">
     </div>
-    <div class="form-row enhanced-row block-noindent" id="node-hysteresis">
-        <label for="time-control-hysteresis"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.hysteresis"></span></label>
-        <input type="text" class="spinner-time" id="time-control-hysteresis" data-i18n="[placeholder]blind-control.placeholder.hysteresis" value="">
-        <select id="time-control-hysteresis-multiplier" class="node-input-multiplier">
+    <div class="form-row enhanced-row block-noindent" id="node-smoothTime">
+        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value="">
+        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
             <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
         </select>
-        <input type="hidden" id="node-input-hysteresis">
+        <input type="hidden" id="node-input-smoothTime">
     </div>
     <hr>
     <!-- #region End ######################################################################## -->
@@ -362,13 +362,18 @@
         return v;
     }
 
+    function countDecimals(value) {
+        return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
+    }
+
     function validateBlindPos(node, v) {
         const n = parseFloat(v);
+        const inc = getVal(node, 'blindIncrement');
         return RED.validators.number(v) &&
                 (v !== '') &&
                 (n <= getVal(node, 'blindOpenPos')) &&
                 (n >= getVal(node, 'blindClosedPos')) &&
-                Number.isInteger(n / getVal(node, 'blindIncrement'));
+                Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
     }
 
     RED.nodes.registerType('blind-control', {
@@ -456,11 +461,11 @@
             },
             once: { value:false },
             onceDelay: { value: 0.1 },
-            hysteresis: {
+            smoothTime: {
                 value:'',
                 validate: function(v) {
                     const n = parseFloat(v);
-                    return ((v === '') || (RED.validators.number(v) && (n <= -2147483647) && (n < 0x7FFFFFFF)));
+                    return ((v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                 }
             },
             // #endregion time settings
@@ -678,22 +683,24 @@
                 // #region time rule-container
                 function resizeRule(rule) {
                     const newWidth = rule.width() - 10;
+                    const timeOperatorField = rule.find('.node-input-rule-time-operator');
                     const timeField = rule.find('.node-input-rule-time');
                     const propertyLblField = rule.find('.node-input-rule-property-lbl');
+                    const propertyField = rule.find('.node-input-rule-property');
 
                     const offsetField = rule.find('.node-input-rule-offset');
                     const multiplierField = rule.find('.node-input-rule-multiplier');
-                    const propertyField = rule.find('.node-input-rule-property');
 
                     const levelLblField = rule.find('.node-input-rule-level-lbl');
-                    const operatorField = rule.find('.node-input-rule-operator');
+                    const operatorField = rule.find('.node-input-rule-level-operator');
                     const levelField = rule.find('.node-input-rule-level');
 
                     // row1
                     propertyLblField.width('auto');
                     const lbl1Width = propertyLblField.width();
+                    timeOperatorField.width(50);
                     timeField.typedInput('width', 180);
-                    propertyField.typedInput('width', (newWidth - 180 - lbl1Width - 40));
+                    propertyField.typedInput('width', (newWidth - lbl1Width - 295));
                     // propertyLblField.width(lbl1Width);
                     // row2
                     const multiplierWidth = 125;
@@ -727,8 +734,15 @@
                         const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
 
                         // #region row1
-                        // [start - time] - lbl - [none / Bedingung]
+                        // [from-to] - [start - time] - lbl - [none / Bedingung]
                         addLabel(row1, 'node-input-rule-time', 'fa fa-clock-o');
+                        const timeOperatorField = $('<select/>', {
+                            class: 'node-input-rule-time-operator',
+                            id: 'node-input-rule-time-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row1);
+                        timeOperatorField.append($('<option></option>').val(0).text(node._('blind-control.label.until')));
+                        timeOperatorField.append($('<option></option>').val(1).text(node._('blind-control.label.from')));
                         const timeField = $('<input/>', {
                             class: 'node-input-rule-time',
                             id: 'node-input-rule-time' + containerIndex,
@@ -769,8 +783,8 @@
                         // [min/max/abs] - [blind-level / open / closed] - [need reset]
                         addLabel(row3, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
                         const operatorField = $('<select/>', {
-                            class: 'node-input-rule-operator',
-                            id: 'node-input-rule-operator' + containerIndex,
+                            class: 'node-input-rule-level-operator',
+                            id: 'node-input-rule-level-operator' + containerIndex,
                             style: 'margin-left: 5px;'
                         }).appendTo(row3);
                         appendOptions(node, operatorField, 'blindOperator');
@@ -786,6 +800,7 @@
                         // #region init fields
                         timeField.change(() => {
                             const opType = timeField.typedInput('type');
+                            // timeOperatorField.attr('disabled', (opType === 'none'));
                             if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                                 row2.show(); // offset
                                 row3.show(); // limit
@@ -800,9 +815,10 @@
                         });
                         // setting defaultValues
                         const selFields = getSelectFields();
+                        timeOperatorField.val(data.timeOp || 0);
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        operatorField.val(data.operator || selFields.blindOperator[0].id);
+                        operatorField.val(data.levelOp || selFields.blindOperator[0].id);
                         levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
                         levelField.typedInput('value', (data.levelValue || ''));
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
@@ -902,9 +918,9 @@
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                 });
-                setMultiplier(node,'hysteresis', (v) => {
+                setMultiplier(node,'smoothTime', (v) => {
                     const n = parseFloat(v);
-                    return (v === '') || (RED.validators.number(v) && (n >= 10) && (n < 0x7FFFFFFF));
+                    return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
                 });
 
                 $('.enhanced-row-toggle').on('click', () => {
@@ -913,7 +929,7 @@
 
                 if (chkVal('tsCompare', '0') &&
                     (node.interval==='' || chkVal('interval', 0)) &&
-                    (node.hysteresis==='' || chkVal('hysteresis', 0)) &&
+                    (node.smoothTime==='' || chkVal('smoothTime', 0)) &&
                     chkVal('once', false)) {
                     $('.enhanced-row').hide();
                 } else {
@@ -950,8 +966,10 @@
                 const data = {
                     timeType: rule.find('.node-input-rule-time').typedInput('type'),
                     timeValue: rule.find('.node-input-rule-time').typedInput('value'),
-                    operator: rule.find('.node-input-rule-operator').val(),
-                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
+                    timeOp: rule.find('.node-input-rule-time-operator').val(),
+                    timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
+                    levelOp: rule.find('.node-input-rule-level-operator').val(),
+                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
                     levelType: rule.find('.node-input-rule-level').typedInput('type'),
                     levelValue: rule.find('.node-input-rule-level').typedInput('value'),
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
@@ -963,25 +981,25 @@
                 node.rules.push(data);
             });
 
-            const overwriteExpire = $('#time-control-overwriteExpire').val();
+            const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
             if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
                 $('node-input-overwriteExpire').val('');
             } else {
-                $('#node-input-overwriteExpire').val(overwriteExpire * $('#time-control-overwriteExpire-multiplier').val());
+                $('#node-input-overwriteExpire').val(overwriteExpire * parseFloat($('#time-control-overwriteExpire-multiplier').val()));
             }
 
-            const interval = $('#time-control-interval').val();
+            const interval = parseFloat($('#time-control-interval').val());
             if (isNaN(interval) || interval === '' || interval === 0) {
                 $('#node-input-interval').val('');
             } else {
-                $('#node-input-interval').val(interval * $('#time-control-interval-multiplier').val());
+                $('#node-input-interval').val(interval * parseFloat($('#time-control-interval-multiplier').val()));
             }
 
-            const hysteresis = $('#time-control-hysteresis').val();
-            if (isNaN(hysteresis) || hysteresis === '' || hysteresis === 0) {
-                $('#node-input-hysteresis').val('');
+            const smoothTime = parseFloat($('#time-control-smoothTime').val());
+            if (isNaN(smoothTime) || smoothTime === '' || smoothTime === 0) {
+                $('#node-input-smoothTime').val('');
             } else {
-                $('#node-input-hysteresis').val(hysteresis * $('#time-control-hysteresis-multiplier').val());
+                $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
             }
             // #endregion result-container
         },

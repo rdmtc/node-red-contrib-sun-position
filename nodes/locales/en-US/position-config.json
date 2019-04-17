@@ -158,13 +158,13 @@
             "year"
         ],
         "blindOperatorGroups": [
-            "limit blind position",
-            "fixed position"
+            "fixed position",
+            "limit blind position"
         ],
         "blindOperator": [
+            "absolute",
             "minimum",
-            "maximum",
-            "absolute"
+            "maximum"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",

@@ -96,12 +96,12 @@ const SelectFields = {
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
     ], blindOperatorGroups: [
-        { id: 'limit', label: 'Limit' },
-        { id: 'other', label: 'fix' }
+        { id: 'fix', label: 'fix' },
+        { id: 'limit', label: 'Limit' }
     ], blindOperator: [
+        { id: 0, group: 'fix', label: 'abs' },
         { id: 1, group: 'limit', label: 'min' },
-        { id: 2, group: 'limit', label: 'max' },
-        { id: 0, group: 'other', label: 'abs' }
+        { id: 2, group: 'limit', label: 'max' }
     ]
 };
 
