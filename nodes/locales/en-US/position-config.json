@@ -166,6 +166,20 @@
             "minimum",
             "maximum"
         ],
+        "comparatorGroups": [
+            "fixed position",
+            "limit blind position"
+        ],
+        "comparator": [
+            "is true",
+            "is false",
+            "is null",
+            "is not null",
+            "is empty",
+            "is not empty",
+            "is true expression",
+            "is false expression"
+        ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -211,7 +225,10 @@
         "error-init": "error '__message__', retry in __time__min",
         "warn-init": "warning '__message__', retry in __time__min",
         "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
-        "pos-config-state": "Node not properly configured!!"
+        "pos-config-state": "Node not properly configured!!",
+        "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
+        "notEvaluableProperty":"could not evaluate __type__.__value__",
+        "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
     "position-config": {
         "label": {

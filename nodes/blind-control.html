@@ -683,35 +683,38 @@
                 // #region time rule-container
                 function resizeRule(rule) {
                     const newWidth = rule.width() - 10;
+                    const timeLblField = rule.find('.node-input-rule-time-lbl');
                     const timeOperatorField = rule.find('.node-input-rule-time-operator');
                     const timeField = rule.find('.node-input-rule-time');
+
                     const propertyLblField = rule.find('.node-input-rule-property-lbl');
                     const propertyField = rule.find('.node-input-rule-property');
+                    const propertyOperatorField = rule.find('.node-input-rule-property-operator');
 
                     const offsetField = rule.find('.node-input-rule-offset');
                     const multiplierField = rule.find('.node-input-rule-multiplier');
 
                     const levelLblField = rule.find('.node-input-rule-level-lbl');
-                    const operatorField = rule.find('.node-input-rule-level-operator');
+                    const levelOperatorField = rule.find('.node-input-rule-level-operator');
                     const levelField = rule.find('.node-input-rule-level');
 
                     // row1
                     propertyLblField.width('auto');
-                    const lbl1Width = propertyLblField.width();
-                    timeOperatorField.width(50);
-                    timeField.typedInput('width', 180);
-                    propertyField.typedInput('width', (newWidth - lbl1Width - 295));
-                    // propertyLblField.width(lbl1Width);
+                    propertyOperatorField.width(100);
+                    propertyField.typedInput('width', (newWidth - propertyLblField.width() - 135));
                     // row2
+                    timeLblField.width('auto');
+                    timeOperatorField.width(70);
+                    timeField.typedInput('width', (newWidth - timeLblField.width() - 103));
+                    // row3
                     const multiplierWidth = 125;
                     multiplierField.width(multiplierWidth);
                     offsetField.typedInput('width', (newWidth - multiplierWidth - 50));
-                    // row3
+                    // row4
                     levelLblField.width('auto');
-                    const lbl2Width = levelLblField.width();
-                    operatorField.width(120);
-                    levelField.typedInput('width', (newWidth - 120 - lbl2Width - 30));
-                    // propertyLblField.width(lbl2Width);
+                    const lbl3Width = levelLblField.width();
+                    levelOperatorField.width(120);
+                    levelField.typedInput('width', (newWidth - 120 - lbl3Width - 30));
                 }
 
                 function resizeContainer() {
@@ -732,25 +735,9 @@
                         const row1 = $('<div/>').appendTo(containerRow);
                         const row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-
+                        const row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         // #region row1
-                        // [from-to] - [start - time] - lbl - [none / Bedingung]
-                        addLabel(row1, 'node-input-rule-time', 'fa fa-clock-o');
-                        const timeOperatorField = $('<select/>', {
-                            class: 'node-input-rule-time-operator',
-                            id: 'node-input-rule-time-operator' + containerIndex,
-                            style: 'margin-left: 5px;'
-                        }).appendTo(row1);
-                        timeOperatorField.append($('<option></option>').val(0).text(node._('blind-control.label.until')));
-                        timeOperatorField.append($('<option></option>').val(1).text(node._('blind-control.label.from')));
-                        const timeField = $('<input/>', {
-                            class: 'node-input-rule-time',
-                            id: 'node-input-rule-time' + containerIndex,
-                            type: 'text'
-                        }).appendTo(row1).typedInput({
-                            default: types.TimeEntered.value,
-                            types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env']
-                        });
+                        // lbl - [none / Bedingung] - [compare]
                         addLabel(row1, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
                         const propertyField = $('<input/>', {
                             class: 'node-input-rule-property',
@@ -758,67 +745,100 @@
                             type: 'text'
                         }).appendTo(row1).typedInput({
                             default: types.Unlimited.value,
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
-
-                        // #endregion row1
+                        const propertyOperatorField = $('<select/>', {
+                            class: 'node-input-rule-property-operator',
+                            id: 'node-input-rule-property-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row1);
+                        appendOptions(node, propertyOperatorField, 'comparator');
+                        // #endregion row2
                         // #region row2
+                        // lbl - [from-to] - [start - time]
+                        addLabel(row2, 'node-input-rule-time', 'fa fa-clock-o');
+                        const timeOperatorField = $('<select/>', {
+                            class: 'node-input-rule-time-operator',
+                            id: 'node-input-rule-time-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo(row2);
+                        timeOperatorField.append($('<option></option>').val(0).text(node._('blind-control.label.until')));
+                        timeOperatorField.append($('<option></option>').val(1).text(node._('blind-control.label.from')));
+                        const timeField = $('<input/>', {
+                            class: 'node-input-rule-time',
+                            id: 'node-input-rule-time' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2).typedInput({
+                            default: types.TimeEntered.value,
+                            types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        });
+                        // #endregion row2
+                        // #region row3
                         // [offset] - [multiplier]
-                        addLabel(row2, 'node-input-rule-offset', 'fa fa-plus');
+                        addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
                         const offsetField = $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
                             id: 'node-input-rule-offset' + containerIndex,
                             type: 'text'
-                        }).appendTo(row2).typedInput({
+                        }).appendTo(row3).typedInput({
                             default: types.Undefined.value,
-                            types: [types.Undefined, 'num', 'msg', 'flow', 'global']
+                            types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'jsonata']
                         });
                         const multiplierField = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
-                        }).appendTo(row2);
+                        }).appendTo(row3);
                         appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0));
-                        // #endregion row2
-                        // #region row3
+                        // #endregion row3
+                        // #region row4
                         // [min/max/abs] - [blind-level / open / closed] - [need reset]
-                        addLabel(row3, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
-                        const operatorField = $('<select/>', {
+                        addLabel(row4, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
+                        const levelOperatorField = $('<select/>', {
                             class: 'node-input-rule-level-operator',
                             id: 'node-input-rule-level-operator' + containerIndex,
                             style: 'margin-left: 5px;'
-                        }).appendTo(row3);
-                        appendOptions(node, operatorField, 'blindOperator');
+                        }).appendTo(row4);
+                        appendOptions(node, levelOperatorField, 'blindOperator');
                         const levelField = $('<input/>', {
                             class: 'node-input-rule-level',
                             id: 'node-input-rule-level' + containerIndex,
                             type: 'text'
-                        }).appendTo(row3).typedInput({
+                        }).appendTo(row4).typedInput({
                             default: types.LevelEntered.value,
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
-                        // #endregion row 3
+                        // #endregion row4
                         // #region init fields
                         timeField.change(() => {
                             const opType = timeField.typedInput('type');
                             // timeOperatorField.attr('disabled', (opType === 'none'));
                             if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                                row2.show(); // offset
-                                row3.show(); // limit
+                                row3.show(); // offset
+                                row4.show(); // limit
                             } else if (opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                                row2.hide(); // offset
-                                row3.show(); // limit
+                                row3.hide(); // offset
+                                row4.show(); // limit
                             } else {
-                                row2.hide(); // offset
-                                row3.show(); // limit
+                                row3.hide(); // offset
+                                row4.show(); // limit
                             }
                             resizeContainer();
+                        });
+                        propertyField.change(() => {
+                            const propType = propertyField.typedInput('type');
+                            // timeOperatorField.attr('disabled', (opType === 'none'));
+                            if (propType === 'none') {
+                                propertyOperatorField.attr('disabled', true);
+                            } else {
+                                propertyOperatorField.attr('disabled', false);
+                            }
                         });
                         // setting defaultValues
                         const selFields = getSelectFields();
                         timeOperatorField.val(data.timeOp || 0);
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        operatorField.val(data.levelOp || selFields.blindOperator[0].id);
+                        levelOperatorField.val(data.levelOp || selFields.blindOperator[0].id);
                         levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
                         levelField.typedInput('value', (data.levelValue || ''));
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
@@ -826,6 +846,7 @@
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
                         propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         propertyField.typedInput('value', data.propertyValue || '');
+                        propertyOperatorField.val(data.propertyOp || selFields.comparator[0].id);
                         resizeRule(containerRow);
                         resizeContainer();
                         // #endregion init fields
@@ -976,7 +997,9 @@
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
                     multiplier: rule.find('.node-input-rule-multiplier').val(),
                     propertyType: rule.find('.node-input-rule-property').typedInput('type'),
-                    propertyValue: rule.find('.node-input-rule-property').typedInput('value')
+                    propertyValue: rule.find('.node-input-rule-property').typedInput('value'),
+                    propertyOp: rule.find('.node-input-rule-property-operator').val(),
+                    propertyOpText: rule.find('.node-input-rule-property-operator option:selected').text()
                 };
                 node.rules.push(data);
             });

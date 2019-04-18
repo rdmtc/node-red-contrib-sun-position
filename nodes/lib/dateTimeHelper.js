@@ -95,20 +95,6 @@ function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
 }
 /*******************************************************************************************************/
-/**
- * gets a comparable date Format
- * @param {Date} date - Date to format
- * @return {string} number in Format YYYYMMDDHHMMSS
- */
-function _getComparableDateFormat(date) {
-    return Number(date.getFullYear() +
-        pad2(date.getMonth() + 1) +
-        pad2(date.getDate()) +
-        pad2(date.getHours()) +
-        pad2(date.getMinutes()) +
-        pad2(date.getSeconds()));
-}
-/*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
 /*******************************************************************************************************/
 /**
@@ -250,6 +236,20 @@ function _parseComparableDateFormat(date) {
 }
 
 /*******************************************************************************************************/
+/**
+ * gets a comparable date Format
+ * @param {Date} date - Date to format
+ * @return {string} number in Format YYYYMMDDHHMMSS
+ */
+function _getComparableDateFormat(date) {
+    return Number(date.getFullYear() +
+        pad2(date.getMonth() + 1) +
+        pad2(date.getDate()) +
+        pad2(date.getHours()) +
+        pad2(date.getMinutes()) +
+        pad2(date.getSeconds()));
+}
+
 /**
  * gets a comparable date Format
  * @param {Date} date - Date to format

@@ -102,6 +102,18 @@ const SelectFields = {
         { id: 0, group: 'fix', label: 'abs' },
         { id: 1, group: 'limit', label: 'min' },
         { id: 2, group: 'limit', label: 'max' }
+    ], comparatorGroups: [
+        { id: 'simple', label: 'simple' },
+        { id: 'enhanced', label: 'enhanced' }
+    ], comparator: [
+        { id: 0, group: 'simple', label: 'true' },
+        { id: 1, group: 'simple', label: 'false' },
+        { id: 2, group: 'simple', label: 'null' },
+        { id: 3, group: 'simple', label: 'nnull' },
+        { id: 4, group: 'enhanced', label: 'empty' },
+        { id: 5, group: 'enhanced', label: 'nempty' },
+        { id: 6, group: 'enhanced', label: 'true_expr' },
+        { id: 7, group: 'enhanced', label: 'false_expr' }
     ]
 };
 

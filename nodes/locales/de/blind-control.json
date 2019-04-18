@@ -61,7 +61,7 @@
 		},
 		"text": {
 			"blind": "blind settings",
-			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
+			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or <em>true</em>. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
 			"blindDefaultPos":"if no definition matches the following position will be used",
 			"overwrite": "manual overwrite of the blind position",
 			"sunControlActive": "Restricting the extent to which direct sunlight may shine into the room",
@@ -102,6 +102,14 @@
 			"getPropertyData": "error getting property data: \"__message__\" skipping time",
 			"intervaltoolong":"The selected interval is too long!!",
 			"smoothTimeToolong":"The selected smooth is too long!!"
-		}
+		},
+		"rules" : {
+			"true" : "ist wahr",
+			"false" : "ist falsch",
+			"null" : "ist null",
+			"nnull" : "ist nicht null",
+			"empty" : "ist leer",
+			"nempty" : "ist nicht leer"
+		  }
 	}
 }

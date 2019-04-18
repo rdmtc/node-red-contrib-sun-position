@@ -175,7 +175,7 @@ module.exports = function (RED) {
                 data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
             }
             if (data === null || typeof data === 'undefined') {
-                throw new Error('could not evaluate ' + type + '.' + value);
+                throw new Error(RED._('errors.notEvaluableProperty', {type:type, value:value}));
             }
             data = parseFloat(data);
             if (isNaN(data)) {
@@ -272,7 +272,7 @@ module.exports = function (RED) {
                     if (result && result.value && !result.error) {
                         return result.value;
                     }
-                    throw new Error('could not evaluate ' + vType + '.' + value + ' - ' + result.error);
+                    throw new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
                 } else if (vType === 'entered' || vType === 'dateEntered') {
                     result = hlp.getDateOfText(String(value));
                     const offsetX = node.getFloatProp(node, msg, offsetType, offset);
@@ -349,12 +349,12 @@ module.exports = function (RED) {
                         result.value = hlp.normalizeDate(result.value, offsetX, multiplier, next, days);
                         // node.debug(String(res) + '  --  ' + result.value);
                     } else {
-                        result.error = 'could not evaluate ' + vType + '.' + value;
+                        result.error = RED._('errors.notEvaluableProperty', {type:vType, value:value});
                     }
                 }
             } catch (err) {
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error('Error "${err.message}", could not evaluate ' + vType + '.' + value);
+                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
@@ -370,7 +370,63 @@ module.exports = function (RED) {
             // node.debug('getTimeProp result' + util.inspect(result));
             return result;
         };
-
+        /*******************************************************************************************************/
+        this.comparePropValue = (_srcNode, msg, type, value, compare) => {
+            _srcNode.debug(`getComparablePropValue type='${type}' value='${value}' compare='${compare}'`);
+            let data;
+            if (type === 'none') {
+                return false;
+            } else if (type === '' || typeof type === 'undefined' || type === null) {
+                if (!value) {
+                    _srcNode.warn(RED._('errors.notEvaluableProperty', {type:'"null"', value:value}));
+                    return false;
+                }
+                data = value || 0;
+            } else if (type === 'num') {
+                data = value;
+            } else if (type === 'msgPayload') {
+                data = msg.payload;
+            } else if (type === 'msgValue') {
+                data = msg.value;
+            } else {
+                data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+            }
+            if (data === null || typeof data === 'undefined') {
+                _srcNode.warn(RED._('errors.notEvaluableProperty', {type:type, value:value}));
+                return false;
+            }
+            _srcNode.debug(`data='${data}' type '${typeof data}'`);
+            compare = parseFloat(compare);
+            switch (compare) {
+                case 0: // true
+                    return (data === true);
+                case 1: // false
+                    return (data === false);
+                case 2: // null
+                    return (typeof data == 'undefined' || data === null); // eslint-disable-line eqeqeq
+                case 3: // nnull
+                    return (typeof data != 'undefined' && data !== null); // eslint-disable-line eqeqeq
+                case 4: // empty
+                    if (typeof data === 'string' || Array.isArray(data) || Buffer.isBuffer(data)) {
+                        return data.length === 0;
+                    } else if (typeof data === 'object' && data !== null) {
+                        return Object.keys(data).length === 0;
+                    }
+                    return false;
+                case 5: // nempty
+                    if (typeof data === 'string' || Array.isArray(data) || Buffer.isBuffer(data)) {
+                        return data.length !== 0;
+                    } else if (typeof data === 'object' && data !== null) {
+                        return Object.keys(data).length !== 0;
+                    }
+                    return false;
+                case 6: // true_expr
+                    return hlp.isTrue(data);
+                case 7: // false_expr
+                    return hlp.isFalse(data);
+            }
+            return hlp.isTrue(data);
+        };
         /**************************************************************************************************************/
         this.getSunCalc = (date, noTimes) => {
             // node.debug(`getSunCalc for date="${date}" noTimes="${noTimes}"`);

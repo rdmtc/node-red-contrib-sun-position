@@ -372,8 +372,7 @@ module.exports = function (RED) {
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.propertyType !== 'none') {
                 try {
-                    const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
-                    if (!hlp.isTrue(res)) {
+                    if (!node.positionConfig.comparePropValue(node, msg, rule.propertyType, rule.propertyValue, rule.propertyOp)) {
                         continue;
                     }
                 } catch (err) {
