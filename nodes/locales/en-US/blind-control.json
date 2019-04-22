@@ -78,6 +78,8 @@
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",
+			"sunCtrlMin": "__org__ (__level__ is below minimum)",
+			"sunCtrlMax": "__org__ (__level__ is above maximum)",
 			"cloudExceeded": "Cloud overcast conditions",
 			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)"
 		},
@@ -89,6 +91,8 @@
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
 			"sunCtrl": "sun control",
+			"sunCtrlMin": "__org__ (min)",
+			"sunCtrlMax": "__org__ (max)",
 			"cloudExceeded": "cloud",
 			"smooth": "block change to __pos__"
 		},

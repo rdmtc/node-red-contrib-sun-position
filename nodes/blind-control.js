@@ -337,11 +337,15 @@ module.exports = function (RED) {
             }
             if (node.blindData.level < node.blindData.levelMin)  {
                 // min
-                node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
+                // node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
+                node.reason.state = RED._('blind-control.states.sunCtrlMin', {org: node.reason.state});
+                node.reason.description = RED._('blind-control.reasons.sunCtrlMin', {org: node.reason.description, level:node.blindData.level});
                 node.blindData.level = node.blindData.levelMin;
             } else if (node.blindData.level > node.blindData.levelMax) {
                 // max
-                node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
+                // node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
+                node.reason.state = RED._('blind-control.states.sunCtrlMax', {org: node.reason.state});
+                node.reason.description = RED._('blind-control.reasons.sunCtrlMax', {org: node.reason.description, level:node.blindData.level});
                 node.blindData.level = node.blindData.levelMax;
             }
         } else if (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
