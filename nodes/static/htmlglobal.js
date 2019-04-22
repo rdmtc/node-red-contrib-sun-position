@@ -95,13 +95,6 @@ const SelectFields = {
         // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
-    ], blindOperatorGroups: [
-        { id: 'fix', label: 'fix' },
-        { id: 'limit', label: 'Limit' }
-    ], blindOperator: [
-        { id: 0, group: 'fix', label: 'abs' },
-        { id: 1, group: 'limit', label: 'min' },
-        { id: 2, group: 'limit', label: 'max' }
     ], comparatorGroups: [
         { id: 'simple', label: 'simple' },
         { id: 'enhanced', label: 'enhanced' }
@@ -113,7 +106,9 @@ const SelectFields = {
         { id: 4, group: 'enhanced', label: 'empty' },
         { id: 5, group: 'enhanced', label: 'nempty' },
         { id: 6, group: 'enhanced', label: 'true_expr' },
-        { id: 7, group: 'enhanced', label: 'false_expr' }
+        { id: 7, group: 'enhanced', label: 'false_expr' },
+        { id: 8, group: 'enhanced', label: 'ntrue_expr' },
+        { id: 9, group: 'enhanced', label: 'nfalse_expr' }
     ]
 };
 
@@ -469,23 +464,23 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     const tInputField = $('#node-input-' + data.valueProp);
     const typeField = $('#node-input-' + data.typeProp);
-    if (typeof node[data.typeProp] !== 'undefined') {
-        if (node[data.typeProp] === null ||
-            typeof node[data.typeProp] === 'undefined') {
+    if (typeof node[data.typeProp] === 'undefined' ||
+        node[data.typeProp] === null) {
+        if (typeof data.defaultType !== 'undefined') {
             node[data.typeProp] = data.defaultType;
             typeField.val(data.defaultType);
-        } else {
-            typeField.val(node[data.typeProp]);
         }
+    } else {
+        typeField.val(node[data.typeProp]);
     }
-    if (typeof node[data.valueProp] !== 'undefined') {
-        if (node[data.valueProp] === null ||
-            typeof node[data.valueProp] === 'undefined') {
+    if (typeof node[data.valueProp] === 'undefined' ||
+        node[data.valueProp] === null) {
+        if (typeof data.defaultValue !== 'undefined') {
             node[data.valueProp] = data.defaultValue;
             tInputField.val(node[data.defaultValue]);
-        } else {
-            tInputField.val(node[data.valueProp]);
         }
+    } else {
+        tInputField.val(node[data.valueProp]);
     }
     tInputField.typedInput({
         typeField: typeField,

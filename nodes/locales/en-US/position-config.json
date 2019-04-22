@@ -157,15 +157,6 @@
             "month",
             "year"
         ],
-        "blindOperatorGroups": [
-            "fixed position",
-            "limit blind position"
-        ],
-        "blindOperator": [
-            "absolute",
-            "minimum",
-            "maximum"
-        ],
         "comparatorGroups": [
             "fixed position",
             "limit blind position"
@@ -177,8 +168,10 @@
             "is not null",
             "is empty",
             "is not empty",
-            "is true expression",
-            "is false expression"
+            "is a true expression",
+            "is a false expression",
+            "is not a true expression",
+            "is not a false expression"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",

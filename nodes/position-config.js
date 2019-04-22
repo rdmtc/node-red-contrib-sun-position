@@ -424,6 +424,10 @@ module.exports = function (RED) {
                     return hlp.isTrue(data);
                 case 7: // false_expr
                     return hlp.isFalse(data);
+                case 8: // not true_expr
+                    return !hlp.isTrue(data);
+                case 9: // not false_expr
+                    return !hlp.isFalse(data);
             }
             return hlp.isTrue(data);
         };
