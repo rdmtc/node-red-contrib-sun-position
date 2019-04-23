@@ -201,6 +201,7 @@ module.exports = function (RED) {
     function blindPosOverwriteReset(node) {
         node.debug(`blindPosOverwriteReset expire=${node.blindData.overwrite.expires}`);
         node.blindData.overwrite.active = false;
+        node.blindData.overwrite.priority = 0;
         node.blindData.nextchange = 0;
         if (node.blindData.overwrite.expires) {
             delete node.blindData.overwrite.expires;
@@ -227,13 +228,14 @@ module.exports = function (RED) {
                 }
             });
 
-        const prio = hlp.getMsgBoolValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
-        if (node.blindData.overwrite.active && !prio && node.blindData.overwrite.expireNever) {
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
+        if (node.blindData.overwrite.active && node.blindData.overwrite.expireNever &&
+            ((prio < node.blindData.overwrite.priority) || (node.blindData.overwrite.priority > 0)) ) {
             return true;
         }
         const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'], undefined, -1);
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire', undefined, -10);
-        if (prio || (newPos > -1) || (expire > -10)) {
+        if ((prio > 0) || (newPos > -1) || (expire > -10)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos > -1) {
                 if (!validPosition_(node, newPos)) {
@@ -247,13 +249,13 @@ module.exports = function (RED) {
                 }
                 node.blindData.level = newPos;
             }
-            if (prio || (expire === 0) || (expire === -1)) {
+            if ((prio > 0) || (expire === 0) || (expire === -1)) {
                 node.blindData.overwrite.expireNever = true;
                 node.blindData.overwrite.active = true;
+                node.blindData.overwrite.priority = prio;
                 node.reason.code = 2;
                 node.reason.state = RED._('blind-control.states.overwritePrio');
                 node.reason.description = RED._('blind-control.reasons.overwritePrio');
-
                 // node.blindData.level
             } else {
                 if (node.timeOutObj) {
@@ -383,9 +385,9 @@ module.exports = function (RED) {
             rule.timeOp = Number(rule.timeOp);
             rule.pos = i + 1;
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-            if (rule.propertyType !== 'none') {
+            if (rule.validOperandAType !== 'none') {
                 try {
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.propertyType, rule.propertyValue, rule.propertyOp)) {
+                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue)) {
                         continue;
                     }
                 } catch (err) {
@@ -430,17 +432,6 @@ module.exports = function (RED) {
             if (res) {
                 ruleSel = res;
                 break;
-                /*
-                if (res.levelOp === 0) {
-                    ruleSel = res;
-                    break;
-                } else if (res.levelOp === 1 && (timeData.levelMinType !== 1)) {
-                    timeData.levelMin = getBlindPosFromTI(node, msg, res.levelType, res.levelValue, node.blindData.defaultPos);
-                    timeData.levelMinType = 2;
-                } else if (res.levelOp === 2 && (timeData.levelMaxType !== 1)) {
-                    timeData.levelMax = getBlindPosFromTI(node, msg, res.levelType, res.levelValue, node.blindData.defaultPos);
-                    timeData.levelMaxType = 2;
-                } /* */
             }
         }
 
@@ -453,17 +444,6 @@ module.exports = function (RED) {
             if (res) {
                 ruleSel = res;
                 break;
-                /*
-                if (res.levelOp === 0) {
-                    ruleSel = res;
-                    break;
-                } else if ((res.levelOp === 1) && (timeData.levelMinType !== 2)) {
-                    timeData.levelMin = getBlindPosFromTI(node, msg, res.levelType, res.levelValue, node.blindData.defaultPos);
-                    timeData.levelMinType = 2;
-                } else if ((res.levelOp === 2) && (timeData.levelMaxType !== 2)) {
-                    timeData.levelMax = getBlindPosFromTI(node, msg, res.levelType, res.levelValue, node.blindData.defaultPos);
-                    timeData.levelMaxType = 2;
-                } /* */
             }
         }
 
@@ -472,7 +452,7 @@ module.exports = function (RED) {
             if (ruleSel.timeType !== 'none') {
                 ruleSel.text = ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
             }
-            if (ruleSel.propertyType !== 'none') {
+            if (ruleSel.validOperandAType !== 'none') {
                 ruleSel.text += '*';
             }
             node.debug(timeData.text);
@@ -543,7 +523,8 @@ module.exports = function (RED) {
             /** level if sun is not in window */
             overwrite : {
                 active: false,
-                expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, 0))
+                expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, 0)),
+                priority: 0
             },
             nextchange:0
         };

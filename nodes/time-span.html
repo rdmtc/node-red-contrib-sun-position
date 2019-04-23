@@ -427,7 +427,7 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getOperator getMultiplier getTypes appendOptions setupTInput initCombobox */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox */
                 const types = getTypes(node);
                 // #region operand1
                 setupTInput(node, {
@@ -619,16 +619,17 @@
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row);
-                        appendOptions(node, multiplierField, 'multiplier', (id) => (id > 0) );
+                        appendOptions(node, multiplierField, 'multiplier', (data) => (data.id > 0) );
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
                         }).appendTo(row);
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
                         // setting defaultValues
-                        operatorField.val(data.operator || getOperator(0).id);
+                        const selFields = getSelectFields();
+                        operatorField.val(data.operator || selFields.operators[0].id);
                         operandField.typedInput('type', data.operandType || 'num');
                         operandField.typedInput('value', data.operandValue || '');
-                        multiplierField.val(data.multiplier || getMultiplier(0).id);
+                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
                         resizeRule(containerRow);
                         resizeContainer();
                     },

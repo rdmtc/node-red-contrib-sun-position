@@ -330,8 +330,8 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
         }
         for (let i = 0; i < ids.length; i++) {
             const id = ids[i];
-            if (msg.payload && (typeof msg.payload[id] !== 'undefined')) {
-                const res = parseFloat(msg.payload[id]);
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== '')) {
+                const res = Number(msg.payload[id]); // Number() instead of parseFloat() to also parse boolean
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
                         return isFound(res);
@@ -339,8 +339,8 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
                     return res;
                 }
             }
-            if (typeof msg[id] !== 'undefined') {
-                const res = parseFloat(msg[id]);
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== '')) {
+                const res = Number(msg[id]);
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
                         return isFound(res);
@@ -352,14 +352,14 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
     }
     // includes
     if (names && msg && msg.topic && msg.payload) {
-        const res = parseFloat(msg.payload);
+        const res = Number(msg.payload);
         if (!isNaN(res)) {
             if (!Array.isArray(names)) {
                 names = [names];
             }
             for (let i = 0; i < names.length; i++) {
                 if (String(msg.topic).toLowerCase().includes(names[i])) {
-                    const res = parseFloat(msg.payload);
+                    const res = Number(msg.payload);
                     if (!isNaN(res)) {
                         if (typeof isFound === 'function') {
                             return isFound(res);

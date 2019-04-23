@@ -66,6 +66,56 @@ Date.prototype.addDays = function (days) {
     return date;
 };
 
+const compareOperators = {
+    'true': (a) => (a === true),
+    'false': (a) => (a === false),
+    'null': (a) => (typeof a == 'undefined' || a === null), // eslint-disable-line eqeqeq
+    'nnull': (a) => (typeof a != 'undefined' && a !== null), // eslint-disable-line eqeqeq
+    'empty': (a) => {
+        if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+            return a.length === 0;
+        } else if (typeof a === 'object' && a !== null) {
+            return Object.keys(a).length === 0;
+        }
+        return false;
+    },
+    'nempty': (a) => {
+        if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+            return a.length !== 0;
+        } else if (typeof a === 'object' && a !== null) {
+            return Object.keys(a).length !== 0;
+        }
+        return false;
+    },
+    'true_expr': (a) => hlp.isTrue(a),
+    'false_expr': (a) => hlp.isFalse(a),
+    'ntrue_expr': (a) => (!hlp.isTrue(a)),
+    'nfalse_expr': (a) => (!hlp.isFalse(a)),
+    'equal': (a, b) => (a == b),  // eslint-disable-line eqeqeq
+    'nequal': (a, b) => (a != b),  // eslint-disable-line eqeqeq
+    'lt': (a, b) => (a < b),
+    'lte': (a, b) => (a <= b),
+    'gt': (a, b) => (a > b),
+    'gte': (a, b) => (a >= b),
+    'contain': (a, b) => ((a + '').indexOf(b) !== -1),
+    'istype': (a, b) => {
+        if (b === 'array') {
+            return Array.isArray(a);
+        } else if (b === 'buffer') {
+            return Buffer.isBuffer(a);
+        } else if (b === 'json') {
+            try {
+                JSON.parse(a); return true;
+            } catch (e) {
+                return false;
+            }
+        } else if (b === 'null') {
+            return a === null;
+        }
+        return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null;
+    }
+};
+
 module.exports = function (RED) {
     'use strict';
 
@@ -371,65 +421,45 @@ module.exports = function (RED) {
             return result;
         };
         /*******************************************************************************************************/
-        this.comparePropValue = (_srcNode, msg, type, value, compare) => {
-            _srcNode.debug(`getComparablePropValue type='${type}' value='${value}' compare='${compare}'`);
-            let data;
-            if (type === 'none') {
+        this.comparePropValue = (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB) => {
+            _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
+            if (opTypeA === 'none') {
                 return false;
-            } else if (type === '' || typeof type === 'undefined' || type === null) {
-                if (!value) {
-                    _srcNode.warn(RED._('errors.notEvaluableProperty', {type:'"null"', value:value}));
-                    return false;
+            }
+            const fkt = (type, value) => {
+                if (type === 'none') {
+                    return null;
+                } else if (type === '' || typeof type === 'undefined' || type === null) {
+                    if (!value) {
+                        _srcNode.warn(RED._('errors.notEvaluableProperty', {type:'"null"', value:value}));
+                        return false;
+                    }
+                    return value || 0;
+                } else if (type === 'num') {
+                    return value;
+                } else if (type === 'msgPayload') {
+                    return msg.payload;
+                } else if (type === 'msgValue') {
+                    return msg.value;
                 }
-                data = value || 0;
-            } else if (type === 'num') {
-                data = value;
-            } else if (type === 'msgPayload') {
-                data = msg.payload;
-            } else if (type === 'msgValue') {
-                data = msg.value;
-            } else {
-                data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
-            }
-            if (data === null || typeof data === 'undefined') {
-                _srcNode.warn(RED._('errors.notEvaluableProperty', {type:type, value:value}));
+                return RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+            };
+
+            const opA = fkt(opTypeA, opValueA);
+            if (opA === null || typeof opA === 'undefined') {
+                _srcNode.warn(RED._('errors.notEvaluableProperty', { type: opTypeA, value: opValueA }));
                 return false;
             }
-            _srcNode.debug(`data='${data}' type '${typeof data}'`);
-            compare = parseFloat(compare);
-            switch (compare) {
-                case 0: // true
-                    return (data === true);
-                case 1: // false
-                    return (data === false);
-                case 2: // null
-                    return (typeof data == 'undefined' || data === null); // eslint-disable-line eqeqeq
-                case 3: // nnull
-                    return (typeof data != 'undefined' && data !== null); // eslint-disable-line eqeqeq
-                case 4: // empty
-                    if (typeof data === 'string' || Array.isArray(data) || Buffer.isBuffer(data)) {
-                        return data.length === 0;
-                    } else if (typeof data === 'object' && data !== null) {
-                        return Object.keys(data).length === 0;
-                    }
-                    return false;
-                case 5: // nempty
-                    if (typeof data === 'string' || Array.isArray(data) || Buffer.isBuffer(data)) {
-                        return data.length !== 0;
-                    } else if (typeof data === 'object' && data !== null) {
-                        return Object.keys(data).length !== 0;
-                    }
-                    return false;
-                case 6: // true_expr
-                    return hlp.isTrue(data);
-                case 7: // false_expr
-                    return hlp.isFalse(data);
-                case 8: // not true_expr
-                    return !hlp.isTrue(data);
-                case 9: // not false_expr
-                    return !hlp.isFalse(data);
-            }
-            return hlp.isTrue(data);
+
+            _srcNode.debug(`opA='${opA}' type '${typeof opA}'`);
+            return compareOperators[compare](opA, () => {
+                const opB = fkt(opTypeB, opValueB);
+                if (opB === null || typeof opB === 'undefined') {
+                    _srcNode.warn(RED._('errors.notEvaluableProperty', { type: opTypeB, value: opValueB }));
+                    return null;
+                }
+                return opB;
+            });
         };
         /**************************************************************************************************************/
         this.getSunCalc = (date, noTimes) => {

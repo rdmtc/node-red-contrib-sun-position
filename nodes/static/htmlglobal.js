@@ -97,31 +97,32 @@ const SelectFields = {
         {id: -2, group: 'other', label: 'year'}
     ], comparatorGroups: [
         { id: 'simple', label: 'simple' },
+        { id: 'compare', label: 'compare' },
         { id: 'enhanced', label: 'enhanced' }
     ], comparator: [
-        { id: 0, group: 'simple', label: 'true' },
-        { id: 1, group: 'simple', label: 'false' },
-        { id: 2, group: 'simple', label: 'null' },
-        { id: 3, group: 'simple', label: 'nnull' },
-        { id: 4, group: 'enhanced', label: 'empty' },
-        { id: 5, group: 'enhanced', label: 'nempty' },
-        { id: 6, group: 'enhanced', label: 'true_expr' },
-        { id: 7, group: 'enhanced', label: 'false_expr' },
-        { id: 8, group: 'enhanced', label: 'ntrue_expr' },
-        { id: 9, group: 'enhanced', label: 'nfalse_expr' }
+        { id: 'true', group: 'simple', label: 'true', operatorCount: 1 },
+        { id: 'false', group: 'simple', label: 'false', operatorCount: 1 },
+        { id: 'null', group: 'simple', label: 'null', operatorCount: 1 },
+        { id: 'nnull', group: 'simple', label: 'not null', operatorCount: 1 },
+        { id: 'empty', group: 'simple', label: 'empty', operatorCount: 1 },
+        { id: 'nempty', group: 'simple', label: 'not empty', operatorCount: 1 },
+        { id: 'true_expr', group: 'enhanced', label: 'true_expr', operatorCount: 1 },
+        { id: 'false_expr', group: 'enhanced', label: 'false_expr', operatorCount: 1 },
+        { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operatorCount: 1 },
+        { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operatorCount: 1 },
+        { id: 'equal', group: 'compare', label: 'equal', operatorCount: 2 },
+        { id: 'nequal', group: 'compare', label: 'not equal', operatorCount: 2 },
+        { id: 'lt', group: 'compare', label: 'less than', operatorCount: 2 },
+        { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
+        { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
+        { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
+        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
+        { id: 'istype', group: 'enhanced', label: 'is of type', operatorCount: 2 }
     ]
 };
 
-function getOperator(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.operators[nr];
-}
-
-function getMultiplier(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.multiplier[nr];
-}
-
-function getParseFormats(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.parseFormats[nr];
+function getSelectFields() { // eslint-disable-line no-unused-vars
+    return SelectFields;
 }
 
 function getTypes(node) { // eslint-disable-line no-unused-vars
@@ -246,10 +247,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: false
         }
     };
-}
-
-function getSelectFields() { // eslint-disable-line no-unused-vars
-    return SelectFields;
 }
 
 const autocompleteFormats = {
@@ -450,7 +447,7 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (limit) {
-                    if (limit(elements[eIndex].id)) {
+                    if (limit(elements[eIndex])) {
                         group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                     }
                 } else {

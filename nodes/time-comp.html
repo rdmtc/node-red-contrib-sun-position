@@ -431,7 +431,7 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getOperator getMultiplier getParseFormats getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
                 const types = getTypes(node);
                 const operatorTypesShort = [
                     {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
@@ -659,15 +659,16 @@
                             }
                         });
                         // setting defaultValues
-                        operatorField.val(data.operator || getOperator(0).id);
+                        const selFields = getSelectFields();
+                        operatorField.val(data.operator || selFields.operators[0].id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
                         operandField.typedInput('type', (data.operandType || types.DateEntered.value));
                         operandField.typedInput('value', (data.operandValue || ''));
                         formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
-                        formatSelField.val(data.formatSelection || getParseFormats(0).id);
+                        formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
                         offsetField.typedInput('value', data.offsetValue || '');
-                        multiplierField.val(data.multiplier || getMultiplier(0).id);
+                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
                         propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         propertyField.typedInput('value', data.propertyValue || '');
                         resizeRule(containerRow);

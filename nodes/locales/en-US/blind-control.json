@@ -30,7 +30,9 @@
 			"blindPosMax": "maximale position",
 			"smoothTime":"smoothTime",
 			"from": "from",
-			"until": "until"
+			"until": "until",
+			"propCompare": " ",
+			"options":"special options"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -69,6 +71,13 @@
 		},
 		"tips": {
 			"addTimes": "..."
+		},
+		"options": {
+			"none":"no special",
+			"resetOverwrite": "reset overwrite",
+			"expiringOverwrite": "as expiring overwrite",
+			"prioOverwrite": "as priority overwrite",
+			"prioHighOverwrite": "as high priority overwrite"
 		},
 		"reasons": {
 			"overwritePrio": "position is overwritten by priority, no expire",

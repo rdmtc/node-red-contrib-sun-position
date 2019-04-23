@@ -158,8 +158,9 @@
             "year"
         ],
         "comparatorGroups": [
-            "fixed position",
-            "limit blind position"
+            "simple",
+            "medium",
+            "enhanced"
         ],
         "comparator": [
             "is true",
@@ -171,7 +172,15 @@
             "is a true expression",
             "is a false expression",
             "is not a true expression",
-            "is not a false expression"
+            "is not a false expression",
+            "equal",
+            "not equal",
+            "less than",
+            "less than or equal",
+            "greater than",
+            "greater than or equal",
+            "contain",
+            "is of type"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
