@@ -219,22 +219,40 @@ module.exports = function (RED) {
      * @param {*} node node data
      * @param {*} msg message object
      */
-    function checkBlindPosOverwrite(node, msg, now) {
+    function checkBlindPosOverwrite(node, msg, timeData) {
         // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
-        hlp.getMsgBoolValue(msg, 'reset', 'reset',
-            (val) => {
-                if (val) {
-                    blindPosOverwriteReset(node);
-                }
-            });
+        if (timeData.option === 'resetOverwrite') {
+            blindPosOverwriteReset(node);
+        } else {
+            hlp.getMsgBoolValue(msg, 'reset', 'reset',
+                (val) => {
+                    if (val) {
+                        blindPosOverwriteReset(node);
+                    }
+                });
+        }
 
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
+        let prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
         if (node.blindData.overwrite.active && node.blindData.overwrite.expireNever &&
             ((prio < node.blindData.overwrite.priority) || (node.blindData.overwrite.priority > 0)) ) {
             return true;
         }
-        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'], undefined, -1);
+        let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'], undefined, -1);
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire', undefined, -10);
+        if ((prio <= 0) && (newPos < 0) && (expire < 0) && (!node.blindData.overwrite.active)) {
+            if ((timeData.option === 'expiringOverwrite') && (!node.timeOutObj)) {
+                prio = 0;
+                expire = -1;
+                newPos = timeData.level;
+            } else if (timeData.option === 'prioOverwrite') {
+                prio = 1;
+                expire = 1;
+                newPos = timeData.level;
+            } else if (timeData.option === 'prioHighOverwrite') {
+                prio = 10;
+                newPos = timeData.level;
+            }
+        }
         if ((prio > 0) || (newPos > -1) || (expire > -10)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos > -1) {
@@ -263,7 +281,7 @@ module.exports = function (RED) {
                 }
                 expire = (expire < 10) ? node.blindData.overwrite.expireDuration : expire;
                 node.blindData.overwrite.active = true;
-                node.blindData.overwrite.expires = (now.getTime() + expire);
+                node.blindData.overwrite.expires = (timeData.now.getTime() + expire);
                 node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expires);
                 node.debug(`expires in ${expire}ms = ${node.blindData.overwrite.expireDate}`);
                 node.timeOutObj = setTimeout(() => {
@@ -295,10 +313,6 @@ module.exports = function (RED) {
      */
     function calcBlindPosition(node, msg, timeData) {
         // node.debug('calcBlindPosition');
-        if (timeData.levelFixed || !node.sunData.active) {
-            // node.debug(`absolute time pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
-            return;
-        }
         // sun control is active
         const sunPosition = getSunPosition_(node, timeData.now);
         msg.blindCtrl.sunPosition = sunPosition;
@@ -310,6 +324,11 @@ module.exports = function (RED) {
             return;
         }
         checkWeather(node, msg);
+        // set default values:
+        node.blindData.level = timeData.level;
+        node.reason.code = timeData.code;
+        node.reason.state = timeData.state;
+        node.reason.description = timeData.description;
 
         if (node.cloudData.inLimit &&
                     (!node.sunData.minAltitude ||
@@ -460,20 +479,32 @@ module.exports = function (RED) {
             timeData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.defaultPos);
             timeData.ruleId = ruleSel.pos;
             timeData.state = RED._('blind-control.states.time', ruleSel);
+            timeData.option = Number(ruleSel.option);
+            timeData.code = 4;
+            timeData.state = RED._('blind-control.states.time', ruleSel);
+            timeData.description = RED._('blind-control.reasons.time', ruleSel);
+            /*
             node.blindData.level = timeData.level;
             node.reason.code = 4;
             node.reason.state = RED._('blind-control.states.time', ruleSel);
             node.reason.description = RED._('blind-control.reasons.time', ruleSel);
+            */
             // node.debug('timeData=' + util.inspect(timeData,{colors:true, compact:10}));
             return;
         }
         timeData.levelFixed = false;
         timeData.level = node.blindData.defaultPos;
         timeData.ruleId = -1;
+        timeData.option = 0;
+        timeData.code = 1;
+        timeData.state = RED._('blind-control.states.default');
+        timeData.description = RED._('blind-control.reasons.default');
+        /*
         node.blindData.level = node.blindData.defaultPos;
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
+        */
         // node.debug('timeData default ' + util.inspect(timeData, {colors:true, compact:10}));
     }
     /******************************************************************************************/
@@ -595,11 +626,11 @@ module.exports = function (RED) {
                 };
                 const timeData = { now : getNow_(node, msg, config.tsCompare) };
                 // check if the message contains any weather data
+                // calc times:
+                calcTimes(node, msg, timeData);
 
                 // check for manual overwrite
-                if (!checkBlindPosOverwrite(node, msg, timeData.now)) {
-                    // calc times:
-                    calcTimes(node, msg, timeData);
+                if (!checkBlindPosOverwrite(node, msg, timeData) && !timeData.levelFixed && node.sunData.active) {
                     // calc sun position:
                     calcBlindPosition(node, msg, timeData);
 

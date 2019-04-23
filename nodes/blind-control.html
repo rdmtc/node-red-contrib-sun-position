@@ -684,8 +684,12 @@
                         const propertyField = rule.find('.node-input-rule-property');
                         const propertyOperatorField = rule.find('.node-input-rule-property-operator');
                         propertyLblField.width('auto');
-                        propertyOperatorField.width(100);
-                        propertyField.typedInput('width', (newWidth - propertyLblField.width() - 135));
+                        if (propertyOperatorField.is(':visible')) {
+                            propertyOperatorField.width(100);
+                            propertyField.typedInput('width', (newWidth - propertyLblField.width() - 135));
+                        } else {
+                            propertyField.typedInput('width', (newWidth - propertyLblField.width() - 15));
+                        }
                         // row2
                         const propCompareLblField = rule.find('.node-input-rule-propCompare-lbl');
                         const propCompareField = rule.find('.node-input-rule-propCompare');
@@ -713,7 +717,7 @@
                         const optionLblField = rule.find('.node-input-rule-option-lbl');
                         const optionField = rule.find('.node-input-rule-option');
                         optionLblField.width('auto');
-                        optionField.width(newWidth - optionLblField.width() - 10);
+                        optionField.width(newWidth - optionLblField.width() - 28);
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -830,11 +834,11 @@
                             id: 'node-input-rule-option' + containerIndex,
                             style: 'margin-left: 5px;'
                         }).appendTo(row6);
-                        optionField.append($('<option></option>').val(0).text(node._('blind-control.options.none')));
-                        optionField.append($('<option></option>').val(1).text(node._('blind-control.options.resetOverwrite')));
-                        optionField.append($('<option></option>').val(2).text(node._('blind-control.options.expiringOverwrite')));
-                        optionField.append($('<option></option>').val(3).text(node._('blind-control.options.prioOverwrite')));
-                        optionField.append($('<option></option>').val(4).text(node._('blind-control.options.prioHighOverwrite')));
+                        optionField.append($('<option></option>').val('none').text(node._('blind-control.options.none')));
+                        optionField.append($('<option></option>').val('resetOverwrite').text(node._('blind-control.options.resetOverwrite')));
+                        optionField.append($('<option></option>').val('expiringOverwrite').text(node._('blind-control.options.expiringOverwrite')));
+                        optionField.append($('<option></option>').val('prioOverwrite').text(node._('blind-control.options.prioOverwrite')));
+                        optionField.append($('<option></option>').val('prioHighOverwrite').text(node._('blind-control.options.prioHighOverwrite')));
                         // TODO, reset of manual overwrites
                         // #endregion row6
                         // #region init fields
@@ -851,20 +855,22 @@
                         propertyField.change(() => {
                             const propType = propertyField.typedInput('type');
                             if (propType === 'none') {
-                                propertyOperatorField.attr('disabled', true);
+                                propertyOperatorField.hide();
                                 row2.hide(); // propCompare
                             } else if (propType === 'jsonata') {
+                                propertyOperatorField.show();
                                 propertyOperatorField.attr('disabled', true);
                                 propertyOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
                                 row2.hide(); // propCompare
                             } else {
+                                propertyOperatorField.show();
                                 propertyOperatorField.attr('disabled', false);
                                 const propOp = propertyOperatorField.val();
                                 let operatorCount = 1;
                                 // console.log(selFields.comparator);
                                 const fields = selFields.comparator;
-                                const fielslength = fields.length;
-                                for (let index = 0; index < fielslength; index++) {
+                                const fieldsLength = fields.length;
+                                for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === propOp) {
                                         operatorCount = el.operatorCount;
@@ -896,7 +902,7 @@
                         propertyOperatorField.val(data.propertyOp || selFields.comparator[0].id);
                         propCompareField.typedInput('type', data.propertyCompareType || 'str');
                         propCompareField.typedInput('value', data.propertyCompareValue || '');
-                        optionField.val(data.option || 0);
+                        optionField.val(data.option || 'none');
                         resizeRule(containerRow);
                         // resizeContainer();
                         propertyField.change();
