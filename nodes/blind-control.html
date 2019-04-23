@@ -771,8 +771,8 @@
                             id: 'node-input-rule-propCompare' + containerIndex,
                             type: 'text'
                         }).appendTo(row2).typedInput({
-                            default: 'num',
-                            types: ['msg', 'flow', 'global', 'str', 'num', 'env', 'jsonata']
+                            default: 'str',
+                            types: ['msg', 'flow', 'global', 'str', 'num', 'env']
                         });
                         // #endregion row2
                         // #region row3 - time
@@ -824,7 +824,7 @@
                         });
                         // #endregion row5
                         // #region row6 - options
-                        addLabel(row5, 'node-input-rule-option', 'fa fa-cogs', node._('blind-control.label.option'));
+                        addLabel(row6, 'node-input-rule-option', 'fa fa-cogs', node._('blind-control.label.options'));
                         const optionField = $('<select/>', {
                             class: 'node-input-rule-option',
                             id: 'node-input-rule-option' + containerIndex,
@@ -853,17 +853,25 @@
                             if (propType === 'none') {
                                 propertyOperatorField.attr('disabled', true);
                                 row2.hide(); // propCompare
+                            } else if (propType === 'jsonata') {
+                                propertyOperatorField.attr('disabled', true);
+                                propertyOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
+                                row2.hide(); // propCompare
                             } else {
                                 propertyOperatorField.attr('disabled', false);
                                 const propOp = propertyOperatorField.val();
-                                let opCount = 1;
-                                for (const d in selFields.comparator) {
-                                    if (d.id === propOp) {
-                                        opCount = d.operatorCount;
+                                let operatorCount = 1;
+                                // console.log(selFields.comparator);
+                                const fields = selFields.comparator;
+                                const fielslength = fields.length;
+                                for (let index = 0; index < fielslength; index++) {
+                                    const el = fields[index];
+                                    if (el.id === propOp) {
+                                        operatorCount = el.operatorCount;
                                         break;
                                     }
                                 }
-                                if (opCount > 1) {
+                                if (operatorCount > 1) {
                                     row2.show(); // propCompare
                                 } else {
                                     row2.hide(); // propCompare
@@ -886,15 +894,12 @@
                         propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         propertyField.typedInput('value', data.propertyValue || '');
                         propertyOperatorField.val(data.propertyOp || selFields.comparator[0].id);
-                        propCompareField.typedInput('type', data.propertyCompareType || 'num');
+                        propCompareField.typedInput('type', data.propertyCompareType || 'str');
                         propCompareField.typedInput('value', data.propertyCompareValue || '');
                         optionField.val(data.option || 0);
-                        console.log('init x3');
                         resizeRule(containerRow);
                         // resizeContainer();
-                        console.log('init x4');
                         propertyField.change();
-                        console.log('init x5');
                         timeField.change();
                         // #endregion init fields
                     },
