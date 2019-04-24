@@ -16,15 +16,15 @@ const util = require('util');
 function validPosition_(node, level) {
     // node.debug('validPosition_ level='+level);
     if (isNaN(level)) {
-        node.debug(`Position: "${level}" is NaN!`);
+        node.warn(`Position: "${level}" is NaN!`);
         return false;
     }
     if (level < node.blindData.closedPos) {
-        node.debug(`Position: "${level}" < ${node.blindData.closedPos}`);
+        node.warn(`Position: "${level}" < closedPos ${node.blindData.closedPos}`);
         return false;
     }
     if (node.blindData.level > node.blindData.openPos) {
-        node.debug(`Position: "${level}" > ${node.blindData.openPos}`);
+        node.warn(`Position: "${level}" > openPos ${node.blindData.openPos}`);
         return false;
     }
     if (Number.isInteger(node.blindData.openPos) &&
@@ -32,7 +32,7 @@ function validPosition_(node, level) {
         Number.isInteger(node.blindData.increment) &&
         ((level % node.blindData.increment !== 0) ||
         !Number.isInteger(level) )) {
-        node.debug(`Position invalid "${level}" > ${node.blindData.openPos}`);
+        node.warn(`Position invalid "${level}" not fit to increment ${node.blindData.increment}`);
         return false;
     }
     return Number.isInteger(Number((level / node.blindData.increment).toFixed(hlp.countDecimals(node.blindData.increment) + 2)));
@@ -202,7 +202,7 @@ module.exports = function (RED) {
         node.debug(`blindPosOverwriteReset expire=${node.blindData.overwrite.expires}`);
         node.blindData.overwrite.active = false;
         node.blindData.overwrite.priority = 0;
-        node.blindData.nextchange = 0;
+        node.blindData.overwrite.level = -1;
         if (node.blindData.overwrite.expires) {
             delete node.blindData.overwrite.expires;
             delete node.blindData.overwrite.expireNever;
@@ -221,38 +221,28 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, timeData) {
         // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
-        if (timeData.option === 'resetOverwrite') {
+        if (timeData.option === 'notOverwritable') {
             blindPosOverwriteReset(node);
-        } else {
-            hlp.getMsgBoolValue(msg, 'reset', 'reset',
-                (val) => {
-                    if (val) {
-                        blindPosOverwriteReset(node);
-                    }
-                });
+            node.blindData.level = timeData.level;
+            node.reason.code = timeData.code;
+            node.reason.state = timeData.state;
+            node.reason.description = timeData.description;
+            return true;
         }
+        hlp.getMsgBoolValue(msg, 'reset', 'reset',
+            (val) => {
+                if (val) {
+                    blindPosOverwriteReset(node);
+                }
+            });
 
-        let prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'alarm'], ['prio', 'alarm']);
         if (node.blindData.overwrite.active && node.blindData.overwrite.expireNever &&
             ((prio < node.blindData.overwrite.priority) || (node.blindData.overwrite.priority > 0)) ) {
             return true;
         }
-        let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'], undefined, -1);
+        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'], undefined, -1);
         let expire = hlp.getMsgNumberValue(msg, 'expire', 'expire', undefined, -10);
-        if ((prio <= 0) && (newPos < 0) && (expire < 0) && (!node.blindData.overwrite.active)) {
-            if ((timeData.option === 'expiringOverwrite') && (!node.timeOutObj)) {
-                prio = 0;
-                expire = -1;
-                newPos = timeData.level;
-            } else if (timeData.option === 'prioOverwrite') {
-                prio = 1;
-                expire = 1;
-                newPos = timeData.level;
-            } else if (timeData.option === 'prioHighOverwrite') {
-                prio = 10;
-                newPos = timeData.level;
-            }
-        }
         if ((prio > 0) || (newPos > -1) || (expire > -10)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos > -1) {
@@ -265,16 +255,16 @@ module.exports = function (RED) {
                 if (noSameValue && (node.blindData.previous.level === newPos)) {
                     return true;
                 }
-                node.blindData.level = newPos;
+                node.blindData.overwrite.level = newPos;
             }
             if ((prio > 0) || (expire === 0) || (expire === -1)) {
                 node.blindData.overwrite.expireNever = true;
                 node.blindData.overwrite.active = true;
                 node.blindData.overwrite.priority = prio;
+                node.blindData.level = node.blindData.overwrite.level;
                 node.reason.code = 2;
                 node.reason.state = RED._('blind-control.states.overwritePrio');
                 node.reason.description = RED._('blind-control.reasons.overwritePrio');
-                // node.blindData.level
             } else {
                 if (node.timeOutObj) {
                     blindPosOverwriteReset(node);
@@ -289,6 +279,7 @@ module.exports = function (RED) {
                     blindPosOverwriteReset(node);
                     node.emit('input', {payload:-1, topic:'internal-trigger-overwriteExpired', force:false});
                 }, expire);
+                node.blindData.level = node.blindData.overwrite.level;
                 node.reason.code = 3;
                 node.reason.state = RED._('blind-control.states.overwrite', {
                     time: node.blindData.overwrite.expireDate.toLocaleTimeString()
@@ -302,6 +293,10 @@ module.exports = function (RED) {
         if (node.blindData.overwrite.active) {
             return true;
         }
+        node.blindData.level = timeData.level;
+        node.reason.code = timeData.code;
+        node.reason.state = timeData.state;
+        node.reason.description = timeData.description;
         return false;
     }
 
@@ -311,8 +306,8 @@ module.exports = function (RED) {
      * @param {*} node the node data
      * @param {*} msg the message object
      */
-    function calcBlindPosition(node, msg, timeData) {
-        // node.debug('calcBlindPosition');
+    function calcBlindSunPosition(node, msg, timeData) {
+        // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, timeData.now);
         msg.blindCtrl.sunPosition = sunPosition;
@@ -325,10 +320,6 @@ module.exports = function (RED) {
         }
         checkWeather(node, msg);
         // set default values:
-        node.blindData.level = timeData.level;
-        node.reason.code = timeData.code;
-        node.reason.state = timeData.state;
-        node.reason.description = timeData.description;
 
         if (node.cloudData.inLimit &&
                     (!node.sunData.minAltitude ||
@@ -343,8 +334,8 @@ module.exports = function (RED) {
             } else {
                 node.blindData.level = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
             }
-            if ((node.smoothTime > 0) && (node.blindData.nextchange > timeData.now.getTime())) {
-                // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  nextchange= ${node.blindData.nextchange}`);
+            if ((node.smoothTime > 0) && (node.sunData.changeAgain > timeData.now.getTime())) {
+                // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
                 node.reason.code = 10;
                 node.reason.state = RED._('blind-control.states.smooth', { pos: node.blindData.level.toString()});
                 node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
@@ -353,8 +344,8 @@ module.exports = function (RED) {
                 node.reason.code = 7;
                 node.reason.state = RED._('blind-control.states.sunCtrl');
                 node.reason.description = RED._('blind-control.reasons.sunCtrl');
-                node.blindData.nextchange = timeData.now.getTime() + node.smoothTime;
-                // node.debug(`set next time - smoothTime= ${node.smoothTime}  nextchange= ${node.blindData.nextchange} now=` + timeData.now.getTime());
+                node.sunData.changeAgain = timeData.now.getTime() + node.smoothTime;
+                // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} now=` + timeData.now.getTime());
             }
             if (node.blindData.level < node.blindData.levelMin)  {
                 // min
@@ -379,7 +370,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('blind-control.states.cloudExceeded');
             node.reason.description = RED._('blind-control.reasons.cloudExceeded');
         }
-        // node.debug(`calcBlindPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
+        // node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
     }
     /******************************************************************************************/
     /**
@@ -388,63 +379,44 @@ module.exports = function (RED) {
        * @param {*} msg the message object
        * @param {*} config the configuration object
        */
-    function calcTimes(node, msg, timeData) {
+    function checkRules(node, msg, timeData) {
         const nowNr = hlp.getTimeNumber(timeData.now);
-        const rulesLength = node.timeRules.length;
-        const rulesx=[];
-        let ruleSel = null;
-        // timeData.levelMin = node.blindData.closedPos;
-        // timeData.levelMinType = 0;
-        // timeData.levelMax = node.blindData.openPos;
-        // timeData.levelMaxType = 0;
-        // prepare
-        for (let i = 0; i < rulesLength; ++i) {
-            const rule = node.timeRules[i];
-            // rule.levelOp = Number(rule.levelOp);
-            rule.timeOp = Number(rule.timeOp);
-            rule.pos = i + 1;
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-            if (rule.validOperandAType !== 'none') {
+        // node.debug(`checkRules nowNr=${nowNr}, node.timeRulesLength=${node.timeRulesLength}`); // {colors:true, compact:10}
+        const fkt = (rule, cmp) => {
+            // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
+            if (rule.conditional) {
                 try {
                     if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue)) {
-                        continue;
+                        return null;
                     }
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
                     node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                    continue;
+                    return null;
                 }
             }
-            if (rule.timeType === 'none') {
-                rulesx.push(rule);
-                continue;
+            if (!rule.timeLimited) {
+                return rule;
             }
             rule.switchTime = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetValue, rule.offsetType, rule.multiplier);
             if (rule.switchTime.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.switchTime.error }), undefined, rule.switchTime.error);
-                continue;
+                return null;
             } else if (!rule.switchTime.value) {
                 throw new Error('Error can not calc time!');
             }
             rule.switchTime.num = hlp.getTimeNumber(rule.switchTime.value);
-            rulesx.push(rule);
-            continue;
-        }
 
-        const rulesxLength = rulesx.length;
-        // node.debug(`calcTimes nowNr=${nowNr}, rulesCount=${rulesLength}`); // {colors:true, compact:10}
-        const fkt = (rule, cmp) => {
-            if (rule.timeType === 'none') {
-                return rule;
-            }
             if (cmp(rule.switchTime.num, nowNr)) {
                 return rule;
             }
             return null;
         };
-        // node.debug('first loop ' + rulesLength);
-        for (let i = 0; i < rulesxLength; ++i) {
-            const rule = rulesx[i];
+
+        let ruleSel = null;
+        // node.debug('first loop ' + node.timeRulesLength);
+        for (let i = 0; i < node.timeRulesLength; ++i) {
+            const rule = node.timeRules[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.timeOp !== 0) { continue; }
             const res = fkt(rule, (r,h) => (r >= h));
@@ -453,59 +425,47 @@ module.exports = function (RED) {
                 break;
             }
         }
-
-        // node.debug('second loop ' + rulesLength);
-        for (let i = (rulesxLength -1); i >= 0; --i) {
-            const rule = rulesx[i];
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-            if (rule.timeOp === 0) { continue; }
-            const res = fkt(rule, (r,h) => (r <= h));
-            if (res) {
-                ruleSel = res;
-                break;
+        if (!ruleSel || ruleSel.timeLimited) {
+            // node.debug('second loop ' + node.timeRulesLength);
+            for (let i = (node.timeRulesLength -1); i >= 0; --i) {
+                const rule = node.timeRules[i];
+                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
+                if (rule.timeOp === 0) { continue; }
+                const res = fkt(rule, (r,h) => (r <= h));
+                if (res) {
+                    ruleSel = res;
+                    break;
+                }
             }
         }
 
         if (ruleSel) {
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
-            if (ruleSel.timeType !== 'none') {
+            if (ruleSel.timeLimited) {
                 ruleSel.text = ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
             }
-            if (ruleSel.validOperandAType !== 'none') {
+            if (ruleSel.conditional) {
                 ruleSel.text += '*';
             }
-            node.debug(timeData.text);
             timeData.levelFixed = true;
             timeData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.defaultPos);
             timeData.ruleId = ruleSel.pos;
             timeData.state = RED._('blind-control.states.time', ruleSel);
-            timeData.option = Number(ruleSel.option);
+            timeData.option = ruleSel.option;
             timeData.code = 4;
             timeData.state = RED._('blind-control.states.time', ruleSel);
             timeData.description = RED._('blind-control.reasons.time', ruleSel);
-            /*
-            node.blindData.level = timeData.level;
-            node.reason.code = 4;
-            node.reason.state = RED._('blind-control.states.time', ruleSel);
-            node.reason.description = RED._('blind-control.reasons.time', ruleSel);
-            */
-            // node.debug('timeData=' + util.inspect(timeData,{colors:true, compact:10}));
+            // node.debug('checkRules end: timeData=' + util.inspect(timeData,{colors:true, compact:10}));
             return;
         }
         timeData.levelFixed = false;
         timeData.level = node.blindData.defaultPos;
         timeData.ruleId = -1;
-        timeData.option = 0;
+        timeData.option = 'none';
         timeData.code = 1;
         timeData.state = RED._('blind-control.states.default');
         timeData.description = RED._('blind-control.reasons.default');
-        /*
-        node.blindData.level = node.blindData.defaultPos;
-        node.reason.code = 1;
-        node.reason.state = RED._('blind-control.states.default');
-        node.reason.description = RED._('blind-control.reasons.default');
-        */
-        // node.debug('timeData default ' + util.inspect(timeData, {colors:true, compact:10}));
+        // node.debug('checkRules end default: timeData=' + util.inspect(timeData, {colors:true, compact:10}));
     }
     /******************************************************************************************/
     /******************************************************************************************/
@@ -520,9 +480,9 @@ module.exports = function (RED) {
         }
 
         node.reason = {
-            Code : 0,
-            State: '',
-            Description: ''
+            code : 0,
+            state: '',
+            description: ''
         };
         // Retrieve the config node
         node.sunData = {
@@ -531,7 +491,8 @@ module.exports = function (RED) {
             /** define how long could be the sun on the floor **/
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
-            minAltitude: Number(hlp.chkValueFilled(config.sunMinAltitude,0))
+            minAltitude: Number(hlp.chkValueFilled(config.sunMinAltitude, 0)),
+            changeAgain: 0
         };
         node.windowSettings = {
             /** The top of the window */
@@ -556,8 +517,7 @@ module.exports = function (RED) {
                 active: false,
                 expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, 0)),
                 priority: 0
-            },
-            nextchange:0
+            }
         };
         node.blindData.defaultPos = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.openPos);
         node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.closedPos);
@@ -627,12 +587,13 @@ module.exports = function (RED) {
                 const timeData = { now : getNow_(node, msg, config.tsCompare) };
                 // check if the message contains any weather data
                 // calc times:
-                calcTimes(node, msg, timeData);
+                checkRules(node, msg, timeData);
 
+                // node.debug(`start pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description} timeData.level=${timeData.level} timeData.code=${timeData.code} timeData.description=${timeData.description}`);
                 // check for manual overwrite
                 if (!checkBlindPosOverwrite(node, msg, timeData) && !timeData.levelFixed && node.sunData.active) {
                     // calc sun position:
-                    calcBlindPosition(node, msg, timeData);
+                    calcBlindSunPosition(node, msg, timeData);
 
                     if (node.blindData.level < node.blindData.closedPos) {
                         node.debug(`${node.blindData.level} is below ${node.blindData.closedPos}`);
@@ -671,6 +632,20 @@ module.exports = function (RED) {
             }
         });
         // ####################################################################################################
+        // initialize
+        function initialize() {
+            node.debug('initialize');
+            node.timeRulesLength = node.timeRules.length;
+            for (let i = 0; i < node.timeRulesLength; ++i) {
+                const rule = node.timeRules[i];
+                // rule.levelOp = Number(rule.levelOp);
+                rule.timeOp = Number(rule.timeOp);
+                rule.pos = i + 1;
+                rule.conditional = (rule.validOperandAType !== 'none');
+                rule.timeLimited = (rule.timeType !== 'none');
+            }
+        }
+        initialize();
     }
 
     RED.nodes.registerType('blind-control', sunBlindControlNode);

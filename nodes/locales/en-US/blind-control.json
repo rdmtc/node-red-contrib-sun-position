@@ -32,7 +32,7 @@
 			"from": "from",
 			"until": "until",
 			"propCompare": " ",
-			"options":"special options"
+			"conditional-options":"special options"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -74,16 +74,13 @@
 		},
 		"options": {
 			"none":"no special",
-			"resetOverwrite": "reset overwrite",
-			"expiringOverwrite": "as expiring overwrite",
-			"prioOverwrite": "as priority overwrite",
-			"prioHighOverwrite": "as high priority overwrite"
+			"notOverwritable": "can not be overwritten"
 		},
 		"reasons": {
 			"overwritePrio": "position is overwritten by priority, no expire",
 			"overwrite": "position is overwritten, will expire __time__",
 			"default": "position is set to default position because no other rule matches",
-			"time": "position by time [rule __rule__] __text__",
+			"time": "position by time [rule __pos__] __text__",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",

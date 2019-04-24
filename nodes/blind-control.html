@@ -22,7 +22,7 @@
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
-    <div  class="form-row-showLater hidden">
+    <div class="form-row-showLater hidden">
         <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
         <div class="form-row node-input-rule-container-row row-full-width">
         <ol id="node-input-rule-container"></ol>
@@ -151,7 +151,7 @@
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-tips form-row-showLater hidden">
-        <span data-i18n="blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
     </div>
 </script>
 <style>
@@ -680,21 +680,21 @@
                     try {
                         const newWidth = rule.width() - 10;
                         // row1
-                        const propertyLblField = rule.find('.node-input-rule-property-lbl');
-                        const propertyField = rule.find('.node-input-rule-property');
-                        const propertyOperatorField = rule.find('.node-input-rule-property-operator');
-                        propertyLblField.width('auto');
-                        if (propertyOperatorField.is(':visible')) {
-                            propertyOperatorField.width(100);
-                            propertyField.typedInput('width', (newWidth - propertyLblField.width() - 135));
+                        const validOperandALblField = rule.find('.node-input-rule-condOpA-lbl');
+                        const validOperandAField = rule.find('.node-input-rule-condOpA');
+                        const validOperatorField = rule.find('.node-input-rule-condOperator');
+                        validOperandALblField.width('auto');
+                        if (validOperatorField.is(':visible')) {
+                            validOperatorField.width(100);
+                            validOperandAField.typedInput('width', (newWidth - validOperandALblField.width() - 135));
                         } else {
-                            propertyField.typedInput('width', (newWidth - propertyLblField.width() - 15));
+                            validOperandAField.typedInput('width', (newWidth - validOperandALblField.width() - 15));
                         }
                         // row2
-                        const propCompareLblField = rule.find('.node-input-rule-propCompare-lbl');
-                        const propCompareField = rule.find('.node-input-rule-propCompare');
-                        propCompareLblField.width('auto');
-                        propCompareField.typedInput('width', (newWidth - propCompareLblField.width() - 10));
+                        const validOperandBLblField = rule.find('.node-input-rule-condOpB-lbl');
+                        const validOperandBField = rule.find('.node-input-rule-condOpB');
+                        validOperandBLblField.width('auto');
+                        validOperandBField.typedInput('width', (newWidth - validOperandBLblField.width() - 10));
                         // row3
                         const timeLblField = rule.find('.node-input-rule-time-lbl');
                         const timeOperatorField = rule.find('.node-input-rule-time-operator');
@@ -714,10 +714,10 @@
                         levelLblField.width('auto');
                         levelField.typedInput('width', (newWidth - levelLblField.width() - 10));
                         // row6
-                        const optionLblField = rule.find('.node-input-rule-option-lbl');
-                        const optionField = rule.find('.node-input-rule-option');
-                        optionLblField.width('auto');
-                        optionField.width(newWidth - optionLblField.width() - 28);
+                        const optionCondLblField = rule.find('.node-input-rule-conditional-option-lbl');
+                        const optionCondField = rule.find('.node-input-rule-conditional-option');
+                        optionCondLblField.width('auto');
+                        optionCondField.width(newWidth - optionCondLblField.width() - 28);
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -739,7 +739,7 @@
                     }
                 }
 
-                $('#node-input-rule-container').css('min-height', '40px').css('min-width', '150px').editableList({
+                $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                     addItem(containerRow, containerIndex, data) {
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
                         const row1 = $('<div/>').appendTo(containerRow);
@@ -748,39 +748,37 @@
                         const row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row5 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row6 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        // #region row1 - property
-                        // lbl - [none / Bedingung] - [compare]
-                        addLabel(row1, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
-                        const propertyField = $('<input/>', {
-                            class: 'node-input-rule-property',
-                            id: 'node-input-rule-property' + containerIndex,
+                        // #region row1 - property -- lbl - [none / Bedingung] - [compare]
+                        addLabel(row1, 'node-input-rule-condOpA', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
+                        const validOperandAField = $('<input/>', {
+                            class: 'node-input-rule-condOpA',
+                            id: 'node-input-rule-condOpA' + containerIndex,
                             type: 'text'
                         }).appendTo(row1).typedInput({
                             default: types.Unlimited.value,
                             types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
-                        const propertyOperatorField = $('<select/>', {
-                            class: 'node-input-rule-property-operator',
-                            id: 'node-input-rule-property-operator' + containerIndex,
+                        const validOperatorField = $('<select/>', {
+                            class: 'node-input-rule-condOperator',
+                            id: 'node-input-rule-condOperator' + containerIndex,
                             style: 'margin-left: 5px;'
                         }).appendTo(row1);
-                        appendOptions(node, propertyOperatorField, 'comparator');
+                        appendOptions(node, validOperatorField, 'comparator');
                         const finalspan = $('<span/>',{style:'float: right;margin-top: 6px;'}).appendTo(row1);
                         finalspan.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
                         // #endregion row1
-                        // #region row2 - property Operator2
-                        addLabel(row2, 'node-input-rule-propCompare', 'fa fa-ellipsis-h', node._('blind-control.label.propCompare'));
-                        const propCompareField = $('<input/>', {
-                            class: 'node-input-rule-propCompare',
-                            id: 'node-input-rule-propCompare' + containerIndex,
+                        // #region row2 - property Operator2 -- lbl - [none / Bedingung]
+                        addLabel(row2, 'node-input-rule-condOpB', 'fa fa-ellipsis-h', node._('blind-control.label.condOpB'));
+                        const validOperandBField = $('<input/>', {
+                            class: 'node-input-rule-condOpB',
+                            id: 'node-input-rule-condOpB' + containerIndex,
                             type: 'text'
                         }).appendTo(row2).typedInput({
                             default: 'str',
                             types: ['msg', 'flow', 'global', 'str', 'num', 'env']
                         });
                         // #endregion row2
-                        // #region row3 - time
-                        // lbl - [from-to] - [start - time]
+                        // #region row3 - time -- lbl - [from-to] - [start - time]
                         addLabel(row3, 'node-input-rule-time', 'fa fa-clock-o');
                         const timeOperatorField = $('<select/>', {
                             class: 'node-input-rule-time-operator',
@@ -798,8 +796,7 @@
                             types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
                         // #endregion row3
-                        // #region row4 - time - offset - multiplier
-                        // [offset] - [multiplier]
+                        // #region row4 - time -- [offset] - [multiplier]
                         addLabel(row4, 'node-input-rule-offset', 'fa fa-plus');
                         const offsetField = $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
@@ -815,8 +812,7 @@
                         }).appendTo(row4);
                         appendOptions(node, multiplierField, 'multiplier', (data) => (data.id > 0));
                         // #endregion row4
-                        // #region row5 - Blind Level
-                        // [min/max/abs] - [blind-level / open / closed] - [need reset]
+                        // #region row5 - Blind Level -- [blind-level / open / closed]
                         addLabel(row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.blindLevel'));
                         const levelField = $('<input/>', {
                             class: 'node-input-rule-level',
@@ -827,21 +823,17 @@
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
                         // #endregion row5
-                        // #region row6 - options
-                        addLabel(row6, 'node-input-rule-option', 'fa fa-cogs', node._('blind-control.label.options'));
-                        const optionField = $('<select/>', {
-                            class: 'node-input-rule-option',
-                            id: 'node-input-rule-option' + containerIndex,
+                        // #region row6 - conditional - options -- [option]
+                        addLabel(row6, 'node-input-rule-conditional-option', 'fa fa-cogs', node._('blind-control.label.conditional-options'));
+                        const optionCondField = $('<select/>', {
+                            class: 'node-input-rule-conditional-option',
+                            id: 'node-input-rule-conditional-option' + containerIndex,
                             style: 'margin-left: 5px;'
                         }).appendTo(row6);
-                        optionField.append($('<option></option>').val('none').text(node._('blind-control.options.none')));
-                        optionField.append($('<option></option>').val('resetOverwrite').text(node._('blind-control.options.resetOverwrite')));
-                        optionField.append($('<option></option>').val('expiringOverwrite').text(node._('blind-control.options.expiringOverwrite')));
-                        optionField.append($('<option></option>').val('prioOverwrite').text(node._('blind-control.options.prioOverwrite')));
-                        optionField.append($('<option></option>').val('prioHighOverwrite').text(node._('blind-control.options.prioHighOverwrite')));
-                        // TODO, reset of manual overwrites
+                        optionCondField.append($('<option></option>').val('none').text(node._('blind-control.options.none')));
+                        optionCondField.append($('<option></option>').val('notOverwritable').text(node._('blind-control.options.notOverwritable')));
                         // #endregion row6
-                        // #region init fields
+                        // #region fields changes
                         const selFields = getSelectFields();
                         timeField.change(() => {
                             const opType = timeField.typedInput('type');
@@ -852,41 +844,45 @@
                             }
                             resizeContainer();
                         });
-                        propertyField.change(() => {
-                            const propType = propertyField.typedInput('type');
+                        validOperandAField.change(() => {
+                            const propType = validOperandAField.typedInput('type');
                             if (propType === 'none') {
-                                propertyOperatorField.hide();
-                                row2.hide(); // propCompare
+                                validOperatorField.hide();
+                                row2.hide(); // condOpB
+                                row6.hide(); // conditional - options
                             } else if (propType === 'jsonata') {
-                                propertyOperatorField.show();
-                                propertyOperatorField.attr('disabled', true);
-                                propertyOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
-                                row2.hide(); // propCompare
+                                validOperatorField.show();
+                                validOperatorField.attr('disabled', true);
+                                validOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
+                                row2.hide(); // condOpB
+                                row6.show(); // conditional - options
                             } else {
-                                propertyOperatorField.show();
-                                propertyOperatorField.attr('disabled', false);
-                                const propOp = propertyOperatorField.val();
+                                row6.show(); // conditional - options
+                                validOperatorField.show();
+                                validOperatorField.attr('disabled', false);
+                                const condOp = validOperatorField.val();
                                 let operatorCount = 1;
                                 // console.log(selFields.comparator);
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
-                                    if (el.id === propOp) {
+                                    if (el.id === condOp) {
                                         operatorCount = el.operatorCount;
                                         break;
                                     }
                                 }
                                 if (operatorCount > 1) {
-                                    row2.show(); // propCompare
+                                    row2.show(); // condOpB
                                 } else {
-                                    row2.hide(); // propCompare
+                                    row2.hide(); // condOpB
                                 }
 
                             }
+                            validOperandBField.change();
                             resizeContainer();
                         });
-                        propertyOperatorField.change(() => { propertyField.change(); });
+                        validOperatorField.change(() => { validOperandAField.change(); });
                         // setting defaultValues
                         timeOperatorField.val(data.timeOp || 0);
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
@@ -897,15 +893,15 @@
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
                         offsetField.typedInput('value', data.offsetValue || '');
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
-                        propertyField.typedInput('value', data.propertyValue || '');
-                        propertyOperatorField.val(data.propertyOp || selFields.comparator[0].id);
-                        propCompareField.typedInput('type', data.propertyCompareType || 'str');
-                        propCompareField.typedInput('value', data.propertyCompareValue || '');
-                        optionField.val(data.option || 'none');
+                        validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
+                        validOperandAField.typedInput('value', data.validOperandAValue || '');
+                        validOperandBField.typedInput('type', data.validOperandBType || 'str');
+                        validOperandBField.typedInput('value', data.validOperandBValue || '');
+                        validOperatorField.val(data.validOperator || selFields.comparator[0].id);
+                        optionCondField.val(data.option || 'none');
                         resizeRule(containerRow);
                         // resizeContainer();
-                        propertyField.change();
+                        validOperandAField.change();
                         timeField.change();
                         // #endregion init fields
                     },
@@ -1067,14 +1063,14 @@
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
                     multiplier: rule.find('.node-input-rule-multiplier').val(),
-                    validOperandAType: rule.find('.node-input-rule-property').typedInput('type'),
-                    validOperandAValue: rule.find('.node-input-rule-property').typedInput('value'),
-                    validOperator: rule.find('.node-input-rule-property-operator').val(),
-                    validOperatorText: rule.find('.node-input-rule-property-operator option:selected').text(),
-                    validOperandBType: rule.find('.node-input-rule-propCompare').typedInput('type'),
-                    validOperandBValue: rule.find('.node-input-rule-propCompare').typedInput('value'),
-                    option: rule.find('.node-input-rule-option option:selected').val(),
-                    optionText: rule.find('.node-input-rule-option option:selected').text()
+                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
+                    validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
+                    validOperator: rule.find('.node-input-rule-condOperator').val(),
+                    validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
+                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type'),
+                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
+                    option: rule.find('.node-input-rule-conditional-option option:selected').val(),
+                    optionText: rule.find('.node-input-rule-conditional-option option:selected').text()
                 };
                 node.rules.push(data);
             });
