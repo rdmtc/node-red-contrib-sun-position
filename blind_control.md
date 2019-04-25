@@ -64,16 +64,18 @@ If sun-control checkbox is not checked, the defined **default position** will be
 ![blind-control](images/blind-control-settings-7.png?raw=true)
 
 If the sun control is active and no other rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room. This calculation includes:
- - Determination of whether direct sunlight is entering the room based on the orientation of the blind and the azimuth of the sun
- - Dimensions of the window and the current altitude of the sun.
- - consideration of weather conditions against defined thresholds
+
+- Determination of whether direct sunlight is entering the room based on the orientation of the blind and the azimuth of the sun
+- Dimensions of the window and the current altitude of the sun.
+- consideration of weather conditions against defined thresholds
 
 - **start** The azimuth of the sun, when the sun start falls into the window.
 - **end** The azimuth of the sun, when the sun no longer falls into the window.
 
 under the simplest assumption starting from the bearing representing the perpendicular of the window to geographical north:
- - start = orientation - 90
- - end = orientation + 90
+
+- start = orientation - 90
+- end = orientation + 90
 
 - **top** Measurement from the floor to top of the window covered by the blind.
 - **bottom** Measurement from the floor to bottom of the window covered by the blind.
@@ -85,35 +87,35 @@ under the simplest assumption starting from the bearing representing the perpend
 ![blind-control](images/blind-control-settings-8.png?raw=true)
 
 ![blind-control](images/blind-control-settings-9.png?raw=true)
-- **Cloud** a property which contains a numerical value representing the percentage of sky occluded by clouds. If the value can not be determined, the value is taken at which the value could be determined last. If there is no previous value a error will be thrown otherwise only a log output. This could be useful to use a value of a incoming message, where the message property is not on all incoming messages available.
-- **Threshold** a numerical value representing the maximum percentage of sky occluded by clouds.
-- **blind position** the blind position which should be used if the percentage of sky occluded by clouds exceeds the defined threshold.
 
-If the numeric values are floating point or integers will not matter.
+- **Cloud**, **cloud Operator**, **Threshold** allows to define properties to be used instead of the calculated value by the sun.
+  - Example: If the **Cloud** is a property which contains a numerical value representing the percentage of sky occluded by clouds. and an operator greater tan or equal is used wit a **Threshold** a numerical value representing the maximum percentage of sky occluded by clouds. Then if the **cloud** value exceeds the **Threshold** the **blind position** will be used instead of the position calculated by the sun.
+  - If the values of  **Cloud** or **Threshold** comes from a message object and the value can not be determined, the value is taken at which the value could be determined last. If there is no previous value a error will be thrown otherwise only a log output. To thus the message property not needs to be available in all incoming messages. But this evaluation is only considered by messages when no rule active.
+  - **blind position** the blind position which should be used if the defined expression for **cloud** is **true**.
 
 #### Node Input
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
- - **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `reset` and the value of `msg.payload` = `true` will reset any existing overrides.
- - **position** 'blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'
- - **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
+- **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `reset` and the value of `msg.payload` = `true` will reset any existing overrides.
+  - **position** 'blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'
+  - **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
     - A message property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority`
     - or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
     - A `boolean` value `true` is considered as numeric `1`
   - **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
-   - A message property `msg.expire` or `msg.payload.expire`
-   - or when the `msg.topic` contains `expire` and the value of `msg.payload` is a valid numeric value
-   - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
+    - A message property `msg.expire` or `msg.payload.expire`
+    - or when the `msg.topic` contains `expire` and the value of `msg.payload` is a valid numeric value
+    - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
 
 Useful to know:
-  - If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set.
-  - An already active Override can only be changed if the prio of the existing is `0` (default) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
-  - **position** of a value `-1`
-  - There are a special configuration for rules with a condition, with which it can be prevented to allow overrides.
+
+- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set.
+- An already active Override can only be changed if the prio of the existing is `0` (default) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
+- **position** of a value `-1`
+- There are a special configuration for rules with a condition, with which it can be prevented to allow overrides.
 
 #### blind-control - Node Output
-
 
 - **first output**
   - `msg.payload.azimuth` the azimuth of the sun position relative to the given coordinates.

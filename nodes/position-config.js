@@ -423,16 +423,13 @@ module.exports = function (RED) {
         /*******************************************************************************************************/
         this.comparePropValue = (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage) => {
             _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
-            if (opTypeA === 'none') {
+            if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
             const opVal = (type, value, opName) => {
                 let opData = null;
                 try {
-                    if (type === 'none' || type === '' || typeof type === 'undefined' || type === null) {
-                        _srcNode.warn(RED._('errors.notEvaluableProperty', { type: type, value: value }));
-                        return null;
-                    } else if (type === 'num') {
+                    if (type === 'num') {
                         return Number(value);
                     } else if (type === 'msgPayload') {
                         return msg.payload;
@@ -444,7 +441,8 @@ module.exports = function (RED) {
                         tempStorage[opName] = opData;
                     }
                     return opData;
-                } catch (ex) {
+                } catch (err) {
+                    node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                     if (tempStorage && (type === 'msg') && tempStorage[opName]) {
                         _srcNode.log(RED._('errors.notEvaluableProperty', { type: type, value: value }));
                         return tempStorage[opName];

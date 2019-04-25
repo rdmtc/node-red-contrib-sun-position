@@ -104,16 +104,19 @@
     <!-- #region weather ######################################################################## -->
     <div class="form-row form-row-sunControlActive hidden block-noindent">
         <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
-        <input type="text" id="node-input-cloudValue" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="text" id="node-input-cloudValue" class="" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
         <input type="hidden" id="node-input-cloudValueType">
+        <select id="node-input-cloudCompare" class="node-input-addOn">
+        </select>
     </div>
-    <div class="form-row hidden row-cloudValue block-indent1-noadd">
+    <div class="form-row hidden row-cloudThreshold block-indent1-noadd">
         <label for="node-input-cloudThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
-        <input type="text" id="node-input-cloudThreshold" class="spinner-noLimit row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
+        <input type="text" id="node-input-cloudThreshold" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold">
+        <input type="hidden" id="node-input-cloudThresholdType">
     </div>
-    <div class="form-row hidden row-cloudValue block-indent1">
+    <div class="form-row hidden row-cloudBlindPos block-indent1">
         <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
-        <input type="text" id="node-input-cloudBlindPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
+        <input type="text" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
         <input type="hidden" id="node-input-cloudBlindPosType">
     </div>
     <hr>
@@ -217,6 +220,10 @@
     }
     .node-input-multiplier {
         width: 125px;
+        margin-left: 5px;
+    }
+    .node-input-addOn {
+        width: 100px;
         margin-left: 5px;
     }
 </style>
@@ -494,7 +501,7 @@
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
                 }
-            }
+            },
             // #endregion sun settings
             // #region window settings
             windowTop: {
@@ -545,13 +552,24 @@
             cloudValueType: {
                 value: 'none'
             },
+            cloudCompare: {
+                value: 'gte',
+                validate: function (v) {
+                    return (getVal(this, 'sunControlActive') === false) ||
+                            (getVal(this, 'cloudValueType') === 'none') ||
+                            (v !== '');
+                }
+            },
             cloudThreshold: {
                 value: '',
                 validate: function (v) {
                     return (getVal(this, 'sunControlActive') === false) ||
                             (getVal(this, 'cloudValueType') === 'none') ||
-                            ((v !== '') && RED.validators.number(v));
+                            RED.validators.typedInput('cloudThresholdType')(v);
                 }
+            },
+            cloudThresholdType: {
+                value: 'none'
             },
             cloudBlindPos: {
                 value: 'open (max)',
@@ -597,6 +615,8 @@
                 $('.form-row-showLater').show();
                 // #region initialize
                 const types = getTypes(node);
+                const selFields = getSelectFields();
+
                 types.LevelEntered = {
                     value: 'num',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
@@ -719,11 +739,6 @@
                         const levelField = rule.find('.node-input-rule-level');
                         levelLblField.width('auto');
                         levelField.typedInput('width', (newWidth - levelLblField.width() - 10));
-                        // row6
-                        const optionCondLblField = rule.find('.node-input-rule-conditional-option-lbl');
-                        const optionCondField = rule.find('.node-input-rule-conditional-option');
-                        optionCondLblField.width('auto');
-                        optionCondField.width(newWidth - optionCondLblField.width() - 28);
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -753,7 +768,6 @@
                         const row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const row5 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        const row6 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         // #region row1 - property -- lbl - [none / Bedingung] - [compare]
                         addLabel(row1, 'node-input-rule-condOpA', 'fa fa-puzzle-piece', node._('blind-control.label.onlyIf'));
                         const validOperandAField = $('<input/>', {
@@ -829,18 +843,7 @@
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
                         // #endregion row5
-                        // #region row6 - conditional - options -- [option]
-                        addLabel(row6, 'node-input-rule-conditional-option', 'fa fa-cogs', node._('blind-control.label.conditional-options'));
-                        const optionCondField = $('<select/>', {
-                            class: 'node-input-rule-conditional-option',
-                            id: 'node-input-rule-conditional-option' + containerIndex,
-                            style: 'margin-left: 5px;'
-                        }).appendTo(row6);
-                        optionCondField.append($('<option></option>').val('none').text(node._('blind-control.options.none')));
-                        optionCondField.append($('<option></option>').val('notOverwritable').text(node._('blind-control.options.notOverwritable')));
-                        // #endregion row6
                         // #region fields changes
-                        const selFields = getSelectFields();
                         timeField.change(() => {
                             const opType = timeField.typedInput('type');
                             if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
@@ -855,15 +858,12 @@
                             if (propType === 'none') {
                                 validOperatorField.hide();
                                 row2.hide(); // condOpB
-                                row6.hide(); // conditional - options
                             } else if (propType === 'jsonata') {
                                 validOperatorField.show();
                                 validOperatorField.attr('disabled', true);
                                 validOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
                                 row2.hide(); // condOpB
-                                row6.show(); // conditional - options
                             } else {
-                                row6.show(); // conditional - options
                                 validOperatorField.show();
                                 validOperatorField.attr('disabled', false);
                                 const condOp = validOperatorField.val();
@@ -893,7 +893,6 @@
                         timeOperatorField.val(data.timeOp || 0);
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        // levelOperatorField.val(data.levelOp || selFields.blindOperator[0].id);
                         levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
                         levelField.typedInput('value', (data.levelValue || ''));
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
@@ -904,7 +903,6 @@
                         validOperandBField.typedInput('type', data.validOperandBType || 'str');
                         validOperandBField.typedInput('value', data.validOperandBValue || '');
                         validOperatorField.val(data.validOperator || selFields.comparator[0].id);
-                        optionCondField.val(data.option || 'none');
                         resizeRule(containerRow);
                         // resizeContainer();
                         validOperandAField.change();
@@ -939,7 +937,8 @@
                 $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
                     if (chkVal('sunControlActive', false)) {
                         $('.form-row-sunControlActive').hide();
-                        $('.row-cloudValue').hide();
+                        $('.row-cloudThreshold').hide();
+                        $('.row-cloudBlindPos').hide();
                     } else {
                         $('.form-row-sunControlActive').show();
                     }
@@ -948,7 +947,7 @@
                 setupTInput(node, {
                     typeProp: 'blindPosMinType',
                     valueProp: 'blindPosMin',
-                    width: 'calc(100% - 110px)',
+                    width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: 'closed (min)', // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
@@ -956,7 +955,7 @@
                 setupTInput(node, {
                     typeProp: 'blindPosMaxType',
                     valueProp: 'blindPosMax',
-                    width: 'calc(100% - 110px)',
+                    width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: 'open (max)', // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
@@ -966,25 +965,68 @@
                 const cloudValueField = setupTInput(node, {
                     typeProp: 'cloudValueType',
                     valueProp: 'cloudValue',
-                    width: 'calc(100% - 120px)',
+                    width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
                     onChange: (_type, _value) => {
                         const cloudValueType = $('#node-input-cloudValue').typedInput('type');
                         if ( cloudValueType === types.Undefined.value ) {
-                            $('.row-cloudValue').hide();
+                            $('.row-cloudBlindPos').hide();
+                            $('#node-input-cloudCompare').hide();
+                            $('.row-cloudThreshold').hide();
+                            $('#node-input-cloudValue').typedInput('width','calc(100% - 110px)');
+                        } else if (cloudValueType === 'jsonata') {
+                            $('.row-cloudBlindPos').show();
+                            $('#node-input-cloudCompare').show();
+                            $('#node-input-cloudCompare').attr('disabled', true);
+                            $('#node-input-cloudCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('.row-cloudThreshold').hide();
+                            $('#node-input-cloudValue').typedInput('width','calc(100% - 220px)');
                         } else {
-                            $('.row-cloudValue').show();
+                            $('.row-cloudBlindPos').show();
+                            $('#node-input-cloudCompare').show();
+                            $('#node-input-cloudCompare').attr('disabled', false);
+                            $('#node-input-cloudValue').typedInput('width','calc(100% - 220px)');
+                            const condOp = $('#node-input-cloudCompare').val();
+                            let operatorCount = 1;
+                            // console.log(selFields.comparator);
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('.row-cloudThreshold').show(); // condOpB
+                            } else {
+                                $('.row-cloudThreshold').hide(); // condOpB
+                            }
                         }
                         $('#node-input-cloudThreshold').change();
                         $('#node-input-cloudBlindPos').change();
                     }
                 });
+
+                const cloudCompareField = $('#node-input-cloudCompare');
+                appendOptions(node, cloudCompareField, 'comparator');
+                cloudCompareField.val(node.cloudCompare);
+                cloudCompareField.change(() => { $('#node-input-cloudValue').change(); });
+                setupTInput(node, {
+                    typeProp: 'cloudThresholdType',
+                    valueProp: 'cloudThreshold',
+                    width: 'calc(100% - 120px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                });
                 setupTInput(node, {
                     typeProp: 'cloudBlindPosType',
                     valueProp: 'cloudBlindPos',
-                    width: 'calc(100% - 110px)',
+                    width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
@@ -1074,9 +1116,7 @@
                     validOperator: rule.find('.node-input-rule-condOperator').val(),
                     validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
                     validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type'),
-                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
-                    option: rule.find('.node-input-rule-conditional-option option:selected').val(),
-                    optionText: rule.find('.node-input-rule-conditional-option option:selected').text()
+                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value')
                 };
                 node.rules.push(data);
             });
