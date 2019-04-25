@@ -26,8 +26,8 @@
 			"msgtime": "msg.time",
 			"msgvalue": "msg.value",
 			"showEnhSettings": "Enhanced settings",
-			"blindPosMin": "minimal position",
-			"blindPosMax": "maximale position",
+			"blindPosMin": "min position",
+			"blindPosMax": "max position",
 			"smoothTime":"smoothTime",
 			"from": "from",
 			"until": "until",
@@ -44,7 +44,7 @@
 			"blindClosedPos": "0",
 			"blindPosDefault": "position if no other used",
 			"OverwriteExpire": "(opt) the duration a manual setting will remain is place",
-			"sunFloorLength": "the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
+			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
 			"cloudValue": "percentage of sky occluded by clouds",
 			"cloudThreshold": "threshold for set blind position",
@@ -77,8 +77,8 @@
 			"notOverwritable": "can not be overwritten"
 		},
 		"reasons": {
-			"overwritePrio": "position is overwritten by priority, no expire",
-			"overwrite": "position is overwritten, will expire __time__",
+			"overwriteNoExpire": "position is overwritten (Prio __prio__), no expire",
+			"overwriteExpire": "position is overwritten (Prio __prio__), will expire __time__",
 			"default": "position is set to default position because no other rule matches",
 			"time": "position by time [rule __pos__] __text__",
 			"sunMinAltitude": "sun below minimum altitude",
@@ -90,8 +90,8 @@
 			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)"
 		},
 		"states": {
-			"overwritePrio": "overwritten",
-			"overwrite": "overwritten till __time__",
+			"overwriteNoExpire": "overwritten [__prio__]",
+			"overwriteExpire": "overwritten [__prio__], till __time__",
 			"default": "default",
 			"time": "by time  [__pos__] __text__",
 			"sunMinAltitude": "min altitude",

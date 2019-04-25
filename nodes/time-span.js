@@ -297,7 +297,7 @@ module.exports = function (RED) {
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
                     try {
-                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue);
+                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue, 0);
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }

@@ -4,5 +4,6 @@ test/
 test/*
 .travis.yml
 .gitignore
+.gitconfig
 .gitattributes
 .jsbeautifyrc

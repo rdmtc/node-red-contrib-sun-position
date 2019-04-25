@@ -57,25 +57,6 @@
         <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
         <span data-i18n="[html]blind-control.text.sunControlActive" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
-    </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
-    </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
-        <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindPosMin"></span></label>
-        <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindPosMin"/>
-        <input type="hidden" id="node-input-blindPosMinType">
-    </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
-        <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindPosMax"></span></label>
-        <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindPosMax"/>
-        <input type="hidden" id="node-input-blindPosMaxType">
-    </div>
-    <hr>
     <!-- window ######################################################################## -->
     <div class="form-row form-row-sunControlActive hidden block-noindent">
         <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
@@ -100,6 +81,26 @@
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom" >
     </div>
     <hr class="form-row-sunControlActive hidden" >
+     <!-- sun ######################################################################## -->
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude" >
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindPosMin"></span></label>
+        <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindPosMin"/>
+        <input type="hidden" id="node-input-blindPosMinType">
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd">
+        <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindPosMax"></span></label>
+        <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindPosMax"/>
+        <input type="hidden" id="node-input-blindPosMaxType">
+    </div>
+    <hr class="form-row-sunControlActive hidden" >
     <!-- #region weather ######################################################################## -->
     <div class="form-row form-row-sunControlActive hidden block-noindent">
         <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
@@ -115,7 +116,7 @@
         <input type="text" id="node-input-cloudBlindPos" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
         <input type="hidden" id="node-input-cloudBlindPosType">
     </div>
-    <hr class="form-row-sunControlActive hidden">
+    <hr>
     <!-- #region Enhanced ######################################################################## -->
     <div class="form-row block-noindent">
         <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
@@ -388,7 +389,7 @@
             },
             // #region blind settings
             blindIncrement: {
-                value: 1,
+                value: 0.01,
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
@@ -398,7 +399,7 @@
                 }
             },
             blindOpenPos: {
-                value: 100,
+                value: 1.00,
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
@@ -408,7 +409,7 @@
                 }
             },
             blindClosedPos: {
-                value: 0,
+                value: 0.00,
                 required: true,
                 validate: function (v) {
                     const n = parseFloat(v);
@@ -416,6 +417,9 @@
                             (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
                             (n < getVal(this, 'blindOpenPos'));
                 }
+            },
+            blindPosReverse: {
+                value: false
             },
             blindPosDefault: {
                 value: 'open (max)',
@@ -473,9 +477,11 @@
                 }
             },
             sunFloorLength: {
-                value: 0,
+                value: '',
+                required: false,
                 validate: function (v) {
                     return (getVal(this, 'sunControlActive') === false) ||
+                            (v === '') ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
@@ -488,7 +494,7 @@
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
                 }
-            },
+            }
             // #endregion sun settings
             // #region window settings
             windowTop: {

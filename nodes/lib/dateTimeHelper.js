@@ -372,8 +372,10 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
     }
     if (typeof notFound === 'function') {
         return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return NaN;
     }
-    return notFound || NaN;
+    return notFound;
 }
 
 /**
@@ -418,11 +420,10 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     }
     if (typeof notFound === 'function') {
         return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return false;
     }
-    if (typeof notFound === 'boolean') {
-        return notFound;
-    }
-    return false;
+    return notFound;
 }
 
 /*******************************************************************************************************/

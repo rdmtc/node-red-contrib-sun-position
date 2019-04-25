@@ -430,6 +430,13 @@ A simple node that routes messages depending on the time. If the current time fa
 
 Without defining any comparison, the node allows by only defining inputs and result a simply timespan calculation.
 
+
+### blind-control
+
+Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message payload can be a variety of types, including strings, JavaScript objects, the current time or the current sun or moon position.
+
+[blind-control](blind_control.md)
+
 ### Times definitions
 
 The time definitions of the nodes has different configuration possibilities
