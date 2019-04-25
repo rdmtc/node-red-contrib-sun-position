@@ -245,7 +245,7 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
-        hlp.getMsgBoolValue(msg, 'reset', 'reset',
+        hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
             (val) => {
                 if (val) {
                     blindPosOverwriteReset(node);
@@ -258,7 +258,7 @@ module.exports = function (RED) {
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
-        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite']);
+        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (node.blindData.overwrite.active && isNaN(newPos)) {
             node.debug(`change of prio=${prio} or expire=${expire}`);

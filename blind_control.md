@@ -97,8 +97,12 @@ under the simplest assumption starting from the bearing representing the perpend
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
-- **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `reset` and the value of `msg.payload` = `true` will reset any existing overrides.
-  - **position** 'blindPosition', 'position', 'level', 'blindlevel'], ['manual', 'overwrite'
+- **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
+  - **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
+    - If an override is already active a new message changes the blind level if the **priority** of the existing override allows this.
+    - Except `-1` the position must be a valid blind Position as defined in the node settings or otherwise it will throw an error.
+    - The **position** of the special value of `-1` will set the node in override mode without sending any message out until override **position** is changed, override is **expired** or **reset**.
+      - Example: THis could be useful if a blind is controlled by an external button, where not known the blind position after button press. In this case the Button-event can used to trigger the override-mode of the node without knowing the real **position** of the blind.
   - **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
     - A message property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority`
     - or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
@@ -107,12 +111,12 @@ The Input is for triggering the calculation and for setting overwrites of the bl
     - A message property `msg.expire` or `msg.payload.expire`
     - or when the `msg.topic` contains `expire` and the value of `msg.payload` is a valid numeric value
     - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
+    - If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
 
 Useful to know:
 
-- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set.
-- An already active Override can only be changed if the prio of the existing is `0` (default) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
-- **position** of a value `-1`
+- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
+- An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
 - There are a special configuration for rules with a condition, with which it can be prevented to allow overrides.
 
 #### blind-control - Node Output
