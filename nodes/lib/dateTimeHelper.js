@@ -26,7 +26,8 @@ module.exports = {
     getNodeId,
     initializeParser,
     getFormattedDateOut,
-    parseDateFromFormat
+    parseDateFromFormat,
+    topicReplace
 };
 
 /*******************************************************************************************************/
@@ -358,7 +359,7 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
                 names = [names];
             }
             for (let i = 0; i < names.length; i++) {
-                if (String(msg.topic).includes(names[i])) {
+                if (String(msg.topic).includes(String(names[i]))) {
                     const res = Number(msg.payload);
                     if (!isNaN(res)) {
                         if (typeof isFound === 'function') {
@@ -392,13 +393,13 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             const id = ids[i];
             if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(msg.payload[id], msg.topic);
+                    return isFound(isTrue(msg.payload[id]), msg.payload[id], msg.topic);
                 }
                 return isTrue(msg.payload[id]);
             }
             if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(msg[id], msg.topic);
+                    return isFound(isTrue(msg[id]), msg[id], msg.topic);
                 }
                 return isTrue(msg[id]);
             }
@@ -410,9 +411,9 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             names = [names];
         }
         for (let i = 0; i < names.length; i++) {
-            if (String(msg.topic).includes(names[i])) {
+            if (String(msg.topic).includes(String(names[i]))) {
                 if (typeof isFound === 'function') {
-                    return isFound(msg.payload, msg.topic);
+                    return isFound(true, msg.payload, msg.topic);
                 }
                 return true;
             }
@@ -1399,4 +1400,27 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
         throw new Error('could not evaluate format of ' + date + ' (' + format+')');
     }
     return res;
+}
+
+function topicReplace(topic, topicAttrs) {
+    if (!topic || typeof topicAttrs !== 'object') {
+        return topic;
+    }
+
+    const topicAttrsLower = {};
+    Object.keys(topicAttrs).forEach(k => {
+        topicAttrsLower[k.toLowerCase()] = topicAttrs[k];
+    });
+
+    const match = topic.match(/\${[^}]+}/g);
+    if (match) {
+        match.forEach(v => {
+            const key = v.substr(2, v.length - 3);
+            const rx = new RegExp('\\${' + key + '}', 'g');
+            const rkey = key.toLowerCase();
+            topic = topic.replace(rx, topicAttrsLower[rkey] || '');
+        });
+    }
+
+    return topic;
 }

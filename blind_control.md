@@ -150,21 +150,21 @@ An output can be triggered by an incoming message or by an expiring timeout from
       - `msg.blindCtrl.blind.overwrite.expireTs` - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
       - `msg.blindCtrl.blind.overwrite.expireDate` - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
   - `msg.blindCtrl.rule` - exists only if no override is active
-      - `msg.blindCtrl.rule.active` - `true` if a rule applies
-      - `msg.blindCtrl.rule.ruleId` - number of the rule who applies (is `-1` if no rule has applied)
-      - `msg.blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
-      - `msg.blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
-      - `msg.blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
+    - `msg.blindCtrl.rule.active` - `true` if a rule applies
+    - `msg.blindCtrl.rule.ruleId` - number of the rule who applies (is `-1` if no rule has applied)
+    - `msg.blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
+    - `msg.blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
+    - `msg.blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
   - `msg.blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     - `msg.blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
   - `msg.blindCtrl.cloud` - object containing cloud data, exists only if override by cloud is activated!
     - `msg.blindCtrl.cloud.isOperative` - `true` if it is active and defined limit is applicable otherwise `false`
 
-
 ### Node Status
 
 The node status representing the value of the `msg.blindCtrl.reason.state` of the output.
 The color of the output is as following:
+
 - red - any error
 - blue - override active
 - grey - level by rule

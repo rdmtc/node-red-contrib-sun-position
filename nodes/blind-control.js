@@ -131,6 +131,11 @@ function getSunPosition_(node, now) {
 module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
+    /**
+     * check the weather data
+     * @param {*} node node data
+     * @param {*} msg the message object
+     */
     function checkWeather(node, msg) {
         // node.debug('checkWeather');
         if (!node.cloudData.active) {
@@ -189,12 +194,14 @@ module.exports = function (RED) {
         return def;
     }
     /******************************************************************************************/
-
+    /**
+     * reset any existing override
+     * @param {*} node node data
+     */
     function blindPosOverwriteReset(node) {
         node.debug(`blindPosOverwriteReset expire=${node.blindData.overwrite.expireTs}`);
         node.blindData.overwrite.active = false;
         node.blindData.overwrite.priority = 0;
-        node.blindData.overwrite.level = -1;
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
@@ -206,6 +213,12 @@ module.exports = function (RED) {
         }
     }
 
+    /**
+     * setup the expiring of n override or update an existing expiring
+     * @param {*} node node data
+     * @param {Date} now the current timestamp
+     * @param {number} expire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
+     */
     function setExpiringOverwrite(node, now, expire) {
         node.debug(`setExpiringOverwrite now=${now}, expire=${expire}`);
         if (node.timeOutObj) {
@@ -234,10 +247,35 @@ module.exports = function (RED) {
             node.emit('input', { payload: -1, topic: 'internal-trigger-overwriteExpired', force: false });
         }, expire);
     }
+
+    /**
+     * setting the reason for override
+     * @param {*} node node data
+     */
+    function setOverwriteReason(node) {
+        if (node.blindData.overwrite.expireTs) {
+            node.reason.code = 3;
+            node.reason.state = RED._('blind-control.states.overwriteExpire', {
+                prio: node.blindData.overwrite.priority,
+                time: node.blindData.overwrite.expireDate.toLocaleTimeString()
+            });
+            node.reason.description = RED._('blind-control.reasons.overwriteExpire', {
+                prio: node.blindData.overwrite.priority,
+                time: node.blindData.overwrite.expireDate.toISOString()
+            });
+        } else {
+            node.reason.code = 2;
+            node.reason.state = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
+            node.reason.description = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
+        }
+        node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+    }
+
     /**
      * check if a manual overwrite of the blind level should be set
      * @param {*} node node data
      * @param {*} msg message object
+     * @returns true if override is active, otherwhise false
      */
     function checkBlindPosOverwrite(node, msg, now) {
         // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
@@ -251,24 +289,30 @@ module.exports = function (RED) {
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], undefined, 0);
 
         if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
+            setOverwriteReason(node);
+            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
         const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (node.blindData.overwrite.active && isNaN(newPos)) {
-            node.debug(`change of prio=${prio} or expire=${expire}`);
-            if (isNaN(expire)) {
+            node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
+            if (Number.isFinite(expire)) {
+                // set to new expiring time
                 setExpiringOverwrite(node, now, expire);
             }
             if (prio > 0) {
+                // set to new priority
                 node.blindData.overwrite.priority = prio;
             }
+            setOverwriteReason(node);
+            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, newPos=${newPos}, expire=${expire}`);
             return true;
         } else if (!isNaN(newPos)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos === -1) {
-                node.blindData.overwrite.level = NaN;
+                node.blindData.level = NaN;
             } else if (!isNaN(newPos)) {
                 if (!validPosition_(node, newPos)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
@@ -277,9 +321,10 @@ module.exports = function (RED) {
                 node.debug(`overwrite newPos=${newPos}`);
                 const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
                 if (noSameValue && (node.previousData.level === newPos)) {
+                    setOverwriteReason(node);
+                    node.debug(`overwrite exit true noSameValue=${noSameValue}, newPos=${newPos}`);
                     return true;
                 }
-                node.blindData.overwrite.level = newPos;
                 node.blindData.level = newPos;
             }
 
@@ -296,23 +341,11 @@ module.exports = function (RED) {
             node.blindData.overwrite.active = true;
         }
         if (node.blindData.overwrite.active) {
-            if (node.blindData.overwrite.expireTs) {
-                node.reason.code = 3;
-                node.reason.state = RED._('blind-control.states.overwriteExpire', {
-                    prio: node.blindData.overwrite.priority,
-                    time: node.blindData.overwrite.expireDate.toLocaleTimeString()
-                });
-                node.reason.description = RED._('blind-control.reasons.overwriteExpire', {
-                    prio: node.blindData.overwrite.priority,
-                    time: node.blindData.overwrite.expireDate.toISOString()
-                });
-            } else {
-                node.reason.code = 2;
-                node.reason.state = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
-                node.reason.description = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
-            }
+            setOverwriteReason(node);
+            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
             return true;
         }
+        node.debug(`overwrite exit false node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
         return false;
     }
 
@@ -321,6 +354,7 @@ module.exports = function (RED) {
      * calculates for the blind the new level
      * @param {*} node the node data
      * @param {*} msg the message object
+     * @returns the sun position object
      */
     function calcBlindSunPosition(node, msg, now) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
@@ -398,6 +432,7 @@ module.exports = function (RED) {
        * @param {*} node node data
        * @param {*} msg the message object
        * @param {*} config the configuration object
+       * @returns the active rule or null
        */
     function checkRules(node, msg, now) {
         const livingRuleData = {};
@@ -468,7 +503,7 @@ module.exports = function (RED) {
             if (ruleSel.conditional) {
                 ruleSel.text += '*';
             }
-            livingRuleData.ruleId = ruleSel.pos;
+            livingRuleData.id = ruleSel.pos;
             livingRuleData.active = true;
             livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
             livingRuleData.conditional = ruleSel.conditional;
@@ -481,7 +516,7 @@ module.exports = function (RED) {
             return livingRuleData;
         }
         livingRuleData.active = false;
-        livingRuleData.ruleId = -1;
+        livingRuleData.id = -1;
         node.blindData.level = node.blindData.levelDefault;
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
@@ -491,6 +526,10 @@ module.exports = function (RED) {
     }
     /******************************************************************************************/
     /******************************************************************************************/
+    /**
+     * standard Node-Red Node handler for the sunBlindControlNode
+     * @param {*} config the Node-Red Configuration property of the Node
+     */
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
@@ -527,7 +566,9 @@ module.exports = function (RED) {
             AzimuthEnd: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthEnd, 0)))
         };
         node.blindData = {
+            /** The Level of the window */
             level: NaN, // unknown
+            /** The override settings */
             overwrite: {
                 active: false,
                 expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN)),
@@ -558,6 +599,9 @@ module.exports = function (RED) {
             usedRule: NaN
         };
 
+        /**
+         * set the state of the node
+         */
         function setState() {
             let code = node.reason.code;
             let shape = 'ring';
@@ -585,12 +629,12 @@ module.exports = function (RED) {
             });
         }
 
+        /**
+         * handles the input of a message object to the node
+         */
         this.on('input', function (msg) {
             try {
                 node.debug(`input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                if (msg.payload<0) {
-                    msg.payload = node.blindData.level;
-                }
                 // node.debug('input ' + util.inspect(msg, {colors:true, compact:10})); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
@@ -608,16 +652,19 @@ module.exports = function (RED) {
 
                 node.previousData.level = node.blindData.level;
                 node.previousData.reasonCode= node.reason.code;
+                node.previousData.reasonState= node.reason.state;
+                node.previousData.reasonDescription= node.reason.description;
                 node.reason.code = NaN;
                 const now = getNow_(node, msg, config.tsCompare);
                 // check if the message contains any weather data
+                let ruleId = NaN;
 
                 // node.debug(`start pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
                 if (!checkBlindPosOverwrite(node, msg, now)) {
                     // calc times:
                     msg.blindCtrl.rule = checkRules(node, msg, now);
-
+                    ruleId = msg.blindCtrl.rule.id;
                     if (!msg.blindCtrl.rule.active && node.sunData.active) {
                         // calc sun position:
                         msg.blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
@@ -637,24 +684,27 @@ module.exports = function (RED) {
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();
 
-                const forceOutput = (!isNaN(node.blindData.level) && hlp.getMsgBoolValue(msg, 'forceOut', 'forceOut'));
+                const forceOutput = hlp.getMsgBoolValue(msg, 'forceOut', 'forceOut');
 
-                if (node.blindData.level !== node.previousData.level ||
+                if (forceOutput ||
+                    ((!isNaN(node.blindData.level)) &&
+                    (node.blindData.level !== node.previousData.level ||
                     node.reason.code !== node.previousData.reasonCode ||
-                    msg.blindCtrl.rule.ruleId !== node.previousData.usedRule ||
-                    forceOutput) {
+                    ruleId !== node.previousData.usedRule))) {
                     msg.payload = node.blindData.level;
                     // msg.blindCtrl.blind = node.blindData;
                     if (config.topic) {
-                        msg.topic = config.topic;
+                        const topicAttrs = {
+                            name: node.name,
+                            level: node.blindData.level,
+                            code: node.reason.code,
+                            rule: ruleId
+                        };
+                        msg.topic = hlp.topicReplace(config.topic, topicAttrs);
                     }
                     node.send(msg);
                 }
-                if (msg.blindCtrl.rule && msg.blindCtrl.rule.ruleId) {
-                    node.previousData.usedRule = msg.blindCtrl.rule.ruleId;
-                } else {
-                    node.previousData.usedRule = NaN;
-                }
+                node.previousData.usedRule = ruleId;
                 return null;
             } catch (err) {
                 node.error(RED._('blind-control.errors.internal', err));
@@ -667,7 +717,9 @@ module.exports = function (RED) {
             }
         });
         // ####################################################################################################
-        // initialize
+        /**
+         * initializes the node
+         */
         function initialize() {
             node.debug('initialize');
             node.rulesCount = node.rulesData.length;

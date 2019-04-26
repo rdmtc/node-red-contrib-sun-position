@@ -49,6 +49,7 @@
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
         </select>
+        <input type="hidden" id="node-input-overwriteExpire">
     </div>
     <hr>
     <!-- #region sun ######################################################################## -->
@@ -771,7 +772,7 @@
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
                         validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
                         validOperandAField.typedInput('value', data.validOperandAValue || '');
-                        validOperandBField.typedInput('type', data.validOperandBType || 'str');
+                        validOperandBField.typedInput('type', data.validOperandBType || 'num');
                         validOperandBField.typedInput('value', data.validOperandBValue || '');
                         validOperatorField.val(data.validOperator || selFields.comparator[0].id);
                         resizeRule(containerRow);
@@ -995,7 +996,7 @@
 
             const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
             if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
-                $('node-input-overwriteExpire').val('');
+                $('#node-input-overwriteExpire').val('');
             } else {
                 let val = overwriteExpire * parseFloat($('#time-control-overwriteExpire-multiplier').val());
                 if (val < 1000) {
