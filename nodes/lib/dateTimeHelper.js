@@ -358,7 +358,7 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
                 names = [names];
             }
             for (let i = 0; i < names.length; i++) {
-                if (String(msg.topic).toLowerCase().includes(names[i])) {
+                if (String(msg.topic).includes(names[i])) {
                     const res = Number(msg.payload);
                     if (!isNaN(res)) {
                         if (typeof isFound === 'function') {
@@ -392,13 +392,13 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             const id = ids[i];
             if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg.payload[id]));
+                    return isFound(msg.payload[id], msg.topic);
                 }
                 return isTrue(msg.payload[id]);
             }
             if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg[id]));
+                    return isFound(msg[id], msg.topic);
                 }
                 return isTrue(msg[id]);
             }
@@ -410,11 +410,11 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             names = [names];
         }
         for (let i = 0; i < names.length; i++) {
-            if (String(msg.topic).toLowerCase().includes(names[i])) {
+            if (String(msg.topic).includes(names[i])) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg.payload));
+                    return isFound(msg.payload, msg.topic);
                 }
-                return isTrue(msg.payload);
+                return true;
             }
         }
     }
