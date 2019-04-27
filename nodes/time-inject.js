@@ -348,14 +348,6 @@ module.exports = function (RED) {
 
     RED.nodes.registerType('time-inject', timeInjectNode);
 
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        res.sendFile(req.params[0], options);
-    });
-
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
         const node = RED.nodes.getNode(req.params.id);
         if (node !== null) {

@@ -736,12 +736,4 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('blind-control', sunBlindControlNode);
-
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req, res) => {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        res.sendFile(req.params[0], options);
-    });
 };
