@@ -498,7 +498,7 @@ module.exports = function (RED) {
         if (ruleSel) {
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
             if (ruleSel.timeLimited) {
-                ruleSel.text = ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
+                ruleSel.text += ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
             }
             if (ruleSel.conditional) {
                 ruleSel.text += '*';
@@ -684,25 +684,27 @@ module.exports = function (RED) {
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();
 
-                const forceOutput = hlp.getMsgBoolValue(msg, 'forceOut', 'forceOut');
+                let topic=config.topic;
+                if (config.topic) {
+                    const topicAttrs = {
+                        name: node.name,
+                        level: node.blindData.level,
+                        code: node.reason.code,
+                        rule: ruleId
+                    };
+                    topic = hlp.topicReplace(config.topic, topicAttrs);
+                    msg.topic = topic;
+                }
 
-                if (forceOutput ||
-                    ((!isNaN(node.blindData.level)) &&
+                if ((!isNaN(node.blindData.level)) &&
                     (node.blindData.level !== node.previousData.level ||
                     node.reason.code !== node.previousData.reasonCode ||
-                    ruleId !== node.previousData.usedRule))) {
+                    ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
                     // msg.blindCtrl.blind = node.blindData;
-                    if (config.topic) {
-                        const topicAttrs = {
-                            name: node.name,
-                            level: node.blindData.level,
-                            code: node.reason.code,
-                            rule: ruleId
-                        };
-                        msg.topic = hlp.topicReplace(config.topic, topicAttrs);
-                    }
-                    node.send(msg);
+                    node.send(msg,{topic:topic, payload:msg.blindCtrl.reason, blindCtrl: msg.blindCtrl});
+                } else {
+                    node.send(null,{topic:topic, payload:msg.blindCtrl.reason, blindCtrl: msg.blindCtrl});
                 }
                 node.previousData.usedRule = ruleId;
                 return null;

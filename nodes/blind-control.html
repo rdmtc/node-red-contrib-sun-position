@@ -256,7 +256,7 @@
         color: '#FFCC66',
         icon: 'blind-white.png',
         inputs: 1,
-        outputs: 1,
+        outputs: 2,
         defaults: {
             name: {
                 value: '',
@@ -457,7 +457,7 @@
             // #endregion weather settings
         },
         outputLabels() {
-            return 'new blind level';
+            return ['new blind level', 'return state object'];
         },
         label() {
             let suffix = '';
