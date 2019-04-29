@@ -695,22 +695,21 @@ module.exports = function (RED) {
                     };
                     topic = hlp.topicReplace(config.topic, topicAttrs);
                 }
-
                 if ((!isNaN(node.blindData.level)) &&
                     (node.blindData.level !== node.previousData.level ||
                     node.reason.code !== node.previousData.reasonCode ||
                     ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
                     // msg.blindCtrl.blind = node.blindData;
-                    if (node.outputs === 1) {
+                    if (node.outputs > 1) {
+                        node.send([msg, { topic: topic, payload: blindCtrl }]);
+                    } else {
                         msg.topic = topic || msg.topic;
                         msg.blindCtrl = blindCtrl;
                         node.send(msg, null);
-                    } else {
-                        node.send(msg, { topic: topic, payload: blindCtrl });
                     }
-                } else if (node.outputs !== 1) {
-                    node.send(null, { topic: topic, payload: blindCtrl });
+                } else if (node.outputs > 1) {
+                    node.send([null, { topic: topic, payload: blindCtrl }]);
                 }
                 node.previousData.usedRule = ruleId;
                 return null;
