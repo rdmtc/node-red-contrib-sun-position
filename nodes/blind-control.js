@@ -496,6 +496,7 @@ module.exports = function (RED) {
         }
 
         if (ruleSel) {
+            ruleSel.text = '';
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
             if (ruleSel.timeLimited) {
                 ruleSel.text += ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
