@@ -20,6 +20,8 @@
 			"ruleTimeUntil": "until",
 			"ruleBlindLevel": "blind position",
 			"sunControlActive": "active",
+			"sunControlIsActive": "restrict sunlight",
+			"sunControlNotActive": "no restriction, no sun control",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
 			"cloudValue": "Cloud",
@@ -30,7 +32,10 @@
 			"now": "date.now",
 			"msgts": "msg.ts",
 			"msglc": "msg.lc",
-			"msgtime": "msg.time"
+			"msgtime": "msg.time",
+			"outputs": "Outputs",
+			"singleOutput": "single (1)",
+			"splitOutput": "split (2)"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -63,7 +68,8 @@
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
 			"blindLevelDefault":"if no definition matches the following position will be used",
 			"overwrite": "manual overwrite of the blind position",
-			"sunControlActive": "Restricting the extent to which direct sunlight may shine into the room",
+			"sunControlNotActive": "Only time control",
+			"sunControlActive": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.",
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind"
 		},

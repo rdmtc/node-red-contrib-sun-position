@@ -54,9 +54,14 @@
     <hr>
     <!-- #region sun ######################################################################## -->
     <div class="form-row block-noindent form-row-showLater hidden">
+        <span data-i18n="[html]blind-control.text.sunControlActive" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row block-noindent">
         <label for="node-input-sunControlActive"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlActive"></span></label>
-        <input type="checkbox" id="node-input-sunControlActive" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="[html]blind-control.text.sunControlActive" style="word-wrap:break-word;"></span>
+        <select id="node-input-sunControlActive" class="row-full-width">
+            <option value="false" data-i18n="[html]blind-control.label.sunControlNotActive"></option>
+            <option value="true" data-i18n="[html]blind-control.label.sunControlIsActive"></option>
+        </select>
     </div>
     <!-- window ######################################################################## -->
     <div class="form-row form-row-sunControlActive hidden block-noindent">
@@ -143,6 +148,13 @@
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
         </select>
         <input type="hidden" id="node-input-smoothTime">
+    </div>
+    <div class="form-row enhanced-row block-noindent">
+        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
+        <select id="node-input-outputs" class="row-full-width">
+            <option value="1" data-i18n="blind-control.label.singleOutput"></option>
+            <option value="2" data-i18n="blind-control.label.splitOutput"></option>
+        </select>
     </div>
     <hr>
     <!-- #region End ######################################################################## -->
@@ -236,7 +248,6 @@
         }
         return v;
     }
-
     function countDecimals(value) {
         return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
     }
@@ -256,7 +267,7 @@
         color: '#FFCC66',
         icon: 'blind-white.png',
         inputs: 1,
-        outputs: 2,
+        outputs: 1,
         defaults: {
             name: {
                 value: '',
@@ -271,6 +282,7 @@
                 type: 'position-config',
                 required: true
             },
+            outputs: { value: '1' },
             // #region blind settings
             blindIncrement: {
                 value: 0.01,
@@ -312,20 +324,6 @@
             blindPosDefaultType: {
                 value: 'levelFixed'
             },
-            blindPosMin: {
-                value: 'closed (min)',
-                validate: RED.validators.typedInput('blindPosMinType')
-            },
-            blindPosMinType: {
-                value: 'levelFixed'
-            },
-            blindPosMax: {
-                value: 'open (max)',
-                validate: RED.validators.typedInput('blindPosMaxType')
-            },
-            blindPosMaxType: {
-                value: 'levelFixed'
-            },
             // #endregion blind settings
             // #region overwrite settings
             overwriteExpire: {
@@ -347,17 +345,17 @@
             // #endregion time settings
             // #region sun settings
             sunControlActive: {
-                value: false,
+                value: 'false',
                 required: true,
                 validate: function(v) {
-                    return (v === true || v === false);
+                    return (v === 'true' || v === 'false');
                 }
             },
             sunFloorLength: {
                 value: '',
                 required: false,
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (v === '') ||
                             (v !== '' && RED.validators.number(v));
                 }
@@ -367,42 +365,59 @@
                 required: false,
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
                 }
+            },
+            blindPosMin: {
+                value: 'closed (min)',
+                validate: function (v) {
+                    return ((getVal(this, 'sunControlActive') !== 'true') ||
+                        RED.validators.typedInput('blindPosMinType')(v));
+                }
+            },
+            blindPosMinType: {
+                value: 'levelFixed'
+            },
+            blindPosMax: {
+                value: 'open (max)',
+                validate: function(v) {
+                    return ((getVal(this, 'sunControlActive') !== 'true') ||
+                    RED.validators.typedInput('blindPosMaxType')(v));
+                }
+            },
+            blindPosMaxType: {
+                value: 'levelFixed'
             },
             smoothTime: {
                 value: '',
                 validate: function (v) {
                     const n = parseFloat(v);
-                    return ((v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
+                    return ((getVal(this, 'sunControlActive') !== 'true') || (v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                 }
             },
             // #endregion sun settings
             // #region window settings
             windowTop: {
                 value: '',
-                required: true,
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowBottom: {
                 value: '',
-                required: true,
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowAzimuthStart: {
                 value: '',
-                required: true,
                 validate: function (v) {
                     const n = Number(v);
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
                             (n < getVal(this, 'windowAzimuthEnd')) );
                 }
@@ -411,7 +426,7 @@
                 value: '',
                 validate: function (v) {
                     const n = Number(v);
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
                             (n > getVal(this, 'windowAzimuthStart')) );
                 }
@@ -422,7 +437,7 @@
                 value: '',
                 required: false,
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             RED.validators.typedInput('cloudValueType')(v);
                 }
             },
@@ -435,7 +450,7 @@
             cloudThreshold: {
                 value: '',
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (getVal(this, 'cloudValueType') === 'none') ||
                             RED.validators.typedInput('cloudThresholdType')(v);
                 }
@@ -446,7 +461,7 @@
             cloudBlindPos: {
                 value: 'open (max)',
                 validate: function (v) {
-                    return (getVal(this, 'sunControlActive') === false) ||
+                    return (getVal(this, 'sunControlActive') !== 'true') ||
                             (getVal(this, 'cloudValueType') === 'none') ||
                             RED.validators.typedInput('cloudBlindPosType')(v); // validateBlindPos(this, v);
                 }
@@ -464,7 +479,7 @@
             if (this.rules && (this.rules.length >0)) {
                 suffix += '⏲';
             }
-            if (this.sunControlActive) {
+            if (this.sunControlActive === 'true') {
                 suffix += '☀';
             }
             if (this.name) {
@@ -481,6 +496,7 @@
         },
         paletteLabel: 'blind-control',
         oneditprepare() {
+            this.outputs = this.outputs || 1;
             const node = this;
             const setup = function(node) {
                 /* global getTypes getSelectFields setupTInput appendOptions addLabel */
@@ -510,7 +526,7 @@
                         'closed (min)'
                     ]
                 };
-                function setMultiplier(node, name, element, validate) {
+                function setMultiplier(node, name, element, validate, defMultiplier) {
                     const c = Number(node[name]);
                     // console.log(`name=${name} - element=${element} - value=${c}`);
                     if (node[name] !== '' && !isNaN(c)) {
@@ -524,6 +540,7 @@
                         $('#time-control-' + name + '-multiplier').val(r);
                     } else {
                         $('#time-control-' + name).val('');
+                        $('#time-control-' + name + '-multiplier').val(defMultiplier || 1000);
                     }
                     $('#time-control-' + name).on('change focus focusout', () => {
                         const el = $('#time-control-' + name);
@@ -557,18 +574,27 @@
                         ($('#node-input-' + name).val() === val) ||
                         ($('#node-input-' + name).is(':checked') === val);
                 };
+                function getDefLevel(type, value, def) {
+                    if (value) {
+                        return value;
+                    }
+                    if (!type || type === types.LevelFix.value) {
+                        return def || types.LevelFix.options[0];
+                    }
+                    return def || '';
+                }
                 // #endregion initialize
                 // #region blind
                 setMultiplier(node,'overwriteExpire', (v) => {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
-                });
+                }, 3600000);
                 setupTInput(node, {
                     typeProp: 'blindPosDefaultType',
                     valueProp: 'blindPosDefault',
                     width: 'calc(100% - 110px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: 'open (max)', // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosDefaultType, node.blindPosDefault, 'open (max)'), // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
                 });
 
@@ -711,7 +737,7 @@
                             id: 'node-input-rule-level' + containerIndex,
                             type: 'text'
                         }).appendTo(row5).typedInput({
-                            default: types.LevelEntered.value,
+                            default: types.LevelFix.value,
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
                         // #endregion row5
@@ -765,8 +791,8 @@
                         timeOperatorField.val(data.timeOp || 0);
                         timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        levelField.typedInput('type', (data.levelType || types.LevelEntered.value));
-                        levelField.typedInput('value', (data.levelValue || ''));
+                        levelField.typedInput('type', (data.levelType || types.LevelFix.value));
+                        levelField.typedInput('value', (data.levelValue || getDefLevel(data.levelTyp, data.levelValue,'closed (min)')));
                         offsetField.typedInput('type', data.offsetType || types.Undefined.value);
                         offsetField.typedInput('value', data.offsetValue || '');
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
@@ -808,12 +834,13 @@
                 // #endregion rules
                 // #region sun
                 $('#node-input-sunControlActive').on('change focus focusin focusout', (_type, _value) => {
-                    if (chkVal('sunControlActive', false)) {
+                    const val= $('#node-input-sunControlActive').val();
+                    if (val === 'true') {
+                        $('.form-row-sunControlActive').show();
+                    } else {
                         $('.form-row-sunControlActive').hide();
                         $('.row-cloudThreshold').hide();
                         $('.row-cloudBlindPos').hide();
-                    } else {
-                        $('.form-row-sunControlActive').show();
                     }
                     $('#node-input-cloudValue').change();
                 });
@@ -822,7 +849,7 @@
                     valueProp: 'blindPosMin',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: 'closed (min)', // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'), // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
                 });
                 setupTInput(node, {
@@ -830,12 +857,12 @@
                     valueProp: 'blindPosMax',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: 'open (max)', // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered]
                 });
                 // #endregion sun
                 // #region weather
-                const cloudValueField = setupTInput(node, {
+                setupTInput(node, {
                     typeProp: 'cloudValueType',
                     valueProp: 'cloudValue',
                     width: 'calc(100% - 110px)',
@@ -843,8 +870,9 @@
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
                     onChange: (_type, _value) => {
+                        const sunControlActive = $('#node-input-sunControlActive').val();
                         const cloudValueType = $('#node-input-cloudValue').typedInput('type');
-                        if ( cloudValueType === types.Undefined.value ) {
+                        if ((cloudValueType === types.Undefined.value) || (sunControlActive !== 'true')) {
                             $('.row-cloudBlindPos').hide();
                             $('#node-input-cloudCompare').hide();
                             $('.row-cloudThreshold').hide();
@@ -901,7 +929,7 @@
                     valueProp: 'cloudBlindPos',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.cloudBlindPosType, node.cloudBlindPos, 'open (max)'),
                     types: [types.LevelFix, types.LevelEntered]
                 });
                 // #endregion weather
@@ -932,13 +960,14 @@
                 setMultiplier(node,'smoothTime', (v) => {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
-                });
+                }, 60000);
 
                 $('.enhanced-row-toggle').on('click', () => {
                     $('.enhanced-row').toggle(); // .hide();
                 });
 
                 if (chkVal('tsCompare', '0') &&
+                    chkVal('outputs', '1') &&
                     (node.smoothTime==='' || chkVal('smoothTime', 0))) {
                     $('.enhanced-row').hide();
                     $('#time-control-smoothTime').val('');
@@ -948,7 +977,6 @@
                 }
                 // #endregion Enhanced settings
                 $('#node-input-sunControlActive').change();
-                cloudValueField.change();
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {

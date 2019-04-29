@@ -533,6 +533,7 @@ module.exports = function (RED) {
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || 0);
         const node = this;
         if (node.smoothTime >= 0x7FFFFFFF) {
@@ -548,7 +549,7 @@ module.exports = function (RED) {
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
-            active: hlp.chkValueFilled(config.sunControlActive,true),
+            active: (config.sunControlActive === 'true' || config.sunControlActive === true),
             /** define how long could be the sun on the floor **/
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
@@ -645,7 +646,7 @@ module.exports = function (RED) {
                     });
                     return null;
                 }
-                msg.blindCtrl = {
+                const blindCtrl = {
                     reason : node.reason,
                     blind: node.blindData
                 };
@@ -663,13 +664,13 @@ module.exports = function (RED) {
                 // check for manual overwrite
                 if (!checkBlindPosOverwrite(node, msg, now)) {
                     // calc times:
-                    msg.blindCtrl.rule = checkRules(node, msg, now);
-                    ruleId = msg.blindCtrl.rule.id;
-                    if (!msg.blindCtrl.rule.active && node.sunData.active) {
+                    blindCtrl.rule = checkRules(node, msg, now);
+                    ruleId = blindCtrl.rule.id;
+                    if (!blindCtrl.rule.active && node.sunData.active) {
                         // calc sun position:
-                        msg.blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
+                        blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
                         if (node.cloudData.active) {
-                            msg.blindCtrl.cloud = node.cloudData;
+                            blindCtrl.cloud = node.cloudData;
                         }
                     }
                     if (node.blindData.level < node.blindData.levelClosed) {
@@ -684,8 +685,8 @@ module.exports = function (RED) {
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();
 
-                let topic=config.topic;
-                if (config.topic) {
+                let topic = config.topic;
+                if (topic) {
                     const topicAttrs = {
                         name: node.name,
                         level: node.blindData.level,
@@ -693,7 +694,6 @@ module.exports = function (RED) {
                         rule: ruleId
                     };
                     topic = hlp.topicReplace(config.topic, topicAttrs);
-                    msg.topic = topic;
                 }
 
                 if ((!isNaN(node.blindData.level)) &&
@@ -702,9 +702,15 @@ module.exports = function (RED) {
                     ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
                     // msg.blindCtrl.blind = node.blindData;
-                    node.send(msg,{topic:topic, payload:msg.blindCtrl.reason, blindCtrl: msg.blindCtrl});
-                } else {
-                    node.send(null,{topic:topic, payload:msg.blindCtrl.reason, blindCtrl: msg.blindCtrl});
+                    if (node.outputs === 1) {
+                        msg.topic = topic || msg.topic;
+                        msg.blindCtrl = blindCtrl;
+                        node.send(msg, null);
+                    } else {
+                        node.send(msg, { topic: topic, payload: blindCtrl });
+                    }
+                } else if (node.outputs !== 1) {
+                    node.send(null, { topic: topic, payload: blindCtrl });
                 }
                 node.previousData.usedRule = ruleId;
                 return null;

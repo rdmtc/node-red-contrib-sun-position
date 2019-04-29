@@ -95,7 +95,6 @@ under the simplest assumption starting from the bearing representing the perpend
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
-- **force output** an incoming message with a property `msg.forceOut`, `msg.payload.forceOut` of value true will force to send the output message every time. Otherwise a new output message will only be send if the blind position or the reason for the blind position has changed to the last out message. (This will not work if no blind position is available.)
 - **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
   - **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
     - If an override is already active a new message changes the blind level if the **priority** of the existing override allows this.
@@ -121,13 +120,21 @@ Useful to know:
 
 ### Node Output
 
-An output can be triggered by an incoming message or by an expiring timeout from an override. If the trigger is a incoming message, the incoming message will be forwarded to the output with the following changes:
+In then enhanced option are configurable if the node has one single (default) or two outputs.
 
+
+An output can be triggered by an incoming message or by an expiring timeout from an override. If the trigger is a incoming message, the incoming message will be forwarded to the first output if the blind position has changed.
+
+The incoming message is changed as following:
 - `msg.topic` if a topic is defined this topic will be used, otherwise no change of the topic from the incoming message
 - `msg.payload` the payload will be set to the new blind level (numeric value)
-- `msg.blindCtrl` a object will be added with the following properties:
-  - `msg.blindCtrl.reason` object for the reason of the current blind position
-    - `msg.blindCtrl.reason.code` a number representing the reason for the blind position. The possible codes are
+
+If the output is set to single, an object property `msg.blindCtrl` will be attached to the message and forwarded to the first output.
+If the node is configured with two outputs this object is set as the `msg.payload` property of the message that is send to the second output. The difference is also, that the second output will give this object every time a recalculation will is triggered, where the first output only send a message on blind position change.
+
+- `blindCtrl` a object will be added add as `msg.blindCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
+  - `blindCtrl.reason` object for the reason of the current blind position
+    - `blindCtrl.reason.code` a number representing the reason for the blind position. The possible codes are
       - **1** - defined default blind position, because no other rule/condition/behavior
       - **2** - manual override
       - **3** - manual override - expiring
@@ -139,30 +146,30 @@ An output can be triggered by an incoming message or by an expiring timeout from
       - **9** - blind position calculated by sun position
       - **10** - defined cloud condition applies
       - **11** - (enhanced settings) blind position calculated by sun position was not used caused by smooth settings
-    - `msg.blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
-    - `msg.blindCtrl.reason.description` a text, describe the reason for the blind position
-  - `msg.blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here
-    - `msg.blindCtrl.blind.level` - equal to `msg.payload`
-    - `msg.blindCtrl.blind.overwrite`
-      - `msg.blindCtrl.blind.overwrite.active` - is `true` when overwrite is active, otherwise `false`
-      - `msg.blindCtrl.blind.overwrite.priority` - the priority of the override
-      - `msg.blindCtrl.blind.overwrite.expires` -  is `true` when overwrite expires [exists only if overwrite active]
-      - `msg.blindCtrl.blind.overwrite.expireTs` - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
-      - `msg.blindCtrl.blind.overwrite.expireDate` - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
-  - `msg.blindCtrl.rule` - exists only if no override is active
-    - `msg.blindCtrl.rule.active` - `true` if a rule applies
-    - `msg.blindCtrl.rule.ruleId` - number of the rule who applies (is `-1` if no rule has applied)
-    - `msg.blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
-    - `msg.blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
-    - `msg.blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
-  - `msg.blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
-    - `msg.blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
-  - `msg.blindCtrl.cloud` - object containing cloud data, exists only if override by cloud is activated!
-    - `msg.blindCtrl.cloud.isOperative` - `true` if it is active and defined limit is applicable otherwise `false`
+    - `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
+    - `blindCtrl.reason.description` a text, describe the reason for the blind position
+  - `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here
+    - `blindCtrl.blind.level` -  the new blind level (numeric value) - equal to `msg.payload` of the first output message.
+    - `blindCtrl.blind.overwrite`
+      - `blindCtrl.blind.overwrite.active` - is `true` when overwrite is active, otherwise `false`
+      - `blindCtrl.blind.overwrite.priority` - the priority of the override
+      - `blindCtrl.blind.overwrite.expires` -  is `true` when overwrite expires [exists only if overwrite active]
+      - `blindCtrl.blind.overwrite.expireTs` - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
+      - `blindCtrl.blind.overwrite.expireDate` - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
+  - `blindCtrl.rule` - exists only if no override is active
+    - `blindCtrl.rule.active` - `true` if a rule applies
+    - `blindCtrl.rule.ruleId` - number of the rule who applies (is `-1` if no rule has applied)
+    - `blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
+    - `blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
+    - `blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
+  - `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
+    - `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
+  - `blindCtrl.cloud` - object containing cloud data, exists only if override by cloud is activated!
+    - `blindCtrl.cloud.isOperative` - `true` if it is active and defined limit is applicable otherwise `false`
 
 ### Node Status
 
-The node status representing the value of the `msg.blindCtrl.reason.state` of the output.
+The node status representing the value of the `blindCtrl.reason.state` of the output.
 The color of the output is as following:
 
 - red - any error
@@ -174,3 +181,17 @@ The color of the output is as following:
 The shape indicates whether the blind is fully closed or not.
 
 ## Samples
+
+Example for a time-control to open blind on civilDawn, but not before 6 o'clock and close blind on civilDusk, but not later than 23:00 o clock:
+
+![blind-control](images/blind-control-example-1.png?raw=true)
+
+```
+[{"id":"955111e1.50585","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"650223e.daba8dc","outputs":"1","blindIncrement":0.01,"blindOpenPos":1,"blindClosedPos":0,"blindPosReverse":false,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeType":"entered","timeValue":"6:00","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDawn","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDusk","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"entered","timeValue":"23:00","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""}],"tsCompare":"0","sunControlActive":"false","sunFloorLength":"","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","cloudValue":"","cloudValueType":"none","cloudCompare":"gte","cloudThreshold":"","cloudThresholdType":"num","cloudBlindPos":"open (max)","cloudBlindPosType":"levelFixed","x":440,"y":2385,"wires":[["afa7898a.2362b8"]]},{"id":"dc2734a.e0332c8","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":235,"y":2385,"wires":[["955111e1.50585"]]},{"id":"afa7898a.2362b8","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":655,"y":2385,"wires":[]},{"id":"650223e.daba8dc","type":"position-config","z":"","name":"","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":-60}]
+```
+
+similar example with additional different times for weekend:
+```
+[{"id":"65945da6.f4c7d4","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"d2b0ae0f.90e0c","outputs":1,"blindIncrement":"0.01","blindOpenPos":"1","blindClosedPos":0,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"14400000","rules":[{"timeType":"entered","timeValue":"6:30","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""},{"timeType":"entered","timeValue":"7:25","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"global","validOperandAValue":"dayInfo.today.isWeekendOrHoliday","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDawn","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDusk","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""},{"timeType":"entered","timeValue":"22:35","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""},{"timeType":"entered","timeValue":"23:15","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"global","validOperandAValue":"dayInfo.tomorrow.isWeekendOrHoliday","validOperator":"true","validOperatorText":"is true","validOperandBType":"str","validOperandBValue":""}],"tsCompare":"0","sunControlActive":"false","sunFloorLength":"","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","cloudValue":"","cloudValueType":"none","cloudCompare":"gte","cloudThreshold":"50","cloudThresholdType":"num","cloudBlindPos":"open (max)","cloudBlindPosType":"levelFixed","x":440,"y":2445,"wires":[["b833cc54.55162"]]},{"id":"c3adc7de.37c938","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":235,"y":2445,"wires":[["65945da6.f4c7d4"]]},{"id":"b833cc54.55162","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":655,"y":2445,"wires":[]},{"id":"d2b0ae0f.90e0c","type":"position-config","z":"","name":"Kap-Halbinsel","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":"1"}]
+```
+
