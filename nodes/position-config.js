@@ -455,7 +455,10 @@ module.exports = function (RED) {
             const opVal = (type, value, opName) => {
                 let opData = null;
                 try {
-                    if (type === 'num') {
+                    if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
+                        _srcNode.warn(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                        return opData;
+                    } else if (type === 'num') {
                         return Number(value);
                     } else if (type === 'msgPayload') {
                         return msg.payload;
