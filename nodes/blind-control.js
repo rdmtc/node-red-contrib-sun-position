@@ -360,28 +360,44 @@ module.exports = function (RED) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, now);
-        // to be able to store values
-        checkWeather(node, msg);
 
         if (!sunPosition.InWindow) {
-            node.reason.code = 8;
-            node.reason.state = RED._('blind-control.states.sunNotInWin');
-            node.reason.description = RED._('blind-control.reasons.sunNotInWin');
+            if (node.sunData.mode === 1) {
+                node.blindData.level = node.blindData.levelMin;
+                node.reason.code = 13;
+                node.reason.state = RED._('blind-control.states.sunNotInWinMin');
+                node.reason.description = RED._('blind-control.reasons.sunNotInWin');
+            } else {
+                node.reason.code = 8;
+                node.reason.state = RED._('blind-control.states.sunNotInWin');
+                node.reason.description = RED._('blind-control.reasons.sunNotInWin');
+            }
             return sunPosition;
         }
 
-        if (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
+        // to be able to store values
+        checkWeather(node, msg);
+
+        if ((node.sunData.mode === 2) && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
             node.reason.code = 7;
             node.reason.state = RED._('blind-control.states.sunMinAltitude');
             node.reason.description = RED._('blind-control.reasons.sunMinAltitude');
             return sunPosition;
         }
-        // set default values:
+
         if (node.cloudData.isOperative) {
             node.blindData.level = node.cloudData.blindPos;
             node.reason.code = 10;
             node.reason.state = RED._('blind-control.states.cloudExceeded');
             node.reason.description = RED._('blind-control.reasons.cloudExceeded');
+            return sunPosition;
+        }
+
+        if (node.sunData.mode === 1) {
+            node.blindData.level = node.blindData.levelMax;
+            node.reason.code = 12;
+            node.reason.state = RED._('blind-control.states.sunInWinMax');
+            node.reason.description = RED._('blind-control.reasons.sunInWinMax');
             return sunPosition;
         }
 
@@ -550,13 +566,16 @@ module.exports = function (RED) {
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
-            active: (config.sunControlActive === 'true' || config.sunControlActive === true),
+            active: false,
+            mode: Number(hlp.chkValueFilled(config.sunControlMode, 0)),
             /** define how long could be the sun on the floor **/
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
             minAltitude: Number(hlp.chkValueFilled(config.sunMinAltitude, 0)),
             changeAgain: 0
         };
+        node.sunData.active = node.sunData.mode > 0;
+        node.sunData.modeMax = node.sunData.mode;
         node.windowSettings = {
             /** The top of the window */
             top: Number(config.windowTop),
@@ -661,6 +680,11 @@ module.exports = function (RED) {
                 // check if the message contains any weather data
                 let ruleId = NaN;
 
+                const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
+                if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
+                    node.sunData.mode = newMode;
+                }
+
                 // node.debug(`start pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
                 if (!checkBlindPosOverwrite(node, msg, now)) {
@@ -692,7 +716,11 @@ module.exports = function (RED) {
                         name: node.name,
                         level: node.blindData.level,
                         code: node.reason.code,
-                        rule: ruleId
+                        state: node.reason.state,
+                        rule: ruleId,
+                        mode: node.sunData.mode,
+                        topic: msg.topic,
+                        payload: msg.payload
                     };
                     topic = hlp.topicReplace(config.topic, topicAttrs);
                 }
@@ -701,7 +729,6 @@ module.exports = function (RED) {
                     node.reason.code !== node.previousData.reasonCode ||
                     ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
-                    // msg.blindCtrl.blind = node.blindData;
                     if (node.outputs > 1) {
                         node.send([msg, { topic: topic, payload: blindCtrl }]);
                     } else {

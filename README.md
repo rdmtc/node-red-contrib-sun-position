@@ -433,7 +433,7 @@ Without defining any comparison, the node allows by only defining inputs and res
 
 ### blind-control
 
-Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message payload can be a variety of types, including strings, JavaScript objects, the current time or the current sun or moon position.
+Used to control a blind with many possibilities. This can be time-dependent and it can calculate the blind position based on the current position of the sun to limit the sun light To limit the sunlight on the floor of a window.
 
 [blind-control](blind_control.md)
 

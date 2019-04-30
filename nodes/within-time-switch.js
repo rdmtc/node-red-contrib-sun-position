@@ -102,9 +102,8 @@ module.exports = function (RED) {
         if (result.altStartTime) {
             // node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
             try {
-                // evaluateNodeProperty(node.property, type, node, msg, callback)
-                const res = RED.util.evaluateNodeProperty(node.propertyStart, node.propertyStartType, node, msg);
-                result.altStartTime = hlp.isTrue(res);
+                result.altStartTime = node.positionConfig.comparePropValue(node, msg, node.propertyStartType, node.propertyStart,
+                    node.propertyStartOperator, node.propertyStartThresholdType, node.propertyStartThresholdValue);
             } catch (err) {
                 result.altStartTime = false;
                 hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', {
@@ -118,9 +117,8 @@ module.exports = function (RED) {
         if (result.altEndTime) {
             // node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.propertyEnd);
             try {
-                // evaluateNodeProperty(node.property, type, node, msg, callback)
-                const res = RED.util.evaluateNodeProperty(node.propertyEnd, node.propertyEndType, node, msg);
-                result.altEndTime = hlp.isTrue(res);
+                result.altEndTime = node.positionConfig.comparePropValue(node, msg, node.propertyEndType, node.propertyEnd,
+                    node.propertyEndOperator, node.propertyEndThresholdType, node.propertyEndThresholdValue);
             } catch (err) {
                 result.altEndTime = false;
                 hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyEnd-type', {
@@ -192,9 +190,16 @@ module.exports = function (RED) {
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config));
 
         this.propertyStart = config.propertyStart || '';
-        this.propertyEnd = config.propertyEnd || '';
         this.propertyStartType = config.propertyStartType || 'none';
+        this.propertyStartOperator = config.propertyStartCompare || 'true';
+        this.propertyStartThresholdValue = config.propertyStartThreshold;
+        this.propertyStartThresholdType = config.propertyStartThresholdType;
+
+        this.propertyEnd = config.propertyEnd || '';
         this.propertyEndType = config.propertyEndType || 'none';
+        this.propertyEndOperator = config.propertyEndCompare || 'true';
+        this.propertyEndThresholdValue = config.propertyEndThreshold;
+        this.propertyEndThresholdType = config.propertyEndThresholdType;
         this.timeOutObj = null;
         this.lastMsgObj = null;
         const node = this;

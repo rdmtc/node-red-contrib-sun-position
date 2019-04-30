@@ -2,6 +2,7 @@
     "time-inject": {
         "label": {
             "property": "Property",
+            "propertyThreshold": "Threshold",
             "time": "Time",
             "timeOffset": "Offset",
             "timeAlt": "Alternate time",
@@ -32,6 +33,7 @@
             "name": "Name",
             "topic": "Name",
             "property": "Property",
+            "propertyThreshold": "threshold",
             "payloadStart": "",
             "payloadEnd": "",
             "startTime": "7:40",

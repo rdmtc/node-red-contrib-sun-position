@@ -71,6 +71,9 @@ module.exports = function (RED) {
 
         this.property = config.property || '';
         this.propertyType = config.propertyType || 'none';
+        this.propertyOperator = config.propertyCompare || 'true';
+        this.propertyThresholdValue = config.propertyThreshold;
+        this.propertyThresholdType = config.propertyThresholdType;
         this.timeAlt = config.timeAlt || '';
         this.timeAltType = config.timeAltType || 'none';
         this.timeAltOffset = config.timeAltOffset || 0;
@@ -164,8 +167,8 @@ module.exports = function (RED) {
                     if (isAlt) {
                         let needsRecalc = false;
                         try {
-                            const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                            useAlternateTime = hlp.isTrue(res);
+                            useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
+                                node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;

@@ -116,8 +116,7 @@ const SelectFields = {
         { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
         { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
         { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
-        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
-        { id: 'istype', group: 'enhanced', label: 'is of type', operatorCount: 2 }
+        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 }
     ]
 };
 

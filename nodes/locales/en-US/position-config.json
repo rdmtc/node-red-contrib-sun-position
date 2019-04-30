@@ -179,8 +179,7 @@
             "less than or equal",
             "greater than",
             "greater than or equal",
-            "contain",
-            "is of type"
+            "contain"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",

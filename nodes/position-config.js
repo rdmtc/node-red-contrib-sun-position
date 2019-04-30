@@ -97,23 +97,7 @@ const compareOperators = {
     'lte': (a, b) => (a <= b),
     'gt': (a, b) => (a > b),
     'gte': (a, b) => (a >= b),
-    'contain': (a, b) => ((a + '').indexOf(b) !== -1),
-    'istype': (a, b) => {
-        if (b === 'array') {
-            return Array.isArray(a);
-        } else if (b === 'buffer') {
-            return Buffer.isBuffer(a);
-        } else if (b === 'json') {
-            try {
-                JSON.parse(a); return true;
-            } catch (e) {
-                return false;
-            }
-        } else if (b === 'null') {
-            return a === null;
-        }
-        return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null;
-    }
+    'contain': (a, b) => ((a + '').indexOf(b) !== -1)
 };
 
 module.exports = function (RED) {
