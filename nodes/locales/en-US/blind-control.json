@@ -12,8 +12,6 @@
 			"blindLevelMin": "min position",
 			"blindLevelMax": "max position",
 			"overwriteExpire": "expire",
-			"addTimes": "alternate start or end time",
-			"compareTime": "base time",
 			"ruleCondition": "only if",
 			"ruleConditionThreshold": "threshold",
 			"ruleTimeFrom": "from",
@@ -30,13 +28,9 @@
 			"cloudBlindPos": "blind position",
 			"smoothTime": "smoothTime",
 			"showEnhSettings": "Enhanced settings",
-			"now": "date.now",
-			"msgts": "msg.ts",
-			"msglc": "msg.lc",
-			"msgtime": "msg.time",
 			"outputs": "Outputs",
 			"singleOutput": "single (1)",
-			"splitOutput": "split (2)"
+			"splitOutput": "dual (2)"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -49,43 +43,37 @@
 			"blindLevelDefault": "position if no other used",
 			"blindLevelMin": "maximum position if sun calced position",
 			"blindLevelMax": "minimum position if sun calced position",
-			"OverwriteExpire": "(opt) the duration a manual setting will remain is place",
+			"OverwriteExpire": "(opt) the duration a manual setting will remain",
 			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
-			"cloudValue": "percentage of sky occluded by clouds",
-			"cloudThreshold": "threshold for set blind position",
-			"cloudBlindPos": "blind position when cloud-value is below threshold",
+			"cloudValue": "value to compre",
+			"cloudThreshold": "threshold for the compare",
+			"cloudBlindPos": "blind position when the compare be the case",
 			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
-			"property": "Property",
-			"startOffset": "0",
-			"endOffset": "0",
-			"startOffsetAlt": "0",
-			"endOffsetAlt": "0"
 		},
 		"text": {
 			"blind": "blind settings",
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
-			"blindLevelDefault":"if no definition matches the following position will be used",
+			"blindLevelDefault":"if no rule matches the following position will be used, On sun light restriction this is the blind level wenn sun is not in the window.",
 			"overwrite": "manual overwrite of the blind position",
-			"sunControlNotActive": "Only time control",
+			"sunControlNotActive": "Only rule control",
 			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.",
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind"
 		},
 		"tips": {
-			"addTimes": "..."
-		},
-		"options": {
-			"none":"no special",
-			"notOverwritable": "can not be overwritten"
+			"sunPosControl": "..."
 		},
 		"reasons": {
 			"overwriteNoExpire": "position is overwritten (Prio __prio__), no expire",
 			"overwriteExpire": "position is overwritten (Prio __prio__), will expire __time__",
 			"default": "position is set to default position because no other rule matches",
-			"time": "position by time [rule __pos__] __text__",
+			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [rule __number__]"
+			"ruleCond": "position by conditional rule __text__ [rule __number__]",
+			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [rule __number__]"
+			"rule": "position by fixed rule __number__",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",
@@ -100,7 +88,10 @@
 			"overwriteNoExpire": "overwritten [__prio__]",
 			"overwriteExpire": "overwritten [__prio__], till __time__",
 			"default": "default",
-			"time": "by time  [__pos__] __text__",
+			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]"
+			"ruleCond": "__text__ [rule __number__]",
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + __text__ [rule __number__]"
+			"rule": "by fixed rule __number__",
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
 			"sunCtrl": "sun control",
@@ -117,7 +108,7 @@
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
 			"getCloudData": "error getting cloudData: __message__",
 			"getBlindPosData": "error getting blind level: __message__",
-			"getPropertyData": "error getting property data: \"__message__\" skipping time",
+			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
 			"smoothTimeToolong":"The selected smooth is too long!!"
 		}
 	}

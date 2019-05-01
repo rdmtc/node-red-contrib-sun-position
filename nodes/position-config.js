@@ -447,12 +447,15 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage) {
+        comparePropValue (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, outReason) {
             _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
-            const opVal = (type, value, opName) => {
+            if (compare === '' || typeof compare !== 'string' || compare === null) {
+                compare = 'true';
+            }
+            const opVal = (type, value, opName, res) => {
                 let opData = null;
                 try {
                     if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
@@ -469,6 +472,7 @@ module.exports = function (RED) {
                     if (typeof tempStorage !== 'undefined' && type === 'msg') {
                         tempStorage[opName] = opData;
                     }
+                    res[opName] = opData;
                     return opData;
                 } catch (err) {
                     this.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -477,10 +481,16 @@ module.exports = function (RED) {
                         return tempStorage[opName];
                     }
                     _srcNode.warn(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                    res[opName] = null;
                     return null;
                 }
             };
-
+            if (typeof outReason === 'object') {
+                const result = compareOperators[compare](opVal(opTypeA, opValueA, 'OperandA', outReason), opVal(opTypeB, opValueB, 'OperandB', outReason));
+                outReason.compare = RED._('common.comparators.'+compare);
+                outReason.text = outReason.OperandA + ' ' + outReason.compare + (outReason.OperandB) ? ' ' + outReason.OperandB : '';
+                return result;
+            }
             return compareOperators[compare](opVal(opTypeA, opValueA, 'OperandA'), opVal(opTypeB, opValueB, 'OperandB'));
         }
         /**************************************************************************************************************/

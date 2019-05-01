@@ -44,24 +44,17 @@ function validPosition_(node, level) {
    * @param {*} msg the message object
    * @param {*} node the current node object
    */
-function getNow_(node, msg, compareType) {
-    let id = '';
+function getNow_(node, msg) {
     let value = '';
-    if (compareType == '0' || compareType == '') { // eslint-disable-line eqeqeq
-        return new Date();
-    } else if (compareType === '1') {
-        id = 'msg.ts';
-        value = msg.ts;
-    } else if (compareType === '2') {
-        id = 'msg.lc';
-        value = msg.lc;
-    } else if (compareType === '3') {
-        id = 'msg.time';
+    if (typeof msg.time === 'number') {
         value = msg.time;
+        node.debug(`compare time to msg.time = "${value}"`);
+    } else if (typeof msg.ts === 'number') {
+        value = msg.ts;
+        node.debug(`compare time to msg.ts = "${value}"`);
     } else {
         return new Date();
     }
-    node.debug(`compare time to ${id} = "${value}"`);
     const dto = new Date(msg.ts);
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
         return dto;
@@ -458,7 +451,8 @@ module.exports = function (RED) {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp)) {
+                    rule.conditonData = {};
+                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp. rule.conditonData)) {
                         return null;
                     }
                 } catch (err) {
@@ -470,16 +464,16 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            rule.switchTime = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetValue, rule.offsetType, rule.multiplier);
-            if (rule.switchTime.error) {
-                hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.switchTime.error }), undefined, rule.switchTime.error);
+            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetValue, rule.offsetType, rule.multiplier);
+            if (rule.timeData.error) {
+                hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;
-            } else if (!rule.switchTime.value) {
+            } else if (!rule.timeData.value) {
                 throw new Error('Error can not calc time!');
             }
-            rule.switchTime.num = hlp.getTimeNumber(rule.switchTime.value);
+            rule.timeData.num = hlp.getTimeNumber(rule.timeData.value);
 
-            if (cmp(rule.switchTime.num, nowNr)) {
+            if (cmp(rule.timeData.num, nowNr)) {
                 return rule;
             }
             return null;
@@ -514,12 +508,6 @@ module.exports = function (RED) {
         if (ruleSel) {
             ruleSel.text = '';
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
-            if (ruleSel.timeLimited) {
-                ruleSel.text += ruleSel.timeOpText + ' ' + ruleSel.switchTime.value.toLocaleTimeString();
-            }
-            if (ruleSel.conditional) {
-                ruleSel.text += '*';
-            }
             livingRuleData.id = ruleSel.pos;
             livingRuleData.active = true;
             livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
@@ -527,8 +515,23 @@ module.exports = function (RED) {
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.blindData.level = livingRuleData.level;
             node.reason.code = 4;
-            node.reason.state= RED._('blind-control.states.time', ruleSel);
-            node.reason.description = RED._('blind-control.reasons.time', ruleSel);
+            const data = { number: ruleSel.pos };
+            let name = 'rule';
+            if (ruleSel.conditional && !ruleSel.timeLimited) {
+                data.text = ruleSel.conditonData;
+                name='ruleCond';
+            } else if (ruleSel.timeLimited) {
+                data.timeOp = ruleSel.timeOpText;
+                data.timeLocal = ruleSel.timeData.value.toLocaleTimeString();
+                data.time = ruleSel.timeData.value.toLocaleTimeString();
+                name='ruleTime';
+                if (ruleSel.conditional) {
+                    data.text = ruleSel.conditonData;
+                    name='ruleTimeCond';
+                }
+            }
+            node.reason.state= RED._('blind-control.states.'+name, data);
+            node.reason.description = RED._('blind-control.reasons.'+name, data);
             // node.debug('checkRules end: livingRuleData=' + util.inspect(livingRuleData,{colors:true, compact:10}));
             return livingRuleData;
         }
@@ -676,7 +679,7 @@ module.exports = function (RED) {
                 node.previousData.reasonState= node.reason.state;
                 node.previousData.reasonDescription= node.reason.description;
                 node.reason.code = NaN;
-                const now = getNow_(node, msg, config.tsCompare);
+                const now = getNow_(node, msg);
                 // check if the message contains any weather data
                 let ruleId = NaN;
 

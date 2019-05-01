@@ -131,15 +131,6 @@
     <div class="form-row block-noindent">
         <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
     </div>
-    <div class="form-row enhanced-row block-noindent">
-        <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.compareTime"></span></label>
-        <select id="node-input-tsCompare" class="row-full-width">
-            <option value="0" data-i18n="blind-control.label.now"></option>
-            <option value="1" data-i18n="blind-control.label.msgts"></option>
-            <option value="2" data-i18n="blind-control.label.msglc"></option>
-            <option value="3" data-i18n="blind-control.label.msgtime"></option>
-        </select>
-    </div>
     <div class="form-row enhanced-row block-noindent" id="node-smoothTime">
         <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
         <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value="">
@@ -150,7 +141,7 @@
         </select>
         <input type="hidden" id="node-input-smoothTime">
     </div>
-    <div class="form-row enhanced-row block-noindent">
+    <div class="form-row block-noindent">
         <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
         <select id="node-input-outputs" class="row-full-width">
             <option value="1" data-i18n="blind-control.label.singleOutput"></option>
@@ -340,9 +331,6 @@
             rules: {
                 value: {}
             },
-            tsCompare: {
-                value: '0'
-            },
             // #endregion time settings
             // #region sun settings
             sunControlMode: {
@@ -481,9 +469,9 @@
             if (this.rules && (this.rules.length >0)) {
                 suffix += '⏲';
             }
-            if (Number(this.sunControlMode) === '1') {
+            if (Number(this.sunControlMode) === 2) {
                 suffix += '☀';
-            } else if (Number(this.sunControlMode) === '2') {
+            } else if (Number(this.sunControlMode) === 1) {
                 suffix += '☃';
             }
             if (this.name) {
@@ -976,12 +964,10 @@
                     $('.enhanced-row').toggle(); // .hide();
                 });
 
-                if (chkVal('tsCompare', '0') &&
-                    chkVal('outputs', '1') &&
+                if (chkVal('outputs', '1') &&
                     (node.smoothTime==='' || chkVal('smoothTime', 0))) {
                     $('.enhanced-row').hide();
                     $('#time-control-smoothTime').val('');
-                    $('#node-input-tsCompare').val('0');
                 } else {
                     $('.enhanced-row').show();
                 }

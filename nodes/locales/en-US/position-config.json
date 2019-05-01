@@ -169,8 +169,8 @@
             "is not null",
             "is empty",
             "is not empty",
-            "is a true expression",
-            "is a false expression",
+            "is a true expression (true, on, 1)",
+            "is a false expression (false, off, 0)",
             "is not a true expression",
             "is not a false expression",
             "equal",
@@ -218,7 +218,25 @@
             "isoTime": "HH:MM:ss",
             "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
             "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
-        }
+        },
+        "comparators" : {
+            "true": "is true",
+            "false": "is false",
+            "null": "is null",
+            "nnull": "is not null",
+            "empty": "is empty",
+            "nempty": "is not empty",
+            "true_expr": "is true*",
+            "false_expr": "is false*",
+            "ntrue_expr": "is not true*",
+            "nfalse_expr": "is not false*",
+            "equal": "=",
+            "nequal": "!=",
+            "lt": "<",
+            "lte": "<=",
+            "gt": ">",
+            "gte": ">=",
+            "contain": "contain"
     },
     "errors": {
         "error": "<strong>Error</strong>: __message__",

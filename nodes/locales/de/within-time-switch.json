@@ -3,9 +3,11 @@
         "label": {
             "addTimes": "alternative Start- oder End-Zeit",
             "propertyStart": "Alt. Start",
+            "propertyStartThreshold": "Schwelle",
             "startTime": "Start",
             "startTimeAlt": "Start",
             "propertyEnd": "Alt. Ende",
+            "propertyEndThreshold": "Schwelle",
             "endTime": "Ende",
             "endTimeAlt": "Ende",
             "startOffset": "Offset",
@@ -23,9 +25,13 @@
             "lastMsgOnEndOut": "resend end",
             "lastMsgOnEndOutTxt": "Zum nächsten Ende wird die letzte Nachricht welche innerhalb der Zeit angekommen ist ausgesendet",
             "compareTime":"Vergleichs Basis"
+            "showEnhSettings":"Erweiterte Einstellungen"
         },
         "placeholder": {
-            "property": "Property",
+            "propertyStart": "Wert",
+            "propertyStartThreshold": "schwellwert",
+            "propertyEnd": "Wert",
+            "propertyEndThreshold": "schwellwert",
             "startTime": "7:40",
             "startOffset": "0",
             "endTime": "18:15",
