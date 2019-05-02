@@ -205,7 +205,7 @@
             "in 4 Tagen",
             "in 5 Tagen",
             "in 6 Tagen"
-        ]
+        ],
         "comparators" : {
             "true": "ist wahr",
             "false": "ist falsch",
@@ -224,17 +224,18 @@
             "gt": ">",
             "gte": ">=",
             "contain": "enthält"
-    },
-    "errors": {
-        "error": "<strong>Fehler</strong>: __message__",
-        "error-title": "interner Fehler",
-        "error-init": "Fehler '__message__', wiederhole in __time__min",
-        "warn-init": "Warnung '__message__', wiederhole in __time__min"
-        "pos-config": "Node ist nicht richtig konfiguriert!! Fehlende oder flasche positionsangaben!",
-        "pos-config-state": "Node ist nicht richtig konfiguriert!!",
-        "unknownPropertyOperator": "Fehler, der verwendete Operator __propertyOp__=\"__propertyOpText__\" ist unbekannt!",
-        "notEvaluableProperty":"kann den Wert von __type__.__value__ nicht ermitteln",
-        "notEvaluablePropertyAdd":"Fehler \"__err__\", kann den Wert von __type__.__value__ nicht ermitteln!"
+        },
+        "errors": {
+            "error": "<strong>Fehler</strong>: __message__",
+            "error-title": "interner Fehler",
+            "error-init": "Fehler '__message__', wiederhole in __time__min",
+            "warn-init": "Warnung '__message__', wiederhole in __time__min",
+            "pos-config": "Node ist nicht richtig konfiguriert!! Fehlende oder flasche positionsangaben!",
+            "pos-config-state": "Node ist nicht richtig konfiguriert!!",
+            "unknownPropertyOperator": "Fehler, der verwendete Operator __propertyOp__=\"__propertyOpText__\" ist unbekannt!",
+            "notEvaluableProperty":"kann den Wert von __type__.__value__ nicht ermitteln",
+            "notEvaluablePropertyAdd":"Fehler \"__err__\", kann den Wert von __type__.__value__ nicht ermitteln!"
+        }
     },
     "position-config": {
         "label": {

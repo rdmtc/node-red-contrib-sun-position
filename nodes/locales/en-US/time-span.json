@@ -18,8 +18,15 @@
             "result1Offset": "Offset"
         },
         "placeholder": {
-            "name": "Name",
-            "offset": "0"
+            "operand": "Input",
+            "operandFormat": "parse format",
+            "operandOffset": "Offset",
+            "operator": "calculation",
+            "result": "result",
+            "resultValue": "value",
+            "resultTSFormat": "output format",
+            "resultFormat": "output format",
+            "resultOffset": "Offset"
         }
     }
 }

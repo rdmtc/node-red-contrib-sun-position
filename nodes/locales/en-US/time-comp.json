@@ -14,18 +14,14 @@
             "result1Offset": "Offset"
         },
         "placeholder": {
-            "position": "Position",
-            "name": "Name",
-            "topic": "Name",
             "property": "Property",
-            "payloadStart": "",
-            "payloadEnd": "",
-            "startTime": "7:40",
-            "startOffset": "0",
-            "time": "18:15",
-            "offset": "0",
-            "timeAlt": "18:15",
-            "timeAltOffset": "0"
+            "input": "Input",
+            "inputFormat": "parse format",
+            "inputOffset": "Offset",
+            "result": "result",
+            "resultValue": "value",
+            "resultFormat": "output format",
+            "resultOffset": "Offset"
         }
     }
 }

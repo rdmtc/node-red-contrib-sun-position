@@ -1,36 +1,36 @@
 <script type="text/x-red" data-template-name="sun-position">
-    <div class="form-row">
+    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
         <input type="hidden" id="node-input-outputs"/>
     </div>
-    <div class="form-row time-topic">
+    <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic">
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
     </div>
     <hr>
-    <div class="form-row node-input-rule-container-row">
+    <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
         <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.azimuthpos"></span></label>
         <ol id="node-input-rule-container"></ol>
     </div>
     <hr>
-    <div class="form-row block-noindent">
+    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.start">
         <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
-        <input type="text" id="node-input-start" />
+        <input type="text" id="node-input-start" data-i18n="[title]sun-position.placeholder.start"/>
         <input type="hidden" id="node-input-startType">
     </div>
-    <div class="form-row block-indent1 sun-position-row-startOffset hidden">
+    <div class="form-row block-indent1 sun-position-row-startOffset hidden" data-i18n="[title]sun-position.placeholder.startOffset">
         <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
         <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"></input>
         <input type="hidden" id="node-input-startOffsetType">
         <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row block-noindent">
+    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.end">
         <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
-        <input type="text" id="node-input-end" />
+        <input type="text" id="node-input-end" data-i18n="[placeholder]sun-position.placeholder.end"/>
         <input type="hidden" id="node-input-endType">
     </div>
-    <div class="form-row block-indent1 sun-position-row-endOffset hidden">
+    <div class="form-row block-indent1 sun-position-row-endOffset hidden" data-i18n="[title]sun-position.placeholder.endOffset">
         <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
         <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"></input>
         <input type="hidden" id="node-input-endOffsetType">
@@ -38,9 +38,7 @@
     </div>
     <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
     <hr>
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
-    <div class="form-row">
+    <div class="form-row" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>

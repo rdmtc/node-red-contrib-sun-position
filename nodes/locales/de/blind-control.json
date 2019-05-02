@@ -51,11 +51,11 @@
 			"cloudBlindPos": "Position wenn der Vergleich zutrifft",
 			"smoothTime":"(opt) verhindert Änderungen durch Sonnenstandsänderung innerhalb der angegebenen Zeit",
 			"name": "Name",
-			"expiryperiod": "120",
+			"expiryperiod": "120"
 		},
 		"text": {
 			"blind": "Jalousie Einstellungen",
-			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</ b> oder <em>true</ em> ist. <br> <b>bis</ b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</ b> oder größer als <b>now</ b> ist. <br> <b>von</ b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</ b> oder weniger als <b>der aktuelZeitpunkt</ b> ist. <br>",
+			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelZeitpunkt</b> ist. <br>",
 			"blindLevelDefault":"Wenn keine Regel zutrifft, wird die aktuelle Jalousieposition genutzt. Bei beschränkender Sonnen-Steuerung ist die die Jalousieposition, wenn die Sonne nicht in das Fenster scheint.",
 			"overwrite": "manuelles Überschreiben der Jalousieposition",
 			"sunControlNotActive": "Nur Regelbasiert",
@@ -70,9 +70,9 @@
 			"overwriteNoExpire": "manuell überschrieben (Prio __prio__), kein Vefall",
 			"overwriteExpire": "manuell überschrieben (Prio __prio__), verfällt __time__",
 			"default": "Position ist auf Standard gesetzt, eil keine Regel zutrifft",
-			"ruleTime": "Position durch Zeitregel - rule __timeOp__ __timeLocal__ [rule __number__]"
+			"ruleTime": "Position durch Zeitregel - rule __timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "Position duech bedingte Regel __text__ [rule __number__]",
-			"ruleTimeCond": "Position durch Zeit Regel __timeOp__ __timeLocal__ und Bedingung __text__ [rule __number__]"
+			"ruleTimeCond": "Position durch Zeit Regel __timeOp__ __timeLocal__ und Bedingung __text__ [rule __number__]",
 			"rule": "Position durch feste Regel __number__",
 			"sunMinAltitude": "Sonne ist niedriger als der minimale Höhenwinkel",
 			"sunNotInWin": "Sonne scheint nicht in das Fenster",
@@ -88,9 +88,9 @@
 			"overwriteNoExpire": "überschrieben [__prio__]",
 			"overwriteExpire": "überschrieben [__prio__], bis __time__",
 			"default": "Standard",
-			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]"
+			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "__text__ [rule __number__]",
-			"ruleTimeCond": "__timeOp__ __timeLocal__ + __text__ [rule __number__]"
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + __text__ [rule __number__]",
 			"rule": "durch feste Regel __number__",
 			"sunMinAltitude": "mininaler Höhenwinkel",
 			"sunNotInWin": "Sonne scheint nicht isns Fenster",

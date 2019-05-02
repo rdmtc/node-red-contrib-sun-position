@@ -1,40 +1,40 @@
 <script type="text/x-red" data-template-name="time-span">
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row block-noindent time-operand1">
+  <div class="form-row block-noindent time-operand1" data-i18n="[title]time-span.placeholder.operand">
       <label for="node-input-operand1"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand1"></span></label>
-      <input type="text" id="node-input-operand1">
+      <input type="text" id="node-input-operand1" data-i18n="[placeholder]time-span.placeholder.operand">
       <input type="hidden" id="node-input-operand1Type">
   </div>
-  <div class="form-row block-indent1 time-row-operand1Format hidden">
+  <div class="form-row block-indent1 time-row-operand1Format hidden"" data-i18n="[title]time-span.placeholder.operandFormat">
       <label for="node-input-operand1Formatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-span.label.operand1Format"></span></label>
       <select id="node-input-operand1Formatsel" >
       <input type="text" id="node-input-operand1Format" style="margin-left: 5px;"></input>
   </div>
-  <div class="form-row block-indent1 time-row-operand1Offset hidden">
+  <div class="form-row block-indent1 time-row-operand1Offset hidden"" data-i18n="[title]time-span.placeholder.operandOffset">
       <label for="node-input-operand1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.operand1Offset"></span></label>
-      <input id="node-input-operand1Offset" data-i18n="[placeholder]time-span.placeholder.offset"></input>
+      <input id="node-input-operand1Offset" data-i18n="[placeholder]time-span.placeholder.operandOffset"></input>
       <input type="hidden" id="node-input-operand1OffsetType">
       <select id="node-input-operand1OffsetMultiplier" class="node-input-multiplier"></select>
   </div>
   <hr>
-  <div class="form-row block-noindent time-operand2">
+  <div class="form-row block-noindent time-operand2" data-i18n="[title]time-span.placeholder.operand">
       <label for="node-input-operand2"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand2"></span></label>
-      <input type="text" id="node-input-operand2">
+      <input type="text" id="node-input-operand2" data-i18n="[placeholder]time-span.placeholder.operand">
       <input type="hidden" id="node-input-operand2Type"></input>
   </div>
-  <div class="form-row block-indent1 time-row-operand2Format hidden">
+  <div class="form-row block-indent1 time-row-operand2Format hidden" data-i18n="[title]time-span.placeholder.operandFormat">
       <label for="node-input-operand2Formatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-span.label.operand2Format"></span></label>
       <select id="node-input-operand2Formatsel">
       <input type="text" id="node-input-operand2Format" style="margin-left: 5px;"></input>
   </div>
-  <div class="form-row block-indent1 time-row-operand2Offset hidden">
+  <div class="form-row block-indent1 time-row-operand2Offset hidden" data-i18n="[title]time-span.placeholder.operandOffset">
       <label for="node-input-operand2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.operand2Offset"></span></label>
-      <input id="node-input-operand2Offset" data-i18n="[placeholder]time-span.placeholder.offset">
+      <input id="node-input-operand2Offset" data-i18n="[placeholder]time-span.placeholder.operandOffset">
       <input type="hidden" id="node-input-operand2OffsetType">
       <select id="node-input-operand2OffsetMultiplier" class="node-input-multiplier"></select>
   </div>
@@ -52,37 +52,37 @@
       </select>
   </div>
   <hr>
-  <div class="form-row block-noindent time-result1">
+  <div class="form-row block-noindent time-result1" data-i18n="[title]time-span.placeholder.result">
       <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-span.label.result1"></span></label>
-      <input type="text" id="node-input-result1" class="row-full-width">
+      <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-span.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value hidden">
+  <div class="form-row block-indent1 time-result1Value hidden" data-i18n="[title]time-span.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-span.label.result1Value"></span></label>
-      <input type="text" id="node-input-result1Value" class="row-full-width">
+      <input type="text" id="node-input-result1Value" class="row-full-width" data-i18n="[placeholder]time-span.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row block-indent2 time-row-result1TSFormat hidden">
+  <div class="form-row block-indent2 time-row-result1TSFormat hidden" data-i18n="[title]time-span.placeholder.resultTSFormat">
     <label for="node-input-result1TSFormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-span.label.result1TSFormat"></span></label>
     <select id="node-input-result1TSFormatSel">
     </select>
     <input type="text" id="node-input-result1TSFormat" class="form-row time-input-result1TSFormat hidden" style="margin-left: 5px;">
 </div>
-  <div class="form-row block-indent2 time-row-result1Format hidden">
+  <div class="form-row block-indent2 time-row-result1Format hidden" data-i18n="[title]time-span.placeholder.resultFormat">
       <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-span.label.result1Format"></span></label>
       <select id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent2 time-row-result1Offset hidden">
+  <div class="form-row block-indent2 time-row-result1Offset hidden" data-i18n="[title]time-span.placeholder.resultOffset">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-span.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" data-i18n="[placeholder]time-span.placeholder.offset">
+      <input id="node-input-result1Offset" data-i18n="[placeholder]time-span.placeholder.resultOffset">
       <input type="hidden" id="node-input-result1OffsetType">
       <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
       </select>
   </div>
   <hr>
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red:common.label.name">
       <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
       <input type="text" id="node-input-name" data-i18n="[placeholder]time-span.placeholder.name">
   </div>

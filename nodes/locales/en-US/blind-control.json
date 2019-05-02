@@ -43,6 +43,7 @@
 			"blindLevelDefault": "position if no other used",
 			"blindLevelMin": "maximum position if sun calced position",
 			"blindLevelMax": "minimum position if sun calced position",
+			"sunControlMode": "select if sun control is active and how it should working",
 			"OverwriteExpire": "(opt) the duration a manual setting will remain",
 			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
@@ -52,6 +53,7 @@
 			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
+			"outputs": "number of outputs"
 		},
 		"text": {
 			"blind": "blind settings",
@@ -70,9 +72,9 @@
 			"overwriteNoExpire": "position is overwritten (Prio __prio__), no expire",
 			"overwriteExpire": "position is overwritten (Prio __prio__), will expire __time__",
 			"default": "position is set to default position because no other rule matches",
-			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [rule __number__]"
+			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "position by conditional rule __text__ [rule __number__]",
-			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [rule __number__]"
+			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [rule __number__]",
 			"rule": "position by fixed rule __number__",
 			"sunMinAltitude": "sun below minimum altitude",
 			"sunNotInWin": "Sun not in window",
@@ -88,9 +90,9 @@
 			"overwriteNoExpire": "overwritten [__prio__]",
 			"overwriteExpire": "overwritten [__prio__], till __time__",
 			"default": "default",
-			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]"
+			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "__text__ [rule __number__]",
-			"ruleTimeCond": "__timeOp__ __timeLocal__ + __text__ [rule __number__]"
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + __text__ [rule __number__]",
 			"rule": "by fixed rule __number__",
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
