@@ -59,7 +59,7 @@ function getNow_(node, msg) {
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
         return dto;
     }
-    node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
+    node.error('Error can not get a valide timestamp from "' + value + '"! Will use current timestamp!');
     return new Date();
 }
 
@@ -67,10 +67,27 @@ function getNow_(node, msg) {
 /**
  * get the absolute level from percentage level
  * @param {*} node the node settings
- * @param {*} percentPos the level in percentage
+ * @param {*} percentPos the level in percentage (0-1)
  */
 function posPrcToAbs_(node, levelPercent) {
     return posRound_(node, ((node.blindData.levelOpen - node.blindData.levelClosed) * levelPercent) + node.blindData.levelClosed);
+}
+/**
+ * get the percentage level from absolute level  (0-1)
+ * @param {*} node the node settings
+ * @param {*} levelAbsolute the level absolute
+ */
+function posAbsToPrc_(node, levelAbsolute) {
+    return (levelAbsolute - node.blindData.levelClosed) / (node.blindData.levelOpen - node.blindData.levelClosed);
+}
+
+/**
+ * get the absolute inverse level
+ * @param {*} node the node settings
+ * @param {*} levelAbsolute the level absolute
+ */
+function getInversePos_(node, levelAbsolute) {
+    return posPrcToAbs_(1 - posAbsToPrc_(levelAbsolute));
 }
 /**
  * round a level to the next increment
@@ -268,7 +285,7 @@ module.exports = function (RED) {
      * check if a manual overwrite of the blind level should be set
      * @param {*} node node data
      * @param {*} msg message object
-     * @returns true if override is active, otherwhise false
+     * @returns true if override is active, otherwise false
      */
     function checkBlindPosOverwrite(node, msg, now) {
         // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
@@ -306,6 +323,7 @@ module.exports = function (RED) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos === -1) {
                 node.blindData.level = NaN;
+                node.blindData.levelInverse = NaN;
             } else if (!isNaN(newPos)) {
                 if (!validPosition_(node, newPos)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
@@ -319,6 +337,7 @@ module.exports = function (RED) {
                     return true;
                 }
                 node.blindData.level = newPos;
+                node.blindData.levelInverse = newPos;
             }
 
             if (Number.isFinite(expire) || (prio <= 0)) {
@@ -357,6 +376,7 @@ module.exports = function (RED) {
         if (!sunPosition.InWindow) {
             if (node.sunData.mode === 1) {
                 node.blindData.level = node.blindData.levelMin;
+                node.blindData.levelInverse = node.blindData.levelMax;
                 node.reason.code = 13;
                 node.reason.state = RED._('blind-control.states.sunNotInWinMin');
                 node.reason.description = RED._('blind-control.reasons.sunNotInWin');
@@ -388,6 +408,7 @@ module.exports = function (RED) {
 
         if (node.sunData.mode === 1) {
             node.blindData.level = node.blindData.levelMax;
+            node.blindData.levelInverse = node.blindData.levelMin;
             node.reason.code = 12;
             node.reason.state = RED._('blind-control.states.sunInWinMax');
             node.reason.description = RED._('blind-control.reasons.sunInWinMax');
@@ -399,10 +420,13 @@ module.exports = function (RED) {
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${node.sunData.floorLength}`);
         if (height <= node.windowSettings.bottom) {
             node.blindData.level = node.blindData.levelClosed;
+            node.blindData.levelInverse = node.blindData.levelOpen;
         } else if (height >= node.windowSettings.top) {
             node.blindData.level = node.blindData.levelOpen;
+            node.blindData.levelInverse = node.blindData.levelClosed;
         } else {
             node.blindData.level = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
+            node.blindData.levelInverse = getInversePos_(node.blindData.level);
         }
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
             // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
@@ -410,6 +434,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('blind-control.states.smooth', { pos: node.blindData.level.toString()});
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
             node.blindData.level = node.previousData.level;
+            node.blindData.levelInverse = node.previousData.levelInverse;
         } else {
             node.reason.code = 9;
             node.reason.state = RED._('blind-control.states.sunCtrl');
@@ -424,6 +449,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('blind-control.states.sunCtrlMin', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMin', {org: node.reason.description, level:node.blindData.level});
             node.blindData.level = node.blindData.levelMin;
+            node.blindData.levelInverse = node.blindData.levelMax;
         } else if (node.blindData.level > node.blindData.levelMax) {
             // max
             // node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
@@ -431,6 +457,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('blind-control.states.sunCtrlMax', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMax', {org: node.reason.description, level:node.blindData.level});
             node.blindData.level = node.blindData.levelMax;
+            node.blindData.levelInverse = node.blindData.levelMin;
         }
         // node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
@@ -514,6 +541,7 @@ module.exports = function (RED) {
             livingRuleData.conditional = ruleSel.conditional;
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.blindData.level = livingRuleData.level;
+            node.blindData.levelInverse = getInversePos_(livingRuleData.level);
             node.reason.code = 4;
             const data = { number: ruleSel.pos };
             let name = 'rule';
@@ -538,6 +566,7 @@ module.exports = function (RED) {
         livingRuleData.active = false;
         livingRuleData.id = -1;
         node.blindData.level = node.blindData.levelDefault;
+        node.blindData.levelInverse = getInversePos_(node.blindData.levelDefault);
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
@@ -675,6 +704,7 @@ module.exports = function (RED) {
                 };
 
                 node.previousData.level = node.blindData.level;
+                node.previousData.levelInverse = node.blindData.levelInverse;
                 node.previousData.reasonCode= node.reason.code;
                 node.previousData.reasonState= node.reason.state;
                 node.previousData.reasonDescription= node.reason.description;
@@ -704,10 +734,12 @@ module.exports = function (RED) {
                     if (node.blindData.level < node.blindData.levelClosed) {
                         node.debug(`${node.blindData.level} is below ${node.blindData.levelClosed}`);
                         node.blindData.level = node.blindData.levelClosed;
+                        node.blindData.levelInverse = node.blindData.levelOpen;
                     }
                     if (node.blindData.level > node.blindData.levelOpen) {
                         node.debug(`${node.blindData.level} is above ${node.blindData.levelClosed}`);
                         node.blindData.level = node.blindData.levelOpen;
+                        node.blindData.levelInverse = node.blindData.levelClosed;
                     }
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
@@ -718,6 +750,7 @@ module.exports = function (RED) {
                     const topicAttrs = {
                         name: node.name,
                         level: node.blindData.level,
+                        levelInverse: node.blindData.levelInverse,
                         code: node.reason.code,
                         state: node.reason.state,
                         rule: ruleId,

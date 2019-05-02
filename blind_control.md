@@ -169,7 +169,8 @@ If the node is configured with two outputs this object is set as the `msg.payloa
     - `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
     - `blindCtrl.reason.description` a text, describe the reason for the blind position
   - `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here
-    - `blindCtrl.blind.level` -  the new blind level (numeric value) - equal to `msg.payload` of the first output message.
+    - `blindCtrl.blind.level` - the new blind level (numeric value) - equal to `msg.payload` of the first output message.
+    - `blindCtrl.blind.levelInverse` - if `blindCtrl.blind.overwrite.active` is true, the value of `blindCtrl.blind.levelInverse` will be equal to the value of `blindCtrl.blind.level`, otherwise it will be the inverse to `blindCtrl.blind.level`. This means if `blindCtrl.blind.level` indicates how much the blind is open, then `blindCtrl.blind.levelInverse` indicates how much the blind is closed. So if `blindCtrl.blind.level` is equal to **min position**, `blindCtrl.blind.levelInverse` will be **max position**.
     - `blindCtrl.blind.overwrite`
       - `blindCtrl.blind.overwrite.active` - is `true` when overwrite is active, otherwise `false`
       - `blindCtrl.blind.overwrite.priority` - the priority of the override
