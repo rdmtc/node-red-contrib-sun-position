@@ -87,7 +87,7 @@ function posAbsToPrc_(node, levelAbsolute) {
  * @param {*} levelAbsolute the level absolute
  */
 function getInversePos_(node, levelAbsolute) {
-    return posPrcToAbs_(1 - posAbsToPrc_(levelAbsolute));
+    return posPrcToAbs_(node, 1 - posAbsToPrc_(node, levelAbsolute));
 }
 /**
  * round a level to the next increment
@@ -220,6 +220,10 @@ module.exports = function (RED) {
             delete node.blindData.overwrite.expires;
             delete node.blindData.overwrite.expireTs;
             delete node.blindData.overwrite.expireDate;
+            delete node.blindData.overwrite.expireDateISO;
+            delete node.blindData.overwrite.expireDateUTC;
+            delete node.blindData.overwrite.expireTimeLocal;
+            delete node.blindData.overwrite.expireDateLocal;
         }
     }
 
@@ -250,6 +254,10 @@ module.exports = function (RED) {
         }
         node.blindData.overwrite.expireTs = (now.getTime() + expire);
         node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expireTs);
+        node.blindData.overwrite.expireDateISO = node.blindData.overwrite.expireDate.toISOString();
+        node.blindData.overwrite.expireDateUTC = node.blindData.overwrite.expireDate.toUTCString();
+        node.blindData.overwrite.expireDateLocal = node.blindData.overwrite.expireDate.toLocaleString();
+        node.blindData.overwrite.expireTimeLocal = node.blindData.overwrite.expireDate.toLocaleTimeString();
         node.debug(`expires in ${expire}ms = ${node.blindData.overwrite.expireDate}`);
         node.timeOutObj = setTimeout(() => {
             node.debug('timeout - overwrite expired');
@@ -265,14 +273,15 @@ module.exports = function (RED) {
     function setOverwriteReason(node) {
         if (node.blindData.overwrite.expireTs) {
             node.reason.code = 3;
-            node.reason.state = RED._('blind-control.states.overwriteExpire', {
+            const obj = {
                 prio: node.blindData.overwrite.priority,
-                time: node.blindData.overwrite.expireDate.toLocaleTimeString()
-            });
-            node.reason.description = RED._('blind-control.reasons.overwriteExpire', {
-                prio: node.blindData.overwrite.priority,
-                time: node.blindData.overwrite.expireDate.toISOString()
-            });
+                timeLocal: node.blindData.overwrite.expireTimeLocal,
+                dateLocal: node.blindData.overwrite.expireDateLocal,
+                dateISO: node.blindData.overwrite.expireDateISO,
+                dateUTC: node.blindData.overwrite.expireDateUTC
+            };
+            node.reason.state = RED._('blind-control.states.overwriteExpire', obj);
+            node.reason.description = RED._('blind-control.reasons.overwriteExpire', obj);
         } else {
             node.reason.code = 2;
             node.reason.state = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
@@ -426,7 +435,7 @@ module.exports = function (RED) {
             node.blindData.levelInverse = node.blindData.levelClosed;
         } else {
             node.blindData.level = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
-            node.blindData.levelInverse = getInversePos_(node.blindData.level);
+            node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
         }
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
             // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
@@ -478,9 +487,15 @@ module.exports = function (RED) {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
-                    rule.conditonData = {};
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp. rule.conditonData)) {
+                    rule.conditonData = {
+                        operator: rule.validOperator
+                    };
+                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, rule.conditonData)) {
                         return null;
+                    }
+                    rule.conditonData.text = rule.conditonData.operandA + ' ' + RED._('node-red-contrib-sun-position/position-config:common.comparators.' + rule.validOperator);
+                    if (rule.conditonData.operandB) {
+                        rule.conditonData.text += ' ' + rule.conditonData.operandB;
                     }
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
@@ -541,22 +556,25 @@ module.exports = function (RED) {
             livingRuleData.conditional = ruleSel.conditional;
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.blindData.level = livingRuleData.level;
-            node.blindData.levelInverse = getInversePos_(livingRuleData.level);
+            node.blindData.levelInverse = getInversePos_(node, livingRuleData.level);
             node.reason.code = 4;
             const data = { number: ruleSel.pos };
             let name = 'rule';
-            if (ruleSel.conditional && !ruleSel.timeLimited) {
-                data.text = ruleSel.conditonData;
-                name='ruleCond';
-            } else if (ruleSel.timeLimited) {
+            if (ruleSel.conditional) {
+                livingRuleData.conditonData = ruleSel.conditonData;
+                data.text = ruleSel.conditonData.text;
+                name = 'ruleCond';
+            }
+            if (ruleSel.timeLimited) {
                 data.timeOp = ruleSel.timeOpText;
-                data.timeLocal = ruleSel.timeData.value.toLocaleTimeString();
-                data.time = ruleSel.timeData.value.toLocaleTimeString();
-                name='ruleTime';
-                if (ruleSel.conditional) {
-                    data.text = ruleSel.conditonData;
-                    name='ruleTimeCond';
-                }
+                livingRuleData.time = {
+                    timeLocal: ruleSel.timeData.value.toLocaleTimeString(),
+                    dateISO: ruleSel.timeData.value.toISOString(),
+                    dateUTC: ruleSel.timeData.value.toUTCString()
+                };
+                data.timeLocal = livingRuleData.time.timeLocal;
+                data.time = livingRuleData.time.dateISO;
+                name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
             node.reason.state= RED._('blind-control.states.'+name, data);
             node.reason.description = RED._('blind-control.reasons.'+name, data);
@@ -566,7 +584,7 @@ module.exports = function (RED) {
         livingRuleData.active = false;
         livingRuleData.id = -1;
         node.blindData.level = node.blindData.levelDefault;
-        node.blindData.levelInverse = getInversePos_(node.blindData.levelDefault);
+        node.blindData.levelInverse = getInversePos_(node, node.blindData.levelDefault);
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
@@ -621,15 +639,19 @@ module.exports = function (RED) {
         node.blindData = {
             /** The Level of the window */
             level: NaN, // unknown
+            levelInverse: NaN,
+            levelOpen: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
+            levelClosed: Number(hlp.chkValueFilled(config.blindClosedPos, 0)),
+            increment: Number(hlp.chkValueFilled(config.blindIncrement, 1)),
+            levelDefault: NaN,
+            levelMin: NaN,
+            levelMax: NaN,
             /** The override settings */
             overwrite: {
                 active: false,
                 expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN)),
                 priority: 0
-            },
-            increment: Number(hlp.chkValueFilled(config.blindIncrement,1)),
-            levelOpen: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
-            levelClosed: Number(hlp.chkValueFilled(config.blindClosedPos, 0))
+            }
         };
         node.blindData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.levelOpen);
         node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.levelClosed);

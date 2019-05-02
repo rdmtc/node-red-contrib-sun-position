@@ -462,7 +462,7 @@
             // #endregion weather settings
         },
         outputLabels() {
-            return ['new blind level', 'return state object'];
+            return [this._('blind-control.label.output1'), this._('blind-control.label.output2')];
         },
         label() {
             let suffix = '';
@@ -477,7 +477,7 @@
             if (this.name) {
                 return this.name+' '+suffix;
             }
-            const result = 'blind-control';
+            const result = this._('blind-control.label.blind-control');
             if (this.topic && (this.topic.length + result.length <= 32)) {
                 return this.topic + ':' + result+' '+suffix;
             }
@@ -486,7 +486,7 @@
         labelStyle() {
             return this.name ? 'node_label_italic' : '';
         },
-        paletteLabel: 'blind-control',
+        paletteLabel() { return this._('blind-control.label.blind-control-palette'); },
         oneditprepare() {
             this.outputs = this.outputs || 1;
             this.sunControlMode = this.sunControlMode || 0;

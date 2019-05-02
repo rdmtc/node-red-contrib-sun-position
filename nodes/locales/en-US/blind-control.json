@@ -1,6 +1,10 @@
 {
 	"blind-control": {
 		"label": {
+			"blind-control":"blind-control",
+			"blind-control-palette": "blind",
+			"output1":"new blind level",
+			"output2": "state object",
 			"windowTop": "window top",
 			"windowBottom": "window bottom",
 			"windowAzimuthStart":"start",
@@ -69,8 +73,8 @@
 			"sunPosControl": "..."
 		},
 		"reasons": {
-			"overwriteNoExpire": "position is overwritten (Prio __prio__), no expire",
-			"overwriteExpire": "position is overwritten (Prio __prio__), will expire __time__",
+			"overwriteNoExpire": "position is overwritten with priority __prio__",
+			"overwriteExpire": "position is overwritten with priority __prio__, will expire __dateISO__",
 			"default": "position is set to default position because no other rule matches",
 			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "position by conditional rule __text__ [rule __number__]",
@@ -87,8 +91,8 @@
 			"sunNotInWinMin": "Sun not in window (Level is minimum)"
 		},
 		"states": {
-			"overwriteNoExpire": "overwritten [__prio__]",
-			"overwriteExpire": "overwritten [__prio__], till __time__",
+			"overwriteNoExpire": "overwritten [prio=__prio__]",
+			"overwriteExpire": "overwritten [prio=__prio__], till __timeLocal__",
 			"default": "default",
 			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "__text__ [rule __number__]",

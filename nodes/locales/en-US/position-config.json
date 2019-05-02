@@ -237,18 +237,20 @@
             "gt": ">",
             "gte": ">=",
             "contain": "contain"
-        },
-        "errors": {
-            "error": "<strong>Error</strong>: __message__",
-            "error-title": "internal error",
-            "error-init": "error '__message__', retry in __time__min",
-            "warn-init": "warning '__message__', retry in __time__min",
-            "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
-            "pos-config-state": "Node not properly configured!!",
-            "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
-            "notEvaluableProperty":"could not evaluate __type__.__value__",
-            "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
         }
+    },
+    "errors": {
+        "error": "<strong>Error</strong>: __message__",
+        "error-title": "internal error",
+        "error-init": "error '__message__', retry in __time__min",
+        "warn-init": "warning '__message__', retry in __time__min",
+        "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
+        "pos-config-state": "Node not properly configured!!",
+        "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
+        "unknownCompareOperator": "error, the unsed compare operator \"__operator__\" is unknown!",
+        "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
+        "notEvaluablePropertyDefault": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!",
+        "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
     "position-config": {
         "label": {

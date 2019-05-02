@@ -66,40 +66,6 @@ Date.prototype.addDays = function (days) {
     return date;
 };
 
-const compareOperators = {
-    'true': (a) => (a === true),
-    'false': (a) => (a === false),
-    'null': (a) => (typeof a == 'undefined' || a === null), // eslint-disable-line eqeqeq
-    'nnull': (a) => (typeof a != 'undefined' && a !== null), // eslint-disable-line eqeqeq
-    'empty': (a) => {
-        if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
-            return a.length === 0;
-        } else if (typeof a === 'object' && a !== null) {
-            return Object.keys(a).length === 0;
-        }
-        return false;
-    },
-    'nempty': (a) => {
-        if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
-            return a.length !== 0;
-        } else if (typeof a === 'object' && a !== null) {
-            return Object.keys(a).length !== 0;
-        }
-        return false;
-    },
-    'true_expr': (a) => hlp.isTrue(a),
-    'false_expr': (a) => hlp.isFalse(a),
-    'ntrue_expr': (a) => (!hlp.isTrue(a)),
-    'nfalse_expr': (a) => (!hlp.isFalse(a)),
-    'equal': (a, b) => (a == b),  // eslint-disable-line eqeqeq
-    'nequal': (a, b) => (a != b),  // eslint-disable-line eqeqeq
-    'lt': (a, b) => (a < b),
-    'lte': (a, b) => (a <= b),
-    'gt': (a, b) => (a > b),
-    'gte': (a, b) => (a >= b),
-    'contain': (a, b) => ((a + '').indexOf(b) !== -1)
-};
-
 module.exports = function (RED) {
     'use strict';
 
@@ -452,15 +418,14 @@ module.exports = function (RED) {
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
-            if (compare === '' || typeof compare !== 'string' || compare === null) {
-                compare = 'true';
-            }
-            const opVal = (type, value, opName, res) => {
+
+            const opVal = (type, value, opName) => {
+                _srcNode.debug(`getting ${opName} = ${type}.${value}`);
                 let opData = null;
                 try {
                     if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
-                        _srcNode.warn(RED._('errors.notEvaluableProperty', { type: type, value: value }));
-                        return opData;
+                        _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue:'null' }));
+                        return null;
                     } else if (type === 'num') {
                         return Number(value);
                     } else if (type === 'msgPayload') {
@@ -469,29 +434,81 @@ module.exports = function (RED) {
                         return msg.value;
                     }
                     opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                    if (opData === null || typeof opData === 'undefined') {
+                        throw new Error(opData);
+                    }
                     if (typeof tempStorage !== 'undefined' && type === 'msg') {
                         tempStorage[opName] = opData;
                     }
-                    res[opName] = opData;
+                    if (typeof outReason === 'object') {
+                        outReason[opName] = opData;
+                        _srcNode.debug('opData=' + opData + ' outReason = ' + util.inspect(outReason, Object.getOwnPropertyNames(outReason)));
+                    }
                     return opData;
                 } catch (err) {
-                    this.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                     if (tempStorage && (type === 'msg') && tempStorage[opName]) {
-                        _srcNode.log(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                        _srcNode.log(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: tempStorage[opName] }));
                         return tempStorage[opName];
                     }
-                    _srcNode.warn(RED._('errors.notEvaluableProperty', { type: type, value: value }));
-                    res[opName] = null;
+                    _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: 'null' }));
+                    if (typeof outReason === 'object') {
+                        outReason[opName] = null;
+                        outReason[opName + '_error'] = err;
+                    }
                     return null;
                 }
             };
-            if (typeof outReason === 'object') {
-                const result = compareOperators[compare](opVal(opTypeA, opValueA, 'OperandA', outReason), opVal(opTypeB, opValueB, 'OperandB', outReason));
-                outReason.compare = RED._('common.comparators.'+compare);
-                outReason.text = outReason.OperandA + ' ' + outReason.compare + (outReason.OperandB) ? ' ' + outReason.OperandB : '';
-                return result;
+            const a = opVal(opTypeA, opValueA, 'operandA');
+            switch (compare) {
+                case 'true':
+                    return (a === true);
+                case 'false':
+                    return (a === false);
+                case 'null':
+                    return (typeof a == 'undefined' || a === null); // eslint-disable-line eqeqeq
+                case 'nnull':
+                    return (typeof a != 'undefined' && a !== null); // eslint-disable-line eqeqeq
+                case 'empty':
+                    if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                        return a.length === 0;
+                    } else if (typeof a === 'object' && a !== null) {
+                        return Object.keys(a).length === 0;
+                    }
+                    return false;
+                case 'nempty':
+                    if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                        return a.length !== 0;
+                    } else if (typeof a === 'object' && a !== null) {
+                        return Object.keys(a).length !== 0;
+                    }
+                    return false;
+                case 'true_expr':
+                    return hlp.isTrue(a);
+                case 'false_expr':
+                    return hlp.isFalse(a);
+                case 'ntrue_expr':
+                    return !hlp.isTrue(a);
+                case 'nfalse_expr':
+                    return !hlp.isFalse(a);
+                case 'equal':
+                    return (a == opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                case 'nequal':
+                    return (a != opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                case 'lt':
+                    return (a < opVal(opTypeB, opValueB, 'operandB'));
+                case 'lte':
+                    return (a <= opVal(opTypeB, opValueB, 'operandB'));
+                case 'gt':
+                    return (a > opVal(opTypeB, opValueB, 'operandB'));
+                case 'gte':
+                    return (a >= opVal(opTypeB, opValueB, 'operandB'));
+                case 'contain':
+                    return ((a + '').indexOf(opVal(opTypeB, opValueB, 'operandB')) !== -1);
+                default:
+                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
+                    return hlp.isTrue(a);
             }
-            return compareOperators[compare](opVal(opTypeA, opValueA, 'OperandA'), opVal(opTypeB, opValueB, 'OperandB'));
         }
         /**************************************************************************************************************/
         getSunCalc(date, noTimes) {
