@@ -488,13 +488,16 @@ module.exports = function (RED) {
             if (rule.conditional) {
                 try {
                     rule.conditonData = {
+                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
                         operator: rule.validOperator
                     };
                     if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, rule.conditonData)) {
                         return null;
                     }
-                    rule.conditonData.text = rule.conditonData.operandA + ' ' + RED._('node-red-contrib-sun-position/position-config:common.comparators.' + rule.validOperator);
+                    rule.conditonData.operatorText = RED._('node-red-contrib-sun-position/position-config:common.comparators.' + rule.validOperator);
+                    rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
                     if (rule.conditonData.operandB) {
+                        rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
                         rule.conditonData.text += ' ' + rule.conditonData.operandB;
                     }
                 } catch (err) {
@@ -563,6 +566,7 @@ module.exports = function (RED) {
             if (ruleSel.conditional) {
                 livingRuleData.conditonData = ruleSel.conditonData;
                 data.text = ruleSel.conditonData.text;
+                data.operatorText = ruleSel.conditonData.operatorText;
                 name = 'ruleCond';
             }
             if (ruleSel.timeLimited) {
