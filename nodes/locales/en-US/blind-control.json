@@ -96,7 +96,7 @@
 			"default": "default",
 			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "__text__ [rule __number__]",
-			"ruleTimeCond": "__timeOp__ __timeLocal__ + __operatorText__ [rule __number__]",
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [rule __number__]",
 			"rule": "by fixed rule __number__",
 			"sunMinAltitude": "min altitude",
 			"sunNotInWin": "no sun in window",
