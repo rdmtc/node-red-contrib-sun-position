@@ -351,8 +351,7 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
             }
         }
     }
-    // includes
-    if (names && msg && msg.topic && msg.payload) {
+    if (names && msg && msg.topic) {
         const res = Number(msg.payload);
         if (!isNaN(res)) {
             if (!Array.isArray(names)) {
@@ -360,13 +359,10 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
             }
             for (let i = 0; i < names.length; i++) {
                 if (String(msg.topic).includes(String(names[i]))) {
-                    const res = Number(msg.payload);
-                    if (!isNaN(res)) {
-                        if (typeof isFound === 'function') {
-                            return isFound(res);
-                        }
-                        return res;
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
                     }
+                    return res;
                 }
             }
         }
@@ -405,8 +401,7 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             }
         }
     }
-
-    if (names && msg && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
+    if (names && msg && msg.topic) {
         if (!Array.isArray(names)) {
             names = [names];
         }

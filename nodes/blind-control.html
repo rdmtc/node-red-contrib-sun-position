@@ -782,17 +782,17 @@
                         validOperatorField.change(() => { validOperandAField.change(); });
                         // setting defaultValues
                         timeOperatorField.val(data.timeOp || 0);
-                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         timeField.typedInput('value', (data.timeValue || ''));
-                        levelField.typedInput('type', (data.levelType || types.LevelFix.value));
+                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
                         levelField.typedInput('value', (data.levelValue || getDefLevel(data.levelTyp, data.levelValue,'closed (min)')));
-                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        levelField.typedInput('type', (data.levelType || types.LevelFix.value));
                         offsetField.typedInput('value', data.offsetValue || '');
+                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
                         validOperandAField.typedInput('value', data.validOperandAValue || '');
-                        validOperandBField.typedInput('type', data.validOperandBType || 'num');
+                        validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
                         validOperandBField.typedInput('value', data.validOperandBValue || '');
+                        validOperandBField.typedInput('type', data.validOperandBType || 'num');
                         validOperatorField.val(data.validOperator || selFields.comparator[0].id);
                         resizeRule(containerRow);
                         // resizeContainer();
@@ -999,21 +999,21 @@
             rules.each(function (_i) {
                 const rule = $(this);
                 const data = {
-                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
                     timeValue: rule.find('.node-input-rule-time').typedInput('value'),
+                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
                     timeOp: rule.find('.node-input-rule-time-operator').val(),
                     timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
-                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
                     levelValue: rule.find('.node-input-rule-level').typedInput('value'),
-                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
+                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
+                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     multiplier: rule.find('.node-input-rule-multiplier').val(),
-                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
                     validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
+                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
                     validOperator: rule.find('.node-input-rule-condOperator').val(),
                     validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
-                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type'),
-                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value')
+                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
+                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type')
                 };
                 node.rules.push(data);
             });

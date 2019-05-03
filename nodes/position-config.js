@@ -414,13 +414,13 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         comparePropValue (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, outReason) {
-            _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
+            // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
 
             const opVal = (type, value, opName) => {
-                _srcNode.debug(`getting ${opName} = ${type}.${value}`);
+                // _srcNode.debug(`getting ${opName} = ${type}.${value}`);
                 let opData = null;
                 try {
                     if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
@@ -442,7 +442,7 @@ module.exports = function (RED) {
                     }
                     if (typeof outReason === 'object') {
                         outReason[opName] = opData;
-                        _srcNode.debug('opData=' + opData + ' outReason = ' + util.inspect(outReason, Object.getOwnPropertyNames(outReason)));
+                        // _srcNode.debug('opData=' + opData + ' outReason= ' + util.inspect(outReason, Object.getOwnPropertyNames(outReason)));
                     }
                     return opData;
                 } catch (err) {

@@ -267,6 +267,24 @@ module.exports = function (RED) {
     }
 
     /**
+     * check if an override can be reset
+     * @param {*} node node data
+     * @param {*} msg message object
+     * @param {*} now current timestamp
+     */
+    function checkOverrideReset(node, msg, now) {
+        if (node.blindData.overwrite && node.blindData.overwrite.expires && (node.blindData.overwrite.expireTs < now.getTime())) {
+            blindPosOverwriteReset(node);
+        }
+        hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
+            (val) => {
+                node.debug('reset val="' + util.inspect(val, { colors: true, compact: 10 }) + '"');
+                if (val) {
+                    blindPosOverwriteReset(node);
+                }
+            });
+    }
+    /**
      * setting the reason for override
      * @param {*} node node data
      */
@@ -297,13 +315,8 @@ module.exports = function (RED) {
      * @returns true if override is active, otherwise false
      */
     function checkBlindPosOverwrite(node, msg, now) {
-        // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active}`);
-        hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
-            (val) => {
-                if (val) {
-                    blindPosOverwriteReset(node);
-                }
-            });
+        node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
+        checkOverrideReset(node, msg, now);
 
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], undefined, 0);
 
@@ -564,18 +577,17 @@ module.exports = function (RED) {
             const data = { number: ruleSel.pos };
             let name = 'rule';
             if (ruleSel.conditional) {
-                livingRuleData.conditonData = ruleSel.conditonData;
+                livingRuleData.conditon = ruleSel.conditonData;
                 data.text = ruleSel.conditonData.text;
                 data.operatorText = ruleSel.conditonData.operatorText;
                 name = 'ruleCond';
             }
             if (ruleSel.timeLimited) {
+                livingRuleData.time = ruleSel.timeData;
+                livingRuleData.time.timeLocal = ruleSel.timeData.value.toLocaleTimeString();
+                livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
+                livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
                 data.timeOp = ruleSel.timeOpText;
-                livingRuleData.time = {
-                    timeLocal: ruleSel.timeData.value.toLocaleTimeString(),
-                    dateISO: ruleSel.timeData.value.toISOString(),
-                    dateUTC: ruleSel.timeData.value.toUTCString()
-                };
                 data.timeLocal = livingRuleData.time.timeLocal;
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
@@ -792,14 +804,14 @@ module.exports = function (RED) {
                     ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
                     if (node.outputs > 1) {
-                        node.send([msg, { topic: topic, payload: blindCtrl }]);
+                        node.send([msg, { topic: topic, payload: blindCtrl}]);
                     } else {
                         msg.topic = topic || msg.topic;
                         msg.blindCtrl = blindCtrl;
                         node.send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    node.send([null, { topic: topic, payload: blindCtrl }]);
+                    node.send([null, { topic: topic, payload: blindCtrl}]);
                 }
                 node.previousData.usedRule = ruleId;
                 return null;
