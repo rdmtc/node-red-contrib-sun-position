@@ -2,6 +2,7 @@
     "time-inject": {
         "label": {
             "property": "Property",
+	    "propertyThreshold": "Schwelle",
             "time": "Zeit",
             "offset": "Offset",
             "timeAlt": "Alternative Zeit",
@@ -32,6 +33,7 @@
             "name": "Name",
             "topic": "Name",
             "property": "Property",
+	    "propertyThreshold": "schwellwert",
             "payloadStart": "",
             "payloadEnd": "",
             "startTime": "7:40",
@@ -51,6 +53,7 @@
             "onceDelay": "verzögert um __seconds__s"
         },
         "errors": {
+	    "failed": "inject fehlgeschlagen, sehen sie ins Log für mehr Informationen",
             "invalid-property-type": "Ungültiger Datentyp: __type__"
         }
     }

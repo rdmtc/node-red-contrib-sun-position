@@ -109,7 +109,7 @@ module.exports = function (RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value);
+                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
             } catch (err) {
                 return undefined;
             }

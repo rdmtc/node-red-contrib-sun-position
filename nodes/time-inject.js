@@ -71,6 +71,9 @@ module.exports = function (RED) {
 
         this.property = config.property || '';
         this.propertyType = config.propertyType || 'none';
+        this.propertyOperator = config.propertyCompare || 'true';
+        this.propertyThresholdValue = config.propertyThreshold;
+        this.propertyThresholdType = config.propertyThresholdType;
         this.timeAlt = config.timeAlt || '';
         this.timeAltType = config.timeAltType || 'none';
         this.timeAltOffset = config.timeAltOffset || 0;
@@ -164,8 +167,8 @@ module.exports = function (RED) {
                     if (isAlt) {
                         let needsRecalc = false;
                         try {
-                            const res = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
-                            useAlternateTime = hlp.isTrue(res);
+                            useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
+                                node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
                             needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                         } catch (err) {
                             needsRecalc = isAltFirst;
@@ -347,14 +350,6 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('time-inject', timeInjectNode);
-
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (req,res) => {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        res.sendFile(req.params[0], options);
-    });
 
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
         const node = RED.nodes.getNode(req.params.id);

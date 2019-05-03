@@ -3,6 +3,8 @@
  *********************************************/
 'use strict';
 const util = require('util');
+const path = require('path');
+const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 // const path = require('path');
 // const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
@@ -263,9 +265,9 @@ module.exports = function (RED) {
                     if (config.result1ValueType === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
                     } else if (config.result1ValueType === 'operand1') {
-                        resultObj = node.positionConfig.formatOutDate(operand1, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(operand1, config.result1Format);
                     } else if (config.result1ValueType === 'operand2') {
-                        resultObj = node.positionConfig.formatOutDate(operand2, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(operand2, config.result1Format);
                     } else {
                         resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
@@ -297,7 +299,7 @@ module.exports = function (RED) {
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule = rules[i];
                     try {
-                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue);
+                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue, 0);
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
@@ -372,12 +374,4 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('time-span', timeSpanNode);
-
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (_req,_res) => {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        _res.sendFile(_req.params[0], options);
-    });
 };

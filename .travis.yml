@@ -3,6 +3,8 @@ node_js:
   - '8'
   - '10'
 
+cache: npm
+
 deploy:
   provider: npm
   email: hypnos3@online.de

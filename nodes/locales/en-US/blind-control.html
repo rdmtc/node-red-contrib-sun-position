@@ -1,0 +1,124 @@
+<script type="text/x-red" data-help-name="blind-control">
+    <p><b>Attention, this node is under development and may still have errors!!</b><br><br></p>
+
+    <h3>About</h3>
+    <p>Gets the position of the sun</p>
+        <h3>Inputs</h3>
+    The Input is for triggering the calculation and for setting overwrites of the blind position.
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">string | object</span>
+        </dt>
+        <dd> the payload of the message. Could be an object.</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd> .</dd>
+        <dt class="optional">reset <span class="property-type">boolean</span></dt>
+        <dd> if <b>true</b> will reset any manual override (can be as <code>msg.reset</code> or <code>msg.payload.reset</code>) </dd>
+        <dt class="optional">position <span class="property-type">number</span></dt>
+        <dd> will override any of rule/sun/.. based level of the blind (can be as <code>msg.position</code> or <code>msg.payload.position</code>) </dd>
+        <dt class="optional">priority <span class="property-type">number</span></dt>
+        <dd> priority of the override, <em>default is 0</em> (can be as <code>msg.priority</code> or <code>msg.payload.priority</code>) </dd>
+        <dt class="optional">expire <span class="property-type">number</span></dt>
+        <dd> time in milliseconds when the override should be expire (can be as <code>msg.expire</code> or <code>msg.payload.expire</code>) </dd>
+    </dl>
+
+ <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>first output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">number</span></dt>
+                 <dd>the new blind position</dd>
+                 <dt>topic <span class="property-type">string</span></dt>
+                 <dd>the defined topic</dd>
+                 <dt>blindCtrl <span class="property-type">object</span></dt>
+                 <dd>(optional) the object containing additional information about the blind position</dd>
+             </dl>
+         </li>
+         <li>second output - only available if configured
+                <dl class="message-properties">
+                    <dt>payload <span class="property-type">object</span></dt>
+                 	<dd>the object containing additional information about the blind position</dd>
+                 	<dt>topic <span class="property-type">string</span></dt>
+                 	<dd>the defined topic</dd>
+                </dl>
+            </li>
+     </ol>
+
+     <h3>additional blind control object properties</h3>
+     <dl class="message-properties">
+            <dt>reason.code <span class="property-type">number</span></dt>
+            <dd> the reason for the blind position
+                <ol>
+                    <li>defined default blind position, because no other rule/condition/behavior</li>
+                    <li>manual override</li>
+                    <li>manual override - expiring</li>
+                    <li>based blind position based by rule</li>
+                    <li>calculated blind position by sun control is below defined minimum blind position (minimum blind position used)</li>
+                    <li>calculated blind position by sun control is above defined maximum blind position (maximum blind position used)</li>
+                    <li>Sun below altitude threshold</li>
+                    <li>sun is not in window, default blind position is used</li>
+                    <li>blind position calculated by sun position</li>
+                    <li>defined cloud condition applies</li>
+                    <li>(enhanced settings) blind position calculated by sun position was not used caused by smooth settings</li>
+                </ol>
+
+            <dt>reason.state <span class="property-type">string</span></dt>
+            <dd> a short text (same as node status text) representing the reason for the blind position</dd>
+
+            <dt>reason.description <span class="property-type">string</span></dt>
+            <dd> a text representing the reason for the blind position</dd>
+
+            <dt>reason.blind.level <span class="property-type">number</span></dt>
+            <dd> the new blind level (numeric value) - equal to `msg.payload` of the first output message</dd>
+
+            <dt>reason.blind.overwrite.active <span class="property-type">boolean</span></dt>
+            <dd> is <code>true</code> when overwrite is active, otherwise <code>false</code></dd>
+
+            <dt>reason.blind.overwrite.priority <span class="property-type">number</span></dt>
+            <dd> the priority of the override</dd>
+
+            <dt>reason.blind.overwrite.expires <span class="property-type">number</span></dt>
+            <dd> (optional) is <code>true</code> when overwrite expires</dd>
+
+            <dt>reason.blind.overwrite.expireTs <span class="property-type">number</span></dt>
+            <dd> (optional) a timestamp (UNIX) when overwrite expiring</dd>
+
+            <dt>reason.blind.overwrite.expireDate <span class="property-type">Date | String</span></dt>
+            <dd> (optional) a timestamp (String) when overwrite expiring</dd>
+
+            <dt>reason.rule.active <span class="property-type">boolean</span></dt>
+            <dd> (optional) <code>true</code> if a rule applies</dd>
+
+            <dt>reason.rule.ruleId <span class="property-type">number</span></dt>
+            <dd> (optional) number of the rule who applies (is <code>-1</code> if no rule has applied - default blind position)</dd>
+
+            <dt>reason.rule.active <span class="property-type">boolean</span></dt>
+            <dd> (optional) <code>true</code> if a rule applies</dd>
+
+            <dt>reason.rule.conditional <span class="property-type">boolean</span></dt>
+            <dd> (optional) <code>true</code> if the rule has a condition</dd>
+
+            <dt>reason.rule.timeLimited <span class="property-type">boolean</span></dt>
+            <dd> (optional) <code>true</code> if the rule has a time</dd>
+
+            <dt>reason.sunPosition <span class="property-type">object</span></dt>
+            <dd> (optional) calculated sub-position data</dd>
+
+            <dt>reason.sunPosition.InWindow <span class="property-type">boolean</span></dt>
+            <dd> (optional) <code>true</code> if sun is in window</dd>
+
+            <dt>reason.cloud <span class="property-type">object</span></dt>
+            <dd> (optional) object containing cloud data</dd>
+
+            <dt>reason.cloud.isOperative <span class="property-type">object</span></dt>
+            <dd> (optional) <code>true</code> if it is active and defined limit is applicable</dd>
+        </dl>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
+        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
+    </ul>
+    With friendly support by <b>agag</b>.
+</script>

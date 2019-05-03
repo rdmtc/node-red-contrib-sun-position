@@ -1,22 +1,20 @@
 <script type="text/x-red" data-template-name="moon-position">
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
       <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
       <input type="text" id="node-input-positionConfig">
       <input type="hidden" id="node-input-outputs"/>
   </div>
-  <div class="form-row time-topic">
+  <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
       <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-      <input type="text" id="node-input-topic">
+      <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
   </div>
   <hr>
-  <div class="form-row node-input-rule-container-row">
+  <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
         <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="moon-position.label.azimuthpos"></span></label>
       <ol id="node-input-rule-container"></ol>
   </div>
   <hr>
-  <!-- By convention, most nodes have a 'name' property. The following div -->
-  <!-- provides the necessary field. Should always be the last option      -->
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red:common.label.name">
       <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
       <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
   </div>

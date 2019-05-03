@@ -3,9 +3,7 @@
  *********************************************/
 'use strict';
 const util = require('util');
-
 const path = require('path');
-
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
@@ -35,7 +33,7 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
                     if (config.result1ValueType === 'input') {
-                        resultObj =  node.positionConfig.formatOutDate(inputData, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(inputData, config.result1Format);
                     } else {
                         resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
                     }
@@ -209,12 +207,4 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('time-comp', timeCompNode);
-
-    RED.httpAdmin.get('/sun-position/js/*', RED.auth.needsPermission('sun-position.read'), (_req,_res) => {
-        const options = {
-            root: __dirname + '/static/',
-            dotfiles: 'deny'
-        };
-        _res.sendFile(_req.params[0], options);
-    });
 };

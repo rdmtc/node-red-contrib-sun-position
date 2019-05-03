@@ -26,7 +26,8 @@ module.exports = {
     getNodeId,
     initializeParser,
     getFormattedDateOut,
-    parseDateFromFormat
+    parseDateFromFormat,
+    topicReplace
 };
 
 /*******************************************************************************************************/
@@ -93,20 +94,6 @@ function getNodeId(node) {
  */
 function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
-}
-/*******************************************************************************************************/
-/**
- * gets a comparable date Format
- * @param {Date} date - Date to format
- * @return {string} number in Format YYYYMMDDHHMMSS
- */
-function _getComparableDateFormat(date) {
-    return Number(date.getFullYear() +
-        pad2(date.getMonth() + 1) +
-        pad2(date.getDate()) +
-        pad2(date.getHours()) +
-        pad2(date.getMinutes()) +
-        pad2(date.getSeconds()));
 }
 /*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
@@ -253,6 +240,20 @@ function _parseComparableDateFormat(date) {
 /**
  * gets a comparable date Format
  * @param {Date} date - Date to format
+ * @return {string} number in Format YYYYMMDDHHMMSS
+ */
+function _getComparableDateFormat(date) {
+    return Number(date.getFullYear() +
+        pad2(date.getMonth() + 1) +
+        pad2(date.getDate()) +
+        pad2(date.getHours()) +
+        pad2(date.getMinutes()) +
+        pad2(date.getSeconds()));
+}
+
+/**
+ * gets a comparable date Format
+ * @param {Date} date - Date to format
  * @return {string} number in Format YYYYMMDD.HHMMSS
  */
 function _getComparableDateFormat2(date) {
@@ -330,8 +331,8 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
         }
         for (let i = 0; i < ids.length; i++) {
             const id = ids[i];
-            if (msg.payload && (typeof msg.payload[id] !== 'undefined')) {
-                const res = parseFloat(msg.payload[id]);
+            if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== '')) {
+                const res = Number(msg.payload[id]); // Number() instead of parseFloat() to also parse boolean
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
                         return isFound(res);
@@ -339,8 +340,8 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
                     return res;
                 }
             }
-            if (typeof msg[id] !== 'undefined') {
-                const res = parseFloat(msg[id]);
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== '')) {
+                const res = Number(msg[id]);
                 if (!isNaN(res)) {
                     if (typeof isFound === 'function') {
                         return isFound(res);
@@ -350,30 +351,28 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
             }
         }
     }
-    // includes
-    if (names && msg && msg.topic && msg.payload) {
-        const res = parseFloat(msg.payload);
+    if (names && msg && msg.topic) {
+        const res = Number(msg.payload);
         if (!isNaN(res)) {
             if (!Array.isArray(names)) {
                 names = [names];
             }
             for (let i = 0; i < names.length; i++) {
-                if (String(msg.topic).toLowerCase().includes(names[i])) {
-                    const res = parseFloat(msg.payload);
-                    if (!isNaN(res)) {
-                        if (typeof isFound === 'function') {
-                            return isFound(res);
-                        }
-                        return res;
+                if (String(msg.topic).includes(String(names[i]))) {
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
                     }
+                    return res;
                 }
             }
         }
     }
     if (typeof notFound === 'function') {
         return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return NaN;
     }
-    return notFound || NaN;
+    return notFound;
 }
 
 /**
@@ -390,39 +389,37 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             const id = ids[i];
             if (msg.payload && (typeof msg.payload[id] !== 'undefined') && (msg.payload[id] !== null) && (msg.payload[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg.payload[id]));
+                    return isFound(isTrue(msg.payload[id]), msg.payload[id], msg.topic);
                 }
                 return isTrue(msg.payload[id]);
             }
             if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg[id]));
+                    return isFound(isTrue(msg[id]), msg[id], msg.topic);
                 }
                 return isTrue(msg[id]);
             }
         }
     }
-
-    if (names && msg && msg.topic && ((typeof msg.payload === 'string') || (typeof msg.payload === 'number'))) {
+    if (names && msg && msg.topic) {
         if (!Array.isArray(names)) {
             names = [names];
         }
         for (let i = 0; i < names.length; i++) {
-            if (String(msg.topic).toLowerCase().includes(names[i])) {
+            if (String(msg.topic).includes(String(names[i]))) {
                 if (typeof isFound === 'function') {
-                    return isFound(isTrue(msg.payload));
+                    return isFound(true, msg.payload, msg.topic);
                 }
-                return isTrue(msg.payload);
+                return true;
             }
         }
     }
     if (typeof notFound === 'function') {
         return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return false;
     }
-    if (typeof notFound === 'boolean') {
-        return notFound;
-    }
-    return false;
+    return notFound;
 }
 
 /*******************************************************************************************************/
@@ -1398,4 +1395,27 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
         throw new Error('could not evaluate format of ' + date + ' (' + format+')');
     }
     return res;
+}
+
+function topicReplace(topic, topicAttrs) {
+    if (!topic || typeof topicAttrs !== 'object') {
+        return topic;
+    }
+
+    const topicAttrsLower = {};
+    Object.keys(topicAttrs).forEach(k => {
+        topicAttrsLower[k.toLowerCase()] = topicAttrs[k];
+    });
+
+    const match = topic.match(/\${[^}]+}/g);
+    if (match) {
+        match.forEach(v => {
+            const key = v.substr(2, v.length - 3);
+            const rx = new RegExp('\\${' + key + '}', 'g');
+            const rkey = key.toLowerCase();
+            topic = topic.replace(rx, topicAttrsLower[rkey] || '');
+        });
+    }
+
+    return topic;
 }

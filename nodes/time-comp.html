@@ -1,23 +1,23 @@
 <script type="text/x-red" data-template-name="time-comp">
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
     <input type="text" id="node-input-positionConfig">
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row block-noindent time-input">
+  <div class="form-row block-noindent time-input" data-i18n="[title]time-comp.placeholder.input">
       <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
-      <input type="text" id="node-input-input">
+      <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
       <input type="hidden" id="node-input-inputType">
   </div>
-  <div class="form-row block-indent1 time-row-inputFormat hidden">
+  <div class="form-row block-indent1 time-row-inputFormat hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
       <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
       <select id="node-input-inputFormatsel">
       <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent1 time-row-inputOffset hidden">
+  <div class="form-row block-indent1 time-row-inputOffset hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
       <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
-      <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.inputOffset">
       <input type="hidden" id="node-input-inputOffsetType">
       <select id="node-input-inputOffsetMultiplier" class="node-input-multiplier">
       </select>
@@ -36,31 +36,31 @@
       </select>
   </div>
   <hr>
-  <div class="form-row block-noindent time-result1">
+  <div class="form-row block-noindent time-result1" data-i18n="[title]time-comp.placeholder.result">
       <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-comp.label.result1"></span></label>
-      <input type="text" id="node-input-result1" class="row-full-width">
+      <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value hidden">
+  <div class="form-row block-indent1 time-result1Value hidden" data-i18n="[title]time-comp.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
-      <input type="text" id="node-input-result1Value">
+      <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row block-indent2 time-row-result1Format hidden">
+  <div class="form-row block-indent2 time-row-result1Format hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
       <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
       <select id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent2 time-row-result1Offset hidden">
+  <div class="form-row block-indent2 time-row-result1Offset hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.offset">
+      <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.resultOffset">
       <input type="hidden" id="node-input-result1OffsetType">
       <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
       </select>
   </div>
   <hr>
-  <div class="form-row">
+  <div class="form-row" data-i18n="[title]node-red:common.label.name">
       <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
       <input type="text" id="node-input-name" data-i18n="[placeholder]time-comp.placeholder.name">
   </div>
@@ -431,7 +431,7 @@
         oneditprepare() {
             const node = this;
             const setup = function(node) {
-                /* global getOperator getMultiplier getParseFormats getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
                 const types = getTypes(node);
                 const operatorTypesShort = [
                     {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
@@ -659,17 +659,18 @@
                             }
                         });
                         // setting defaultValues
-                        operatorField.val(data.operator || getOperator(0).id);
+                        const selFields = getSelectFields();
+                        operatorField.val(data.operator || selFields.operators[0].id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-                        operandField.typedInput('type', (data.operandType || types.DateEntered.value));
                         operandField.typedInput('value', (data.operandValue || ''));
+                        operandField.typedInput('type', (data.operandType || types.DateEntered.value));
                         formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
-                        formatSelField.val(data.formatSelection || getParseFormats(0).id);
-                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
                         offsetField.typedInput('value', data.offsetValue || '');
-                        multiplierField.val(data.multiplier || getMultiplier(0).id);
-                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
+                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
                         propertyField.typedInput('value', data.propertyValue || '');
+                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         resizeRule(containerRow);
                         autocomplete(formatIpField, 'dateParseFormat');
                         resizeContainer();

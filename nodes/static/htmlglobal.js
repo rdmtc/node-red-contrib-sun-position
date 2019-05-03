@@ -95,26 +95,33 @@ const SelectFields = {
         // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
         {id: -1, group: 'other', label: 'month'},
         {id: -2, group: 'other', label: 'year'}
-    ], blindOperatorGroups: [
-        { id: 'limit', label: 'Limit' },
-        { id: 'other', label: 'fix' }
-    ], blindOperator: [
-        { id: 1, group: 'limit', label: 'min' },
-        { id: 2, group: 'limit', label: 'max' },
-        { id: 0, group: 'other', label: 'abs' }
+    ], comparatorGroups: [
+        { id: 'simple', label: 'simple' },
+        { id: 'compare', label: 'compare' },
+        { id: 'enhanced', label: 'enhanced' }
+    ], comparator: [
+        { id: 'true', group: 'simple', label: 'true', operatorCount: 1 },
+        { id: 'false', group: 'simple', label: 'false', operatorCount: 1 },
+        { id: 'null', group: 'simple', label: 'null', operatorCount: 1 },
+        { id: 'nnull', group: 'simple', label: 'not null', operatorCount: 1 },
+        { id: 'empty', group: 'simple', label: 'empty', operatorCount: 1 },
+        { id: 'nempty', group: 'simple', label: 'not empty', operatorCount: 1 },
+        { id: 'true_expr', group: 'enhanced', label: 'true_expr', operatorCount: 1 },
+        { id: 'false_expr', group: 'enhanced', label: 'false_expr', operatorCount: 1 },
+        { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operatorCount: 1 },
+        { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operatorCount: 1 },
+        { id: 'equal', group: 'compare', label: 'equal', operatorCount: 2 },
+        { id: 'nequal', group: 'compare', label: 'not equal', operatorCount: 2 },
+        { id: 'lt', group: 'compare', label: 'less than', operatorCount: 2 },
+        { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
+        { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
+        { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
+        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 }
     ]
 };
 
-function getOperator(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.operators[nr];
-}
-
-function getMultiplier(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.multiplier[nr];
-}
-
-function getParseFormats(nr) { // eslint-disable-line no-unused-vars
-    return SelectFields.parseFormats[nr];
+function getSelectFields() { // eslint-disable-line no-unused-vars
+    return SelectFields;
 }
 
 function getTypes(node) { // eslint-disable-line no-unused-vars
@@ -239,10 +246,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: false
         }
     };
-}
-
-function getSelectFields() { // eslint-disable-line no-unused-vars
-    return SelectFields;
 }
 
 const autocompleteFormats = {
@@ -443,7 +446,7 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (limit) {
-                    if (limit(elements[eIndex].id)) {
+                    if (limit(elements[eIndex])) {
                         group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                     }
                 } else {
@@ -457,23 +460,23 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     const tInputField = $('#node-input-' + data.valueProp);
     const typeField = $('#node-input-' + data.typeProp);
-    if (typeof node[data.typeProp] !== 'undefined') {
-        if (node[data.typeProp] === null ||
-            typeof node[data.typeProp] === 'undefined') {
+    if (typeof node[data.typeProp] === 'undefined' ||
+        node[data.typeProp] === null) {
+        if (typeof data.defaultType !== 'undefined') {
             node[data.typeProp] = data.defaultType;
             typeField.val(data.defaultType);
-        } else {
-            typeField.val(node[data.typeProp]);
         }
+    } else {
+        typeField.val(node[data.typeProp]);
     }
-    if (typeof node[data.valueProp] !== 'undefined') {
-        if (node[data.valueProp] === null ||
-            typeof node[data.valueProp] === 'undefined') {
+    if (typeof node[data.valueProp] === 'undefined' ||
+        node[data.valueProp] === null) {
+        if (typeof data.defaultValue !== 'undefined') {
             node[data.valueProp] = data.defaultValue;
             tInputField.val(node[data.defaultValue]);
-        } else {
-            tInputField.val(node[data.valueProp]);
         }
+    } else {
+        tInputField.val(node[data.valueProp]);
     }
     tInputField.typedInput({
         typeField: typeField,

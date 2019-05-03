@@ -3,9 +3,11 @@
         "label": {
             "addTimes": "alternate start or end time",
             "propertyStart": "Alt. Start on",
+            "propertyStartThreshold": "Threshold",
             "startTime": "Start time",
             "startTimeAlt": "Start time",
             "propertyEnd": "Alt. End on",
+            "propertyEndThreshold": "Threshold",
             "endTime": "End time",
             "endTimeAlt": "End time",
             "startOffset": "Offset",
@@ -31,7 +33,10 @@
             "showEnhSettings":"Enhanced settings"
         },
         "placeholder": {
-            "property": "Property",
+            "propertyStart": "Property",
+            "propertyStartThreshold": "threshold",
+            "propertyEnd": "Property",
+            "propertyEndThreshold": "threshold",
             "startTime": "7:40",
             "startOffset": "0",
             "endTime": "18:15",

@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.2.11",
+  "version": "0.3.0-beta",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -47,7 +47,8 @@
     "node": ">=8.0.0"
   },
   "scripts": {
-    "test": "camo-purge; eslint \"./**/*.js\" \"./**/*.html\"",
+    "test": "eslint \"./**/*.js\" \"./**/*.html\"",
+    "camo-purg": "camo-purge; eslint \"./**/*.js\" \"./**/*.html\"",
     "lintfix": "eslint --fix \"./**/*.js\" \"./**/*.html\"",
     "lint": "eslint \"./**/*.js\" \"./**/*.html\"",
     "predev": "npm i -g",
@@ -82,7 +83,8 @@
       "within-time-switch": "nodes/within-time-switch.js",
       "time-inject": "nodes/time-inject.js",
       "time-comp": "nodes/time-comp.js",
-      "time-span": "nodes/time-span.js"
+      "time-span": "nodes/time-span.js",
+      "blind-control": "nodes/blind-control.js"
     }
   },
   "dependencies": {
@@ -96,7 +98,7 @@
   "disabledSettings": {
     "devDependencies-disabled": {
       "eslint-plugin-jsdoc": "^4.4.3"
-      },
+    },
     "plugins-disabled": [
       "jsdoc"
     ]
@@ -110,8 +112,7 @@
       "jquery": true
     },
     "plugins": [
-      "html",
-      "jsdoc"
+      "html"
     ],
     "extends": "eslint:recommended",
     "settings": {

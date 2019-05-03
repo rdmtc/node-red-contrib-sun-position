@@ -157,14 +157,29 @@
             "month",
             "year"
         ],
-        "blindOperatorGroups": [
-            "limit blind position",
-            "fixed position"
+        "comparatorGroups": [
+            "simple",
+            "medium",
+            "enhanced"
         ],
-        "blindOperator": [
-            "minimum",
-            "maximum",
-            "absolute"
+        "comparator": [
+            "is true",
+            "is false",
+            "is null",
+            "is not null",
+            "is empty",
+            "is not empty",
+            "is a true expression (true, on, 1)",
+            "is a false expression (false, off, 0)",
+            "is not a true expression",
+            "is not a false expression",
+            "equal",
+            "not equal",
+            "less than",
+            "less than or equal",
+            "greater than",
+            "greater than or equal",
+            "contain"
         ],
         "days": [
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -203,6 +218,25 @@
             "isoTime": "HH:MM:ss",
             "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
             "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
+        },
+        "comparators" : {
+            "true": "is true",
+            "false": "is false",
+            "null": "is null",
+            "nnull": "is not null",
+            "empty": "is empty",
+            "nempty": "is not empty",
+            "true_expr": "is true*",
+            "false_expr": "is false*",
+            "ntrue_expr": "is not true*",
+            "nfalse_expr": "is not false*",
+            "equal": "=",
+            "nequal": "!=",
+            "lt": "<",
+            "lte": "<=",
+            "gt": ">",
+            "gte": ">=",
+            "contain": "contain"
         }
     },
     "errors": {
@@ -211,7 +245,12 @@
         "error-init": "error '__message__', retry in __time__min",
         "warn-init": "warning '__message__', retry in __time__min",
         "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
-        "pos-config-state": "Node not properly configured!!"
+        "pos-config-state": "Node not properly configured!!",
+        "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
+        "unknownCompareOperator": "error, the unsed compare operator \"__operator__\" is unknown!",
+        "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
+        "notEvaluablePropertyDefault": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!",
+        "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
     "position-config": {
         "label": {
@@ -225,6 +264,7 @@
             "minutes": "minutes"
         },
         "placeholder": {
+            "positionConfig":"select or create generic configuration",
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
