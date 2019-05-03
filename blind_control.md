@@ -4,11 +4,13 @@
 
 Used to control a blind with many possibilities. This can be time-dependent and it can calculate the blind position based on the current position of the sun to limit the sun light To limit the sunlight on the floor of a window.
 
-![blind-control](images/blind-control-example.png?raw=true)
+![blind-control](images/appearance2.png?raw=true)
 
 ### Node settings
 
 #### general
+
+![blind-control-settings-1](https://user-images.githubusercontent.com/12692680/57134454-8c753100-6da6-11e9-95e9-bdff86f1e3d4.png)
 
 - **Position Konfiguration** connects to the central configuration node, which contains the current position, but also handles a lot of internal shared functions. Thus, this configuration is always needed, even if the sense does not always open up.
 - **topic** if defined, the topic of any outgoing message will be set to this value, otherwise the topic of the ingoing message will not changed
@@ -16,7 +18,7 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 #### blind settings
 
-![blind-control](images/blind-control-settings-2.png?raw=true)
+![blind-control-settings-2](https://user-images.githubusercontent.com/12692680/57134458-8d0dc780-6da6-11e9-80c3-2d8e130bd8fb.png)
 
 - **Increment** defines the minimum degree the blind position can be controlled
 - **open position** The value for maximum open degree of a blind.
@@ -26,11 +28,11 @@ All values could be floating point values.
 
 #### rule settings
 
-![blind-control](images/blind-control-settings-3.png?raw=true)
+![blind-control-settings-3](https://user-images.githubusercontent.com/12692680/57134461-8d0dc780-6da6-11e9-8235-a5bd141fef99.png)
 
 - **default position** The value which will be used if no other value given by condition, time or sun applies.
 
-![blind-control](images/blind-control-settings-4.png?raw=true)
+![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/57134463-8d0dc780-6da6-11e9-9019-1cb4ed85e756.png)
 
  - If a rule applies, the blind position defined by the rule will be used.
    - sun control will then not be active
@@ -46,7 +48,7 @@ All values could be floating point values.
 
 #### overwrite settings
 
-![blind-control](images/blind-control-settings-5.png?raw=true)
+![blind-control-settings-5](https://user-images.githubusercontent.com/12692680/57134465-8d0dc780-6da6-11e9-97a6-8f3b61ed2de9.png)
 
 - **expire** the duration in minutes a manual setting will remain is place. If not defined, there will be no default expiring of overrides.
 
@@ -54,11 +56,11 @@ All values could be floating point values.
 
 Sun control is only active if no override and no rule applies!
 
-![blind-control](images/blind-control-settings-6.png?raw=true)
+![blind-control-settings-6](https://user-images.githubusercontent.com/12692680/57134466-8da65e00-6da6-11e9-84d2-425ca0be5e3d.png)
 
 If sun-control checkbox is not checked, the defined **default position** will be used.
 
-![blind-control](images/blind-control-settings-7.png?raw=true)
+![blind-control-settings-7](https://user-images.githubusercontent.com/12692680/57134469-8da65e00-6da6-11e9-979b-ca875da064d7.png)
 
 The sun control (maximize or restrict sunlight) is only active, if no other rule or override matches.
   - Requirements that should be valid with a higher priority should be set up as rules.
@@ -96,9 +98,9 @@ under the simplest assumption starting from the bearing representing the perpend
 - **min position** minimum blind position if the sun is in the window, the min altitude threshold is given and weather conditions given.
 - **max position** maximum blind position if the sun is in the window, the min altitude threshold is given and weather conditions given.
 
-![blind-control](images/blind-control-settings-8.png?raw=true)
+![blind-control-settings-8](https://user-images.githubusercontent.com/12692680/57134470-8da65e00-6da6-11e9-95a9-41eab8f6a6d3.png)
 
-![blind-control](images/blind-control-settings-9.png?raw=true)
+![blind-control-settings-9](https://user-images.githubusercontent.com/12692680/57134453-8c753100-6da6-11e9-9285-74e98e17f62b.png)
 
 - **Cloud**, **cloud Operator**, **Threshold** allows to define a blind position which should be used in a given condition to be used instead of the calculated value by the sun. Typical use-case is a weather condition but it is not limited to that.
   - the value for **Threshold** can only be entered if needed by selected **operator**
@@ -207,7 +209,7 @@ The shape indicates whether the blind is fully closed or not.
 
 Example for a time-control to open blind on civilDawn, but not before 6 o'clock and close blind on civilDusk, but not later than 23:00 o clock:
 
-![blind-control](images/blind-control-example-1.png?raw=true)
+![blind-control-example-1](https://user-images.githubusercontent.com/12692680/57134447-867f5000-6da6-11e9-81dc-24fbf58dcd15.png)
 
 ```
 [{"id":"955111e1.50585","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"650223e.daba8dc","outputs":"1","blindIncrement":0.01,"blindOpenPos":1,"blindClosedPos":0,"blindPosReverse":false,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeType":"entered","timeValue":"6:00","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDawn","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDusk","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"entered","timeValue":"23:00","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""}],"tsCompare":"0","sunControlMode":"0","sunFloorLength":"","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","cloudValue":"","cloudValueType":"none","cloudCompare":"gte","cloudThreshold":"","cloudThresholdType":"num","cloudBlindPos":"open (max)","cloudBlindPosType":"levelFixed","x":440,"y":2385,"wires":[["afa7898a.2362b8"]]},{"id":"dc2734a.e0332c8","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":235,"y":2385,"wires":[["955111e1.50585"]]},{"id":"afa7898a.2362b8","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":655,"y":2385,"wires":[]},{"id":"650223e.daba8dc","type":"position-config","z":"","name":"","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":-60}]
@@ -219,7 +221,7 @@ similar example with additional different times for weekend:
 ```
 
 Flow for testing overrides and rules:
-![blind-control](images/blind-control-example-3.png?raw=true)
+![blind-control-example-3](https://user-images.githubusercontent.com/12692680/57134451-897a4080-6da6-11e9-989e-15ab04e11d9d.png)
 ```
 [{"id":"133a6b14.ea2b85","type":"function","z":"d7bd7fb6.a0c13","name":"test","func":"\nconst minutesEachLoop = 30;\nconst loopCycle = 2; // seconds\nlet timeObj = context.get(\"timeObj\");\n\nif (timeObj && msg.topic.includes('stop')) {\n    clearInterval(timeObj);\n    context.set(\"timeObj\", null);\n    let d = new Date(context.get(\"date\"));\n    node.status({fill:\"red\",shape:\"ring\",text:\"stopped - \" + d.toLocaleTimeString()});\n    return null;\n} else if (!timeObj && msg.topic.includes('start')) {\n    context.set(\"message\", msg);\n    let d = new Date();\n    let num = Number(msg.payload) || 0;\n    d.setHours(num);\n    d.setMinutes(0);\n    context.set(\"date\", d.getTime());\n    msg.lts = d.toLocaleTimeString();\n    msg.ts = d.getTime();\n    node.log(\"sending \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n    node.send(msg);\n\n    let timeObj = setInterval(function(){\n        let msg = context.get(\"message\");\n        let d = new Date(context.get(\"date\"));\n        //d.setHours(d.getHours()+1);\n        d.setMinutes(d.getMinutes() + minutesEachLoop)\n        context.set(\"date\", d.getTime());\n        msg.lts = d.toLocaleTimeString();\n        msg.ts = d.getTime();\n        node.status({fill:\"green\",shape:\"dot\",text:\"run - \" + d.toLocaleTimeString()});\n        node.log(\"sending \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n        node.send(msg);\n\t}, (1000 * loopCycle));\n    context.set(\"timeObj\", timeObj);\n    node.status({fill:\"green\",shape:\"ring\",text:\"start - \" + d.toLocaleTimeString()});\n    return null;\n}\n\nlet d = new Date(context.get(\"date\"));\nd.setMinutes(d.getMinutes() + 1)\n//d.setHours(d.getHours()+1);\nmsg.lts = d.toLocaleTimeString();\nmsg.ts = d.getTime();\nnode.status({fill:\"yellow\",shape:\"dot\",text:\"interposed - \" + d.toLocaleTimeString()});\nnode.log(\"sending interposed msg \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\nnode.send(msg);\nreturn null;","outputs":1,"noerr":0,"x":500,"y":2580,"wires":[["2f830c53.455b44"]]},{"id":"66a0fed2.d1c17","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"start/stop","payload":"0","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":225,"y":2535,"wires":[["133a6b14.ea2b85"]]},{"id":"36b5bf53.635a","type":"inject","z":"d7bd7fb6.a0c13","name":"reset","topic":"resetOverwrite","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2625,"wires":[["133a6b14.ea2b85"]]},{"id":"26e49680.865ada","type":"inject","z":"d7bd7fb6.a0c13","name":"0%","topic":"levelOverwrite","payload":"0","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2665,"wires":[["133a6b14.ea2b85"]]},{"id":"5d82a89c.499078","type":"inject","z":"d7bd7fb6.a0c13","name":"60%","topic":"levelOverwrite","payload":"0.6","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2710,"wires":[["133a6b14.ea2b85"]]},{"id":"e8ac078f.9bc308","type":"comment","z":"d7bd7fb6.a0c13","name":"manual overrides:","info":"","x":225,"y":2580,"wires":[]},{"id":"32306190.8018ee","type":"inject","z":"d7bd7fb6.a0c13","name":"90%, expire 2,5s","topic":"","payload":"{\"position\":0.9,\"expire\":2500}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":260,"y":2760,"wires":[["133a6b14.ea2b85"]]},{"id":"5c942931.d78168","type":"inject","z":"d7bd7fb6.a0c13","name":"30% Prio 1","topic":"","payload":"{\"position\":0.3,\"prio\":1}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":240,"y":2805,"wires":[["133a6b14.ea2b85"]]},{"id":"d21d3f4d.50916","type":"inject","z":"d7bd7fb6.a0c13","name":"100% prio 1","topic":"","payload":"{\"priority\":1, \"position\":1}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":250,"y":2850,"wires":[["133a6b14.ea2b85"]]},{"id":"2f830c53.455b44","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"d9e9ca6a.952218","outputs":2,"blindIncrement":"0.01","blindOpenPos":"1","blindClosedPos":0,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeValue":"6:30","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"7:25","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.today.isWeekendOrHoliday","validOperandAType":"flow","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDawn","timeType":"pdsTime","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDusk","timeType":"pdsTime","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"22:35","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"23:15","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.tomorrow.isWeekendOrHoliday","validOperandAType":"flow","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"}],"sunControlMode":"2","sunFloorLength":"0.6","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"1.28","windowBottom":"0","windowAzimuthStart":"70","windowAzimuthEnd":"150","cloudValue":"","cloudValueType":"none","cloudCompare":"gte","cloudThreshold":"50","cloudThresholdType":"num","cloudBlindPos":"open (max)","cloudBlindPosType":"levelFixed","x":740,"y":2580,"wires":[["12e898d.ca51e67"],["324e3f09.4452"]]},{"id":"12e898d.ca51e67","type":"debug","z":"d7bd7fb6.a0c13","name":"Blind position","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","x":985,"y":2565,"wires":[]},{"id":"324e3f09.4452","type":"debug","z":"d7bd7fb6.a0c13","name":"Blind status","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":985,"y":2625,"wires":[]},{"id":"4abea741.2fd968","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.today.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.today.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":785,"y":2715,"wires":[[]]},{"id":"4548475.5b1feb8","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":515,"y":2715,"wires":[["4abea741.2fd968"]]},{"id":"fb328117.4c438","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":515,"y":2760,"wires":[["4abea741.2fd968"]]},{"id":"db519048.9483b","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.tomorrow.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.tomorrow.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":795,"y":2805,"wires":[[]]},{"id":"1230ba43.d37cd6","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":515,"y":2805,"wires":[["db519048.9483b"]]},{"id":"d9e378ce.f2db68","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":515,"y":2850,"wires":[["db519048.9483b"]]},{"id":"d9e9ca6a.952218","type":"position-config","z":"","name":"Entenhausen","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":"1"}]
 ```

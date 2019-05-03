@@ -92,7 +92,7 @@ The nodes are designed to be accurate to seconds. This means it was designed to 
 
 The node calculates the current sun position on any input message. This node is compatible to [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller).
 
-![sun-position](images/sun-position-example.png?raw=true)
+![sun-position-example](https://user-images.githubusercontent.com/12692680/57134504-aa429600-6da6-11e9-9e36-7d1eb80f5589.png)
 
 ```json
 [{"id":"fc962ea1.197a3","type":"inject","z":"de4e9c38.0d942","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":300,"wires":[["56265aeb.99f034"]]},{"id":"a0d0e562.7ad1d8","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":300,"wires":[]},{"id":"56265aeb.99f034","type":"sun-position","z":"de4e9c38.0d942","name":"","positionConfig":"2831ba70.55a636","rules":[{"valueLow":"10","valueLowType":"num","valueHigh":"100","valueHighType":"num"}],"onlyOnChange":"true","topic":"","outputs":2,"x":330,"y":300,"wires":[["a0d0e562.7ad1d8","9cc2d51.4ac0828","28e91.9d63d16f6"],["e921e01a.a0fa3"]]},{"id":"9cc2d51.4ac0828","type":"change","z":"de4e9c38.0d942","name":"azimuth","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.azimuth","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":560,"y":340,"wires":[["e866e950.a7f798"]]},{"id":"28e91.9d63d16f6","type":"change","z":"de4e9c38.0d942","name":"altitude","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.altitude","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":560,"y":380,"wires":[["5b085e1b.4ec8a"]]},{"id":"e921e01a.a0fa3","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":550,"y":420,"wires":[]},{"id":"e866e950.a7f798","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":750,"y":340,"wires":[]},{"id":"5b085e1b.4ec8a","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":750,"y":380,"wires":[]},{"id":"2831ba70.55a636","type":"position-config","z":"","name":"Kap-Halbinsel","longitude":"-34.357051","latitude":"18.473782","angleType":"deg"}]
@@ -100,7 +100,7 @@ The node calculates the current sun position on any input message. This node is 
 
 #### sun-position - Node settings
 
-![sun-position](images/sun-position-settings.png?raw=true)
+![sun-position-settings](https://user-images.githubusercontent.com/12692680/57134503-aa429600-6da6-11e9-945b-aa7b6d750267.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
@@ -189,7 +189,7 @@ The Input is for triggering the calculation. If limits are defined the input mes
 
 The node calculates the current sun position on any input message.
 
-![moon-position](images/moon-position-example.png?raw=true)
+![moon-position-example](https://user-images.githubusercontent.com/12692680/57134922-f6daa100-6da7-11e9-91f7-6f33ab997df5.png)
 
 ```json
 [{"id":"d99ac08d.fdb94","type":"moon-position","z":"de4e9c38.0d942","name":"","positionConfig":"2831ba70.55a636","rules":[],"outputs":1,"topic":"","x":340,"y":520,"wires":[["e5e8e9a1.6080e8","e9ec273d.d90168","45563d84.0c4bf4","cce94ccc.b2dd2","65c76f28.3dd49","ac44c210.86465","f2deae49.60015","a9e0a2d1.0633a","948f6e2.8a4a39","cc85e458.447ba8","bff5a621.3fb498"]]},{"id":"124bfd72.dcb2f3","type":"inject","z":"de4e9c38.0d942","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":520,"wires":[["d99ac08d.fdb94"]]},{"id":"e5e8e9a1.6080e8","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":590,"y":520,"wires":[]},{"id":"e9ec273d.d90168","type":"change","z":"de4e9c38.0d942","name":"azimuth","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.azimuth","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":580,"y":560,"wires":[[]]},{"id":"45563d84.0c4bf4","type":"change","z":"de4e9c38.0d942","name":"altitude","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.altitude","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":580,"y":600,"wires":[[]]},{"id":"cce94ccc.b2dd2","type":"change","z":"de4e9c38.0d942","name":"distance","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.distance","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":580,"y":640,"wires":[[]]},{"id":"65c76f28.3dd49","type":"change","z":"de4e9c38.0d942","name":"parallacticAngle","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.parallacticAngle","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":600,"y":680,"wires":[[]]},{"id":"ac44c210.86465","type":"change","z":"de4e9c38.0d942","name":"illumination angle","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.angle","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":610,"y":720,"wires":[[]]},{"id":"f2deae49.60015","type":"change","z":"de4e9c38.0d942","name":"illumination fraction","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.fraction","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":610,"y":760,"wires":[[]]},{"id":"a9e0a2d1.0633a","type":"change","z":"de4e9c38.0d942","name":"illumination phase","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.phase.value","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":610,"y":800,"wires":[[]]},{"id":"948f6e2.8a4a39","type":"change","z":"de4e9c38.0d942","name":"illumination phase angle","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.phase.angle","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":630,"y":840,"wires":[[]]},{"id":"bff5a621.3fb498","type":"change","z":"de4e9c38.0d942","name":"illumination zenithAngle","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.zenithAngle","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":630,"y":920,"wires":[[]]},{"id":"cc85e458.447ba8","type":"change","z":"de4e9c38.0d942","name":"illumination phase name","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.illumination.phase.name","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":630,"y":880,"wires":[[]]},{"id":"2831ba70.55a636","type":"position-config","z":"","name":"Kap-Halbinsel","longitude":"-34.357051","latitude":"18.473782","angleType":"deg"}]
@@ -197,7 +197,7 @@ The node calculates the current sun position on any input message.
 
 #### moon-position - Node settings
 
-![moon-position](images/sun-position-settings.png?raw=true)
+![moon-position-settings](https://user-images.githubusercontent.com/12692680/57134923-f6daa100-6da7-11e9-9e1d-a49ecfc4bbcc.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Topic** defines the topic of the first output
@@ -269,7 +269,7 @@ The node calculates the current sun position on any input message.
 
 Injects a message into a flow either manually or at timestamps which can also depending on the sunset, sunrise, or moon set and rise. The message payload can be a variety of types, including strings, JavaScript objects, the current time or the current sun or moon position.
 
-![time-inject](images/time-inject-example.png?raw=true)
+![time-inject-example](https://user-images.githubusercontent.com/12692680/57134517-b4fd2b00-6da6-11e9-914a-30741c285426.png)
 
 ```json
 [{"id":"d3c04d4e.ce3e3","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":570,"y":2100,"wires":[]},{"id":"586e4ae2.5b4f14","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":570,"y":2160,"wires":[]},{"id":"1b71d0e5.35b02f","type":"debug","z":"de4e9c38.0d942","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":570,"y":2220,"wires":[]},{"id":"3e4d36c0.620e7a","type":"time-inject","z":"de4e9c38.0d942","name":"","positionConfig":"bdf7c4a.9ca6c38","time":"nadir","timeType":"pdsTime","timeDays":"*","offset":0,"offsetMultiplier":60,"payload":"","payloadType":"date","topic":"","x":320,"y":2100,"wires":[["d3c04d4e.ce3e3"]]},{"id":"c11713e.db07ef","type":"time-inject","z":"de4e9c38.0d942","name":"","positionConfig":"bdf7c4a.9ca6c38","time":"dawn","timeType":"pdsTime","timeDays":"*","offset":0,"offsetMultiplier":60,"payload":"","payloadType":"date","topic":"","x":320,"y":2160,"wires":[["586e4ae2.5b4f14"]]},{"id":"b227cadc.dcf8c8","type":"time-inject","z":"de4e9c38.0d942","name":"","positionConfig":"bdf7c4a.9ca6c38","time":"rise","timeType":"pdmTime","timeDays":"1,4,0","offset":0,"offsetMultiplier":60,"payload":"{\"bool\":true}","payloadType":"json","topic":"","x":340,"y":2220,"wires":[["1b71d0e5.35b02f"]]},{"id":"bdf7c4a.9ca6c38","type":"position-config","z":"","name":"","longitude":"13.71587","latitude":"51.01732","angleType":"deg"}]
@@ -277,7 +277,7 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 #### time-inject - Node settings
 
-![time-inject](images/time-inject-settings.png?raw=true)
+![time-inject-settings](https://user-images.githubusercontent.com/12692680/57134518-b4fd2b00-6da6-11e9-891a-d62b271b1de3.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Payload** defines the payload of the message object send to the output
@@ -295,9 +295,9 @@ Injects a message into a flow either manually or at timestamps which can also de
   - set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
   - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise.
     - **set additional timestamp**:
-      ![time-inject](images/time-inject-settings-addProp1.png?raw=true)
+      !![time-inject-settings-addProp1](https://user-images.githubusercontent.com/12692680/57134519-b4fd2b00-6da6-11e9-843a-dd1d83555b8b.png)
     - **set additional sun timestamp**:
-      ![time-inject](images/time-inject-settings-addProp2.png?raw=true)
+      ![time-inject-settings-addProp2](https://user-images.githubusercontent.com/12692680/57134520-b4fd2b00-6da6-11e9-9832-a3d8beda4897.png)
     - **possible formats of timestamp output**
       - number - milliseconds UNIX timestamp
       - string - ECMA-262
@@ -327,7 +327,7 @@ The output is a message with the defined payload and topic in the settings.
 
 ### within-time
 
-![within-time](images/within-time-example.png?raw=true)
+![within-time-example](https://user-images.githubusercontent.com/12692680/57134524-b595c180-6da6-11e9-9208-a5c7cb89d2db.png)
 
 ```json
 [{"id":"bd9bd279.302eb","type":"inject","z":"de4e9c38.0d942","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":1180,"wires":[["b5c283be.eb945"]]},{"id":"273eb4cb.2715fc","type":"debug","z":"de4e9c38.0d942","name":"out1","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":590,"y":1180,"wires":[]},{"id":"78f068d6.2fe9f8","type":"debug","z":"de4e9c38.0d942","name":"out2","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","x":590,"y":1220,"wires":[]},{"id":"b5c283be.eb945","type":"within-time-switch","z":"de4e9c38.0d942","name":"","positionConfig":"bdf7c4a.9ca6c38","startTime":"7:00","startTimeType":"entered","startOffset":0,"startOffsetMultiplier":"60","endTime":"9:00","endTimeType":"entered","endOffset":0,"endOffsetMultiplier":"60","property":"","propertyType":"none","startTimeAlt":"","startTimeAltType":"none","startOffsetAlt":0,"startOffsetAltMultiplier":"60","endTimeAlt":"","endTimeAltType":"none","endOffsetAlt":0,"endOffsetAltMultiplier":"60","x":330,"y":1180,"wires":[["273eb4cb.2715fc"],["78f068d6.2fe9f8"]]},{"id":"bdf7c4a.9ca6c38","type":"position-config","z":"","name":"","longitude":"13.71587","latitude":"51.01732","angleType":"deg"}]
@@ -337,7 +337,7 @@ The output is a message with the defined payload and topic in the settings.
 
 A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.
 
-![within-time](images/within-time-settings.png?raw=true)
+![within-time-settings](https://user-images.githubusercontent.com/12692680/57134525-b62e5800-6da6-11e9-9946-2c6873592026.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
@@ -354,13 +354,13 @@ A simple node that routes messages depending on the time. If the current time fa
 - **Status** here can be adjusted which status should be displayed under the node.
   - this has the following possibilities:
     - **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
-      ![within-time-status-error](images/within-time-status-error.png?raw=true)
+      ![within-time-status-error](https://user-images.githubusercontent.com/12692680/57134527-b62e5800-6da6-11e9-946a-677044d25655.png)
     - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
-      ![within-time-status-time](images/within-time-status-time.png?raw=true)
+      ![within-time-status-time](https://user-images.githubusercontent.com/12692680/57134513-b4649480-6da6-11e9-9bb2-3acda84b8ef8.png)
     - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
-      ![within-time-status-error](images/within-time-status-message-block.png?raw=true)
+      ![within-time-status-message-block](https://user-images.githubusercontent.com/12692680/57134528-b6c6ee80-6da6-11e9-90be-e3b15c2b2bff.png)
       if the message was pass through the timestamp of this message will be shown.
-      ![within-time-status-send](images/within-time-status-message-send.png?raw=true)
+      ![within-time-status-message-send](https://user-images.githubusercontent.com/12692680/57134529-b6c6ee80-6da6-11e9-8c71-7245dda4b6ee.png)
     - **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
 - **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 - **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
@@ -369,7 +369,7 @@ A simple node that routes messages depending on the time. If the current time fa
 
 A enhanced node for time format change and time comparison.
 
-![time-comp](images/time-comp-example.png?raw=true)
+![time-comp-example](https://user-images.githubusercontent.com/12692680/57134514-b4649480-6da6-11e9-9321-9fd1a2927a9b.png)
 
 **This node is in development and has a pre release state!!**
 
@@ -381,7 +381,7 @@ A enhanced node for time format change and time comparison.
 
 A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.
 
-![time-comp](images/time-comp-settings.png?raw=true)
+![time-comp-settings](https://user-images.githubusercontent.com/12692680/57134515-b4fd2b00-6da6-11e9-9d04-0cafb0721ba8.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Input** defines the input parameter for the time stamp
@@ -400,7 +400,7 @@ A simple node that routes messages depending on the time. If the current time fa
 
 A enhanced node for time span calculation and time span comparison.
 
-![time-span](images/time-span-example.png?raw=true)
+![time-span-example](https://user-images.githubusercontent.com/12692680/57134521-b595c180-6da6-11e9-82fe-01ddaaba0d7b.png)
 
 **This node is in development and has a pre release state!!**
 
@@ -412,7 +412,7 @@ tbd
 
 A simple node that routes messages depending on the time. If the current time falls within the range specified in the node configuration, the message is routed to output 1. Otherwise the message is routed to output 2.
 
-![time-span](images/time-span-settings.png?raw=true)
+![time-span-settings](https://user-images.githubusercontent.com/12692680/57134523-b595c180-6da6-11e9-8146-ce1d7a59792a.png)
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Input 1** defines the first input parameter for the time span calculation
@@ -441,7 +441,7 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 The time definitions of the nodes has different configuration possibilities
 
-![within-time start Time](images/within-time-startTime.png?raw=true)
+![within-time-startTime](https://user-images.githubusercontent.com/12692680/57134526-b62e5800-6da6-11e9-9b95-b0e9998c41c4.png)
 
 manual timestamps can be entered as one of the following formats:
 
@@ -479,7 +479,7 @@ following Sun times can be chosen:
 
 SunBH is the angle of the sun below the horizon
 
-![sun times](images/sun-times.png?raw=true)
+![sun-times](https://user-images.githubusercontent.com/12692680/57134546-c6dece00-6da6-11e9-8a32-c3517c5211fe.png)
 
 ##### remarks
 

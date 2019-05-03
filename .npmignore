@@ -2,6 +2,8 @@
 Thumbs.db
 test/
 test/*
+backup/
+backup/*
 .travis.yml
 .gitignore
 .gitconfig
