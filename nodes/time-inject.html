@@ -322,13 +322,6 @@
 </style>
 
 <script type="text/javascript">
-    function getVal(node, name) {
-        const v = $('#node-input-' + name).val();
-        if (v === undefined) {
-            return node[name];
-        }
-        return v;
-    }
     function clipValueLength(v, l) {
         if (v.length > l) {
             return v.substring(0, (l - 3)) + '...';
