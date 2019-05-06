@@ -22,46 +22,48 @@ Additional you can get sun and moon position or to control a flow by sun or moon
 > This is still in development!
 > This is not fully tested and documentation are missing!
 
-[TOC]
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [General](#general)
-  - [Saving resources](#saving-resources)
-  - [second based accuracy](#second-based-accuracy)
-- [Implemented Nodes](#implemented-nodes)
-  - [sun-position](#sun-position)
+### Table of contents
+
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+* [General](#general)
+  + [Saving resources](#saving-resources)
+  + [second based accuracy](#second-based-accuracy)
+* [Implemented Nodes](#implemented-nodes)
+  + [sun-position](#sun-position)
     - [sun-position - Node settings](#sun-position---node-settings)
     - [Node Input](#node-input)
-    - [sun-position -Node Output](#sun-position---node-output)
-  - [moon-position](#moon-position)
+    - [sun-position - Node Output](#sun-position---node-output)
+  + [moon-position](#moon-position)
     - [moon-position - Node settings](#moon-position---node-settings)
     - [moon-position - Node Output](#moon-position---node-output)
-  - [time-inject](#time-inject)
+  + [time-inject](#time-inject)
     - [time-inject - Node settings](#time-inject---node-settings)
     - [time-inject - Node Input](#time-inject---node-input)
     - [time-inject - Node Output](#time-inject---node-output)
-  - [within-time](#within-time)
+  + [within-time](#within-time)
     - [within-time - Node settings](#within-time---node-settings)
-  - [time-comp](#time-comp)
+  + [time-comp](#time-comp)
     - [time-comp - Node settings](#time-comp---node-settings)
-  - [time-span](#time-span)
+  + [time-span](#time-span)
     - [time-span - Node settings](#time-span---node-settings)
-  - [Times definitions](#times-definitions)
+  + [blind-control](#blind-control)
+  + [Times definitions](#times-definitions)
     - [sun times](#sun-times)
-      - [remarks](#remarks)
-        - [blue hour](#blue-hour)
-        - [amateurDawn /amateurDusk](#amateurdawn--amateurdusk)
-        - [alternate properties](#alternate-properties)
+      * [remarks](#remarks)
+        + [blue hour](#blue-hour)
+        + [amateurDawn /amateurDusk](#amateurdawn--amateurdusk)
+        + [alternate properties](#alternate-properties)
     - [moon times](#moon-times)
     - [message, flow or global property or JSONATA expression](#message--flow-or-global-property-or-jsonata-expression)
-  - [input parse formats](#input-parse-formats)
-  - [output timestamp formats](#output-timestamp-formats)
-  - [output timespan formats](#output-timespan-formats)
-- [TODO](#todo)
-- [Bugs and Feedback](#bugs-and-feedback)
-- [LICENSE](#license)
-- [Other](#other)
+  + [input parse formats](#input-parse-formats)
+  + [output timestamp formats](#output-timestamp-formats)
+  + [output timespan formats](#output-timespan-formats)
+* [TODO](#todo)
+* [Bugs and Feedback](#bugs-and-feedback)
+* [LICENSE](#license)
+* [Other](#other)
 
 ## Installation
 
@@ -659,10 +661,6 @@ The formats are:
 - [ ] add possibility to select input/output timezone
   - [ ] select auto add get info from getTimezoneOffset
   - [ ] solve problem of DST
-- [ ] within-time
-  - [ ] add result like other nodes
-  - [ ] remove status configuration, always show start and end
-  - [ ] offset als Typed Input mit Wahl des offset: NA, num, msg, flow, global
 
 ## Bugs and Feedback
 
