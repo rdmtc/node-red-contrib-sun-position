@@ -413,7 +413,24 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, outReason) {
+        savePropValue(_srcNode, msg, type, value, tempStorage, opName) {
+            if (type === 'msgPayload') {
+                tempStorage[opName] = msg.payload;
+            } else if (type === 'msgValue') {
+                tempStorage[opName] = msg.value;
+            } else if (type === 'msg') {
+                try {
+                    const opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                    if (opData !== null && typeof opData !== 'undefined') {
+                        tempStorage[opName] = opData;
+                    }
+                } catch (err) {
+                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                }
+            }
+        }
+        /*******************************************************************************************************/
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, opNameA, opNameB, outReason) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
@@ -459,7 +476,7 @@ module.exports = function (RED) {
                     return null;
                 }
             };
-            const a = opVal(opTypeA, opValueA, 'operandA');
+            const a = opVal(opTypeA, opValueA, opNameA);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -492,19 +509,19 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                    return (a == opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                    return (a != opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < opVal(opTypeB, opValueB, 'operandB'));
+                    return (a < opVal(opTypeB, opValueB, opNameB));
                 case 'lte':
-                    return (a <= opVal(opTypeB, opValueB, 'operandB'));
+                    return (a <= opVal(opTypeB, opValueB, opNameB));
                 case 'gt':
-                    return (a > opVal(opTypeB, opValueB, 'operandB'));
+                    return (a > opVal(opTypeB, opValueB, opNameB));
                 case 'gte':
-                    return (a >= opVal(opTypeB, opValueB, 'operandB'));
+                    return (a >= opVal(opTypeB, opValueB, opNameB));
                 case 'contain':
-                    return ((a + '').indexOf(opVal(opTypeB, opValueB, 'operandB')) !== -1);
+                    return ((a + '').indexOf(opVal(opTypeB, opValueB, opNameB)) !== -1);
                 default:
                     _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
                     return hlp.isTrue(a);

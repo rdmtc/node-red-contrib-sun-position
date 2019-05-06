@@ -27,9 +27,9 @@
 			"sunControlMaximize": "maximize sunlight (Winter)",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
-			"cloudValue": "Cloud",
-			"cloudThreshold": "Threshold",
-			"cloudBlindPos": "blind position",
+			"oversteerValue": "oversteer",
+			"oversteerThreshold": "Threshold",
+			"oversteerBlindPos": "blind position",
 			"smoothTime": "smoothTime",
 			"showEnhSettings": "Enhanced settings",
 			"outputs": "Outputs",
@@ -51,9 +51,9 @@
 			"OverwriteExpire": "(opt) the duration a manual setting will remain",
 			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
-			"cloudValue": "value to compare",
-			"cloudThreshold": "threshold for the compare",
-			"cloudBlindPos": "blind position when the compare be the case",
+			"oversteerValue": "value to compare",
+			"oversteerThreshold": "threshold for the compare",
+			"oversteerBlindPos": "blind position when the compare be the case",
 			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
@@ -67,7 +67,8 @@
 			"sunControlNotActive": "Only rule control",
 			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.",
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
-			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind"
+			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
+			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)"
 		},
 		"tips": {
 			"sunPosControl": "..."
@@ -85,7 +86,7 @@
 			"sunCtrl": "sun control",
 			"sunCtrlMin": "__org__ (__level__ is below minimum)",
 			"sunCtrlMax": "__org__ (__level__ is above maximum)",
-			"cloudExceeded": "Cloud overcast conditions",
+			"oversteer": "sun position oversteers",
 			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)",
 			"sunInWinMax": "Sun in window (Level is maximum)",
 			"sunNotInWinMin": "Sun not in window (Level is minimum)"
@@ -95,7 +96,7 @@
 			"overwriteExpire": "overwritten [prio=__prio__], till __timeLocal__",
 			"default": "default",
 			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
-			"ruleCond": "__text__ [rule __number__]",
+			"ruleCond": "__textShort__ [rule __number__]",
 			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [rule __number__]",
 			"rule": "by fixed rule __number__",
 			"sunMinAltitude": "min altitude",
@@ -103,7 +104,7 @@
 			"sunCtrl": "sun control",
 			"sunCtrlMin": "__org__ (min)",
 			"sunCtrlMax": "__org__ (max)",
-			"cloudExceeded": "cloud",
+			"oversteer": "oversteer",
 			"smooth": "block change to __pos__",
 			"sunInWinMax":"Sun in window (max)",
 			"sunNotInWinMin": "Sun not in window (min)"
@@ -112,7 +113,7 @@
 			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
-			"getCloudData": "error getting cloudData: __message__",
+			"getOversteerData": "error getting oversteer data: __message__",
 			"getBlindPosData": "error getting blind level: __message__",
 			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
 			"smoothTimeToolong":"The selected smooth is too long!!"

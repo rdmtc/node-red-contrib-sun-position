@@ -142,25 +142,26 @@ module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
     /**
-     * check the weather data
+     * check the oversteering data
      * @param {*} node node data
      * @param {*} msg the message object
      */
-    function checkWeather(node, msg) {
-        // node.debug('checkWeather');
-        if (!node.cloudData.active) {
-            node.cloudData.isOperative = false;
+    function checkOversteer(node, msg) {
+        // node.debug('checkOversteer');
+        if (!node.oversteerData.active) {
+            node.oversteerData.isOperative = false;
             return;
         }
         try {
-            node.cloudData.isOperative = node.positionConfig.comparePropValue(node, msg, node.cloudData.valueType, node.cloudData.value,
-                node.cloudData.operator, node.cloudData.thresholdType, node.cloudData.thresholdValue, node.cloudData.temp);
+            node.oversteerData.isChecked = true;
+            node.oversteerData.isOperative = node.positionConfig.comparePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value,
+                node.oversteerData.operator, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'value', 'threshold');
         } catch (err) {
-            node.error(RED._('blind-control.errors.getCloudData', err));
+            node.error(RED._('blind-control.errors.getOversteerData', err));
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-            node.cloudData.isOperative = false;
+            node.oversteerData.isOperative = false;
         }
-        // node.debug('node.cloudData=' + util.inspect(node.cloudData));
+        // node.debug('node.oversteerData=' + util.inspect(node.oversteerData));
     }
     /******************************************************************************************/
     /**
@@ -272,17 +273,21 @@ module.exports = function (RED) {
      * @param {*} msg message object
      * @param {*} now current timestamp
      */
-    function checkOverrideReset(node, msg, now) {
-        if (node.blindData.overwrite && node.blindData.overwrite.expires && (node.blindData.overwrite.expireTs < now.getTime())) {
+    function checkOverrideReset(node, msg, now, prio) {
+        if (node.blindData.overwrite &&
+            node.blindData.overwrite.expires &&
+            (node.blindData.overwrite.expireTs < now.getTime())) {
             blindPosOverwriteReset(node);
         }
-        hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
-            (val) => {
-                node.debug('reset val="' + util.inspect(val, { colors: true, compact: 10 }) + '"');
-                if (val) {
-                    blindPosOverwriteReset(node);
-                }
-            });
+        if ((!prio) || (node.blindData.overwrite.priority <= prio)) {
+            hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
+                (val) => {
+                    node.debug('reset val="' + util.inspect(val, { colors: true, compact: 10 }) + '"');
+                    if (val) {
+                        blindPosOverwriteReset(node);
+                    }
+                });
+        }
     }
     /**
      * setting the reason for override
@@ -316,9 +321,8 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
-        checkOverrideReset(node, msg, now);
-
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], undefined, 0);
+        checkOverrideReset(node, msg, now, prio);
 
         if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             setOverwriteReason(node);
@@ -410,9 +414,6 @@ module.exports = function (RED) {
             return sunPosition;
         }
 
-        // to be able to store values
-        checkWeather(node, msg);
-
         if ((node.sunData.mode === 2) && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
             node.reason.code = 7;
             node.reason.state = RED._('blind-control.states.sunMinAltitude');
@@ -420,11 +421,14 @@ module.exports = function (RED) {
             return sunPosition;
         }
 
-        if (node.cloudData.isOperative) {
-            node.blindData.level = node.cloudData.blindPos;
+        // to be able to store values
+        checkOversteer(node, msg);
+
+        if (node.oversteerData.isOperative) {
+            node.blindData.level = node.oversteerData.blindPos;
             node.reason.code = 10;
-            node.reason.state = RED._('blind-control.states.cloudExceeded');
-            node.reason.description = RED._('blind-control.reasons.cloudExceeded');
+            node.reason.state = RED._('blind-control.states.oversteer');
+            node.reason.description = RED._('blind-control.reasons.oversteer');
             return sunPosition;
         }
 
@@ -504,14 +508,16 @@ module.exports = function (RED) {
                         operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
                         operator: rule.validOperator
                     };
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, rule.conditonData)) {
+                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, 'value', 'threshold', rule.conditonData)) {
                         return null;
                     }
                     rule.conditonData.operatorText = RED._('node-red-contrib-sun-position/position-config:common.comparators.' + rule.validOperator);
                     rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
+                    rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName,25) + ' ' + rule.conditonData.operatorText;
                     if (rule.conditonData.operandB) {
                         rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
                         rule.conditonData.text += ' ' + rule.conditonData.operandB;
+                        rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
                     }
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
@@ -579,6 +585,7 @@ module.exports = function (RED) {
             if (ruleSel.conditional) {
                 livingRuleData.conditon = ruleSel.conditonData;
                 data.text = ruleSel.conditonData.text;
+                data.textShort = ruleSel.conditonData.textShort;
                 data.operatorText = ruleSel.conditonData.operatorText;
                 name = 'ruleCond';
             }
@@ -672,16 +679,17 @@ module.exports = function (RED) {
         node.blindData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.levelOpen);
         node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.levelClosed);
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
-        node.cloudData = {
-            active: (typeof config.cloudValueType !== 'undefined') && (config.cloudValueType !== 'none'),
-            value: config.cloudValue || '',
-            valueType: config.cloudValueType || 'none',
-            operator: config.cloudCompare,
-            thresholdValue: config.cloudThreshold,
-            thresholdType: config.cloudThresholdType,
-            blindPos: getBlindPosFromTI(node, undefined, config.cloudBlindPosType, config.cloudBlindPos, node.blindData.levelOpen),
+        node.oversteerData = {
+            active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
+            value: config.oversteerValue || '',
+            valueType: config.oversteerValueType || 'none',
+            operator: config.oversteerCompare,
+            thresholdValue: config.oversteerThreshold,
+            thresholdType: config.oversteerThresholdType,
+            blindPos: getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen),
             isOperative: false,
-            temp: {}
+            temp: {},
+            isChecked: false
         };
         node.rulesData = config.rules || [];
         node.previousData = {
@@ -710,7 +718,7 @@ module.exports = function (RED) {
             } else if (code === 4) {
                 fill = 'grey'; // rule
             } else if (code === 1 || code === 8) {
-                fill = 'green'; // not in window or cloudExceeded
+                fill = 'green'; // not in window or oversteerExceeded
             }
 
             node.status({
@@ -746,9 +754,10 @@ module.exports = function (RED) {
                 node.previousData.reasonCode= node.reason.code;
                 node.previousData.reasonState= node.reason.state;
                 node.previousData.reasonDescription= node.reason.description;
+                node.oversteerData.isChecked = false;
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
-                // check if the message contains any weather data
+                // check if the message contains any oversteering data
                 let ruleId = NaN;
 
                 const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
@@ -765,8 +774,8 @@ module.exports = function (RED) {
                     if (!blindCtrl.rule.active && node.sunData.active) {
                         // calc sun position:
                         blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
-                        if (node.cloudData.active) {
-                            blindCtrl.cloud = node.cloudData;
+                        if (node.oversteerData.active) {
+                            blindCtrl.oversteer = node.oversteerData;
                         }
                     }
                     if (node.blindData.level < node.blindData.levelClosed) {
@@ -779,6 +788,11 @@ module.exports = function (RED) {
                         node.blindData.level = node.blindData.levelOpen;
                         node.blindData.levelInverse = node.blindData.levelClosed;
                     }
+                }
+
+                if (node.oversteerData.active && !node.oversteerData.isChecked) {
+                    node.positionConfig.savePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value, node.oversteerData.temp, 'value');
+                    node.positionConfig.savePropValue(node, msg, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'threshold');
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();

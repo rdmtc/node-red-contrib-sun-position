@@ -8,6 +8,7 @@ module.exports = {
     isBool,
     isTrue,
     isFalse,
+    clipValueLength,
     countDecimals,
     handleError,
     chkValueFilled,
@@ -142,6 +143,19 @@ function handleError(node, messageText, err, stateText) {
  */
 function chkValueFilled(val, defaultVal) {
     return ((typeof val === 'undefined') || (val === '') || (val === null)) ? defaultVal : val;
+}
+
+/*******************************************************************************************************/
+/**
+ * clip a test to a maximum length
+ * @param {string} v text to clip
+ * @param {number} l length to clip the text
+ */
+function clipValueLength(v, l) {
+    if (v.length > l) {
+        return v.substring(0, (l - 3)) + '...';
+    }
+    return v;
 }
 /*******************************************************************************************************/
 /**

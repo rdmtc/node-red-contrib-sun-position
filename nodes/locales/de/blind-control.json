@@ -27,9 +27,9 @@
 			"sunControlMaximize": "Sonnenlicht maximieren",
 			"sunFloorLength": "Länge auf dem Boden",
 			"sunMinAltitude": "Minimaler Höhenwinkel",
-			"cloudValue": "Wolken",
-			"cloudThreshold": "Schwelle",
-			"cloudBlindPos": "Rollladenposition",
+			"oversteerValue": "Übersteuerung",
+			"oversteerThreshold": "Schwelle",
+			"oversteerBlindPos": "Rollladenposition",
 			"smoothTime": "glätten",
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"outputs": "Ausgänge",
@@ -50,9 +50,9 @@
 			"OverwriteExpire": "(opt) Dauer nasch der eine manuelle Einstellung verfällt",
 			"sunFloorLength": "das Ausmaß, in dem direktes Sonnenlicht durch das Fenster in den Raum gelangen darf, definiert als Länge am Boden",
 			"sunMinAltitude": "(opt) minimaler Höhenwinkel der Sonne",
-			"cloudValue": "Wert zum Vergleich",
-			"cloudThreshold": "Schwelle für den Vergleich",
-			"cloudBlindPos": "Position wenn der Vergleich zutrifft",
+			"oversteerValue": "Wert zum Vergleich",
+			"oversteerThreshold": "Schwelle für den Vergleich",
+			"oversteerBlindPos": "Position wenn der Vergleich zutrifft",
 			"smoothTime":"(opt) verhindert Änderungen durch Sonnenstandsänderung innerhalb der angegebenen Zeit",
 			"name": "Name",
 			"expiryperiod": "120"
@@ -65,7 +65,8 @@
 			"sunControlNotActive": "Nur Regelbasiert",
 			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden.",
 			"windowAzimuth": "Darstellung der Ausrichtung des Fensters zum geografischen Norden (in Grad), wenn die Sonne in das Fenster fällt (Sonnenazimut).",
-			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters"
+			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters",
+			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.)"
 		},
 		"tips": {
 			"sunPosControl": "..."
@@ -110,7 +111,7 @@
 			"internal": "Fehler: __message__",
 			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
 			"invalid-blind-level": "Rollladenposition __pos__ ist keine gültige Position!",
-			"getCloudData": "Fehler bei der Ermittlung der Daten: __message__",
+			"getOversteerData": "Fehler bei der Ermittlung der Daten: __message__",
 			"getBlindPosData": "Fehler bei der Ermittlung der Rollladenposition: __message__",
 			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
 			"smoothTimeToolong":"Die gewählte zeit ist zu groß!!"
