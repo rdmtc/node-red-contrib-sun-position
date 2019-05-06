@@ -6,6 +6,22 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ![blind-control](images/appearance2.png?raw=true)
 
+### Table of contents
+
+* [blind-control](#blind-control)
+  + [Node settings](#node-settings)
+    - [general](#general)
+    - [blind settings](#blind-settings)
+    - [rule settings](#rule-settings)
+    - [overwrite settings](#overwrite-settings)
+    - [sun settings](#sun-settings)
+      * [maximize sunlight (Winter)](#maximize-sunlight--winter-)
+      * [restrict sunlight (Summer)](#restrict-sunlight--summer-)
+  + [Node Input](#node-input)
+  + [Node Output](#node-output)
+  + [Node Status](#node-status)
+* [Samples](#samples)
+
 ### Node settings
 
 #### general
