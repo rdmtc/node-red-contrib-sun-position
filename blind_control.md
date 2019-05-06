@@ -189,8 +189,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
     - `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
   - `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     - `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
-  - `blindCtrl.oversteer` - object containing oversteer data, exists only if override by oversteer is activated!
-    - `blindCtrl.oversteer.isOperative` - `true` if it is active and defined limit is applicable otherwise `false`
+    - `blindCtrl.sunPosition.oversteer` - object containing oversteer data!
 
 ### Node Status
 

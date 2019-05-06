@@ -148,20 +148,16 @@ module.exports = function (RED) {
      */
     function checkOversteer(node, msg) {
         // node.debug('checkOversteer');
-        if (!node.oversteerData.active) {
-            node.oversteerData.isOperative = false;
-            return;
-        }
         try {
             node.oversteerData.isChecked = true;
-            node.oversteerData.isOperative = node.positionConfig.comparePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value,
+            return node.positionConfig.comparePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value,
                 node.oversteerData.operator, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'value', 'threshold');
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-            node.oversteerData.isOperative = false;
         }
         // node.debug('node.oversteerData=' + util.inspect(node.oversteerData));
+        return false;
     }
     /******************************************************************************************/
     /**
@@ -421,16 +417,15 @@ module.exports = function (RED) {
             return sunPosition;
         }
 
-        // to be able to store values
-        checkOversteer(node, msg);
-
-        if (node.oversteerData.isOperative) {
+        if (node.oversteerData.active && checkOversteer(node, msg)) {
             node.blindData.level = node.oversteerData.blindPos;
             node.reason.code = 10;
             node.reason.state = RED._('blind-control.states.oversteer');
             node.reason.description = RED._('blind-control.reasons.oversteer');
+            sunPosition.oversteer = node.oversteerData;
             return sunPosition;
         }
+        sunPosition.oversteer = node.oversteerData;
 
         if (node.sunData.mode === 1) {
             node.blindData.level = node.blindData.levelMax;
@@ -681,16 +676,18 @@ module.exports = function (RED) {
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
         node.oversteerData = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
-            value: config.oversteerValue || '',
-            valueType: config.oversteerValueType || 'none',
-            operator: config.oversteerCompare,
-            thresholdValue: config.oversteerThreshold,
-            thresholdType: config.oversteerThresholdType,
-            blindPos: getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen),
-            isOperative: false,
             temp: {},
             isChecked: false
         };
+        if (node.oversteerData.active) {
+            node.oversteerData.value = config.oversteerValue || '';
+            node.oversteerData.valueType = config.oversteerValueType || 'none';
+            node.oversteerData.operator = config.oversteerCompare;
+            node.oversteerData.thresholdValue = config.oversteerThreshold || '';
+            node.oversteerData.thresholdType = config.oversteerThresholdType;
+            node.oversteerData.blindPos = getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen);
+        }
+
         node.rulesData = config.rules || [];
         node.previousData = {
             level: NaN,
@@ -774,9 +771,6 @@ module.exports = function (RED) {
                     if (!blindCtrl.rule.active && node.sunData.active) {
                         // calc sun position:
                         blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
-                        if (node.oversteerData.active) {
-                            blindCtrl.oversteer = node.oversteerData;
-                        }
                     }
                     if (node.blindData.level < node.blindData.levelClosed) {
                         node.debug(`${node.blindData.level} is below ${node.blindData.levelClosed}`);
