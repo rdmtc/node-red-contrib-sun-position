@@ -786,7 +786,6 @@ module.exports = function (RED) {
 
                 if (node.oversteerData.active && !node.oversteerData.isChecked) {
                     node.positionConfig.savePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value, node.oversteerData.temp, 'value');
-                    node.positionConfig.savePropValue(node, msg, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'threshold');
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();

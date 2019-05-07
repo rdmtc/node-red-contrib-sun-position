@@ -69,11 +69,11 @@
         <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
-        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
-        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-noindent">
@@ -113,7 +113,7 @@
         <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteerValue"><i class="fa fa-oversteer"></i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
+        <label for="node-input-oversteerValue"><i class="fa fa-superpowers"></i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
         <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteerValueType">
         <select id="node-input-oversteerCompare" class="node-input-addOn">
@@ -688,8 +688,8 @@
                             id: 'node-input-rule-condOpB' + containerIndex,
                             type: 'text'
                         }).appendTo(row2).typedInput({
-                            default: 'str',
-                            types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                            default: 'num',
+                            types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                         });
                         // #endregion row2
                         // #region row3 - time -- lbl - [from-to] - [start - time]
@@ -923,7 +923,7 @@
                     width: 'calc(100% - 120px)',
                     defaultType: 'num',
                     defaultValue: '',
-                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                 });
                 setupTInput(node, {
                     typeProp: 'oversteerBlindPosType',
