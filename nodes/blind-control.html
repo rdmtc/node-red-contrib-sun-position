@@ -670,7 +670,7 @@
                             type: 'text'
                         }).appendTo(row1).typedInput({
                             default: types.Unlimited.value,
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.DayOfMonth, types.DayOfWeek]
                         });
                         const validOperatorField = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -749,10 +749,13 @@
                         });
                         validOperandAField.change(() => {
                             const propType = validOperandAField.typedInput('type');
-                            if (propType === 'none') {
+                            if (propType === 'none' ||
+                                propType === types.DayOfMonth.value ||
+                                propType === types.DayOfWeek.value) {
+                                validOperatorField.val(selFields.comparator[0].id); // only true is valid for DayOfMonth or DayOfWeek
                                 validOperatorField.hide();
                                 row2.hide(); // condOpB
-                            } else if (propType === 'jsonata') {
+                            } else if ( propType === 'jsonata') {
                                 validOperatorField.show();
                                 validOperatorField.attr('disabled', true);
                                 validOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata

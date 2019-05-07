@@ -219,6 +219,28 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 'last Sunday'
             ]
         },
+        DayOfWeek: {
+            value: 'DayOfWeek',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.dayofweek','day of week'),
+            options: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+                'Sat or Sun',
+                'Sun to Thu',
+                'Sun to Fri',
+                'Mon to Thu',
+                'Mon to Fri',
+                'Mon to Sat',
+                'Tue to Thu',
+                'Tue to Fri',
+                'Tue to Sat'
+            ]
+        },
         TimeSun: {
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),

@@ -225,9 +225,9 @@ module.exports = function (RED) {
                     throw new Error('Error can not calc time!');
                 }
 
-                const startNr = hlp.getTimeNumber(result.start.value);
-                const endNr = hlp.getTimeNumber(result.end.value);
-                const cmpNow = hlp.getTimeNumber(now);
+                const startNr = hlp.getTimeNumberUTC(result.start.value);
+                const endNr = hlp.getTimeNumberUTC(result.end.value);
+                const cmpNow = hlp.getTimeNumberUTC(now);
                 const status = (config.statusOut || 3);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {

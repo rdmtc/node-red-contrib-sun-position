@@ -449,6 +449,51 @@ module.exports = function (RED) {
                         return msg.payload;
                     } else if (type === 'msgValue') {
                         return msg.value;
+                    } else if (type === 'DayOfMonth') {
+                        const d = new Date();
+                        const nd = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
+                        if (nd === null) {
+                            return false;
+                        }
+                        return (nd.getDate() === d.getDate());
+                    } else if (type === 'DayOfWeek') {
+                        const d = new Date();
+                        switch (value) {
+                            case 'Sunday':
+                                return d.getDay() === 0;
+                            case 'Monday':
+                                return d.getDay() === 1;
+                            case 'Tuesday':
+                                return d.getDay() === 2;
+                            case 'Wednesday':
+                                return d.getDay() === 3;
+                            case 'Thursday':
+                                return d.getDay() === 4;
+                            case 'Friday':
+                                return d.getDay() === 5;
+                            case 'Saturday':
+                                return d.getDay() === 6;
+                            case 'Sat or Sun':
+                                return (d.getDay() === 0 || d.getDay() === 6);
+                            case 'Sun to Thu':
+                                return (d.getDay() <= 4);
+                            case 'Sun to Fri':
+                                return (d.getDay() <= 5);
+                            case 'Mon to Thu':
+                                return (d.getDay() >= 1) && (d.getDay() <= 4);
+                            case 'Mon to Fri':
+                                return (d.getDay() >= 1) && (d.getDay() <= 5);
+                            case 'Mon to Sat':
+                                return (d.getDay() >= 1) && (d.getDay() <= 6);
+                            case 'Tue to Thu':
+                                return (d.getDay() >= 2) && (d.getDay() <= 4);
+                            case 'Tue to Fri':
+                                return (d.getDay() >= 2) && (d.getDay() <= 5);
+                            case 'Tue to Sat':
+                                return (d.getDay() >= 2) && (d.getDay() <= 6);
+                            default:
+                                return false;
+                        }
                     }
                     opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                     if (opData === null || typeof opData === 'undefined') {

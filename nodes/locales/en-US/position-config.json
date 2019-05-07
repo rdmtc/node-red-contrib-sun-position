@@ -19,6 +19,7 @@
             "dateentered":"date",
             "timepredefined":"fixed times",
             "dayofmonth":"day of month",
+            "dayofweek":"day of week",
             "timesun":"sun time",
             "timemoon":"moon time",
             "suncalc":"sun calculation",
