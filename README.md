@@ -22,47 +22,50 @@ Additional you can get sun and moon position or to control a flow by sun or moon
 > This is still in development!
 > This is not fully tested and documentation are missing!
 
-### Table of contents
+## Table of contents
 
-* [Installation](#installation)
-* [Quick Start](#quick-start)
-* [General](#general)
-  * [Saving resources](#saving-resources)
-  * [second based accuracy](#second-based-accuracy)
-* [Implemented Nodes](#implemented-nodes)
-  * [sun-position](#sun-position)
-    * [sun-position - Node settings](#sun-position---node-settings)
-    * [Node Input](#node-input)
-    * [sun-position - Node Output](#sun-position---node-output)
-  * [moon-position](#moon-position)
-    * [moon-position - Node settings](#moon-position---node-settings)
-    * [moon-position - Node Output](#moon-position---node-output)
-  * [time-inject](#time-inject)
-    * [time-inject - Node settings](#time-inject---node-settings)
-    * [time-inject - Node Input](#time-inject---node-input)
-    * [time-inject - Node Output](#time-inject---node-output)
-  * [within-time](#within-time)
-    * [within-time - Node settings](#within-time---node-settings)
-  * [time-comp](#time-comp)
-    * [time-comp - Node settings](#time-comp---node-settings)
-  * [time-span](#time-span)
-    * [time-span - Node settings](#time-span---node-settings)
-  * [blind-control](#blind-control)
-  * [Times definitions](#times-definitions)
-    * [sun times](#sun-times)
-      * [remarks](#remarks)
-        * [blue hour](#blue-hour)
-        * [amateurDawn /amateurDusk](#amateurdawn--amateurdusk)
-        * [alternate properties](#alternate-properties)
-    * [moon times](#moon-times)
-    * [message, flow or global property or JSONATA expression](#message--flow-or-global-property-or-jsonata-expression)
-  * [input parse formats](#input-parse-formats)
-  * [output timestamp formats](#output-timestamp-formats)
-  * [output timespan formats](#output-timespan-formats)
-* [TODO](#todo)
-* [Bugs and Feedback](#bugs-and-feedback)
-* [LICENSE](#license)
-* [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [Quick Start](#quick-start)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [TODO](#todo)
+  * [Bugs and Feedback](#bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Installation
 
@@ -287,8 +290,8 @@ Injects a message into a flow either manually or at timestamps which can also de
 * **Offset** An optional property which is only available if an time is chosen. The offset can be a positive or negative and defines a time offset to the chosen time.
 * **Days** An optional property which is only available if an time is chosen. There can be defined on which days a msg should be emitted.
 
-* **Property** _optional_ here can be defined a context property which must be of type boolean. If this property is true alternate time will be used.
-* **Alternate time** _optional_ defines an alternate start time which will be used if the property is true. This can be used for different times for example of holidays/weekend.
+* **Property** _optional_ here can be defined a [condition](#conditions) under which a alternate time should be used.
+* **Alternate time** _optional_ defines an alternate start time which will be used if the condition applies. This can be used for different times for example of holidays/weekend.
 
 * **Additional Inject on Start** If this checkbox is set the inject node can emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be useful for initializing any flow.
 
@@ -345,13 +348,15 @@ A simple node that routes messages depending on the time. If the current time fa
   * **Start Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
 * **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
   * **End Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
-* **Property** _optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.
-* **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
+
+* **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the [conditions](#conditions) matches. This can be used for different times for example of holidays.
   * **Start time** alternate start time
   * **Start Offset** offset for the alternate start time
-* **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
+
+* **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the [conditions](#conditions) matches. This can be used for different times for example of holidays.
   * **End time** alternate end time
   * **End Offset** offset for the alternate end time
+
 * **Status** here can be adjusted which status should be displayed under the node.
   * this has the following possibilities:
     * **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
@@ -394,7 +399,7 @@ A simple node that routes messages depending on the time. If the current time fa
   * **time** defines where the time to which should be compared comes from
   * **parse format** defines the format for the time to compare, more information see [input parse formats](#input-parse-formats).
   * **Offset** allows to define a positive or negative offset to the given time.
-  * **limitation** here it is possible to additionally define a parameter. if defined this comparison will only be made if this parameter has the value "true".
+  * **limitation** here it is possible to additionally define a parameter. if defined this comparison will only be made if the [conditions](#conditions) matches.
 * **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
 
 ### time-span
@@ -541,21 +546,21 @@ The formats are:
 * **various** the system will try to parse different string formats
 * **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
 
- Field        | Full Form          | Short Form
- -------------|--------------------|-----------------------
- Year         | yyyy (4 digits)    | yy (2 digits), y (2 or 4 digits)
- Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
- Month        | NNN (abbr.)        |
- Day of Month | dd (2 digits)      | d (1 or 2 digits)
- Day of Week  | EE (name)          | E (abbr.)
- Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
- Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
- Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
- Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
- Minute       | mm (2 digits)      | m (1 or 2 digits)
- Second       | ss (2 digits)      | s (1 or 2 digits)
- Millisecond  | ll (3 digits)      | l (1, 2 or 3 digits)
- AM/PM        | tt  (2 digits)     | t (1 or 2 digits)
+ | Field        | Full Form           | Short Form                       |
+ | ------------ | ------------------- | -------------------------------- |
+ | Year         | yyyy (4 digits)     | yy (2 digits), y (2 or 4 digits) |
+ | Month        | MMM (name or abbr.) | MM (2 digits), M (1 or 2 digits) |
+ | Month        | NNN (abbr.)         |
+ | Day of Month | dd (2 digits)       | d (1 or 2 digits)                |
+ | Day of Week  | EE (name)           | E (abbr.)                        |
+ | Hour (1-12)  | hh (2 digits)       | h (1 or 2 digits)                |
+ | Hour (0-23)  | HH (2 digits)       | H (1 or 2 digits)                |
+ | Hour (0-11)  | KK (2 digits)       | K (1 or 2 digits)                |
+ | Hour (1-24)  | kk (2 digits)       | k (1 or 2 digits)                |
+ | Minute       | mm (2 digits)       | m (1 or 2 digits)                |
+ | Second       | ss (2 digits)       | s (1 or 2 digits)                |
+ | Millisecond  | ll (3 digits)       | l (1, 2 or 3 digits)             |
+ | AM/PM        | tt  (2 digits)      | t (1 or 2 digits)                |
 
 ### output timestamp formats
 
@@ -592,48 +597,48 @@ The formats are:
   * **delaySec** the time in seconds between output and timestamp
 * **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
 
-|placeholder|Description|
-|--- |--- |
-|d|Day of the month as digits; no leading zero for single-digit days.|
-|dd|Day of the month as digits; leading zero for single-digit days.|
-|ddd|Day of the week as a three-letter abbreviation. (same as E)|
-|dddd|Day of the week as its full name.  (same as EE)|
-|E|Day of the week as a three-letter abbreviation.|
-|EE|Day of the week as its full name.|
-|M|Month as digits; no leading zero for single-digit months.|
-|MM|Month as digits; leading zero for single-digit months.|
-|MMM|Month as a three-letter abbreviation.|
-|MMMM|Month as its full name.|
-|yy|Year as last two digits; leading zero for years less than 10.|
-|yyyy|Year represented by four digits.|
-|h|Hours; no leading zero for single-digit hours (12-hour clock 1-12).|
-|hh|Hours; leading zero for single-digit hours (12-hour clock 01-12).|
-|H|Hours; no leading zero for single-digit hours (24-hour clock  0-23).|
-|HH|Hours; leading zero for single-digit hours (24-hour clock 00-23).|
-|k|Hours; no leading zero for single-digit hours (12-hour clock 0-11).|
-|kk|Hours; leading zero for single-digit hours (12-hour clock  00-11).|
-|K|Hours; no leading zero for single-digit hours (24-hour clock 1-24).|
-|KK|Hours; leading zero for single-digit hours (24-hour clock 01-24).|
-|m|Minutes; no leading zero for single-digit minutes.|
-|mm|Minutes; leading zero for single-digit minutes.|
-|s|Seconds; no leading zero for single-digit seconds.|
-|ss|Seconds; leading zero for single-digit seconds.|
-|l|Milliseconds; no leading zeros for single-digit|
-|ll|Milliseconds; 1 leading zero for single-digit; no for 3 digits|
-|lll|Milliseconds; 2 leading zero for single-digit; 2 for 2 digits|
-|L|Milliseconds divided by 100 round to 0; no leading zero|
-|LL|Milliseconds divided by 10 round to 0; leading zero for single-digit|
-|t|Lowercase, single-character time marker string: a or p.|
-|tt|Lowercase, two-character time marker string: am or pm.|
-|T|Uppercase, single-character time marker string: A or P.|
-|TT|Uppercase, two-character time marker string: AM or PM.|
-|Z|US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500|
-|o|GMT/UTC timezone offset, e.g. -0500 or +0230.|
-|S|The date's ordinal suffix (st, nd, rd, or th). Works well with d.|
-|x|difference of days from timestamp day to output day|
-|xx|difference of days from timestamp day to output day with relative names for today, tomorrow, ...|
-|'…' or "…"|Literal character sequence. Surrounding quotes are removed.|
-|UTC:|Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed.|
+| placeholder | Description                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| d           | Day of the month as digits; no leading zero for single-digit days.                                                                                            |
+| dd          | Day of the month as digits; leading zero for single-digit days.                                                                                               |
+| ddd         | Day of the week as a three-letter abbreviation. (same as E)                                                                                                   |
+| dddd        | Day of the week as its full name.  (same as EE)                                                                                                               |
+| E           | Day of the week as a three-letter abbreviation.                                                                                                               |
+| EE          | Day of the week as its full name.                                                                                                                             |
+| M           | Month as digits; no leading zero for single-digit months.                                                                                                     |
+| MM          | Month as digits; leading zero for single-digit months.                                                                                                        |
+| MMM         | Month as a three-letter abbreviation.                                                                                                                         |
+| MMMM        | Month as its full name.                                                                                                                                       |
+| yy          | Year as last two digits; leading zero for years less than 10.                                                                                                 |
+| yyyy        | Year represented by four digits.                                                                                                                              |
+| h           | Hours; no leading zero for single-digit hours (12-hour clock 1-12).                                                                                           |
+| hh          | Hours; leading zero for single-digit hours (12-hour clock 01-12).                                                                                             |
+| H           | Hours; no leading zero for single-digit hours (24-hour clock  0-23).                                                                                          |
+| HH          | Hours; leading zero for single-digit hours (24-hour clock 00-23).                                                                                             |
+| k           | Hours; no leading zero for single-digit hours (12-hour clock 0-11).                                                                                           |
+| kk          | Hours; leading zero for single-digit hours (12-hour clock  00-11).                                                                                            |
+| K           | Hours; no leading zero for single-digit hours (24-hour clock 1-24).                                                                                           |
+| KK          | Hours; leading zero for single-digit hours (24-hour clock 01-24).                                                                                             |
+| m           | Minutes; no leading zero for single-digit minutes.                                                                                                            |
+| mm          | Minutes; leading zero for single-digit minutes.                                                                                                               |
+| s           | Seconds; no leading zero for single-digit seconds.                                                                                                            |
+| ss          | Seconds; leading zero for single-digit seconds.                                                                                                               |
+| l           | Milliseconds; no leading zeros for single-digit                                                                                                               |
+| ll          | Milliseconds; 1 leading zero for single-digit; no for 3 digits                                                                                                |
+| lll         | Milliseconds; 2 leading zero for single-digit; 2 for 2 digits                                                                                                 |
+| L           | Milliseconds divided by 100 round to 0; no leading zero                                                                                                       |
+| LL          | Milliseconds divided by 10 round to 0; leading zero for single-digit                                                                                          |
+| t           | Lowercase, single-character time marker string: a or p.                                                                                                       |
+| tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
+| T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
+| TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
+| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
+| o           | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
+| S           | The date's ordinal suffix (st, nd, rd, or th). Works well with d.                                                                                             |
+| x           | difference of days from timestamp day to output day                                                                                                           |
+| xx          | difference of days from timestamp day to output day with relative names for today, tomorrow, ...                                                              |
+| '…' or "…"  | Literal character sequence. Surrounding quotes are removed.                                                                                                   |
+| UTC:        | Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed. |
 
 ### output timespan formats
 
@@ -654,6 +659,36 @@ The formats are:
   * **delaySec** the time in seconds between output and timestamp
 * **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
 
+### Conditions
+
+A condition usually consists of a *property*, an *operator* and depending on the operator, a *threshold*.
+
+*property*, an *operator*:
+
+![condition-1](https://user-images.githubusercontent.com/12692680/57455030-81207a80-726a-11e9-8803-eb7e526950b4.png)
+
+*property*, *operator* and *threshold*:
+![condition-2](https://user-images.githubusercontent.com/12692680/57455031-81b91100-726a-11e9-9987-d53c201f79b0.png)
+
+The operators are:
+
+* `is true` - the value of the *property* must be of type boolean and the condition is fulfilled if the value is `true`
+* `is false` - the value of the *property* must be of type boolean and the condition is fulfilled if the value is `false`
+* `is null` - the value of the *property* must be `undefined` or `null`
+* `is not null` - the value of the *property* can have an obscure value that is not `undefined` or `null`
+* `is empty` - the condition is fulfilled if the *property* is an empty `string`, `array`, `buffer` or an object with no properties
+* `is not empty` - the condition is fulfilled if the *property* is an  `string`, `array`, `buffer` which is not empty or an object which has properties
+* `true expression` - the condition is fulfilled if the *property* is a number and greater `0` or a Boolean which is `true` or a string containing one of the following values `true`, `yes`, `on`, `ja`. If the property has a string `switchon` then this would evaluate to true, because `on` is part of the string.
+* `false expression` - the condition is fulfilled if the *property* is a number and less than or equal `0` or a Boolean which is `false` or a string containing one of the following values `false`, `no`, `off`, `nein`.  If the property has a string `nonsens` then this would evaluate to true, because `no` is part of the string.
+* `not true expression` - the condition is fulfilled if the *property* is a number and **not** greater `0` or a Boolean which is **not** `true` or a string containing **none** of the following values `true`, `yes`, `on`, `ja`. It the property is a number and **NaN** then this would evaluate to true.
+* `false expression` - the condition is fulfilled if the *property* is a number and **not** less than or equal `0` or a Boolean which is **not** `false` or a string containing **none** of the following values `false`, `no`, `off`, `nein`.
+* `<`, `<=`, `==`, `!=`, `>`, `>=` - compares the value of the *property* with a *threshold*. Typically this makes only sense if the *property* and the *threshold* are numbers.
+* `contain` - the condition is fulfilled if the *property* contains the string defined in the *threshold*.
+* `containSome` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as only one of the seperated parts of the *threshold* string is is included in the *property* value.
+* `containEvery` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as all of the seperated parts of the *threshold* string are included in the *property* value.
+
+A JSONata expression in the *property* must be always a boolean with value true, in this case the operator can not be chosen.
+
 ## TODO
 
 * [ ] add possibility to select input/output timezone
@@ -665,7 +700,7 @@ The formats are:
 For bugs, questions and discussions please use the
 [GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
 
-### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
+:moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
 Even for those that don't have the technical knowhow to help developing on there are ways to support development. So if you want to donate some money please feel free to send money via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN).
 

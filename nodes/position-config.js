@@ -456,44 +456,6 @@ module.exports = function (RED) {
                             return false;
                         }
                         return (nd.getDate() === d.getDate());
-                    } else if (type === 'DayOfWeek') {
-                        const d = new Date();
-                        switch (value) {
-                            case 'Sunday':
-                                return d.getDay() === 0;
-                            case 'Monday':
-                                return d.getDay() === 1;
-                            case 'Tuesday':
-                                return d.getDay() === 2;
-                            case 'Wednesday':
-                                return d.getDay() === 3;
-                            case 'Thursday':
-                                return d.getDay() === 4;
-                            case 'Friday':
-                                return d.getDay() === 5;
-                            case 'Saturday':
-                                return d.getDay() === 6;
-                            case 'Sat or Sun':
-                                return (d.getDay() === 0 || d.getDay() === 6);
-                            case 'Sun to Thu':
-                                return (d.getDay() <= 4);
-                            case 'Sun to Fri':
-                                return (d.getDay() <= 5);
-                            case 'Mon to Thu':
-                                return (d.getDay() >= 1) && (d.getDay() <= 4);
-                            case 'Mon to Fri':
-                                return (d.getDay() >= 1) && (d.getDay() <= 5);
-                            case 'Mon to Sat':
-                                return (d.getDay() >= 1) && (d.getDay() <= 6);
-                            case 'Tue to Thu':
-                                return (d.getDay() >= 2) && (d.getDay() <= 4);
-                            case 'Tue to Fri':
-                                return (d.getDay() >= 2) && (d.getDay() <= 5);
-                            case 'Tue to Sat':
-                                return (d.getDay() >= 2) && (d.getDay() <= 6);
-                            default:
-                                return false;
-                        }
                     }
                     opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                     if (opData === null || typeof opData === 'undefined') {
@@ -566,7 +528,17 @@ module.exports = function (RED) {
                 case 'gte':
                     return (a >= opVal(opTypeB, opValueB, opNameB));
                 case 'contain':
-                    return ((a + '').indexOf(opVal(opTypeB, opValueB, opNameB)) !== -1);
+                    return ((a + '').includes(opVal(opTypeB, opValueB, opNameB)));
+                case 'containSome': {
+                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const txt = (a + '');
+                    return vals.some(v => txt.includes(v));
+                }
+                case 'containEvery': {
+                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const txt = (a + '');
+                    return vals.every(v => txt.includes(v));
+                }
                 default:
                     _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
                     return hlp.isTrue(a);
@@ -807,14 +779,16 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
+        console.log('getting request');
+        console.log(req);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
                 res.status(500).send(JSON.stringify({}));
                 return;
             }
-            const obj = {};
-            switch (req.query.type) {
+            let obj = {};
+            switch (req.query.kind) {
                 case 'getFloatProp': {
                     try {
                         obj.value = posConfig.getFloatProp(posConfig, undefined, req.query.type, req.query.value, NaN);
@@ -827,7 +801,7 @@ module.exports = function (RED) {
                 }
                 case 'getTimeProp': {
                     try {
-                        obj.value = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.valueoffset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;
@@ -835,9 +809,9 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateFromProp': {
+                case 'getDateProp': {
                     try {
-                        obj.value = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.format, req.query.valueoffset, req.query.offsetType, req.query.multiplier);
+                        obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

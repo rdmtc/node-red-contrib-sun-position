@@ -493,9 +493,10 @@
         oneditprepare() {
             this.outputs = this.outputs || 1;
             this.sunControlMode = this.sunControlMode || 0;
+            const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeProp */
                 $('.form-row-showLater').show();
                 // #region initialize
                 const types = getTypes(node);
@@ -670,7 +671,7 @@
                             type: 'text'
                         }).appendTo(row1).typedInput({
                             default: types.Unlimited.value,
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.DayOfMonth, types.DayOfWeek]
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.DayOfMonth]
                         });
                         const validOperatorField = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -719,7 +720,7 @@
                         }).appendTo(row4).typedInput({
                             default: types.Undefined.value,
                             types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'jsonata']
-                        });
+                        }).change(() => { timeField.change(); });
                         const multiplierField = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
@@ -745,14 +746,20 @@
                             } else {
                                 row4.hide(); // offset
                             }
+                            getTimeProp(d => {
+                                console.log(typeof d.value);
+                                if (d.value) {
+                                    const dv = new Date(d.value);
+                                    row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
+                                }
+                            }, $nodeConfig.val(), opType, timeField.typedInput('value'), offsetField.typedInput('type'), offsetField.typedInput('value'), multiplierField.val());
                             resizeContainer();
                         });
                         validOperandAField.change(() => {
                             const propType = validOperandAField.typedInput('type');
                             if (propType === 'none' ||
-                                propType === types.DayOfMonth.value ||
-                                propType === types.DayOfWeek.value) {
-                                validOperatorField.val(selFields.comparator[0].id); // only true is valid for DayOfMonth or DayOfWeek
+                                propType === types.DayOfMonth.value) {
+                                validOperatorField.val(selFields.comparator[0].id); // only true is valid for DayOfMonth
                                 validOperatorField.hide();
                                 row2.hide(); // condOpB
                             } else if ( propType === 'jsonata') {
@@ -788,17 +795,17 @@
                         validOperatorField.change(() => { validOperandAField.change(); });
                         // setting defaultValues
                         timeOperatorField.val(data.timeOp || 0);
-                        timeField.typedInput('value', (data.timeValue || ''));
-                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
-                        levelField.typedInput('value', (data.levelValue || getDefLevel(data.levelTyp, data.levelValue,'closed (min)')));
-                        levelField.typedInput('type', (data.levelType || types.LevelFix.value));
-                        offsetField.typedInput('value', data.offsetValue || '');
-                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        const setTV = (f,t,v) => {
+                            f.typedInput('value', v);
+                            f.typedInput('type', t);
+                            f.typedInput('validate');
+                        };
+                        setTV(timeField, (data.timeType || types.TimeEntered.value), (data.timeValue || ''));
+                        setTV(levelField, (data.levelType || types.LevelFix.value), (data.levelValue || getDefLevel(data.levelTyp, data.levelValue, 'closed (min)')), (data.timeType || types.TimeEntered.value));
+                        setTV(offsetField, (data.offsetType || types.Undefined.value), (data.offsetValue || ''));
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        validOperandAField.typedInput('value', data.validOperandAValue || '');
-                        validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
-                        validOperandBField.typedInput('value', data.validOperandBValue || '');
-                        validOperandBField.typedInput('type', data.validOperandBType || 'num');
+                        setTV(validOperandAField, (data.validOperandAType || types.Unlimited.value), (data.validOperandAValue || ''));
+                        setTV(validOperandBField, (data.validOperandBType || 'num'), (data.validOperandBValue || ''));
                         validOperatorField.val(data.validOperator || selFields.comparator[0].id);
                         resizeRule(containerRow);
                         // resizeContainer();
