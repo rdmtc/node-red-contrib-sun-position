@@ -747,12 +747,15 @@
                                 row4.hide(); // offset
                             }
                             getTimeProp(d => {
-                                console.log(typeof d.value);
                                 if (d.value) {
                                     const dv = new Date(d.value);
                                     row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
                                 }
-                            }, $nodeConfig.val(), opType, timeField.typedInput('value'), offsetField.typedInput('type'), offsetField.typedInput('value'), multiplierField.val());
+                            }, $nodeConfig.val(), opType,
+                            timeField.typedInput('value'),
+                            offsetField.typedInput('type'),
+                            offsetField.typedInput('value'),
+                            multiplierField.val());
                             resizeContainer();
                         });
                         validOperandAField.change(() => {
@@ -772,7 +775,6 @@
                                 validOperatorField.attr('disabled', false);
                                 const condOp = validOperatorField.val();
                                 let operatorCount = 1;
-                                // console.log(selFields.comparator);
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
@@ -902,7 +904,6 @@
                             $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
                             const condOp = $('#node-input-oversteerCompare').val();
                             let operatorCount = 1;
-                            // console.log(selFields.comparator);
                             const fields = selFields.comparator;
                             const fieldsLength = fields.length;
                             for (let index = 0; index < fieldsLength; index++) {

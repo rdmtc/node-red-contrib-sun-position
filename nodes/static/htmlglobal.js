@@ -684,7 +684,7 @@ function getFloatProp(result, config, type, value) { // eslint-disable-line no-u
 
 function getTimeProp(result, config, type, value, offset, offsetType, multiplier, next, days) { // eslint-disable-line no-unused-vars
     if (type === 'none' || type === '' || type === 'json' || type === 'jsonata' || type === 'bin') {
-        result({ value: ''});
+        result({ value: type});
     } else if (type === 'num' || type === 'str' || type === 'bool') {
         result({ value: value });
     } else if (type === 'msg' || type === 'flow' || type === 'global' || type === 'env') {
@@ -721,4 +721,36 @@ function getDateProp(result, config, type, value, format, offset, offsetType, mu
     if (offsetType) { url += '&offsetType=' + offsetType; }
     if (multiplier) { url += '&multiplier=' + multiplier; }
     $.getJSON(url, result);
+}
+
+function getOutDataProp(result, config, type, value, format, offset, offsetType, multiplier, days) { // eslint-disable-line no-unused-vars
+    if (type === 'none' || type === '' || type === 'json' || type === 'jsonata' || type === 'bin') {
+        result(type);
+    } else if (type === 'num' || type === 'str' || type === 'bool') {
+        result(value);
+    } else if (type === 'msg' || type === 'flow' || type === 'global' || type === 'env') {
+        result(type + '.' + value);
+    } else if (type === 'msgPayload') {
+        result('msg.payload');
+    } else if (type === 'msgTs') {
+        result('msg.ts');
+    } else if (type === 'msgLC') {
+        result('msg.lc');
+    } else if (type === 'msgValue') {
+        result('msg.value');
+    } else if (type === 'msgDelay') {
+        result('msg.delay');
+    } else if (type === 'msgOnTime') {
+        result('msg.onTime');
+    } else if (type === 'msgRampTime') {
+        result('msg.rampTime');
+    } else {
+        let url = '/sun-position/data?config=' + config + '&kind=getOutDataProp&type=' + type + '&value=' + value;
+        if (format) { url += '&format=' + format; }
+        if (offset) { url += '&offset=' + offset; }
+        if (offsetType) { url += '&offsetType=' + offsetType; }
+        if (multiplier) { url += '&multiplier=' + multiplier; }
+        if (days) { url += '&days=' + days; }
+        $.getJSON(url, result);
+    }
 }

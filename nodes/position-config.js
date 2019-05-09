@@ -819,6 +819,16 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
+                case 'getOutDataProp': {
+                    try {
+                        obj = posConfig.getOutDataProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.days);
+                    } catch(err) {
+                        obj.value = NaN;
+                        obj.error = err;
+                    }
+                    res.status(200).send(JSON.stringify(obj));
+                    break;
+                }
             }
         }
     });
