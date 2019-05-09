@@ -8,6 +8,7 @@ module.exports = {
     isBool,
     isTrue,
     isFalse,
+    clipValueLength,
     countDecimals,
     handleError,
     chkValueFilled,
@@ -23,6 +24,7 @@ module.exports = {
     getTimeOfText,
     getDateOfText,
     getTimeNumber,
+    getTimeNumberUTC,
     getNodeId,
     initializeParser,
     getFormattedDateOut,
@@ -142,6 +144,19 @@ function handleError(node, messageText, err, stateText) {
  */
 function chkValueFilled(val, defaultVal) {
     return ((typeof val === 'undefined') || (val === '') || (val === null)) ? defaultVal : val;
+}
+
+/*******************************************************************************************************/
+/**
+ * clip a test to a maximum length
+ * @param {string} v text to clip
+ * @param {number} l length to clip the text
+ */
+function clipValueLength(v, l) {
+    if (v.length > l) {
+        return v.substring(0, (l - 3)) + '...';
+    }
+    return v;
 }
 /*******************************************************************************************************/
 /**
@@ -290,9 +305,17 @@ function _parseComparableDateFormat2(date) {
  * @return {number}   numeric representation of the time part of the date
  */
 function getTimeNumber(date) {
-    return date.getUTCMilliseconds() + date.getUTCSeconds() * 1000 + date.getUTCMinutes() * 60000 + date.getUTCHours() * 3600000;
+    return date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60000 + date.getHours() * 3600000;
 }
 
+/**
+ * convert the time part of a date into a comparable number
+ * @param {Date} date  - date to convert
+ * @return {number}   numeric representation of the time part of the date
+ */
+function getTimeNumberUTC(date) {
+    return date.getUTCMilliseconds() + date.getUTCSeconds() * 1000 + date.getUTCMinutes() * 60000 + date.getUTCHours() * 3600000;
+}
 /*******************************************************************************************************/
 /**
  * check if a given number is in given limits

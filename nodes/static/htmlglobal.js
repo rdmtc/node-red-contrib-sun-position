@@ -116,7 +116,9 @@ const SelectFields = {
         { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
         { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
         { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
-        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 }
+        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
+        { id: 'containSome', group: 'enhanced', label: 'containSome', operatorCount: 2 },
+        { id: 'containEvery', group: 'enhanced', label: 'containEvery', operatorCount: 2 }
     ]
 };
 
@@ -223,6 +225,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
+            hasValue: false,
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
                 'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
                 'civilDusk', 'blueHourDuskEnd', 'amateurDusk', 'astronomicalDusk', 'nadir']
@@ -231,6 +234,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
+            hasValue: false,
             options: ['rise', 'set']
         },
         SunCalc: {
@@ -458,40 +462,43 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
 }
 
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
-    const tInputField = $('#node-input-' + data.valueProp);
-    const typeField = $('#node-input-' + data.typeProp);
+    const $inputField = $('#node-input-' + data.valueProp);
+    const $typeField = $('#node-input-' + data.typeProp);
     if (typeof node[data.typeProp] === 'undefined' ||
         node[data.typeProp] === null) {
         if (typeof data.defaultType !== 'undefined') {
             node[data.typeProp] = data.defaultType;
-            typeField.val(data.defaultType);
+            $typeField.val(data.defaultType);
         }
     } else {
-        typeField.val(node[data.typeProp]);
+        $typeField.val(node[data.typeProp]);
     }
     if (typeof node[data.valueProp] === 'undefined' ||
         node[data.valueProp] === null) {
         if (typeof data.defaultValue !== 'undefined') {
             node[data.valueProp] = data.defaultValue;
-            tInputField.val(node[data.defaultValue]);
+            $inputField.val(node[data.defaultValue]);
         }
     } else {
-        tInputField.val(node[data.valueProp]);
+        $inputField.val(node[data.valueProp]);
     }
-    tInputField.typedInput({
-        typeField: typeField,
+    $inputField.typedInput({
+        typeField: $typeField,
         types: data.types
     });
+    if (data.tooltip) {
+        $inputField.$attr('title', data.tooltip);
+    }
     if (data.width) {
-        tInputField.typedInput('width', data.width);
+        $inputField.typedInput('width', data.width);
     }
     if (data.onChange) {
-        tInputField.on('change', data.onChange);
+        $inputField.on('change', data.onChange);
     }
     if (data.onFocus) {
-        tInputField.on('change focus focusin focusout', data.onFocus);
+        $inputField.on('change focus focusin focusout', data.onFocus);
     }
-    return tInputField;
+    return $inputField;
 }
 
 /**
@@ -667,4 +674,51 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
         }
     });
     return multiselect;
+}
+
+
+function getFloatProp(result, config, type, value) { // eslint-disable-line no-unused-vars
+    const url = '/sun-position/data?config=' + config + '&kind=getFloatProp&type=' + type + '&value=' + value;
+    $.getJSON(url, result );
+}
+
+function getTimeProp(result, config, type, value, offset, offsetType, multiplier, next, days) { // eslint-disable-line no-unused-vars
+    if (type === 'none' || type === '' || type === 'json' || type === 'jsonata' || type === 'bin') {
+        result({ value: ''});
+    } else if (type === 'num' || type === 'str' || type === 'bool') {
+        result({ value: value });
+    } else if (type === 'msg' || type === 'flow' || type === 'global' || type === 'env') {
+        result({ value: type + '.' + value });
+    } else if (type === 'msgPayload') {
+        result({ value: 'msg.payload' });
+    } else if (type === 'msgTs') {
+        result({ value: 'msg.ts' });
+    } else if (type === 'msgLC') {
+        result({ value: 'msg.lc' });
+    } else if (type === 'msgValue') {
+        result({ value: 'msg.value' });
+    } else if (type === 'msgDelay') {
+        result({ value: 'msg.delay' });
+    } else if (type === 'msgOnTime') {
+        result({ value: 'msg.onTime' });
+    } else if (type === 'msgRampTime') {
+        result({ value: 'msg.rampTime' });
+    } else {
+        let url = '/sun-position/data?config=' + config + '&kind=getTimeProp&type=' + type + '&value=' + value;
+        if (offset) { url += '&offset=' + offset; }
+        if (offsetType) { url += '&offsetType=' + offsetType; }
+        if (multiplier) { url += '&multiplier=' + multiplier; }
+        if (next) { url += '&next=' + next; }
+        if (days) { url += '&days=' + days; }
+        $.getJSON(url, result);
+    }
+}
+
+function getDateProp(result, config, type, value, format, offset, offsetType, multiplier) { // eslint-disable-line no-unused-vars
+    let url = '/sun-position/data?config=' + config + '&kind=getDateProp&type=' + type + '&value=' + value;
+    if (format) { url += '&format=' + format; }
+    if (offset) { url += '&offset=' + offset; }
+    if (offsetType) { url += '&offsetType=' + offsetType; }
+    if (multiplier) { url += '&multiplier=' + multiplier; }
+    $.getJSON(url, result);
 }

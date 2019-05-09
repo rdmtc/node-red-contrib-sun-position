@@ -413,7 +413,24 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue (_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, outReason) {
+        savePropValue(_srcNode, msg, type, value, tempStorage, opName) {
+            if (type === 'msgPayload') {
+                tempStorage[opName] = msg.payload;
+            } else if (type === 'msgValue') {
+                tempStorage[opName] = msg.value;
+            } else if (type === 'msg') {
+                try {
+                    const opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                    if (opData !== null && typeof opData !== 'undefined') {
+                        tempStorage[opName] = opData;
+                    }
+                } catch (err) {
+                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                }
+            }
+        }
+        /*******************************************************************************************************/
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, opNameA, opNameB, outReason) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
@@ -432,6 +449,13 @@ module.exports = function (RED) {
                         return msg.payload;
                     } else if (type === 'msgValue') {
                         return msg.value;
+                    } else if (type === 'DayOfMonth') {
+                        const d = new Date();
+                        const nd = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
+                        if (nd === null) {
+                            return false;
+                        }
+                        return (nd.getDate() === d.getDate());
                     }
                     opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                     if (opData === null || typeof opData === 'undefined') {
@@ -459,7 +483,7 @@ module.exports = function (RED) {
                     return null;
                 }
             };
-            const a = opVal(opTypeA, opValueA, 'operandA');
+            const a = opVal(opTypeA, opValueA, opNameA);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -492,19 +516,29 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                    return (a == opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != opVal(opTypeB, opValueB, 'operandB'));  // eslint-disable-line eqeqeq
+                    return (a != opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < opVal(opTypeB, opValueB, 'operandB'));
+                    return (a < opVal(opTypeB, opValueB, opNameB));
                 case 'lte':
-                    return (a <= opVal(opTypeB, opValueB, 'operandB'));
+                    return (a <= opVal(opTypeB, opValueB, opNameB));
                 case 'gt':
-                    return (a > opVal(opTypeB, opValueB, 'operandB'));
+                    return (a > opVal(opTypeB, opValueB, opNameB));
                 case 'gte':
-                    return (a >= opVal(opTypeB, opValueB, 'operandB'));
+                    return (a >= opVal(opTypeB, opValueB, opNameB));
                 case 'contain':
-                    return ((a + '').indexOf(opVal(opTypeB, opValueB, 'operandB')) !== -1);
+                    return ((a + '').includes(opVal(opTypeB, opValueB, opNameB)));
+                case 'containSome': {
+                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const txt = (a + '');
+                    return vals.some(v => txt.includes(v));
+                }
+                case 'containEvery': {
+                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const txt = (a + '');
+                    return vals.every(v => txt.includes(v));
+                }
                 default:
                     _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
                     return hlp.isTrue(a);
@@ -745,14 +779,16 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
+        console.log('getting request');
+        console.log(req);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
                 res.status(500).send(JSON.stringify({}));
                 return;
             }
-            const obj = {};
-            switch (req.query.type) {
+            let obj = {};
+            switch (req.query.kind) {
                 case 'getFloatProp': {
                     try {
                         obj.value = posConfig.getFloatProp(posConfig, undefined, req.query.type, req.query.value, NaN);
@@ -765,7 +801,7 @@ module.exports = function (RED) {
                 }
                 case 'getTimeProp': {
                     try {
-                        obj.value = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.valueoffset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;
@@ -773,9 +809,9 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateFromProp': {
+                case 'getDateProp': {
                     try {
-                        obj.value = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.format, req.query.valueoffset, req.query.offsetType, req.query.multiplier);
+                        obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

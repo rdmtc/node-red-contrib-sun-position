@@ -4,8 +4,8 @@
             "positionConfig": "Konfiguration",
             "binary": "binär",
             "json": "json",
-            "jsonata": "json Ausdr.",
-            "timestamp": "Zeitmarke",
+            "jsonata": "jsonata Ausdr.",
+            "timestamp": "Zeitpunkt",
             "blank": "\"\"",
             "nothing": "nichts",
             "checkall" : "Alle Regeln überprüfen",
@@ -14,11 +14,12 @@
         "types": {
             "unlimited": "keine Limitierung",
             "undefined": "nicht verwendet",
-            "datespecific": "Zeitmarke (erweitert)",
+            "datespecific": "Zeitpunkt (erweitert)",
             "timeentered": "Uhrzeit (nächste)",
             "dateentered": "Datum (Zeitpunkt)",
             "timepredefined": "Uhrzeit speziell",
-            "dayofmonth": "Spezieller Monatstag",
+            "dayofmonth": "Monatstag",
+            "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "suncalc": "Sonnenposition",
@@ -30,7 +31,7 @@
             "operatorTypes": "in Vergleich einbeziehen"
         },
         "operatorsGroups": [
-            "kompletter Zeitstempel"
+            "kompletter Zeitpunkt"
         ],
         "operators": [
             "==     (gleich)",
@@ -69,7 +70,7 @@
             "lokale Datum und Zeit",
             "lokale Datum und Zeit erweitert",
             "lokale Zeit",
-            "lokale Zeit enh.",
+            "lokale Zeit erw.",
             "lokales Datum",
             "lokales Datum lang",
             "UTC Datum und Zeit",
@@ -106,8 +107,8 @@
             "other"
         ],
         "outputTSFormatsGroups": [
-            "Zeitmarke (Zahl)",
-            "Zeitmarke gerundet (Zahl)",
+            "Zeitpunkt (Zahl)",
+            "Zeitpunkt gerundet (Zahl)",
             "Text"
         ],
         "outputTSFormats": [
@@ -163,23 +164,25 @@
             "erweitert"
         ],
         "comparator": [
-            "ist wahr",
-            "ist falsch",
+            "ist true",
+            "ist false",
             "ist null",
             "ist nicht null",
             "ist leer",
             "ist nicht leer",
-            "ist ein wahr Ausdruck (true, on, wahr, 1)",
-            "ist ein falsch Ausdruck (false, off, falsch, 0)",
-            "ist kein wahr Ausdruck (true, on, wahr, 1)",
-            "ist kein falsch Ausdruck (false, off, falsch, 0)",
-            "gleich",
-            "ungleich",
-            "kleiner als",
-            "kleiner oder gleich",
-            "größer",
-            "größer oder gleich",
-            "enthält"
+            "ist wahr/true/on/1",
+            "ist falsch/false/off/0",
+            "ist nicht wahr/true/on/1",
+            "ist nicht falsch/false/off/0",
+            "=",
+            "!=",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "enthält",
+            "enthält irgendeins",
+            "enthält alle"
         ],
 
         "days": [
@@ -206,24 +209,26 @@
             "in 5 Tagen",
             "in 6 Tagen"
         ],
-        "comparators" : {
-            "true": "ist wahr",
-            "false": "ist falsch",
+        "comparatorDescription" : {
+            "true": "ist Boolean wahr",
+            "false": "ist Boolean falsch",
             "null": "ist null",
             "nnull": "ist nicht null",
             "empty": "ist leer",
             "nempty": "ist nicht empty",
-            "true_expr": "ist wahr*",
-            "false_expr": "ist falsch*",
-            "ntrue_expr": "ist nicht wahr*",
-            "nfalse_expr": "ist nicht falsch*",
-            "equal": "=",
-            "nequal": "!=",
-            "lt": "<",
-            "lte": "<=",
-            "gt": ">",
-            "gte": ">=",
-            "contain": "enthält"
+            "true_expr": "ist wahr (true, on, wahr, 1)",
+            "false_expr": "ist falsch (false, off, 0)",
+            "ntrue_expr": "ist nicht wahr (true, on, 1)",
+            "nfalse_expr": "ist nicht falsch (false, off, 0)",
+            "equal": "gleich",
+            "nequal": "ungleich",
+            "lt": "kleiner als",
+            "lte": "kleiner oder gleich",
+            "gt": "größer",
+            "gte": "größer oder gleich",
+            "contain": "enthält",
+            "containSome": "enthält irgendeins",
+            "containEvery": "enthält alle"
         }
     },
     "errors": {
@@ -231,10 +236,10 @@
         "error-title": "interner Fehler",
         "error-init": "Fehler '__message__', wiederhole in __time__min",
         "warn-init": "Warnung '__message__', wiederhole in __time__min",
-        "pos-config": "Node ist nicht richtig konfiguriert!! Fehlende oder flasche positionsangaben!",
+        "pos-config": "Node ist nicht richtig konfiguriert!! Fehlende oder falsche positionsangaben!",
         "pos-config-state": "Node ist nicht richtig konfiguriert!!",
         "unknownPropertyOperator": "Fehler, der verwendete Operator __propertyOp__=\"__propertyOpText__\" ist unbekannt!",
-        "unknownCompareOperator": "Fehler, der verwendete vergleichs Operator \"__operator__\" ist unbekannt!",
+        "unknownCompareOperator": "Fehler, der verwendete vergleichs-Operator \"__operator__\" ist unbekannt!",
         "notEvaluableProperty":"Fehler: kann den Wert von __type__.__value__ nicht ermitteln",
         "notEvaluablePropertyDefault": "Fehler: kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!",
         "notEvaluablePropertyAdd":"Fehler \"__err__\", kann den Wert von __type__.__value__ nicht ermitteln!"

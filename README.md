@@ -22,46 +22,50 @@ Additional you can get sun and moon position or to control a flow by sun or moon
 > This is still in development!
 > This is not fully tested and documentation are missing!
 
-[TOC]
+## Table of contents
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [General](#general)
-  - [Saving resources](#saving-resources)
-  - [second based accuracy](#second-based-accuracy)
-- [Implemented Nodes](#implemented-nodes)
-  - [sun-position](#sun-position)
-    - [sun-position - Node settings](#sun-position---node-settings)
-    - [Node Input](#node-input)
-    - [sun-position -Node Output](#sun-position---node-output)
-  - [moon-position](#moon-position)
-    - [moon-position - Node settings](#moon-position---node-settings)
-    - [moon-position - Node Output](#moon-position---node-output)
-  - [time-inject](#time-inject)
-    - [time-inject - Node settings](#time-inject---node-settings)
-    - [time-inject - Node Input](#time-inject---node-input)
-    - [time-inject - Node Output](#time-inject---node-output)
-  - [within-time](#within-time)
-    - [within-time - Node settings](#within-time---node-settings)
-  - [time-comp](#time-comp)
-    - [time-comp - Node settings](#time-comp---node-settings)
-  - [time-span](#time-span)
-    - [time-span - Node settings](#time-span---node-settings)
-  - [Times definitions](#times-definitions)
-    - [sun times](#sun-times)
-      - [remarks](#remarks)
-        - [blue hour](#blue-hour)
-        - [amateurDawn /amateurDusk](#amateurdawn--amateurdusk)
-        - [alternate properties](#alternate-properties)
-    - [moon times](#moon-times)
-    - [message, flow or global property or JSONATA expression](#message--flow-or-global-property-or-jsonata-expression)
-  - [input parse formats](#input-parse-formats)
-  - [output timestamp formats](#output-timestamp-formats)
-  - [output timespan formats](#output-timespan-formats)
-- [TODO](#todo)
-- [Bugs and Feedback](#bugs-and-feedback)
-- [LICENSE](#license)
-- [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [Quick Start](#quick-start)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [TODO](#todo)
+  * [Bugs and Feedback](#bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Installation
 
@@ -83,10 +87,10 @@ The nodes are designed to be accurate to seconds. This means it was designed to 
 
 ## Implemented Nodes
 
-- within-time a switch node, which forwards a message only within a certain period of time.The beginning and the end can also be sunset, sunrise, moonset, moonrise or any other sun times.
-- time-inject a inject node, which can send a message on a specified time, which can also be a sun or moon time.
-- sun-position a node which calculates sun position. Can be used as a switch node for specific azimuth of the sun.
-- moon-position a node which calculates moon position and phases. Can be used as a switch node for specific azimuth of the sun.
+* within-time a switch node, which forwards a message only within a certain period of time.The beginning and the end can also be sunset, sunrise, moonset, moonrise or any other sun times.
+* time-inject a inject node, which can send a message on a specified time, which can also be a sun or moon time.
+* sun-position a node which calculates sun position. Can be used as a switch node for specific azimuth of the sun.
+* moon-position a node which calculates moon position and phases. Can be used as a switch node for specific azimuth of the sun.
 
 ### sun-position
 
@@ -102,10 +106,10 @@ The node calculates the current sun position on any input message. This node is 
 
 ![sun-position-settings](https://user-images.githubusercontent.com/12692680/57134503-aa429600-6da6-11e9-945b-aa7b6d750267.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Topic** defines the topic of the first output
-- **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
-- **Name** name of the Node
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Topic** defines the topic of the first output
+* **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
+* **Name** name of the Node
 
 #### Node Input
 
@@ -113,34 +117,34 @@ The Input is for triggering the calculation. If limits are defined the input mes
 
 #### sun-position - Node Output
 
-- **first output**
-  - `msg.payload.azimuth` the azimuth of the sun position relative to the given coordinates.
-  - `msg.payload.altitude` the altitude/elevation of the sun position relative to the given coordinates.
-  - `msg.payload.times` the sun times as object.
-    - `msg.payload.times.astronomicalDawn` night ends (morning astronomical twilight starts)
-    - `msg.payload.times.amateurDawn` amateur astronomical dawn (sun at 12° before sunrise)
-    - `msg.payload.times.nauticalDawn` nautical dawn (morning nautical twilight starts)
-    - `msg.payload.times.blueHourDawnStart` blue Hour start (time for special photography photos starts)
-    - `msg.payload.times.civilDawn` dawn (morning nautical twilight ends, morning civil twilight starts)
-    - `msg.payload.times.blueHourDawnEnd` blue Hour end (time for special photography photos starts)
-    - `msg.payload.times.sunrise` sunrise (top edge of the sun appears on the horizon)
-    - `msg.payload.times.sunriseEnd` sunrise ends (bottom edge of the sun touches the horizon)
-    - `msg.payload.times.goldenHourEnd` morning golden hour (soft light, best time for photography) ends
-    - `msg.payload.times.solarNoon` solar noon (sun is in the highest position)
-    - `msg.payload.times.goldenHourStart` evening golden hour starts
-    - `msg.payload.times.sunsetStart` sunset starts (bottom edge of the sun touches the horizon)
-    - `msg.payload.times.sunset` sunset (sun disappears below the horizon, evening civil twilight starts)
-    - `msg.payload.times.blueHourDuskStart` nautical dusk start (evening astronomical twilight starts)
-    - `msg.payload.times.civilDusk` dusk (evening nautical twilight starts)
-    - `msg.payload.times.blueHourDuskEnd` nautical dusk end (evening astronomical twilight starts)
-    - `msg.payload.times.amateurDusk` amateur astronomical dusk (sun at 12° after sunrise)
-    - `msg.payload.times.astronomicalDusk` night starts (dark enough for astronomical observations)
-    - `msg.payload.times.nadir` nadir (darkest moment of the night, sun is in the lowest position)
-  - `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
-  - `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
-  - `msg.payload.startTime` if a start time is defined the start timestamp (inclusive of offset).
-  - `msg.payload.endTime` if a end time is defined the end timestamp (inclusive of offset).
-  - `msg.payload.sunInSky` if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.
+* **first output**
+  * `msg.payload.azimuth` the azimuth of the sun position relative to the given coordinates.
+  * `msg.payload.altitude` the altitude/elevation of the sun position relative to the given coordinates.
+  * `msg.payload.times` the sun times as object.
+    * `msg.payload.times.astronomicalDawn` night ends (morning astronomical twilight starts)
+    * `msg.payload.times.amateurDawn` amateur astronomical dawn (sun at 12° before sunrise)
+    * `msg.payload.times.nauticalDawn` nautical dawn (morning nautical twilight starts)
+    * `msg.payload.times.blueHourDawnStart` blue Hour start (time for special photography photos starts)
+    * `msg.payload.times.civilDawn` dawn (morning nautical twilight ends, morning civil twilight starts)
+    * `msg.payload.times.blueHourDawnEnd` blue Hour end (time for special photography photos starts)
+    * `msg.payload.times.sunrise` sunrise (top edge of the sun appears on the horizon)
+    * `msg.payload.times.sunriseEnd` sunrise ends (bottom edge of the sun touches the horizon)
+    * `msg.payload.times.goldenHourEnd` morning golden hour (soft light, best time for photography) ends
+    * `msg.payload.times.solarNoon` solar noon (sun is in the highest position)
+    * `msg.payload.times.goldenHourStart` evening golden hour starts
+    * `msg.payload.times.sunsetStart` sunset starts (bottom edge of the sun touches the horizon)
+    * `msg.payload.times.sunset` sunset (sun disappears below the horizon, evening civil twilight starts)
+    * `msg.payload.times.blueHourDuskStart` nautical dusk start (evening astronomical twilight starts)
+    * `msg.payload.times.civilDusk` dusk (evening nautical twilight starts)
+    * `msg.payload.times.blueHourDuskEnd` nautical dusk end (evening astronomical twilight starts)
+    * `msg.payload.times.amateurDusk` amateur astronomical dusk (sun at 12° after sunrise)
+    * `msg.payload.times.astronomicalDusk` night starts (dark enough for astronomical observations)
+    * `msg.payload.times.nadir` nadir (darkest moment of the night, sun is in the lowest position)
+  * `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
+  * `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
+  * `msg.payload.startTime` if a start time is defined the start timestamp (inclusive of offset).
+  * `msg.payload.endTime` if a end time is defined the end timestamp (inclusive of offset).
+  * `msg.payload.sunInSky` if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.
 
 ```json
 {
@@ -183,7 +187,7 @@ The Input is for triggering the calculation. If limits are defined the input mes
 }
 ```
 
-- **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
+* **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
 
 ### moon-position
 
@@ -199,35 +203,35 @@ The node calculates the current sun position on any input message.
 
 ![moon-position-settings](https://user-images.githubusercontent.com/12692680/57134923-f6daa100-6da7-11e9-9e1d-a49ecfc4bbcc.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Topic** defines the topic of the first output
-- **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
-- **Name** name of the Node
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Topic** defines the topic of the first output
+* **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
+* **Name** name of the Node
 
 #### moon-position - Node Output
 
-- **first output**
-  - `msg.payload.azimuth` the azimuth of the moon position relative to the given coordinates.
-  - `msg.payload.altitude` the altitude/elevation of the moon position relative to the given coordinates.
-  - `msg.payload.distance` the distance of the moon.
-  - `msg.payload.parallacticAngle` the parallacticAngle of the moon.
-  - `msg.payload.illumination` the illumination of the moon as object.
-    - `msg.payload.illumination.angle` the illumination angle of the moon.
-    - `msg.payload.illumination.fraction` the illumination fraction angle of the moon.
-    - `msg.payload.illumination.zenithAngle` the illumination zenith angle of the moon.
-    - `msg.payload.illumination.phase` the illumination phase of the moon as object.
-      - `msg.payload.illumination.phase.value` the current phase of the moon in percent, where 0%/100% is New Moon, from 0% to 50% is growing, 50% is Full Moon and >50% is decreasing.
-      - `msg.payload.illumination.phase.angle` the current phase angle of the moon.
-      - `msg.payload.illumination.phase.emoji` the emoji of the current phase of the moon.
-      - `msg.payload.illumination.phase.code` the code of the emoji for the current phase of the moon.
-      - `msg.payload.illumination.phase.name` the name of the current phase of the moon.
-  - `msg.payload.times` the moon times as object.
-    - `msg.payload.times.rise` the moon rise time.
-    - `msg.payload.times.set` the moon set time.
-    - `msg.payload.times.alwaysUp` boolean which is _true_ if the moon never rises/sets and is always above the horizon during the day.
-    - `msg.payload.times.alwaysDown` boolean which is _true_ if the moon is always below the horizon.
-  - `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
-  - `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
+* **first output**
+  * `msg.payload.azimuth` the azimuth of the moon position relative to the given coordinates.
+  * `msg.payload.altitude` the altitude/elevation of the moon position relative to the given coordinates.
+  * `msg.payload.distance` the distance of the moon.
+  * `msg.payload.parallacticAngle` the parallacticAngle of the moon.
+  * `msg.payload.illumination` the illumination of the moon as object.
+    * `msg.payload.illumination.angle` the illumination angle of the moon.
+    * `msg.payload.illumination.fraction` the illumination fraction angle of the moon.
+    * `msg.payload.illumination.zenithAngle` the illumination zenith angle of the moon.
+    * `msg.payload.illumination.phase` the illumination phase of the moon as object.
+      * `msg.payload.illumination.phase.value` the current phase of the moon in percent, where 0%/100% is New Moon, from 0% to 50% is growing, 50% is Full Moon and >50% is decreasing.
+      * `msg.payload.illumination.phase.angle` the current phase angle of the moon.
+      * `msg.payload.illumination.phase.emoji` the emoji of the current phase of the moon.
+      * `msg.payload.illumination.phase.code` the code of the emoji for the current phase of the moon.
+      * `msg.payload.illumination.phase.name` the name of the current phase of the moon.
+  * `msg.payload.times` the moon times as object.
+    * `msg.payload.times.rise` the moon rise time.
+    * `msg.payload.times.set` the moon set time.
+    * `msg.payload.times.alwaysUp` boolean which is _true_ if the moon never rises/sets and is always above the horizon during the day.
+    * `msg.payload.times.alwaysDown` boolean which is _true_ if the moon is always below the horizon.
+  * `msg.payload.pos` array with a boolean of every defined limit of the azimuth, which is _true_ if the azimuth is inside the limit.
+  * `msg.payload.posChanged` boolean which is true if any of the defined limit of the azimuth has changed to the last calculation.
 
 ```json
 {
@@ -263,7 +267,7 @@ The node calculates the current sun position on any input message.
 }
 ```
 
-- **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.payload.posChanged` property of type _boolean_ which is true if the limit has changed since the last azimuth calculation.
+* **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.payload.posChanged` property of type _boolean_ which is true if the limit has changed since the last azimuth calculation.
 
 ### time-inject
 
@@ -279,39 +283,39 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 ![time-inject-settings](https://user-images.githubusercontent.com/12692680/57134518-b4fd2b00-6da6-11e9-891a-d62b271b1de3.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Payload** defines the payload of the message object send to the output
-- **Topic** defines the topic of the send message
-- **Time** An optional property that can be [configured](#times-definitions) when the inject node should emit a message on that timestamp.
-- **Offset** An optional property which is only available if an time is chosen. The offset can be a positive or negative and defines a time offset to the chosen time.
-- **Days** An optional property which is only available if an time is chosen. There can be defined on which days a msg should be emitted.
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Payload** defines the payload of the message object send to the output
+* **Topic** defines the topic of the send message
+* **Time** An optional property that can be [configured](#times-definitions) when the inject node should emit a message on that timestamp.
+* **Offset** An optional property which is only available if an time is chosen. The offset can be a positive or negative and defines a time offset to the chosen time.
+* **Days** An optional property which is only available if an time is chosen. There can be defined on which days a msg should be emitted.
 
-- **Property** _optional_ here can be defined a context property which must be of type boolean. If this property is true alternate time will be used.
-- **Alternate time** _optional_ defines an alternate start time which will be used if the property is true. This can be used for different times for example of holidays/weekend.
+* **Property** _optional_ here can be defined a [condition](#conditions) under which a alternate time should be used.
+* **Alternate time** _optional_ defines an alternate start time which will be used if the condition applies. This can be used for different times for example of holidays/weekend.
 
-- **Additional Inject on Start** If this checkbox is set the inject node can emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be useful for initializing any flow.
+* **Additional Inject on Start** If this checkbox is set the inject node can emit the message on Node-Red Start or on any deploy of this node. There can be defined a delay after the emit should be done. This can be useful for initializing any flow.
 
-- **Set additional** With this selection you can
-  - set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
-  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise.
-    - **set additional timestamp**:
+* **Set additional** With this selection you can
+  * set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
+  * for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise.
+    * **set additional timestamp**:
       !![time-inject-settings-addProp1](https://user-images.githubusercontent.com/12692680/57134519-b4fd2b00-6da6-11e9-843a-dd1d83555b8b.png)
-    - **set additional sun timestamp**:
+    * **set additional sun timestamp**:
       ![time-inject-settings-addProp2](https://user-images.githubusercontent.com/12692680/57134520-b4fd2b00-6da6-11e9-9832-a3d8beda4897.png)
-    - **possible formats of timestamp output**
-      - number - milliseconds UNIX timestamp
-      - string - ECMA-262
-      - string - local date and time
-      - string - local time
-      - string - UTC date and time
-      - string - ISO date and time
-      - string - YYYYMMDDHHMMSS
-      - string - YYYYMMDD.HHMMSS
-      - number - milliseconds since emit
-      - number - seconds since emit
-      - number - minutes since emit
-      - number - hour since emit
-      - as object
+    * **possible formats of timestamp output**
+      * number - milliseconds UNIX timestamp
+      * string - ECMA-262
+      * string - local date and time
+      * string - local time
+      * string - UTC date and time
+      * string - ISO date and time
+      * string - YYYYMMDDHHMMSS
+      * string - YYYYMMDD.HHMMSS
+      * number - milliseconds since emit
+      * number - seconds since emit
+      * number - minutes since emit
+      * number - hour since emit
+      * as object
 
 time-inject-settings-addProp1
 
@@ -339,31 +343,33 @@ A simple node that routes messages depending on the time. If the current time fa
 
 ![within-time-settings](https://user-images.githubusercontent.com/12692680/57134525-b62e5800-6da6-11e9-9946-2c6873592026.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
-  - **Start Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
-- **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
-  - **End Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
-- **Property** _optional_ here can be defined a boolean property. If it is true alternate start or and times will be used.
-- **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
-  - **Start time** alternate start time
-  - **Start Offset** offset for the alternate start time
-- **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the property is true. This can be used for different times for example of holidays.
-  - **End time** alternate end time
-  - **End Offset** offset for the alternate end time
-- **Status** here can be adjusted which status should be displayed under the node.
-  - this has the following possibilities:
-    - **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Start time** defines the start time of the time range with with different [configuration possibilities](#times-definitions)
+  * **Start Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **Start Time**. This will be useful for sun based times.
+* **End time** defines the end time of the time range with with different [configuration possibilities](#times-definitions)
+  * **End Offset** allows to define a positive or negative offset in *seconds*, *minutes* or *hours* to the given **End Time**. This will be useful for sun based times.
+
+* **Alternate start time** _optional_ defines an alternate start time of the time range which will be used if the [conditions](#conditions) matches. This can be used for different times for example of holidays.
+  * **Start time** alternate start time
+  * **Start Offset** offset for the alternate start time
+
+* **Alternate end time** _optional_ defines an alternate end time of the time range which will be used if the [conditions](#conditions) matches. This can be used for different times for example of holidays.
+  * **End time** alternate end time
+  * **End Offset** offset for the alternate end time
+
+* **Status** here can be adjusted which status should be displayed under the node.
+  * this has the following possibilities:
+    * **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
       ![within-time-status-error](https://user-images.githubusercontent.com/12692680/57134527-b62e5800-6da6-11e9-946a-677044d25655.png)
-    - **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
+    * **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
       ![within-time-status-time](https://user-images.githubusercontent.com/12692680/57134513-b4649480-6da6-11e9-9bb2-3acda84b8ef8.png)
-    - **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
+    * **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
       ![within-time-status-message-block](https://user-images.githubusercontent.com/12692680/57134528-b6c6ee80-6da6-11e9-90be-e3b15c2b2bff.png)
       if the message was pass through the timestamp of this message will be shown.
       ![within-time-status-message-send](https://user-images.githubusercontent.com/12692680/57134529-b6c6ee80-6da6-11e9-8c71-7245dda4b6ee.png)
-    - **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
-- **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
-- **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
+    * **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
+* **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
+* **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
 ### time-comp
 
@@ -383,18 +389,18 @@ A simple node that routes messages depending on the time. If the current time fa
 
 ![time-comp-settings](https://user-images.githubusercontent.com/12692680/57134515-b4fd2b00-6da6-11e9-9d04-0cafb0721ba8.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Input** defines the input parameter for the time stamp
-  - **parse format** defines the format for the input parameter, more information see [input parse formats](#input-parse-formats).
-  - **Offset** allows to define a positive or negative offset to the given **Input Time**.
-- **compare with** here can be defined various definitions of times to which the input time should be compared.
-  - **operator** Drop down to define operator
-  - **compare type** allows to define what parts of the time string should be compared. Default is a comparison of the complete timestamp. But it is possible to only compare a pat like the only the year.
-  - **time** defines where the time to which should be compared comes from
-  - **parse format** defines the format for the time to compare, more information see [input parse formats](#input-parse-formats).
-  - **Offset** allows to define a positive or negative offset to the given time.
-  - **limitation** here it is possible to additionally define a parameter. if defined this comparison will only be made if this parameter has the value "true".
-- **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Input** defines the input parameter for the time stamp
+  * **parse format** defines the format for the input parameter, more information see [input parse formats](#input-parse-formats).
+  * **Offset** allows to define a positive or negative offset to the given **Input Time**.
+* **compare with** here can be defined various definitions of times to which the input time should be compared.
+  * **operator** Drop down to define operator
+  * **compare type** allows to define what parts of the time string should be compared. Default is a comparison of the complete timestamp. But it is possible to only compare a pat like the only the year.
+  * **time** defines where the time to which should be compared comes from
+  * **parse format** defines the format for the time to compare, more information see [input parse formats](#input-parse-formats).
+  * **Offset** allows to define a positive or negative offset to the given time.
+  * **limitation** here it is possible to additionally define a parameter. if defined this comparison will only be made if the [conditions](#conditions) matches.
+* **result** allows to write the **Input time** to a parameter in a different format. Without defining any **compare with**, the node allows by only defining input and result parameter a simply time format conversation.
 
 ### time-span
 
@@ -414,22 +420,21 @@ A simple node that routes messages depending on the time. If the current time fa
 
 ![time-span-settings](https://user-images.githubusercontent.com/12692680/57134523-b595c180-6da6-11e9-8146-ce1d7a59792a.png)
 
-- **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
-- **Input 1** defines the first input parameter for the time span calculation
-  - **parse format** defines the format for the first input parameter, more information see [input parse formats](#input-parse-formats).
-  - **Offset** allows to define a positive or negative offset to the given **Input 1 Time**.
-- **Input 2** defines the second input parameter for the time span calculation
-  - **parse format** defines the format for the second input parameter, more information see [input parse formats](#input-parse-formats).
-  - **Offset** allows to define a positive or negative offset to the given **Input 2 Time**.
-- **compare with** here can be defined various time spams to which the time span between timestamp of input 1 and input 2 should be compared.
-  - **operator** Drop down to define operator for comparison
-  - **time** defines a number to which should be the timespan be compared
-  - **time type** the unit of the given time
-- **result** ** as result of an incoming message, data could be written to that destination. This could be a message property, a flow or a global context.
-  - **result value** defines the value which should be written to the result destination. Could be the timestamp, one of the Input times or any other time/data. For timestamp or times the output format or maybe an offset could be defined.
+* **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
+* **Input 1** defines the first input parameter for the time span calculation
+  * **parse format** defines the format for the first input parameter, more information see [input parse formats](#input-parse-formats).
+  * **Offset** allows to define a positive or negative offset to the given **Input 1 Time**.
+* **Input 2** defines the second input parameter for the time span calculation
+  * **parse format** defines the format for the second input parameter, more information see [input parse formats](#input-parse-formats).
+  * **Offset** allows to define a positive or negative offset to the given **Input 2 Time**.
+* **compare with** here can be defined various time spams to which the time span between timestamp of input 1 and input 2 should be compared.
+  * **operator** Drop down to define operator for comparison
+  * **time** defines a number to which should be the timespan be compared
+  * **time type** the unit of the given time
+* **result** ** as result of an incoming message, data could be written to that destination. This could be a message property, a flow or a global context.
+  * **result value** defines the value which should be written to the result destination. Could be the timestamp, one of the Input times or any other time/data. For timestamp or times the output format or maybe an offset could be defined.
 
 Without defining any comparison, the node allows by only defining inputs and result a simply timespan calculation.
-
 
 ### blind-control
 
@@ -445,10 +450,10 @@ The time definitions of the nodes has different configuration possibilities
 
 manual timestamps can be entered as one of the following formats:
 
-- `00:00 ... 23:59` 24h Format
-- `00:00:00 ... 23:59:00` 24h Format with seconds
-- `00:00pm ... 12:59pm` 12h Format
-- `00:00:00pm ... 12:59:00pm` 12h Format with seconds
+* `00:00 ... 23:59` 24h Format
+* `00:00:00 ... 23:59:00` 24h Format with seconds
+* `00:00pm ... 12:59pm` 12h Format
+* `00:00:00pm ... 12:59:00pm` 12h Format with seconds
 
 #### sun times
 
@@ -512,21 +517,21 @@ moon rise and moon set can be used
 
 any message, flow or global property which contain any of the following types:
 
-- Integer which is a [Unix Time Stamp](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16) representing the number of milliseconds since January 1, 1970, 00:00:00 UTC, with leap seconds ignored.
-- String value representing a valid JavaScript date-string.
+* Integer which is a [Unix Time Stamp](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16) representing the number of milliseconds since January 1, 1970, 00:00:00 UTC, with leap seconds ignored.
+* String value representing a valid JavaScript date-string.
 
 String as one of the following formats:
 
-- `00:00 ... 23:59` 24h Format
-- `00:00:00 ... 23:59:00` 24h Format with seconds
-- `00:00pm ... 12:59pm` 12h Format
-- `00:00:00pm ... 12:59:00pm` 12h Format with seconds
+* `00:00 ... 23:59` 24h Format
+* `00:00:00 ... 23:59:00` 24h Format with seconds
+* `00:00pm ... 12:59pm` 12h Format
+* `00:00:00pm ... 12:59:00pm` 12h Format with seconds
 
 **Offsets:**
 The start and end time can have an offset. This is specified in seconds,minutes or hours:
 
-- negative number brings the time forward. E.g. if the time is dusk and offset is -60 minutes, the start time will be 60 minutes before dusk.
-- positive number delays the time by the specified number
+* negative number brings the time forward. E.g. if the time is dusk and offset is -60 minutes, the start time will be 60 minutes before dusk.
+* positive number delays the time by the specified number
 
 ### input parse formats
 
@@ -534,28 +539,28 @@ Some nodes has the ability to get an input time out of different pre defined for
 
 The formats are:
 
-- **milliseconds UNIX timestamp** This is the default for Node-ed. Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
-- **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
-- **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
-- **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
-- **various** the system will try to parse different string formats
-- **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+* **milliseconds UNIX timestamp** This is the default for Node-ed. Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
+* **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
+* **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
+* **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
+* **various** the system will try to parse different string formats
+* **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
 
- Field        | Full Form          | Short Form
- -------------|--------------------|-----------------------
- Year         | yyyy (4 digits)    | yy (2 digits), y (2 or 4 digits)
- Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
- Month        | NNN (abbr.)        |
- Day of Month | dd (2 digits)      | d (1 or 2 digits)
- Day of Week  | EE (name)          | E (abbr.)
- Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
- Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
- Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
- Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
- Minute       | mm (2 digits)      | m (1 or 2 digits)
- Second       | ss (2 digits)      | s (1 or 2 digits)
- Millisecond  | ll (3 digits)      | l (1, 2 or 3 digits)
- AM/PM        | tt  (2 digits)     | t (1 or 2 digits)
+ | Field        | Full Form           | Short Form                       |
+ | ------------ | ------------------- | -------------------------------- |
+ | Year         | yyyy (4 digits)     | yy (2 digits), y (2 or 4 digits) |
+ | Month        | MMM (name or abbr.) | MM (2 digits), M (1 or 2 digits) |
+ | Month        | NNN (abbr.)         |
+ | Day of Month | dd (2 digits)       | d (1 or 2 digits)                |
+ | Day of Week  | EE (name)           | E (abbr.)                        |
+ | Hour (1-12)  | hh (2 digits)       | h (1 or 2 digits)                |
+ | Hour (0-23)  | HH (2 digits)       | H (1 or 2 digits)                |
+ | Hour (0-11)  | KK (2 digits)       | K (1 or 2 digits)                |
+ | Hour (1-24)  | kk (2 digits)       | k (1 or 2 digits)                |
+ | Minute       | mm (2 digits)       | m (1 or 2 digits)                |
+ | Second       | ss (2 digits)       | s (1 or 2 digits)                |
+ | Millisecond  | ll (3 digits)       | l (1, 2 or 3 digits)             |
+ | AM/PM        | tt  (2 digits)      | t (1 or 2 digits)                |
 
 ### output timestamp formats
 
@@ -563,77 +568,77 @@ For timestamp outputs some nodes has the ability to define the format of the tim
 
 The formats are:
 
-- **milliseconds UNIX timestamp** Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
-- **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
-- **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
-- **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
-- **local** is the java script output of date.toLocaleString()
-- **localLong** is the java script output of date.toString()
-- **localTime** is the java script output of date.toLocaleTimeString()
-- **localTimeLong** is the java script output of date.toTimeString()
-- **localDate** is the java script output of date.toLocaleDateString()
-- **localDateLong** is the java script output of date.toDateString()
-- **UTC** is the java script output of date.toUTCString()
-- **ISO** YYYY-MM-DDTHH:mm:ss.sssZ (output of date.toISOString())
-- **ms** the time in milliseconds between output and timestamp
-- **sec** the time in seconds between output and timestamp
-- **min** the time in minutes between output and timestamp
-- **hour** the time in hours between output and timestamp
-- **Day Name** the timestamps day in the format Monday, 22.12.
-- **Day in relative** the timestamps day in relative to output time in the format Today, 22.12.
-- **object** gives back an object for the timestamp with the following properties:
-  - **date** Java script Date object
-  - **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
-  - **timeUTCStr** string representation of the Time in UTC format
-  - **timeISOStr** string representation of the Time in ISO format
-  - **timeLocaleStr** the java script output of date.toLocaleString()
-  - **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
-  - **delay** the time in milliseconds between output and timestamp
-  - **delaySec** the time in seconds between output and timestamp
-- **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+* **milliseconds UNIX timestamp** Timestamps are a numeric representation of the time in milliseconds since 1970-01-01 UTC
+* **ECMA-262** YYYY-MM-DDTHH:mm:ss.sssZ - This is the default toString output of JavaScript. This is a simplification of the ISO 8601 Extended Format.
+* **YYYYMMDDHHMMSS** is a number of the format YYYYMMDDHHMMSS.
+* **YYYYMMDD.HHMMSS** is a number of the format YYYYMMDD.HHMMSS.
+* **local** is the java script output of date.toLocaleString()
+* **localLong** is the java script output of date.toString()
+* **localTime** is the java script output of date.toLocaleTimeString()
+* **localTimeLong** is the java script output of date.toTimeString()
+* **localDate** is the java script output of date.toLocaleDateString()
+* **localDateLong** is the java script output of date.toDateString()
+* **UTC** is the java script output of date.toUTCString()
+* **ISO** YYYY-MM-DDTHH:mm:ss.sssZ (output of date.toISOString())
+* **ms** the time in milliseconds between output and timestamp
+* **sec** the time in seconds between output and timestamp
+* **min** the time in minutes between output and timestamp
+* **hour** the time in hours between output and timestamp
+* **Day Name** the timestamps day in the format Monday, 22.12.
+* **Day in relative** the timestamps day in relative to output time in the format Today, 22.12.
+* **object** gives back an object for the timestamp with the following properties:
+  * **date** Java script Date object
+  * **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
+  * **timeUTCStr** string representation of the Time in UTC format
+  * **timeISOStr** string representation of the Time in ISO format
+  * **timeLocaleStr** the java script output of date.toLocaleString()
+  * **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
+  * **delay** the time in milliseconds between output and timestamp
+  * **delaySec** the time in seconds between output and timestamp
+* **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
 
-|placeholder|Description|
-|--- |--- |
-|d|Day of the month as digits; no leading zero for single-digit days.|
-|dd|Day of the month as digits; leading zero for single-digit days.|
-|ddd|Day of the week as a three-letter abbreviation. (same as E)|
-|dddd|Day of the week as its full name.  (same as EE)|
-|E|Day of the week as a three-letter abbreviation.|
-|EE|Day of the week as its full name.|
-|M|Month as digits; no leading zero for single-digit months.|
-|MM|Month as digits; leading zero for single-digit months.|
-|MMM|Month as a three-letter abbreviation.|
-|MMMM|Month as its full name.|
-|yy|Year as last two digits; leading zero for years less than 10.|
-|yyyy|Year represented by four digits.|
-|h|Hours; no leading zero for single-digit hours (12-hour clock 1-12).|
-|hh|Hours; leading zero for single-digit hours (12-hour clock 01-12).|
-|H|Hours; no leading zero for single-digit hours (24-hour clock  0-23).|
-|HH|Hours; leading zero for single-digit hours (24-hour clock 00-23).|
-|k|Hours; no leading zero for single-digit hours (12-hour clock 0-11).|
-|kk|Hours; leading zero for single-digit hours (12-hour clock  00-11).|
-|K|Hours; no leading zero for single-digit hours (24-hour clock 1-24).|
-|KK|Hours; leading zero for single-digit hours (24-hour clock 01-24).|
-|m|Minutes; no leading zero for single-digit minutes.|
-|mm|Minutes; leading zero for single-digit minutes.|
-|s|Seconds; no leading zero for single-digit seconds.|
-|ss|Seconds; leading zero for single-digit seconds.|
-|l|Milliseconds; no leading zeros for single-digit|
-|ll|Milliseconds; 1 leading zero for single-digit; no for 3 digits|
-|lll|Milliseconds; 2 leading zero for single-digit; 2 for 2 digits|
-|L|Milliseconds divided by 100 round to 0; no leading zero|
-|LL|Milliseconds divided by 10 round to 0; leading zero for single-digit|
-|t|Lowercase, single-character time marker string: a or p.|
-|tt|Lowercase, two-character time marker string: am or pm.|
-|T|Uppercase, single-character time marker string: A or P.|
-|TT|Uppercase, two-character time marker string: AM or PM.|
-|Z|US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500|
-|o|GMT/UTC timezone offset, e.g. -0500 or +0230.|
-|S|The date's ordinal suffix (st, nd, rd, or th). Works well with d.|
-|x|difference of days from timestamp day to output day|
-|xx|difference of days from timestamp day to output day with relative names for today, tomorrow, ...|
-|'…' or "…"|Literal character sequence. Surrounding quotes are removed.|
-|UTC:|Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed.|
+| placeholder | Description                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| d           | Day of the month as digits; no leading zero for single-digit days.                                                                                            |
+| dd          | Day of the month as digits; leading zero for single-digit days.                                                                                               |
+| ddd         | Day of the week as a three-letter abbreviation. (same as E)                                                                                                   |
+| dddd        | Day of the week as its full name.  (same as EE)                                                                                                               |
+| E           | Day of the week as a three-letter abbreviation.                                                                                                               |
+| EE          | Day of the week as its full name.                                                                                                                             |
+| M           | Month as digits; no leading zero for single-digit months.                                                                                                     |
+| MM          | Month as digits; leading zero for single-digit months.                                                                                                        |
+| MMM         | Month as a three-letter abbreviation.                                                                                                                         |
+| MMMM        | Month as its full name.                                                                                                                                       |
+| yy          | Year as last two digits; leading zero for years less than 10.                                                                                                 |
+| yyyy        | Year represented by four digits.                                                                                                                              |
+| h           | Hours; no leading zero for single-digit hours (12-hour clock 1-12).                                                                                           |
+| hh          | Hours; leading zero for single-digit hours (12-hour clock 01-12).                                                                                             |
+| H           | Hours; no leading zero for single-digit hours (24-hour clock  0-23).                                                                                          |
+| HH          | Hours; leading zero for single-digit hours (24-hour clock 00-23).                                                                                             |
+| k           | Hours; no leading zero for single-digit hours (12-hour clock 0-11).                                                                                           |
+| kk          | Hours; leading zero for single-digit hours (12-hour clock  00-11).                                                                                            |
+| K           | Hours; no leading zero for single-digit hours (24-hour clock 1-24).                                                                                           |
+| KK          | Hours; leading zero for single-digit hours (24-hour clock 01-24).                                                                                             |
+| m           | Minutes; no leading zero for single-digit minutes.                                                                                                            |
+| mm          | Minutes; leading zero for single-digit minutes.                                                                                                               |
+| s           | Seconds; no leading zero for single-digit seconds.                                                                                                            |
+| ss          | Seconds; leading zero for single-digit seconds.                                                                                                               |
+| l           | Milliseconds; no leading zeros for single-digit                                                                                                               |
+| ll          | Milliseconds; 1 leading zero for single-digit; no for 3 digits                                                                                                |
+| lll         | Milliseconds; 2 leading zero for single-digit; 2 for 2 digits                                                                                                 |
+| L           | Milliseconds divided by 100 round to 0; no leading zero                                                                                                       |
+| LL          | Milliseconds divided by 10 round to 0; leading zero for single-digit                                                                                          |
+| t           | Lowercase, single-character time marker string: a or p.                                                                                                       |
+| tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
+| T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
+| TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
+| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
+| o           | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
+| S           | The date's ordinal suffix (st, nd, rd, or th). Works well with d.                                                                                             |
+| x           | difference of days from timestamp day to output day                                                                                                           |
+| xx          | difference of days from timestamp day to output day with relative names for today, tomorrow, ...                                                              |
+| '…' or "…"  | Literal character sequence. Surrounding quotes are removed.                                                                                                   |
+| UTC:        | Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed. |
 
 ### output timespan formats
 
@@ -641,35 +646,61 @@ For timespan output the calc-timespan node has the ability to define the format 
 
 The formats are:
 
-- **ms** timespan im milliseconds (integer value)
-- **sec**, **min**,..., **month**, **years** timespan as a floating point number or as a integer number of the the chosen unit.
-- **object** gives back an object for the timespan with the following properties:
-  - **date** Java script Date object
-  - **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
-  - **timeUTCStr** string representation of the Time in UTC format
-  - **timeISOStr** string representation of the Time in ISO format
-  - **timeLocaleStr** the java script output of date.toLocaleString()
-  - **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
-  - **delay** the time in milliseconds between output and timestamp
-  - **delaySec** the time in seconds between output and timestamp
-- **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+* **ms** timespan im milliseconds (integer value)
+* **sec**, **min**,..., **month**, **years** timespan as a floating point number or as a integer number of the the chosen unit.
+* **object** gives back an object for the timespan with the following properties:
+  * **date** Java script Date object
+  * **ts** number - Unix timestamp (milliseconds since 1970-01-01 UTC)
+  * **timeUTCStr** string representation of the Time in UTC format
+  * **timeISOStr** string representation of the Time in ISO format
+  * **timeLocaleStr** the java script output of date.toLocaleString()
+  * **timeLocaleTimeStr** the java script output of date.toLocaleTimeString()
+  * **delay** the time in milliseconds between output and timestamp
+  * **delaySec** the time in seconds between output and timestamp
+* **other** there you can define a format like "yyyy-MM-dd HH:mm:ss" of the given time. Possible format placeholders are:
+
+### Conditions
+
+A condition usually consists of a *property*, an *operator* and depending on the operator, a *threshold*.
+
+*property*, an *operator*:
+
+![condition-1](https://user-images.githubusercontent.com/12692680/57455030-81207a80-726a-11e9-8803-eb7e526950b4.png)
+
+*property*, *operator* and *threshold*:
+![condition-2](https://user-images.githubusercontent.com/12692680/57455031-81b91100-726a-11e9-9987-d53c201f79b0.png)
+
+The operators are:
+
+* `is true` - the value of the *property* must be of type boolean and the condition is fulfilled if the value is `true`
+* `is false` - the value of the *property* must be of type boolean and the condition is fulfilled if the value is `false`
+* `is null` - the value of the *property* must be `undefined` or `null`
+* `is not null` - the value of the *property* can have an obscure value that is not `undefined` or `null`
+* `is empty` - the condition is fulfilled if the *property* is an empty `string`, `array`, `buffer` or an object with no properties
+* `is not empty` - the condition is fulfilled if the *property* is an  `string`, `array`, `buffer` which is not empty or an object which has properties
+* `true expression` - the condition is fulfilled if the *property* is a number and greater `0` or a Boolean which is `true` or a string containing one of the following values `true`, `yes`, `on`, `ja`. If the property has a string `switchon` then this would evaluate to true, because `on` is part of the string.
+* `false expression` - the condition is fulfilled if the *property* is a number and less than or equal `0` or a Boolean which is `false` or a string containing one of the following values `false`, `no`, `off`, `nein`.  If the property has a string `nonsens` then this would evaluate to true, because `no` is part of the string.
+* `not true expression` - the condition is fulfilled if the *property* is a number and **not** greater `0` or a Boolean which is **not** `true` or a string containing **none** of the following values `true`, `yes`, `on`, `ja`. It the property is a number and **NaN** then this would evaluate to true.
+* `false expression` - the condition is fulfilled if the *property* is a number and **not** less than or equal `0` or a Boolean which is **not** `false` or a string containing **none** of the following values `false`, `no`, `off`, `nein`.
+* `<`, `<=`, `==`, `!=`, `>`, `>=` - compares the value of the *property* with a *threshold*. Typically this makes only sense if the *property* and the *threshold* are numbers.
+* `contain` - the condition is fulfilled if the *property* contains the string defined in the *threshold*.
+* `containSome` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as only one of the seperated parts of the *threshold* string is is included in the *property* value.
+* `containEvery` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as all of the seperated parts of the *threshold* string are included in the *property* value.
+
+A JSONata expression in the *property* must be always a boolean with value true, in this case the operator can not be chosen.
 
 ## TODO
 
-- [ ] add possibility to select input/output timezone
-  - [ ] select auto add get info from getTimezoneOffset
-  - [ ] solve problem of DST
-- [ ] within-time
-  - [ ] add result like other nodes
-  - [ ] remove status configuration, always show start and end
-  - [ ] offset als Typed Input mit Wahl des offset: NA, num, msg, flow, global
+* [ ] add possibility to select input/output timezone
+  * [ ] select auto add get info from getTimezoneOffset
+  * [ ] solve problem of DST
 
 ## Bugs and Feedback
 
 For bugs, questions and discussions please use the
 [GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
 
-### :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
+:moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
 Even for those that don't have the technical knowhow to help developing on there are ways to support development. So if you want to donate some money please feel free to send money via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN).
 
@@ -690,5 +721,5 @@ specific language governing permissions and limitations under the License.
 
 this node is published also here:
 
-- [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
-- [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)
+* [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
+* [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)

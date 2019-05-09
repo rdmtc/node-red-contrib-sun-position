@@ -69,11 +69,11 @@
         <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
-        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
-        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
     </div>
     <div class="form-row form-row-sunControlActive hidden block-noindent">
@@ -108,23 +108,26 @@
         <input type="hidden" id="node-input-blindPosMaxType">
     </div>
     <hr class="form-row-sunControlActive hidden" >
-    <!-- #region weather ######################################################################## -->
-    <div class="form-row form-row-sunControlActive hidden block-noindent" data-i18n="[title]blind-control.placeholder.cloudValue">
-        <label for="node-input-cloudValue"><i class="fa fa-cloud"></i> <span data-i18n="blind-control.label.cloudValue"></span></label>
-        <input type="text" id="node-input-cloudValue" class="" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
-        <input type="hidden" id="node-input-cloudValueType">
-        <select id="node-input-cloudCompare" class="node-input-addOn">
+    <!-- #region oversteering ######################################################################## -->
+    <div class="form-row form-row-sunControlActive hidden block-noindent">
+        <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteerValue"><i class="fa fa-superpowers"></i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
+        <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteerValueType">
+        <select id="node-input-oversteerCompare" class="node-input-addOn">
         </select>
     </div>
-    <div class="form-row hidden row-cloudThreshold block-indent1-noadd" data-i18n="[title]blind-control.placeholder.cloudThreshold">
-        <label for="node-input-cloudThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.cloudThreshold"></span></label>
-        <input type="text" id="node-input-cloudThreshold" data-i18n="[placeholder]blind-control.placeholder.cloudThreshold"/>
-        <input type="hidden" id="node-input-cloudThresholdType">
+    <div class="form-row hidden row-oversteerThreshold block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteerThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteerThreshold"></span></label>
+        <input type="text" id="node-input-oversteerThreshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteerThresholdType">
     </div>
-    <div class="form-row hidden row-cloudBlindPos block-indent1" data-i18n="[title]blind-control.placeholder.cloudValue">
-        <label for="node-input-cloudBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.cloudBlindPos"></span></label>
-        <input type="text" id="node-input-cloudBlindPos" data-i18n="[placeholder]blind-control.placeholder.cloudValue"/>
-        <input type="hidden" id="node-input-cloudBlindPosType">
+    <div class="form-row hidden row-oversteerBlindPos block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
+        <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteerBlindPosType">
     </div>
     <hr>
     <!-- #region Enhanced ######################################################################## -->
@@ -422,44 +425,44 @@
                 }
             },
             // #endregion window settings
-            // #region weather settings
-            cloudValue: {
+            // #region oversteering settings
+            oversteerValue: {
                 value: '',
                 required: false,
                 validate: function (v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            RED.validators.typedInput('cloudValueType')(v);
+                            RED.validators.typedInput('oversteerValueType')(v);
                 }
             },
-            cloudValueType: {
+            oversteerValueType: {
                 value: 'none'
             },
-            cloudCompare: {
+            oversteerCompare: {
                 value: 'gte'
             },
-            cloudThreshold: {
+            oversteerThreshold: {
                 value: '',
                 validate: function (v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'cloudValueType') === 'none') ||
-                            RED.validators.typedInput('cloudThresholdType')(v);
+                            (getVal(this, 'oversteerValueType') === 'none') ||
+                            RED.validators.typedInput('oversteerThresholdType')(v);
                 }
             },
-            cloudThresholdType: {
+            oversteerThresholdType: {
                 value: 'num'
             },
-            cloudBlindPos: {
+            oversteerBlindPos: {
                 value: 'open (max)',
                 validate: function (v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'cloudValueType') === 'none') ||
-                            RED.validators.typedInput('cloudBlindPosType')(v); // validateBlindPos(this, v);
+                            (getVal(this, 'oversteerValueType') === 'none') ||
+                            RED.validators.typedInput('oversteerBlindPosType')(v); // validateBlindPos(this, v);
                 }
             },
-            cloudBlindPosType: {
+            oversteerBlindPosType: {
                 value: 'levelFixed'
             }
-            // #endregion weather settings
+            // #endregion oversteering settings
         },
         outputLabels() {
             return [this._('blind-control.label.output1'), this._('blind-control.label.output2')];
@@ -490,9 +493,10 @@
         oneditprepare() {
             this.outputs = this.outputs || 1;
             this.sunControlMode = this.sunControlMode || 0;
+            const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeProp */
                 $('.form-row-showLater').show();
                 // #region initialize
                 const types = getTypes(node);
@@ -667,7 +671,7 @@
                             type: 'text'
                         }).appendTo(row1).typedInput({
                             default: types.Unlimited.value,
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.DayOfMonth]
                         });
                         const validOperatorField = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -685,8 +689,8 @@
                             id: 'node-input-rule-condOpB' + containerIndex,
                             type: 'text'
                         }).appendTo(row2).typedInput({
-                            default: 'str',
-                            types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                            default: 'num',
+                            types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                         });
                         // #endregion row2
                         // #region row3 - time -- lbl - [from-to] - [start - time]
@@ -716,7 +720,7 @@
                         }).appendTo(row4).typedInput({
                             default: types.Undefined.value,
                             types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'jsonata']
-                        });
+                        }).change(() => { timeField.change(); });
                         const multiplierField = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
@@ -742,14 +746,23 @@
                             } else {
                                 row4.hide(); // offset
                             }
+                            getTimeProp(d => {
+                                console.log(typeof d.value);
+                                if (d.value) {
+                                    const dv = new Date(d.value);
+                                    row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
+                                }
+                            }, $nodeConfig.val(), opType, timeField.typedInput('value'), offsetField.typedInput('type'), offsetField.typedInput('value'), multiplierField.val());
                             resizeContainer();
                         });
                         validOperandAField.change(() => {
                             const propType = validOperandAField.typedInput('type');
-                            if (propType === 'none') {
+                            if (propType === 'none' ||
+                                propType === types.DayOfMonth.value) {
+                                validOperatorField.val(selFields.comparator[0].id); // only true is valid for DayOfMonth
                                 validOperatorField.hide();
                                 row2.hide(); // condOpB
-                            } else if (propType === 'jsonata') {
+                            } else if ( propType === 'jsonata') {
                                 validOperatorField.show();
                                 validOperatorField.attr('disabled', true);
                                 validOperatorField.val(selFields.comparator[0].id); // only true is valid for jsonata
@@ -782,17 +795,17 @@
                         validOperatorField.change(() => { validOperandAField.change(); });
                         // setting defaultValues
                         timeOperatorField.val(data.timeOp || 0);
-                        timeField.typedInput('value', (data.timeValue || ''));
-                        timeField.typedInput('type', (data.timeType || types.TimeEntered.value));
-                        levelField.typedInput('value', (data.levelValue || getDefLevel(data.levelTyp, data.levelValue,'closed (min)')));
-                        levelField.typedInput('type', (data.levelType || types.LevelFix.value));
-                        offsetField.typedInput('value', data.offsetValue || '');
-                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        const setTV = (f,t,v) => {
+                            f.typedInput('value', v);
+                            f.typedInput('type', t);
+                            f.typedInput('validate');
+                        };
+                        setTV(timeField, (data.timeType || types.TimeEntered.value), (data.timeValue || ''));
+                        setTV(levelField, (data.levelType || types.LevelFix.value), (data.levelValue || getDefLevel(data.levelTyp, data.levelValue, 'closed (min)')), (data.timeType || types.TimeEntered.value));
+                        setTV(offsetField, (data.offsetType || types.Undefined.value), (data.offsetValue || ''));
                         multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        validOperandAField.typedInput('value', data.validOperandAValue || '');
-                        validOperandAField.typedInput('type', data.validOperandAType || types.Unlimited.value);
-                        validOperandBField.typedInput('value', data.validOperandBValue || '');
-                        validOperandBField.typedInput('type', data.validOperandBType || 'num');
+                        setTV(validOperandAField, (data.validOperandAType || types.Unlimited.value), (data.validOperandAValue || ''));
+                        setTV(validOperandBField, (data.validOperandBType || 'num'), (data.validOperandBValue || ''));
                         validOperatorField.val(data.validOperator || selFields.comparator[0].id);
                         resizeRule(containerRow);
                         // resizeContainer();
@@ -837,10 +850,10 @@
                     } else {
                         $('.form-row-sunControlActive').hide();
                         $('.form-row-sunControlRestriction').hide();
-                        $('.row-cloudThreshold').hide();
-                        $('.row-cloudBlindPos').hide();
+                        $('.row-oversteerThreshold').hide();
+                        $('.row-oversteerBlindPos').hide();
                     }
-                    $('#node-input-cloudValue').change();
+                    $('#node-input-oversteerValue').change();
                 });
                 setupTInput(node, {
                     typeProp: 'blindPosMinType',
@@ -859,35 +872,35 @@
                     types: [types.LevelFix, types.LevelEntered]
                 });
                 // #endregion sun
-                // #region weather
+                // #region oversteering
                 setupTInput(node, {
-                    typeProp: 'cloudValueType',
-                    valueProp: 'cloudValue',
+                    typeProp: 'oversteerValueType',
+                    valueProp: 'oversteerValue',
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
                     onChange: (_type, _value) => {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
-                        const cloudValueType = $('#node-input-cloudValue').typedInput('type');
-                        if ((cloudValueType === types.Undefined.value) || (sunControlMode <= 0)) {
-                            $('.row-cloudBlindPos').hide();
-                            $('#node-input-cloudCompare').hide();
-                            $('.row-cloudThreshold').hide();
-                            $('#node-input-cloudValue').typedInput('width','calc(100% - 110px)');
-                        } else if (cloudValueType === 'jsonata') {
-                            $('.row-cloudBlindPos').show();
-                            $('#node-input-cloudCompare').show();
-                            $('#node-input-cloudCompare').attr('disabled', true);
-                            $('#node-input-cloudCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                            $('.row-cloudThreshold').hide();
-                            $('#node-input-cloudValue').typedInput('width','calc(100% - 220px)');
+                        const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
+                        if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            $('.row-oversteerBlindPos').hide();
+                            $('#node-input-oversteerCompare').hide();
+                            $('.row-oversteerThreshold').hide();
+                            $('#node-input-oversteerValue').typedInput('width','calc(100% - 110px)');
+                        } else if (oversteerValueType === 'jsonata') {
+                            $('.row-oversteerBlindPos').show();
+                            $('#node-input-oversteerCompare').show();
+                            $('#node-input-oversteerCompare').attr('disabled', true);
+                            $('#node-input-oversteerCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('.row-oversteerThreshold').hide();
+                            $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
                         } else {
-                            $('.row-cloudBlindPos').show();
-                            $('#node-input-cloudCompare').show();
-                            $('#node-input-cloudCompare').attr('disabled', false);
-                            $('#node-input-cloudValue').typedInput('width','calc(100% - 220px)');
-                            const condOp = $('#node-input-cloudCompare').val();
+                            $('.row-oversteerBlindPos').show();
+                            $('#node-input-oversteerCompare').show();
+                            $('#node-input-oversteerCompare').attr('disabled', false);
+                            $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
+                            const condOp = $('#node-input-oversteerCompare').val();
                             let operatorCount = 1;
                             // console.log(selFields.comparator);
                             const fields = selFields.comparator;
@@ -900,37 +913,37 @@
                                 }
                             }
                             if (operatorCount > 1) {
-                                $('.row-cloudThreshold').show(); // condOpB
+                                $('.row-oversteerThreshold').show(); // condOpB
                             } else {
-                                $('.row-cloudThreshold').hide(); // condOpB
+                                $('.row-oversteerThreshold').hide(); // condOpB
                             }
                         }
-                        $('#node-input-cloudThreshold').change();
-                        $('#node-input-cloudBlindPos').change();
+                        $('#node-input-oversteerThreshold').change();
+                        $('#node-input-oversteerBlindPos').change();
                     }
                 });
 
-                const cloudCompareField = $('#node-input-cloudCompare');
-                appendOptions(node, cloudCompareField, 'comparator');
-                cloudCompareField.val(node.cloudCompare || 'gte');
-                cloudCompareField.change(() => { $('#node-input-cloudValue').change(); });
+                const oversteerCompareField = $('#node-input-oversteerCompare');
+                appendOptions(node, oversteerCompareField, 'comparator');
+                oversteerCompareField.val(node.oversteerCompare || 'gte');
+                oversteerCompareField.change(() => { $('#node-input-oversteerValue').change(); });
                 setupTInput(node, {
-                    typeProp: 'cloudThresholdType',
-                    valueProp: 'cloudThreshold',
+                    typeProp: 'oversteerThresholdType',
+                    valueProp: 'oversteerThreshold',
                     width: 'calc(100% - 120px)',
                     defaultType: 'num',
                     defaultValue: '',
-                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                 });
                 setupTInput(node, {
-                    typeProp: 'cloudBlindPosType',
-                    valueProp: 'cloudBlindPos',
+                    typeProp: 'oversteerBlindPosType',
+                    valueProp: 'oversteerBlindPos',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: getDefLevel(node.cloudBlindPosType, node.cloudBlindPos, 'open (max)'),
+                    defaultValue: getDefLevel(node.oversteerBlindPosType, node.oversteerBlindPos, 'open (max)'),
                     types: [types.LevelFix, types.LevelEntered]
                 });
-                // #endregion weather
+                // #endregion oversteering
                 // #region Enhanced settings
                 $('.spinner-noLimit').spinner();
                 $('.spinner-angle').spinner({
