@@ -164,13 +164,14 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getMoonTime(now, value, offset, multiplier, next, days) {
-            // this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+            this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = this._moonTimesCheck( now);
+            this.debug('getMoonTime moonTimesToday=' + util.inspect(this.moonTimesToday));
             result.value = hlp.addOffset(new Date(this.moonTimesToday[value]), offset, multiplier);
             if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                 if (next === 1) {
                     result.value = hlp.addOffset(new Date(this.moonTimesTomorow[value]), offset, multiplier);
-                    // this.debug('Moon Times tomorrow =' + util.inspect(this.moonTimesTomorrow));
+                    this.debug('Moon Times tomorrow =' + util.inspect(this.moonTimesTomorow));
                 } else if (next > 1) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(next);
@@ -192,7 +193,9 @@ module.exports = function (RED) {
                     // this.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                 }
             }
-
+            if (isNaN(result.value)) {
+                result.error = 'No valid time for moon ' + value + ' found!';
+            }
             // this.debug('getMoonTime result' + util.inspect(result));
             return result;
         }
@@ -779,8 +782,6 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
-        console.log('getting request');
-        console.log(req);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
@@ -801,7 +802,11 @@ module.exports = function (RED) {
                 }
                 case 'getTimeProp': {
                     try {
+                        console.log('getting request');
+                        console.log(req.query);
                         obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        console.log('request result');
+                        console.log(obj);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

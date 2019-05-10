@@ -4,10 +4,10 @@
             "time-span": "time-span",
             "compare": "vergleich",
             "operand1": "Eingangswert 1",
-            "operand1Format": "parse format",
+            "operand1Format": "Eingangsformat",
             "operand1Offset": "Offset",
             "operand2": "Eingangswert 2",
-            "operand2Format": "parse format",
+            "operand2Format": "Eingangsformat",
             "operand2Offset": "Offset",
             "operator":"Berechnung",
             "operatorContainer": "Vergleich der Zeitspanne zwischen den Eingangswerten",
@@ -18,8 +18,15 @@
             "result1Offset": "Offset"
         },
         "placeholder": {
-            "name": "Name",
-            "offset": "0"
+            "operand": "Eingangswert",
+            "operandFormat": "Eingangsformat",
+            "operandOffset": "Offset",
+            "operator": "calculation",
+            "result": "Ergebnis",
+            "resultValue": "Wert",
+            "resultTSFormat": "Ausgabeformat",
+            "resultFormat": "Ausgabeformat",
+            "resultOffset": "Offset"
         }
     }
 }

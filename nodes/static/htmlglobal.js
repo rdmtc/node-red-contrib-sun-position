@@ -225,7 +225,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
-            hasValue: false,
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
                 'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
                 'civilDusk', 'blueHourDuskEnd', 'amateurDusk', 'astronomicalDusk', 'nadir']
@@ -234,7 +233,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
-            hasValue: false,
             options: ['rise', 'set']
         },
         SunCalc: {

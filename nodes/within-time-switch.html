@@ -4,7 +4,7 @@
         <input type="text" id="node-input-positionConfig">
     </div>
     <hr>
-    <div class="form-row block-noindent">
+    <div class="form-row block-noindent" id="node-input-startTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.startTime">
         <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
         <input type="text" id="node-input-startTime" />
         <input type="hidden" id="node-input-startTimeType">
@@ -16,7 +16,7 @@
         <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
 
-    <div class="form-row block-noindent" data-i18n="[title]within-time-switch.placeholder.endTime">
+    <div class="form-row block-noindent" id="node-input-endTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTime">
         <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
         <input type="text" id="node-input-endTime" data-i18n="[placeholder]within-time-switch.label.endTime"/>
         <input type="hidden" id="node-input-endTimeType">
@@ -44,7 +44,7 @@
         <input type="text" id="node-input-propertyStartThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyStartThreshold">
         <input type="hidden" id="node-input-propertyStartThresholdType">
     </div>
-    <div class="form-row block-indent1 alternate-time-start hidden" data-i18n="[title]time-inject.placeholder.startTimeAlt">
+    <div class="form-row block-indent1 alternate-time-start hidden" id="node-input-startTimeAlt-div" data-i18n="[titleOrg]time-inject.placeholder.startTimeAlt">
         <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
         <input type="text" id="node-input-startTimeAlt" data-i18n="[placeholder]time-inject.placeholder.startTimeAlt"/>
         <input type="hidden" id="node-input-startTimeAltType">
@@ -67,7 +67,7 @@
         <input type="text" id="node-input-propertyEndThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyEndThreshold">
         <input type="hidden" id="node-input-propertyEndThresholdType">
     </div>
-    <div class="form-row block-indent1 alternate-time-end hidden" data-i18n="[title]time-inject.placeholder.endTimeAlt">
+    <div class="form-row block-indent1 alternate-time-end hidden" id="node-input-endTimeAlt-div data-i18n="[titleOrg]time-inject.placeholder.endTimeAlt">
         <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
         <input type="text" id="node-input-endTimeAlt" data-i18n="[placeholder]time-inject.placeholder.endTimeAlt"/>
         <input type="hidden" id="node-input-endTimeAltType">
@@ -503,8 +503,9 @@
             });
 
             const node = this;
+            const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getTypes getSelectFields appendOptions setupTInput initializeValue */
+                /* global getTypes getSelectFields appendOptions setupTInput initializeValue getTimeProp */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
@@ -528,7 +529,7 @@
                 }
                 // #endregion initialize
                 // #region timeStart
-                const startTimeTypeField = setupTInput(node, {
+                const $startTime = setupTInput(node, {
                     typeProp: 'startTimeType',
                     valueProp: 'startTime',
                     width: 'calc(100% - 110px)',
@@ -548,6 +549,23 @@
                         } else {
                             $('.msg-start-out-row').show();
                         }
+                    },
+                    onChange: (_type, _value) => {
+                        getTimeProp(d => {
+                            const $div = $('#node-input-startTime-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d.value) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, $nodeConfig.val(),
+                        $('#node-input-startTime').typedInput('type'),
+                        $('#node-input-startTime').typedInput('value'),
+                        $('#node-input-startOffset').typedInput('type'),
+                        $('#node-input-startOffset').typedInput('value'),
+                        $('#node-input-startOffsetMultiplier').val());
                     }
                 });
 
@@ -570,7 +588,7 @@
                 }).change();
                 // #endregion timeStart
                 // #region timeEnd
-                const endTimeTypeField = setupTInput(node, {
+                const $endTime = setupTInput(node, {
                     typeProp: 'endTimeType',
                     valueProp: 'endTime',
                     width: 'calc(100% - 110px)',
@@ -590,6 +608,23 @@
                         } else {
                             $('.msg-end-out-row').show();
                         }
+                    },
+                    onChange: (_type, _value) => {
+                        getTimeProp(d => {
+                            const $div = $('#node-input-endTime-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d.value) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, $nodeConfig.val(),
+                        $('#node-input-endTime').typedInput('type'),
+                        $('#node-input-endTime').typedInput('value'),
+                        $('#node-input-endOffset').typedInput('type'),
+                        $('#node-input-endOffset').typedInput('value'),
+                        $('#node-input-endOffsetMultiplier').val());
                     }
                 });
 
@@ -612,7 +647,7 @@
                 }).change();
                 // #endregion timeEnd
                 // #region propertyStart
-                const propertyStartTypeField = setupTInput(node, {
+                const $propertyStart = setupTInput(node, {
                     typeProp: 'propertyStartType',
                     valueProp: 'propertyStart',
                     width: 'calc(100% - 110px)',
@@ -642,7 +677,6 @@
                             $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
                             const condOp = propCompare.val();
                             let operatorCount = 1;
-                            // console.log(selFields.comparator);
                             const fields = selFields.comparator;
                             const fieldsLength = fields.length;
                             for (let index = 0; index < fieldsLength; index++) {
@@ -662,10 +696,10 @@
                         $('#node-input-propertyStartThreshold').change();
                     }
                 });
-                const propertyStartCompareField = $('#node-input-propertyStartCompare');
-                appendOptions(node, propertyStartCompareField, 'comparator');
-                propertyStartCompareField.val(node.propertyStartCompare || 'true');
-                propertyStartCompareField.change(() => { $('#node-input-propertyStart').change(); });
+                const $propertyStartCompare = $('#node-input-propertyStartCompare');
+                appendOptions(node, $propertyStartCompare, 'comparator');
+                $propertyStartCompare.val(node.propertyStartCompare || 'true');
+                $propertyStartCompare.change(() => { $('#node-input-propertyStart').change(); });
                 setupTInput(node, {
                     typeProp: 'propertyStartThresholdType',
                     valueProp: 'propertyStartThreshold',
@@ -690,8 +724,25 @@
                         } else {
                             $('.alternate-time-start-offset').show();
                         }
+                    },
+                    onChange: (_type, _value) => {
+                        getTimeProp(d => {
+                            const $div = $('#node-input-startTimeAlt-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d.value) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, $nodeConfig.val(),
+                        $('#node-input-startTimeAlt').typedInput('type'),
+                        $('#node-input-startTimeAlt').typedInput('value'),
+                        $('#node-input-startTimeAltOffset').typedInput('type'),
+                        $('#node-input-startTimeAltOffset').typedInput('value'),
+                        $('#node-input-startTimeAltOffsetMultiplier').val());
                     }
-                }).change();
+                });
 
                 node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
                 setupTInput(node, {
@@ -712,7 +763,7 @@
                 }).change();
                 // #endregion timeAltStart
                 // #region propertyEnd
-                const propertyEndTypeField = setupTInput(node, {
+                const $propertyEnd = setupTInput(node, {
                     typeProp: 'propertyEndType',
                     valueProp: 'propertyEnd',
                     width: 'calc(100% - 110px)',
@@ -743,7 +794,6 @@
                             $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
                             const condOp = propCompare.val();
                             let operatorCount = 1;
-                            // console.log(selFields.comparator);
                             const fields = selFields.comparator;
                             const fieldsLength = fields.length;
                             for (let index = 0; index < fieldsLength; index++) {
@@ -759,14 +809,14 @@
                                 $('.row-propertyEndThreshold').hide(); // condOpB
                             }
                         }
-                        ('#node-input-endTimeAlt').change();
+                        $('#node-input-endTimeAlt').change();
                         $('#node-input-propertyEndThreshold').change();
                     }
                 });
-                const propertyEndCompareField = $('#node-input-propertyEndCompare');
-                appendOptions(node, propertyEndCompareField, 'comparator');
-                propertyEndCompareField.val(node.propertyEndCompare || 'true');
-                propertyEndCompareField.change(() => { $('#node-input-propertyEnd').change(); });
+                const $propertyEndCompare = $('#node-input-propertyEndCompare');
+                appendOptions(node, $propertyEndCompare, 'comparator');
+                $propertyEndCompare.val(node.propertyEndCompare || 'true');
+                $propertyEndCompare.change(() => { $('#node-input-propertyEnd').change(); });
                 setupTInput(node, {
                     typeProp: 'propertyEndThresholdType',
                     valueProp: 'propertyEndThreshold',
@@ -791,8 +841,25 @@
                         } else {
                             $('.alternate-time-start-offset').show();
                         }
+                    },
+                    onChange: (_type, _value) => {
+                        getTimeProp(d => {
+                            const $div = $('#node-input-endTimeAlt-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d.value) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, $nodeConfig.val(),
+                        $('#node-input-endTimeAlt').typedInput('type'),
+                        $('#node-input-endTimeAlt').typedInput('value'),
+                        $('#node-input-endTimeAltOffset').typedInput('type'),
+                        $('#node-input-endTimeAltOffset').typedInput('value'),
+                        $('#node-input-endTimeAltOffsetMultiplier').val());
                     }
-                }).change();
+                });
 
                 node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
                 setupTInput(node, {
@@ -832,10 +899,10 @@
                     $('.enhanced-row').show();
                 }
                 // #endregion Enhanced settings
-                startTimeTypeField.change();
-                endTimeTypeField.change();
-                propertyStartTypeField.change();
-                propertyEndTypeField.change();
+                $startTime.change();
+                $endTime.change();
+                $propertyStart.change();
+                $propertyEnd.change();
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')

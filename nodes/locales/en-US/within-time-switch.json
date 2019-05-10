@@ -33,17 +33,17 @@
             "showEnhSettings":"Enhanced settings"
         },
         "placeholder": {
-            "propertyStart": "Property",
+            "propertyStart": "Property for alternate start time",
             "propertyStartThreshold": "threshold",
-            "propertyEnd": "Property",
+            "propertyEnd": "Property for alternate end time",
             "propertyEndThreshold": "threshold",
-            "startTime": "7:40",
+            "startTime": "start time, e.g. 7:40",
             "startOffset": "0",
-            "endTime": "18:15",
+            "endTime": "end time, e.g. 18:15",
             "endOffset": "0",
-            "startTimeAlt": "7:40",
+            "startTimeAlt": "alternate start time, e.g. 7:40",
             "startOffsetAlt": "0",
-            "endTimeAlt": "18:15",
+            "endTimeAlt": "alternate end time, e.g. 18:15",
             "endOffsetAlt": "0"
         },
         "tips": {

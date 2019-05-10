@@ -24,21 +24,21 @@
             "lastMsgOnStartOutTxt": "Beim nächsten Start-Zeitpunkt wird die letzte Nachricht welche außerhalb der Zeit empfangen wurde ausgesendet.",
             "lastMsgOnEndOut": "resend end",
             "lastMsgOnEndOutTxt": "Zum nächsten Ende wird die letzte Nachricht welche innerhalb der Zeit angekommen ist ausgesendet",
-            "compareTime":"Vergleichs Basis"
+            "compareTime":"Vergleichs Basis",
             "showEnhSettings":"Erweiterte Einstellungen"
         },
         "placeholder": {
-            "propertyStart": "Wert",
-            "propertyStartThreshold": "schwellwert",
-            "propertyEnd": "Wert",
-            "propertyEndThreshold": "schwellwert",
-            "startTime": "7:40",
+            "propertyStart": "Eigenschaft for alternative Startzeit",
+            "propertyStartThreshold": "Schwellwert",
+            "propertyEnd": "Eigenschaft for alternative Endzeit",
+            "propertyEndThreshold": "Schwellwert",
+            "startTime": "Startzeit, Bsp.: 7:40",
             "startOffset": "0",
-            "endTime": "18:15",
+            "endTime": "Endzeit, Bsp.: 18:15",
             "endOffset": "0",
-            "startTimeAlt": "7:40",
+            "startTimeAlt": "alternative Startzeit, Bsp.: 7:40",
             "startOffsetAlt": "0",
-            "endTimeAlt": "18:15",
+            "endTimeAlt": "alternative Endzeit, Bsp.: 18:15",
             "endOffsetAlt": "0"
         },
         "tips": {

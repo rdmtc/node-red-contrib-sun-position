@@ -1022,15 +1022,11 @@
                             $('.time-inject-row-payloadOffset').hide();
                         }
                         getOutDataProp(d => {
-                            console.log('payload');
-                            console.log(d);
                             const $div = $('#node-input-payload-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d) {
-                                console.log( d + ' - ' + titleOrg);
                                 $div.attr('title', d + ' - ' + titleOrg);
                             } else {
-                                console.log(titleOrg);
                                 $div.attr('title', titleOrg);
                             }
                         }, $nodeConfig.val(), plVType,  $('#node-input-payload').typedInput('value'),
@@ -1084,8 +1080,6 @@
                             $('.time-inject-row-alt').show();
 
                             getTimeProp(d => {
-                                console.log('time');
-                                console.log(d);
                                 const $div = $('#node-input-time-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1211,7 +1205,6 @@
                     onChange: (_type, _value) => {
                         if (!$('.time-inject-row-timeAlt').is(':hidden')) {
                             getTimeProp(d => {
-                                console.log(d);
                                 const $div = $('#node-input-timeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1326,7 +1319,6 @@
                         $('#node-input-addPayload1').change();
                         if (!$('.time-addPayload1Value').is(':hidden')) {
                             getOutDataProp(d => {
-                                console.log(d);
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1444,7 +1436,6 @@
                         $('#node-input-addPayload2').change();
                         if (!$('.time-addPayload2Value').is(':hidden')) {
                             getOutDataProp(d => {
-                                console.log(d);
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1557,7 +1548,6 @@
                         $('#node-input-addPayload3').change();
                         if (!$('.time-addPayload3Value').is(':hidden')) {
                             getOutDataProp(d => {
-                                console.log(d);
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {

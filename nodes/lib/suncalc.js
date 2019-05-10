@@ -383,13 +383,16 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
 
         const result = {};
-
         if (rise) {
             result.rise = hoursLater(t, rise);
+        } else {
+            result.rise = NaN;
         }
 
         if (set) {
             result.set = hoursLater(t, set);
+        } else {
+            result.set = NaN;
         }
 
         if (!rise && !set) {

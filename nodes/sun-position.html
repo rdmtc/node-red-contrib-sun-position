@@ -377,24 +377,26 @@
                             class: 'node-input-rule-btwn-label'
                         }).text(' ' + btwnLabel + ' ').appendTo(row);
 
-                        const btwnValueField = $('<input/>', {
+                        $('<input/>', {
                             class: 'node-input-rule-btwn-value',
                             type: 'text',
-                            style: 'margin-left: 5px;'
+                            style: 'margin-left: 5px;',
+                            value: rule.valueLow
                         }).appendTo(row).typedInput({
-                            default: 'num',
+                            default: rule.valueLowType || 'num',
                             types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
                         });
 
                         $('<span/>', {
                             class: 'node-input-rule-btwn-label'
                         }).text(' ' + andLabel + ' ').appendTo(row);
-                        const btwnValue2Field = $('<input/>', {
+                        $('<input/>', {
                             class: 'node-input-rule-btwn-value2',
                             type: 'text',
-                            style: 'margin-left:2px;'
+                            style: 'margin-left:2px;',
+                            value: rule.valueHigh
                         }).appendTo(row).typedInput({
-                            default: 'num',
+                            default: rule.valueHighType || 'num',
                             types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
                         });
 
@@ -404,10 +406,6 @@
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
 
                         resizeRule(container);
-                        btwnValueField.typedInput('value', rule.valueLow);
-                        btwnValueField.typedInput('type', rule.valueLowType || 'num');
-                        btwnValue2Field.typedInput('value', rule.valueHigh);
-                        btwnValue2Field.typedInput('type', rule.valueHighType || 'num');
 
                         // {"0":0,"1":-1,"2":-1,"3":-1}
                         // {"0":0}
