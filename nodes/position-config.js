@@ -164,9 +164,9 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getMoonTime(now, value, offset, multiplier, next, days) {
-            this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+            // this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = this._moonTimesCheck( now);
-            this.debug('getMoonTime moonTimesToday=' + util.inspect(this.moonTimesToday));
+            // this.debug('getMoonTime moonTimesToday=' + util.inspect(this.moonTimesToday));
             result.value = hlp.addOffset(new Date(this.moonTimesToday[value]), offset, multiplier);
             if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                 if (next === 1) {
@@ -204,7 +204,7 @@ module.exports = function (RED) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
-                data = value;
+                data = Number(value); // extra conversation to handle empty string as 0
             } else if (type === '' || (typeof type === 'undefined') || type === null) {
                 if (isNaN(value)) {
                     return def || NaN;
@@ -348,7 +348,7 @@ module.exports = function (RED) {
             }
         }
         /*******************************************************************************************************/
-        getTimeProp(_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) {
+        getTimeProp(_srcNode, msg, vType, value,offsetType,  offset, multiplier, next, days) {
             // this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
@@ -790,23 +790,9 @@ module.exports = function (RED) {
             }
             let obj = {};
             switch (req.query.kind) {
-                case 'getFloatProp': {
+                case 'getTimeData': {
                     try {
-                        obj.value = posConfig.getFloatProp(posConfig, undefined, req.query.type, req.query.value, NaN);
-                    } catch (err) {
-                        obj.value = NaN;
-                        obj.error = err;
-                    }
-                    res.status(200).send(JSON.stringify(obj));
-                    break;
-                }
-                case 'getTimeProp': {
-                    try {
-                        console.log('getting request');
-                        console.log(req.query);
-                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
-                        console.log('request result');
-                        console.log(obj);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;
@@ -814,7 +800,7 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateProp': {
+                case 'getDateData': {
                     try {
                         obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
                     } catch(err) {
@@ -824,7 +810,7 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getOutDataProp': {
+                case 'getOutDataData': {
                     try {
                         obj = posConfig.getOutDataProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.days);
                     } catch(err) {

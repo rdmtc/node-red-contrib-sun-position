@@ -927,10 +927,17 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getTimeProp getOutDataProp */
+                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getTimeData getOutDataData */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
+                function getDaysStr(value) {
+                    const days = value.map((_, el) => { return $(el).val(); }).get();
+                    if (days.length === 0) { return ''; }
+                    if (days.length === 7) { return '*'; }
+                    return days.join(',');
+                }
+
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', (data) => (data.id > 0));
@@ -1021,7 +1028,7 @@
                             $('.time-inject-row-payloadTimeFormat').hide();
                             $('.time-inject-row-payloadOffset').hide();
                         }
-                        getOutDataProp(d => {
+                        getOutDataData(d => {
                             const $div = $('#node-input-payload-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d) {
@@ -1029,11 +1036,15 @@
                             } else {
                                 $div.attr('title', titleOrg);
                             }
-                        }, $nodeConfig.val(), plVType,  $('#node-input-payload').typedInput('value'),
-                        $('#node-input-payloadTimeFormat').val(),
-                        $('#node-input-payloadOffset').typedInput('type'),
-                        $('#node-input-payloadOffset').typedInput('value'),
-                        $('#node-input-payloadOffsetMultiplier').val());
+                        }, {
+                            config:     $nodeConfig.val(),
+                            type:       plVType,
+                            value:      $('#node-input-payload').typedInput('value'),
+                            format:     $('#node-input-payloadTimeFormat').val(),
+                            offsetType: $('#node-input-payloadOffset').typedInput('type'),
+                            offset:     $('#node-input-payloadOffset').typedInput('value'),
+                            multiplier: $('#node-input-payloadOffsetMultiplier').val()
+                        });
                     }
                 });
                 initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
@@ -1079,7 +1090,7 @@
                             $('.time-inject-row-timeDays').show();
                             $('.time-inject-row-alt').show();
 
-                            getTimeProp(d => {
+                            getTimeData(d => {
                                 const $div = $('#node-input-time-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1088,11 +1099,16 @@
                                 } else {
                                     $div.attr('title', titleOrg);
                                 }
-                            }, $nodeConfig.val(), type,
-                            $('#node-input-time').typedInput('value'),
-                            $('#node-input-offset').typedInput('type'),
-                            $('#node-input-offset').typedInput('value'),
-                            $('#node-input-offsetMultiplier').val());
+                            }, {
+                                config:     $nodeConfig.val(),
+                                type:       type,
+                                value:      $('#node-input-time').typedInput('value'),
+                                offsetType: $('#node-input-offset').typedInput('type'),
+                                offset:     $('#node-input-offset').typedInput('value'),
+                                multiplier: $('#node-input-offsetMultiplier').val(),
+                                next: 1,
+                                days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'))
+                            });
                         }
                         $('#node-input-property').change();
                     }
@@ -1204,7 +1220,7 @@
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
                     onChange: (_type, _value) => {
                         if (!$('.time-inject-row-timeAlt').is(':hidden')) {
-                            getTimeProp(d => {
+                            getTimeData(d => {
                                 const $div = $('#node-input-timeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1213,12 +1229,16 @@
                                 } else {
                                     $div.attr('title', titleOrg);
                                 }
-                            }, $nodeConfig.val(),
-                            $('#node-input-timeAlt').typedInput('type'),
-                            $('#node-input-timeAlt').typedInput('value'),
-                            $('#node-input-timeAltOffset').typedInput('type'),
-                            $('#node-input-timeAltOffset').typedInput('value'),
-                            $('#node-input-timeAltOffsetMultiplier').val());
+                            }, {
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-timeAlt').typedInput('type'),
+                                value:      $('#node-input-timeAlt').typedInput('value'),
+                                offsetType: $('#node-input-timeAltOffset').typedInput('type'),
+                                offset:     $('#node-input-timeAltOffset').typedInput('value'),
+                                multiplier: $('#node-input-timeAltOffsetMultiplier').val(),
+                                next: 1,
+                                days:       getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'))
+                            });
                         }
                     }
                 });
@@ -1318,7 +1338,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload1').change();
                         if (!$('.time-addPayload1Value').is(':hidden')) {
-                            getOutDataProp(d => {
+                            getOutDataData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1326,13 +1346,15 @@
                                 } else {
                                     $div.attr('title', titleOrg);
                                 }
-                            }, $nodeConfig.val(),
-                            $('#node-input-addPayload1Value').typedInput('type'),
-                            $('#node-input-addPayload1Value').typedInput('value'),
-                            $('#node-input-addPayload1Format').val(),
-                            $('#node-input-addPayload1Offset').typedInput('type'),
-                            $('#node-input-addPayload1Offset').typedInput('value'),
-                            $('#node-input-addPayload1OffsetMultiplier').val());
+                            }, {
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-addPayload1Value').typedInput('type'),
+                                value:      $('#node-input-addPayload1Value').typedInput('value'),
+                                format:     $('#node-input-addPayload1Format').val(),
+                                offsetType: $('#node-input-addPayload1Offset').typedInput('type'),
+                                offset:     $('#node-input-addPayload1Offset').typedInput('value'),
+                                multiplier: $('#node-input-addPayload1OffsetMultiplier').val()
+                            });
                         }
                     }
                 });
@@ -1435,7 +1457,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload2').change();
                         if (!$('.time-addPayload2Value').is(':hidden')) {
-                            getOutDataProp(d => {
+                            getOutDataData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1443,13 +1465,15 @@
                                 } else {
                                     $div.attr('title', titleOrg);
                                 }
-                            }, $nodeConfig.val(),
-                            $('#node-input-addPayload2Value').typedInput('type'),
-                            $('#node-input-addPayload2Value').typedInput('value'),
-                            $('#node-input-addPayload2Format').val(),
-                            $('#node-input-addPayload2Offset').typedInput('type'),
-                            $('#node-input-addPayload2Offset').typedInput('value'),
-                            $('#node-input-addPayload2OffsetMultiplier').val());
+                            }, {
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-addPayload2Value').typedInput('type'),
+                                value:      $('#node-input-addPayload2Value').typedInput('value'),
+                                format:     $('#node-input-addPayload2Format').val(),
+                                offsetType: $('#node-input-addPayload2Offset').typedInput('type'),
+                                offset:     $('#node-input-addPayload2Offset').typedInput('value'),
+                                multiplier: $('#node-input-addPayload2OffsetMultiplier').val()
+                            });
                         }
                     }
                 });
@@ -1547,7 +1571,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload3').change();
                         if (!$('.time-addPayload3Value').is(':hidden')) {
-                            getOutDataProp(d => {
+                            getOutDataData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1555,13 +1579,15 @@
                                 } else {
                                     $div.attr('title', titleOrg);
                                 }
-                            }, $nodeConfig.val(),
-                            $('#node-input-addPayload3Value').typedInput('type'),
-                            $('#node-input-addPayload3Value').typedInput('value'),
-                            $('#node-input-addPayload3Format').val(),
-                            $('#node-input-addPayload3Offset').typedInput('type'),
-                            $('#node-input-addPayload3Offset').typedInput('value'),
-                            $('#node-input-addPayload3OffsetMultiplier').val());
+                            }, {
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-addPayload3Value').typedInput('type'),
+                                value:      $('#node-input-addPayload3Value').typedInput('value'),
+                                format:     $('#node-input-addPayload3Format').val(),
+                                offsetType: $('#node-input-addPayload3Offset').typedInput('type'),
+                                offset:     $('#node-input-addPayload3Offset').typedInput('value'),
+                                multiplier: $('#node-input-addPayload3OffsetMultiplier').val()
+                            });
                         }
                     }
                 });
@@ -1617,12 +1643,7 @@
         },
         oneditsave() {
             function getDaysStr(value) {
-                const days = value
-                    .map((_, el) => {
-                        return $(el).val();
-                    })
-                    .get();
-
+                const days = value.map((_, el) => { return $(el).val(); }).get();
                 if (days.length === 0) { return ''; }
                 if (days.length === 7) { return '*'; }
                 return days.join(',');

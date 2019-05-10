@@ -524,7 +524,7 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetValue, rule.offsetType, rule.multiplier);
+            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetType, rule.offsetValue, rule.multiplier);
             if (rule.timeData.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;

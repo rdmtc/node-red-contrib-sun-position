@@ -330,13 +330,14 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         } else {
             t.setHours(0, 0, 0, 0);
         }
+        // console.log(`getMoonTimes lat=${lat} lng=${lng} inUTC=${inUTC} date=${date} t=${t}`);
 
         const hc = 0.133 * rad;
         let h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc;
         let rise; let set; let ye; let d; let roots; let x1; let x2; let dx;
 
         // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
-        for (let i = 1; i <= 24; i += 2) {
+        for (let i = 1; i <= 26; i += 2) {
             const h1 = SunCalc.getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
             const h2 = SunCalc.getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
 
@@ -398,7 +399,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         if (!rise && !set) {
             result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
         }
-
         return result;
     };
 
