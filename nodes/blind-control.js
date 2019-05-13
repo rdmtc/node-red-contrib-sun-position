@@ -140,6 +140,24 @@ function getSunPosition_(node, now) {
 
 module.exports = function (RED) {
     'use strict';
+
+    function evalTempData(node, type, value, data) {
+        if (!data) {
+            const name = type + '.' + value;
+            if (node.tempData[name]) {
+                node.log(RED._('errors.usingTempValue', { type: type, value: value, usedValue: node.tempData[name] }));
+                return node.tempData[name];
+            }
+            if (node.nowarn[name]) {
+                return null; // only one error per run
+            }
+            node.warn(RED._('errors.notEvaluableProperty', { type: type, value: value, usedValue: 'null' }));
+            node.nowarn[name] = true;
+            return null;
+        }
+        node.tempData[type + '.' + value] = data;
+    }
+
     /******************************************************************************************/
     /**
      * check the oversteering data
@@ -150,8 +168,15 @@ module.exports = function (RED) {
         // node.debug('checkOversteer');
         try {
             node.oversteerData.isChecked = true;
-            return node.positionConfig.comparePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value,
-                node.oversteerData.operator, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'value', 'threshold');
+            return node.positionConfig.comparePropValue(node, msg,
+                node.oversteerData.valueType,
+                node.oversteerData.value,
+                node.oversteerData.operator,
+                node.oversteerData.thresholdType,
+                node.oversteerData.thresholdValue,
+                (type, value, data, _id) => { // opCallback
+                    return evalTempData(node, type, value, data);
+                });
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -495,10 +520,30 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = hlp.getTimeNumber(now);
         // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
+        // pre-checking conditions to may be able to store temp data
+        for (let i = 0; i < node.rulesCount; ++i) {
+            const rule = node.rulesData[i];
+            if (rule.conditional) {
+                rule.conditonData.result = node.positionConfig.comparePropValue(node, msg,
+                    rule.validOperandAType,
+                    rule.validOperandAValue,
+                    rule.validOperator,
+                    rule.validOperandBType,
+                    rule.validOperandBValue,
+                    (type, value, data, _id) => { // opCallback
+                        return evalTempData(node, type, value, data);
+                    });
+            }
+        }
+
         const fkt = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
+                    if (!rule.conditonData.result) {
+                        return null;
+                    }
+                    /*
                     rule.conditonData = {
                         operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
                         operator: rule.validOperator
@@ -514,7 +559,7 @@ module.exports = function (RED) {
                         rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
                         rule.conditonData.text += ' ' + rule.conditonData.operandB;
                         rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
-                    }
+                    } */
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
                     node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -627,12 +672,14 @@ module.exports = function (RED) {
             node.error(RED._('blind-control.errors.smoothTimeToolong', this));
             delete node.smoothTime;
         }
-
+        node.nowarn = {};
         node.reason = {
             code : 0,
             state: '',
             description: ''
         };
+        // temporary node Data
+        node.tempData = {};
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
@@ -678,7 +725,6 @@ module.exports = function (RED) {
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
         node.oversteerData = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
-            temp: {},
             isChecked: false
         };
         if (node.oversteerData.active) {
@@ -743,6 +789,7 @@ module.exports = function (RED) {
                     });
                     return null;
                 }
+                node.nowarn = {};
                 const blindCtrl = {
                     reason : node.reason,
                     blind: node.blindData
@@ -787,7 +834,15 @@ module.exports = function (RED) {
                 }
 
                 if (node.oversteerData.active && !node.oversteerData.isChecked) {
-                    node.positionConfig.savePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value, node.oversteerData.temp, 'value');
+                    node.positionConfig.getPropValue(node, msg,
+                        node.oversteerData.valueType,
+                        node.oversteerData.value,
+                        node.oversteerData.operator,
+                        (type, value, data, _id) => {
+                            if (data) {
+                                node.tempData[type + '.' + value] = data;
+                            }
+                        });
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();
@@ -841,13 +896,29 @@ module.exports = function (RED) {
         function initialize() {
             node.debug('initialize');
             node.rulesCount = node.rulesData.length;
+            node.rulesTemp = [];
             for (let i = 0; i < node.rulesCount; ++i) {
                 const rule = node.rulesData[i];
                 rule.timeOp = Number(rule.timeOp);
                 rule.pos = i + 1;
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
-                rule.temp = {};
+                if (rule.conditional) {
+                    rule.conditonData = {
+                        result: false,
+                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
+                        operator: rule.validOperator,
+                        operatorText: rule.validOperatorText,
+                        operatorDescription: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator)
+                    };
+                    rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
+                    rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName, 25) + ' ' + rule.conditonData.operatorText;
+                    if (rule.conditonData.operandB) {
+                        rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
+                        rule.conditonData.text += ' ' + rule.conditonData.operandB;
+                        rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
+                    }
+                }
             }
         }
         initialize();

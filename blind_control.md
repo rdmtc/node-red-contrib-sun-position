@@ -11,8 +11,9 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 * [Blind Controller](#blind-controller)
   * [blind-control](#blind-control)
     * [Table of contents](#table-of-contents)
+    * [The node](#the-node)
     * [Node settings](#node-settings)
-      * [general](#general)
+      * [general settings](#general-settings)
       * [blind settings](#blind-settings)
       * [rule settings](#rule-settings)
       * [overwrite settings](#overwrite-settings)
@@ -26,9 +27,23 @@ Used to control a blind with many possibilities. This can be time-dependent and 
     * [rules example](#rules-example)
   * [Samples](#samples)
 
+### The node
+
+Thanks a lot [alisdairjsmyth](https://github.com/alisdairjsmyth) with its node [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller). To be able to use the node [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller), a lot of functions around the node would have been necessary. As a result, I landed at a new node. So this node originated in the style of [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller) but internally has become a complete new development. I did not make the decision easy as to whether this node should be developed as a standalone node or as part of that node collection. The decisive factor was that this node uses many of the existing functions of that node collection.
+
+Depending on the use case, this node may be the more appropriate one or the node [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller). The differences from this node to [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller) are:
+
+* The output at the [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller) node is different to that node.
+  * The node is designed to determine the degree of opening, so the higher number is open and the lower number is closed.
+  * There is a `blindCtrl.blind.levelInverse` output who will have the inverse value if needed.
+  * The levels can be integer or floating point numbers. It is depending on the configuration of Open-level, closed-level and increment. This means the node can be configured to have 100=open, 0=closed with an increment of 1, but also 1=open, 0=closed with an increment of 0.01.
+* This node is very flexible where information comes to the blind controller. So these do not always have to be part of the msg object, but can also come from environment variables or contexts.
+* This node has the possibility for manual override with different priority. THis can be used to differentiate between manual operation, fire alarm, window knob handle, etc. ...
+* Various conditions for the absolute position are selectable, which unfortunately does not make the configuration easy. An example is if in the morning the blind should open depending on the position of the sun, but at the earliest at a defined time, which must be different between week and weekend.
+
 ### Node settings
 
-#### general
+#### general settings
 
 ![blind-control-settings-1](https://user-images.githubusercontent.com/12692680/57134454-8c753100-6da6-11e9-95e9-bdff86f1e3d4.png)
 

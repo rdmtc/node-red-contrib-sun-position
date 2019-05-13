@@ -591,7 +591,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: getDefLevel(node.blindPosDefaultType, node.blindPosDefault, 'open (max)'), // types.LevelFix.options[0],
-                    types: [types.LevelFix, types.LevelEntered]
+                    types: [types.LevelFix, types.LevelEntered, 'env']
                 });
 
                 // #endregion blind
@@ -855,7 +855,7 @@
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'), // types.LevelFix.options[0],
-                    types: [types.LevelFix, types.LevelEntered]
+                    types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 setupTInput(node, {
                     typeProp: 'blindPosMaxType',
@@ -863,7 +863,7 @@
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
-                    types: [types.LevelFix, types.LevelEntered]
+                    types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 // #endregion sun
                 // #region oversteering
@@ -934,7 +934,7 @@
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
                     defaultValue: getDefLevel(node.oversteerBlindPosType, node.oversteerBlindPos, 'open (max)'),
-                    types: [types.LevelFix, types.LevelEntered]
+                    types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 // #endregion oversteering
                 // #region Enhanced settings

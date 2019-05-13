@@ -116,7 +116,9 @@
 			"getOversteerData": "error getting oversteer data: __message__",
 			"getBlindPosData": "error getting blind level: __message__",
 			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
-			"smoothTimeToolong":"The selected smooth is too long!!"
+			"smoothTimeToolong":"The selected smooth is too long!!",
+			"usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!",
+			"notEvaluableProperty": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!"
 		}
 	}
 }

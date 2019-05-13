@@ -416,77 +416,48 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        savePropValue(_srcNode, msg, type, value, tempStorage, opName) {
-            if (type === 'msgPayload') {
-                tempStorage[opName] = msg.payload;
+        getPropValue(_srcNode, msg, type, value, callback, addID) {
+            // _srcNode.debug(`getPropValue ${type}.${value} (${addID})`);
+            let result = null;
+            if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
+                return null;
+            } else if (type === 'num') {
+                result = Number(value);
+            } else if (type === 'msgPayload') {
+                result = msg.payload;
             } else if (type === 'msgValue') {
-                tempStorage[opName] = msg.value;
-            } else if (type === 'msg') {
+                result = msg.value;
+            } else if (type === 'DayOfMonth') {
+                const d = new Date();
+                const nd = hlp.getSpecialDayOfMonth(d.getFullYear(), d.getMonth(), value);
+                if (nd === null) {
+                    result = false;
+                } else {
+                    result = (nd.getDate() === d.getDate());
+                }
+            } else {
                 try {
-                    const opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
-                    if (opData !== null && typeof opData !== 'undefined') {
-                        tempStorage[opName] = opData;
-                    }
+                    result = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
+            if (typeof callback === 'function') {
+                return callback(type, value, result, addID);
+            } else if (result === null || typeof result === 'undefined') {
+                _srcNode.error(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                return null;
+            }
+            return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, opNameA, opNameB, outReason) {
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
 
-            const opVal = (type, value, opName) => {
-                // _srcNode.debug(`getting ${opName} = ${type}.${value}`);
-                let opData = null;
-                try {
-                    if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
-                        _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue:'null' }));
-                        return null;
-                    } else if (type === 'num') {
-                        return Number(value);
-                    } else if (type === 'msgPayload') {
-                        return msg.payload;
-                    } else if (type === 'msgValue') {
-                        return msg.value;
-                    } else if (type === 'DayOfMonth') {
-                        const d = new Date();
-                        const nd = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
-                        if (nd === null) {
-                            return false;
-                        }
-                        return (nd.getDate() === d.getDate());
-                    }
-                    opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
-                    if (opData === null || typeof opData === 'undefined') {
-                        throw new Error(opData);
-                    }
-                    if (typeof tempStorage !== 'undefined' && type === 'msg') {
-                        tempStorage[opName] = opData;
-                    }
-                    if (typeof outReason === 'object') {
-                        outReason[opName] = opData;
-                        // _srcNode.debug('opData=' + opData + ' outReason= ' + util.inspect(outReason, Object.getOwnPropertyNames(outReason)));
-                    }
-                    return opData;
-                } catch (err) {
-                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                    if (tempStorage && (type === 'msg') && tempStorage[opName]) {
-                        _srcNode.log(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: tempStorage[opName] }));
-                        return tempStorage[opName];
-                    }
-                    _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: 'null' }));
-                    if (typeof outReason === 'object') {
-                        outReason[opName] = null;
-                        outReason[opName + '_error'] = err;
-                    }
-                    return null;
-                }
-            };
-            const a = opVal(opTypeA, opValueA, opNameA);
+            const a = this.getPropValue(_srcNode, msg, opTypeA, opValueA, opCallback, 1);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -519,26 +490,26 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
+                    return (a == this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
+                    return (a != this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < opVal(opTypeB, opValueB, opNameB));
+                    return (a < this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'lte':
-                    return (a <= opVal(opTypeB, opValueB, opNameB));
+                    return (a <= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'gt':
-                    return (a > opVal(opTypeB, opValueB, opNameB));
+                    return (a > this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'gte':
-                    return (a >= opVal(opTypeB, opValueB, opNameB));
+                    return (a >= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'contain':
-                    return ((a + '').includes(opVal(opTypeB, opValueB, opNameB)));
+                    return ((a + '').includes(this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2)));
                 case 'containSome': {
-                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
