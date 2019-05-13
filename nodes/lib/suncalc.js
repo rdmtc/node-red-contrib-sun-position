@@ -205,7 +205,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             nadir: {
                 value: fromJulian(Jnoon + 0.5),
                 pos: sunTimesDefault.nadir,
-                name: 'solarNoon',
+                name: 'nadir',
                 angle: 270
             }
         };
