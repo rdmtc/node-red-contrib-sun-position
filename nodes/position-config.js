@@ -200,7 +200,7 @@ module.exports = function (RED) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
-                data = value;
+                data = Number(value); // extra conversation to handle empty string as 0
             } else if (type === '' || (typeof type === 'undefined') || type === null) {
                 if (isNaN(value)) {
                     return def || NaN;
@@ -344,7 +344,7 @@ module.exports = function (RED) {
             }
         }
         /*******************************************************************************************************/
-        getTimeProp(_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) {
+        getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
             // this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
@@ -757,19 +757,9 @@ module.exports = function (RED) {
             }
             let obj = {};
             switch (req.query.kind) {
-                case 'getFloatProp': {
+                case 'getTimeData': {
                     try {
-                        obj.value = posConfig.getFloatProp(posConfig, undefined, req.query.type, req.query.value, NaN);
-                    } catch (err) {
-                        obj.value = NaN;
-                        obj.error = err;
-                    }
-                    res.status(200).send(JSON.stringify(obj));
-                    break;
-                }
-                case 'getTimeProp': {
-                    try {
-                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;
@@ -777,7 +767,7 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateProp': {
+                case 'getDateData': {
                     try {
                         obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
                     } catch(err) {
@@ -787,7 +777,7 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getOutDataProp': {
+                case 'getOutDataData': {
                     try {
                         obj = posConfig.getOutDataProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.days);
                     } catch(err) {

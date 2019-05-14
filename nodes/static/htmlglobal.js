@@ -659,69 +659,49 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     return multiselect;
 }
 
-
-function getFloatProp(result, config, type, value) { // eslint-disable-line no-unused-vars
-    const url = '/sun-position/data?config=' + config + '&kind=getFloatProp&type=' + type + '&value=' + value;
-    $.getJSON(url, result );
-}
-
-function getTimeProp(result, config, type, value, offset, offsetType, multiplier, next, days) { // eslint-disable-line no-unused-vars
-    if (type === 'none' || type === '' || type === 'json' || type === 'jsonata' || type === 'bin') {
-        result({ value: type});
-    } else if (type === 'num' || type === 'str' || type === 'bool') {
-        result({ value: value });
-    } else if (type === 'msg' || type === 'flow' || type === 'global' || type === 'env') {
-        result({ value: type + '.' + value });
-    } else if (type === 'msgPayload') {
+function getTimeData(result, data) { // eslint-disable-line no-unused-vars
+    if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
+        result({ value: data.type});
+    } else if (data.type === 'num' || data.type === 'str' || data.type === 'bool') {
+        result({ value: data.value });
+    } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
+        result({ value: data.type + '.' + data.value });
+    } else if (data.type === 'msgPayload') {
         result({ value: 'msg.payload' });
-    } else if (type === 'msgTs') {
+    } else if (data.type === 'msgTs') {
         result({ value: 'msg.ts' });
-    } else if (type === 'msgLC') {
+    } else if (data.type === 'msgLC') {
         result({ value: 'msg.lc' });
-    } else if (type === 'msgValue') {
+    } else if (data.type === 'msgValue') {
         result({ value: 'msg.value' });
     } else {
-        let url = '/sun-position/data?config=' + config + '&kind=getTimeProp&type=' + type + '&value=' + value;
-        if (offset) { url += '&offset=' + offset; }
-        if (offsetType) { url += '&offsetType=' + offsetType; }
-        if (multiplier) { url += '&multiplier=' + multiplier; }
-        if (next) { url += '&next=' + next; }
-        if (days) { url += '&days=' + days; }
+        const url = '/sun-position/data?kind=getTimeData&' + jQuery.param( data );
         $.getJSON(url, result);
     }
 }
 
-function getDateProp(result, config, type, value, format, offset, offsetType, multiplier) { // eslint-disable-line no-unused-vars
-    let url = '/sun-position/data?config=' + config + '&kind=getDateProp&type=' + type + '&value=' + value;
-    if (format) { url += '&format=' + format; }
-    if (offset) { url += '&offset=' + offset; }
-    if (offsetType) { url += '&offsetType=' + offsetType; }
-    if (multiplier) { url += '&multiplier=' + multiplier; }
+function getDateData(result, data) { // eslint-disable-line no-unused-vars
+    const url = '/sun-position/data?kind=getDateData&' + jQuery.param( data );
     $.getJSON(url, result);
 }
 
-function getOutDataProp(result, config, type, value, format, offset, offsetType, multiplier, days) { // eslint-disable-line no-unused-vars
-    if (type === 'none' || type === '' || type === 'json' || type === 'jsonata' || type === 'bin') {
-        result(type);
-    } else if (type === 'num' || type === 'str' || type === 'bool') {
-        result(value);
-    } else if (type === 'msg' || type === 'flow' || type === 'global' || type === 'env') {
-        result(type + '.' + value);
-    } else if (type === 'msgPayload') {
+function getOutDataData(result, data) { // eslint-disable-line no-unused-vars
+    if (data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
+        result(data.type);
+    } else if (data.type === 'num' || data.type === 'str' || data.type === 'bool') {
+        result(data.value);
+    } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
+        result(data.type + '.' + data.value);
+    } else if (data.type === 'msgPayload') {
         result('msg.payload');
-    } else if (type === 'msgTs') {
+    } else if (data.type === 'msgTs') {
         result('msg.ts');
-    } else if (type === 'msgLC') {
+    } else if (data.type === 'msgLC') {
         result('msg.lc');
-    } else if (type === 'msgValue') {
+    } else if (data.type === 'msgValue') {
         result('msg.value');
     } else {
-        let url = '/sun-position/data?config=' + config + '&kind=getOutDataProp&type=' + type + '&value=' + value;
-        if (format) { url += '&format=' + format; }
-        if (offset) { url += '&offset=' + offset; }
-        if (offsetType) { url += '&offsetType=' + offsetType; }
-        if (multiplier) { url += '&multiplier=' + multiplier; }
-        if (days) { url += '&days=' + days; }
+        const url = '/sun-position/data?kind=getOutDataData&' + jQuery.param( data );
         $.getJSON(url, result);
     }
 }

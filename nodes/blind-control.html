@@ -496,7 +496,7 @@
             const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeProp */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeData */
                 $('.form-row-showLater').show();
                 // #region initialize
                 const types = getTypes(node);
@@ -753,16 +753,19 @@
                             } else {
                                 $row4.hide(); // offset
                             }
-                            getTimeProp(d => {
+                            getTimeData(d => {
                                 if (d.value) {
                                     const dv = new Date(d.value);
                                     $row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
                                 }
-                            }, $nodeConfig.val(), opType,
-                            $time.typedInput('value'),
-                            $offset.typedInput('type'),
-                            $offset.typedInput('value'),
-                            $multiplier.val());
+                            }, {
+                                config : $nodeConfig.val(),
+                                type: opType,
+                                value: $time.typedInput('value'),
+                                offsetType: $offset.typedInput('type'),
+                                offset: $offset.typedInput('value'),
+                                multiplier: $multiplier.val()
+                            });
                             resizeContainer();
                         });
                         $validOperandA.change(() => {
