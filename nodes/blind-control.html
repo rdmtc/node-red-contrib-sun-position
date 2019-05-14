@@ -671,7 +671,7 @@
                             value: (data.validOperandAValue || '')
                         }).appendTo($row1).typedInput({
                             default: (data.validOperandAType || types.Unlimited.value),
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.DayOfMonth]
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
                         const $validOperator = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -767,8 +767,7 @@
                         });
                         $validOperandA.change(() => {
                             const propType = $validOperandA.typedInput('type');
-                            if (propType === 'none' ||
-                                propType === types.DayOfMonth.value) {
+                            if (propType === 'none') {
                                 $validOperator.val(selFields.comparator[0].id); // only true is valid for DayOfMonth
                                 $validOperator.hide();
                                 $row2.hide(); // condOpB

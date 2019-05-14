@@ -20,12 +20,18 @@ Used to control a blind with many possibilities. This can be time-dependent and 
       * [sun settings](#sun-settings)
         * [maximize sunlight (Winter)](#maximize-sunlight-winter)
         * [restrict sunlight (Summer)](#restrict-sunlight-summer)
+        * [sun position settings](#sun-position-settings)
     * [Node Input](#node-input)
     * [Node Output](#node-output)
     * [Node Status](#node-status)
   * [rules](#rules)
     * [rules example](#rules-example)
   * [Samples](#samples)
+  * [Additional FAQ](#additional-faq)
+    * [Why is there no multi blind controller?](#why-is-there-no-multi-blind-controller)
+    * [How to define a Temperature Overwrite?](#how-to-define-a-temperature-overwrite)
+    * [How do I achieve that when opening a window the blind opens?](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens)
+  * [Other](#other)
 
 ### The node
 
@@ -118,21 +124,27 @@ This calculation includes:
 * Dimensions of the window and the current altitude of the sun.
 * consideration of weather conditions against defined thresholds
 
+##### sun position settings
+
 * **start** The azimuth (in degree) of the sun, when the sun start falls into the window.
 * **end** The azimuth (in degree) of the sun, when the sun no longer falls into the window.
+
+![sun-azimuth2](https://user-images.githubusercontent.com/12692680/57704950-2f5d6300-7663-11e9-9ce1-4f90bbf3eed6.png)
 
 under the simplest assumption starting from the bearing representing the perpendicular of the window to geographical north:
 
 * start = orientation - 90 degree
 * end = orientation + 90 degree
 
+![sun-bottom-top](https://user-images.githubusercontent.com/12692680/57705862-ee664e00-7664-11e9-9e73-1306ffd2a6f8.png)
+
 * The units of length is measure agnostic, They must be all in the same unit, but it does not matter which unit is used. If as lengths are used meter all lengths must be in meter. If used centimeters, all must be in centimeter.
 * **top** Measurement from the floor to top of the window covered by the blind.
 * **bottom** Measurement from the floor to bottom of the window covered by the blind.
 * **length on the floor** (optional) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor.
 * **min altitude threshold** (optional) minimum altitude (in degree) of the sun for determination of blind position.
-* **min position** minimum blind position if the sun is in the window, the min altitude threshold is given and weather conditions given.
-* **max position** maximum blind position if the sun is in the window, the min altitude threshold is given and weather conditions given.
+* **min position** minimum blind position if the sun is in the window. The blind will not close more than this minimum value, even if the calculated value results in a lower position.
+* **max position** maximum blind position if the sun is in the window. The blind will not open more than this maximum value, even if the calculated value results in a higher position.
 
 ![blind-control-settings-8](https://user-images.githubusercontent.com/12692680/57453633-2df8f880-7267-11e9-85be-721ca916d2b1.png)
 
@@ -149,21 +161,24 @@ under the simplest assumption starting from the bearing representing the perpend
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
 * **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  * **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
-    * If an override is already active a new message changes the blind level if the **priority** of the existing override allows this.
-      * The override could also limited if  a property `msg.ignoreSameValue`, `msg.payload.ignoreSameValue` is set to true an existing override will only be changed if the position value differs from the active override position.
-    * Except `-1` the position must be a valid blind Position as defined in the node settings or otherwise it will throw an error.
-    * The **position** of the special value of `-1` will set the node in override mode without sending any message out until override **position** is changed, override is **expired** or **reset**.
-      * Example: This could be useful if a blind is controlled by an external button, where not known the blind position after button press. In this case the Button-event can used to trigger the override-mode of the node without knowing the real **position** of the blind.
-  * **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
-    * A message property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority`
+  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is equal or higher then the priotiry of the existing override. The message priority can be defined by
+    * a property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority` with a valid numeric value
     * or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
-    * A `boolean` value `true` is considered as numeric `1`
-  * **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
-    * A message property `msg.expire` or `msg.payload.expire`
-    * or when the `msg.topic` contains `expire` and the value of `msg.payload` is a valid numeric value
-    * The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
-    * If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
+* **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
+  * If an override is already active a new message changes the blind level if the **priority** of the existing override allows this.
+    * The override could also limited if  a property `msg.ignoreSameValue`, `msg.payload.ignoreSameValue` is set to true an existing override will only be changed if the position value differs from the active override position.
+  * Except `-1` the position must be a valid blind Position as defined in the node settings or otherwise it will throw an error.
+  * The **position** of the special value of `-1` will set the node in override mode without sending any message out until override **position** is changed, override is **expired** or **reset**.
+    * Example: This could be useful if a blind is controlled by an external button, where not known the blind position after button press. In this case the Button-event can used to trigger the override-mode of the node without knowing the real **position** of the blind.
+* **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
+  * A message property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority` with a valid numeric value
+  * or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
+  * A `boolean` value `true` is considered as numeric `1`
+* **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
+  * A message property `msg.expire` or `msg.payload.expire`
+  * or when the `msg.topic` contains `expire` and the value of `msg.payload` is a valid numeric value
+  * The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
+  * If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
 
 Useful to know:
 
@@ -308,3 +323,27 @@ Flow for testing overrides and rules:
 ```json
 [{"id":"133a6b14.ea2b85","type":"function","z":"d7bd7fb6.a0c13","name":"test","func":"\nconst minutesEachLoop = 30;\nconst loopCycle = 2; // seconds\nlet timeObj = context.get(\"timeObj\");\n\nif (timeObj && msg.topic.includes('stop')) {\n    clearInterval(timeObj);\n    context.set(\"timeObj\", null);\n    let d = new Date(context.get(\"date\"));\n    node.status({fill:\"red\",shape:\"ring\",text:\"stopped - \" + d.toLocaleTimeString()});\n    return null;\n} else if (!timeObj && msg.topic.includes('start')) {\n    context.set(\"message\", msg);\n    let d = new Date();\n    let num = Number(msg.payload) || 0;\n    d.setHours(num);\n    d.setMinutes(0);\n    context.set(\"date\", d.getTime());\n    msg.lts = d.toLocaleTimeString();\n    msg.ts = d.getTime();\n    node.log(\"sending \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n    node.send(msg);\n\n    let timeObj = setInterval(function(){\n        let msg = context.get(\"message\");\n        let d = new Date(context.get(\"date\"));\n        //d.setHours(d.getHours()+1);\n        d.setMinutes(d.getMinutes() + minutesEachLoop)\n        context.set(\"date\", d.getTime());\n        msg.lts = d.toLocaleTimeString();\n        msg.ts = d.getTime();\n        node.status({fill:\"green\",shape:\"dot\",text:\"run - \" + d.toLocaleTimeString()});\n        node.log(\"sending \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n        node.send(msg);\n\t}, (1000 * loopCycle));\n    context.set(\"timeObj\", timeObj);\n    node.status({fill:\"green\",shape:\"ring\",text:\"start - \" + d.toLocaleTimeString()});\n    return null;\n}\n\nlet d = new Date(context.get(\"date\"));\nd.setMinutes(d.getMinutes() + 1)\n//d.setHours(d.getHours()+1);\nmsg.lts = d.toLocaleTimeString();\nmsg.ts = d.getTime();\nnode.status({fill:\"yellow\",shape:\"dot\",text:\"interposed - \" + d.toLocaleTimeString()});\nnode.log(\"sending interposed msg \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\nnode.send(msg);\nreturn null;","outputs":1,"noerr":0,"x":500,"y":2580,"wires":[["2f830c53.455b44"]]},{"id":"66a0fed2.d1c17","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"start/stop","payload":"0","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":225,"y":2535,"wires":[["133a6b14.ea2b85"]]},{"id":"36b5bf53.635a","type":"inject","z":"d7bd7fb6.a0c13","name":"reset","topic":"resetOverwrite","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2625,"wires":[["133a6b14.ea2b85"]]},{"id":"26e49680.865ada","type":"inject","z":"d7bd7fb6.a0c13","name":"0%","topic":"levelOverwrite","payload":"0","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2665,"wires":[["133a6b14.ea2b85"]]},{"id":"5d82a89c.499078","type":"inject","z":"d7bd7fb6.a0c13","name":"60%","topic":"levelOverwrite","payload":"0.6","payloadType":"num","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":230,"y":2710,"wires":[["133a6b14.ea2b85"]]},{"id":"e8ac078f.9bc308","type":"comment","z":"d7bd7fb6.a0c13","name":"manual overrides:","info":"","x":225,"y":2580,"wires":[]},{"id":"32306190.8018ee","type":"inject","z":"d7bd7fb6.a0c13","name":"90%, expire 2,5s","topic":"","payload":"{\"position\":0.9,\"expire\":2500}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":260,"y":2760,"wires":[["133a6b14.ea2b85"]]},{"id":"5c942931.d78168","type":"inject","z":"d7bd7fb6.a0c13","name":"30% Prio 1","topic":"","payload":"{\"position\":0.3,\"prio\":1}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":240,"y":2805,"wires":[["133a6b14.ea2b85"]]},{"id":"d21d3f4d.50916","type":"inject","z":"d7bd7fb6.a0c13","name":"100% prio 1","topic":"","payload":"{\"priority\":1, \"position\":1}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":250,"y":2850,"wires":[["133a6b14.ea2b85"]]},{"id":"2f830c53.455b44","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"d9e9ca6a.952218","outputs":2,"blindIncrement":"0.01","blindOpenPos":"1","blindClosedPos":0,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeValue":"6:30","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"7:25","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.today.isWeekendOrHoliday","validOperandAType":"flow","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDawn","timeType":"pdsTime","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDusk","timeType":"pdsTime","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"22:35","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"23:15","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.tomorrow.isWeekendOrHoliday","validOperandAType":"flow","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"}],"sunControlMode":"2","sunFloorLength":"0.6","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"1.28","windowBottom":"0","windowAzimuthStart":"70","windowAzimuthEnd":"150","oversteerValue":"","oversteerValueType":"none","oversteerCompare":"gte","oversteerThreshold":"50","oversteerThresholdType":"num","oversteerBlindPos":"open (max)","oversteerBlindPosType":"levelFixed","x":740,"y":2580,"wires":[["12e898d.ca51e67"],["324e3f09.4452"]]},{"id":"12e898d.ca51e67","type":"debug","z":"d7bd7fb6.a0c13","name":"Blind position","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","x":985,"y":2565,"wires":[]},{"id":"324e3f09.4452","type":"debug","z":"d7bd7fb6.a0c13","name":"Blind status","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":985,"y":2625,"wires":[]},{"id":"4abea741.2fd968","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.today.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.today.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":785,"y":2715,"wires":[[]]},{"id":"4548475.5b1feb8","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":515,"y":2715,"wires":[["4abea741.2fd968"]]},{"id":"fb328117.4c438","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":515,"y":2760,"wires":[["4abea741.2fd968"]]},{"id":"db519048.9483b","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.tomorrow.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.tomorrow.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":795,"y":2805,"wires":[[]]},{"id":"1230ba43.d37cd6","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":515,"y":2805,"wires":[["db519048.9483b"]]},{"id":"d9e378ce.f2db68","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":515,"y":2850,"wires":[["db519048.9483b"]]},{"id":"d9e9ca6a.952218","type":"position-config","z":"","name":"Entenhausen","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":"1"}]
 ```
+
+## Additional FAQ
+
+### Why is there no multi blind controller?
+
+The approach is that there is a node for a blind. To reduce the setup overhead it is possible to create a sub-flow with the node per side of the house and thus only have to make the settings once. Settings such as overrides or times can still be configured individually, for example via sub-flow environment variables.
+
+Maybe in this case [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller) is better suited here as well.
+
+### How to define a Temperature Overwrite?
+
+To Overwrite the sun-.calculation by a temperature threshold can be archived by using a conditional rule.
+
+### How do I achieve that when opening a window the blind opens?
+
+This can be archived in different ways:
+
+* using override possibilities with different priority
+* using conditional rules
+
+## Other
+
+For bugs, questions and feature requests please use the
+[GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).

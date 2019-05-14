@@ -167,21 +167,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: 'msg.value',
             hasValue: false
         },
-        MsgDelay: {
-            value: 'msgDelay',
-            label: 'msg.delay',
-            hasValue: false
-        },
-        MsgOnTime: {
-            value: 'msgOnTime',
-            label: 'msg.onTime',
-            hasValue: false
-        },
-        MsgRampTime: {
-            value: 'msgRampTime',
-            label: 'msg.rampTime',
-            hasValue: false
-        },
         TimeEntered: {
             value: 'entered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
@@ -695,12 +680,6 @@ function getTimeProp(result, config, type, value, offset, offsetType, multiplier
         result({ value: 'msg.lc' });
     } else if (type === 'msgValue') {
         result({ value: 'msg.value' });
-    } else if (type === 'msgDelay') {
-        result({ value: 'msg.delay' });
-    } else if (type === 'msgOnTime') {
-        result({ value: 'msg.onTime' });
-    } else if (type === 'msgRampTime') {
-        result({ value: 'msg.rampTime' });
     } else {
         let url = '/sun-position/data?config=' + config + '&kind=getTimeProp&type=' + type + '&value=' + value;
         if (offset) { url += '&offset=' + offset; }
@@ -736,12 +715,6 @@ function getOutDataProp(result, config, type, value, format, offset, offsetType,
         result('msg.lc');
     } else if (type === 'msgValue') {
         result('msg.value');
-    } else if (type === 'msgDelay') {
-        result('msg.delay');
-    } else if (type === 'msgOnTime') {
-        result('msg.onTime');
-    } else if (type === 'msgRampTime') {
-        result('msg.rampTime');
     } else {
         let url = '/sun-position/data?config=' + config + '&kind=getOutDataProp&type=' + type + '&value=' + value;
         if (format) { url += '&format=' + format; }

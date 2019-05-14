@@ -164,20 +164,17 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getMoonTime(now, value, offset, multiplier, next, days) {
-            this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
+            // this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = this._moonTimesCheck( now);
-            this.debug('getMoonTime moonTimesToday=' + util.inspect(this.moonTimesToday));
             result.value = hlp.addOffset(new Date(this.moonTimesToday[value]), offset, multiplier);
             if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                 if (next === 1) {
                     result.value = hlp.addOffset(new Date(this.moonTimesTomorow[value]), offset, multiplier);
-                    this.debug('Moon Times tomorrow =' + util.inspect(this.moonTimesTomorow));
                 } else if (next > 1) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(next);
                     const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude, true);
                     result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
-                    // this.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                 }
             }
 
@@ -196,7 +193,6 @@ module.exports = function (RED) {
             if (isNaN(result.value)) {
                 result.error = 'No valid time for moon ' + value + ' found!';
             }
-            // this.debug('getMoonTime result' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
@@ -411,8 +407,6 @@ module.exports = function (RED) {
                 }
                 result.value = new Date();
             }
-
-            // this.debug('getTimeProp result' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
@@ -420,21 +414,23 @@ module.exports = function (RED) {
             // _srcNode.debug(`getPropValue ${type}.${value} (${addID})`);
             let result = null;
             if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
-                return null;
+                result = null;
             } else if (type === 'num') {
                 result = Number(value);
             } else if (type === 'msgPayload') {
                 result = msg.payload;
             } else if (type === 'msgValue') {
                 result = msg.value;
-            } else if (type === 'DayOfMonth') {
-                const d = new Date();
-                const nd = hlp.getSpecialDayOfMonth(d.getFullYear(), d.getMonth(), value);
-                if (nd === null) {
-                    result = false;
-                } else {
-                    result = (nd.getDate() === d.getDate());
-                }
+            } else if (type === 'msgTs') {
+                result =  msg.ts;
+            } else if (type === 'msgLc') {
+                result = msg.lc;
+            } else if (type === 'pdsCalcData') {
+                result = this.getSunCalc(msg.ts);
+            } else if (type === 'pdmCalcData') {
+                result = this.getMoonCalc(msg.ts);
+            } else if (type === 'entered' || type === 'dateEntered') {
+                result = hlp.getDateOfText(String(value));
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
@@ -773,11 +769,7 @@ module.exports = function (RED) {
                 }
                 case 'getTimeProp': {
                     try {
-                        console.log('getting request');
-                        console.log(req.query);
                         obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
-                        console.log('request result');
-                        console.log(obj);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

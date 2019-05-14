@@ -142,16 +142,17 @@ module.exports = function (RED) {
     'use strict';
 
     function evalTempData(node, type, value, data) {
-        if (!data) {
+        // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        if (data === null || typeof data === 'undefined') {
             const name = type + '.' + value;
-            if (node.tempData[name]) {
-                node.log(RED._('errors.usingTempValue', { type: type, value: value, usedValue: node.tempData[name] }));
+            if (typeof node.tempData[name] !== 'undefined') {
+                node.log(RED._('blind-control.errors.usingTempValue', { type: type, value: value, usedValue: node.tempData[name] }));
                 return node.tempData[name];
             }
             if (node.nowarn[name]) {
                 return null; // only one error per run
             }
-            node.warn(RED._('errors.notEvaluableProperty', { type: type, value: value, usedValue: 'null' }));
+            node.warn(RED._('blind-control.errors.notEvaluableProperty', { type: type, value: value, usedValue: 'null' }));
             node.nowarn[name] = true;
             return null;
         }
@@ -342,9 +343,13 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], undefined, 0);
-        checkOverrideReset(node, msg, now, prio);
-
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], (p) => {
+            checkOverrideReset(node, msg, now, p);
+            return p;
+        }, () => {
+            checkOverrideReset(node, msg, now);
+            return 0;
+        });
         if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             setOverwriteReason(node);
             node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
@@ -668,6 +673,7 @@ module.exports = function (RED) {
         this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || 0);
         const node = this;
+
         if (node.smoothTime >= 0x7FFFFFFF) {
             node.error(RED._('blind-control.errors.smoothTimeToolong', this));
             delete node.smoothTime;
@@ -765,11 +771,11 @@ module.exports = function (RED) {
             } else if (code === 1 || code === 8) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
-
+            node.reason.stateComplete = (isNaN(node.blindData.level)) ? node.reason.state : node.blindData.level.toString() + ' - ' + node.reason.state;
             node.status({
                 fill: fill,
                 shape: shape,
-                text: (isNaN(node.blindData.level)) ? node.reason.state : node.blindData.level.toString() + ' - ' + node.reason.state
+                text: node.reason.stateComplete
             });
         }
 
@@ -839,7 +845,7 @@ module.exports = function (RED) {
                         node.oversteerData.value,
                         node.oversteerData.operator,
                         (type, value, data, _id) => {
-                            if (data) {
+                            if (data !== null && typeof data !== 'undefined') {
                                 node.tempData[type + '.' + value] = data;
                             }
                         });

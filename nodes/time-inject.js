@@ -39,12 +39,6 @@ module.exports = function (RED) {
                 msg.lc = res;
             } else if (type === 'msgValue') {
                 msg.value = res;
-            } else if (type === 'msgDelay') {
-                msg.delay = res;
-            } else if (type === 'msgOnTime') {
-                msg.onTime = res;
-            } else if (type === 'msgRampTime') {
-                msg.rampTime = res;
             } else if (type === 'msg') {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {

@@ -697,7 +697,7 @@ A JSONata expression in the *property* must be always a boolean with value true,
 
 ## Bugs and Feedback
 
-For bugs, questions and discussions please use the
+For bugs, questions and feature requests please use the
 [GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
