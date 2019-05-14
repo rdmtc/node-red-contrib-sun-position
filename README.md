@@ -632,7 +632,7 @@ The formats are:
 | tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
 | T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
 | TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
-| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
+| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US time zones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
 | o           | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
 | S           | The date's ordinal suffix (st, nd, rd, or th). Works well with d.                                                                                             |
 | x           | difference of days from timestamp day to output day                                                                                                           |

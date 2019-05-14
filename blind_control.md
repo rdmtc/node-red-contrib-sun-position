@@ -161,7 +161,7 @@ under the simplest assumption starting from the bearing representing the perpend
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
 * **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is equal or higher then the priotiry of the existing override. The message priority can be defined by
+  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is equal or higher then the priority of the existing override. The message priority can be defined by
     * a property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority` with a valid numeric value
     * or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
 * **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
