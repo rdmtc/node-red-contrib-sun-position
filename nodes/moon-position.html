@@ -65,12 +65,9 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
-    function clipValueLength(v) {
-        if (v.length > 15) {
-            return v.substring(0, 15) + '...';
-        }
-
-        return v;
+    function clipValueLength(v, l) {
+        l = l || 15;
+        return (v.length > l) ? v.substring(0, (l - 3)) + '...' : v;
     }
 
     function prop2name(key) {
