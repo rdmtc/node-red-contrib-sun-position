@@ -538,6 +538,12 @@ module.exports = function (RED) {
                     (type, value, data, _id) => { // opCallback
                         return evalTempData(node, type, value, data);
                     });
+                rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
+                rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName, 25) + ' ' + rule.conditonData.operatorText;
+                if (typeof rule.conditonData.operandB !== 'undefined' && rule.conditonData.operandB !== null) {
+                    rule.conditonData.text += ' ' + rule.conditonData.operandB;
+                    rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
+                }
             }
         }
 
@@ -548,23 +554,6 @@ module.exports = function (RED) {
                     if (!rule.conditonData.result) {
                         return null;
                     }
-                    /*
-                    rule.conditonData = {
-                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
-                        operator: rule.validOperator
-                    };
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, 'value', 'threshold', rule.conditonData)) {
-                        return null;
-                    }
-                    rule.conditonData.operatorText = rule.validOperatorText;
-                    rule.conditonData.operatorDescription = RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator);
-                    rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
-                    rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName,25) + ' ' + rule.conditonData.operatorText;
-                    if (rule.conditonData.operandB) {
-                        rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
-                        rule.conditonData.text += ' ' + rule.conditonData.operandB;
-                        rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
-                    } */
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
                     node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -912,18 +901,12 @@ module.exports = function (RED) {
                 if (rule.conditional) {
                     rule.conditonData = {
                         result: false,
-                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
+                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue.replace(/^#:(.+)::/, ''),
+                        operandBName: rule.validOperandBType + '.' + rule.validOperandBValue.replace(/^#:(.+)::/, ''),
                         operator: rule.validOperator,
                         operatorText: rule.validOperatorText,
                         operatorDescription: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator)
                     };
-                    rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
-                    rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName, 25) + ' ' + rule.conditonData.operatorText;
-                    if (rule.conditonData.operandB) {
-                        rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
-                        rule.conditonData.text += ' ' + rule.conditonData.operandB;
-                        rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
-                    }
                 }
             }
         }
