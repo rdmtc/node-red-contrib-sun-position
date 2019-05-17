@@ -157,6 +157,7 @@ module.exports = function (RED) {
             return null;
         }
         node.tempData[type + '.' + value] = data;
+        return data;
     }
 
     /******************************************************************************************/
@@ -480,7 +481,7 @@ module.exports = function (RED) {
             node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
         }
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
-            // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
+            node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
             node.reason.state = RED._('blind-control.states.smooth', { pos: node.blindData.level.toString()});
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
@@ -495,7 +496,7 @@ module.exports = function (RED) {
         }
         if (node.blindData.level < node.blindData.levelMin)  {
             // min
-            // node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
+            node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
             node.reason.code = 5;
             node.reason.state = RED._('blind-control.states.sunCtrlMin', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMin', {org: node.reason.description, level:node.blindData.level});
@@ -503,14 +504,14 @@ module.exports = function (RED) {
             node.blindData.levelInverse = node.blindData.levelMax;
         } else if (node.blindData.level > node.blindData.levelMax) {
             // max
-            // node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
+            node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
             node.reason.code = 6;
             node.reason.state = RED._('blind-control.states.sunCtrlMax', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMax', {org: node.reason.description, level:node.blindData.level});
             node.blindData.level = node.blindData.levelMax;
             node.blindData.levelInverse = node.blindData.levelMin;
         }
-        // node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
+        node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
     }
     /******************************************************************************************/
@@ -529,6 +530,8 @@ module.exports = function (RED) {
         for (let i = 0; i < node.rulesCount; ++i) {
             const rule = node.rulesData[i];
             if (rule.conditional) {
+                delete rule.conditonData.operandValue;
+                delete rule.conditonData.thresholdValue;
                 rule.conditonData.result = node.positionConfig.comparePropValue(node, msg,
                     rule.validOperandAType,
                     rule.validOperandAValue,
@@ -536,13 +539,18 @@ module.exports = function (RED) {
                     rule.validOperandBType,
                     rule.validOperandBValue,
                     (type, value, data, _id) => { // opCallback
+                        if (_id === 1) {
+                            rule.conditonData.operandValue = value;
+                        } else if (_id === 2) {
+                            rule.conditonData.thresholdValue = value;
+                        }
                         return evalTempData(node, type, value, data);
                     });
-                rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
-                rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName, 25) + ' ' + rule.conditonData.operatorText;
-                if (typeof rule.conditonData.operandB !== 'undefined' && rule.conditonData.operandB !== null) {
-                    rule.conditonData.text += ' ' + rule.conditonData.operandB;
-                    rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
+                rule.conditonData.text = rule.conditonData.operandName + ' ' + rule.conditonData.operatorText;
+                rule.conditonData.textShort = (rule.conditonData.operandNameShort || rule.conditonData.operandName) + ' ' + rule.conditonData.operatorText;
+                if (typeof rule.conditonData.thresholdValue !== 'undefined') {
+                    rule.conditonData.text += ' ' + rule.conditonData.thresholdValue;
+                    rule.conditonData.textShort += ' ' + hlp.clipStrLength(rule.conditonData.thresholdValue, 10);
                 }
             }
         }
@@ -638,6 +646,7 @@ module.exports = function (RED) {
             node.reason.state= RED._('blind-control.states.'+name, data);
             node.reason.description = RED._('blind-control.reasons.'+name, data);
             // node.debug('checkRules end: livingRuleData=' + util.inspect(livingRuleData,{colors:true, compact:10}));
+            node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -648,6 +657,7 @@ module.exports = function (RED) {
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
         // node.debug('checkRules end default: livingRuleData=' + util.inspect(livingRuleData, {colors:true, compact:10}));
+        node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -892,6 +902,41 @@ module.exports = function (RED) {
             node.debug('initialize');
             node.rulesCount = node.rulesData.length;
             node.rulesTemp = [];
+            const getName = (type, value) => {
+                if (type === 'num') {
+                    return value;
+                } else if (type === 'str') {
+                    return '"' + value + '"';
+                } else if (type === 'bool') {
+                    return '"' + value + '"';
+                } else if (type === 'global' || type === 'flow') {
+                    value = value.replace(/^#:(.+)::/, '');
+                }
+                return type + '.' + value;
+            };
+            const getNameShort = (type, value) => {
+                if (type === 'num') {
+                    return value;
+                } else if (type === 'str') {
+                    return '"' + hlp.clipStrLength(value,20) + '"';
+                } else if (type === 'bool') {
+                    return '"' + value + '"';
+                } else if (type === 'global' || type === 'flow') {
+                    value = value.replace(/^#:(.+)::/, '');
+                    // special for Homematic Devices
+                    if (/^.+\[('|").{18,}('|")\].*$/.test(value)) {
+                        value = value.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                        if (value.length > 25) {
+                            return '...' + value.slice(-22);
+                        }
+                        return value;
+                    }
+                }
+                if ((type + value).length > 25) {
+                    return type + '...' + value.slice(-22);
+                }
+                return type + '.' + value;
+            };
             for (let i = 0; i < node.rulesCount; ++i) {
                 const rule = node.rulesData[i];
                 rule.timeOp = Number(rule.timeOp);
@@ -901,12 +946,18 @@ module.exports = function (RED) {
                 if (rule.conditional) {
                     rule.conditonData = {
                         result: false,
-                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue.replace(/^#:(.+)::/, ''),
-                        operandBName: rule.validOperandBType + '.' + rule.validOperandBValue.replace(/^#:(.+)::/, ''),
+                        operandName: getName(rule.validOperandAType,rule.validOperandAValue),
+                        thresholdName: getName(rule.validOperandBType, rule.validOperandBValue),
                         operator: rule.validOperator,
                         operatorText: rule.validOperatorText,
                         operatorDescription: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator)
                     };
+                    if (rule.conditonData.operandName.length > 25) {
+                        rule.conditonData.operandNameShort = getNameShort(rule.validOperandAType, rule.validOperandAValue);
+                    }
+                    if (rule.conditonData.thresholdName.length > 25) {
+                        rule.conditonData.thresholdNameShort = getNameShort(rule.validOperandBType, rule.validOperandBValue);
+                    }
                 }
             }
         }

@@ -142,7 +142,7 @@
 <script type="text/javascript">
     function clipValueLength(v, l) {
         l = l || 15;
-        return (v.length > l) ? v.substring(0, (l - 3)) + '...' : v;
+        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {

@@ -196,7 +196,7 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        getFloatProp(_srcNode, msg, type, value, def) {
+        getFloatProp(_srcNode, msg, type, value, def, opCallback) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
@@ -208,12 +208,8 @@ module.exports = function (RED) {
                 data = value;
             } else if (type === 'none') {
                 return def || NaN;
-            } else if (type === 'msgPayload') {
-                data = msg.payload;
-            } else if (type === 'msgValue') {
-                data = msg.value;
             } else {
-                data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                data = this.getPropValue(_srcNode, msg, type, value, opCallback);
             }
             if (data === null || typeof data === 'undefined') {
                 throw new Error(RED._('errors.notEvaluableProperty', {type:type, value:value}));
@@ -241,18 +237,6 @@ module.exports = function (RED) {
                 const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                 result = hlp.addOffset((new Date()), offsetX, multiplier);
                 return hlp.getFormattedDateOut(result, format);
-            } else if (vType === 'msgPayload') {
-                return msg.payload;
-            } else if (vType === 'msgTs') {
-                return msg.ts;
-            } else if (vType === 'msgLc') {
-                return msg.lc;
-            } else if (vType === 'msgValue') {
-                return msg.value;
-            } else if (vType === 'pdsCalcData') {
-                return this.getSunCalc(msg.ts);
-            } else if (vType === 'pdmCalcData') {
-                return this.getMoonCalc(msg.ts);
             } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                 if (vType === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -280,7 +264,7 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            return RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+            return this.getPropValue(_srcNode, msg, vType, value);
         }
         /*******************************************************************************************************/
         getDateFromProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier) {
@@ -318,17 +302,9 @@ module.exports = function (RED) {
                     result = hlp.getDateOfText(String(value));
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     return hlp.addOffset(result, offsetX, multiplier);
-                } else if (vType === 'msgPayload') {
-                    result = msg.payload;
-                } else if (vType === 'msgTs') {
-                    result = msg.ts;
-                } else if (vType === 'msgLc') {
-                    return msg.lc;
-                } else if (vType === 'msgValue') {
-                    result = msg.value;
                 } else {
                     // msg, flow, global, str, num, env
-                    result = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+                    result = this.getPropValue(_srcNode, msg, vType, value);
                 }
                 if (result !== null && typeof result !== 'undefined') {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -383,7 +359,8 @@ module.exports = function (RED) {
                 } else {
                     // can handle context, json, jsonata, env, ...
                     result.fix = (vType === 'json'); // is not a fixed time if can be changed
-                    const res = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+                    const res = this.getPropValue(_srcNode, msg, vType, value);
+
                     if (res) {
                         result.value = hlp.getDateOfText(res);
                         const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -417,6 +394,12 @@ module.exports = function (RED) {
                 result = null;
             } else if (type === 'num') {
                 result = Number(value);
+            } else if (type === 'str') {
+                result = ''+value;
+            } else if (type === 'bool') {
+                result = /^true$/i.test(value);
+            } else if (type === 'date') {
+                result = Date.now();
             } else if (type === 'msgPayload') {
                 result = msg.payload;
             } else if (type === 'msgValue') {
