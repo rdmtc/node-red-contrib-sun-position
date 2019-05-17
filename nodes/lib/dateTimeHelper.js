@@ -8,6 +8,8 @@ module.exports = {
     isBool,
     isTrue,
     isFalse,
+    pad2,
+    customISOstring,
     clipStrLength,
     countDecimals,
     handleError,
@@ -96,6 +98,25 @@ function getNodeId(node) {
  */
 function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
+}
+/*******************************************************************************************************/
+/**
+ * Formats a Date object to a custom ISO String
+ * @param {*} date Date to Format
+ * @param {*} offset Offset for Format
+ */
+function customISOstring(date, offset) {
+    date = new Date(date); // copy instance
+    const h = Math.floor(Math.abs(offset)/60);
+    const m = Math.abs(offset) % 60;
+    date.setMinutes(date.getMinutes() - offset); // apply custom timezone
+    return    date.getUTCFullYear() + '-' // return custom format
+        + pad2(date.getUTCMonth() + 1) + '-'
+        + pad2(date.getUTCDate()) + 'T'
+        + pad2(date.getUTCHours()) + ':'
+        + pad2(date.getUTCMinutes()) + ':'
+        + pad2(date.getUTCSeconds())
+        + (offset === 0 ? 'Z' : (offset<0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
 }
 /*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */

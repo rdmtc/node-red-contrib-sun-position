@@ -13,8 +13,12 @@ const util = require('util');
  * @param {*} level the level to check
  * @returns {boolean} true if the level is valid, otherwise false
  */
-function validPosition_(node, level) {
+function validPosition_(node, level, allowRound) {
     // node.debug('validPosition_ level='+level);
+    if (level === '' || level === null || typeof level === 'undefined') {
+        node.warn(`Position is empty!`);
+        return false;
+    }
     if (isNaN(level)) {
         node.warn(`Position: "${level}" is NaN!`);
         return false;
@@ -34,6 +38,9 @@ function validPosition_(node, level) {
         !Number.isInteger(level) )) {
         node.warn(`Position invalid "${level}" not fit to increment ${node.blindData.increment}`);
         return false;
+    }
+    if (allowRound) {
+        return true;
     }
     return Number.isInteger(Number((level / node.blindData.increment).toFixed(hlp.countDecimals(node.blindData.increment) + 2)));
 }
@@ -357,7 +364,7 @@ module.exports = function (RED) {
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
-        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
+        let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (node.blindData.overwrite.active && isNaN(newPos)) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
@@ -378,9 +385,13 @@ module.exports = function (RED) {
                 node.blindData.level = NaN;
                 node.blindData.levelInverse = NaN;
             } else if (!isNaN(newPos)) {
-                if (!validPosition_(node, newPos)) {
+                const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
+                if (!validPosition_(node, newPos, allowRound)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
                     return false;
+                }
+                if (allowRound) {
+                    newPos = posRound_(node, newPos);
                 }
                 node.debug(`overwrite newPos=${newPos}`);
                 const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
