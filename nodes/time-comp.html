@@ -183,10 +183,8 @@
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
-        if (v.length > l) {
-            return v.substring(0, (l - 3)) + '...';
-        }
-        return v;
+        l = l || 15;
+        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {
@@ -433,6 +431,7 @@
             const setup = function(node) {
                 /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
                 const types = getTypes(node);
+                const selFields = getSelectFields();
                 const operatorTypesShort = [
                     {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
                     {selection: /^(11,)?12,13,14$/, label: 'T'},
@@ -573,14 +572,17 @@
                         }).appendTo(row);
                         appendOptions(node, operatorField, 'operators');
                         const operatorTypeField = multiselect(node, row, 'operatorTypes', 'node-red-contrib-sun-position/position-config:common.operatorTypes','node-input-rule-operatorType-' + containerIndex);
+                        operatorField.val(data.operator || selFields.operators[0].id);
+                        setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
 
                         addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
                         const operandField = $('<input/>', {
                             class: 'node-input-rule-operand',
                             id: 'node-input-rule-operand' + containerIndex,
-                            type: 'text'
+                            type: 'text',
+                            value: (data.operandValue || '')
                         }).appendTo(row).typedInput({
-                            default: types.DateEntered.value,
+                            default: (data.operandType || types.DateEntered.value),
                             types: [
                                 'msg',
                                 'flow',
@@ -610,19 +612,22 @@
                         const formatIpField = $('<input/>', {
                             class: 'node-input-rule-operandFormatIp',
                             id: 'node-input-rule-operandFormatIp' + containerIndex,
-                            type: 'text'
+                            type: 'text',
+                            value: (data.format || node._('time-comp.timeFormat.default'))
                         }).appendTo(row2);
                         formatSelField.change(() => {
                             resizeRule(containerRow);
                         });
+                        formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
                         // row3
                         addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
-                        const offsetField = $('<input/>', {
+                        $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
                             id: 'node-input-rule-offset' + containerIndex,
-                            type: 'text'
+                            type: 'text',
+                            value: (data.offsetValue || '')
                         }).appendTo(row3).typedInput({
-                            default: types.Undefined.value,
+                            default: (data.offsetType || types.Undefined.value),
                             types: [types.Undefined, 'num', 'msg', 'flow', 'global']
                         });
                         const multiplierField = $('<select/>', {
@@ -630,14 +635,16 @@
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row3);
                         appendOptions(node, multiplierField, 'multiplier');
+                        multiplierField.val(data.multiplier || 60000);
                         // row4
                         addLabel(row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
-                        const propertyField = $('<input/>', {
+                        $('<input/>', {
                             class: 'node-input-rule-property',
                             id: 'node-input-rule-property' + containerIndex,
-                            type: 'text'
+                            type: 'text',
+                            value: (data.propertyValue || '')
                         }).appendTo(row4).typedInput({
-                            default: types.Unlimited.value,
+                            default: (data.propertyType || types.Unlimited.value),
                             types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
                         });
                         // changes
@@ -659,18 +666,17 @@
                             }
                         });
                         // setting defaultValues
-                        const selFields = getSelectFields();
-                        operatorField.val(data.operator || selFields.operators[0].id);
-                        setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-                        operandField.typedInput('value', (data.operandValue || ''));
-                        operandField.typedInput('type', (data.operandType || types.DateEntered.value));
-                        formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
-                        formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
-                        offsetField.typedInput('value', data.offsetValue || '');
-                        offsetField.typedInput('type', data.offsetType || types.Undefined.value);
-                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
-                        propertyField.typedInput('value', data.propertyValue || '');
-                        propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
+                        // operatorField.val(data.operator || selFields.operators[0].id);
+                        // setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
+                        // operandField.typedInput('value', (data.operandValue || ''));
+                        // operandField.typedInput('type', (data.operandType || types.DateEntered.value));
+                        // formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
+                        // formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
+                        // offsetField.typedInput('value', data.offsetValue || '');
+                        // offsetField.typedInput('type', data.offsetType || types.Undefined.value);
+                        // multiplierField.val(data.multiplier || 60000);
+                        // propertyField.typedInput('value', data.propertyValue || '');
+                        // propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
                         resizeRule(containerRow);
                         autocomplete(formatIpField, 'dateParseFormat');
                         resizeContainer();
@@ -785,7 +791,6 @@
 
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {
-                    // console.log( _data ); // Data returned
                     setup(node);
                 })
                 .fail((jqxhr, settings, exception) => {
@@ -827,11 +832,9 @@
                 };
                 node.rules.push(data);
             });
-            // console.log(this.rules);
             const outputs = (node.rules) ? (node.rules.length + 1) : 1;
             $('#node-input-outputs').val(outputs);
             // #endregion result-container
-            // console.log(outputs);
 
             if (Number($('#node-input-result1FormatSel').val()) !== 99) {
                 $('#node-input-result1Format').val($('#node-input-result1FormatSel').val());
@@ -843,6 +846,5 @@
             node.result1ValueType = $('#node-input-result1Value').typedInput('type');
             node.result2Type = $('#node-input-result2').typedInput('type');
             node.result2ValueType = $('#node-input-result2Value').typedInput('type');
-        // console.log($("#node-input-outputs").val());
         }
     });</script>

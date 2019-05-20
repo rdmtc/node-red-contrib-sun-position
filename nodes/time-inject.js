@@ -39,12 +39,6 @@ module.exports = function (RED) {
                 msg.lc = res;
             } else if (type === 'msgValue') {
                 msg.value = res;
-            } else if (type === 'msgDelay') {
-                msg.delay = res;
-            } else if (type === 'msgOnTime') {
-                msg.onTime = res;
-            } else if (type === 'msgRampTime') {
-                msg.rampTime = res;
             } else if (type === 'msg') {
                 RED.util.setMessageProperty(msg, name, res);
             } else if ((type === 'flow' || type === 'global')) {
@@ -104,7 +98,7 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offset, node.offsetType, node.offsetMultiplier, 1, node.timeDays);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, 1, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextTime = null;
@@ -124,7 +118,7 @@ module.exports = function (RED) {
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
                 // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffset, node.timeAltOffsetType, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.nextTimeAlt = null;

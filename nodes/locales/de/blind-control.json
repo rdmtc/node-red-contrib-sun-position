@@ -41,8 +41,8 @@
 			"windowBottom": "Unterkante Fenster",
 			"windowAzimuthStart": "linke Seite Fenster zum geografischen Norden",
 			"windowAzimuthEnd": "rechte Seite Fenster zum geografischen Norden",
-			"blindIncrement": "0.01 or 1",
-			"blindOpenPos": "100",
+			"blindIncrement": "0.01 oder 1",
+			"blindOpenPos": "1 oder 100",
 			"blindClosedPos": "0",
 			"blindLevelDefault": "Rollladenposition, wenn keine andere zutrifft",
 			"blindLevelMin": "maximale Rollladenposition Sonnenstands abhängig",
@@ -115,7 +115,9 @@
 			"getOversteerData": "Fehler bei der Ermittlung der Daten: __message__",
 			"getBlindPosData": "Fehler bei der Ermittlung der Rollladenposition: __message__",
 			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
-			"smoothTimeToolong":"Die gewählte zeit ist zu groß!!"
+			"smoothTimeToolong":"Die gewählte zeit ist zu groß!!",
+			"usingTempValue": "Wert von __type__.__value__ kann nicht ermitteln werden und es wird der gespeicherte Wert \"__usedValue__\" verwendet!",
+			"notEvaluableProperty": "Fehler: kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
 		}
 	}
 }

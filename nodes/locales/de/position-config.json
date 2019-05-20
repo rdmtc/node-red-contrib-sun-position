@@ -241,7 +241,6 @@
         "unknownPropertyOperator": "Fehler, der verwendete Operator __propertyOp__=\"__propertyOpText__\" ist unbekannt!",
         "unknownCompareOperator": "Fehler, der verwendete vergleichs-Operator \"__operator__\" ist unbekannt!",
         "notEvaluableProperty":"Fehler: kann den Wert von __type__.__value__ nicht ermitteln",
-        "notEvaluablePropertyDefault": "Fehler: kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!",
         "notEvaluablePropertyAdd":"Fehler \"__err__\", kann den Wert von __type__.__value__ nicht ermitteln!"
     },
     "position-config": {

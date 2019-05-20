@@ -13,8 +13,12 @@ const util = require('util');
  * @param {*} level the level to check
  * @returns {boolean} true if the level is valid, otherwise false
  */
-function validPosition_(node, level) {
+function validPosition_(node, level, allowRound) {
     // node.debug('validPosition_ level='+level);
+    if (level === '' || level === null || typeof level === 'undefined') {
+        node.warn(`Position is empty!`);
+        return false;
+    }
     if (isNaN(level)) {
         node.warn(`Position: "${level}" is NaN!`);
         return false;
@@ -34,6 +38,9 @@ function validPosition_(node, level) {
         !Number.isInteger(level) )) {
         node.warn(`Position invalid "${level}" not fit to increment ${node.blindData.increment}`);
         return false;
+    }
+    if (allowRound) {
+        return true;
     }
     return Number.isInteger(Number((level / node.blindData.increment).toFixed(hlp.countDecimals(node.blindData.increment) + 2)));
 }
@@ -140,6 +147,26 @@ function getSunPosition_(node, now) {
 
 module.exports = function (RED) {
     'use strict';
+
+    function evalTempData(node, type, value, data) {
+        // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        if (data === null || typeof data === 'undefined') {
+            const name = type + '.' + value;
+            if (typeof node.tempData[name] !== 'undefined') {
+                node.log(RED._('blind-control.errors.usingTempValue', { type: type, value: value, usedValue: node.tempData[name] }));
+                return node.tempData[name];
+            }
+            if (node.nowarn[name]) {
+                return null; // only one error per run
+            }
+            node.warn(RED._('blind-control.errors.notEvaluableProperty', { type: type, value: value, usedValue: 'null' }));
+            node.nowarn[name] = true;
+            return null;
+        }
+        node.tempData[type + '.' + value] = data;
+        return data;
+    }
+
     /******************************************************************************************/
     /**
      * check the oversteering data
@@ -150,8 +177,15 @@ module.exports = function (RED) {
         // node.debug('checkOversteer');
         try {
             node.oversteerData.isChecked = true;
-            return node.positionConfig.comparePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value,
-                node.oversteerData.operator, node.oversteerData.thresholdType, node.oversteerData.thresholdValue, node.oversteerData.temp, 'value', 'threshold');
+            return node.positionConfig.comparePropValue(node, msg,
+                node.oversteerData.valueType,
+                node.oversteerData.value,
+                node.oversteerData.operator,
+                node.oversteerData.thresholdType,
+                node.oversteerData.thresholdValue,
+                (type, value, data, _id) => { // opCallback
+                    return evalTempData(node, type, value, data);
+                });
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -317,16 +351,20 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], undefined, 0);
-        checkOverrideReset(node, msg, now, prio);
-
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], (p) => {
+            checkOverrideReset(node, msg, now, p);
+            return p;
+        }, () => {
+            checkOverrideReset(node, msg, now);
+            return 0;
+        });
         if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             setOverwriteReason(node);
             node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
-        const newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
+        let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (node.blindData.overwrite.active && isNaN(newPos)) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
@@ -347,9 +385,13 @@ module.exports = function (RED) {
                 node.blindData.level = NaN;
                 node.blindData.levelInverse = NaN;
             } else if (!isNaN(newPos)) {
-                if (!validPosition_(node, newPos)) {
+                const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
+                if (!validPosition_(node, newPos, allowRound)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
                     return false;
+                }
+                if (allowRound) {
+                    newPos = posRound_(node, newPos);
                 }
                 node.debug(`overwrite newPos=${newPos}`);
                 const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
@@ -450,7 +492,7 @@ module.exports = function (RED) {
             node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
         }
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
-            // node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
+            node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
             node.reason.state = RED._('blind-control.states.smooth', { pos: node.blindData.level.toString()});
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
@@ -465,7 +507,7 @@ module.exports = function (RED) {
         }
         if (node.blindData.level < node.blindData.levelMin)  {
             // min
-            // node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
+            node.debug(`${node.blindData.level} is below ${node.blindData.levelMin} (min)`);
             node.reason.code = 5;
             node.reason.state = RED._('blind-control.states.sunCtrlMin', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMin', {org: node.reason.description, level:node.blindData.level});
@@ -473,14 +515,14 @@ module.exports = function (RED) {
             node.blindData.levelInverse = node.blindData.levelMax;
         } else if (node.blindData.level > node.blindData.levelMax) {
             // max
-            // node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
+            node.debug(`${node.blindData.level} is above ${node.blindData.levelMax} (max)`);
             node.reason.code = 6;
             node.reason.state = RED._('blind-control.states.sunCtrlMax', {org: node.reason.state});
             node.reason.description = RED._('blind-control.reasons.sunCtrlMax', {org: node.reason.description, level:node.blindData.level});
             node.blindData.level = node.blindData.levelMax;
             node.blindData.levelInverse = node.blindData.levelMin;
         }
-        // node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
+        node.debug(`calcBlindSunPosition end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
     }
     /******************************************************************************************/
@@ -495,25 +537,41 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = hlp.getTimeNumber(now);
         // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
+        // pre-checking conditions to may be able to store temp data
+        for (let i = 0; i < node.rulesCount; ++i) {
+            const rule = node.rulesData[i];
+            if (rule.conditional) {
+                delete rule.conditonData.operandValue;
+                delete rule.conditonData.thresholdValue;
+                rule.conditonData.result = node.positionConfig.comparePropValue(node, msg,
+                    rule.validOperandAType,
+                    rule.validOperandAValue,
+                    rule.validOperator,
+                    rule.validOperandBType,
+                    rule.validOperandBValue,
+                    (type, value, data, _id) => { // opCallback
+                        if (_id === 1) {
+                            rule.conditonData.operandValue = value;
+                        } else if (_id === 2) {
+                            rule.conditonData.thresholdValue = value;
+                        }
+                        return evalTempData(node, type, value, data);
+                    });
+                rule.conditonData.text = rule.conditonData.operandName + ' ' + rule.conditonData.operatorText;
+                rule.conditonData.textShort = (rule.conditonData.operandNameShort || rule.conditonData.operandName) + ' ' + rule.conditonData.operatorText;
+                if (typeof rule.conditonData.thresholdValue !== 'undefined') {
+                    rule.conditonData.text += ' ' + rule.conditonData.thresholdValue;
+                    rule.conditonData.textShort += ' ' + hlp.clipStrLength(rule.conditonData.thresholdValue, 10);
+                }
+            }
+        }
+
         const fkt = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
-                    rule.conditonData = {
-                        operandAName: rule.validOperandAType + '.' + rule.validOperandAValue,
-                        operator: rule.validOperator
-                    };
-                    if (!node.positionConfig.comparePropValue(node, msg, rule.validOperandAType, rule.validOperandAValue, rule.validOperator, rule.validOperandBType, rule.validOperandBValue, rule.temp, 'value', 'threshold', rule.conditonData)) {
+                    if (!rule.conditonData.result) {
                         return null;
-                    }
-                    rule.conditonData.operatorText = rule.validOperatorText;
-                    rule.conditonData.operatorDescription = RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator);
-                    rule.conditonData.text = rule.conditonData.operandAName + ' ' + rule.conditonData.operatorText;
-                    rule.conditonData.textShort = hlp.clipValueLength(rule.conditonData.operandAName,25) + ' ' + rule.conditonData.operatorText;
-                    if (rule.conditonData.operandB) {
-                        rule.conditonData.operandBName = rule.validOperandBType + '.' + rule.validOperandBValue;
-                        rule.conditonData.text += ' ' + rule.conditonData.operandB;
-                        rule.conditonData.textShort += ' ' + hlp.clipValueLength(rule.conditonData.operandBName, 20);
                     }
                 } catch (err) {
                     node.warn(RED._('blind-control.errors.getPropertyData', err));
@@ -524,7 +582,7 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetValue, rule.offsetType, rule.multiplier);
+            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetType, rule.offsetValue, rule.multiplier);
             if (rule.timeData.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;
@@ -599,6 +657,7 @@ module.exports = function (RED) {
             node.reason.state= RED._('blind-control.states.'+name, data);
             node.reason.description = RED._('blind-control.reasons.'+name, data);
             // node.debug('checkRules end: livingRuleData=' + util.inspect(livingRuleData,{colors:true, compact:10}));
+            node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -609,6 +668,7 @@ module.exports = function (RED) {
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
         // node.debug('checkRules end default: livingRuleData=' + util.inspect(livingRuleData, {colors:true, compact:10}));
+        node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -623,16 +683,19 @@ module.exports = function (RED) {
         this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || 0);
         const node = this;
+
         if (node.smoothTime >= 0x7FFFFFFF) {
             node.error(RED._('blind-control.errors.smoothTimeToolong', this));
             delete node.smoothTime;
         }
-
+        node.nowarn = {};
         node.reason = {
             code : 0,
             state: '',
             description: ''
         };
+        // temporary node Data
+        node.tempData = {};
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
@@ -678,7 +741,6 @@ module.exports = function (RED) {
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
         node.oversteerData = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
-            temp: {},
             isChecked: false
         };
         if (node.oversteerData.active) {
@@ -719,11 +781,11 @@ module.exports = function (RED) {
             } else if (code === 1 || code === 8) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
-
+            node.reason.stateComplete = (isNaN(node.blindData.level)) ? node.reason.state : node.blindData.level.toString() + ' - ' + node.reason.state;
             node.status({
                 fill: fill,
                 shape: shape,
-                text: (isNaN(node.blindData.level)) ? node.reason.state : node.blindData.level.toString() + ' - ' + node.reason.state
+                text: node.reason.stateComplete
             });
         }
 
@@ -743,6 +805,7 @@ module.exports = function (RED) {
                     });
                     return null;
                 }
+                node.nowarn = {};
                 const blindCtrl = {
                     reason : node.reason,
                     blind: node.blindData
@@ -787,7 +850,15 @@ module.exports = function (RED) {
                 }
 
                 if (node.oversteerData.active && !node.oversteerData.isChecked) {
-                    node.positionConfig.savePropValue(node, msg, node.oversteerData.valueType, node.oversteerData.value, node.oversteerData.temp, 'value');
+                    node.positionConfig.getPropValue(node, msg,
+                        node.oversteerData.valueType,
+                        node.oversteerData.value,
+                        node.oversteerData.operator,
+                        (type, value, data, _id) => {
+                            if (data !== null && typeof data !== 'undefined') {
+                                node.tempData[type + '.' + value] = data;
+                            }
+                        });
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();
@@ -841,13 +912,64 @@ module.exports = function (RED) {
         function initialize() {
             node.debug('initialize');
             node.rulesCount = node.rulesData.length;
+            node.rulesTemp = [];
+            const getName = (type, value) => {
+                if (type === 'num') {
+                    return value;
+                } else if (type === 'str') {
+                    return '"' + value + '"';
+                } else if (type === 'bool') {
+                    return '"' + value + '"';
+                } else if (type === 'global' || type === 'flow') {
+                    value = value.replace(/^#:(.+)::/, '');
+                }
+                return type + '.' + value;
+            };
+            const getNameShort = (type, value) => {
+                if (type === 'num') {
+                    return value;
+                } else if (type === 'str') {
+                    return '"' + hlp.clipStrLength(value,20) + '"';
+                } else if (type === 'bool') {
+                    return '"' + value + '"';
+                } else if (type === 'global' || type === 'flow') {
+                    value = value.replace(/^#:(.+)::/, '');
+                    // special for Homematic Devices
+                    if (/^.+\[('|").{18,}('|")\].*$/.test(value)) {
+                        value = value.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                        if (value.length > 25) {
+                            return '...' + value.slice(-22);
+                        }
+                        return value;
+                    }
+                }
+                if ((type + value).length > 25) {
+                    return type + '...' + value.slice(-22);
+                }
+                return type + '.' + value;
+            };
             for (let i = 0; i < node.rulesCount; ++i) {
                 const rule = node.rulesData[i];
                 rule.timeOp = Number(rule.timeOp);
                 rule.pos = i + 1;
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
-                rule.temp = {};
+                if (rule.conditional) {
+                    rule.conditonData = {
+                        result: false,
+                        operandName: getName(rule.validOperandAType,rule.validOperandAValue),
+                        thresholdName: getName(rule.validOperandBType, rule.validOperandBValue),
+                        operator: rule.validOperator,
+                        operatorText: rule.validOperatorText,
+                        operatorDescription: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule.validOperator)
+                    };
+                    if (rule.conditonData.operandName.length > 25) {
+                        rule.conditonData.operandNameShort = getNameShort(rule.validOperandAType, rule.validOperandAValue);
+                    }
+                    if (rule.conditonData.thresholdName.length > 25) {
+                        rule.conditonData.thresholdNameShort = getNameShort(rule.validOperandBType, rule.validOperandBValue);
+                    }
+                }
             }
         }
         initialize();

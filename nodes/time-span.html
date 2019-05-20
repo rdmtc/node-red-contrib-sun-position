@@ -141,10 +141,8 @@
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
-        if (v.length > l) {
-            return v.substring(0, (l - 3)) + '...';
-        }
-        return v;
+        l = l || 15;
+        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {
@@ -429,6 +427,7 @@
             const setup = function(node) {
                 /* global getSelectFields getTypes appendOptions setupTInput initCombobox */
                 const types = getTypes(node);
+                const selFields = getSelectFields();
                 // #region operand1
                 setupTInput(node, {
                     typeProp: 'operand1Type',
@@ -606,13 +605,15 @@
                             id: 'node-input-rule-operator' + containerIndex
                         }).appendTo(row);
                         appendOptions(node, operatorField, 'operators');
+                        operatorField.val(data.operator || selFields.operators[0].id);
 
-                        const operandField = $('<input/>', {
+                        $('<input/>', {
                             class: 'node-input-rule-operand',
                             id: 'node-input-rule-operand' + containerIndex,
-                            type: 'text'
+                            type: 'text',
+                            value: (data.operandValue || '')
                         }).appendTo(row).typedInput({
-                            default: 'num',
+                            default: (data.operandType || 'num'),
                             types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
                         });
                         const multiplierField = $('<select/>', {
@@ -620,16 +621,13 @@
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row);
                         appendOptions(node, multiplierField, 'multiplier', (data) => (data.id > 0) );
+                        multiplierField.val(data.multiplier || 60000);
+
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
                         }).appendTo(row);
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-                        // setting defaultValues
-                        const selFields = getSelectFields();
-                        operatorField.val(data.operator || selFields.operators[0].id);
-                        operandField.typedInput('value', data.operandValue || '');
-                        operandField.typedInput('type', data.operandType || 'num');
-                        multiplierField.val(data.multiplier || selFields.multiplier[0].id);
+
                         resizeRule(containerRow);
                         resizeContainer();
                     },
@@ -752,7 +750,6 @@
 
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {
-                    // console.log( _data ); // Data returned
                     setup(node);
                 })
                 .fail((jqxhr, settings, exception) => {

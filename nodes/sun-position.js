@@ -61,7 +61,7 @@ module.exports = function (RED) {
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
                 if (node.startType !== 'none') {
-                    const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffset, node.startOffsetType, node.startOffsetMultiplier);
+                    const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffsetType, node.startOffset, node.startOffsetMultiplier);
                     node.debug('startTime: ' + util.inspect(startTime));
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
@@ -73,7 +73,7 @@ module.exports = function (RED) {
                 }
 
                 if (node.endType !== 'none') {
-                    const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffset, node.endOffsetType, node.endOffsetMultiplier);
+                    const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffsetType, node.endOffset, node.endOffsetMultiplier);
                     node.debug('endTime: ' + util.inspect(endTime));
                     if (endTime.error) {
                         errorStatus = 'could not evaluate end time';

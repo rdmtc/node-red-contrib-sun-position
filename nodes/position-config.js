@@ -170,13 +170,11 @@ module.exports = function (RED) {
             if (next && !isNaN(next) && result.value.getTime() <= now.getTime()) {
                 if (next === 1) {
                     result.value = hlp.addOffset(new Date(this.moonTimesTomorow[value]), offset, multiplier);
-                    // this.debug('Moon Times tomorrow =' + util.inspect(this.moonTimesTomorrow));
                 } else if (next > 1) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(next);
                     const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude, true);
                     result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
-                    // this.debug('Moon Times for ' + date + ' =' + util.inspect(times));
                 }
             }
 
@@ -192,16 +190,17 @@ module.exports = function (RED) {
                     // this.debug('getMoonTime - no valid week day found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + result.value);
                 }
             }
-
-            // this.debug('getMoonTime result' + util.inspect(result));
+            if (isNaN(result.value)) {
+                result.error = 'No valid time for moon ' + value + ' found!';
+            }
             return result;
         }
         /*******************************************************************************************************/
-        getFloatProp(_srcNode, msg, type, value, def) {
+        getFloatProp(_srcNode, msg, type, value, def, opCallback) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
-                data = value;
+                data = Number(value); // extra conversation to handle empty string as 0
             } else if (type === '' || (typeof type === 'undefined') || type === null) {
                 if (isNaN(value)) {
                     return def || NaN;
@@ -209,12 +208,8 @@ module.exports = function (RED) {
                 data = value;
             } else if (type === 'none') {
                 return def || NaN;
-            } else if (type === 'msgPayload') {
-                data = msg.payload;
-            } else if (type === 'msgValue') {
-                data = msg.value;
             } else {
-                data = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                data = this.getPropValue(_srcNode, msg, type, value, opCallback);
             }
             if (data === null || typeof data === 'undefined') {
                 throw new Error(RED._('errors.notEvaluableProperty', {type:type, value:value}));
@@ -242,18 +237,6 @@ module.exports = function (RED) {
                 const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                 result = hlp.addOffset((new Date()), offsetX, multiplier);
                 return hlp.getFormattedDateOut(result, format);
-            } else if (vType === 'msgPayload') {
-                return msg.payload;
-            } else if (vType === 'msgTs') {
-                return msg.ts;
-            } else if (vType === 'msgLc') {
-                return msg.lc;
-            } else if (vType === 'msgValue') {
-                return msg.value;
-            } else if (vType === 'pdsCalcData') {
-                return this.getSunCalc(msg.ts);
-            } else if (vType === 'pdmCalcData') {
-                return this.getMoonCalc(msg.ts);
             } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                 if (vType === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -281,7 +264,7 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            return RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+            return this.getPropValue(_srcNode, msg, vType, value);
         }
         /*******************************************************************************************************/
         getDateFromProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier) {
@@ -319,17 +302,9 @@ module.exports = function (RED) {
                     result = hlp.getDateOfText(String(value));
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     return hlp.addOffset(result, offsetX, multiplier);
-                } else if (vType === 'msgPayload') {
-                    result = msg.payload;
-                } else if (vType === 'msgTs') {
-                    result = msg.ts;
-                } else if (vType === 'msgLc') {
-                    return msg.lc;
-                } else if (vType === 'msgValue') {
-                    result = msg.value;
                 } else {
                     // msg, flow, global, str, num, env
-                    result = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+                    result = this.getPropValue(_srcNode, msg, vType, value);
                 }
                 if (result !== null && typeof result !== 'undefined') {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -345,7 +320,7 @@ module.exports = function (RED) {
             }
         }
         /*******************************************************************************************************/
-        getTimeProp(_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days) {
+        getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
             // this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
@@ -384,7 +359,8 @@ module.exports = function (RED) {
                 } else {
                     // can handle context, json, jsonata, env, ...
                     result.fix = (vType === 'json'); // is not a fixed time if can be changed
-                    const res = RED.util.evaluateNodeProperty(value, vType, _srcNode, msg);
+                    const res = this.getPropValue(_srcNode, msg, vType, value);
+
                     if (res) {
                         result.value = hlp.getDateOfText(res);
                         const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -408,82 +384,59 @@ module.exports = function (RED) {
                 }
                 result.value = new Date();
             }
-
-            // this.debug('getTimeProp result' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
-        savePropValue(_srcNode, msg, type, value, tempStorage, opName) {
-            if (type === 'msgPayload') {
-                tempStorage[opName] = msg.payload;
+        getPropValue(_srcNode, msg, type, value, callback, addID) {
+            // _srcNode.debug(`getPropValue ${type}.${value} (${addID})`);
+            let result = null;
+            if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
+                result = null;
+            } else if (type === 'num') {
+                result = Number(value);
+            } else if (type === 'str') {
+                result = ''+value;
+            } else if (type === 'bool') {
+                result = /^true$/i.test(value);
+            } else if (type === 'date') {
+                result = Date.now();
+            } else if (type === 'msgPayload') {
+                result = msg.payload;
             } else if (type === 'msgValue') {
-                tempStorage[opName] = msg.value;
-            } else if (type === 'msg') {
+                result = msg.value;
+            } else if (type === 'msgTs') {
+                result =  msg.ts;
+            } else if (type === 'msgLc') {
+                result = msg.lc;
+            } else if (type === 'pdsCalcData') {
+                result = this.getSunCalc(msg.ts);
+            } else if (type === 'pdmCalcData') {
+                result = this.getMoonCalc(msg.ts);
+            } else if (type === 'entered' || type === 'dateEntered') {
+                result = hlp.getDateOfText(String(value));
+            } else {
                 try {
-                    const opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
-                    if (opData !== null && typeof opData !== 'undefined') {
-                        tempStorage[opName] = opData;
-                    }
+                    result = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
+            if (typeof callback === 'function') {
+                return callback(type, value, result, addID);
+            } else if (result === null || typeof result === 'undefined') {
+                _srcNode.error(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                return null;
+            }
+            return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, tempStorage, opNameA, opNameB, outReason) {
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             }
 
-            const opVal = (type, value, opName) => {
-                // _srcNode.debug(`getting ${opName} = ${type}.${value}`);
-                let opData = null;
-                try {
-                    if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
-                        _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue:'null' }));
-                        return null;
-                    } else if (type === 'num') {
-                        return Number(value);
-                    } else if (type === 'msgPayload') {
-                        return msg.payload;
-                    } else if (type === 'msgValue') {
-                        return msg.value;
-                    } else if (type === 'DayOfMonth') {
-                        const d = new Date();
-                        const nd = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
-                        if (nd === null) {
-                            return false;
-                        }
-                        return (nd.getDate() === d.getDate());
-                    }
-                    opData = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
-                    if (opData === null || typeof opData === 'undefined') {
-                        throw new Error(opData);
-                    }
-                    if (typeof tempStorage !== 'undefined' && type === 'msg') {
-                        tempStorage[opName] = opData;
-                    }
-                    if (typeof outReason === 'object') {
-                        outReason[opName] = opData;
-                        // _srcNode.debug('opData=' + opData + ' outReason= ' + util.inspect(outReason, Object.getOwnPropertyNames(outReason)));
-                    }
-                    return opData;
-                } catch (err) {
-                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                    if (tempStorage && (type === 'msg') && tempStorage[opName]) {
-                        _srcNode.log(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: tempStorage[opName] }));
-                        return tempStorage[opName];
-                    }
-                    _srcNode.warn(RED._('errors.notEvaluablePropertyDefault', { type: type, value: value, usedValue: 'null' }));
-                    if (typeof outReason === 'object') {
-                        outReason[opName] = null;
-                        outReason[opName + '_error'] = err;
-                    }
-                    return null;
-                }
-            };
-            const a = opVal(opTypeA, opValueA, opNameA);
+            const a = this.getPropValue(_srcNode, msg, opTypeA, opValueA, opCallback, 1);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -516,26 +469,26 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
+                    return (a == this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != opVal(opTypeB, opValueB, opNameB));  // eslint-disable-line eqeqeq
+                    return (a != this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < opVal(opTypeB, opValueB, opNameB));
+                    return (a < this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'lte':
-                    return (a <= opVal(opTypeB, opValueB, opNameB));
+                    return (a <= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'gt':
-                    return (a > opVal(opTypeB, opValueB, opNameB));
+                    return (a > this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'gte':
-                    return (a >= opVal(opTypeB, opValueB, opNameB));
+                    return (a >= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
                 case 'contain':
-                    return ((a + '').includes(opVal(opTypeB, opValueB, opNameB)));
+                    return ((a + '').includes(this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2)));
                 case 'containSome': {
-                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = opVal(opTypeB, opValueB, opNameB).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
@@ -779,8 +732,6 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
-        console.log('getting request');
-        console.log(req);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
@@ -789,19 +740,9 @@ module.exports = function (RED) {
             }
             let obj = {};
             switch (req.query.kind) {
-                case 'getFloatProp': {
+                case 'getTimeData': {
                     try {
-                        obj.value = posConfig.getFloatProp(posConfig, undefined, req.query.type, req.query.value, NaN);
-                    } catch (err) {
-                        obj.value = NaN;
-                        obj.error = err;
-                    }
-                    res.status(200).send(JSON.stringify(obj));
-                    break;
-                }
-                case 'getTimeProp': {
-                    try {
-                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;
@@ -809,9 +750,19 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateProp': {
+                case 'getDateData': {
                     try {
                         obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
+                    } catch(err) {
+                        obj.value = NaN;
+                        obj.error = err;
+                    }
+                    res.status(200).send(JSON.stringify(obj));
+                    break;
+                }
+                case 'getOutDataData': {
+                    try {
+                        obj = posConfig.getOutDataProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

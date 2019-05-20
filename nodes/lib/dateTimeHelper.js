@@ -8,7 +8,9 @@ module.exports = {
     isBool,
     isTrue,
     isFalse,
-    clipValueLength,
+    pad2,
+    customISOstring,
+    clipStrLength,
     countDecimals,
     handleError,
     chkValueFilled,
@@ -98,6 +100,25 @@ function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
 }
 /*******************************************************************************************************/
+/**
+ * Formats a Date object to a custom ISO String
+ * @param {*} date Date to Format
+ * @param {*} offset Offset for Format
+ */
+function customISOstring(date, offset) {
+    date = new Date(date); // copy instance
+    const h = Math.floor(Math.abs(offset)/60);
+    const m = Math.abs(offset) % 60;
+    date.setMinutes(date.getMinutes() - offset); // apply custom timezone
+    return    date.getUTCFullYear() + '-' // return custom format
+        + pad2(date.getUTCMonth() + 1) + '-'
+        + pad2(date.getUTCDate()) + 'T'
+        + pad2(date.getUTCHours()) + ':'
+        + pad2(date.getUTCMinutes()) + ':'
+        + pad2(date.getUTCSeconds())
+        + (offset === 0 ? 'Z' : (offset<0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
+}
+/*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
 /*******************************************************************************************************/
 /**
@@ -152,9 +173,10 @@ function chkValueFilled(val, defaultVal) {
  * @param {string} v text to clip
  * @param {number} l length to clip the text
  */
-function clipValueLength(v, l) {
+function clipStrLength(v, l) {
+    l = l || 15;
     if (v.length > l) {
-        return v.substring(0, (l - 3)) + '...';
+        return v.slice(0, (l - 3)) + '...';
     }
     return v;
 }
@@ -1040,7 +1062,7 @@ function _isInteger(val) {
  */
 function _getInt(str, i, minlength, maxlength) {
     for (let x = maxlength; x >= minlength; x--) {
-        const token = str.substring(i, i + x);
+        const token = str.substr(i, x);
         if (token.length < minlength) {
             return null;
         }
@@ -1119,7 +1141,7 @@ function getDateFromFormat(val, format) {
             month = 0;
             for (let i = 0; i < dateFormat.i18n.monthNames.length; i++) {
                 const month_name = dateFormat.i18n.monthNames[i];
-                if (val.substring(i_val, i_val + month_name.length).toLowerCase() === month_name.toLowerCase()) {
+                if (val.substr(i_val, month_name.length).toLowerCase() === month_name.toLowerCase()) {
                     if (token === 'MMM' || ((token === 'NNN' || token === 'MMMM') && i > 11)) {
                         month = i + 1;
                         if (month > 12) {
@@ -1138,7 +1160,7 @@ function getDateFromFormat(val, format) {
         } else if (token === 'EE' || token === 'E' || token === 'dddd' || token === 'ddd') {
             for (let i = 0; i < dateFormat.i18n.dayNames.length; i++) {
                 const day_name = dateFormat.i18n.dayNames[i];
-                if (val.substring(i_val, i_val + day_name.length).toLowerCase() === day_name.toLowerCase()) {
+                if (val.substr(i_val, day_name.length).toLowerCase() === day_name.toLowerCase()) {
                     i_val += day_name.length;
                     break;
                 }
@@ -1205,23 +1227,23 @@ function getDateFromFormat(val, format) {
                 misec = misec * 10;
             }
         } else if ((token.toLowerCase() === 'tt') || (token.toLowerCase() === 't')) {
-            if (val.substring(i_val, i_val + 2).toLowerCase() === 'am') {
+            if (val.substr(i_val, 2).toLowerCase() === 'am') {
                 ampm = 'AM';
                 i_val += 2;
-            } else if (val.substring(i_val, i_val + 2).toLowerCase() === 'pm') {
+            } else if (val.substr(i_val, 2).toLowerCase() === 'pm') {
                 ampm = 'PM';
                 i_val += 2;
-            } else if (val.substring(i_val, i_val + 1).toLowerCase() === 'a') {
+            } else if (val.substr(i_val, 1).toLowerCase() === 'a') {
                 ampm = 'AM';
                 i_val += 1;
-            } else if (val.substring(i_val, i_val + 1).toLowerCase() === 'p') {
+            } else if (val.substr(i_val, 1).toLowerCase() === 'p') {
                 ampm = 'PM';
                 i_val += 1;
             } else {
                 return null;
             }
         } else {
-            if (val.substring(i_val, i_val + token.length) !== token) {
+            if (val.substr(i_val, token.length) !== token) {
                 return null;
             }
 

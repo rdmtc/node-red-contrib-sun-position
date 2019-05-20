@@ -3,8 +3,8 @@
         "label": {
             "time-comp": "time-comp",
             "compare": "vergleich",
-            "input": "Input",
-            "inputFormat": "parse format",
+            "input": "Eingangswert",
+            "inputFormat": "Eingangsformat",
             "inputOffset": "Offset",
             "operatorContainer": "vergleich mit",
             "onlyif": "nur wenn",
@@ -12,6 +12,16 @@
             "result1Value": "Wert",
             "result1Format": "Ausgabeformat",
             "result1Offset": "Offset"
+        },
+        "placeholder": {
+            "property": "Property",
+            "input": "Eingangswert",
+            "inputFormat": "Format des Eingangswertes",
+            "inputOffset": "Offset",
+            "result": "Ergebnis",
+            "resultValue": "Wert",
+            "resultFormat": "Format des Ergebnisses",
+            "resultOffset": "Offset"
         }
     }
 }

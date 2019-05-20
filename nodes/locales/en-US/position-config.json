@@ -254,7 +254,6 @@
         "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
         "unknownCompareOperator": "error, the unsed compare operator \"__operator__\" is unknown!",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
-        "notEvaluablePropertyDefault": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
     "position-config": {

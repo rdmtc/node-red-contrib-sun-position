@@ -16,64 +16,62 @@
 
 This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variations) and much more.
 Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
+In addition, there is now a blind controller, which can set blind position time and sun controlled. ( see [blind-control](blind_control.md) )
 
 ![nodes](images/appearance1.png?raw=true)
+![nodes](images/appearance2.png?raw=true)
 
 > This is still in development!
 > This is not fully tested and documentation are missing!
 
 ## Table of contents
 
-* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  * [Table of contents](#table-of-contents)
-  * [Installation](#installation)
-  * [Quick Start](#quick-start)
-  * [General](#general)
-    * [Saving resources](#saving-resources)
-    * [second based accuracy](#second-based-accuracy)
-  * [Implemented Nodes](#implemented-nodes)
-    * [sun-position](#sun-position)
-      * [sun-position - Node settings](#sun-position---node-settings)
-      * [Node Input](#node-input)
-      * [sun-position - Node Output](#sun-position---node-output)
-    * [moon-position](#moon-position)
-      * [moon-position - Node settings](#moon-position---node-settings)
-      * [moon-position - Node Output](#moon-position---node-output)
-    * [time-inject](#time-inject)
-      * [time-inject - Node settings](#time-inject---node-settings)
-      * [time-inject - Node Input](#time-inject---node-input)
-      * [time-inject - Node Output](#time-inject---node-output)
-    * [within-time](#within-time)
-      * [within-time - Node settings](#within-time---node-settings)
-    * [time-comp](#time-comp)
-      * [time-comp - Node settings](#time-comp---node-settings)
-    * [time-span](#time-span)
-      * [time-span - Node settings](#time-span---node-settings)
-    * [blind-control](#blind-control)
-    * [Times definitions](#times-definitions)
-      * [sun times](#sun-times)
-        * [remarks](#remarks)
-          * [blue hour](#blue-hour)
-          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          * [alternate properties](#alternate-properties)
-      * [moon times](#moon-times)
-      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    * [input parse formats](#input-parse-formats)
-    * [output timestamp formats](#output-timestamp-formats)
-    * [output timespan formats](#output-timespan-formats)
-    * [Conditions](#conditions)
-  * [TODO](#todo)
-  * [Bugs and Feedback](#bugs-and-feedback)
-  * [LICENSE](#license)
-  * [Other](#other)
+- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  - [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+  - [General](#general)
+    - [Saving resources](#saving-resources)
+    - [second based accuracy](#second-based-accuracy)
+  - [Implemented Nodes](#implemented-nodes)
+    - [sun-position](#sun-position)
+      - [sun-position - Node settings](#sun-position---node-settings)
+      - [Node Input](#node-input)
+      - [sun-position - Node Output](#sun-position---node-output)
+    - [moon-position](#moon-position)
+      - [moon-position - Node settings](#moon-position---node-settings)
+      - [moon-position - Node Output](#moon-position---node-output)
+    - [time-inject](#time-inject)
+      - [time-inject - Node settings](#time-inject---node-settings)
+      - [time-inject - Node Input](#time-inject---node-input)
+      - [time-inject - Node Output](#time-inject---node-output)
+    - [within-time](#within-time)
+      - [within-time - Node settings](#within-time---node-settings)
+    - [time-comp](#time-comp)
+      - [time-comp - Node settings](#time-comp---node-settings)
+    - [time-span](#time-span)
+      - [time-span - Node settings](#time-span---node-settings)
+    - [blind-control](#blind-control)
+    - [Times definitions](#times-definitions)
+      - [sun times](#sun-times)
+        - [remarks](#remarks)
+          - [blue hour](#blue-hour)
+          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          - [alternate properties](#alternate-properties)
+      - [moon times](#moon-times)
+      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    - [input parse formats](#input-parse-formats)
+    - [output timestamp formats](#output-timestamp-formats)
+    - [output timespan formats](#output-timespan-formats)
+    - [Conditions](#conditions)
+  - [TODO](#todo)
+  - [Bugs and Feedback](#bugs-and-feedback)
+  - [LICENSE](#license)
+  - [Other](#other)
 
 ## Installation
 
 `npm install node-red-contrib-sun-position`
 
-## Quick Start
-
-tbd
 
 ## General
 
@@ -360,14 +358,23 @@ A simple node that routes messages depending on the time. If the current time fa
 * **Status** here can be adjusted which status should be displayed under the node.
   * this has the following possibilities:
     * **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
+
       ![within-time-status-error](https://user-images.githubusercontent.com/12692680/57134527-b62e5800-6da6-11e9-946a-677044d25655.png)
+
     * **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
+
       ![within-time-status-time](https://user-images.githubusercontent.com/12692680/57134513-b4649480-6da6-11e9-9bb2-3acda84b8ef8.png)
+
     * **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
+
       ![within-time-status-message-block](https://user-images.githubusercontent.com/12692680/57134528-b6c6ee80-6da6-11e9-90be-e3b15c2b2bff.png)
+
       if the message was pass through the timestamp of this message will be shown.
+
       ![within-time-status-message-send](https://user-images.githubusercontent.com/12692680/57134529-b6c6ee80-6da6-11e9-8c71-7245dda4b6ee.png)
+
     * **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
+
 * **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 * **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
@@ -632,7 +639,7 @@ The formats are:
 | tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
 | T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
 | TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
-| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
+| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US time zones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
 | o           | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
 | S           | The date's ordinal suffix (st, nd, rd, or th). Works well with d.                                                                                             |
 | x           | difference of days from timestamp day to output day                                                                                                           |
@@ -697,7 +704,7 @@ A JSONata expression in the *property* must be always a boolean with value true,
 
 ## Bugs and Feedback
 
-For bugs, questions and discussions please use the
+For bugs, questions and feature requests please use the
 [GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)

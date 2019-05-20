@@ -45,8 +45,8 @@
 			"blindOpenPos": "100",
 			"blindClosedPos": "0",
 			"blindLevelDefault": "position if no other used",
-			"blindLevelMin": "maximum position if sun calculated position",
-			"blindLevelMax": "minimum position if sun calculated position",
+			"blindLevelMin": "minimum position if sun calculated position",
+			"blindLevelMax": "maximum position if sun calculated position",
 			"sunControlMode": "select if sun control is active and how it should working",
 			"OverwriteExpire": "(opt) the duration a manual setting will remain",
 			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
@@ -116,7 +116,9 @@
 			"getOversteerData": "error getting oversteer data: __message__",
 			"getBlindPosData": "error getting blind level: __message__",
 			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
-			"smoothTimeToolong":"The selected smooth is too long!!"
+			"smoothTimeToolong":"The selected smooth is too long!!",
+			"usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!",
+			"notEvaluableProperty": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!"
 		}
 	}
 }
