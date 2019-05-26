@@ -251,8 +251,8 @@
         "warn-init": "warning '__message__', retry in __time__min",
         "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
         "pos-config-state": "Node not properly configured!!",
-        "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
-        "unknownCompareOperator": "error, the unsed compare operator \"__operator__\" is unknown!",
+        "unknownPropertyOperator": "error, the used property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
+        "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown!",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
@@ -265,7 +265,10 @@
             "timezoneOffset": "TZ Offset",
             "name": "Name",
             "property": "Property",
-            "minutes": "minutes"
+            "minutes": "minutes",
+            "stateDateFormat": "State Date Format",
+            "stateTimeFormat": "State Time Format",
+            "stateDateTimeFormat": "State Format"
         },
         "placeholder": {
             "positionConfig":"select or create generic configuration",
@@ -273,7 +276,10 @@
             "longitude": "-1.4",
             "angleType": "deg",
             "timezoneOffset": "0",
-            "name": "Name"
+            "name": "Name",
+            "stateTimeFormat": "Format of the state output of a time only. If empty default toLocale​Time​String will be used.",
+            "stateDateFormat": "Format of the state output of a date only. If empty default toLocale​Date​String will be used.",
+            "stateDateTimeFormat": "Format of the state output for Date with time. If empty default toLocale​String will be used."
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",

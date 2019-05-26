@@ -221,20 +221,20 @@ module.exports = function (RED) {
                     node.status({
                         fill: 'green',
                         shape: 'ring',
-                        text: node.nextTimeAlt.toLocaleString() + ' / ' + node.nextTime.toLocaleTimeString()
+                        text: node.positionConfig.dateToString(node.nextTimeAlt) + ' / ' + node.positionConfig.dateToTimeString(node.nextTime)
                     });
                 } else {
                     node.status({
                         fill: 'green',
                         shape: 'dot',
-                        text: node.nextTime.toLocaleString() + ' / ' + node.nextTimeAlt.toLocaleTimeString()
+                        text: node.positionConfig.dateToString(node.nextTime) + ' / ' + node.positionConfig.dateToTimeString(node.nextTimeAlt)
                     });
                 }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
                     fill: 'green',
                     shape: 'dot',
-                    text: node.nextTime.toLocaleString()
+                    text: node.positionConfig.dateToString(node.nextTime)
                 });
             } else {
                 node.status({});

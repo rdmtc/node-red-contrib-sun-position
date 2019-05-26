@@ -82,7 +82,10 @@ module.exports = function (RED) {
                 this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
                 this.angleType = config.angleType;
-                this.tzOffset = (config.timezoneOffset * -60) || 0;
+                this.tzOffset = (config.timeZoneOffset * -60) || 99;
+                this.sFormatTime = config.stateTimeFormat || '';
+                // this.sFormatDate = config.stateDateFormat || '';
+                this.sFormatDateTime = config.stateDateTimeFormat || '';
                 // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
                 this.lastSunCalc = {
                     ts: 0
@@ -195,6 +198,25 @@ module.exports = function (RED) {
             }
             return result;
         }
+        /*******************************************************************************************************/
+        dateToString(_srcNode, date) {
+            if (node.sFormatDateTime === '') {
+                return date.toLocaleString();
+            }
+            return hlp.getDateFromFormat(date, node.sFormatDateTime);
+        }
+        dateToTimeString(date) {
+            if (node.sFormatTime === '') {
+                return date.toLocale​Time​String();
+            }
+            return hlp.getDateFromFormat(date, node.sFormatTime);
+        }
+        /* dateToDateString(date) {
+            if (node.sFormatDate === '') {
+                return date.toLocaleDateString();
+            }
+            return hlp.getDateFromFormat(date, node.sFormatDate);
+        } */
         /*******************************************************************************************************/
         getFloatProp(_srcNode, msg, type, value, def, opCallback) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
