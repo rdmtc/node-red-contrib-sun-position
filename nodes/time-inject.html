@@ -323,12 +323,12 @@
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {
-        l = l || 15;
+        l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
             suffix = '↷';
@@ -392,7 +392,7 @@
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
         }
 
@@ -903,10 +903,10 @@
                 result += getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12);
             } else {
                 const timeTxt = getTimeId();
-                if (timeTxt.length > 24) {
+                if (timeTxt.length > 26) {
                     result += timeTxt + ' =...';
                 } else {
-                    result += timeTxt + ' = ' + getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12);
+                    result += timeTxt + ' = ' + getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 14);
                 }
             }
 

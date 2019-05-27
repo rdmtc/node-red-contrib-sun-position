@@ -9,7 +9,6 @@ module.exports = {
     isTrue,
     isFalse,
     pad2,
-    customISOstring,
     clipStrLength,
     countDecimals,
     handleError,
@@ -30,6 +29,7 @@ module.exports = {
     getNodeId,
     initializeParser,
     getFormattedDateOut,
+    getDateFromFormat,
     parseDateFromFormat,
     topicReplace
 };
@@ -98,25 +98,6 @@ function getNodeId(node) {
  */
 function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
-}
-/*******************************************************************************************************/
-/**
- * Formats a Date object to a custom ISO String
- * @param {*} date Date to Format
- * @param {*} offset Offset for Format
- */
-function customISOstring(date, offset) {
-    date = new Date(date); // copy instance
-    const h = Math.floor(Math.abs(offset)/60);
-    const m = Math.abs(offset) % 60;
-    date.setMinutes(date.getMinutes() - offset); // apply custom timezone
-    return    date.getUTCFullYear() + '-' // return custom format
-        + pad2(date.getUTCMonth() + 1) + '-'
-        + pad2(date.getUTCDate()) + 'T'
-        + pad2(date.getUTCHours()) + ':'
-        + pad2(date.getUTCMinutes()) + ':'
-        + pad2(date.getUTCSeconds())
-        + (offset === 0 ? 'Z' : (offset<0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
 }
 /*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
@@ -954,6 +935,20 @@ function getFormattedDateOut(date, format, utc) {
             return  dateFormat(date, 'dddd, d.M.', utc);
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
             return  dateFormat(date, 'xx, d.M.', utc);
+        case 18: { // customISOstring(date, offset)
+            date = new Date(date); // copy instance
+            const offset = date.getTimezoneOffset();
+            const h = Math.floor(Math.abs(offset) / 60);
+            const m = Math.abs(offset) % 60;
+            date.setMinutes(date.getMinutes() - offset); // apply custom timezone
+            return date.getUTCFullYear() + '-' // return custom format
+                + pad2(date.getUTCMonth() + 1) + '-'
+                + pad2(date.getUTCDate()) + 'T'
+                + pad2(date.getUTCHours()) + ':'
+                + pad2(date.getUTCMinutes()) + ':'
+                + pad2(date.getUTCSeconds())
+                + (offset === 0 ? 'Z' : (offset < 0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
+        }
     }
 
     const now = new Date();

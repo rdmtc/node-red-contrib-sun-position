@@ -62,6 +62,7 @@ const SelectFields = {
         {id: 15, group: 'string', name: 'localDateLong', label: 'local date long'},
         {id: 4, group: 'string', name: 'UTC', label: 'UTC date and time'},
         {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
+        {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
         {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
         {id: 7, group: 'time', name: 'sec', label: 'seconds'},
         {id: 8, group: 'time', name: 'min', label: 'minutes'},
