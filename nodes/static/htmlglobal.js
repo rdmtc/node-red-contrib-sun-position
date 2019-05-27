@@ -511,17 +511,26 @@ function initCombobox(node, inputSelectName, inputBoxName, dataList, optionEleme
     const $inputBox = $('#node-input-' + inputBoxName);
     $inputSelect.attr('base-width', width);
     $inputSelect.attr('linked-input', inputBoxName);
+    $inputBox.attr('linked-select', inputSelectName);
 
     appendOptions(node, $inputSelect, optionElementName);
     autocomplete($('#node-input-' + inputBoxName), dataList);
+    const valueNum = Number(value);
+    if (isNaN(valueNum)) {
+        $inputSelect.val(99);
+        $inputBox.val(value);
+    } else {
+        $inputSelect.val(valueNum);
+    }
 
     $inputSelect.on('change', (_type, _value) => {
         // const $inputSelect = $( this ); // $('#node-input-' + inputSelectName);
-        const inputBoxName = $inputSelect.attr('linked-input');
+        // const inputBoxName = $inputSelect.attr('linked-input');
+        // const $inputBox = $('#node-input-' + inputBoxName);
         let width = Number($inputSelect.attr('base-width'));
-        const $inputBox = $('#node-input-' + inputBoxName);
 
         if (Number($inputSelect.val()) === 99) {
+            console.log('selection');
             $inputSelect.css({width: '100px'});
             width = (205 + width);
             $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
@@ -530,18 +539,14 @@ function initCombobox(node, inputSelectName, inputBoxName, dataList, optionEleme
                 $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
             }
         } else {
+            console.log('number');
             $inputBox.hide();
             width = (100 + width);
             $inputSelect.css({width: 'calc(100% - ' + width + 'px)'});
             $inputBox.val($inputSelect.val());
         }
     });
-    if (value && isNaN(value)) {
-        $inputSelect.val(99);
-        $inputBox.val(value);
-    } else {
-        $inputSelect.val(Number(value));
-    }
+
     $inputSelect.change();
 }
 // ************************************************************************************************

@@ -82,10 +82,15 @@ module.exports = function (RED) {
                 this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
                 this.angleType = config.angleType;
-                this.tzOffset = (config.timeZoneOffset * -60) || 99;
-                this.sFormatTime = config.stateTimeFormat || '';
-                // this.sFormatDate = config.stateDateFormat || '';
-                this.sFormatDateTime = config.stateDateTimeFormat || '';
+                this.tzOffset = (config.timeZoneOffset || 99);
+                if (isNaN(this.tzOffset) || this.tzOffset > 99 || this.tzOffset < -99) {
+                    this.tzOffset = 99;
+                }
+                this.tzOffset = (this.tzOffset * -60);
+
+                this.stateTimeFormat = config.stateTimeFormat || '3';
+                this.stateDateFormat = config.stateDateFormat || '12';
+                this.stateDateTimeFormat = config.stateDateTimeFormat || '2';
                 // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
                 this.lastSunCalc = {
                     ts: 0
@@ -230,10 +235,10 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         dateToString(dt) {
-            if (this.sFormatDateTime === '') {
+            if (this.stateDateTimeFormat === '2') {
                 return dt.toLocaleString();
             }
-            return hlp.getFormattedDateOut(dt, this.sFormatDateTime);
+            return hlp.getFormattedDateOut(dt, this.stateDateTimeFormat);
         }
 
         /**
@@ -242,18 +247,23 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         dateToTimeString(dt) {
-            if (this.sFormatTime === '') {
+            if (this.stateTimeFormat === '3') {
                 return dt.toLocaleTimeString();
             }
-            return hlp.getFormattedDateOut(dt, this.sFormatTime);
+            return hlp.getFormattedDateOut(dt, this.stateTimeFormat);
         }
 
-        /* dateToDateString(dt) {
-            if (node.sFormatDate === '') {
+        /**
+         * Formate a Date Object to a Date String
+         * @param {Date} dt Date to format to Date string
+         * @returns {string} formated Date object
+         */
+        dateToDateString(dt) {
+            if (this.stateDateFormat === '12') {
                 return dt.toLocaleDateString();
             }
-            return hlp.getFormattedDateOut(dt, node.sFormatDate);
-        } */
+            return hlp.getFormattedDateOut(dt, this.stateDateFormat);
+        }
         /*******************************************************************************************************/
         /**
          * get a float value from a type input in Node-Red

@@ -267,20 +267,30 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const dec = declination(L, 0);
         const Jnoon = solarTransitJ(ds, M, L);
 
+        const noonVal = fromJulianDay(Jnoon);
+        const nadirVal = fromJulianDay(Jnoon + 0.5);
+
         const result = {
-            solarNoon: {
-                value: fromJulianDay(Jnoon),
+            solarNoon : {
+                value: noonVal,
+                ts: noonVal.getTime(),
                 pos: sunTimesDefault.solarNoon,
                 name: 'solarNoon',
-                angle: 90
+                angle: 90,
+                julian: Jnoon,
+                valid: !isNaN(Jnoon)
             },
             nadir: {
-                value: fromJulianDay(Jnoon + 0.5),
+                value: nadirVal,
+                ts: nadirVal.getTime(),
                 pos: sunTimesDefault.nadir,
                 name: 'nadir',
-                angle: 270
+                angle: 270,
+                julian: Jnoon + 0.5,
+                valid: !isNaN(Jnoon)
             }
         };
+
         result.solarNoon.ts = result.solarNoon.value.getTime();
         result.nadir.ts = result.nadir.value.getTime();
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
@@ -301,9 +311,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             }
 
             const Jrise = Jnoon - (Jset - Jnoon);
+            const v1 = fromJulianDay(Jset);
+            const v2 = fromJulianDay(Jrise);
 
             result[time[2]] = {
-                value: fromJulianDay(Jset),
+                value: v1,
+                ts: v1.getTime(),
                 pos: time[4],
                 name: time[2],
                 angle: sa,
@@ -311,7 +324,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 valid
             };
             result[time[1]] = {
-                value: fromJulianDay(Jrise),
+                value: v2,
+                ts: v2.getTime(),
                 pos: time[3],
                 name: time[1],
                 angle: (180 + (sa * -1)),
