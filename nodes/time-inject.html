@@ -290,6 +290,7 @@
     }
     .node-input-multiplier {
         width: 125px;
+        max-width: 125px;
         margin-left: 5px;
     }
     .time-inject-row-timeDays,
@@ -1045,7 +1046,7 @@
                         });
                     }
                 });
-                initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
+                initCombobox(node, $('#node-input-payloadTimeFormatsel'), $('#node-input-payloadTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
                 node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
                 setupTInput(node, {
@@ -1357,7 +1358,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
 
-                initCombobox(node, 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload1Formatsel'), $('#node-input-addPayload1Format'), 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
                 node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
 
@@ -1476,7 +1477,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
 
-                initCombobox(node, 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload2Formatsel'), $('#node-input-addPayload2Format'), 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
                 node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
                 setupTInput(node, {
@@ -1590,7 +1591,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
 
-                initCombobox(node, 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload3Formatsel'), $('#node-input-addPayload3Format'), 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
                 node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
                 setupTInput(node, {

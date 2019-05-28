@@ -90,7 +90,6 @@ module.exports = function (RED) {
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
-                this.stateDateTimeFormat = config.stateDateTimeFormat || '2';
                 // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
                 this.lastSunCalc = {
                     ts: 0
@@ -235,10 +234,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         dateToString(dt) {
-            if (this.stateDateTimeFormat === '2') {
-                return dt.toLocaleString();
-            }
-            return hlp.getFormattedDateOut(dt, this.stateDateTimeFormat);
+            return (this.dateToDateString(dt) + ' ' + this.dateToTimeString(dt)).trim();
         }
 
         /**

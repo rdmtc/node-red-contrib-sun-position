@@ -9,6 +9,7 @@ module.exports = {
     isTrue,
     isFalse,
     pad2,
+    pad,
     clipStrLength,
     countDecimals,
     handleError,
@@ -99,6 +100,22 @@ function getNodeId(node) {
 function pad2(n) { // always returns a string
     return (n < 0 || n > 9 ? '' : '0') + n;
 }
+
+/**
+ * creates a string from a number with leading zeros
+ * @param {string|number|boolean} n number to format
+ * @param {number} [len] length of number (default 2)
+ * @returns {string} number with minimum digits as defined in length
+ */
+function pad(val, len) {
+    val = String(val);
+    len = len || 2;
+    while (val.length < len) {
+        val = '0' + val;
+    }
+    return val;
+}
+
 /*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
 /*******************************************************************************************************/
@@ -650,7 +667,6 @@ function getDateOfText(dt, preferMonthFirst) {
  * Accepts a date, a mask, or a date and a mask.
  * Returns a formatted version of the given date.
  * The date defaults to the current date/time.
- * The mask defaults to dateFormat.masks.default.
  *
  * http://blog.stevenlevithan.com/archives/date-time-format
  * http://stevenlevithan.com/assets/misc/date.format.js
@@ -665,21 +681,10 @@ function getDateOfText(dt, preferMonthFirst) {
  * @return {string}   date as depending on the given Format
  */
 const dateFormat = (function () {
-    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LoSZ]|"[^"]*"|'[^']*'/g;
+    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|"[^"]*"|'[^']*'/g;
 
-    const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
-
-    const timezoneClip = /[^-+\dA-Z]/g;
-
-    const pad = function (val, len) {
-        val = String(val);
-        len = len || 2;
-        while (val.length < len) {
-            val = '0' + val;
-        }
-
-        return val;
-    };
+    // const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
+    // const timezoneClip = /[^-+\dA-Z]/g;
 
     // Regexes and supporting functions are cached through closure
     return function (date, mask, utc) {
@@ -698,7 +703,7 @@ const dateFormat = (function () {
             throw new SyntaxError('invalid date');
         }
 
-        mask = String(dF.masks[mask] || mask || dF.masks.default);
+        mask = String(mask || dateFormat.isoDateTime);
 
         // Allow setting the utc argument via the mask
         if (mask.slice(0, 4) === 'UTC:') {
@@ -719,42 +724,47 @@ const dateFormat = (function () {
 
         const flags = {
             d,
-            dd: pad(d),
+            dd: pad2(d),
             ddd: dF.i18n.dayNames[D + 7],
             dddd: dF.i18n.dayNames[D],
             E: dF.i18n.dayNames[D + 7],
             EE: dF.i18n.dayNames[D],
             M: M + 1,
-            MM: pad(M + 1),
+            MM: pad2(M + 1),
             MMM: dF.i18n.monthNames[M + 12],
             MMMM: dF.i18n.monthNames[M],
             NNN: dF.i18n.monthNames[M],
             yy: String(y).slice(2),
             yyyy: y,
             h: H % 12 || 12,
-            hh: pad(H % 12 || 12),
+            hh: pad2(H % 12 || 12),
             H, // 0-23
-            HH: pad(H), // 00-23
+            HH: pad2(H), // 00-23
             k: (H % 12 || 12) - 1,
-            kk: pad((H % 12 || 12) - 1),
+            kk: pad2((H % 12 || 12) - 1),
             K: H + 1,
-            KK: pad(H + 1),
+            KK: pad2(H + 1),
             m,
-            mm: pad(m),
+            mm: pad2(m),
             s,
-            ss: pad(s),
+            ss: pad2(s),
             l,
-            ll: pad(l),
+            ll: pad2(l),
             lll: pad(l, 3),
             L: Math.round(l / 100),
-            LL: pad(Math.round(l / 10)),
+            LL: pad2(Math.round(l / 10)),
             LLL: pad(l, 3),
             t: H < 12 ? 'a' : 'p',
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
             TT: H < 12 ? 'AM' : 'PM',
-            Z: utc ? 'UTC' : (String(date).match(timezone) || ['']).pop().replace(timezoneClip, ''),
-            o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            Z: utc ? 'UTC' : /.*\s(.+)/.exec(date.toLocaleTimeString([], { timeZoneName: 'short' }))[1],
+            z: utc ? '' : (String(date).match(/\b(?:GMT|UTC)(?:[-+]\d{4})?\b/g) || ['']).pop(),
+            zz: utc ? '' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            o: (o > 0 ? '-' : '+') + pad2(Math.floor(Math.abs(o) / 60)) + ':' + pad2(Math.abs(o) % 60),
+            oo: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            ooo: utc ? 'Z' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            oooo: utc ? 'UTC' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
             x: dayDiff,
             xx: ((dayDiff >= -7) && ((dayDiff + 7) < dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames[dayDiff + 7] : dF.i18n.dayNames[D]
@@ -767,21 +777,7 @@ const dateFormat = (function () {
 })();
 
 // Some common format strings
-dateFormat.masks = {
-    default: 'ddd MMM dd yyyy HH:mm:ss',
-    shortDate: 'm/d/yy',
-    mediumDate: 'MMM d, yyyy',
-    longDate: 'MMMM d, yyyy',
-    fullDate: 'dddd, MMMM d, yyyy',
-    shortTime: 'h:mm TT',
-    mediumTime: 'h:mm:ss TT',
-    longTime: 'h:mm:ss TT Z',
-    isoDate: 'yyyy-MM-dd',
-    isoTime: 'HH:MM:ss',
-    isoDateTime: 'yyyy-MM-dd\'T\'HH:mm:ss',
-    isoUtcDateTime: 'UTC:yyyy-MM-dd\'T\'HH:mm:ss\'Z\''
-};
-
+dateFormat.isoDateTime = 'yyyy-MM-dd\'T\'HH:mm:ss';
 dateFormat.parseDates = {
     monthFirst : ['MMM d, y', 'MMM d,y', 'M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'MMM d', 'M-d'],
     dateFirst : ['d-MMM-y', 'd/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M', 'd MMM'],
@@ -1343,7 +1339,7 @@ function _parseDateTime(val, preferMonthFirst) {
         return result;
     }
 
-    let checkList = [dateFormat.masks.isoDateTime];
+    let checkList = [dateFormat.isoDateTime];
     if (preferMonthFirst) {
         checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
         checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);

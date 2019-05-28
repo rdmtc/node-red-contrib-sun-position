@@ -26,47 +26,47 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ## Table of contents
 
-- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  - [Table of contents](#table-of-contents)
-  - [Installation](#installation)
-  - [General](#general)
-    - [Saving resources](#saving-resources)
-    - [second based accuracy](#second-based-accuracy)
-  - [Implemented Nodes](#implemented-nodes)
-    - [sun-position](#sun-position)
-      - [sun-position - Node settings](#sun-position---node-settings)
-      - [Node Input](#node-input)
-      - [sun-position - Node Output](#sun-position---node-output)
-    - [moon-position](#moon-position)
-      - [moon-position - Node settings](#moon-position---node-settings)
-      - [moon-position - Node Output](#moon-position---node-output)
-    - [time-inject](#time-inject)
-      - [time-inject - Node settings](#time-inject---node-settings)
-      - [time-inject - Node Input](#time-inject---node-input)
-      - [time-inject - Node Output](#time-inject---node-output)
-    - [within-time](#within-time)
-      - [within-time - Node settings](#within-time---node-settings)
-    - [time-comp](#time-comp)
-      - [time-comp - Node settings](#time-comp---node-settings)
-    - [time-span](#time-span)
-      - [time-span - Node settings](#time-span---node-settings)
-    - [blind-control](#blind-control)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
-  - [TODO](#todo)
-  - [Bugs and Feedback](#bugs-and-feedback)
-  - [LICENSE](#license)
-  - [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [TODO](#todo)
+  * [Bugs and Feedback](#bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Installation
 
@@ -639,8 +639,13 @@ The formats are:
 | tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
 | T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
 | TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
-| Z           | US timezone abbreviation, e.g. EST or MDT. With non-US time zones or in the Opera browser, the GMT/UTC offset is returned, e.g. GMT-0500                       |
-| o           | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
+| Z           | timezone abbreviation, e.g. EST, MDT, MESZ or MEZ.                                                                                                            |
+| z           | timezone offset, e.g. GMT-0500                                                                                                                                |
+| zz          | timezone offset - nothing for GMT/UTC, e.g. -0500 or +0230.                                                                                                   |
+| o           | GMT/UTC timezone offset in  hours:minutes, e.g. -05:00 or +02:30.                                                                                             |
+| oo          | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |
+| ooo         | GMT/UTC timezone offset - 'Z' for GMT/UTC, e.g. -0500 or +0230.                                                                                               |
+| oooo        | GMT/UTC timezone offset - 'UTC' for GMT/UTC, e.g. -0500 or +0230.                                                                                             |
 | S           | The date's ordinal suffix (st, nd, rd, or th). Works well with d.                                                                                             |
 | x           | difference of days from timestamp day to output day                                                                                                           |
 | xx          | difference of days from timestamp day to output day with relative names for today, tomorrow, ...                                                              |

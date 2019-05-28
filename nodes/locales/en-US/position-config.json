@@ -219,8 +219,9 @@
             "mediumTime": "h:mm:ss TT",
             "longTime": "h:mm:ss TT Z",
             "isoDate": "yyyy-MM-dd",
-            "isoTime": "HH:MM:ss",
-            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
+            "isoTime": "HH:mm:ss",
+            "isoTimeZ": "HH:mm:ssooo",
+            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ssooo",
             "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
         },
         "comparatorDescription" : {
@@ -284,7 +285,8 @@
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
+            "stateFormat":"Formatchanges to time could taken time until it will get any effect."
         },
         "errors": {
             "longitude-missing": "Longitude is missing or wrong!",

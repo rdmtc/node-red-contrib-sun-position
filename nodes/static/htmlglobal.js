@@ -505,17 +505,12 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 
 // ************************************************************************************************
 
-function initCombobox(node, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
-    // console.log('initCombobox node=' + node + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
-    const $inputSelect = $('#node-input-' + inputSelectName);
-    const $inputBox = $('#node-input-' + inputBoxName);
-    $inputSelect.attr('base-width', width);
-    $inputSelect.attr('linked-input', inputBoxName);
-    $inputBox.attr('linked-select', inputSelectName);
-
+function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName, value, baseWidth, timeFormat) { // eslint-disable-line no-unused-vars
+    // console.log('initCombobox node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     appendOptions(node, $inputSelect, optionElementName);
-    autocomplete($('#node-input-' + inputBoxName), dataList);
+    autocomplete($inputBox, dataList);
     const valueNum = Number(value);
+    timeFormat = timeFormat || 'default';
     if (isNaN(valueNum)) {
         $inputSelect.val(99);
         $inputBox.val(value);
@@ -524,25 +519,20 @@ function initCombobox(node, inputSelectName, inputBoxName, dataList, optionEleme
     }
 
     $inputSelect.on('change', (_type, _value) => {
-        // const $inputSelect = $( this ); // $('#node-input-' + inputSelectName);
-        // const inputBoxName = $inputSelect.attr('linked-input');
-        // const $inputBox = $('#node-input-' + inputBoxName);
-        let width = Number($inputSelect.attr('base-width'));
-
         if (Number($inputSelect.val()) === 99) {
             console.log('selection');
-            $inputSelect.css({width: '100px'});
-            width = (205 + width);
-            $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
+            $inputSelect.css({ width: '100px' });
+            const width = (205 + baseWidth);
+            $inputBox.css({ width: 'calc(100% - ' + width + 'px)' });
             $inputBox.show();
             if (!isNaN($inputBox.val())) {
-                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
+                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.' + timeFormat));
             }
         } else {
             console.log('number');
             $inputBox.hide();
-            width = (100 + width);
-            $inputSelect.css({width: 'calc(100% - ' + width + 'px)'});
+            const width = (100 + baseWidth);
+            $inputSelect.css({ width: 'calc(100% - ' + width + 'px)' });
             $inputBox.val($inputSelect.val());
         }
     });
