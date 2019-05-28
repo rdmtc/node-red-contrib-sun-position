@@ -262,7 +262,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
      * @return {suntimes} result object of sunTime
      */
-    SunCalc.getSunTimes = function (date, lat, lng, inUTC) {
+    SunCalc.getSunTimes = function (date, lat, lng, inUTC, noDeprecated) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -350,10 +350,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time[1]].ts = result[time[1]].value.getTime();
         }
 
-        // for backward compatibility
-        for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
-            const time = sunTimesAlternate[i];
-            result[time[0]] = result[time[1]];
+        if (!noDeprecated) {
+            // for backward compatibility
+            for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
+                const time = sunTimesAlternate[i];
+                result[time[0]] = result[time[1]];
+            }
         }
 
         return result;
