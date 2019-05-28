@@ -264,24 +264,22 @@
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "angle type",
-            "timezoneOffset": "TZ Offset",
+            "timeZoneOffset": "TZ Offset",
             "name": "Name",
             "property": "Property",
             "minutes": "minutes",
             "stateDateFormat": "State Date Format",
-            "stateTimeFormat": "State Time Format",
-            "stateDateTimeFormat": "State Format"
+            "stateTimeFormat": "State Time Format"
         },
         "placeholder": {
             "positionConfig":"select or create generic configuration",
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
-            "timezoneOffset": "0",
+            "timeZoneOffset": "0",
             "name": "Name",
-            "stateTimeFormat": "Format of the state output of a time only. If empty default toLocale​Time​String will be used.",
             "stateDateFormat": "Format of the state output of a date only. If empty default toLocale​Date​String will be used.",
-            "stateDateTimeFormat": "Format of the state output for Date with time. If empty default toLocale​String will be used."
+            "stateTimeFormat": "Format of the state output of a time only. If empty default toLocale​Time​String will be used."
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",

@@ -250,7 +250,7 @@
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "Winkel Typ",
-            "timezoneOffset": "Zeitzone",
+            "timeZoneOffset": "Zeitzone",
             "name": "Name",
             "property": "Property",
             "minutes": "Minuten"
@@ -260,7 +260,7 @@
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
-            "timezoneOffset": "0",
+            "timeZoneOffset": "0",
             "name": "Name"
         },
         "tips": {
