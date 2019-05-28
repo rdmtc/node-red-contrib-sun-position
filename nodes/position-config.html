@@ -263,9 +263,8 @@
             }
             const setup = function(_node) {
                 /* global initCombobox */
-                console.log('in setup');
-                initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 30, 'isoDate');
-                initCombobox(node, $('#node-config-input-stateTimeFormatSel'), $('#node-config-input-stateTimeFormat'), 'dateOutFormat', 'outputFormats', node.stateTimeFormat || 3, 30, 'isoTime');
+                initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 50, 'isoDate');
+                initCombobox(node, $('#node-config-input-stateTimeFormatSel'), $('#node-config-input-stateTimeFormat'), 'dateOutFormat', 'outputFormats', node.stateTimeFormat || 3, 50, 'isoTime');
             }; // setup
 
             $.getScript('sun-position/js/htmlglobal.js')

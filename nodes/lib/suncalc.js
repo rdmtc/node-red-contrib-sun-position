@@ -154,45 +154,55 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @typedef {Object} suntimes
     * @property {suntime} solarNoon - The sun-time for the solar noon (sun is in the highest position)
     * @property {suntime} nadir - The sun-time for nadir (darkest moment of the night, sun is in the lowest position)
-    * @property {suntime} goldenHourEnd - The sun-time for
-    * @property {suntime} goldenHourStart - The sun-time for
-    * @property {suntime} sunriseEnd - The sun-time for
-    * @property {suntime} sunsetStart - The sun-time for
-    * @property {suntime} sunrise - The sun-time for
-    * @property {suntime} blueHourDawnEnd - The sun-time for
-    * @property {suntime} blueHourDuskStart - The sun-time for
-    * @property {suntime} civilDawn - The sun-time for
-    * @property {suntime} civilDusk - The sun-time for
-    * @property {suntime} nauticalDawn - The sun-time for
-    * @property {suntime} nauticalDusk - The sun-time for
-    * @property {suntime} amateurDawn - The sun-time for
-    * @property {suntime} amateurDusk - The sun-time for
-    * @property {suntime} astronomicalDawn - The sun-time for
-    * @property {suntime} astronomicalDusk - The sun-time for
+    * @property {suntime} goldenHourDawnStart - The sun-time for morning golden hour (soft light, best time for photography)
+    * @property {suntime} goldenHourDawnEnd - The sun-time for morning golden hour (soft light, best time for photography)
+    * @property {suntime} goldenHourDuskStart - The sun-time for evening golden hour starts
+    * @property {suntime} goldenHourDuskEnd - The sun-time for evening golden hour starts
+    * @property {suntime} sunriseEnd - The sun-time for sunrise ends (bottom edge of the sun touches the horizon)
+    * @property {suntime} sunsetStart - The sun-time for sunset starts (bottom edge of the sun touches the horizon)
+    * @property {suntime} sunrise - The sun-time for sunrise (top edge of the sun appears on the horizon)
+    * @property {suntime} sunset - The sun-time for sunset (sun disappears below the horizon, evening civil twilight starts)
+    * @property {suntime} blueHourDawnStart - The sun-time for blue Hour start (time for special photography photos starts)
+    * @property {suntime} blueHourDawnEnd - The sun-time for blue Hour end (time for special photography photos end)
+    * @property {suntime} blueHourDuskStart - The sun-time for blue Hour start (time for special photography photos starts)
+    * @property {suntime} blueHourDuskEnd - The sun-time for blue Hour end (time for special photography photos end)
+    * @property {suntime} civilDawn - The sun-time for dawn (morning nautical twilight ends, morning civil twilight starts)
+    * @property {suntime} civilDusk - The sun-time for dusk (evening nautical twilight starts)
+    * @property {suntime} nauticalDawn - The sun-time for nautical dawn (morning nautical twilight starts)
+    * @property {suntime} nauticalDusk - The sun-time for nautical dusk end (evening astronomical twilight starts)
+    * @property {suntime} amateurDawn - The sun-time for amateur astronomical dawn (sun at 12° before sunrise)
+    * @property {suntime} amateurDusk - The sun-time for amateur astronomical dusk (sun at 12° after sunrise)
+    * @property {suntime} astronomicalDawn - The sun-time for night ends (morning astronomical twilight starts)
+    * @property {suntime} astronomicalDusk - The sun-time for night starts (dark enough for astronomical observations)
     * @property {suntime} [dawn] - Deprecated: alternate for civilDawn
     * @property {suntime} [dusk] - Deprecated: alternate for civilDusk
     * @property {suntime} [nightEnd] - Deprecated: alternate for astronomicalDawn
     * @property {suntime} [night] - Deprecated: alternate for astronomicalDusk
     * @property {suntime} [nightStart] - Deprecated: alternate for astronomicalDusk
-    * @property {suntime} [goldenHour] - Deprecated: alternate for goldenHourStart
+    * @property {suntime} [goldenHour] - Deprecated: alternate for goldenHourDuskStart
+    * @property {suntime} [sunsetEnd] - Deprecated: alternate for sunset
+    * @property {suntime} [sunriseStart] - Deprecated: alternate for sunrise
+    * @property {suntime} [goldenHourEnd] - Deprecated: alternate for goldenHourDawnEnd
+    * @property {suntime} [goldenHourStart] - Deprecated: alternate for goldenHourDuskStart
     */
 
     /** sun times configuration (angle, morning name, evening name) */
     const sunTimes = SunCalc.times = [
-        [6, 'goldenHourEnd', 'goldenHourStart', 9, 11], // GOLDEN_HOUR_AM
-        [-0.3, 'sunriseEnd', 'sunsetStart', 8, 12], // SUNRISE_END
-        [-0.833, 'sunrise', 'sunset', 7, 13], // SUNRISE
-        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 14], // BLUE_HOUR
-        [-6, 'civilDawn', 'civilDusk', 5, 15], // DAWN
-        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 16], // BLUE_HOUR
-        [-12, 'nauticalDawn', 'nauticalDusk', 3, 17], // NAUTIC_DAWN
-        [-15, 'amateurDawn', 'amateurDusk', 2, 18],
-        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 19] // ASTRO_DAWN
+        [6, 'goldenHourDawnEnd', 'goldenHourDuskStart', 10, 12], // GOLDEN_HOUR_2
+        [-0.3, 'sunriseEnd', 'sunsetStart', 9, 13], // SUNRISE_END
+        [-0.833, 'sunrise', 'sunset', 8, 14], // SUNRISE
+        [-1, 'goldenHourDawnStart', 'goldenHourDuskEnd', 7, 15], // GOLDEN_HOUR_1
+        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 16], // BLUE_HOUR
+        [-6, 'civilDawn', 'civilDusk', 5, 17], // DAWN
+        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 18], // BLUE_HOUR
+        [-12, 'nauticalDawn', 'nauticalDusk', 3, 19], // NAUTIC_DAWN
+        [-15, 'amateurDawn', 'amateurDusk', 2, 20],
+        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 21] // ASTRO_DAWN
     ];
 
     /** default time definitions */
     const sunTimesDefault = SunCalc.timesDefault = {
-        solarNoon: 10,
+        solarNoon: 11,
         nadir: 0
     };
 
@@ -203,7 +213,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         ['nightEnd', 'astronomicalDawn'],
         ['night', 'astronomicalDusk'],
         ['nightStart', 'astronomicalDusk'],
-        ['goldenHour', 'goldenHourStart']
+        ['goldenHour', 'goldenHourDuskStart'],
+        ['sunriseStart', 'sunrise'],
+        ['sunsetEnd', 'sunset'],
+        ['goldenHourEnd', 'goldenHourDawnEnd'],
+        ['goldenHourStart', 'goldenHourDuskStart']
     ];
 
     /** adds a custom time to the times config */

@@ -26,47 +26,47 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ## Table of contents
 
-* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  * [Table of contents](#table-of-contents)
-  * [Installation](#installation)
-  * [General](#general)
-    * [Saving resources](#saving-resources)
-    * [second based accuracy](#second-based-accuracy)
-  * [Implemented Nodes](#implemented-nodes)
-    * [sun-position](#sun-position)
-      * [sun-position - Node settings](#sun-position---node-settings)
-      * [Node Input](#node-input)
-      * [sun-position - Node Output](#sun-position---node-output)
-    * [moon-position](#moon-position)
-      * [moon-position - Node settings](#moon-position---node-settings)
-      * [moon-position - Node Output](#moon-position---node-output)
-    * [time-inject](#time-inject)
-      * [time-inject - Node settings](#time-inject---node-settings)
-      * [time-inject - Node Input](#time-inject---node-input)
-      * [time-inject - Node Output](#time-inject---node-output)
-    * [within-time](#within-time)
-      * [within-time - Node settings](#within-time---node-settings)
-    * [time-comp](#time-comp)
-      * [time-comp - Node settings](#time-comp---node-settings)
-    * [time-span](#time-span)
-      * [time-span - Node settings](#time-span---node-settings)
-    * [blind-control](#blind-control)
-    * [Times definitions](#times-definitions)
-      * [sun times](#sun-times)
-        * [remarks](#remarks)
-          * [blue hour](#blue-hour)
-          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          * [alternate properties](#alternate-properties)
-      * [moon times](#moon-times)
-      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    * [input parse formats](#input-parse-formats)
-    * [output timestamp formats](#output-timestamp-formats)
-    * [output timespan formats](#output-timespan-formats)
-    * [Conditions](#conditions)
-  * [TODO](#todo)
-  * [Bugs and Feedback](#bugs-and-feedback)
-  * [LICENSE](#license)
-  * [Other](#other)
+- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  - [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+  - [General](#general)
+    - [Saving resources](#saving-resources)
+    - [second based accuracy](#second-based-accuracy)
+  - [Implemented Nodes](#implemented-nodes)
+    - [sun-position](#sun-position)
+      - [sun-position - Node settings](#sun-position---node-settings)
+      - [Node Input](#node-input)
+      - [sun-position - Node Output](#sun-position---node-output)
+    - [moon-position](#moon-position)
+      - [moon-position - Node settings](#moon-position---node-settings)
+      - [moon-position - Node Output](#moon-position---node-output)
+    - [time-inject](#time-inject)
+      - [time-inject - Node settings](#time-inject---node-settings)
+      - [time-inject - Node Input](#time-inject---node-input)
+      - [time-inject - Node Output](#time-inject---node-output)
+    - [within-time](#within-time)
+      - [within-time - Node settings](#within-time---node-settings)
+    - [time-comp](#time-comp)
+      - [time-comp - Node settings](#time-comp---node-settings)
+    - [time-span](#time-span)
+      - [time-span - Node settings](#time-span---node-settings)
+    - [blind-control](#blind-control)
+    - [Times definitions](#times-definitions)
+      - [sun times](#sun-times)
+        - [remarks](#remarks)
+          - [blue hour](#blue-hour)
+          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          - [alternate properties](#alternate-properties)
+      - [moon times](#moon-times)
+      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    - [input parse formats](#input-parse-formats)
+    - [output timestamp formats](#output-timestamp-formats)
+    - [output timespan formats](#output-timespan-formats)
+    - [Conditions](#conditions)
+  - [TODO](#todo)
+  - [Bugs and Feedback](#bugs-and-feedback)
+  - [LICENSE](#license)
+  - [Other](#other)
 
 ## Installation
 
@@ -127,9 +127,9 @@ The Input is for triggering the calculation. If limits are defined the input mes
     * `msg.payload.times.blueHourDawnEnd` blue Hour end (time for special photography photos starts)
     * `msg.payload.times.sunrise` sunrise (top edge of the sun appears on the horizon)
     * `msg.payload.times.sunriseEnd` sunrise ends (bottom edge of the sun touches the horizon)
-    * `msg.payload.times.goldenHourEnd` morning golden hour (soft light, best time for photography) ends
+    * `msg.payload.times.goldenHourDawnEnd` morning golden hour (soft light, best time for photography) ends
     * `msg.payload.times.solarNoon` solar noon (sun is in the highest position)
-    * `msg.payload.times.goldenHourStart` evening golden hour starts
+    * `msg.payload.times.goldenHourDuskStart` evening golden hour starts
     * `msg.payload.times.sunsetStart` sunset starts (bottom edge of the sun touches the horizon)
     * `msg.payload.times.sunset` sunset (sun disappears below the horizon, evening civil twilight starts)
     * `msg.payload.times.blueHourDuskStart` nautical dusk start (evening astronomical twilight starts)
@@ -171,8 +171,8 @@ The Input is for triggering the calculation. If limits are defined the input mes
       "amateurDusk":"2018-12-10T16:41:44.795Z",
       "astronomicalDawn":"2018-12-10T04:56:49.931Z",
       "astronomicalDusk":"2018-12-10T17:01:39.696Z",
-      "goldenHourEnd":"2018-12-10T07:58:28.541Z",
-      "goldenHourStart":"2018-12-10T14:00:01.086Z",
+      "goldenHourDawnEnd":"2018-12-10T07:58:28.541Z",
+      "goldenHourDuskStart":"2018-12-10T14:00:01.086Z",
       "dawn":"2018-12-10T06:19:31.249Z",
       "dusk":"2018-12-10T15:38:58.379Z",
       "nightEnd":"2018-12-10T04:56:49.931Z",
@@ -464,7 +464,7 @@ manual timestamps can be entered as one of the following formats:
 
 #### sun times
 
-following Sun times can be chosen:
+following Sun times will be calculated and can be chosen:
 
 | Time                | Description                                                              | SunBH |
 | ------------------- | ------------------------------------------------------------------------ | ----- |
@@ -474,13 +474,15 @@ following Sun times can be chosen:
 | `blueHourDawnStart` | blue Hour start (time for special photography photos starts)             | 8     |
 | `civilDawn`         | dawn (morning nautical twilight ends, morning civil twilight starts)     | 6     |
 | `blueHourDawnEnd`   | blue Hour end (time for special photography photos end)                  | 4     |
+| `goldenHourDawnStart` | morning golden hour (soft light, best time for photography) starts     | -1    |
 | `sunrise`           | sunrise (top edge of the sun appears on the horizon)                     | 0.833 |
 | `sunriseEnd`        | sunrise ends (bottom edge of the sun touches the horizon)                | 0.3   |
-| `goldenHourEnd`     | morning golden hour (soft light, best time for photography) ends         | -6    |
+| `goldenHourDawnEnd`   | morning golden hour (soft light, best time for photography) ends       | -6    |
 | `solarNoon`         | solar noon (sun is in the highest position)                              |       |
-| `goldenHourStart`   | evening golden hour starts                                               | -6    |
+| `goldenHourDuskStart` | evening golden hour (soft light, best time for photography) starts     | -6    |
 | `sunsetStart`       | sunset starts (bottom edge of the sun touches the horizon)               | 0.3   |
 | `sunset`            | sunset (sun disappears below the horizon, evening civil twilight starts) | 0.833 |
+| `goldenHourDuskEnd` | evening golden hour (soft light, best time for photography) ends         | 1     |
 | `blueHourDuskStart` | blue Hour start (time for special photography photos starts)             | 4     |
 | `civilDusk`         | dusk (evening nautical twilight starts)                                  | 6     |
 | `blueHourDuskEnd`   | blue Hour end (time for special photography photos end)                  | 8     |
@@ -507,14 +509,18 @@ This is not an official definition, this is happend when the Sun is 15° below t
 
 The following time parameters are exists in the output for backward compatibility. These are equal to parameters in the table above:
 
-| time parameter | is equal to        |
-| -------------- | ------------------ |
-| `dawn`         | `civilDawn`        |
-| `dusk`         | `civilDusk`        |
-| `nightEnd`     | `astronomicalDawn` |
-| `night`        | `astronomicalDusk` |
-| `nightStart`   | `astronomicalDusk` |
-| `goldenHour`   | `goldenHourStart`  |
+| time parameter    | is equal to              |
+| ----------------- | ------------------------ |
+| `dawn`            | `civilDawn`              |
+| `dusk`            | `civilDusk`              |
+| `nightEnd`        | `astronomicalDawn`       |
+| `night`           | `astronomicalDusk`       |
+| `nightStart`      | `astronomicalDusk`       |
+| `goldenHour`      | `goldenHourDuskStart`    |
+| `sunsetEnd`       | `sunset`                 |
+| `sunriseStart`    | `sunrise`                |
+| `goldenHourEnd`   | `goldenHourDawnEnd`      |
+| `goldenHourStart` | `goldenHourDuskStart`    |
 
 #### moon times
 

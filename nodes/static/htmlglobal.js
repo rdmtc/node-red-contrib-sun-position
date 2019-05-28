@@ -212,8 +212,9 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
-                'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
-                'civilDusk', 'blueHourDuskEnd', 'amateurDusk', 'astronomicalDusk', 'nadir']
+                'goldenHourDawnStart', 'sunrise', 'sunriseEnd', 'goldenHourDawnEnd', 'solarNoon', 'goldenHourDuskStart',
+                'sunsetStart', 'sunset', 'goldenHourDuskEnd', 'blueHourDuskStart', 'civilDusk', 'blueHourDuskEnd',
+                'nauticalDusk', 'amateurDusk', 'astronomicalDusk', 'nadir']
         },
         TimeMoon: {
             value: 'pdmTime',
@@ -520,7 +521,6 @@ function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName
 
     $inputSelect.on('change', (_type, _value) => {
         if (Number($inputSelect.val()) === 99) {
-            console.log('selection');
             $inputSelect.css({ width: '100px' });
             const width = (205 + baseWidth);
             $inputBox.css({ width: 'calc(100% - ' + width + 'px)' });
@@ -529,7 +529,6 @@ function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName
                 $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.' + timeFormat));
             }
         } else {
-            console.log('number');
             $inputBox.hide();
             const width = (100 + baseWidth);
             $inputSelect.css({ width: 'calc(100% - ' + width + 'px)' });
