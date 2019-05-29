@@ -74,7 +74,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'yellow',
                 shape: 'dot',
-                text: '⏲ ⏵' + result.start.value.toLocaleTimeString() + result.startSuffix + ' - ⏴' + result.end.value.toLocaleTimeString() + result.endSuffix
+                text: '⏲ ⏵' + node.positionConfig.dateToTimeString(result.start.value) + result.startSuffix + ' - ⏴' + node.positionConfig.dateToTimeString(result.end.value) + result.endSuffix
             });
         } else {
             node.status({});
@@ -236,7 +236,7 @@ module.exports = function (RED) {
                         setstate(this, result, status, {
                             fill: 'green',
                             shape: 'ring',
-                            text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
+                            text: '🖅 ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
                         }, false);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
@@ -247,7 +247,7 @@ module.exports = function (RED) {
                     setstate(this, result, status, {
                         fill: 'green',
                         shape: 'dot',
-                        text: '🖅 ' + result.startSuffix + now.toLocaleString() + result.endSuffix
+                        text: '🖅 ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
                     }, false);
                     checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                     return null;
@@ -258,7 +258,7 @@ module.exports = function (RED) {
                 setstate(this, result, status, {
                     fill: 'yellow',
                     shape: 'dot',
-                    text: '⛔' + result.startSuffix + now.toLocaleString() + result.endSuffix
+                    text: '⛔' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
                 }, false);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {

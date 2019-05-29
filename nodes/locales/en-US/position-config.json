@@ -74,7 +74,8 @@
             "local date",
             "local date long",
             "UTC date and time",
-            "ISO date and time",
+            "ISO date and time UTC",
+            "ISO  date and time local",
             "milliseconds",
             "seconds",
             "minutes",
@@ -218,8 +219,9 @@
             "mediumTime": "h:mm:ss TT",
             "longTime": "h:mm:ss TT Z",
             "isoDate": "yyyy-MM-dd",
-            "isoTime": "HH:MM:ss",
-            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ss",
+            "isoTime": "HH:mm:ss",
+            "isoTimeZ": "HH:mm:ssooo",
+            "isoDateTime": "yyyy-MM-dd'T'HH:mm:ssooo",
             "isoUtcDateTime": "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'"
         },
         "comparatorDescription" : {
@@ -251,8 +253,8 @@
         "warn-init": "warning '__message__', retry in __time__min",
         "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
         "pos-config-state": "Node not properly configured!!",
-        "unknownPropertyOperator": "error, the unsed property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
-        "unknownCompareOperator": "error, the unsed compare operator \"__operator__\" is unknown!",
+        "unknownPropertyOperator": "error, the used property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
+        "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown!",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
     },
@@ -262,22 +264,27 @@
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "angle type",
-            "timezoneOffset": "TZ Offset",
+            "timeZoneOffset": "TZ Offset",
             "name": "Name",
             "property": "Property",
-            "minutes": "minutes"
+            "minutes": "minutes",
+            "stateDateFormat": "State Date Format",
+            "stateTimeFormat": "State Time Format"
         },
         "placeholder": {
             "positionConfig":"select or create generic configuration",
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
-            "timezoneOffset": "0",
-            "name": "Name"
+            "timeZoneOffset": "0",
+            "name": "Name",
+            "stateDateFormat": "Format of the state output of a date only. If empty default toLocale​Date​String will be used.",
+            "stateTimeFormat": "Format of the state output of a time only. If empty default toLocale​Time​String will be used."
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
+            "stateFormat":"Formatchanges to time could taken time until it will get any effect."
         },
         "errors": {
             "longitude-missing": "Longitude is missing or wrong!",

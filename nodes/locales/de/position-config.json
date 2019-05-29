@@ -74,7 +74,8 @@
             "lokales Datum",
             "lokales Datum lang",
             "UTC Datum und Zeit",
-            "ISO Datum und Zeit",
+            "ISO Datum und Zeit UTC",
+            "ISO Datum und Zeit Lokal",
             "Millisekunden",
             "Sekunden",
             "Minuten",
@@ -249,22 +250,27 @@
             "latitude": "Latitude",
             "longitude": "Longitude",
             "angleType": "Winkel Typ",
-            "timezoneOffset": "Zeitzone",
+            "timeZoneOffset": "Zeitzone",
             "name": "Name",
             "property": "Property",
-            "minutes": "Minuten"
+            "minutes": "Minuten",
+            "stateDateFormat": "Status-Datums Format",
+            "stateTimeFormat": "Status-Zeit Format"
         },
         "placeholder": {
             "positionConfig": "wähle oder erstelle die Konfiguration",
             "latitude": "51.025",
             "longitude": "-1.4",
             "angleType": "deg",
-            "timezoneOffset": "0",
-            "name": "Name"
+            "timeZoneOffset": "0",
+            "name": "Name",
+            "stateDateFormat": "Format der Statusausgabe eines Datums. Standard ist toLocale​Date​String.",
+            "stateTimeFormat": "Format der Statusausgabe einer Uhrzeit. Standard ist toLocale​Time​String."
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object."
+            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
+            "stateFormat":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen."
         },
         "errors": {
             "longitude-missing": "Koordinate Longitude fehlt oder ist falsch!",

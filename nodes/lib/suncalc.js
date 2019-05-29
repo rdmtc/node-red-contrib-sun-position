@@ -8,6 +8,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
 (function () {
     'use strict';
+    // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 
     // shortcuts for easier to read formulas
     const PI = Math.PI;
@@ -18,23 +19,36 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const atan = Math.atan2;
     const acos = Math.acos;
     const rad = PI / 180;
-    // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
-    // date/time constants and conversions
 
-    const dayMs = 1000 * 60 * 60 * 24;
-    const J1970 = 2440588;
+    // date/time constants and conversions
+    const dayMs = 86400000; // 1000 * 60 * 60 * 24;
+    const J1970 = 2440587.5;
     const J2000 = 2451545;
 
-    function toJulian(date) {
-        return date.valueOf() / dayMs - 0.5 + J1970;
+    /**
+     * convert date from Julian calendar
+     * @param {*} date object to convert
+     * @return {date} result date
+     */
+    function fromJulianDay(j) {
+        return new Date((j - J1970) * dayMs);
     }
 
-    function fromJulian(j) {
-        return new Date((j + 0.5 - J1970) * dayMs);
-    }
+    /**
+     * get number of days for a date since 2000
+     * @param {*} date date to get days
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {number} cont of days
+     */
+    function toDays(date, inUTC) {
+        date = date || new Date();
+        if (inUTC === false) {
+            return ((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / dayMs) + J1970) - J2000;
+        }
+        return ((date.valueOf() / dayMs) + J1970) - J2000;
+        // return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / dayMs + J1970 - J2000;
 
-    function toDays(date) {
-        return toJulian(date) - J2000;
+        // return toJulianDay(date) - J2000;
     }
 
     // general calculations for position
@@ -94,9 +108,21 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     const SunCalc = {};
 
-    // calculates sun position for a given date and latitude/longitude
+    /**
+    * @typedef {Object} sunposition
+    * @property {number} azimuth - The azimuth of the sun
+    * @property {number} altitude - The altitude of the sun
+    */
 
-    SunCalc.getPosition = function (date, lat, lng) {
+    /**
+     * calculates sun position for a given date and latitude/longitude
+     * @param {Date} date Date object with the  for calculating sun-position
+     * @param {number} lat latitude for calculating sun-position
+     * @param {number} lng longitude for calculating sun-position
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {sunposition} result object of sun-position
+    */
+    SunCalc.getPosition = function (date, lat, lng, inUTC) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -106,7 +132,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date);
+        const d = toDays(date, inUTC);
         const c = sunCoords(d);
         const H = siderealTime(d, lw) - c.ra;
         return {
@@ -115,33 +141,86 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         };
     };
 
-    // sun times configuration (angle, morning name, evening name)
+
+    /**
+    * @typedef {Object} suntime
+    * @property {string} name - The Name of the time
+    * @property {Date} value - Date object with the calculated sun-time
+    * @property {number} pos - The position of the sun on the time
+    * @property {number} angle - Angle of the sun on the time
+    */
+
+    /**
+    * @typedef {Object} suntimes
+    * @property {suntime} solarNoon - The sun-time for the solar noon (sun is in the highest position)
+    * @property {suntime} nadir - The sun-time for nadir (darkest moment of the night, sun is in the lowest position)
+    * @property {suntime} goldenHourDawnStart - The sun-time for morning golden hour (soft light, best time for photography)
+    * @property {suntime} goldenHourDawnEnd - The sun-time for morning golden hour (soft light, best time for photography)
+    * @property {suntime} goldenHourDuskStart - The sun-time for evening golden hour starts
+    * @property {suntime} goldenHourDuskEnd - The sun-time for evening golden hour starts
+    * @property {suntime} sunriseEnd - The sun-time for sunrise ends (bottom edge of the sun touches the horizon)
+    * @property {suntime} sunsetStart - The sun-time for sunset starts (bottom edge of the sun touches the horizon)
+    * @property {suntime} sunrise - The sun-time for sunrise (top edge of the sun appears on the horizon)
+    * @property {suntime} sunset - The sun-time for sunset (sun disappears below the horizon, evening civil twilight starts)
+    * @property {suntime} blueHourDawnStart - The sun-time for blue Hour start (time for special photography photos starts)
+    * @property {suntime} blueHourDawnEnd - The sun-time for blue Hour end (time for special photography photos end)
+    * @property {suntime} blueHourDuskStart - The sun-time for blue Hour start (time for special photography photos starts)
+    * @property {suntime} blueHourDuskEnd - The sun-time for blue Hour end (time for special photography photos end)
+    * @property {suntime} civilDawn - The sun-time for dawn (morning nautical twilight ends, morning civil twilight starts)
+    * @property {suntime} civilDusk - The sun-time for dusk (evening nautical twilight starts)
+    * @property {suntime} nauticalDawn - The sun-time for nautical dawn (morning nautical twilight starts)
+    * @property {suntime} nauticalDusk - The sun-time for nautical dusk end (evening astronomical twilight starts)
+    * @property {suntime} amateurDawn - The sun-time for amateur astronomical dawn (sun at 12° before sunrise)
+    * @property {suntime} amateurDusk - The sun-time for amateur astronomical dusk (sun at 12° after sunrise)
+    * @property {suntime} astronomicalDawn - The sun-time for night ends (morning astronomical twilight starts)
+    * @property {suntime} astronomicalDusk - The sun-time for night starts (dark enough for astronomical observations)
+    * @property {suntime} [dawn] - Deprecated: alternate for civilDawn
+    * @property {suntime} [dusk] - Deprecated: alternate for civilDusk
+    * @property {suntime} [nightEnd] - Deprecated: alternate for astronomicalDawn
+    * @property {suntime} [night] - Deprecated: alternate for astronomicalDusk
+    * @property {suntime} [nightStart] - Deprecated: alternate for astronomicalDusk
+    * @property {suntime} [goldenHour] - Deprecated: alternate for goldenHourDuskStart
+    * @property {suntime} [sunsetEnd] - Deprecated: alternate for sunset
+    * @property {suntime} [sunriseStart] - Deprecated: alternate for sunrise
+    * @property {suntime} [goldenHourEnd] - Deprecated: alternate for goldenHourDawnEnd
+    * @property {suntime} [goldenHourStart] - Deprecated: alternate for goldenHourDuskStart
+    */
+
+    /** sun times configuration (angle, morning name, evening name) */
     const sunTimes = SunCalc.times = [
-        [6, 'goldenHourEnd', 'goldenHourStart', 9, 11], // GOLDEN_HOUR_AM
-        [-0.3, 'sunriseEnd', 'sunsetStart', 8, 12], // SUNRISE_END
-        [-0.833, 'sunrise', 'sunset', 7, 13], // SUNRISE
-        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 14], // BLUE_HOUR
-        [-6, 'civilDawn', 'civilDusk', 5, 15], // DAWN
-        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 16], // BLUE_HOUR
-        [-12, 'nauticalDawn', 'nauticalDusk', 3, 17], // NAUTIC_DAWN
-        [-15, 'amateurDawn', 'amateurDusk', 2, 18],
-        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 19] // ASTRO_DAWN
+        [6, 'goldenHourDawnEnd', 'goldenHourDuskStart', 10, 12], // GOLDEN_HOUR_2
+        [-0.3, 'sunriseEnd', 'sunsetStart', 9, 13], // SUNRISE_END
+        [-0.833, 'sunrise', 'sunset', 8, 14], // SUNRISE
+        [-1, 'goldenHourDawnStart', 'goldenHourDuskEnd', 7, 15], // GOLDEN_HOUR_1
+        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 16], // BLUE_HOUR
+        [-6, 'civilDawn', 'civilDusk', 5, 17], // DAWN
+        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 18], // BLUE_HOUR
+        [-12, 'nauticalDawn', 'nauticalDusk', 3, 19], // NAUTIC_DAWN
+        [-15, 'amateurDawn', 'amateurDusk', 2, 20],
+        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 21] // ASTRO_DAWN
     ];
+
+    /** default time definitions */
     const sunTimesDefault = SunCalc.timesDefault = {
-        solarNoon: 10,
+        solarNoon: 11,
         nadir: 0
     };
+
+    /** alternate time names for backward compatibility */
     const sunTimesAlternate = SunCalc.timesAlternate = [
-        // for backward compatibility
         ['dawn', 'civilDawn'],
         ['dusk', 'civilDusk'],
         ['nightEnd', 'astronomicalDawn'],
         ['night', 'astronomicalDusk'],
         ['nightStart', 'astronomicalDusk'],
-        ['goldenHour', 'goldenHourStart']
+        ['goldenHour', 'goldenHourDuskStart'],
+        ['sunriseStart', 'sunrise'],
+        ['sunsetEnd', 'sunset'],
+        ['goldenHourEnd', 'goldenHourDawnEnd'],
+        ['goldenHourStart', 'goldenHourDuskStart']
     ];
 
-    // adds a custom time to the times config
+    /** adds a custom time to the times config */
     SunCalc.addTime = function (angle, riseName, setName, risePos, setPos) {
         sunTimes.push([angle, riseName, setName, risePos, setPos]);
     };
@@ -166,17 +245,24 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
     }
 
-    // returns set time for the given sun altitude
+    /** returns set time for the given sun altitude */
     function getSetJ(h, lw, phi, dec, n, M, L) {
         const w = hourAngle(h, phi, dec);
 
         const a = approxTransit(w, lw, n);
+        // console.log(`h=${h} lw=${lw} phi=${phi} dec=${dec} n=${n} M=${M} L=${L} w=${w} a=${a}`);
         return solarTransitJ(a, M, L);
     }
 
-    // calculates sun times for a given date and latitude/longitude
-
-    SunCalc.getTimes = function (date, lat, lng) {
+    /**
+     * calculates sun times for a given date and latitude/longitude
+     * @param {Date} date Date object with the  for calculating sun-times
+     * @param {number} lat latitude for calculating sun-times
+     * @param {number} lng longitude for calculating sun-times
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {suntimes} result object of sunTime
+     */
+    SunCalc.getSunTimes = function (date, lat, lng, inUTC, noDeprecated) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -187,7 +273,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const lw = rad * -lng;
         const phi = rad * lat;
 
-        const d = toDays(date);
+        const d = toDays(date, inUTC);
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
         const M = solarMeanAnomaly(ds);
@@ -195,48 +281,81 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const dec = declination(L, 0);
         const Jnoon = solarTransitJ(ds, M, L);
 
+        const noonVal = fromJulianDay(Jnoon);
+        const nadirVal = fromJulianDay(Jnoon + 0.5);
+
         const result = {
-            solarNoon: {
-                value: fromJulian(Jnoon),
+            solarNoon : {
+                value: noonVal,
+                ts: noonVal.getTime(),
                 pos: sunTimesDefault.solarNoon,
                 name: 'solarNoon',
-                angle: 90
+                angle: 90,
+                julian: Jnoon,
+                valid: !isNaN(Jnoon)
             },
             nadir: {
-                value: fromJulian(Jnoon + 0.5),
+                value: nadirVal,
+                ts: nadirVal.getTime(),
                 pos: sunTimesDefault.nadir,
                 name: 'nadir',
-                angle: 270
+                angle: 270,
+                julian: Jnoon + 0.5,
+                valid: !isNaN(Jnoon)
             }
         };
+
         result.solarNoon.ts = result.solarNoon.value.getTime();
         result.nadir.ts = result.nadir.value.getTime();
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
             const time = sunTimes[i];
+            const sa = time[0];
+            let valid = true;
 
-            const Jset = getSetJ(time[0] * rad, lw, phi, dec, n, M, L);
+            let Jset = getSetJ(sa * rad, lw, phi, dec, n, M, L);
+            if (isNaN(Jset)) {
+                Jset = (Jnoon + 0.5);
+                valid = false;
+                /* Näherung an Wert
+                const b = Math.abs(time[0]);
+                while (isNaN(Jset) && ((Math.abs(sa) - b) < 2)) {
+                    sa += 0.005;
+                    Jset = getSetJ(sa * rad, lw, phi, dec, n, M, L);
+                } /* */
+            }
+
             const Jrise = Jnoon - (Jset - Jnoon);
+            const v1 = fromJulianDay(Jset);
+            const v2 = fromJulianDay(Jrise);
 
             result[time[2]] = {
-                value: fromJulian(Jset),
+                value: v1,
+                ts: v1.getTime(),
                 pos: time[4],
                 name: time[2],
-                angle: time[0]
+                angle: sa,
+                julian: Jset,
+                valid
             };
             result[time[1]] = {
-                value: fromJulian(Jrise),
+                value: v2,
+                ts: v2.getTime(),
                 pos: time[3],
                 name: time[1],
-                angle: (180 + (time[0] * -1))
+                angle: (180 + (sa * -1)),
+                julian: Jrise,
+                valid
             };
             result[time[2]].ts = result[time[2]].value.getTime();
             result[time[1]].ts = result[time[1]].value.getTime();
         }
 
-        // for backward compatibility
-        for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
-            const time = sunTimesAlternate[i];
-            result[time[0]] = result[time[1]];
+        if (!noDeprecated) {
+            // for backward compatibility
+            for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
+                const time = sunTimesAlternate[i];
+                result[time[0]] = result[time[1]];
+            }
         }
 
         return result;
@@ -244,7 +363,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
-    function moonCoords(d) { // geocentric ecliptic coordinates of the moon
+    /**
+     * calculate the geocentric ecliptic coordinates of the moon
+     * @param {number} d number of days
+     */
+    function moonCoords(d) {
         const L = rad * (218.316 + 13.176396 * d);
         // ecliptic longitude
 
@@ -269,10 +392,26 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         };
     }
 
-    SunCalc.getMoonPosition = function (date, lat, lng) {
+    /**
+    * @typedef {Object} moonposition
+    * @property {number} azimuth - The azimuth of the moon
+    * @property {number} altitude - The altitude of the moon
+    * @property {number} distance - The distance of the moon to the earth
+    * @property {number} parallacticAngle - The parallactic angle of the moon
+    */
+
+    /**
+     * calculates moon position for a given date and latitude/longitude
+     * @param {Date} date Date object with the  for calculating moon-position
+     * @param {number} lat latitude for calculating moon-position
+     * @param {number} lng longitude for calculating moon-position
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {moonposition} result object of moon-position
+     */
+    SunCalc.getMoonPosition = function (date, lat, lng, inUTC) {
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date);
+        const d = toDays(date, inUTC);
         const c = moonCoords(d);
         const H = siderealTime(d, lw) - c.ra;
         let h = altitude(H, phi, c.dec);
@@ -289,12 +428,23 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         };
     };
 
-    // calculations for illumination parameters of the moon,
-    // based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
-    // Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+    /**
+    * @typedef {Object} moonillumination
+    * @property {number} fraction - The fraction of the moon
+    * @property {number} phase - The phase of the moon
+    * @property {number} angle - The angle of the moon
+    */
 
-    SunCalc.getMoonIllumination = function (date) {
-        const d = toDays(date || new Date());
+    /**
+     * calculations for illumination parameters of the moon,
+     * based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
+     * Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+     * @param {Date} date Date object with the  for calculating moon-illumination
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {moonillumination} result object of moon-illumination
+     */
+    SunCalc.getMoonIllumination = function (date, inUTC) {
+        const d = toDays(date, inUTC);
 
         const s = sunCoords(d);
 
@@ -321,14 +471,28 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return new Date(date.valueOf() + h * dayMs / 24);
     }
 
-    // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
+    /**
+    * @typedef {Object} moontimes
+    * @property {Date} rise - a Date object if the moon is rising on the given Date, otherwhise NaN
+    * @property {Date} set - a Date object if the moon is setting on the given Date, otherwhise NaN
+    * @property {boolean} [alwaysUp] - is true if the moon in always up, oitherwise property not exists
+    * @property {boolean} [alwaysDown] - is true if the moon in always up, oitherwise property not exists
+    */
 
+    /**
+     * calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
+     * @param {Date} date Date object with the  for calculating moon-times
+     * @param {number} lat latitude for calculating moon-times
+     * @param {number} lng longitude for calculating moon-times
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {moontimes} result object of sunTime
+     */
     SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
         const t = new Date(date);
-        if (inUTC) {
-            t.setUTCHours(0, 0, 0, 0);
-        } else {
+        if (inUTC === false) {
             t.setHours(0, 0, 0, 0);
+        } else {
+            t.setUTCHours(0, 0, 0, 0);
         }
         // console.log(`getMoonTimes lat=${lat} lng=${lng} inUTC=${inUTC} date=${date} t=${t}`);
 

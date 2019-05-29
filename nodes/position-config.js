@@ -82,7 +82,14 @@ module.exports = function (RED) {
                 this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
                 this.angleType = config.angleType;
-                this.tzOffset = (config.timezoneOffset * -60) || 0;
+                this.tzOffset = (config.timeZoneOffset || 99);
+                if (isNaN(this.tzOffset) || this.tzOffset > 99 || this.tzOffset < -99) {
+                    this.tzOffset = 99;
+                }
+                this.tzOffset = (this.tzOffset * -60);
+
+                this.stateTimeFormat = config.stateTimeFormat || '3';
+                this.stateDateFormat = config.stateDateFormat || '12';
                 // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
                 this.lastSunCalc = {
                     ts: 0
@@ -109,26 +116,42 @@ module.exports = function (RED) {
         }
 
         /**
-         *
-         * @param node
+         * register a node as child
+         * @param node node to register as child node
          */
         register(node) {
             this.users[node.id] = node;
         }
 
         /**
-         *
-         * @param node
-         * @param done
-         * @returns {*}
+         * remove a previous registered node as child
+         * @param node node to remove
+         * @param done function which should be executed after deregister
+         * @returns {function}
          */
         deregister(node, done) {
             delete node.users[node.id];
             return done();
         }
         /*******************************************************************************************************/
+        /**
+        * @typedef {Object} timeresult
+        * @property {Date} value - a Date object of the neesed date/time
+        * @property {string} [error] - string of an error message if an error occurs
+        */
+
+        /**
+         * gets sun time
+         * @param {Date} now current time
+         * @param {string} value name of the sun time
+         * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
+         * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
+         * @param {number} [next] if greater than 0 the number of days in the future
+         * @param {string} [days] days for which should be calculated the sun time
+         * @return {timeresult} result object of sunTime
+         */
         getSunTime(now, value, offset, multiplier, next, days) {
-            // this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = this._sunTimesCheck(now);
             result = Object.assign(result, this.sunTimesToday[value]);
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -138,7 +161,7 @@ module.exports = function (RED) {
                 } else if (next > 1) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(next);
-                    result = Object.assign(result, sunCalc.getTimes(date, this.latitude, this.longitude)[value]);
+                    result = Object.assign(result, sunCalc.getSunTimes(date, this.latitude, this.longitude)[value]);
                 }
 
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -150,8 +173,7 @@ module.exports = function (RED) {
                 if (dayx > 0) {
                     this._checkCoordinates();
                     const date = result.value.addDays(dayx);
-                    // let times = sunCalc.getTimes(date, this.latitude, this.longitude);
-                    result = Object.assign(result, sunCalc.getTimes(date, this.latitude, this.longitude)[value]);
+                    result = Object.assign(result, sunCalc.getSunTimes(date, this.latitude, this.longitude)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 } else if (dayx < 0) {
                     // this.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
@@ -159,10 +181,20 @@ module.exports = function (RED) {
                 }
             }
 
-            // this.debug('getSunTime result=' + util.inspect(result));
+            this.debug('getSunTime result=' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
+        /**
+        * gets moon time
+        * @param {Date} now current time
+        * @param {string} value name of the moon time
+        * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
+        * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
+        * @param {number} [next] if greater than 0 the number of days in the future
+        * @param {string} [days] days for which should be calculated the moon time
+        * @return {timeresult} result object of moon time
+        */
         getMoonTime(now, value, offset, multiplier, next, days) {
             // this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
             const result = this._moonTimesCheck( now);
@@ -173,7 +205,7 @@ module.exports = function (RED) {
                 } else if (next > 1) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(next);
-                    const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude, true);
+                    const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude);
                     result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
                 }
             }
@@ -183,7 +215,7 @@ module.exports = function (RED) {
                 if (dayx > 0) {
                     this._checkCoordinates();
                     const date = (new Date()).addDays(dayx);
-                    const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude, true);
+                    const times = sunCalc.getMoonTimes(date, this.latitude, this.longitude);
                     result.value = hlp.addOffset(new Date(times[value]), offset, multiplier);
                 } else if (dayx < 0) {
                     result.error = 'No valid day of week found!';
@@ -196,6 +228,49 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
+        /**
+         * Formate a Date Object to a Date and Time String
+         * @param {Date} dt Date to format to Date and Time string
+         * @returns {string} formated Date object
+         */
+        dateToString(dt) {
+            return (this.dateToDateString(dt) + ' ' + this.dateToTimeString(dt)).trim();
+        }
+
+        /**
+         * Formate a Date Object to a Time String
+         * @param {Date} dt Date to format to trime string
+         * @returns {string} formated Date object
+         */
+        dateToTimeString(dt) {
+            if (this.stateTimeFormat === '3') {
+                return dt.toLocaleTimeString();
+            }
+            return hlp.getFormattedDateOut(dt, this.stateTimeFormat);
+        }
+
+        /**
+         * Formate a Date Object to a Date String
+         * @param {Date} dt Date to format to Date string
+         * @returns {string} formated Date object
+         */
+        dateToDateString(dt) {
+            if (this.stateDateFormat === '12') {
+                return dt.toLocaleDateString();
+            }
+            return hlp.getFormattedDateOut(dt, this.stateDateFormat);
+        }
+        /*******************************************************************************************************/
+        /**
+         * get a float value from a type input in Node-Red
+         * @param {*} _srcNode - source node information
+         * @param {*} msg - message object
+         * @param {string} type - type name of the type input
+         * @param {*} value - value of the type input
+         * @param {*} [def] - default value if can not get float value
+         * @param {*} [opCallback] - callback function for getting getPropValue
+         * @returns {number} float property
+         */
         getFloatProp(_srcNode, msg, type, value, def, opCallback) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
@@ -240,10 +315,10 @@ module.exports = function (RED) {
             } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                 if (vType === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getSunTime((new Date()), value, offsetX, multiplier, undefined, days);
+                    result = this.getSunTime((new Date()), value, offsetX, multiplier, 1, days);
                 } else if (vType === 'pdmTime') { // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getMoonTime((new Date()), value, offsetX, multiplier, undefined, days);
+                    result = this.getMoonTime((new Date()), value, offsetX, multiplier, 1, days);
                 }
                 if (result && result.value && !result.error) {
                     return hlp.getFormattedDateOut(result.value, format);
@@ -321,7 +396,7 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
-            // this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = {
                 value: null,
                 error: null,
@@ -387,6 +462,16 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
+        /**
+        * get a property value from a type input in Node-Red
+        * @param {*} _srcNode - source node information
+        * @param {*} msg - message object
+        * @param {string} type - type name of the type input
+        * @param {*} value - value of the type input
+        * @param {function} [callback] - function which should be called after value was recived
+        * @param {*} [addID] - additional parameter for the callback
+        * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
+        */
         getPropValue(_srcNode, msg, type, value, callback, addID) {
             // _srcNode.debug(`getPropValue ${type}.${value} (${addID})`);
             let result = null;
@@ -647,8 +732,8 @@ module.exports = function (RED) {
         _sunTimesRefresh(today, tomorrow, dayId) {
             this._checkCoordinates();
             // this.debug('sunTimesRefresh - calculate sun times');
-            this.sunTimesToday = sunCalc.getTimes(today, this.latitude, this.longitude);
-            this.sunTimesTomorow = sunCalc.getTimes(tomorrow, this.latitude, this.longitude);
+            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude);
+            this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude);
             this.sunDayId = dayId;
         }
 
@@ -670,7 +755,7 @@ module.exports = function (RED) {
         _moonTimesRefresh(today, tomorrow, dayId) {
             this._checkCoordinates();
             // this.debug('moonTimesRefresh - calculate moon times');
-            this.moonTimesToday = sunCalc.getMoonTimes(today, this.latitude, this.longitude, true);
+            this.moonTimesToday = sunCalc.getMoonTimes(today, this.latitude, this.longitude);
             if (!this.moonTimesToday.alwaysUp) {
                 // true if the moon never rises/sets and is always above the horizon during the day
                 this.moonTimesToday.alwaysUp = false;
@@ -681,7 +766,7 @@ module.exports = function (RED) {
                 this.moonTimesToday.alwaysDown = false;
             }
 
-            this.moonTimesTomorow = sunCalc.getMoonTimes(tomorrow, this.latitude, this.longitude, true);
+            this.moonTimesTomorow = sunCalc.getMoonTimes(tomorrow, this.latitude, this.longitude);
             if (!this.moonTimesTomorow.alwaysUp) {
                 // true if the moon never rises/sets and is always above the horizon during the day
                 this.moonTimesTomorow.alwaysUp = false;

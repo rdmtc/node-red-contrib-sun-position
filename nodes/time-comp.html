@@ -123,6 +123,7 @@
     }
     .node-input-multiplier {
         width: 125px;
+        max-width: 125px;
         margin-left: 5px;
     }
     .node-input-rule-property {
@@ -251,7 +252,7 @@
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
         }
 
@@ -484,7 +485,7 @@
                     }
                 }).change();
 
-                initCombobox(node, 'inputFormatsel', 'inputFormat', 'dateParseFormat', 'parseFormats', node.inputFormat, 20);
+                initCombobox(node, $('#node-input-inputFormatsel'), $('#node-input-inputFormat'), 'dateParseFormat', 'parseFormats', node.inputFormat, 20);
 
                 const inputMultiplierField = $('#node-input-inputOffsetMultiplier');
                 appendOptions(node, inputMultiplierField, 'multiplier');
@@ -763,7 +764,7 @@
                     onChange: (_type, _value) => { $('#node-input-result1').change(); }
                 }).change();
                 /********************************************************/
-                initCombobox(node, 'result1FormatSel', 'result1Format', 'dateOutFormat', 'outputFormats', node.result1Format, 30);
+                initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
                 /********************************************************/
                 const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
                 appendOptions(node, resultMultiplierField, 'multiplier');

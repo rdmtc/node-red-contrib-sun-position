@@ -62,6 +62,7 @@ const SelectFields = {
         {id: 15, group: 'string', name: 'localDateLong', label: 'local date long'},
         {id: 4, group: 'string', name: 'UTC', label: 'UTC date and time'},
         {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
+        {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
         {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
         {id: 7, group: 'time', name: 'sec', label: 'seconds'},
         {id: 8, group: 'time', name: 'min', label: 'minutes'},
@@ -211,8 +212,9 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
             options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
-                'sunrise', 'sunriseEnd', 'goldenHourEnd', 'solarNoon', 'goldenHourStart', 'sunsetStart', 'sunset', 'blueHourDuskStart',
-                'civilDusk', 'blueHourDuskEnd', 'amateurDusk', 'astronomicalDusk', 'nadir']
+                'goldenHourDawnStart', 'sunrise', 'sunriseEnd', 'goldenHourDawnEnd', 'solarNoon', 'goldenHourDuskStart',
+                'sunsetStart', 'sunset', 'goldenHourDuskEnd', 'blueHourDuskStart', 'civilDusk', 'blueHourDuskEnd',
+                'nauticalDusk', 'amateurDusk', 'astronomicalDusk', 'nadir']
         },
         TimeMoon: {
             value: 'pdmTime',
@@ -504,43 +506,36 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 
 // ************************************************************************************************
 
-function initCombobox(node, inputSelectName, inputBoxName, dataList, optionElementName, value, width) { // eslint-disable-line no-unused-vars
-    // console.log('initCombobox node=' + node + ' inputSelectName=' + inputSelectName + ' inputBoxName=' + inputBoxName + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
-    const $inputSelect = $('#node-input-' + inputSelectName);
-    const $inputBox = $('#node-input-' + inputBoxName);
-    $inputSelect.attr('base-width', width);
-    $inputSelect.attr('linked-input', inputBoxName);
-
+function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName, value, baseWidth, timeFormat) { // eslint-disable-line no-unused-vars
+    // console.log('initCombobox node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     appendOptions(node, $inputSelect, optionElementName);
-    autocomplete($('#node-input-' + inputBoxName), dataList);
-
-    $inputSelect.on('change', (_type, _value) => {
-        // const $inputSelect = $( this ); // $('#node-input-' + inputSelectName);
-        const inputBoxName = $inputSelect.attr('linked-input');
-        let width = Number($inputSelect.attr('base-width'));
-        const $inputBox = $('#node-input-' + inputBoxName);
-
-        if (Number($inputSelect.val()) === 99) {
-            $inputSelect.css({width: '100px'});
-            width = (205 + width);
-            $inputBox.css({width: 'calc(100% - ' + width + 'px)'});
-            $inputBox.show();
-            if (!isNaN($inputBox.val())) {
-                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
-            }
-        } else {
-            $inputBox.hide();
-            width = (100 + width);
-            $inputSelect.css({width: 'calc(100% - ' + width + 'px)'});
-            $inputBox.val($inputSelect.val());
-        }
-    });
-    if (value && isNaN(value)) {
+    autocomplete($inputBox, dataList);
+    const valueNum = Number(value);
+    timeFormat = timeFormat || 'default';
+    if (isNaN(valueNum)) {
         $inputSelect.val(99);
         $inputBox.val(value);
     } else {
-        $inputSelect.val(Number(value));
+        $inputSelect.val(valueNum);
     }
+
+    $inputSelect.on('change', (_type, _value) => {
+        if (Number($inputSelect.val()) === 99) {
+            $inputSelect.css({ width: '100px' });
+            const width = (205 + baseWidth);
+            $inputBox.css({ width: 'calc(100% - ' + width + 'px)' });
+            $inputBox.show();
+            if (!isNaN($inputBox.val())) {
+                $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.' + timeFormat));
+            }
+        } else {
+            $inputBox.hide();
+            const width = (100 + baseWidth);
+            $inputSelect.css({ width: 'calc(100% - ' + width + 'px)' });
+            $inputBox.val($inputSelect.val());
+        }
+    });
+
     $inputSelect.change();
 }
 // ************************************************************************************************

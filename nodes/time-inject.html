@@ -290,6 +290,7 @@
     }
     .node-input-multiplier {
         width: 125px;
+        max-width: 125px;
         margin-left: 5px;
     }
     .time-inject-row-timeDays,
@@ -323,12 +324,12 @@
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {
-        l = l || 15;
+        l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
             suffix = '↷';
@@ -392,7 +393,7 @@
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
         }
 
@@ -903,10 +904,10 @@
                 result += getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12);
             } else {
                 const timeTxt = getTimeId();
-                if (timeTxt.length > 24) {
+                if (timeTxt.length > 26) {
                     result += timeTxt + ' =...';
                 } else {
-                    result += timeTxt + ' = ' + getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12);
+                    result += timeTxt + ' = ' + getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 14);
                 }
             }
 
@@ -1045,7 +1046,7 @@
                         });
                     }
                 });
-                initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
+                initCombobox(node, $('#node-input-payloadTimeFormatsel'), $('#node-input-payloadTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
                 node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
                 setupTInput(node, {
@@ -1205,8 +1206,6 @@
                     defaultValue: '',
                     types: ['msg', 'flow', 'global', 'str', 'num', 'env']
                 });
-
-                initCombobox(node, 'payloadTimeFormatsel', 'payloadTimeFormat', 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
                 // #endregion property
                 // #region timeAlt
                 const $timeAlt = setupTInput(node, {
@@ -1359,7 +1358,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
 
-                initCombobox(node, 'addPayload1Formatsel', 'addPayload1Format', 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload1Formatsel'), $('#node-input-addPayload1Format'), 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
                 node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
 
@@ -1478,7 +1477,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
 
-                initCombobox(node, 'addPayload2Formatsel', 'addPayload2Format', 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload2Formatsel'), $('#node-input-addPayload2Format'), 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
                 node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
                 setupTInput(node, {
@@ -1592,7 +1591,7 @@
 
                 initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
 
-                initCombobox(node, 'addPayload3Formatsel', 'addPayload3Format', 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
+                initCombobox(node, $('#node-input-addPayload3Formatsel'), $('#node-input-addPayload3Format'), 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
                 node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
                 setupTInput(node, {

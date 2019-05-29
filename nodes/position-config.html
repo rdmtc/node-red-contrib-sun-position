@@ -22,9 +22,10 @@
         </select>
     </div>
 
-    <div class="form-row hidden">
-        <label for="node-config-input-timezoneOffset"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.timezoneOffset"></span></label>
-        <select type="text" id="node-config-input-timezoneOffset" style="width:70%;">
+    <div class="form-row">
+        <label for="node-config-input-timeZoneOffset"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.timeZoneOffset"></span></label>
+        <select type="text" id="node-config-input-timeZoneOffset" style="width:70%;" disabled>
+            <option timeZoneId="1" gmtAdjustment="GMT-12:00" useDaylightTime="0" value="99">Operating system standard</option>
             <option timeZoneId="1" gmtAdjustment="GMT-12:00" useDaylightTime="0" value="-12">(GMT-12:00) International Date Line West</option>
             <option timeZoneId="2" gmtAdjustment="GMT-11:00" useDaylightTime="0" value="-11">(GMT-11:00) Midway Island, Samoa</option>
             <option timeZoneId="3" gmtAdjustment="GMT-10:00" useDaylightTime="0" value="-10">(GMT-10:00) Hawaii</option>
@@ -110,6 +111,20 @@
             <option timeZoneId="82" gmtAdjustment="GMT+13:00" useDaylightTime="0" value="13">(GMT+13:00) Nuku'alofa</option>
         </select>
     </div>
+
+    <div class="form-row">
+        <label for="node-config-input-stateDateFormatSel"><i class="fa fa-calendar-o"></i> <span data-i18n="position-config.label.stateDateFormat"></span></label>
+        <select id="node-config-input-stateDateFormatSel" data-i18n="[placeholder]position-config.placeholder.stateDateFormat"></select>
+        <input type="text" id="node-config-input-stateDateFormat" data-i18n="[placeholder]position-config.placeholder.stateDateFormat" >
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-stateTimeFormatSel"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.stateTimeFormat"></span></label>
+        <select id="node-config-input-stateTimeFormatSel" data-i18n="[placeholder]position-config.placeholder.stateTimeFormat"></select>
+        <input type="text" id="node-config-input-stateTimeFormat" data-i18n="[placeholder]position-config.placeholder.stateTimeFormat">
+    </div>
+
+    <div class="form-row form-tips" data-i18n="[html]position-config.tips.stateFormat"></div>
     <hr>
     <div class="form-row">
         <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="position-config.label.name"></span></label>
@@ -167,20 +182,34 @@
                     return (v === 'rad' || v === 'deg');
                 }
             },
-            timezoneOffset: {
-                value: null
+            timeZoneOffset: {
+                value: 99999
+            },
+            stateTimeFormat: {
+                value: 3 // 3 - date.toLocaleTimeString()
+            },
+            stateDateFormat: {
+                value: 12 // 12 - date.toLocaleDateString()
             }
         },
         label() {
             return this.name || 'timeControl';
         },
         oneditprepare() {
-            if ((this.timezoneOffset === null) ||
-                (typeof this.timezoneOffset === 'undefined') ||
-                (this.timezoneOffset === '')) {
-                this.timezoneOffset = ((new Date()).getTimezoneOffset() / -60);
-                $('#node-config-input-timezoneOffset').val(this.timezoneOffset);
+            const node = this;
+            const tsOffset = parseInt(this.timeZoneOffset);
+            if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
+                this.timeZoneOffset = 99;
+                $('#node-config-input-timeZoneOffset').val(99);
             }
+
+            /*
+            if ((this.timeZoneOffset === null) ||
+                (typeof this.timeZoneOffset === 'undefined') ||
+                (this.timeZoneOffset === '')) {
+                this.timeZoneOffset = ((new Date()).getTimezoneOffset() / -60);
+                $('#node-config-input-timeZoneOffset').val(this.timeZoneOffset);
+            } /* */
             const latField = $('#node-config-input-posLatitude');
             const lonField = $('#node-config-input-posLongitude');
             const latOldVal = parseFloat($('#node-config-input-latitude').val());
@@ -232,6 +261,27 @@
                     });
                 }
             }
+            const setup = function(_node) {
+                /* global initCombobox */
+                initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 50, 'isoDate');
+                initCombobox(node, $('#node-config-input-stateTimeFormatSel'), $('#node-config-input-stateTimeFormat'), 'dateOutFormat', 'outputFormats', node.stateTimeFormat || 3, 50, 'isoTime');
+            }; // setup
+
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
         },
         oneditsave() {
             /*

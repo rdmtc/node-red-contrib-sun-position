@@ -135,18 +135,19 @@
     }
     .node-input-multiplier {
         width: 125px;
+        max-width: 125px;
         margin-left: 5px;
     }
 </style>
 
 <script type="text/javascript">
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
     function getValueLabel(node, t, v, offset, l) {
-        l = l || 15;
+        l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
             suffix = '↷';
@@ -209,7 +210,7 @@
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('civil', '').replace('amateur', 'amat-').replace('blueHour', 'blHr-').replace('goldenHour', 'goHr-');
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
         }
 
@@ -477,7 +478,7 @@
                     }
                 }).change();
 
-                initCombobox(node, 'operand1Formatsel', 'operand1Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+                initCombobox(node, $('#node-input-operand1Formatsel'), $('#node-input-operand1Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
                 const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
                 appendOptions(node, operand1MultiplierField, 'multiplier');
@@ -547,7 +548,7 @@
                     }
                 }).change();
 
-                initCombobox(node, 'operand2Formatsel', 'operand2Format', 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+                initCombobox(node, $('#node-input-operand2Formatsel'), $('#node-input-operand2Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
                 const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
                 appendOptions(node, operand2MultiplierField, 'multiplier');
@@ -718,9 +719,9 @@
                     onChange: (_type, _value) => { $('#node-input-result1').change(); }
                 }).change();
                 /********************************************************/
-                initCombobox(node, 'result1TSFormatSel', 'result1TSFormat', 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
+                initCombobox(node, $('#node-input-result1TSFormatSel'), $('#node-input-result1TSFormat'), 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
                 /********************************************************/
-                initCombobox(node, 'result1FormatSel', 'result1Format', 'dateOutFormat', 'outputFormats', node.result1Format, 30);
+                initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
                 /********************************************************/
                 const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
                 appendOptions(node, resultMultiplierField, 'multiplier');
