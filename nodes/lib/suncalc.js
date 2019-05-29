@@ -135,12 +135,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const d = toDays(date, inUTC);
         const c = sunCoords(d);
         const H = siderealTime(d, lw) - c.ra;
+
         return {
             azimuth: azimuth(H, phi, c.dec),
-            altitude: altitude(H, phi, c.dec)
+            altitude: altitude(H, phi, c.dec),
+            declination: c.dec
         };
     };
-
 
     /**
     * @typedef {Object} suntime
@@ -305,8 +306,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             }
         };
 
-        result.solarNoon.ts = result.solarNoon.value.getTime();
-        result.nadir.ts = result.nadir.value.getTime();
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
             const time = sunTimes[i];
             const sa = time[0];
@@ -346,8 +345,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 julian: Jrise,
                 valid
             };
-            result[time[2]].ts = result[time[2]].value.getTime();
-            result[time[1]].ts = result[time[1]].value.getTime();
         }
 
         if (!noDeprecated) {
@@ -359,6 +356,58 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
 
         return result;
+    };
+
+    /**
+     * calculates sun times for a given date and latitude/longitude
+     * @param {Date} date Date object with the  for calculating sun-times
+     * @param {number} lat latitude for calculating sun-times
+     * @param {number} lng longitude for calculating sun-times
+     * @param {number} sunAngle sun angle for calculating sun-time
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @return {suntimes} result object of sunTime
+     */
+    SunCalc.getSunTime = function (date, lat, lng, sunAngle, inUTC) {
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
+        if (isNaN(sunAngle)) {
+            throw new Error('angle missing');
+        }
+
+        const lw = rad * -lng;
+        const phi = rad * lat;
+
+        const d = toDays(date, inUTC);
+        const n = julianCycle(d, lw);
+        const ds = approxTransit(0, lw, n);
+        const M = solarMeanAnomaly(ds);
+        const L = eclipticLongitude(M);
+        const dec = declination(L, 0);
+        const Jnoon = solarTransitJ(ds, M, L);
+
+        const Jset = getSetJ(sunAngle * rad, lw, phi, dec, n, M, L);
+        const Jrise = Jnoon - (Jset - Jnoon);
+        const v1 = fromJulianDay(Jset);
+        const v2 = fromJulianDay(Jrise);
+
+        return {
+            set: {
+                value: v1,
+                ts: v1.getTime(),
+                angle: sunAngle,
+                julian: Jset
+            },
+            rise: {
+                value: v2,
+                ts: v2.getTime(),
+                angle: (180 + (sunAngle * -1)),
+                julian: Jrise
+            }
+        };
     };
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas

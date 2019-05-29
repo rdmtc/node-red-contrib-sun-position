@@ -5,7 +5,7 @@
     </div>
     <hr>
     <!-- #region blind ######################################################################## -->
-    <div class="form-row block-noindent form-row-showLater hidden">
+    <div class="form-row block-noindent initially-toshow">
         <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span>
     </div>
     <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
@@ -22,23 +22,23 @@
     </div>
     <hr>
     <!-- #region time ######################################################################## -->
-    <div class="form-row-showLater hidden">
+    <div class="initially-toshow">
         <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
         <div class="form-row node-input-rule-container-row row-full-width">
         <ol id="node-input-rule-container"></ol>
         </div>
     </div>
-    <div class="form-row block-noindent form-row-showLater hidden">
+    <div class="form-row block-noindent initially-toshow">
         <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
     </div>
-    <div class="form-row block-noindent form-row-showLater hidden" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
+    <div class="form-row block-noindent initially-toshow" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
         <label for="node-input-blindPosDefault"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelDefault"></span></label>
         <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
         <input type="hidden" id="node-input-blindPosDefaultType">
     </div>
     <hr>
     <!-- #region overwrite blind ######################################################################## -->
-    <div class="form-row block-noindent form-row-showLater hidden">
+    <div class="form-row block-noindent initially-toshow">
         <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span>
     </div>
     <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
@@ -53,7 +53,7 @@
     </div>
     <hr>
     <!-- #region sun ######################################################################## -->
-    <div class="form-row block-noindent form-row-showLater hidden">
+    <div class="form-row block-noindent initially-toshow">
         <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
@@ -65,66 +65,66 @@
         </select>
     </div>
     <!-- window ######################################################################## -->
-    <div class="form-row form-row-sunControlActive hidden block-noindent">
+    <div class="form-row form-row-sunControlActive block-noindent">
         <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
         <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
         <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-noindent">
+    <div class="form-row form-row-sunControlActive block-noindent">
         <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
         <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop"/>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
     </div>
-    <hr class="form-row-sunControlActive hidden" >
+    <hr class="form-row-sunControlActive" >
      <!-- sun ######################################################################## -->
-    <div class="form-row form-row-sunControlRestriction hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
+    <div class="form-row form-row-sunControlRestriction initially-hide block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
         <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
     </div>
-    <div class="form-row form-row-sunControlRestriction hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
+    <div class="form-row form-row-sunControlRestriction initially-hide block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
         <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
         <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
         <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
         <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
         <input type="hidden" id="node-input-blindPosMinType">
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMax">
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMax">
         <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMax"></span></label>
         <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMax"/>
         <input type="hidden" id="node-input-blindPosMaxType">
     </div>
-    <hr class="form-row-sunControlActive hidden" >
+    <hr class="form-row-sunControlActive" >
     <!-- #region oversteering ######################################################################## -->
-    <div class="form-row form-row-sunControlActive hidden block-noindent">
+    <div class="form-row form-row-sunControlActive block-noindent">
         <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row form-row-sunControlActive hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
         <label for="node-input-oversteerValue"><i class="fa fa-superpowers"></i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
         <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteerValueType">
         <select id="node-input-oversteerCompare" class="node-input-addOn">
         </select>
     </div>
-    <div class="form-row hidden row-oversteerThreshold block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+    <div class="form-row row-oversteerThreshold initially-hide block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
         <label for="node-input-oversteerThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteerThreshold"></span></label>
         <input type="text" id="node-input-oversteerThreshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
         <input type="hidden" id="node-input-oversteerThresholdType">
     </div>
-    <div class="form-row hidden row-oversteerBlindPos block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+    <div class="form-row row-oversteerBlindPos initially-hide block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
         <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
         <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteerBlindPosType">
@@ -161,13 +161,25 @@
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
     </div>
-    <div class="form-tips form-row-showLater hidden">
+    <div class="form-tips initially-toshow">
         <span data-i18n="[html]blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
     </div>
 </script>
 <style>
     hr {
         width: 100%
+    }
+    .initially-toshow {
+        display:none
+    }
+    .initially-hide {
+        display:none
+    }
+    .form-row-sunControlActive {
+        display:none
+    }
+    .form-tips {
+        width: 90%
     }
     .block-indent1 {
         float: left;
@@ -498,7 +510,7 @@
             const node = this;
             const setup = function(node) {
                 /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeData */
-                $('.form-row-showLater').show();
+                $('.initially-toshow').show();
                 // #region initialize
                 const types = getTypes(node);
                 const selFields = getSelectFields();

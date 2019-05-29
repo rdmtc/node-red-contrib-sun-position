@@ -26,52 +26,51 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ## Table of contents
 
-- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  - [Table of contents](#table-of-contents)
-  - [Installation](#installation)
-  - [General](#general)
-    - [Saving resources](#saving-resources)
-    - [second based accuracy](#second-based-accuracy)
-  - [Implemented Nodes](#implemented-nodes)
-    - [sun-position](#sun-position)
-      - [sun-position - Node settings](#sun-position---node-settings)
-      - [Node Input](#node-input)
-      - [sun-position - Node Output](#sun-position---node-output)
-    - [moon-position](#moon-position)
-      - [moon-position - Node settings](#moon-position---node-settings)
-      - [moon-position - Node Output](#moon-position---node-output)
-    - [time-inject](#time-inject)
-      - [time-inject - Node settings](#time-inject---node-settings)
-      - [time-inject - Node Input](#time-inject---node-input)
-      - [time-inject - Node Output](#time-inject---node-output)
-    - [within-time](#within-time)
-      - [within-time - Node settings](#within-time---node-settings)
-    - [time-comp](#time-comp)
-      - [time-comp - Node settings](#time-comp---node-settings)
-    - [time-span](#time-span)
-      - [time-span - Node settings](#time-span---node-settings)
-    - [blind-control](#blind-control)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
-  - [TODO](#todo)
-  - [Bugs and Feedback](#bugs-and-feedback)
-  - [LICENSE](#license)
-  - [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [TODO](#todo)
+  * [Bugs and Feedback](#bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Installation
 
 `npm install node-red-contrib-sun-position`
-
 
 ## General
 
@@ -143,47 +142,6 @@ The Input is for triggering the calculation. If limits are defined the input mes
   * `msg.payload.startTime` if a start time is defined the start timestamp (inclusive of offset).
   * `msg.payload.endTime` if a end time is defined the end timestamp (inclusive of offset).
   * `msg.payload.sunInSky` if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.
-
-```json
-{
-  "lastUpdate": "2018-11-11T11:11:11.111Z",
-  "latitude": "18.473782",
-  "longitude": "-34.357051",
-  "angleType": "deg",
-  "azimuth": 117.72942647370792,
-  "altitude": 20.984193272523992,
-  "times": {
-      "solarNoon":"2018-12-10T10:59:14.814Z",
-      "nadir":"2018-12-10T22:59:14.814Z",
-      "sunrise":"2018-12-10T06:58:55.584Z",
-      "sunset":"2018-12-10T14:59:34.044Z",
-      "sunriseEnd":"2018-12-10T07:03:12.232Z",
-      "sunsetStart":"2018-12-10T14:55:17.395Z",
-      "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",
-      "blueHourDuskStart":"2018-12-10T15:24:06.743Z",
-      "civilDawn":"2018-12-10T06:19:31.249Z",
-      "civilDusk":"2018-12-10T15:38:58.379Z",
-      "blueHourDawnStart":"2018-12-10T06:05:03.443Z",
-      "blueHourDuskEnd":"2018-12-10T15:53:26.185Z",
-      "nauticalDawn":"2018-12-10T05:37:04.859Z",
-      "nauticalDusk":"2018-12-10T16:21:24.768Z",
-      "amateurDawn":"2018-12-10T05:16:44.832Z",
-      "amateurDusk":"2018-12-10T16:41:44.795Z",
-      "astronomicalDawn":"2018-12-10T04:56:49.931Z",
-      "astronomicalDusk":"2018-12-10T17:01:39.696Z",
-      "goldenHourDawnEnd":"2018-12-10T07:58:28.541Z",
-      "goldenHourDuskStart":"2018-12-10T14:00:01.086Z",
-      "dawn":"2018-12-10T06:19:31.249Z",
-      "dusk":"2018-12-10T15:38:58.379Z",
-      "nightEnd":"2018-12-10T04:56:49.931Z",
-      "night":"2018-12-10T17:01:39.696Z",
-      "nightStart":"2018-12-10T17:01:39.696Z",
-      "goldenHour":"2018-12-10T14:00:01.086Z"
-  },
-  "pos": [],
-  "posChanged": false
-}
-```
 
 * **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
 

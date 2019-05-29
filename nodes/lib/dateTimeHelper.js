@@ -952,11 +952,8 @@ function getFormattedDateOut(date, format, utc) {
     return {
         date,
         ts: date.getTime(),
-        dateStr: String(date),
         timeUTCStr: date.toUTCString(),
         timeISOStr: date.toISOString(),
-        timeLocaleStr: date.toLocaleString(),
-        timeLocaleTimeStr: date.toLocaleTimeString(),
         delay,
         delaySec: Math.round(delay / 1000),
         lc: now.getTime()

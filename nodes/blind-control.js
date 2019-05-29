@@ -287,8 +287,9 @@ module.exports = function (RED) {
         node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expireTs);
         node.blindData.overwrite.expireDateISO = node.blindData.overwrite.expireDate.toISOString();
         node.blindData.overwrite.expireDateUTC = node.blindData.overwrite.expireDate.toUTCString();
-        node.blindData.overwrite.expireDateLocal = node.blindData.overwrite.expireDate.toLocaleString();
-        node.blindData.overwrite.expireTimeLocal = node.blindData.overwrite.expireDate.toLocaleTimeString();
+        node.blindData.overwrite.expireDateLocal = node.positionConfig.dateToDateString(node.blindData.overwrite.expireDate);
+        node.blindData.overwrite.expireTimeLocal = node.positionConfig.dateToTimeString(node.blindData.overwrite.expireDate);
+
         node.debug(`expires in ${expire}ms = ${node.blindData.overwrite.expireDate}`);
         node.timeOutObj = setTimeout(() => {
             node.debug('timeout - overwrite expired');
@@ -646,7 +647,8 @@ module.exports = function (RED) {
             }
             if (ruleSel.timeLimited) {
                 livingRuleData.time = ruleSel.timeData;
-                livingRuleData.time.timeLocal = ruleSel.timeData.value.toLocaleTimeString();
+                livingRuleData.time.timeLocal = node.positionConfig.dateToTimeString(ruleSel.timeData.value);
+                livingRuleData.time.timeLocalDate = node.positionConfig.dateToDateString(ruleSel.timeData.value);
                 livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
                 livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
                 data.timeOp = ruleSel.timeOpText;
