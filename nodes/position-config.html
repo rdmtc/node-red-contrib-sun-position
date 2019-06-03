@@ -12,7 +12,7 @@
         <input  type="hidden" id="node-config-input-latitude">
     </div>
 
-    <div class="form-row form-tips" data-i18n="[html]position-config.tips.config"></div>
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]position-config.tips.config"></div>
 
     <div class="form-row">
         <label for="node-config-input-angleType"><i class="fa fa-angle-left"></i> <span data-i18n="position-config.label.angleType"></span></label>
@@ -21,6 +21,10 @@
             <option value="rad" >radians</option>
         </select>
     </div>
+
+    <hr>
+
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]position-config.tips.timeZoneOffset"></div>
 
     <div class="form-row">
         <label for="node-config-input-timeZoneOffset"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.timeZoneOffset"></span></label>
@@ -112,6 +116,15 @@
         </select>
     </div>
 
+    <div class="form-row row-timeZoneDST">
+        <label for="node-config-input-timeZoneDST"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.timeZoneDST"></span></label>
+        <select type="text" id="node-config-input-timeZoneDST" style="width:70%;" disabled>
+            <option value="0" data-i18n="position-config.label.addDST1Hour">No DST</option>
+            <option value="1" data-i18n="position-config.label.addDST1Hour">DST add 1 Hour</option>
+            <option value="2" data-i18n="position-config.label.addDST2Hour">DST add 2 Hours</option>
+        </select>
+    </div>
+
     <div class="form-row">
         <label for="node-config-input-stateDateFormatSel"><i class="fa fa-calendar-o"></i> <span data-i18n="position-config.label.stateDateFormat"></span></label>
         <select id="node-config-input-stateDateFormatSel" data-i18n="[placeholder]position-config.placeholder.stateDateFormat"></select>
@@ -124,13 +137,27 @@
         <input type="text" id="node-config-input-stateTimeFormat" data-i18n="[placeholder]position-config.placeholder.stateTimeFormat">
     </div>
 
-    <div class="form-row form-tips" data-i18n="[html]position-config.tips.stateFormat"></div>
     <hr>
+
     <div class="form-row">
         <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="position-config.label.name"></span></label>
         <input type="text" id="node-config-input-name" data-i18n="[placeholder]position-config.placeholder.name">
     </div>
 </script>
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display: none
+    }
+    .is-initial-hidden {
+        display: none
+    }
+    .is-to-hide-initially {
+        display: none
+    }
+</style>
 
 <script type="text/javascript">
     RED.nodes.registerType('position-config', {
@@ -183,7 +210,10 @@
                 }
             },
             timeZoneOffset: {
-                value: 99999
+                value: 99
+            },
+            timeZoneDST: {
+                value: 0
             },
             stateTimeFormat: {
                 value: 3 // 3 - date.toLocaleTimeString()
@@ -196,71 +226,97 @@
             return this.name || 'timeControl';
         },
         oneditprepare() {
+            setTimeout(() => {
+                $('.is-to-show-initially').show();
+                $('.is-to-hide-initially').hide();
+            }, 300);
+
             const node = this;
-            const tsOffset = parseInt(this.timeZoneOffset);
+            let tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
             if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
                 this.timeZoneOffset = 99;
                 $('#node-config-input-timeZoneOffset').val(99);
+                tsOffset = 99;
+            }
+            console.log(tsOffset);
+
+            const tsDST = parseInt($('#node-config-input-timeZoneOffset').val());
+            if (isNaN(tsDST) || tsDST >= 99 || tsDST <= -99) {
+                this.timeZoneDST = 0;
+                $('#node-config-input-timeZoneDST').val(0);
             }
 
-            /*
-            if ((this.timeZoneOffset === null) ||
-                (typeof this.timeZoneOffset === 'undefined') ||
-                (this.timeZoneOffset === '')) {
-                this.timeZoneOffset = ((new Date()).getTimezoneOffset() / -60);
-                $('#node-config-input-timeZoneOffset').val(this.timeZoneOffset);
-            } /* */
-            const latField = $('#node-config-input-posLatitude');
-            const lonField = $('#node-config-input-posLongitude');
+            $('#node-config-input-timeZoneOffset').on('change focus focusin focusout', () => {
+                const tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
+                console.log(tsOffset);
+                if (tsOffset === 99 || isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
+                    $('#node-config-input-timeZoneOffset').val(99);
+                    $('#node-config-input-timeZoneDST').attr('disabled', true);
+                    $('.row-timeZoneDST').hide();
+                } else {
+                    $('.row-timeZoneDST').show();
+                    $('#node-config-input-timeZoneDST').attr('disabled', false);
+                }
+            });
+            $('#node-config-input-timeZoneOffset').change();
+
+            $('#node-config-input-isValide').val(false);
+            const $lat = $('#node-config-input-posLatitude');
+            const $lon = $('#node-config-input-posLongitude');
             const latOldVal = parseFloat($('#node-config-input-latitude').val());
             const lonOldVal = parseFloat($('#node-config-input-longitude').val());
-            let latVal = parseFloat(latField.val());
-            let lonVal = parseFloat(lonField.val());
+            let latVal = parseFloat($lat.val());
+            let lonVal = parseFloat($lon.val());
 
             const coordChanged = (_type, _value) => {
                 const lat = $('#node-config-input-posLatitude').val();
                 const lon = $('#node-config-input-posLongitude').val();
-                const isValid = !isNaN(lat) && !isNaN(lon);
+                const isValid = !isNaN(lat) && !isNaN(lon) && (lat !== '') && (lon !== '') && (lat !== 0) && (lon !== 0);
                 $('#node-config-input-isValide').val(isValid);
             };
-            latField.on('change', coordChanged);
-            lonField.on('change', coordChanged);
+            $lat.on('change focus focusin focusout', coordChanged);
+            $lon.on('change focus focusin focusout', coordChanged);
 
-            latField.spinner({
+            $lat.spinner({
                 step: 0.00001,
                 numberFormat: 'n'
             });
-            lonField.spinner({
+            $lon.spinner({
                 step: 0.00001,
                 numberFormat: 'n'
             });
 
-            if (latField.val() === '' || isNaN(latVal)) {
+            if ($lat.val() === '' || isNaN(latVal)) {
                 if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
-                    latField.val(latOldVal);
+                    $lat.val(latOldVal);
                 } else {
-                    latField.val('');
+                    $lat.val('');
                 }
-                latVal = parseFloat(latField.val());
+                latVal = parseFloat($lat.val());
             }
 
-            if (lonField.val() === '' || isNaN(lonVal)) {
+            if ($lon.val() === '' || isNaN(lonVal)) {
                 if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
-                    lonField.val(lonOldVal);
+                    $lon.val(lonOldVal);
                 } else {
-                    lonField.val('');
+                    $lon.val('');
                 }
-                lonVal = parseFloat(lonField.val());
+                lonVal = parseFloat($lon.val());
             }
-            if (((latField.val() === '') || isNaN(latVal) || (latVal === 0)) &&
-                ((lonField.val() === '') || isNaN(lonVal) || (lonVal === 0))) {
+
+            if ((($lat.val() === '') || isNaN(latVal) || (latVal === 0)) &&
+                (($lon.val() === '') || isNaN(lonVal) || (lonVal === 0))) {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(position => {
-                        latField.val(Number(position.coords.latitude.toFixed(5)));
-                        lonField.val(Number(position.coords.longitude.toFixed(5)));
+                        $lat.val(Number(position.coords.latitude.toFixed(5)));
+                        $lon.val(Number(position.coords.longitude.toFixed(5)));
                     });
                 }
             }
+
+            $lat.change();
+            $lon.change();
+
             const setup = function(_node) {
                 /* global initCombobox */
                 initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 50, 'isoDate');

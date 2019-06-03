@@ -10,12 +10,12 @@
       <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
       <input type="hidden" id="node-input-inputType">
   </div>
-  <div class="form-row block-indent1 time-row-inputFormat initially-hide" data-i18n="[title]time-comp.placeholder.inputFormat">
+  <div class="form-row block-indent1 time-row-inputFormat is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
       <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
       <select id="node-input-inputFormatsel">
       <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent1 time-row-inputOffset initially-hide" data-i18n="[title]time-comp.placeholder.inputOffset">
+  <div class="form-row block-indent1 time-row-inputOffset is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
       <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
       <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.inputOffset">
       <input type="hidden" id="node-input-inputOffsetType">
@@ -41,18 +41,18 @@
       <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value initially-hide" data-i18n="[title]time-comp.placeholder.resultValue">
+  <div class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row block-indent2 time-row-result1Format initially-hide" data-i18n="[title]time-comp.placeholder.resultFormat">
+  <div class="form-row block-indent2 time-row-result1Format is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
       <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
       <select id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent2 time-row-result1Offset initially-hide" data-i18n="[title]time-comp.placeholder.resultOffset">
+  <div class="form-row block-indent2 time-row-result1Offset is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
       <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.resultOffset">
       <input type="hidden" id="node-input-result1OffsetType">
@@ -69,10 +69,10 @@
         hr {
         width: 100%
     }
-    .initially-toshow {
+    .is-to-show-initially {
         display:none
     }
-    .initially-hide {
+    .is-initial-hidden {
         display:none
     }
     .block-indent1 {
@@ -439,6 +439,10 @@
         paletteLabel: 'time compare and change',
         align: 'left',
         oneditprepare() {
+            setTimeout(() => {
+                $('.is-to-show-initially').show();
+                $('.is-to-hide-initially').hide();
+            }, 300);
             const node = this;
             const setup = function(node) {
                 /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */

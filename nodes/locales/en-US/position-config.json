@@ -66,16 +66,12 @@
             "milliseconds UNIX timestamp",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "ECMA-262 - JSON Date representation",
-            "local date and time",
-            "local date and time enh.",
-            "local time",
-            "local time enh.",
-            "local date",
-            "local date long",
             "UTC date and time",
+            "local date and time",
+            "local time",
+            "local date",
             "ISO date and time UTC",
-            "ISO  date and time local",
+            "ISO date and time local",
             "milliseconds",
             "seconds",
             "minutes",
@@ -84,28 +80,6 @@
             "Day in relative, e.g. Today, 22.12.",
             "as object",
             "Other"
-        ],
-        "outputFormatsName": [
-            "UNIX",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD_HHMMSS",
-            "ECMA262",
-            "local",
-            "localLong",
-            "localTime",
-            "localTimeLong",
-            "localDate",
-            "localDateLong",
-            "UTC",
-            "ISO",
-            "ms",
-            "sec",
-            "min",
-            "hour",
-            "ISO",
-            "ISO",
-            "object",
-            "other"
         ],
         "outputTSFormatsGroups": [
             "timestamp (number)",
@@ -269,7 +243,12 @@
             "property": "Property",
             "minutes": "minutes",
             "stateDateFormat": "State Date Format",
-            "stateTimeFormat": "State Time Format"
+            "stateTimeFormat": "State Time Format",
+            "OSStandard": "Operating system standard",
+            "timeZoneDST": "DST",
+            "noDST": "No DST",
+            "addDST1Hour": "DST add 1 Hour",
+            "addDST2Hour": "DST add 2 Hours"
         },
         "placeholder": {
             "positionConfig":"select or create generic configuration",
@@ -283,8 +262,7 @@
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
-            "stateFormat":"Formatchanges to time could taken time until it will get any effect."
+            "timeZoneOffset": "If for the timezone OS Standard is choosen the standard timezone including daylight saving switch is used. If is not chosen this setting, but a special time zone then no change of the daylightsaving is done! Formatchanges to time could taken time until it will get any effect."
         },
         "errors": {
             "longitude-missing": "Longitude is missing or wrong!",

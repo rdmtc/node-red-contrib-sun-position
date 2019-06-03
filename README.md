@@ -313,26 +313,6 @@ A simple node that routes messages depending on the time. If the current time fa
   * **End time** alternate end time
   * **End Offset** offset for the alternate end time
 
-* **Status** here can be adjusted which status should be displayed under the node.
-  * this has the following possibilities:
-    * **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
-
-      ![within-time-status-error](https://user-images.githubusercontent.com/12692680/57134527-b62e5800-6da6-11e9-946a-677044d25655.png)
-
-    * **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
-
-      ![within-time-status-time](https://user-images.githubusercontent.com/12692680/57134513-b4649480-6da6-11e9-9bb2-3acda84b8ef8.png)
-
-    * **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
-
-      ![within-time-status-message-block](https://user-images.githubusercontent.com/12692680/57134528-b6c6ee80-6da6-11e9-90be-e3b15c2b2bff.png)
-
-      if the message was pass through the timestamp of this message will be shown.
-
-      ![within-time-status-message-send](https://user-images.githubusercontent.com/12692680/57134529-b6c6ee80-6da6-11e9-8c71-7245dda4b6ee.png)
-
-    * **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
-
 * **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 * **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
@@ -341,8 +321,6 @@ A simple node that routes messages depending on the time. If the current time fa
 A enhanced node for time format change and time comparison.
 
 ![time-comp-example](https://user-images.githubusercontent.com/12692680/57134514-b4649480-6da6-11e9-9321-9fd1a2927a9b.png)
-
-**This node is in development and has a pre release state!!**
 
 ```json
 [{"id":"1a6b5f99.4c928","type":"time-comp","z":"4e9a710a.bf0b9","outputs":1,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":120,"wires":[["fd45b2d2.eba89"]]},{"id":"fd45b2d2.eba89","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":120,"wires":[]},{"id":"f390b758.7dd9b8","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":120,"wires":[["1a6b5f99.4c928"]]},{"id":"b87a5c79.d4ce3","type":"comment","z":"4e9a710a.bf0b9","name":"change Unix Timestamp to ISO","info":"","x":210,"y":80,"wires":[]},{"id":"20afdf5d.4cd8d","type":"comment","z":"4e9a710a.bf0b9","name":"compare Time","info":"","x":150,"y":180,"wires":[]},{"id":"3d8ee66c.7c86ea","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":240,"wires":[["f19f0fd9.8ad1d"]]},{"id":"f19f0fd9.8ad1d","type":"time-comp","z":"4e9a710a.bf0b9","outputs":3,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[{"operator":"5","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"12:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""},{"operator":"3","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"15:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""}],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":240,"wires":[["723d7d7c.e7a874"],["44ac03f7.fd68fc"],["4d8512cd.73c90c"]]},{"id":"723d7d7c.e7a874","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":220,"wires":[]},{"id":"44ac03f7.fd68fc","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":260,"wires":[]},{"id":"4d8512cd.73c90c","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":300,"wires":[]},{"id":"d9e9ca6a.952218","type":"position-config","z":0,"name":"Entenhausen","longitude":"13.72324","latitude":"51.12381","angleType":"deg"}]
@@ -372,8 +350,6 @@ A simple node that routes messages depending on the time. If the current time fa
 A enhanced node for time span calculation and time span comparison.
 
 ![time-span-example](https://user-images.githubusercontent.com/12692680/57134521-b595c180-6da6-11e9-82fe-01ddaaba0d7b.png)
-
-**This node is in development and has a pre release state!!**
 
 ```json
 tbd

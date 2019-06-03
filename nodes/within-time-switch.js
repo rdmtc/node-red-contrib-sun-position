@@ -42,48 +42,43 @@ module.exports = function (RED) {
         return new Date();
     }
 
-    function setstate(node, result, status, statusObj, _onInit) {
-        if (status > 255) {
+    function setstate(node, data, _onInit) {
+        if (data.error) {
+            node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: data.error
+            });
             return false;
         }
-        if (result.start.error) {
+        if (data.start && data.start.error) {
             if (_onInit === true) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.start.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', data.start.error)
                 });
-                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.start.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', data.start.error));
                 return true;
             }
-            hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : result.start.error}), undefined, result.start.error);
-        } else if (result.end.error) {
+            hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : data.start.error}), undefined, data.start.error);
+        } else if (data.end && data.end.error) {
             if (_onInit === true) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', result.end.error)
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', data.end.error)
                 });
-                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', result.end.error));
+                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', data.end.error));
                 return true;
             }
-            hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : result.end.error}), undefined, result.end.error);
-        } else if ((status & 2) && statusObj) {
-            node.status(statusObj);
-        } else if ((status & 1) && result.start.value && result.end.value) {
+            hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : data.end.error}), undefined, data.end.error);
+        } else if (data.start && data.start.value && data.end && data.end.value) {
             node.status({
                 fill: 'yellow',
                 shape: 'dot',
-                text: '⏲ ⏵' + node.positionConfig.dateToTimeString(result.start.value) + result.startSuffix + ' - ⏴' + node.positionConfig.dateToTimeString(result.end.value) + result.endSuffix
+                text: '⏵' + node.positionConfig.dateToTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.dateToTimeString(data.end.value) + data.endSuffix
             });
-        } else {
-            node.status({});
-            /*
-            node.status({
-                fill: "red",
-                shape: "dot",
-                text: 'status not available'
-            }); */
         }
         return false;
     }
@@ -208,11 +203,7 @@ module.exports = function (RED) {
             try {
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                    node.status({
-                        fill: 'red',
-                        shape: 'dot',
-                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
-                    });
+                    setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')});
                     return null;
                 }
                 // this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
@@ -228,88 +219,57 @@ module.exports = function (RED) {
                 const startNr = hlp.getTimeNumberUTC(result.start.value);
                 const endNr = hlp.getTimeNumberUTC(result.end.value);
                 const cmpNow = hlp.getTimeNumberUTC(now);
-                const status = (config.statusOut || 3);
+                setstate(this, result);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {
-                        // this.debug('compare in time 1 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                        this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                         this.send([msg, null]);
-                        setstate(this, result, status, {
-                            fill: 'green',
-                            shape: 'ring',
-                            text: '🖅 ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
-                        }, false);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
                 } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
-                    // this.debug('compare in time 2 ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                    this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                     this.send([msg, null]);
-                    setstate(this, result, status, {
-                        fill: 'green',
-                        shape: 'dot',
-                        text: '🖅 ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
-                    }, false);
                     checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                     return null;
                 }
 
-                // this.debug('compare out of time ' + startNr + ' - ' + cmpNow + ' - ' + endNr);
+                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                 this.send([null, msg]);
-                setstate(this, result, status, {
-                    fill: 'yellow',
-                    shape: 'dot',
-                    text: '⛔' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix
-                }, false);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
                 node.error(err.message);
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                });
+                setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
             }
         });
 
         try {
             if (!node.positionConfig) {
                 node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                node.status({
-                    fill: 'red',
-                    shape: 'dot',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
-                });
+                setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state') });
                 return null;
             }
             node.status({});
             const result = calcWithinTimes(this, null, config);
             // if an error occurred, will retry in 6 minutes. This will prevent errors on initialization.
-            if (setstate(this, result, (config.statusOut || 3), null, true)) {
+            if (setstate(this, result, true)) {
                 node.debug('node is in initialization, retrigger time calculation in 6 min');
                 setTimeout(() => {
                     try {
                         const result = calcWithinTimes(this, null, config);
-                        setstate(this, result, (config.statusOut || 3));
+                        setstate(this, result);
                     } catch (err) {
                         node.error(err.message);
                         node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                        node.status({
-                            fill: 'red',
-                            shape: 'ring',
-                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                        });
+                        setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
                     }
                 }, 360000); // 6 Minuten
             }
         } catch (err) {
             node.error(err.message);
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-            node.status({
-                fill: 'red',
-                shape: 'ring',
-                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-            });
+            setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
         }
     }
 
