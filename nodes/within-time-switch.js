@@ -77,7 +77,7 @@ module.exports = function (RED) {
             node.status({
                 fill: 'yellow',
                 shape: 'dot',
-                text: '⏵' + node.positionConfig.dateToTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.dateToTimeString(data.end.value) + data.endSuffix
+                text: '⏵' + node.positionConfig.toTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.toTimeString(data.end.value) + data.endSuffix
             });
         }
         return false;
@@ -222,19 +222,19 @@ module.exports = function (RED) {
                 setstate(this, result);
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {
-                        this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                        this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                         this.send([msg, null]);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         return null;
                     }
                 } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
-                    this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                    this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                     this.send([msg, null]);
                     checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                     return null;
                 }
 
-                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.dateToString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                 this.send([null, msg]);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {

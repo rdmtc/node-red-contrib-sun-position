@@ -22,6 +22,9 @@
             "resultValue": "value",
             "resultFormat": "output format",
             "resultOffset": "Offset"
+        },
+        "timeFormat": {
+            "default": ""
         }
     }
 }

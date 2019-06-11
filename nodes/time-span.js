@@ -260,10 +260,10 @@ module.exports = function (RED) {
                     let resultObj = null;
                     if (config.result1ValueType === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
-                        resultObj.start.timeLocaleTimeStr = node.positionConfig.dateToTimeString(resultObj.start.date);
-                        resultObj.start.timeLocaleDateStr = node.positionConfig.dateToDateString(resultObj.start.date);
-                        resultObj.end.timeLocaleTimeStr = node.positionConfig.dateToTimeString(resultObj.end.date);
-                        resultObj.end.timeLocaleDateStr = node.positionConfig.dateToDateString(resultObj.end.date);
+                        resultObj.start.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.start.date);
+                        resultObj.start.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.start.date);
+                        resultObj.end.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.end.date);
+                        resultObj.end.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.end.date);
                     } else if (config.result1ValueType === 'operand1') {
                         resultObj = hlp.getFormattedDateOut(operand1, config.result1Format);
                     } else if (config.result1ValueType === 'operand2') {

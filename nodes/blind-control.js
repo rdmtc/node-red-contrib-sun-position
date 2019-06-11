@@ -287,8 +287,8 @@ module.exports = function (RED) {
         node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expireTs);
         node.blindData.overwrite.expireDateISO = node.blindData.overwrite.expireDate.toISOString();
         node.blindData.overwrite.expireDateUTC = node.blindData.overwrite.expireDate.toUTCString();
-        node.blindData.overwrite.expireDateLocal = node.positionConfig.dateToDateString(node.blindData.overwrite.expireDate);
-        node.blindData.overwrite.expireTimeLocal = node.positionConfig.dateToTimeString(node.blindData.overwrite.expireDate);
+        node.blindData.overwrite.expireDateLocal = node.positionConfig.toDateString(node.blindData.overwrite.expireDate);
+        node.blindData.overwrite.expireTimeLocal = node.positionConfig.toTimeString(node.blindData.overwrite.expireDate);
 
         node.debug(`expires in ${expire}ms = ${node.blindData.overwrite.expireDate}`);
         node.timeOutObj = setTimeout(() => {
@@ -536,7 +536,7 @@ module.exports = function (RED) {
        */
     function checkRules(node, msg, now) {
         const livingRuleData = {};
-        const nowNr = hlp.getTimeNumber(now);
+        const nowNr = now.getTime();
         // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
         // pre-checking conditions to may be able to store temp data
         for (let i = 0; i < node.rulesCount; ++i) {
@@ -590,8 +590,8 @@ module.exports = function (RED) {
             } else if (!rule.timeData.value) {
                 throw new Error('Error can not calc time!');
             }
-            rule.timeData.num = hlp.getTimeNumber(rule.timeData.value);
-
+            rule.timeData.num = rule.timeData.value.getTime();
+            node.debug('rule.timeData=' + util.inspect(rule.timeData));
             if (cmp(rule.timeData.num, nowNr)) {
                 return rule;
             }
@@ -647,8 +647,8 @@ module.exports = function (RED) {
             }
             if (ruleSel.timeLimited) {
                 livingRuleData.time = ruleSel.timeData;
-                livingRuleData.time.timeLocal = node.positionConfig.dateToTimeString(ruleSel.timeData.value);
-                livingRuleData.time.timeLocalDate = node.positionConfig.dateToDateString(ruleSel.timeData.value);
+                livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
+                livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
                 livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
                 livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
                 data.timeOp = ruleSel.timeOpText;

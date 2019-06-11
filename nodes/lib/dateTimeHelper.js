@@ -1126,7 +1126,6 @@ function _getInt(str, i, minlength, maxlength) {
             return token;
         }
     }
-
     return null;
 }
 
@@ -1138,10 +1137,11 @@ function _getInt(str, i, minlength, maxlength) {
  * @param {string} format format of the value
  * @param {boolean} [utc] indicates if the date should be in utc
  * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
- * @returns {Date|null} a Date object or **null** if pattern does not match.
+ * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
 function _getDateFromFormat(val, format, utc, timeZoneOffset) {
-    // console.log('getDateFromFormat val=' + val + ' --> format=' + format); // eslint-disable-line
+    // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
+    val = String(val);
 
     if (format.slice(0, 4) === 'UTC:' || format.slice(0, 4) === 'utc:') {
         format = format.slice(4);
@@ -1174,7 +1174,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
         while ((format.charAt(i_format) === c) && (i_format < format.length)) {
             token += format.charAt(i_format++);
         }
-
+        // console.log('"'+ token + '" ' + i_val);
         // Extract contents of value based on format token
         if (token === 'yyyy' || token === 'yy' || token === 'y') {
             if (token === 'yyyy') {
@@ -1193,7 +1193,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
             }
             year = _getInt(val, i_val, x, y);
             if (year === null) {
-                return null;
+                return { value: null, error: 'invalid year of format "' + token + '"'};
             }
 
             i_val += year.length;
@@ -1222,7 +1222,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
             }
 
             if ((month < 1) || (month > 12)) {
-                return null;
+                return { value: null, error: 'invalidmonth "' + month + '" of format "' + token + '"' };
             }
         } else if (token === 'EE' || token === 'E' || token === 'dddd' || token === 'ddd') {
             for (let i = 0; i < _dateFormat.i18n.dayNames.length; i++) {
@@ -1235,56 +1235,56 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
         } else if (token === 'MM' || token === 'M') {
             month = _getInt(val, i_val, token.length, 2);
             if (month === null || (month < 1) || (month > 12)) {
-                return null;
+                return { value: null, error: 'invalid month "' + month + '" of format "' + token + '"' };
             }
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || (date < 1) || (date > 31)) {
-                return null;
+                return { value: null, error: 'invalid date "' + date + '"' };
             }
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 1) || (hour > 12)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 0) || (hour > 23)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 0) || (hour > 11)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 1) || (hour > 24)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
             hour--;
         } else if (token === 'mm' || token === 'm') {
             min = _getInt(val, i_val, token.length, 2);
             if (min === null || (min < 0) || (min > 59)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += min.length;
         } else if (token === 'ss' || token === 's') {
             sec = _getInt(val, i_val, token.length, 2);
             if (sec === null || (sec < 0) || (sec > 59)) {
-                return null;
+                return { value: null, error: 'invalid sec "' + sec + '" of format "' + token + '"' };
             }
             i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
             misec = _getInt(val, i_val, token.length, 3);
             if (misec === null || (misec < 0) || (misec > 999)) {
-                return null;
+                return { value: null, error: 'invalid millisecond "' + misec + '" of format "' + token + '"' };
             }
             i_val += misec.length;
             if ( token === 'L' && misec < 10) {
@@ -1307,20 +1307,22 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
                 ampm = 'PM';
                 i_val += 1;
             } else {
-                return null;
+                return { value: null, error: 'invalid ampm "' + sec + '" of format "' + token + '"' };
             }
         } else {
             if (val.substr(i_val, token.length) !== token) {
-                return null;
+                return { value: null, error: 'value ' + val.substr(i_val, token.length) + ' is not equal to ' + token };
             }
 
             i_val += token.length;
         }
     }
 
+    // console.log(`getDateFromFormat midFormat year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec} utc=${utc}`); // eslint-disable-line
+
     // If there are any trailing characters left in the value, it doesn't match
     if (i_val !== val.length) {
-        return null;
+        return { value: null, error: 'input value is longer than format' };
     }
 
     // Is date valid for month?
@@ -1328,16 +1330,16 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
         // Check for leap year
         if (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)) { // leap year
             if (date > 29) {
-                return null;
+                return { value: null, error: 'day of month > 29 (not valid for february - leap year)' };
             }
         } else if (date > 28) {
-            return null;
+            return { value: null, error: 'day of month > 28 (not valid for february)' };
         }
     }
 
     if ((month === 4) || (month === 6) || (month === 9) || (month === 11)) {
         if (date > 30) {
-            return null;
+            return { value: null, error: 'day of month is not valid' };
         }
     }
 
@@ -1349,12 +1351,15 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
     }
 
     if (utc || timeZoneOffset === 0) {
-        return Date.UTC(year, month - 1, date, hour, min, sec, misec);
+        return { value : Date.UTC(year, month - 1, date, hour, min, sec, misec) };
     } else if (timeZoneOffset) {
-        return convertDateTimeZone(new Date(year, month - 1, date, hour, min, sec, misec), timeZoneOffset);
+        return {
+            value: convertDateTimeZone(new Date(year, month - 1, date, hour, min, sec, misec), timeZoneOffset) };
     }
     // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec}`); // eslint-disable-line
-    return new Date(year, month - 1, date, hour, min, sec, misec);
+    return {
+        value: new Date(year, month - 1, date, hour, min, sec, misec)
+    };
 }
 
 /**
@@ -1366,8 +1371,8 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
 function _parseArray(val, listToCheck, utc, timeZoneOffset) {
     for (let i = 0, n = listToCheck.length; i < n; i++) {
         const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset);
-        if (res !== null) {
-            return res;
+        if (res.value !== null) {
+            return res.value;
         }
     }
     return null;
@@ -1464,6 +1469,10 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     let res = null;
     if (isNaN(format)) { // timeparse_TextOther
         res = _getDateFromFormat(date, format, utc, timeZoneOffset);
+        if (res.error) {
+            throw new Error('could not evaluate format of ' + date + ' (' + format + ') - ' + res.error);
+        }
+        res = res.value;
     } else {
         const tryparse = (val, preferMonthFirst) => {
             // console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
@@ -1540,10 +1549,10 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 break;
             }
         }
-    }
-    // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
-    if (res === 'Invalid Date' || isNaN(res) || res === null) {
-        throw new Error('could not evaluate format of ' + date + ' (' + format+')');
+        // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
+        if (res === 'Invalid Date' || isNaN(res) || res === null) {
+            throw new Error('could not evaluate format of ' + date + ' (' + format + ')');
+        }
     }
     return res;
 }

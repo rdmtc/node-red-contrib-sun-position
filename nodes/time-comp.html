@@ -620,6 +620,7 @@
                         // row2
                         const operandSelFieldName = 'node-input-rule-operandFormatSel';
                         addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
+                        /*
                         const formatSelField = $('<select/>', {
                             class: operandSelFieldName,
                             id: operandSelFieldName + containerIndex
@@ -629,12 +630,25 @@
                             class: 'node-input-rule-operandFormatIp',
                             id: 'node-input-rule-operandFormatIp' + containerIndex,
                             type: 'text',
-                            value: (data.format || node._('time-comp.timeFormat.default'))
+                            value: (data.format || selFields.parseFormats[0].id)
                         }).appendTo(row2);
                         formatSelField.change(() => {
                             resizeRule(containerRow);
                         });
                         formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
+                        */
+
+                        const formatSelField = $('<select/>', {
+                            class: operandSelFieldName,
+                            id: operandSelFieldName + containerIndex
+                        }).appendTo(row2);
+                        const formatIpField = $('<input/>', {
+                            class: 'node-input-rule-operandFormatIp',
+                            id: 'node-input-rule-operandFormatIp' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2);
+                        initCombobox(node, formatSelField, formatIpField, 'dateParseFormat', 'parseFormats', data.format, 20);
+
                         // row3
                         addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
                         $('<input/>', {
@@ -686,7 +700,7 @@
                         // setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
                         // operandField.typedInput('value', (data.operandValue || ''));
                         // operandField.typedInput('type', (data.operandType || types.DateEntered.value));
-                        // formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
+                        // formatIpField.val(data.format || 0);
                         // formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
                         // offsetField.typedInput('value', data.offsetValue || '');
                         // offsetField.typedInput('type', data.offsetType || types.Undefined.value);
