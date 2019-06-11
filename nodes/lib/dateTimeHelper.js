@@ -26,7 +26,6 @@ module.exports = {
     normalizeDate,
     getTimeOfText,
     getDateOfText,
-    getTimeNumber,
     getTimeNumberUTC,
     getNodeId,
     initializeParser,
@@ -254,15 +253,6 @@ function getSpecialDayOfMonth(year, month, dayName) {
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
 /*******************************************************************************************************/
-/**
- * convert the time part of a date into a comparable number
- * @param {Date} date  - date to convert
- * @return {number}   numeric representation of the time part of the date
- */
-function getTimeNumber(date) {
-    return date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60000 + date.getHours() * 3600000;
-}
-
 /**
  * convert the time part of a date into a comparable number
  * @param {Date} date  - date to convert

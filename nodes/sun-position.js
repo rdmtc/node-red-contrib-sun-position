@@ -66,7 +66,7 @@ module.exports = function (RED) {
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
                         node.error(startTime.error);
-                        node.debug('startTime: ' + util.inspect(startTime));
+                        // node.debug('startTime: ' + util.inspect(startTime));
                     } else {
                         ports[0].payload.startTime = startTime.value.getTime();
                     }
@@ -78,7 +78,7 @@ module.exports = function (RED) {
                     if (endTime.error) {
                         errorStatus = 'could not evaluate end time';
                         node.error(endTime.error);
-                        node.debug('endTime: ' + util.inspect(endTime));
+                        // node.debug('endTime: ' + util.inspect(endTime));
                     } else {
                         ports[0].payload.endTime = endTime.value.getTime();
                     }

@@ -94,7 +94,7 @@ module.exports = function (RED) {
                     this.debug('tzOffset is set to ' + this.tzOffset + ' tzDST=' + this.tzDST);
                 } else {
                     this.tzOffset = null;
-                    this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
+                    // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
                 }
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
@@ -160,7 +160,7 @@ module.exports = function (RED) {
          * @return {timeresult} result object of sunTime
          */
         getSunTime(now, value, offset, multiplier, next, days) {
-            this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            // this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = this._sunTimesCheck(now);
             result = Object.assign(result, this.sunTimesToday[value]);
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
