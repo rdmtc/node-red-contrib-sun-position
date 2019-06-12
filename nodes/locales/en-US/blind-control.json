@@ -72,8 +72,8 @@
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)",
-			"sunControlMaximization":"If no other rule or override matches, the blind will set to defined <strong>min position</strong> if sun is not in the window (oversteer will ignored).<br />If the sun is in the window and no oversteer the blind level is set to defined <strong>max position</strong>, otherwhise blind will set to the defined oversteer blind position.",
-			"sunControlRestriction": "If no other rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room."
+			"sunControlMaximization":"<ul><li>If no rule or override matches<ul><li>If the sun is <em>not</em> in the window the blind will set to defined <strong>min position</strong>. (oversteer will be ignored)</li><li>If the sun is in the window</li><li>If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.</li><li>otherwise the blind level is set to defined <strong>max position</strong>.</li></ul></li></ul>",
+			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room."
 		},
 		"tips": {
 			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"

@@ -71,7 +71,9 @@
 			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden.",
 			"windowAzimuth": "Darstellung der Ausrichtung des Fensters zum geografischen Norden (in Grad), wenn die Sonne in das Fenster fällt (Sonnenazimut).",
 			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters",
-			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.)"
+			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.)",
+			"sunControlMaximization":"<ul><li>Wenn keine Regel oder Überschreiben (Override) zutrifft,<ul><li>Wenn die Sonne <em>nicht</ em> in das Fenster scheint, wird die Rollladenhöhe die definierte <strong>Minimalposition</ strong> gesetzt. (Übersteuern wird ignoriert)</ li><li>Wenn sich die Sonne im Fenster befindet</ li><li>Wenn eine Übersteueruzng aufgesetzt ist und die bedingung zutrifft, wird der Behang auf die Höhe des Übersteuerns gesetzt.< / li><li>Andernfalls wird die Behanghöhe auf die definierte <strong>Maximalposition</ strong> gesetzt.</ li></ ul></ li></ ul>",
+			"sunControlRestriction": "Wenn keine Regel oder Überschreiben (Override) zutrifft, berechnet der Knoten die entsprechende Blindposition, um die Menge des direkten Sonnenlichts, das in den Raum fällt, zu begrenzen."
 		},
 		"tips": {
 			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"

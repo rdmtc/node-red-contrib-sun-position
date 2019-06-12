@@ -111,7 +111,7 @@ The sun control (maximize or restrict sunlight) is only active, if no other rule
 
 ##### maximize sunlight (Winter)
 
-In this mode if no other rule or override matches:
+In this mode if no rule or override matches:
 
 * If no other rule or override matches
   * If the sun is *not* in the window the blind will set to defined **min position**. (oversteer will be ignored)
@@ -121,7 +121,7 @@ In this mode if no other rule or override matches:
 
 ##### restrict sunlight (Summer)
 
-In this mode if no other rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
+In this mode if no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
 
 This calculation includes:
 
