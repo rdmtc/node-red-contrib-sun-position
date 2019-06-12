@@ -1,9 +1,12 @@
 <script type="text/x-red" data-help-name="blind-control">
-    <p><b>Attention, this node is under development and may still have errors!!</b><br><br></p>
+
+    <p>Used to control a blind with many possibilities. This can be time-dependent and it can calculate the blind position based on the current position of the sun to limit the sun light To limit the sunlight on the floor of a window.</p>
 
     <h3>About</h3>
     <p>Gets the position of the sun</p>
-        <h3>Inputs</h3>
+    <a href="https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md">the Documentation of the Node</a>
+
+    <h3>Inputs</h3>
     The Input is for triggering the calculation and for setting overwrites of the blind position.
     <dl class="message-properties">
         <dt>payload
@@ -23,6 +26,7 @@
     </dl>
 
  <h3>Outputs</h3>
+	<p>It is configurable if the node will have one or two outputs.</p>
      <ol class="node-ports">
          <li>first output
              <dl class="message-properties">
@@ -56,10 +60,12 @@
                     <li>calculated blind position by sun control is below defined minimum blind position (minimum blind position used)</li>
                     <li>calculated blind position by sun control is above defined maximum blind position (maximum blind position used)</li>
                     <li>Sun below altitude threshold</li>
-                    <li>sun is not in window, default blind position is used</li>
+                    <li>Sun is not in window, default blind position is used</li>
                     <li>blind position calculated by sun position</li>
-                    <li>defined cloud condition applies</li>
+                    <li>defined oversteer condition applies</li>
                     <li>(enhanced settings) blind position calculated by sun position was not used caused by smooth settings</li>
+                    <li>sun is in window (maximize mode), max blind position used</li>
+                    <li>sun is not in window (maximize mode), min blind position used</li>
                 </ol>
 
             <dt>reason.state <span class="property-type">string</span></dt>
@@ -69,7 +75,10 @@
             <dd> a text representing the reason for the blind position</dd>
 
             <dt>reason.blind.level <span class="property-type">number</span></dt>
-            <dd> the new blind level (numeric value) - equal to `msg.payload` of the first output message</dd>
+            <dd> the new blind level (numeric value) - equal to <em>msg.payload</em> of the first output message</dd>
+
+            <dt>reason.blind.levelInverse<span class="property-type">number</span></dt>
+            <dd> if <em>blindCtrl.blind.overwrite.active</em> is true, the value of <em>blindCtrl.blind.levelInverse</em> will be equal to the value of <em>blindCtrl.blind.level</em>, otherwise it will be the inverse to <em>blindCtrl.blind.level</em>. This means if <em>blindCtrl.blind.level</em> indicates how much the blind is open, then <em>blindCtrl.blind.levelInverse</em> indicates how much the blind is closed. So if <em>blindCtrl.blind.level</em> is equal to <b>min position</b>, <em>blindCtrl.blind.levelInverse</em> will be <b>max position</b>.</dd>
 
             <dt>reason.blind.overwrite.active <span class="property-type">boolean</span></dt>
             <dd> is <code>true</code> when overwrite is active, otherwise <code>false</code></dd>
@@ -107,18 +116,80 @@
             <dt>reason.sunPosition.InWindow <span class="property-type">boolean</span></dt>
             <dd> (optional) <code>true</code> if sun is in window</dd>
 
-            <dt>reason.cloud <span class="property-type">object</span></dt>
-            <dd> (optional) object containing cloud data</dd>
-
-            <dt>reason.cloud.isOperative <span class="property-type">object</span></dt>
-            <dd> (optional) <code>true</code> if it is active and defined limit is applicable</dd>
+            <dt>reason.sunPosition.oversteer <span class="property-type">object</span></dt>
+            <dd> (optional) object containing oversteer data</dd>
         </dl>
+
+    <h3>Node-Status</h3>
+
+	<ul>
+		<li><span class="background-color:red;">red</span> - any error</li>
+		<li><span class="background-color:blue;">blue</span> - override active</li>
+		<li><span class="background-color:grey;">grey</span> - level by rule</li>
+		<li><span class="background-color:green;">green</span> - default value or sun not in window</li>
+		<li><span class="background-color:yellow;">yellow</span> - any other </li>
+	</ul>
+
+    <h3>rules</h3>
+	<p>The rules are not easy to understand.</p>
+	<p>There are basically 4 types of rules:</p>
+	<ol>
+		<li>absolute rule<ul>
+			<li>a rule with no time and no condition will be absolute. If such a rule is the first rule, no other rule will be active, no sun control will be done</li>
+			<li>such rules not really makes sense</li>
+		</ul>
+		</li>
+		<li>a rule with a condition - conditional rule<ul>
+			<li>a rule with a condition will only be active if the condition matches, otherwise the rule will be ignored</li>
+		</ul>
+		</li>
+		<li>a rule with a given time - time rule<ul>
+			<li>time rules differ again in 2 ways<ul>
+				<li><strong>until</strong> time rules<ul>
+					<li>rules will be active from Midnight <strong>until</strong> the given time</li>
+					<li>the first matching <strong>until</strong> rule will be
+					considered</li>
+				</ul>
+				</li>
+				<li><strong>from</strong> time rules
+				<ul>
+					<li>rules will be active <strong>from</strong> given
+					time to Midnight</li>
+					<li>the last matching <strong>from</strong> rule will be
+					considered</li>
+				</ul>
+			</ul>
+			</li>
+		</ul>
+		</li>
+		<li>a rule with a condition and a given time<ul>
+			<li>these type of rules are a combination. The rules will only be considered if the condition matches and then it act as a normal time rule. Otherwise it will be ignored.
+			</li>
+		</ul>
+		</li>
+	</ol>
+
+<p>a typically ruleset could be setup in a way like:</p>
+	<ol>
+		<li><strong>until</strong> absolute time (e.g. early morning 6:00) blind will be closed</li>
+		<li><strong>until</strong> sun rise time (e.g. sunrise) blind will be closed<ul>
+			<li>The previous absolute until rule (rule 1) will consider that the blind is closed, even if the sun rise time (this rule 2) is earlier than the time of rule 1.</li>
+		</ul>
+		</li>
+		<li><strong>from</strong> sun set time (e.g. sunset) blind will be closed</li>
+		<li><strong>from</strong> absolute time (e.g. late night 22:00) blind will be closed<ul>
+			<li>This rule 4 will be consider that the blind is closed, even if the sun set time (rule 3) is later than this absolute time.</li>
+		</ul>
+		</li>
+	</ol>
+	<p>In the time between the rule 2 (last until) and the rule 3 (first from rule) the blind will set to the default position which is setup normally to open. Only in this time the blind position can be controlled by sun.
+This simple example could be enhanced with additional conditional rules. More examples could be find in the <a href="https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md">Documentation</a> at github. There is also a kind of simulator for testing the rules.</p>
 
     <h3>References</h3>
     <ul>
+        <li><a href="https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md">Documentation</a> - the Documentation of the Node</li>
         <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">Node-Red</a> - the Node-Red Node overview</li>
-        <li><a href="https://github.com/HM-RedMatic/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://github.com/rdmtc/node-red-contrib-sun-position">GitHub</a> - the nodes github repository</li>
         <li><a href="https://flows.nodered.org/node/node-red-contrib-sun-position">NPM</a> - the nodes npm node description</li>
     </ul>
-    With friendly support by <b>agag</b>.
 </script>

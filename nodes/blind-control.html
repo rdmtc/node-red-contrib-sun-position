@@ -64,6 +64,13 @@
             <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
         </select>
     </div>
+    <div class="form-row form-row-sunControlRestriction block-noindent">
+        <span data-i18n="[html]blind-control.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlMaximization block-noindent">
+        <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <hr class="form-row-sunControlActive" >
     <!-- window ######################################################################## -->
     <div class="form-row form-row-sunControlActive block-noindent">
         <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
@@ -76,14 +83,14 @@
         <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
         <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
     </div>
-    <div class="form-row form-row-sunControlActive block-noindent">
+    <div class="form-row form-row-sunControlRestriction block-noindent">
         <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
         <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop"/>
     </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
     </div>
@@ -128,6 +135,28 @@
         <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
         <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteerBlindPosType">
+    </div>
+    <div class="form-row row-oversteer2Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer2Value">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-superpowers fa-stack-1x"></i>
+                <i class="fa fa-plus fa-stack-1x"></i>
+            </span>
+            <span data-i18n="blind-control.label.oversteer2Value"></span></label>
+        <input type="text" id="node-input-oversteer2Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer2ValueType">
+        <select id="node-input-oversteer2Compare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteer2Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteer2Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer2Threshold"></span></label>
+        <input type="text" id="node-input-oversteer2Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteer2ThresholdType">
+    </div>
+    <div class="form-row row-oversteer2BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer2BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer2BlindPos"></span></label>
+        <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer2BlindPosType">
     </div>
     <hr>
     <!-- #region Enhanced ######################################################################## -->
@@ -176,6 +205,12 @@
         display:none
     }
     .form-row-sunControlActive {
+        display:none
+    }
+    .form-row-sunControlRestriction {
+        display:none
+    }
+    .form-row-sunControlMaximization {
         display:none
     }
     .form-tips {
@@ -475,6 +510,45 @@
             },
             oversteerBlindPosType: {
                 value: 'levelFixed'
+            },
+            oversteer2Value: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer2ValueType')(v);
+                }
+            },
+            oversteer2ValueType: {
+                value: 'none'
+            },
+            oversteer2Compare: {
+                value: 'gte'
+            },
+            oversteer2Threshold: {
+                value: '',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer2ThresholdType')(v);
+                }
+            },
+            oversteer2ThresholdType: {
+                value: 'num'
+            },
+            oversteer2BlindPos: {
+                value: 'open (max)',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer2BlindPosType')(v);
+                }
+            },
+            oversteer2BlindPosType: {
+                value: 'levelFixed'
             }
             // #endregion oversteering settings
         },
@@ -513,6 +587,7 @@
             this.sunControlMode = this.sunControlMode || 0;
             const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
+
             const setup = function(node) {
                 /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeData */
                 // #region initialize
@@ -857,14 +932,20 @@
                     if (val === 2) {
                         $('.form-row-sunControlActive').show();
                         $('.form-row-sunControlRestriction').show();
+                        $('.form-row-sunControlMaximization').hide();
                     } else if (val === 1) {
                         $('.form-row-sunControlActive').show();
                         $('.form-row-sunControlRestriction').hide();
+                        $('.form-row-sunControlMaximization').show();
                     } else {
                         $('.form-row-sunControlActive').hide();
                         $('.form-row-sunControlRestriction').hide();
+                        $('.form-row-sunControlMaximization').hide();
                         $('.row-oversteerThreshold').hide();
                         $('.row-oversteerBlindPos').hide();
+                        $('.row-oversteer2Value').hide();
+                        $('.row-oversteer2Threshold').hide();
+                        $('.row-oversteer2BlindPos').hide();
                     }
                     $('#node-input-oversteerValue').change();
                 });
@@ -886,6 +967,7 @@
                 });
                 // #endregion sun
                 // #region oversteering
+                // #region oversteer - 1
                 setupTInput(node, {
                     typeProp: 'oversteerValueType',
                     valueProp: 'oversteerValue',
@@ -932,13 +1014,14 @@
                         }
                         $('#node-input-oversteerThreshold').change();
                         $('#node-input-oversteerBlindPos').change();
+                        $('#node-input-oversteer2Value').change();
                     }
                 });
 
-                const oversteerCompareField = $('#node-input-oversteerCompare');
-                appendOptions(node, oversteerCompareField, 'comparator');
-                oversteerCompareField.val(node.oversteerCompare || 'gte');
-                oversteerCompareField.change(() => { $('#node-input-oversteerValue').change(); });
+                const $oversteerCompare = $('#node-input-oversteerCompare');
+                appendOptions(node, $oversteerCompare, 'comparator');
+                $oversteerCompare.val(node.oversteerCompare || 'gte');
+                $oversteerCompare.change(() => { $('#node-input-oversteerValue').change(); });
                 setupTInput(node, {
                     typeProp: 'oversteerThresholdType',
                     valueProp: 'oversteerThreshold',
@@ -955,6 +1038,89 @@
                     defaultValue: getDefLevel(node.oversteerBlindPosType, node.oversteerBlindPos, 'open (max)'),
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
+                // #endregion oversteer - 1
+                // #region oversteer - 2
+                setupTInput(node, {
+                    typeProp: 'oversteer2ValueType',
+                    valueProp: 'oversteer2Value',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        const sunControlMode = Number($('#node-input-sunControlMode').val());
+                        const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
+                        const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
+
+                        if ((oversteer1ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            $('#node-input-oversteer2Value').typedInput('type', types.Undefined.value);
+                            $('.row-oversteer2Value').hide();
+                            $('.row-oversteer2Threshold').hide();
+                            $('#node-input-oversteer2Compare').hide();
+                            $('.row-oversteer2BlindPos').hide();
+                        } else if (oversteer2ValueType === types.Undefined.value) {
+                            $('.row-oversteer2Value').show();
+                            $('.row-oversteer2BlindPos').hide();
+                            $('#node-input-oversteer2Compare').hide();
+                            $('.row-oversteer2Threshold').hide();
+                            $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 110px)');
+                        } else if (oversteer2ValueType === 'jsonata') {
+                            $('.row-oversteer2Value').show();
+                            $('.row-oversteer2BlindPos').show();
+                            $('#node-input-oversteer2Compare').show();
+                            $('#node-input-oversteer2Compare').attr('disabled', true);
+                            $('#node-input-oversteer2Compare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('.row-oversteer2Threshold').hide();
+                            $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 220px)');
+                        } else {
+                            $('.row-oversteer2Value').show();
+                            $('.row-oversteer2BlindPos').show();
+                            $('#node-input-oversteer2Compare').show();
+                            $('#node-input-oversteer2Compare').attr('disabled', false);
+                            $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 220px)');
+                            const condOp = $('#node-input-oversteer2Compare').val();
+                            let operatorCount = 1;
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('.row-oversteer2Threshold').show(); // condOpB
+                            } else {
+                                $('.row-oversteer2Threshold').hide(); // condOpB
+                            }
+                        }
+                        $('#node-input-oversteer2Threshold').change();
+                        $('#node-input-oversteer2BlindPos').change();
+                    }
+                });
+
+                const $oversteer2Compare = $('#node-input-oversteer2Compare');
+                appendOptions(node, $oversteer2Compare, 'comparator');
+                $oversteer2Compare.val(node.oversteer2Compare || 'gte');
+                $oversteer2Compare.change(() => { $('#node-input-oversteer2Value').change(); });
+                setupTInput(node, {
+                    typeProp: 'oversteer2ThresholdType',
+                    valueProp: 'oversteer2Threshold',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'num',
+                    defaultValue: '',
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                });
+                setupTInput(node, {
+                    typeProp: 'oversteer2BlindPosType',
+                    valueProp: 'oversteer2BlindPos',
+                    width: 'calc(100% - 120px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: getDefLevel(node.oversteer2BlindPosType, node.oversteer2BlindPos, 'open (max)'),
+                    types: [types.LevelFix, types.LevelEntered, 'env']
+                });
+                // #endregion oversteer - 2
                 // #endregion oversteering
                 // #region Enhanced settings
                 $('.spinner-noLimit').spinner();

@@ -23,13 +23,16 @@
 			"ruleBlindLevel": "Rollladenposition",
 			"sunControlMode": "Modus",
 			"sunControlOff": "keine Beschränkung, Sonnenstands unabhängig",
-			"sunControlRestrict": "Sonnenlicht beschränken",
-			"sunControlMaximize": "Sonnenlicht maximieren",
+			"sunControlRestrict": "Sonnenlicht beschränken (Sommer)",
+			"sunControlMaximize": "Sonnenlicht maximieren (Winter)",
 			"sunFloorLength": "Länge auf dem Boden",
 			"sunMinAltitude": "Minimaler Höhenwinkel",
 			"oversteerValue": "Übersteuerung",
 			"oversteerThreshold": "Schwelle",
 			"oversteerBlindPos": "Rollladenposition",
+			"oversteer2Value": "Übersteuerung zus.",
+			"oversteer2Threshold": "Schwelle",
+			"oversteer2BlindPos": "Rollladenposition",
 			"smoothTime": "glätten",
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"outputs": "Ausgänge",
@@ -56,7 +59,8 @@
 			"oversteerBlindPos": "Position wenn der Vergleich zutrifft",
 			"smoothTime":"(opt) verhindert Änderungen durch Sonnenstandsänderung innerhalb der angegebenen Zeit",
 			"name": "Name",
-			"expiryperiod": "120"
+			"expiryperiod": "120",
+			"outputs": "Anzahl der Ausgänge"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
@@ -70,7 +74,7 @@
 			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.)"
 		},
 		"tips": {
-			"sunPosControl": "..."
+			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",

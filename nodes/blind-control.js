@@ -176,22 +176,22 @@ module.exports = function (RED) {
     function checkOversteer(node, msg) {
         // node.debug('checkOversteer');
         try {
-            node.oversteerData.isChecked = true;
-            return node.positionConfig.comparePropValue(node, msg,
-                node.oversteerData.valueType,
-                node.oversteerData.value,
-                node.oversteerData.operator,
-                node.oversteerData.thresholdType,
-                node.oversteerData.thresholdValue,
+            node.oversteer.isChecked = true;
+            return node.oversteerData.find(el => node.positionConfig.comparePropValue(node, msg,
+                el.valueType,
+                el.value,
+                el.operator,
+                el.thresholdType,
+                el.thresholdValue,
                 (type, value, data, _id) => { // opCallback
                     return evalTempData(node, type, value, data);
-                });
+                }));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
         // node.debug('node.oversteerData=' + util.inspect(node.oversteerData));
-        return false;
+        return undefined;
     }
     /******************************************************************************************/
     /**
@@ -437,9 +437,11 @@ module.exports = function (RED) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, now);
+        const winterMode = 1;
+        const summerMode = 2;
 
         if (!sunPosition.InWindow) {
-            if (node.sunData.mode === 1) {
+            if (node.sunData.mode === winterMode) {
                 node.blindData.level = node.blindData.levelMin;
                 node.blindData.levelInverse = node.blindData.levelMax;
                 node.reason.code = 13;
@@ -453,24 +455,28 @@ module.exports = function (RED) {
             return sunPosition;
         }
 
-        if ((node.sunData.mode === 2) && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
+        if ((node.sunData.mode === summerMode) && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
             node.reason.code = 7;
             node.reason.state = RED._('blind-control.states.sunMinAltitude');
             node.reason.description = RED._('blind-control.reasons.sunMinAltitude');
             return sunPosition;
         }
 
-        if (node.oversteerData.active && checkOversteer(node, msg)) {
-            node.blindData.level = node.oversteerData.blindPos;
-            node.reason.code = 10;
-            node.reason.state = RED._('blind-control.states.oversteer');
-            node.reason.description = RED._('blind-control.reasons.oversteer');
-            sunPosition.oversteer = node.oversteerData;
-            return sunPosition;
+        if (node.oversteer.active) {
+            const res = checkOversteer(node, msg);
+            if (res) {
+                node.blindData.level = res.blindPos;
+                node.reason.code = 10;
+                node.reason.state = RED._('blind-control.states.oversteer');
+                node.reason.description = RED._('blind-control.reasons.oversteer');
+                sunPosition.oversteer = res;
+                sunPosition.oversteerAll = node.oversteerData;
+                return sunPosition;
+            }
+            sunPosition.oversteerAll = node.oversteerData;
         }
-        sunPosition.oversteer = node.oversteerData;
 
-        if (node.sunData.mode === 1) {
+        if (node.sunData.mode === winterMode) {
             node.blindData.level = node.blindData.levelMax;
             node.blindData.levelInverse = node.blindData.levelMin;
             node.reason.code = 12;
@@ -741,17 +747,30 @@ module.exports = function (RED) {
         node.blindData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.levelOpen);
         node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.levelClosed);
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
-        node.oversteerData = {
+        node.oversteer = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
             isChecked: false
         };
-        if (node.oversteerData.active) {
-            node.oversteerData.value = config.oversteerValue || '';
-            node.oversteerData.valueType = config.oversteerValueType || 'none';
-            node.oversteerData.operator = config.oversteerCompare;
-            node.oversteerData.thresholdValue = config.oversteerThreshold || '';
-            node.oversteerData.thresholdType = config.oversteerThresholdType;
-            node.oversteerData.blindPos = getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen);
+        node.oversteerData = [];
+        if (node.oversteer.active) {
+            node.oversteerData.push({
+                value: config.oversteerValue || '',
+                valueType: config.oversteerValueType || 'none',
+                operator: config.oversteerCompare,
+                thresholdValue: config.oversteerThreshold || '',
+                thresholdType: config.oversteerThresholdType,
+                blindPos: getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen)
+            });
+            if ((typeof config.oversteer2ValueType !== 'undefined') && (config.oversteer2ValueType !== 'none')) {
+                node.oversteerData.push({
+                    value: config.oversteer2Value || '',
+                    valueType: config.oversteer2ValueType || 'none',
+                    operator: config.oversteer2Compare,
+                    thresholdValue: config.oversteer2Threshold || '',
+                    thresholdType: config.oversteer2ThresholdType,
+                    blindPos: getBlindPosFromTI(node, undefined, config.oversteer2BlindPosType, config.oversteer2BlindPos, node.blindData.levelOpen)
+                });
+            }
         }
 
         node.rulesData = config.rules || [];
@@ -818,7 +837,7 @@ module.exports = function (RED) {
                 node.previousData.reasonCode= node.reason.code;
                 node.previousData.reasonState= node.reason.state;
                 node.previousData.reasonDescription= node.reason.description;
-                node.oversteerData.isChecked = false;
+                node.oversteer.isChecked = false;
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
                 // check if the message contains any oversteering data
@@ -851,16 +870,18 @@ module.exports = function (RED) {
                     }
                 }
 
-                if (node.oversteerData.active && !node.oversteerData.isChecked) {
-                    node.positionConfig.getPropValue(node, msg,
-                        node.oversteerData.valueType,
-                        node.oversteerData.value,
-                        node.oversteerData.operator,
-                        (type, value, data, _id) => {
-                            if (data !== null && typeof data !== 'undefined') {
-                                node.tempData[type + '.' + value] = data;
-                            }
-                        });
+                if (node.oversteer.active && !node.oversteer.isChecked) {
+                    node.oversteerData.forEach(el => {
+                        node.positionConfig.getPropValue(node, msg,
+                            el.valueType,
+                            el.value,
+                            el.operator,
+                            (type, value, data, _id) => {
+                                if (data !== null && typeof data !== 'undefined') {
+                                    node.tempData[type + '.' + value] = data;
+                                }
+                            });
+                    });
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState();

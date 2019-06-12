@@ -1,14 +1,10 @@
 ﻿# node-red-contrib-sun-position for NodeRED
 
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/graphs/commit-activity)
-
-[![HitCount](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position)
-
-[![Dependencies Status](https://img.shields.io/david/HM-RedMatic/node-red-contrib-sun-position.svg)](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position)
-
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rdmtc/node-red-contrib-sun-position/graphs/commit-activity)
+[![HitCount](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position)
+[![Dependencies Status](https://img.shields.io/david/rdmtc/node-red-contrib-sun-position.svg)](https://david-dm.org/rdmtc/node-red-contrib-sun-position)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-[![Issues](https://img.shields.io/github/issues/HM-RedMatic/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues)
+[![Issues](https://img.shields.io/github/issues/rdmtc/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/rdmtc/node-red-contrib-sun-position/issues)
 
 [![NPM](https://nodei.co/npm/node-red-contrib-sun-position.png)](https://nodei.co/npm/node-red-contrib-sun-position/)
 
@@ -18,11 +14,8 @@ This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variat
 Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
 In addition, there is now a blind controller, which can set blind position time and sun controlled. ( see [blind-control](blind_control.md) )
 
-![nodes](images/appearance1.png?raw=true)
-![nodes](images/appearance2.png?raw=true)
-
-> This is still in development!
-> This is not fully tested and documentation are missing!
+[![nodes](images/appearance1.png?raw=true)](README.md)
+[![nodes](images/appearance2.png?raw=true)](blind_control.md)
 
 ## Table of contents
 
@@ -644,13 +637,14 @@ A JSONata expression in the *property* must be always a boolean with value true,
 ## TODO
 
 * [ ] add possibility to select input/output timezone
-  * [ ] select auto add get info from getTimezoneOffset
-  * [ ] solve problem of DST
+  * [x] select auto add get info from getTimezoneOffset
+  * [x] solve problem of DST
+* [ ] Add more exception possibilities (oversteer) to Blind-control
 
 ## Bugs and Feedback
 
 For bugs, questions and feature requests please use the
-[GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
+[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
@@ -669,7 +663,7 @@ specific language governing permissions and limitations under the License.
 
 ## Other
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/HM-RedMatic/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/rdmtc/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
 
 this node is published also here:
 
