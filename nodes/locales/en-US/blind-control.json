@@ -30,6 +30,9 @@
 			"oversteerValue": "oversteer",
 			"oversteerThreshold": "Threshold",
 			"oversteerBlindPos": "blind position",
+			"oversteer2Value": "oversteer add",
+			"oversteer2Threshold": "Threshold",
+			"oversteer2BlindPos": "blind position",
 			"smoothTime": "smoothTime",
 			"showEnhSettings": "Enhanced settings",
 			"outputs": "Outputs",
@@ -68,10 +71,12 @@
 			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.",
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
-			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)"
+			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)",
+			"sunControlMaximization":"<ul><li>If no rule or override matches<ul><li>If the sun is <em>not</em> in the window the blind will set to defined <strong>min position</strong>. (oversteer will be ignored)</li><li>If the sun is in the window</li><li>If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.</li><li>otherwise the blind level is set to defined <strong>max position</strong>.</li></ul></li></ul>",
+			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room."
 		},
 		"tips": {
-			"sunPosControl": "..."
+			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "position is overwritten with priority __prio__",

@@ -66,14 +66,10 @@
             "Millisekunden UNIX-Zeit",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
-            "ECMA-262",
-            "lokale Datum und Zeit",
-            "lokale Datum und Zeit erweitert",
-            "lokale Zeit",
-            "lokale Zeit erw.",
-            "lokales Datum",
-            "lokales Datum lang",
             "UTC Datum und Zeit",
+            "lokale Datum und Zeit",
+            "lokale Zeit",
+            "lokales Datum",
             "ISO Datum und Zeit UTC",
             "ISO Datum und Zeit Lokal",
             "Millisekunden",
@@ -84,28 +80,6 @@
             "Tag relativ, Bsp. Heute, 22.12.",
             "als Objekt",
             "Anderes"
-        ],
-        "outputFormatsName": [
-            "UNIX",
-            "YYYYMMDDHHMMSS",
-            "YYYYMMDD_HHMMSS",
-            "ECMA262",
-            "local",
-            "localLong",
-            "localTime",
-            "localTimeLong",
-            "localDate",
-            "localDateLong",
-            "UTC",
-            "ISO",
-            "ms",
-            "sec",
-            "min",
-            "hour",
-            "ISO",
-            "ISO",
-            "object",
-            "other"
         ],
         "outputTSFormatsGroups": [
             "Zeitpunkt (Zahl)",
@@ -255,7 +229,12 @@
             "property": "Property",
             "minutes": "Minuten",
             "stateDateFormat": "Status-Datums Format",
-            "stateTimeFormat": "Status-Zeit Format"
+            "stateTimeFormat": "Status-Zeit Format",
+            "OSStandard": "Standard vom Betriebssystem",
+            "timeZoneDST": "Sommerzeit",
+            "noDST": "keine Sommerzeit",
+            "addDST1Hour": "Sommerzeit 1 Stunde hinzufügen",
+            "addDST2Hour": "Sommerzeit 2 Stunden hinzufügen"
         },
         "placeholder": {
             "positionConfig": "wähle oder erstelle die Konfiguration",
@@ -270,7 +249,7 @@
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
             "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
-            "stateFormat":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen."
+            "timeZoneOffset":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen."
         },
         "errors": {
             "longitude-missing": "Koordinate Longitude fehlt oder ist falsch!",

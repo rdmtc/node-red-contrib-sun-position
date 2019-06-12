@@ -27,6 +27,7 @@ Used to control a blind with many possibilities. This can be time-dependent and 
   * [rules](#rules)
     * [rules example](#rules-example)
   * [Samples](#samples)
+    * [testing rules and overrides](#testing-rules-and-overrides)
   * [Additional FAQ](#additional-faq)
     * [Why is there no multi blind controller?](#why-is-there-no-multi-blind-controller)
     * [How to define a Temperature Overwrite?](#how-to-define-a-temperature-overwrite)
@@ -110,13 +111,17 @@ The sun control (maximize or restrict sunlight) is only active, if no other rule
 
 ##### maximize sunlight (Winter)
 
-In this mode the blind will set to **min position** if sun is not in the window.
-If the sun is in the window and any oversteer data are setup and met the blind will set to the defined oversteer blind position.
-If the sun is in the window in any other case the blind level is set to **max position**.
+In this mode if no rule or override matches:
+
+* If no other rule or override matches
+  * If the sun is *not* in the window the blind will set to defined **min position**. (oversteer will be ignored)
+  * If the sun is in the window
+    * If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.
+    * otherwise the blind level is set to defined **max position**.
 
 ##### restrict sunlight (Summer)
 
-In this mode if no other rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
+In this mode if no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
 
 This calculation includes:
 
@@ -155,6 +160,8 @@ under the simplest assumption starting from the bearing representing the perpend
   * Example: If the **oversteer** is a property which contains a numerical value representing the percentage of sky occluded by clouds and an operator *greater than or equal* is used with a **Threshold** a numerical value representing the maximum percentage of sky occluded by clouds. Then if the **oversteer** value exceeds the **Threshold** the **blind position** will be used instead of the position calculated by the sun.
   * If the values of **oversteer** or **Threshold** comes from a message object and the value can not be determined, the value is taken at which the value could be determined last. If there is no previous value a error will be thrown otherwise only a log output. To thus the message property not needs to be available in all incoming messages.
   * **blind position** the blind position which should be used instead of the calculated value by the sun if the defined expression for **oversteer** with **operator** (and maybe **Threshold**) is **true**.
+  * can be used for overrides of sunPosition calculation by weather, cloud, temperature, UV-index, ... conditions
+* **oversteer2**, **oversteer2 Operator**, **Threshold** equal to **oversteer**, but an additional oversteer possibility. Lower priority than **oversteer**
 
 ### Node Input
 
@@ -213,7 +220,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * **5** - calculated blind position by sun control is below defined minimum blind position (minimum blind position used)
       * **6** - calculated blind position by sun control is above defined maximum blind position (maximum blind position used)
       * **7** - Sun below altitude threshold
-      * **8** - sun is not in window, default blind position is used
+      * **8** - Sun is not in window, default blind position is used
       * **9** - blind position calculated by sun position
       * **10** - defined oversteer condition applies
       * **11** - (enhanced settings) blind position calculated by sun position was not used caused by smooth settings
@@ -240,7 +247,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
     * `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
   * `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     * `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
-    * `blindCtrl.sunPosition.oversteer` - object containing oversteer data!
+    * `blindCtrl.sunPosition.oversteer` - object containing the active oversteer data
 
 ### Node Status
 
@@ -268,10 +275,26 @@ There are basically 4 types of rules:
   * a rule with a condition will only be active if the condition matches, otherwise the rule will be ignored
 * a rule with a given time - time rule
   * time rules differ again in 2 ways
-    * __to__ time rules
+    * __until__ time rules
+      * rules will be active from Midnight __until__ the given time
+      * the first matching __until__ rule of will be considered
     * __from__ time rules
+      * rules will be active __from__ given time to Midnight
+      * the last matching __from__ rule of will be considered
 * a rule with a condition and a given time
   * these type of rules are a combination. The rules will only be considered if the condition matches and then it act as a normal time rule. Otherwise it will be ignored.
+
+a typically ruleset could be setup in a way like:
+
+* 1 __until__ absolute time (e.g. early morning 6:00) blind will be closed
+* 2 __until__ sun rise time (e.g. sunrise) blind will be closed
+  * The previous absolute __until__ rule (rule 1) will consider that the blind is closed, even if the sun rise time (this rule 2) is earlier than the time of rule 1.
+* 3 __from__ sun set time (e.g. sunset) blind will be closed
+* 4 __from__ absolute time (e.g. late night 22:00) blind will be closed
+  * This rule 4 will be consider that the blind is closed, even if the sun set time (rule 3) is later than this absolute time.
+* In the time between the rule 2 (last __until__) and the rule 3 (first __from__ rule) the blind will set to the default position which is setup normally to open. Only in this time the blind position can be controlled by sun.
+
+This simple example could be enhanced with additional conditional rules.
 
 ### rules example
 
@@ -317,7 +340,12 @@ similar example with additional different times for weekend:
 [{"id":"42177438.2b8acc","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"d2b0ae0f.90e0c","outputs":1,"blindIncrement":"0.01","blindOpenPos":"1","blindClosedPos":0,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"14400000","rules":[{"timeValue":"6:30","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"7:25","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.today.isWeekendOrHoliday","validOperandAType":"global","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDawn","timeType":"pdsTime","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"civilDusk","timeType":"pdsTime","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"22:35","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"dayInfo.tomorrow.isWeekendOrHoliday","validOperandAType":"global","validOperator":"false","validOperatorText":"ist falsch","validOperandBValue":"","validOperandBType":"str"},{"timeValue":"23:15","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist wahr","validOperandBValue":"","validOperandBType":"str"}],"sunControlMode":"0","sunFloorLength":"","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","oversteerValue":"","oversteerValueType":"none","oversteerCompare":"gte","oversteerThreshold":"50","oversteerThresholdType":"num","oversteerBlindPos":"open (max)","oversteerBlindPosType":"levelFixed","x":415,"y":3300,"wires":[["98c3eea0.6fb4b"]]},{"id":"8ad0c281.16c04","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":210,"y":3300,"wires":[["42177438.2b8acc"]]},{"id":"98c3eea0.6fb4b","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":630,"y":3300,"wires":[]},{"id":"75d33e8e.0d3f6","type":"comment","z":"d7bd7fb6.a0c13","name":"Example 2:","info":"","x":150,"y":3255,"wires":[]},{"id":"49b7db3c.bbdb44","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.today.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.today.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":605,"y":3360,"wires":[[]]},{"id":"cfb7c3ce.8f545","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":335,"y":3360,"wires":[["49b7db3c.bbdb44"]]},{"id":"a434dc44.c4da2","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":335,"y":3405,"wires":[["49b7db3c.bbdb44"]]},{"id":"c96a8cf.1e6ea7","type":"change","z":"d7bd7fb6.a0c13","name":"dayInfo.tomorrow.isWeekendOrHoliday","rules":[{"t":"set","p":"dayInfo.tomorrow.isWeekendOrHoliday","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":615,"y":3450,"wires":[[]]},{"id":"d23986f5.6512c8","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"true","payloadType":"bool","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":335,"y":3450,"wires":[["c96a8cf.1e6ea7"]]},{"id":"5b57030c.952d9c","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"false","payloadType":"bool","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":335,"y":3495,"wires":[["c96a8cf.1e6ea7"]]},{"id":"d2b0ae0f.90e0c","type":"position-config","z":"","name":"Kap-Halbinsel","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":"1"}]
 ```
 
-Flow for testing overrides and rules:
+### testing rules and overrides
+
+The following example could be used for testing rules, overrides and sun-position. The function node with the start/stop inject will set `msg.ts` which will be used by the node as the current time. This time is increased every 2 seconds by 30 minutes (can be setup at the beginning of the function node). The given number by the inject will be used as the start hour for that time.
+
+So this example is ideal for testing setup in previous.
+
 ![blind-control-example-3](https://user-images.githubusercontent.com/12692680/57134451-897a4080-6da6-11e9-989e-15ab04e11d9d.png)
 
 ```json
@@ -346,4 +374,4 @@ This can be archived in different ways:
 ## Other
 
 For bugs, questions and feature requests please use the
-[GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
+[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues).

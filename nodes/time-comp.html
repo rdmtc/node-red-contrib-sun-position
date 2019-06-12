@@ -10,12 +10,12 @@
       <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
       <input type="hidden" id="node-input-inputType">
   </div>
-  <div class="form-row block-indent1 time-row-inputFormat hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
+  <div class="form-row block-indent1 time-row-inputFormat is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
       <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
       <select id="node-input-inputFormatsel">
       <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent1 time-row-inputOffset hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
+  <div class="form-row block-indent1 time-row-inputOffset is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
       <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
       <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.inputOffset">
       <input type="hidden" id="node-input-inputOffsetType">
@@ -41,18 +41,18 @@
       <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value hidden" data-i18n="[title]time-comp.placeholder.resultValue">
+  <div class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
   </div>
-  <div class="form-row block-indent2 time-row-result1Format hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
+  <div class="form-row block-indent2 time-row-result1Format is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
       <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
       <select id="node-input-result1FormatSel">
       </select>
       <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
   </div>
-  <div class="form-row block-indent2 time-row-result1Offset hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
+  <div class="form-row block-indent2 time-row-result1Offset is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
       <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
       <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.resultOffset">
       <input type="hidden" id="node-input-result1OffsetType">
@@ -68,6 +68,12 @@
 <style>
         hr {
         width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
     }
     .block-indent1 {
         float: left;
@@ -179,6 +185,11 @@
     }
     #option-checkboxes label:hover {
         background-color: #1e90ff;
+    }
+    .node-input-addOn {
+        width: 100px;
+        max-width: 100px;
+        margin-left: 5px;
     }
 </style>
 
@@ -428,6 +439,10 @@
         paletteLabel: 'time compare and change',
         align: 'left',
         oneditprepare() {
+            setTimeout(() => {
+                $('.is-to-show-initially').show();
+                $('.is-to-hide-initially').hide();
+            }, 300);
             const node = this;
             const setup = function(node) {
                 /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
@@ -605,6 +620,7 @@
                         // row2
                         const operandSelFieldName = 'node-input-rule-operandFormatSel';
                         addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
+                        /*
                         const formatSelField = $('<select/>', {
                             class: operandSelFieldName,
                             id: operandSelFieldName + containerIndex
@@ -614,12 +630,25 @@
                             class: 'node-input-rule-operandFormatIp',
                             id: 'node-input-rule-operandFormatIp' + containerIndex,
                             type: 'text',
-                            value: (data.format || node._('time-comp.timeFormat.default'))
+                            value: (data.format || selFields.parseFormats[0].id)
                         }).appendTo(row2);
                         formatSelField.change(() => {
                             resizeRule(containerRow);
                         });
                         formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
+                        */
+
+                        const formatSelField = $('<select/>', {
+                            class: operandSelFieldName,
+                            id: operandSelFieldName + containerIndex
+                        }).appendTo(row2);
+                        const formatIpField = $('<input/>', {
+                            class: 'node-input-rule-operandFormatIp',
+                            id: 'node-input-rule-operandFormatIp' + containerIndex,
+                            type: 'text'
+                        }).appendTo(row2);
+                        initCombobox(node, formatSelField, formatIpField, 'dateParseFormat', 'parseFormats', data.format, 20);
+
                         // row3
                         addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
                         $('<input/>', {
@@ -671,7 +700,7 @@
                         // setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
                         // operandField.typedInput('value', (data.operandValue || ''));
                         // operandField.typedInput('type', (data.operandType || types.DateEntered.value));
-                        // formatIpField.val(data.format || node._('time-comp.timeFormat.default'));
+                        // formatIpField.val(data.format || 0);
                         // formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
                         // offsetField.typedInput('value', data.offsetValue || '');
                         // offsetField.typedInput('type', data.offsetType || types.Undefined.value);

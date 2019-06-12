@@ -70,14 +70,18 @@ module.exports = function (RED) {
                     }
 
                     if (operatorValid) {
+                        if (rule.format === 'time-calc.timeFormat.default') {
+                            rule.format = 0;
+                        }
                         const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
-                        /*
-                        node.debug('operand ' + util.inspect(ruleoperand));
-                        node.debug('operator ' + util.inspect(rule.operator));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType)); */
+                        if (!ruleoperand) {
+                            continue;
+                        }
+                        // node.debug('operand=' + util.inspect(ruleoperand));
+                        // node.debug('operator=' + util.inspect(rule.operator));
 
                         let compare = null;
-                        switch (rule.operator) {
+                        switch (Number(rule.operator)) {
                             case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
                                 compare = (op1, op2) => op1 === op2;
                                 break;
@@ -101,7 +105,8 @@ module.exports = function (RED) {
                         let result = false;
                         if (compare) {
                             const inputOperant = new Date(inputData);
-                            // result = inputOperant.getTime() <= ruleoperand.getTime();
+                            // node.debug('inputOperant=' + util.inspect(inputOperant));
+                            // node.debug('operatorType=' + util.inspect(rule.operatorType));
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
@@ -169,8 +174,11 @@ module.exports = function (RED) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
 
+                                        // node.debug('inputData=' + util.inspect(inputData));
+                                        // node.debug('operand=' + util.inspect(ruleoperand));
                                         break;
                                 }
+                                // node.debug('result=' + util.inspect(result));
                             }
                         }
 

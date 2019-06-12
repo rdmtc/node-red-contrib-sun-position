@@ -1,14 +1,10 @@
 ﻿# node-red-contrib-sun-position for NodeRED
 
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/graphs/commit-activity)
-
-[![HitCount](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/HM-RedMatic/node-red-contrib-sun-position)
-
-[![Dependencies Status](https://img.shields.io/david/HM-RedMatic/node-red-contrib-sun-position.svg)](https://david-dm.org/HM-RedMatic/node-red-contrib-sun-position)
-
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rdmtc/node-red-contrib-sun-position/graphs/commit-activity)
+[![HitCount](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position)
+[![Dependencies Status](https://img.shields.io/david/rdmtc/node-red-contrib-sun-position.svg)](https://david-dm.org/rdmtc/node-red-contrib-sun-position)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-[![Issues](https://img.shields.io/github/issues/HM-RedMatic/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues)
+[![Issues](https://img.shields.io/github/issues/rdmtc/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/rdmtc/node-red-contrib-sun-position/issues)
 
 [![NPM](https://nodei.co/npm/node-red-contrib-sun-position.png)](https://nodei.co/npm/node-red-contrib-sun-position/)
 
@@ -18,60 +14,56 @@ This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variat
 Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
 In addition, there is now a blind controller, which can set blind position time and sun controlled. ( see [blind-control](blind_control.md) )
 
-![nodes](images/appearance1.png?raw=true)
-![nodes](images/appearance2.png?raw=true)
-
-> This is still in development!
-> This is not fully tested and documentation are missing!
+[![nodes](images/appearance1.png?raw=true)](README.md)
+[![nodes](images/appearance2.png?raw=true)](blind_control.md)
 
 ## Table of contents
 
-- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  - [Table of contents](#table-of-contents)
-  - [Installation](#installation)
-  - [General](#general)
-    - [Saving resources](#saving-resources)
-    - [second based accuracy](#second-based-accuracy)
-  - [Implemented Nodes](#implemented-nodes)
-    - [sun-position](#sun-position)
-      - [sun-position - Node settings](#sun-position---node-settings)
-      - [Node Input](#node-input)
-      - [sun-position - Node Output](#sun-position---node-output)
-    - [moon-position](#moon-position)
-      - [moon-position - Node settings](#moon-position---node-settings)
-      - [moon-position - Node Output](#moon-position---node-output)
-    - [time-inject](#time-inject)
-      - [time-inject - Node settings](#time-inject---node-settings)
-      - [time-inject - Node Input](#time-inject---node-input)
-      - [time-inject - Node Output](#time-inject---node-output)
-    - [within-time](#within-time)
-      - [within-time - Node settings](#within-time---node-settings)
-    - [time-comp](#time-comp)
-      - [time-comp - Node settings](#time-comp---node-settings)
-    - [time-span](#time-span)
-      - [time-span - Node settings](#time-span---node-settings)
-    - [blind-control](#blind-control)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
-  - [TODO](#todo)
-  - [Bugs and Feedback](#bugs-and-feedback)
-  - [LICENSE](#license)
-  - [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [TODO](#todo)
+  * [Bugs and Feedback](#bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Installation
 
 `npm install node-red-contrib-sun-position`
-
 
 ## General
 
@@ -143,47 +135,6 @@ The Input is for triggering the calculation. If limits are defined the input mes
   * `msg.payload.startTime` if a start time is defined the start timestamp (inclusive of offset).
   * `msg.payload.endTime` if a end time is defined the end timestamp (inclusive of offset).
   * `msg.payload.sunInSky` if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.
-
-```json
-{
-  "lastUpdate": "2018-11-11T11:11:11.111Z",
-  "latitude": "18.473782",
-  "longitude": "-34.357051",
-  "angleType": "deg",
-  "azimuth": 117.72942647370792,
-  "altitude": 20.984193272523992,
-  "times": {
-      "solarNoon":"2018-12-10T10:59:14.814Z",
-      "nadir":"2018-12-10T22:59:14.814Z",
-      "sunrise":"2018-12-10T06:58:55.584Z",
-      "sunset":"2018-12-10T14:59:34.044Z",
-      "sunriseEnd":"2018-12-10T07:03:12.232Z",
-      "sunsetStart":"2018-12-10T14:55:17.395Z",
-      "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",
-      "blueHourDuskStart":"2018-12-10T15:24:06.743Z",
-      "civilDawn":"2018-12-10T06:19:31.249Z",
-      "civilDusk":"2018-12-10T15:38:58.379Z",
-      "blueHourDawnStart":"2018-12-10T06:05:03.443Z",
-      "blueHourDuskEnd":"2018-12-10T15:53:26.185Z",
-      "nauticalDawn":"2018-12-10T05:37:04.859Z",
-      "nauticalDusk":"2018-12-10T16:21:24.768Z",
-      "amateurDawn":"2018-12-10T05:16:44.832Z",
-      "amateurDusk":"2018-12-10T16:41:44.795Z",
-      "astronomicalDawn":"2018-12-10T04:56:49.931Z",
-      "astronomicalDusk":"2018-12-10T17:01:39.696Z",
-      "goldenHourDawnEnd":"2018-12-10T07:58:28.541Z",
-      "goldenHourDuskStart":"2018-12-10T14:00:01.086Z",
-      "dawn":"2018-12-10T06:19:31.249Z",
-      "dusk":"2018-12-10T15:38:58.379Z",
-      "nightEnd":"2018-12-10T04:56:49.931Z",
-      "night":"2018-12-10T17:01:39.696Z",
-      "nightStart":"2018-12-10T17:01:39.696Z",
-      "goldenHour":"2018-12-10T14:00:01.086Z"
-  },
-  "pos": [],
-  "posChanged": false
-}
-```
 
 * **second output** to **... output** if limits for azimuth are defined the incoming message will send to this output. It adds a `msg.posChanged` property of type _boolean_ which is true if in the previous calculation no message was send to this output.
 
@@ -355,26 +306,6 @@ A simple node that routes messages depending on the time. If the current time fa
   * **End time** alternate end time
   * **End Offset** offset for the alternate end time
 
-* **Status** here can be adjusted which status should be displayed under the node.
-  * this has the following possibilities:
-    * **none** - no status will be displayed - **only errors** - if an error occurs it will be displayed
-
-      ![within-time-status-error](https://user-images.githubusercontent.com/12692680/57134527-b62e5800-6da6-11e9-946a-677044d25655.png)
-
-    * **time limits** - the time limits will be displayed. An `⎇` sign after a time will show that an alternate time is used.
-
-      ![within-time-status-time](https://user-images.githubusercontent.com/12692680/57134513-b4649480-6da6-11e9-9bb2-3acda84b8ef8.png)
-
-    * **last message** - the time limits will be shown and if the last message was blocked. An `⎇` sign after a time will show that an alternate time is used.
-
-      ![within-time-status-message-block](https://user-images.githubusercontent.com/12692680/57134528-b6c6ee80-6da6-11e9-90be-e3b15c2b2bff.png)
-
-      if the message was pass through the timestamp of this message will be shown.
-
-      ![within-time-status-message-send](https://user-images.githubusercontent.com/12692680/57134529-b6c6ee80-6da6-11e9-8c71-7245dda4b6ee.png)
-
-    * **time limits or last message** - on deploy/start until a message arrives the same behavior as `time limits` options, otherwise the `last message` status display.
-
 * **resend start** If this checkbox is checked and a message arrived outside of time, this message will be additional send again some milliseconds after next start time point. This option is only for fixed time definitions available.
 * **resend end** If this checkbox is checked and a message arrived within time, this message will be additional send again some milliseconds after next end time point. This option is only for fixed time definitions available.
 
@@ -383,8 +314,6 @@ A simple node that routes messages depending on the time. If the current time fa
 A enhanced node for time format change and time comparison.
 
 ![time-comp-example](https://user-images.githubusercontent.com/12692680/57134514-b4649480-6da6-11e9-9321-9fd1a2927a9b.png)
-
-**This node is in development and has a pre release state!!**
 
 ```json
 [{"id":"1a6b5f99.4c928","type":"time-comp","z":"4e9a710a.bf0b9","outputs":1,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":120,"wires":[["fd45b2d2.eba89"]]},{"id":"fd45b2d2.eba89","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":120,"wires":[]},{"id":"f390b758.7dd9b8","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":120,"wires":[["1a6b5f99.4c928"]]},{"id":"b87a5c79.d4ce3","type":"comment","z":"4e9a710a.bf0b9","name":"change Unix Timestamp to ISO","info":"","x":210,"y":80,"wires":[]},{"id":"20afdf5d.4cd8d","type":"comment","z":"4e9a710a.bf0b9","name":"compare Time","info":"","x":150,"y":180,"wires":[]},{"id":"3d8ee66c.7c86ea","type":"inject","z":"4e9a710a.bf0b9","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":160,"y":240,"wires":[["f19f0fd9.8ad1d"]]},{"id":"f19f0fd9.8ad1d","type":"time-comp","z":"4e9a710a.bf0b9","outputs":3,"name":"","positionConfig":"d9e9ca6a.952218","input":"payload","inputType":"msg","inputFormat":"0","inputOffset":0,"inputOffsetMultiplier":60,"rules":[{"operator":"5","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"12:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""},{"operator":"3","operatorType":"11,12,13,14,15,16,17,18","operatorText":"","operandType":"str","operandValue":"15:00","format":"ddd MMM dd yyyy HH:mm:ss","formatSelection":"0","offsetType":"none","offsetValue":"","propertyType":"none","propertyValue":""}],"checkall":"true","result1":"payload","result1Type":"msg","result1Value":"","result1ValueType":"input","result1Format":"5","result1Offset":0,"result1OffsetMultiplier":60,"x":350,"y":240,"wires":[["723d7d7c.e7a874"],["44ac03f7.fd68fc"],["4d8512cd.73c90c"]]},{"id":"723d7d7c.e7a874","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":220,"wires":[]},{"id":"44ac03f7.fd68fc","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":570,"y":260,"wires":[]},{"id":"4d8512cd.73c90c","type":"debug","z":"4e9a710a.bf0b9","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":570,"y":300,"wires":[]},{"id":"d9e9ca6a.952218","type":"position-config","z":0,"name":"Entenhausen","longitude":"13.72324","latitude":"51.12381","angleType":"deg"}]
@@ -414,8 +343,6 @@ A simple node that routes messages depending on the time. If the current time fa
 A enhanced node for time span calculation and time span comparison.
 
 ![time-span-example](https://user-images.githubusercontent.com/12692680/57134521-b595c180-6da6-11e9-82fe-01ddaaba0d7b.png)
-
-**This node is in development and has a pre release state!!**
 
 ```json
 tbd
@@ -710,13 +637,14 @@ A JSONata expression in the *property* must be always a boolean with value true,
 ## TODO
 
 * [ ] add possibility to select input/output timezone
-  * [ ] select auto add get info from getTimezoneOffset
-  * [ ] solve problem of DST
+  * [x] select auto add get info from getTimezoneOffset
+  * [x] solve problem of DST
+* [ ] Add more exception possibilities (oversteer) to Blind-control
 
 ## Bugs and Feedback
 
 For bugs, questions and feature requests please use the
-[GitHub Issues](https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues).
+[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
@@ -735,7 +663,7 @@ specific language governing permissions and limitations under the License.
 
 ## Other
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/HM-RedMatic/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/rdmtc/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
 
 this node is published also here:
 

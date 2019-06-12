@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -59,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HM-RedMatic/node-red-contrib-sun-position.git"
+    "url": "git+https://github.com/rdmtc/node-red-contrib-sun-position.git"
   },
   "author": {
     "name": "Hypnos3",
@@ -74,9 +74,9 @@
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/HM-RedMatic/node-red-contrib-sun-position/issues"
+    "url": "https://github.com/rdmtc/node-red-contrib-sun-position/issues"
   },
-  "homepage": "https://github.com/HM-RedMatic/node-red-contrib-sun-position#readme",
+  "homepage": "https://github.com/rdmtc/node-red-contrib-sun-position#readme",
   "node-red": {
     "nodes": {
       "position-config": "nodes/position-config.js",

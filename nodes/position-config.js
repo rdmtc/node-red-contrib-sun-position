@@ -82,11 +82,20 @@ module.exports = function (RED) {
                 this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
                 this.angleType = config.angleType;
-                this.tzOffset = (config.timeZoneOffset || 99);
+                this.tzOffset = parseInt(config.timeZoneOffset || 99);
+                this.tzDST = parseInt(config.timeZoneDST || 0);
+
                 if (isNaN(this.tzOffset) || this.tzOffset > 99 || this.tzOffset < -99) {
                     this.tzOffset = 99;
                 }
-                this.tzOffset = (this.tzOffset * -60);
+                if (this.tzOffset !== 99) {
+                    this.tzOffset += this.tzDST;
+                    this.tzOffset = (this.tzOffset * -60);
+                    this.debug('tzOffset is set to ' + this.tzOffset + ' tzDST=' + this.tzDST);
+                } else {
+                    this.tzOffset = null;
+                    // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
+                }
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
@@ -151,7 +160,7 @@ module.exports = function (RED) {
          * @return {timeresult} result object of sunTime
          */
         getSunTime(now, value, offset, multiplier, next, days) {
-            this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            // this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
             let result = this._sunTimesCheck(now);
             result = Object.assign(result, this.sunTimesToday[value]);
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -163,7 +172,6 @@ module.exports = function (RED) {
                     const date = (new Date()).addDays(next);
                     result = Object.assign(result, sunCalc.getSunTimes(date, this.latitude, this.longitude)[value]);
                 }
-
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
 
@@ -233,8 +241,8 @@ module.exports = function (RED) {
          * @param {Date} dt Date to format to Date and Time string
          * @returns {string} formated Date object
          */
-        dateToString(dt) {
-            return (this.dateToDateString(dt) + ' ' + this.dateToTimeString(dt)).trim();
+        toDateTimeString(dt) {
+            return (this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
         }
 
         /**
@@ -242,11 +250,11 @@ module.exports = function (RED) {
          * @param {Date} dt Date to format to trime string
          * @returns {string} formated Date object
          */
-        dateToTimeString(dt) {
-            if (this.stateTimeFormat === '3') {
+        toTimeString(dt) {
+            if (!this.tzOffset && this.stateTimeFormat === '3') {
                 return dt.toLocaleTimeString();
             }
-            return hlp.getFormattedDateOut(dt, this.stateTimeFormat);
+            return hlp.getFormattedDateOut(dt, this.stateTimeFormat, (this.tzOffset === 0), this.tzOffset);
         }
 
         /**
@@ -254,11 +262,11 @@ module.exports = function (RED) {
          * @param {Date} dt Date to format to Date string
          * @returns {string} formated Date object
          */
-        dateToDateString(dt) {
-            if (this.stateDateFormat === '12') {
+        toDateString(dt) {
+            if (!this.tzOffset && this.stateDateFormat === '12') {
                 return dt.toLocaleDateString();
             }
-            return hlp.getFormattedDateOut(dt, this.stateDateFormat);
+            return hlp.getFormattedDateOut(dt, this.stateDateFormat, (this.tzOffset === 0), this.tzOffset);
         }
         /*******************************************************************************************************/
         /**
@@ -297,21 +305,24 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getOutDataProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier, days) {
-            // _srcNode.debug('getOutDataProp type='+vType+' value='+value+' format='+format+' offset='+offset+' offset='+offsetType+' multiplier='+multiplier);
+            _srcNode.debug(`getOutDataProp type=${vType} value=${value} format=${format} offset=${offset} offset=${offsetType} multiplier=${multiplier} tzOffset=${this.tzOffset}`);
             let result = null;
             if (vType === null || vType === 'none' || vType === '' || (typeof vType === 'undefined')) {
                 if (value === '' || (typeof value === 'undefined')) {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result = hlp.addOffset((new Date()), offsetX, multiplier);
-                    return hlp.getFormattedDateOut(result, format);
+                    return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return value;
             } else if (vType === 'date') {
+                if (this.tzOffset) {
+                    return hlp.convertDateTimeZone(Date.now(), this.tzOffset);
+                }
                 return Date.now();
             } else if (vType === 'dateSpecific') {
                 const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                 result = hlp.addOffset((new Date()), offsetX, multiplier);
-                return hlp.getFormattedDateOut(result, format);
+                return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
             } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                 if (vType === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -321,21 +332,21 @@ module.exports = function (RED) {
                     result = this.getMoonTime((new Date()), value, offsetX, multiplier, 1, days);
                 }
                 if (result && result.value && !result.error) {
-                    return hlp.getFormattedDateOut(result.value, format);
+                    return hlp.getFormattedDateOut(result.value, format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
             } else if (vType === 'entered' || vType === 'dateEntered') {
-                result = hlp.getDateOfText(String(value));
+                result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
                 const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                 result = hlp.normalizeDate(result, offsetX, multiplier, undefined, days);
-                return hlp.getFormattedDateOut(result, format);
+                return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
             } else if (vType === 'dayOfMonth') {
                 result = new Date();
                 result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
                 if (result !== null && typeof result !== 'undefined') {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result = hlp.addOffset(result, offsetX, multiplier);
-                    return hlp.getFormattedDateOut(result, format);
+                    return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
             }
@@ -343,20 +354,28 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getDateFromProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier) {
-            // _srcNode.debug('getDateFromProp type='+vType+' value='+value+' format='+format+' offset='+offset+ ' offsetType=' + offsetType +' multiplier='+multiplier);
+            _srcNode.debug(`getDateFromProp type=${vType} value=${value} format=${format} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} tzOffset=${this.tzOffset}`);
             let result = null;
             try {
-                if (vType === null || vType === 'none' || vType === '') {
-                    return new Date();
-                } else if (vType === 'date') {
+                if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
+                    if (this.tzOffset) {
+                        return hlp.convertDateTimeZone(new Date(), this.tzOffset);
+                    }
                     return new Date();
                 } else if (vType === 'dateSpecific') {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    return hlp.addOffset((new Date()), offsetX, multiplier);
+                    let d = new Date();
+                    if (this.tzOffset) {
+                        d = hlp.convertDateTimeZone(d, this.tzOffset);
+                    }
+                    return hlp.addOffset(d, offsetX, multiplier);
                 } else if (vType === 'dayOfMonth') {
                     let d = new Date();
                     d = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
+                    if (this.tzOffset) {
+                        return hlp.addOffset(hlp.convertDateTimeZone((new Date()), this.tzOffset), offsetX, multiplier);
+                    }
                     return hlp.addOffset(d, offsetX, multiplier);
                 } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -370,11 +389,14 @@ module.exports = function (RED) {
                         result.fix = true;
                     }
                     if (result && result.value && !result.error) {
+                        if (this.tzOffset) {
+                            return hlp.convertDateTimeZone(result.value, this.tzOffset);
+                        }
                         return result.value;
                     }
                     throw new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
                 } else if (vType === 'entered' || vType === 'dateEntered') {
-                    result = hlp.getDateOfText(String(value));
+                    result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     return hlp.addOffset(result, offsetX, multiplier);
                 } else {
@@ -382,12 +404,16 @@ module.exports = function (RED) {
                     result = this.getPropValue(_srcNode, msg, vType, value);
                 }
                 if (result !== null && typeof result !== 'undefined') {
+                    _srcNode.log(result);
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result = hlp.parseDateFromFormat(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    if (this.tzOffset) {
+                        result = hlp.convertDateTimeZone(result, this.tzOffset);
+                    }
                     return hlp.addOffset(result, offsetX, multiplier);
                 }
             } catch (err) {
-                this.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 const e = new Error(`Exception "${err.message}", on try to evaluate ${vType}.${value}`);
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
@@ -396,7 +422,7 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
-            this.debug('getTimeProp [' + hlp.getNodeId(_srcNode) + '] vType=' + vType + ' value=' + value + ' offset=' + offset + ' offsetType=' + offsetType + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
+            _srcNode.debug(`getTimeProp vType=${vType} value=${value} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} next=${next} days=${days} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
@@ -409,13 +435,19 @@ module.exports = function (RED) {
                     result.error = 'wrong type "' + vType + '"="' + value+'"';
                 } else if (vType === 'date') {
                     result.value = new Date();
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
+                    }
                     result.fix = true;
                 } else if (vType === 'dateSpecific') {
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result.value = hlp.normalizeDate((new Date()), offsetX, multiplier, next, days);
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value);
+                    }
                     result.fix = true;
                 } else if (vType === 'entered') {
-                    result.value = hlp.getTimeOfText(String(value), (new Date()));
+                    result.value = hlp.getTimeOfText(String(value), (new Date()), (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null) {
                         const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                         result.value = hlp.normalizeDate(result.value, offsetX, multiplier, next, days);
@@ -425,11 +457,17 @@ module.exports = function (RED) {
                     // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result = this.getSunTime((new Date()), value, offsetX, multiplier, next, days);
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
+                    }
                     result.fix = true;
                 } else if (vType === 'pdmTime') {
                     // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                     result = this.getMoonTime((new Date()), value, offsetX, multiplier, next, days);
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
+                    }
                     result.fix = true;
                 } else {
                     // can handle context, json, jsonata, env, ...
@@ -437,16 +475,19 @@ module.exports = function (RED) {
                     const res = this.getPropValue(_srcNode, msg, vType, value);
 
                     if (res) {
-                        result.value = hlp.getDateOfText(res);
+                        result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
                         const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
                         result.value = hlp.normalizeDate(result.value, offsetX, multiplier, next, days);
+                        if (this.tzOffset) {
+                            result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
+                        }
                         // this.debug(String(res) + '  --  ' + result.value);
                     } else {
                         result.error = RED._('errors.notEvaluableProperty', {type:vType, value:value});
                     }
                 }
             } catch (err) {
-                this.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
@@ -459,6 +500,7 @@ module.exports = function (RED) {
                 }
                 result.value = new Date();
             }
+            _srcNode.debug('getTimeProp result=' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
@@ -498,7 +540,7 @@ module.exports = function (RED) {
             } else if (type === 'pdmCalcData') {
                 result = this.getMoonCalc(msg.ts);
             } else if (type === 'entered' || type === 'dateEntered') {
-                result = hlp.getDateOfText(String(value));
+                result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
@@ -512,6 +554,7 @@ module.exports = function (RED) {
                 _srcNode.error(RED._('errors.notEvaluableProperty', { type: type, value: value }));
                 return null;
             }
+            _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/

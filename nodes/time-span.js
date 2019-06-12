@@ -190,17 +190,13 @@ function getFormattedTimeSpanOut(date1, date2, format) {
             date: date1,
             ts: date1.getTime(),
             timeUTCStr: date1.toUTCString(),
-            timeISOStr: date1.toISOString(),
-            timeLocaleStr: date1.toLocaleString(),
-            timeLocaleTimeStr: date1.toLocaleTimeString()
+            timeISOStr: date1.toISOString()
         },
         end: {
             date: date2,
             ts: date2.getTime(),
             timeUTCStr: date2.toUTCString(),
-            timeISOStr: date2.toISOString(),
-            timeLocaleStr: date2.toLocaleString(),
-            timeLocaleTimeStr: date2.toLocaleTimeString()
+            timeISOStr: date2.toISOString()
         },
         timeSpan: timeSpan,
         timeSpanAbs: {
@@ -264,6 +260,10 @@ module.exports = function (RED) {
                     let resultObj = null;
                     if (config.result1ValueType === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
+                        resultObj.start.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.start.date);
+                        resultObj.start.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.start.date);
+                        resultObj.end.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.end.date);
+                        resultObj.end.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.end.date);
                     } else if (config.result1ValueType === 'operand1') {
                         resultObj = hlp.getFormattedDateOut(operand1, config.result1Format);
                     } else if (config.result1ValueType === 'operand2') {

@@ -66,7 +66,7 @@ module.exports = function (RED) {
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
                         node.error(startTime.error);
-                        node.debug('startTime: ' + util.inspect(startTime));
+                        // node.debug('startTime: ' + util.inspect(startTime));
                     } else {
                         ports[0].payload.startTime = startTime.value.getTime();
                     }
@@ -78,7 +78,7 @@ module.exports = function (RED) {
                     if (endTime.error) {
                         errorStatus = 'could not evaluate end time';
                         node.error(endTime.error);
-                        node.debug('endTime: ' + util.inspect(endTime));
+                        // node.debug('endTime: ' + util.inspect(endTime));
                     } else {
                         ports[0].payload.endTime = endTime.value.getTime();
                     }
@@ -117,15 +117,15 @@ module.exports = function (RED) {
                         node.status({
                             fill:   'yellow',
                             shape:  'dot',
-                            text:   node.positionConfig.dateToTimeString(new Date(ports[0].payload.startTime)) + ' - ' +
-                                    node.positionConfig.dateToTimeString(new Date(ports[0].payload.endTime))
+                            text:   node.positionConfig.toTimeString(new Date(ports[0].payload.startTime)) + ' - ' +
+                                    node.positionConfig.toTimeString(new Date(ports[0].payload.endTime))
                         });
                     } else {
                         node.status({
                             fill:   'blue',
                             shape:  'dot',
-                            text:   node.positionConfig.dateToTimeString(new Date(ports[0].payload.startTime)) + ' - ' +
-                                    node.positionConfig.dateToTimeString(new Date(ports[0].payload.endTime))
+                            text:   node.positionConfig.toTimeString(new Date(ports[0].payload.startTime)) + ' - ' +
+                                    node.positionConfig.toTimeString(new Date(ports[0].payload.endTime))
                         });
                     }
                 } else {
@@ -135,7 +135,7 @@ module.exports = function (RED) {
                     if (ports[0] && ports[0].payload && ports[0].payload.lastUpdate) {
                         const azimuth = (ports[0].payload.azimuth) ? ports[0].payload.azimuth.toFixed(2) : '?';
                         const altitude = (ports[0].payload.altitude) ? ports[0].payload.altitude.toFixed(2) : '?';
-                        text = azimuth + '/' + altitude + ' - ' + node.positionConfig.dateToString(ports[0].payload.lastUpdate);
+                        text = azimuth + '/' + altitude + ' - ' + node.positionConfig.toDateTimeString(ports[0].payload.lastUpdate);
                         fill = 'grey';
                     }
                     this.status({

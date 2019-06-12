@@ -106,8 +106,8 @@ module.exports = function (RED) {
                     if (_onInit === true) {
                         return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeData.error};
                     }
+                    node.debug('node.nextTimeData=' + util.inspect(node.nextTimeData));
                     node.error(node.nextTimeData.error);
-                    node.debug('nextTimeData ' + util.inspect(node.nextTimeData));
                 } else {
                     node.nextTime = node.nextTimeData.value;
                     isFixedTime = node.nextTimeData.fix;
@@ -126,8 +126,8 @@ module.exports = function (RED) {
                     if (_onInit === true) {
                         return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeAltData.error};
                     }
+                    node.debug('node.nextTimeAltData=' + util.inspect(node.nextTimeAltData));
                     node.error(node.nextTimeAltData.error);
-                    node.debug('nextTimeAltData: ' + util.inspect(node.nextTimeAltData));
                 } else {
                     node.nextTimeAlt = node.nextTimeAltData.value;
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
@@ -207,7 +207,6 @@ module.exports = function (RED) {
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
             }
-
             if ((errorStatus !== '')) {
                 node.status({
                     fill: 'red',
@@ -221,20 +220,20 @@ module.exports = function (RED) {
                     node.status({
                         fill: 'green',
                         shape: 'ring',
-                        text: node.positionConfig.dateToString(node.nextTimeAlt) + ' / ' + node.positionConfig.dateToTimeString(node.nextTime)
+                        text: node.positionConfig.toDateTimeString(node.nextTimeAlt) + ' / ' + node.positionConfig.toTimeString(node.nextTime)
                     });
                 } else {
                     node.status({
                         fill: 'green',
                         shape: 'dot',
-                        text: node.positionConfig.dateToString(node.nextTime) + ' / ' + node.positionConfig.dateToTimeString(node.nextTimeAlt)
+                        text: node.positionConfig.toDateTimeString(node.nextTime) + ' / ' + node.positionConfig.toTimeString(node.nextTimeAlt)
                     });
                 }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
                     fill: 'green',
                     shape: 'dot',
-                    text: node.positionConfig.dateToString(node.nextTime)
+                    text: node.positionConfig.toDateTimeString(node.nextTime)
                 });
             } else {
                 node.status({});

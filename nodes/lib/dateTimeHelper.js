@@ -22,15 +22,14 @@ module.exports = {
     isDSTObserved,
     addOffset,
     calcDayOffset,
+    convertDateTimeZone,
     normalizeDate,
     getTimeOfText,
     getDateOfText,
-    getTimeNumber,
     getTimeNumberUTC,
     getNodeId,
     initializeParser,
     getFormattedDateOut,
-    getDateFromFormat,
     parseDateFromFormat,
     topicReplace
 };
@@ -255,80 +254,6 @@ function getSpecialDayOfMonth(year, month, dayName) {
 /* date-time functions                                                                                 */
 /*******************************************************************************************************/
 /**
- * gets a date from a comparable date Format
- * @param {number} date - number or string in Format YYYYMMDDHHMMSS
- * @return {Date} date of the number
- */
-function _parseComparableDateFormat(date) {
-    date = String(date);
-    const year = date.substr(0, 4);
-    const month = date.substr(4, 2);
-    const day = date.substr(6, 2);
-    const hours = date.substr(8, 2);
-    const mins = date.substr(10, 2);
-    const secs = date.substr(12, 2);
-    const mss = date.substr(14);
-    return new Date(year, month, day, hours, mins, secs, mss);
-}
-
-/*******************************************************************************************************/
-/**
- * gets a comparable date Format
- * @param {Date} date - Date to format
- * @return {string} number in Format YYYYMMDDHHMMSS
- */
-function _getComparableDateFormat(date) {
-    return Number(date.getFullYear() +
-        pad2(date.getMonth() + 1) +
-        pad2(date.getDate()) +
-        pad2(date.getHours()) +
-        pad2(date.getMinutes()) +
-        pad2(date.getSeconds()));
-}
-
-/**
- * gets a comparable date Format
- * @param {Date} date - Date to format
- * @return {string} number in Format YYYYMMDD.HHMMSS
- */
-function _getComparableDateFormat2(date) {
-    return Number(date.getFullYear() +
-        pad2(date.getMonth() + 1) +
-        pad2(date.getDate()) + '.' +
-        pad2(date.getHours()) +
-        pad2(date.getMinutes()) +
-        pad2(date.getSeconds()));
-}
-
-/*******************************************************************************************************/
-/**
- * gets a date from a comparable date Format
- * @param {number} date - number or string in Format YYYYMMDD.HHMMSS or YYYYMMDDTHHMMSS
- * @return {Date} date of the number
- */
-function _parseComparableDateFormat2(date) {
-    date = String(date);
-    const year = date.substr(0, 4);
-    const month = date.substr(4, 2);
-    const day = date.substr(6, 2);
-    const hours = date.substr(9, 2);
-    const mins = date.substr(11, 2);
-    const secs = date.substr(13, 2);
-    const mss = date.substr(15);
-    return new Date(year, month, day, hours, mins, secs, mss);
-}
-
-/*******************************************************************************************************/
-/**
- * convert the time part of a date into a comparable number
- * @param {Date} date  - date to convert
- * @return {number}   numeric representation of the time part of the date
- */
-function getTimeNumber(date) {
-    return date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60000 + date.getHours() * 3600000;
-}
-
-/**
  * convert the time part of a date into a comparable number
  * @param {Date} date  - date to convert
  * @return {number}   numeric representation of the time part of the date
@@ -477,6 +402,20 @@ function isDSTObserved(d) {
     d = d || new Date();
     return d.getTimezoneOffset() < getStdTimezoneOffset(d);
 }
+
+/**
+ * changes the time based on a timezone
+ * @param {date} date Javascript Date object
+ * @param {number} timeZoneOffset Offset in Minutes
+  * @return {date} new date object with changed timezone to use with .toLocaleString()
+ */
+function convertDateTimeZone(date, timeZoneOffset) {
+    const localTime = date.getTime();
+    const localOffset = date.getTimezoneOffset() * 60000;
+    const utc = localTime + localOffset;
+    const destTime = utc + (60000*timeZoneOffset);
+    return new Date(destTime);
+}
 /*******************************************************************************************************/
 /**
  * adds an offset to a given Date object
@@ -567,20 +506,46 @@ function normalizeDate(d, offset, multiplier, next, days) {
  * parses a string which contains only a time to a Date object of today
  * @param {string} t text representation of a time
  * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
+ * @param {boolean} [utc] define if the time should be in utc
  * @return {Date} the parsed date object or **null** if can not parsed
  */
-function getTimeOfText(t, date) {
+function getTimeOfText(t, date, utc, timeZoneOffset) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
     // if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
     if (t && (!t.includes('.')) && (!t.includes('-'))) {
-        const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
+        t = t.toLocaleLowerCase();
+        // const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
+        const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)(?:a|am|m|\s)?\s*(gmt|utc|z)?\s*(?:(\+|-)(\d\d):([0-5]\d)|(\+|-)(\d\d\d\d?))?/);
         if (matches) {
+            if (utc || matches[5] || matches[6] || matches[9] ) {
+                // matches[5] - GMT, UTC or Z; matches[6] - +/-; matches[9] - +/-
+                d.setUTCHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
+                    (parseInt(matches[2]) || 0),
+                    (parseInt(matches[3]) || 0), 0);
+
+                if (matches[6] && matches[7] && matches[8]) {
+                    // +00:00 - timezone offset
+                    const v = ((parseInt(matches[7]) * 60) + (matches[8] ? parseInt(matches[8]) : 0)) * ((matches[6] === '-') ? -1 : 1);
+                    const m = d.getMinutes() + v;
+                    d.setMinutes(m);
+                }
+                if (matches[9] && matches[10]) {
+                    // +0000 or +000
+                    const v = (parseInt(matches[10])) * ((matches[9] === '-') ? -1 : 1);
+                    const m = d.getMinutes() + v;
+                    d.setMinutes(m);
+                }
+                return d;
+            }
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
                 (parseInt(matches[2]) || 0),
                 (parseInt(matches[3]) || 0), 0);
         } else {
             return null;
+        }
+        if (timeZoneOffset) {
+            return convertDateTimeZone(d, timeZoneOffset);
         }
         return d;
     }
@@ -591,12 +556,16 @@ function getTimeOfText(t, date) {
  * parses a string which contains a date or only a time to a Date object
  * @param {any} dt number or text which contains a date or a time
  * @return {Date} the parsed date object, throws an error if can not parsed
+ * @param {boolean} [utc] define if the time should be in utc
  */
-function getDateOfText(dt, preferMonthFirst) {
+function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     // console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
+        if (timeZoneOffset) {
+            return convertDateTimeZone(new Date(), timeZoneOffset);
+        }
         return new Date();
     }
 
@@ -626,9 +595,9 @@ function getDateOfText(dt, preferMonthFirst) {
         }
     }
 
-    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/;
+    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P)?)?.*$/;
     if (re.test(String(dt))) {
-        const result = getTimeOfText(String(dt));
+        const result = getTimeOfText(String(dt), utc, timeZoneOffset);
         if (result !== null) {
             return result;
         }
@@ -638,18 +607,39 @@ function getDateOfText(dt, preferMonthFirst) {
         dt = Number(dt);
     }
 
-    const dto = new Date(dt);
+    let dto = new Date(dt);
+    if (utc || timeZoneOffset === 0) {
+        dto = Date.UTC(dt);
+    } else if (timeZoneOffset) {
+        dto = convertDateTimeZone(dto, timeZoneOffset);
+    }
+
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
         return dto;
     }
 
     if (typeof dt === 'string') {
-        let res = _parseDateTime(dt, preferMonthFirst);
+        let res = _parseDateTime(dt, preferMonthFirst, utc, timeZoneOffset);
         if (res !== null) { return res; }
-        res = _parseDate(dt, preferMonthFirst);
+        res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset);
         if (res !== null) { return res; }
-        res = _parseArray(dt, dateFormat.parseTimes);
+        res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset);
         if (res !== null) { return res; }
+        if (utc || timeZoneOffset === 0) {
+            if (!dt.includes('UTC') && !dt.includes('utc') && !dt.includes('+') && !dt.includes('-')) {
+                dt += ' UTC';
+            }
+        } if (utc || timeZoneOffset === 0) {
+            if (!dt.includes('+') && !dt.includes('-')) {
+                if (timeZoneOffset < 0) {
+                    dt += '-';
+                } else {
+                    dt += '+';
+                }
+                dt += pad2(Math.floor(Math.abs(timeZoneOffset) / 60)) + ':' + pad2(Math.abs(timeZoneOffset) % 60);
+            }
+        }
+
         res = Date.parse(dt);
         if (!isNaN(res)) { return res; }
     }
@@ -678,17 +668,19 @@ function getDateOfText(dt, preferMonthFirst) {
  * Formate a date to the given Format string
  * @param  {Date} date -  JavaScript Date to format
  * @param  {string} mask -  mask of the date
+ * @param  {boolean} [utc] -  if true the time should be delivered as UTC
+ * @param  {number} [timeZoneOffset] -  define a different timezoneOffset in Minutes for output
  * @return {string}   date as depending on the given Format
  */
-const dateFormat = (function () {
+const _dateFormat = (function () {
     const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|"[^"]*"|'[^']*'/g;
 
     // const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
     // const timezoneClip = /[^-+\dA-Z]/g;
 
     // Regexes and supporting functions are cached through closure
-    return function (date, mask, utc) {
-        const dF = dateFormat;
+    return function (date, mask, utc, timeZoneOffset) {
+        const dF = _dateFormat;
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
             mask = date;
@@ -702,11 +694,16 @@ const dateFormat = (function () {
         if (isNaN(date)) {
             throw new SyntaxError('invalid date');
         }
+        if (timeZoneOffset === 0) {
+            utc = true;
+        } else if (timeZoneOffset) {
+            date = convertDateTimeZone(date, timeZoneOffset);
+        }
 
-        mask = String(mask || dateFormat.isoDateTime);
+        mask = String(mask || _dateFormat.isoDateTime);
 
         // Allow setting the utc argument via the mask
-        if (mask.slice(0, 4) === 'UTC:') {
+        if (mask.slice(0, 4) === 'UTC:' || mask.slice(0, 4) === 'utc:') {
             mask = mask.slice(4);
             utc = true;
         }
@@ -720,7 +717,7 @@ const dateFormat = (function () {
         const m = date[_ + 'Minutes']();
         const s = date[_ + 'Seconds']();
         const l = date[_ + 'Milliseconds']();
-        const o = utc ? 0 : date.getTimezoneOffset();
+        const o = utc ? 0 : ( (timeZoneOffset) ? timeZoneOffset : date.getTimezoneOffset());
 
         const flags = {
             d,
@@ -777,14 +774,14 @@ const dateFormat = (function () {
 })();
 
 // Some common format strings
-dateFormat.isoDateTime = 'yyyy-MM-dd\'T\'HH:mm:ss';
-dateFormat.parseDates = {
+_dateFormat.isoDateTime = 'yyyy-MM-dd\'T\'HH:mm:ss';
+_dateFormat.parseDates = {
     monthFirst : ['MMM d, y', 'MMM d,y', 'M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'MMM d', 'M-d'],
     dateFirst : ['d-MMM-y', 'd/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M', 'd MMM'],
     general : ['y-M-d', 'y-MMM-d']
 };
 
-dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h:m:s.t', 'H:m:s:l', 'H:m:s.l', 'H:m:s', 'H:m', 'h:m:s t Z', 'H:m:s Z'];
+_dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h:m:s.t', 'H:m:s:l', 'H:m:s.l', 'H:m:s', 'H:m', 'h:m:s t Z', 'H:m:s Z'];
 
 /**
  * pre defined formats of a given date
@@ -797,14 +794,14 @@ dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function initializeParser(dayNames, monthNames, dayDiffNames) {
-    dateFormat.i18n = {
+    _dateFormat.i18n = {
         dayNames : dayNames,
         monthNames : monthNames,
         dayDiffNames : dayDiffNames
     };
 }
 
-dateFormat.parse = [
+_dateFormat.parse = [
     {label: 'Year yy (2 digits)', value: 'yy'},
     {label: 'Year yyyy (4 digits)', value: 'yyyy'},
     {label: 'Month M (1/2 digit)', value: 'M'},
@@ -835,7 +832,7 @@ dateFormat.parse = [
     {label: 'AM/PM t (1 digit)', value: 't'},
     {label: 'AM/PM tt (2 digits)', value: 'tt'}
 ];
-dateFormat.format = [
+_dateFormat.format = [
     {label: 'Year yyyy (4 digits)', value: 'yyyy'},
     {label: 'Year yy (2 digits)', value: 'yy'},
     {label: 'Month M (1 digit)', value: 'M'},
@@ -882,29 +879,58 @@ dateFormat.format = [
  * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
  * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
  * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
+ * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormattedDateOut(date, format, utc) {
+function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    if (timeZoneOffset === 0) {
+        utc = true;
+    }
     format = format || 0;
     if (date.value) { date = date.value; }
     if (!(date instanceof Date)) { date = Date(date); }
 
     if (isNaN(format)) {
-        return dateFormat(date, String(format), utc);
+        return _dateFormat(date, String(format), utc, timeZoneOffset);
     }
 
     switch (Number(format)) {
         case 0: // timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
+            if (timeZoneOffset) {
+                return convertDateTimeZone(date, timeZoneOffset).getTime();
+            }
             return date.getTime();
         case 1: // timeformat_ECMA262 - date as string ECMA-262
-            return String(date);
+        case 4:
+            return date.toUTCString();
         case 2: // timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
+        case 14:
+            if (utc) {
+                return date.toUTCString();
+            }
+            if (timeZoneOffset) {
+                return convertDateTimeZone(date, timeZoneOffset).toLocaleString();
+            }
             return date.toLocaleString();
         case 3: // timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
+        case 13:
+            if (utc) {
+                return date.toLocaleTimeString([], { timeZone: 'UTC' });
+            }
+            if (timeZoneOffset) {
+                return convertDateTimeZone(date, timeZoneOffset).toLocaleTimeString();
+            }
             return date.toLocaleTimeString();
-        case 4: // timeformat_UTC
-            return date.toUTCString();
+        case 12: // timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
+        case 15:
+            if (utc) {
+                return date.toLocaleDateString([], { timeZone: 'UTC' });
+            }
+            if (timeZoneOffset) {
+                return convertDateTimeZone(date, timeZoneOffset).toLocaleDateString();
+            }
+            return date.toLocaleDateString();
         case 5: // timeformat_ISO
             return date.toISOString();
         case 6: // timeformat_ms
@@ -916,24 +942,55 @@ function getFormattedDateOut(date, format, utc) {
         case 9: // timeformat_hour
             return (Math.round((date.getTime() - (new Date()).getTime()) / 1000) / 3600);
         case 10: // timeformat_YYYYMMDDHHMMSS
-            return _getComparableDateFormat(date);
+            if (utc) {
+                return Number(date.getUTCFullYear() +
+                        pad2(date.getUTCMonth() + 1) +
+                        pad2(date.getUTCDate()) +
+                        pad2(date.getUTCHours()) +
+                        pad2(date.getUTCMinutes()) +
+                        pad2(date.getUTCSeconds()));
+            }
+            if (timeZoneOffset) {
+                date = convertDateTimeZone(date, timeZoneOffset);
+            }
+            return Number(date.getFullYear() +
+                    pad2(date.getMonth() + 1) +
+                    pad2(date.getDate()) +
+                    pad2(date.getHours()) +
+                    pad2(date.getMinutes()) +
+                    pad2(date.getSeconds()));
         case 11: // timeformat_YYYYMMDD_HHMMSS
-            return _getComparableDateFormat2(date);
-        case 12: // timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
-            return date.toLocaleDateString();
-        case 13: // timeformat_localTimeLong       - 23:43:10 GMT+0100 (Mitteleuropäische Normalzeit)
-            return date.toTimeString();
-        case 14: // timeformat_localLong       - Wed Dec 26 2018 23:44:12 GMT+0100 (Mitteleuropäische Normalzeit)
-            return date.toString();
-        case 15: // timeformat_localDateLong       - Wed Dec 26 2018
-            return date.toDateString();
+            if (utc) {
+                return Number(date.getUTCFullYear() +
+                        pad2(date.getUTCMonth() + 1) +
+                        pad2(date.getUTCDate()) + '.' +
+                        pad2(date.getUTCHours()) +
+                        pad2(date.getUTCMinutes()) +
+                        pad2(date.getUTCSeconds()));
+            }
+            if (timeZoneOffset) {
+                date = convertDateTimeZone(date, timeZoneOffset);
+            }
+            return Number(date.getFullYear() +
+                    pad2(date.getMonth() + 1) +
+                    pad2(date.getDate()) + '.' +
+                    pad2(date.getHours()) +
+                    pad2(date.getMinutes()) +
+                    pad2(date.getSeconds()));
         case 16: // timeformat_weekday           - Montag, 22.12.
-            return  dateFormat(date, 'dddd, d.M.', utc);
+            return _dateFormat(date, 'dddd, d.M.', utc, timeZoneOffset);
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-            return  dateFormat(date, 'xx, d.M.', utc);
+            return _dateFormat(date, 'xx, d.M.', utc, timeZoneOffset);
         case 18: { // customISOstring(date, offset)
             date = new Date(date); // copy instance
-            const offset = date.getTimezoneOffset();
+            let offset = 0;
+            if (!utc) {
+                if (!timeZoneOffset) {
+                    offset = date.getTimezoneOffset();
+                } else {
+                    offset = timeZoneOffset;
+                }
+            }
             const h = Math.floor(Math.abs(offset) / 60);
             const m = Math.abs(offset) % 60;
             date.setMinutes(date.getMinutes() - offset); // apply custom timezone
@@ -952,11 +1009,8 @@ function getFormattedDateOut(date, format, utc) {
     return {
         date,
         ts: date.getTime(),
-        dateStr: String(date),
         timeUTCStr: date.toUTCString(),
         timeISOStr: date.toISOString(),
-        timeLocaleStr: date.toLocaleString(),
-        timeLocaleTimeStr: date.toLocaleTimeString(),
         delay,
         delaySec: Math.round(delay / 1000),
         lc: now.getTime()
@@ -1062,7 +1116,6 @@ function _getInt(str, i, minlength, maxlength) {
             return token;
         }
     }
-
     return null;
 }
 
@@ -1072,10 +1125,23 @@ function _getInt(str, i, minlength, maxlength) {
  * getTime() of the date. If it does not match, it returns 0.
  * @param {string} val date string to parse
  * @param {string} format format of the value
- * @returns {Date|null} a Date object or **null** if pattern does not match.
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
-function getDateFromFormat(val, format) {
-    // console.log('getDateFromFormat val=' + val + ' --> format=' + format); // eslint-disable-line
+function _getDateFromFormat(val, format, utc, timeZoneOffset) {
+    // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
+    val = String(val);
+
+    if (format.slice(0, 4) === 'UTC:' || format.slice(0, 4) === 'utc:') {
+        format = format.slice(4);
+        utc = true;
+    }
+    if (val.includes('UTC') || val.includes('utc')) {
+        val = val.replace('UTC', '').replace('utc', '');
+        utc = true;
+    }
+
     val = String(val);
     format = String(format);
     const now = new Date();
@@ -1098,7 +1164,7 @@ function getDateFromFormat(val, format) {
         while ((format.charAt(i_format) === c) && (i_format < format.length)) {
             token += format.charAt(i_format++);
         }
-
+        // console.log('"'+ token + '" ' + i_val);
         // Extract contents of value based on format token
         if (token === 'yyyy' || token === 'yy' || token === 'y') {
             if (token === 'yyyy') {
@@ -1117,7 +1183,7 @@ function getDateFromFormat(val, format) {
             }
             year = _getInt(val, i_val, x, y);
             if (year === null) {
-                return null;
+                return { value: null, error: 'invalid year of format "' + token + '"'};
             }
 
             i_val += year.length;
@@ -1130,8 +1196,8 @@ function getDateFromFormat(val, format) {
             }
         } else if (token === 'MMM' || token === 'NNN' || token === 'MMMM') {
             month = 0;
-            for (let i = 0; i < dateFormat.i18n.monthNames.length; i++) {
-                const month_name = dateFormat.i18n.monthNames[i];
+            for (let i = 0; i < _dateFormat.i18n.monthNames.length; i++) {
+                const month_name = _dateFormat.i18n.monthNames[i];
                 if (val.substr(i_val, month_name.length).toLowerCase() === month_name.toLowerCase()) {
                     if (token === 'MMM' || ((token === 'NNN' || token === 'MMMM') && i > 11)) {
                         month = i + 1;
@@ -1146,11 +1212,11 @@ function getDateFromFormat(val, format) {
             }
 
             if ((month < 1) || (month > 12)) {
-                return null;
+                return { value: null, error: 'invalidmonth "' + month + '" of format "' + token + '"' };
             }
         } else if (token === 'EE' || token === 'E' || token === 'dddd' || token === 'ddd') {
-            for (let i = 0; i < dateFormat.i18n.dayNames.length; i++) {
-                const day_name = dateFormat.i18n.dayNames[i];
+            for (let i = 0; i < _dateFormat.i18n.dayNames.length; i++) {
+                const day_name = _dateFormat.i18n.dayNames[i];
                 if (val.substr(i_val, day_name.length).toLowerCase() === day_name.toLowerCase()) {
                     i_val += day_name.length;
                     break;
@@ -1159,56 +1225,56 @@ function getDateFromFormat(val, format) {
         } else if (token === 'MM' || token === 'M') {
             month = _getInt(val, i_val, token.length, 2);
             if (month === null || (month < 1) || (month > 12)) {
-                return null;
+                return { value: null, error: 'invalid month "' + month + '" of format "' + token + '"' };
             }
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || (date < 1) || (date > 31)) {
-                return null;
+                return { value: null, error: 'invalid date "' + date + '"' };
             }
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 1) || (hour > 12)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 0) || (hour > 23)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 0) || (hour > 11)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || (hour < 1) || (hour > 24)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
             hour--;
         } else if (token === 'mm' || token === 'm') {
             min = _getInt(val, i_val, token.length, 2);
             if (min === null || (min < 0) || (min > 59)) {
-                return null;
+                return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += min.length;
         } else if (token === 'ss' || token === 's') {
             sec = _getInt(val, i_val, token.length, 2);
             if (sec === null || (sec < 0) || (sec > 59)) {
-                return null;
+                return { value: null, error: 'invalid sec "' + sec + '" of format "' + token + '"' };
             }
             i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
             misec = _getInt(val, i_val, token.length, 3);
             if (misec === null || (misec < 0) || (misec > 999)) {
-                return null;
+                return { value: null, error: 'invalid millisecond "' + misec + '" of format "' + token + '"' };
             }
             i_val += misec.length;
             if ( token === 'L' && misec < 10) {
@@ -1231,20 +1297,22 @@ function getDateFromFormat(val, format) {
                 ampm = 'PM';
                 i_val += 1;
             } else {
-                return null;
+                return { value: null, error: 'invalid ampm "' + sec + '" of format "' + token + '"' };
             }
         } else {
             if (val.substr(i_val, token.length) !== token) {
-                return null;
+                return { value: null, error: 'value ' + val.substr(i_val, token.length) + ' is not equal to ' + token };
             }
 
             i_val += token.length;
         }
     }
 
+    // console.log(`getDateFromFormat midFormat year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec} utc=${utc}`); // eslint-disable-line
+
     // If there are any trailing characters left in the value, it doesn't match
     if (i_val !== val.length) {
-        return null;
+        return { value: null, error: 'input value is longer than format' };
     }
 
     // Is date valid for month?
@@ -1252,16 +1320,16 @@ function getDateFromFormat(val, format) {
         // Check for leap year
         if (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)) { // leap year
             if (date > 29) {
-                return null;
+                return { value: null, error: 'day of month > 29 (not valid for february - leap year)' };
             }
         } else if (date > 28) {
-            return null;
+            return { value: null, error: 'day of month > 28 (not valid for february)' };
         }
     }
 
     if ((month === 4) || (month === 6) || (month === 9) || (month === 11)) {
         if (date > 30) {
-            return null;
+            return { value: null, error: 'day of month is not valid' };
         }
     }
 
@@ -1271,8 +1339,17 @@ function getDateFromFormat(val, format) {
     } else if (hour > 11 && ampm === 'AM') {
         hour -= 12;
     }
+
+    if (utc || timeZoneOffset === 0) {
+        return { value : Date.UTC(year, month - 1, date, hour, min, sec, misec) };
+    } else if (timeZoneOffset) {
+        return {
+            value: convertDateTimeZone(new Date(year, month - 1, date, hour, min, sec, misec), timeZoneOffset) };
+    }
     // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec}`); // eslint-disable-line
-    return new Date(year, month - 1, date, hour, min, sec, misec);
+    return {
+        value: new Date(year, month - 1, date, hour, min, sec, misec)
+    };
 }
 
 /**
@@ -1281,11 +1358,11 @@ function getDateFromFormat(val, format) {
  * @param {Array.<string>} listToCheck a list of strings with different formats to check
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseArray(val, listToCheck) {
+function _parseArray(val, listToCheck, utc, timeZoneOffset) {
     for (let i = 0, n = listToCheck.length; i < n; i++) {
-        const res = getDateFromFormat(val, listToCheck[i]);
-        if (res !== null) {
-            return res;
+        const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset);
+        if (res.value !== null) {
+            return res.value;
         }
     }
     return null;
@@ -1312,13 +1389,13 @@ function _isTimestamp(str) {
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseDate(val, preferMonthFirst) {
+function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
-    let res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.monthFirst : dateFormat.parseDates.dateFirst);
+    let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset);
     if (res !== null) { return res; }
-    res = _parseArray(val, (preferMonthFirst) ? dateFormat.parseDates.dateFirst : dateFormat.parseDates.monthFirst);
+    res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset);
     if (res !== null) { return res; }
-    return _parseArray(val, dateFormat.parseDates.general);
+    return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset);
 }
 
 /**
@@ -1328,7 +1405,7 @@ function _parseDate(val, preferMonthFirst) {
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseDateTime(val, preferMonthFirst) {
+function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
@@ -1339,16 +1416,16 @@ function _parseDateTime(val, preferMonthFirst) {
         return result;
     }
 
-    let checkList = [dateFormat.isoDateTime];
+    let checkList = [_dateFormat.isoDateTime];
     if (preferMonthFirst) {
-        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
-        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(_dateFormat.parseDates.monthFirst, _dateFormat.parseTimes, checkList);
+        checkList = mix(_dateFormat.parseDates.dateFirst, _dateFormat.parseTimes, checkList);
     } else {
-        checkList = mix(dateFormat.parseDates.dateFirst, dateFormat.parseTimes, checkList);
-        checkList = mix(dateFormat.parseDates.monthFirst, dateFormat.parseTimes, checkList);
+        checkList = mix(_dateFormat.parseDates.dateFirst, _dateFormat.parseTimes, checkList);
+        checkList = mix(_dateFormat.parseDates.monthFirst, _dateFormat.parseTimes, checkList);
     }
-    checkList = mix(dateFormat.parseDates.general, dateFormat.parseTimes, checkList);
-    return _parseArray(val, checkList);
+    checkList = mix(_dateFormat.parseDates.general, _dateFormat.parseTimes, checkList);
+    return _parseArray(val, checkList, utc, timeZoneOffset);
 }
 
 /**
@@ -1360,33 +1437,40 @@ function _parseDateTime(val, preferMonthFirst) {
  * @param {Array.<string>} [dayDiffNames] list of day diff names
  * @returns {Date} a Date object or throws an error if no patterns match.
  */
-function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
+function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset) {
     // console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
-        dateFormat.i18n.dayNames = dayNames;
+        _dateFormat.i18n.dayNames = dayNames;
     }
 
     if (monthNames) {
-        dateFormat.i18n.monthNames = monthNames;
+        _dateFormat.i18n.monthNames = monthNames;
     }
 
     if (dayDiffNames) {
-        dateFormat.i18n.dayDiffNames = dayDiffNames;
+        _dateFormat.i18n.dayDiffNames = dayDiffNames;
     }
 
     format = format || 0;
+    if (timeZoneOffset === 0) {
+        utc = true;
+    }
 
     let res = null;
     if (isNaN(format)) { // timeparse_TextOther
-        res = getDateFromFormat(date, format);
+        res = _getDateFromFormat(date, format, utc, timeZoneOffset);
+        if (res.error) {
+            throw new Error('could not evaluate format of ' + date + ' (' + format + ') - ' + res.error);
+        }
+        res = res.value;
     } else {
         const tryparse = (val, preferMonthFirst) => {
             // console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
-            let res = _parseDateTime(val, preferMonthFirst);
+            let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset);
             if (res !== null) { return res; }
-            res = _parseDate(val, preferMonthFirst);
+            res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset);
             if (res !== null) { return res; }
-            res = _parseArray(val, dateFormat.parseTimes);
+            res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset);
             if (res !== null) { return res; }
             res = Date.parse(val);
             if (!isNaN(res)) {
@@ -1414,21 +1498,51 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames) {
             case 3: // various - try different Formats, prefer month first like M/d/y (e.g. American format)
                 res = tryparse(date, true);
                 break;
-            case 4: // timeformat_YYYYMMDDHHMMSS
-                res = _parseComparableDateFormat(date);
+            case 4: {// timeformat_YYYYMMDDHHMMSS
+                date = String(date);
+                const year = date.substr(0, 4);
+                const month = date.substr(4, 2);
+                const day = date.substr(6, 2);
+                const hours = date.substr(8, 2);
+                const mins = date.substr(10, 2);
+                const secs = date.substr(12, 2);
+                const mss = date.substr(14);
+                if (utc) {
+                    res = Date.UTC(year, month, day, hours, mins, secs, mss);
+                } else if (timeZoneOffset) {
+                    res = convertDateTimeZone(new Date(year, month, day, hours, mins, secs, mss), timeZoneOffset);
+                } else {
+                    res =new Date(year, month, day, hours, mins, secs, mss);
+                }
                 break;
-            case 5: // timeformat_YYYYMMDD_HHMMSS
-                res = _parseComparableDateFormat2(date);
+            }
+            case 5: { // timeformat_YYYYMMDD_HHMMSS
+                date = String(date);
+                const year = date.substr(0, 4);
+                const month = date.substr(4, 2);
+                const day = date.substr(6, 2);
+                const hours = date.substr(9, 2);
+                const mins = date.substr(11, 2);
+                const secs = date.substr(13, 2);
+                const mss = date.substr(15);
+                if (utc) {
+                    res = Date.UTC(year, month, day, hours, mins, secs, mss);
+                } else if (timeZoneOffset) {
+                    res = convertDateTimeZone(new Date(year, month, day, hours, mins, secs, mss), timeZoneOffset);
+                } else {
+                    res = new Date(year, month, day, hours, mins, secs, mss);
+                }
                 break;
+            }
             default: {
                 res = getDateOfText(date);
                 break;
             }
         }
-    }
-    // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
-    if (res === 'Invalid Date' || isNaN(res) || res === null) {
-        throw new Error('could not evaluate format of ' + date + ' (' + format+')');
+        // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
+        if (res === 'Invalid Date' || isNaN(res) || res === null) {
+            throw new Error('could not evaluate format of ' + date + ' (' + format + ')');
+        }
     }
     return res;
 }

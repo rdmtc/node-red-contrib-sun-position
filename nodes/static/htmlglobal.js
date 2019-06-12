@@ -1,5 +1,5 @@
 /************************************************************************/
-const SelectFields = {
+const globSelectFields = {
     operatorsGroups: [
         {id: 'default', label: 'compare Timestamp'}
     ],
@@ -53,14 +53,10 @@ const SelectFields = {
         {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
         {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS'},
         {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS'},
-        {id: 1, group: 'string', name: 'ECMA262', label: 'ECMA-262', add: 'standard JSON Date representation'},
+        {id: 1, group: 'string', name: 'UTC', label: 'UTC date and time' },
         {id: 2, group: 'string', name: 'local', label: 'local date and time'},
-        {id: 14, group: 'string', name: 'localLong', label: 'local date and time enhanced'},
         {id: 3, group: 'string', name: 'localTime', label: 'local time'},
-        {id: 13, group: 'string', name: 'localTimeLong', label: 'local time enhanced'},
         {id: 12, group: 'string', name: 'localDate', label: 'local date'},
-        {id: 15, group: 'string', name: 'localDateLong', label: 'local date long'},
-        {id: 4, group: 'string', name: 'UTC', label: 'UTC date and time'},
         {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
         {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
         {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
@@ -124,7 +120,7 @@ const SelectFields = {
 };
 
 function getSelectFields() { // eslint-disable-line no-unused-vars
-    return SelectFields;
+    return globSelectFields;
 }
 
 function getTypes(node) { // eslint-disable-line no-unused-vars
@@ -420,13 +416,13 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 
 function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
     // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
-    const groups = SelectFields[elementName + 'Groups'];
+    const groups = globSelectFields[elementName + 'Groups'];
     if (!groups) {
-        throw new Error('no group "' + elementName + 'Groups" in SelectFields found!');
+        throw new Error('no group "' + elementName + 'Groups" in globSelectFields found!');
     }
-    const elements = SelectFields[elementName];
+    const elements = globSelectFields[elementName];
     if (!groups) {
-        throw new Error('no elements "' + elementName + '" in SelectFields found!');
+        throw new Error('no elements "' + elementName + '" in globSelectFields found!');
     }
     const groupLength = groups.length;
     const elementsLength = elements.length;
@@ -590,7 +586,7 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
  * @param {*} id element id, e.g. 'node-input-rule-operatorType-1'
  */
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
-    const types = SelectFields[elementName + 'Short'];
+    const types = globSelectFields[elementName + 'Short'];
     const getSelection = function getCBText(parent) {
         const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
         const elements = value.map((_, el) => { return $(el).val(); }).get();
@@ -614,9 +610,9 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
         class: 'option-checkboxes'
     }).appendTo(multiselect);
     list.attr('expanded', 'false');
-    const groups = SelectFields[elementName + 'Groups'];
+    const groups = globSelectFields[elementName + 'Groups'];
     const groupLength = groups.length;
-    const elements = SelectFields[elementName];
+    const elements = globSelectFields[elementName];
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
         list.append($('<label></label>', {
