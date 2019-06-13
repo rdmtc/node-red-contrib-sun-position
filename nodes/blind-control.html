@@ -153,6 +153,23 @@
         <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteer2BlindPosType">
     </div>
+    <div class="form-row row-oversteer3Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3Value"> <i class="fa fa-tint fa-fw"></i> <span data-i18n="blind-control.label.oversteer3Value"></span></label>
+        <input type="text" id="node-input-oversteer3Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3ValueType">
+        <select id="node-input-oversteer3Compare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteer3Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteer3Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer3Threshold"></span></label>
+        <input type="text" id="node-input-oversteer3Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteer3ThresholdType">
+    </div>
+    <div class="form-row row-oversteer3BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer3BlindPos"></span></label>
+        <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3BlindPosType">
+    </div>
     <hr>
     <!-- #region Enhanced ######################################################################## -->
     <div class="form-row block-noindent">
@@ -544,6 +561,48 @@
             },
             oversteer2BlindPosType: {
                 value: 'levelFixed'
+            },
+            oversteer3Value: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3ValueType')(v);
+                }
+            },
+            oversteer3ValueType: {
+                value: 'none'
+            },
+            oversteer3Compare: {
+                value: 'gte'
+            },
+            oversteer3Threshold: {
+                value: '',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        (getVal(this, 'oversteer3ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3ThresholdType')(v);
+                }
+            },
+            oversteer3ThresholdType: {
+                value: 'num'
+            },
+            oversteer3BlindPos: {
+                value: 'open (max)',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        (getVal(this, 'oversteer3ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3BlindPosType')(v);
+                }
+            },
+            oversteer3BlindPosType: {
+                value: 'levelFixed'
             }
             // #endregion oversteering settings
         },
@@ -858,7 +917,7 @@
                         $validOperandA.change(() => {
                             const propType = $validOperandA.typedInput('type');
                             if (propType === 'none') {
-                                $validOperator.val(selFields.comparator[0].id); // only true is valid for DayOfMonth
+                                $validOperator.val(selFields.comparator[0].id);
                                 $validOperator.hide();
                                 $row2.hide(); // condOpB
                             } else if ( propType === 'jsonata') {
@@ -941,6 +1000,9 @@
                         $('.row-oversteer2Value').hide();
                         $('.row-oversteer2Threshold').hide();
                         $('.row-oversteer2BlindPos').hide();
+                        $('.row-oversteer3Value').hide();
+                        $('.row-oversteer3Threshold').hide();
+                        $('.row-oversteer3BlindPos').hide();
                     }
                     $('#node-input-oversteerValue').change();
                 });
@@ -1092,6 +1154,7 @@
                         }
                         $('#node-input-oversteer2Threshold').change();
                         $('#node-input-oversteer2BlindPos').change();
+                        $('#node-input-oversteer3Value').change();
                     }
                 });
 
@@ -1116,6 +1179,88 @@
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 // #endregion oversteer - 2
+                // #region oversteer - 3
+                setupTInput(node, {
+                    typeProp: 'oversteer3ValueType',
+                    valueProp: 'oversteer3Value',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        const sunControlMode = Number($('#node-input-sunControlMode').val());
+                        const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
+                        const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
+
+                        if ((oversteer2ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            $('#node-input-oversteer3Value').typedInput('type', types.Undefined.value);
+                            $('.row-oversteer3Value').hide();
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Compare').hide();
+                            $('.row-oversteer3BlindPos').hide();
+                        } else if (oversteer3ValueType === types.Undefined.value) {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').hide();
+                            $('#node-input-oversteer3Compare').hide();
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 110px)');
+                        } else if (oversteer3ValueType === 'jsonata') {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').show();
+                            $('#node-input-oversteer3Compare').show();
+                            $('#node-input-oversteer3Compare').attr('disabled', true);
+                            $('#node-input-oversteer3Compare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
+                        } else {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').show();
+                            $('#node-input-oversteer3Compare').show();
+                            $('#node-input-oversteer3Compare').attr('disabled', false);
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
+                            const condOp = $('#node-input-oversteer3Compare').val();
+                            let operatorCount = 1;
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('.row-oversteer3Threshold').show(); // condOpB
+                            } else {
+                                $('.row-oversteer3Threshold').hide(); // condOpB
+                            }
+                        }
+                        $('#node-input-oversteer3Threshold').change();
+                        $('#node-input-oversteer3BlindPos').change();
+                    }
+                });
+
+                const $oversteer3Compare = $('#node-input-oversteer3Compare');
+                appendOptions(node, $oversteer3Compare, 'comparator');
+                $oversteer3Compare.val(node.oversteer3Compare || 'gte');
+                $oversteer3Compare.change(() => { $('#node-input-oversteer3Value').change(); });
+                setupTInput(node, {
+                    typeProp: 'oversteer3ThresholdType',
+                    valueProp: 'oversteer3Threshold',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'num',
+                    defaultValue: '',
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                });
+                setupTInput(node, {
+                    typeProp: 'oversteer3BlindPosType',
+                    valueProp: 'oversteer3BlindPos',
+                    width: 'calc(100% - 120px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: getDefLevel(node.oversteer3BlindPosType, node.oversteer3BlindPos, 'open (max)'),
+                    types: [types.LevelFix, types.LevelEntered, 'env']
+                });
+                // #endregion oversteer - 3
                 // #endregion oversteering
                 // #region Enhanced settings
                 $('.spinner-noLimit').spinner();
