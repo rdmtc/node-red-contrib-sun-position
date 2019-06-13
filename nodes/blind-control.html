@@ -658,16 +658,31 @@
                     value: 'levelFixed',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
                     icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
-                    options: [
-                        'open (max)',
-                        '75%',
-                        '66%',
-                        '50%',
-                        '33%',
-                        '25%',
-                        '10%',
-                        'closed (min)'
-                    ]
+                    options: [{
+                        value: 'open (max)',
+                        label: node._('blind-control.typeOptions.100')
+                    }, {
+                        value: '75%',
+                        label: node._('blind-control.typeOptions.75')
+                    }, {
+                        value: '66%',
+                        label: node._('blind-control.typeOptions.66')
+                    }, {
+                        value: '50%',
+                        label: node._('blind-control.typeOptions.50')
+                    }, {
+                        value: '33%',
+                        label: node._('blind-control.typeOptions.33')
+                    }, {
+                        value: '25%',
+                        label: node._('blind-control.typeOptions.25')
+                    }, {
+                        value: '10%',
+                        label: node._('blind-control.typeOptions.10')
+                    }, {
+                        value: 'closed (min)',
+                        label: node._('blind-control.typeOptions.0')
+                    }]
                 };
                 function setMultiplier(node, name, element, validate, defMultiplier) {
                     const c = Number(node[name]);

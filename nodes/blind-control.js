@@ -208,22 +208,20 @@ module.exports = function (RED) {
         }
         try {
             if (type === 'levelFixed') {
-                if (value.includes('close')) {
-                    return node.blindData.levelClosed;
-                } else if (value === '75%') {
-                    return posPrcToAbs_(node, 0.75);
-                } else if (value === '66%') {
-                    return posPrcToAbs_(node, 0.66666);
-                } else if (value === '50%') {
-                    return posPrcToAbs_(node, 0.5);
-                } else if (value === '33%') {
-                    return posPrcToAbs_(node, 0.33333);
-                } else if (value === '25%') {
-                    return posPrcToAbs_(node, 0.25);
-                } else if (value === '10%') {
-                    return posPrcToAbs_(node, 0.1);
-                } else if (value.includes('open')) {
-                    return node.blindData.levelOpen;
+                const val = parseFloat(value);
+                if (isNaN(val)) {
+                    if (value.includes('close')) {
+                        return node.blindData.levelClosed;
+                    } else if (value.includes('open')) {
+                        return node.blindData.levelOpen;
+                    }
+                } else {
+                    if (val < 1) {
+                        return node.blindData.levelClosed;
+                    } else if (val > 99) {
+                        return node.blindData.levelOpen;
+                    }
+                    return (val / 100);
                 }
                 throw new Error('unknown value "'+ value + '" of type "' + type + '"' );
             }
