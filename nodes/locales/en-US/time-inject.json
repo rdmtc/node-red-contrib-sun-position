@@ -18,6 +18,9 @@
             "addPayload1Offset": "Offset",
             "addPayload2Offset": "Offset",
             "addPayload3Offset": "Offset",
+            "addPayload1Next": "nth occur",
+            "addPayload2Next": "nth occur",
+            "addPayload3Next": "nth occur",
             "addPayload1Format": "time format",
             "addPayload2Format": "time format",
             "addPayload3Format": "time format",
@@ -43,6 +46,7 @@
             "addPayload": "allow to add additional property to the send message",
             "addPayloadValue": "value of the additional property",
             "addPayloadOffset": "Offset to the value",
+            "addPayloadNext": "0=today even if is the past, 1=next occurence, 2=after next occurence",
             "addPayloadFormat": "format of the output",
             "recalcTime": "recalculation interval of the defined times",
             "once": "define if the node should emit a message independent of the time a message on flow start"

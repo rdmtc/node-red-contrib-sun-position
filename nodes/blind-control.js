@@ -496,11 +496,20 @@ module.exports = function (RED) {
             node.blindData.level = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
             node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
         }
+
+        const delta = Math.abs(node.previousData.level - node.blindData.level);
+
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
             node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
             node.reason.state = RED._('blind-control.states.smooth', { pos: node.blindData.level.toString()});
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
+            node.blindData.level = node.previousData.level;
+            node.blindData.levelInverse = node.previousData.levelInverse;
+        } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.blindData.level > node.blindData.levelClosed) && (node.blindData.level < node.blindData.levelOpen)) {
+            node.reason.code = 14;
+            node.reason.state = RED._('blind-control.states.sunMinDelta', { pos: node.blindData.level.toString()});
+            node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: node.blindData.level.toString()});
             node.blindData.level = node.previousData.level;
             node.blindData.levelInverse = node.previousData.levelInverse;
         } else {
@@ -587,7 +596,7 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetType, rule.offsetValue, rule.multiplier);
+            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetType, rule.offsetValue, rule.multiplier, false);
             if (rule.timeData.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;
@@ -711,6 +720,7 @@ module.exports = function (RED) {
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
             minAltitude: Number(hlp.chkValueFilled(config.sunMinAltitude, 0)),
+            minDelta: Number(hlp.chkValueFilled(config.sunMinDelta, 0)),
             changeAgain: 0
         };
         node.sunData.active = node.sunData.mode > 0;

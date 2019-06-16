@@ -104,6 +104,10 @@
         <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
         <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
     </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
+        <label for="node-input-sunMinDelta"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
+        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
+    </div>
     <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
         <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
         <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
@@ -422,6 +426,18 @@
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
+                }
+            },
+            sunMinDelta: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
+                            (v === '') ||
+                            (n <= getVal(this, 'blindOpenPos')) &&
+                            (n >= getVal(this, 'blindClosedPos')) &&
+                            (n >= getVal(this, 'blindIncrement')) );
                 }
             },
             blindPosMin: {

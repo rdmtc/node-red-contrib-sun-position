@@ -496,13 +496,13 @@ function calcDayOffset(days, daystart) {
 function normalizeDate(d, offset, multiplier, next, days) {
     // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
-    if (next && !isNaN(next)) {
+    if (next) {
         const now = new Date();
         d.setMilliseconds(0);
         now.setMilliseconds(600); // security
         const cmp = now.getTime();
-        if (d.getTime() <= cmp) {
-            d.setDate(d.getDate() + Number(next));
+        while (d.getTime() <= cmp) {
+            d.setDate(d.getDate() + 1);
         }
     }
 

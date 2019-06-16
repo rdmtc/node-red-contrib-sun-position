@@ -226,6 +226,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * **11** - (enhanced settings) blind position calculated by sun position was not used caused by smooth settings
       * **12** - sun is in window (maximize mode), max blind position used
       * **13** - sun is not in window (maximize mode), min blind position used
+      * **14** - change is below defined minimum delta
     * `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
     * `blindCtrl.reason.description` a text, describe the reason for the blind position
   * `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here

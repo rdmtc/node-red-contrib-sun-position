@@ -18,6 +18,9 @@
             "addPayload1Offset": "Offset",
             "addPayload2Offset": "Offset",
             "addPayload3Offset": "Offset",
+            "addPayload1Next": "ntes auftreten",
+            "addPayload2Next": "ntes auftreten",
+            "addPayload3Next": "ntes auftreten",
             "addPayload1Format": "Zeitformat",
             "addPayload2Format": "Zeitformat",
             "addPayload3Format": "Zeitformat",
@@ -43,6 +46,7 @@
             "addPayload": "zusätzliche Eigenschaften der gesendeten nachricht festlegen",
             "addPayloadValue": "Wert der zusätzlichen Eigenschaft",
             "addPayloadOffset": "Offset des Wertes",
+            "addPayloadNext": "0=heute auch wenn in der Vergangenheit, 1=nächstes auftreten, 2=übernächstes auftreten",
             "addPayloadFormat": "format des Wertes",
             "recalcTime": "Intervall in dem eine Neuberechnung des Zeitpunktes zum Senden der Nachricht stattfinden soll.",
             "once": "zusätzlich soll beim Start des Flows eine Nachricht (unabhängig von der Zeit) gesendet werden"
