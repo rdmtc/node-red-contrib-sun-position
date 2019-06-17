@@ -21,6 +21,9 @@
 			"ruleTimeFrom": "von",
 			"ruleTimeUntil": "bis",
 			"ruleBlindLevel": "Rollladenposition",
+			"ruleLevelAbs": "👌 - Absolut",
+			"ruleLevelMin": "👇 - Minimum",
+			"ruleLevelMax": "☝️ - Maximum",
 			"sunControlMode": "Modus",
 			"sunControlOff": "keine Beschränkung, Sonnenstands unabhängig",
 			"sunControlRestrict": "Sonnenlicht beschränken (Sommer)",
@@ -55,7 +58,7 @@
 			"OverwriteExpire": "(opt) Dauer nasch der eine manuelle Einstellung verfällt",
 			"sunFloorLength": "das Ausmaß, in dem direktes Sonnenlicht durch das Fenster in den Raum gelangen darf, definiert als Länge am Boden",
 			"sunMinAltitude": "(opt) minimaler Höhenwinkel der Sonne",
-			"sunMinDelta": "(opt) minilmale Änderung der Behanghöhe",
+			"sunMinDelta": "(opt) mindest Änderung der Behanghöhe",
 			"oversteerValue": "Wert zum Vergleich",
 			"oversteerThreshold": "Schwelle für den Vergleich",
 			"oversteerBlindPos": "Position wenn der Vergleich zutrifft",
@@ -76,6 +79,16 @@
 			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.)",
 			"sunControlMaximization":"<ul><li>Wenn keine Regel oder Überschreiben (Override) zutrifft,<ul><li>Wenn die Sonne <em>nicht</ em> in das Fenster scheint, wird die Rollladenhöhe die definierte <strong>Minimalposition</ strong> gesetzt. (Übersteuern wird ignoriert)</ li><li>Wenn sich die Sonne im Fenster befindet</ li><li>Wenn eine Übersteueruzng aufgesetzt ist und die bedingung zutrifft, wird der Behang auf die Höhe des Übersteuerns gesetzt.< / li><li>Andernfalls wird die Behanghöhe auf die definierte <strong>Maximalposition</ strong> gesetzt.</ li></ ul></ li></ ul>",
 			"sunControlRestriction": "Wenn keine Regel oder Überschreiben (Override) zutrifft, berechnet der Knoten die entsprechende Blindposition, um die Menge des direkten Sonnenlichts, das in den Raum fällt, zu begrenzen."
+		},
+		"typeOptions": {
+			"100": "offen (max)",
+			"75": "75%",
+			"66": "66%",
+			"50": "50%",
+			"33": "33%",
+			"25": "25%",
+			"10": "10%",
+			"0": "geschlossen (min)"
 		},
 		"tips": {
 			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
@@ -113,7 +126,7 @@
 			"sunCtrl": "durch Sonnenstand",
 			"sunCtrlMin": "__org__ (min)",
 			"sunCtrlMax": "__org__ (max)",
-			"oversteer": "Wolken",
+			"oversteer": "Übersteuert",
 			"smooth": "Änderung zu __pos__ verhindert",
 			"sunInWinMax":"Sonne scheint ins Fenster (max)",
 			"sunNotInWinMin": "Sonne scheint nicht ins Fenster (min)"

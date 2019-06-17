@@ -97,16 +97,26 @@
     <hr class="form-row-sunControlActive" >
      <!-- sun ######################################################################## -->
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
     </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
         <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
     </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
-        <label for="node-input-sunMinDelta"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
-        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
+        <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
+        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-smoothTime">
     </div>
     <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
         <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
@@ -176,19 +186,6 @@
     </div>
     <hr>
     <!-- #region Enhanced ######################################################################## -->
-    <div class="form-row block-noindent">
-        <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
-    </div>
-    <div class="form-row enhanced-row block-noindent" id="node-smoothTime" data-i18n="[title]blind-control.placeholder.smoothTime">
-        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-        </select>
-        <input type="hidden" id="node-input-smoothTime">
-    </div>
     <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
         <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
         <select id="node-input-outputs" class="row-full-width">
@@ -298,6 +295,10 @@
         max-width: 100px;
         margin-left: 5px;
     }
+    .ui-spinner input {
+        border: none !important;
+        /* width: 95% !important; */
+    }
 </style>
 
 <script type="text/javascript">
@@ -320,6 +321,36 @@
                 (n <= getVal(node, 'blindOpenPos')) &&
                 (n >= getVal(node, 'blindClosedPos')) &&
                 Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
+    }
+
+    function saveRules(rules) {
+        const result = [];
+        if (rules) {
+            rules.each(function (_i) {
+                const rule = $(this);
+                const data = {
+                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
+                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
+                    timeOp: rule.find('.node-input-rule-time-operator').val(),
+                    timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
+                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
+                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelOp: rule.find('.node-input-rule-level-operator').val(),
+                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
+                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
+                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
+                    multiplier: rule.find('.node-input-rule-multiplier').val(),
+                    validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
+                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
+                    validOperator: rule.find('.node-input-rule-condOperator').val(),
+                    validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
+                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
+                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type')
+                };
+                result.push(data);
+            });
+        }
+        return result;
     }
 
     RED.nodes.registerType('blind-control', {
@@ -741,12 +772,6 @@
                     });
                     $('#time-control-' + name).change();
                 }
-                const chkVal = (name, val) => {
-                    return (node[name] === null) ||
-                        (typeof node[name] === 'undefined') ||
-                        ($('#node-input-' + name).val() === val) ||
-                        ($('#node-input-' + name).is(':checked') === val);
-                };
                 function getDefLevel(type, value, def) {
                     if (value) {
                         return value;
@@ -777,28 +802,28 @@
                     try {
                         const newWidth = rule.width() - 10;
                         // row1
-                        const validOperandALblField = rule.find('.node-input-rule-condOpA-lbl');
+                        const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
                         const $validOperandA = rule.find('.node-input-rule-condOpA');
                         const $validOperator = rule.find('.node-input-rule-condOperator');
-                        validOperandALblField.width('auto');
+                        $validOperandALbl.width('auto');
                         if ($validOperator.is(':visible')) {
                             $validOperator.width(100);
-                            $validOperandA.typedInput('width', (newWidth - validOperandALblField.width() - 135));
+                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
                         } else {
-                            $validOperandA.typedInput('width', (newWidth - validOperandALblField.width() - 15));
+                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
                         }
                         // row2
-                        const validOperandBLblField = rule.find('.node-input-rule-condOpB-lbl');
+                        const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
                         const $validOperandB = rule.find('.node-input-rule-condOpB');
-                        validOperandBLblField.width('auto');
-                        $validOperandB.typedInput('width', (newWidth - validOperandBLblField.width() - 10));
+                        $validOperandBLbl.width('auto');
+                        $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
                         // row3
-                        const timeLblField = rule.find('.node-input-rule-time-lbl');
-                        const timeOperatorField = rule.find('.node-input-rule-time-operator');
+                        const $timeLbl = rule.find('.node-input-rule-time-lbl');
+                        const $timeOperator = rule.find('.node-input-rule-time-operator');
                         const $time = rule.find('.node-input-rule-time');
-                        timeLblField.width('auto');
-                        timeOperatorField.width(70);
-                        $time.typedInput('width', (newWidth - timeLblField.width() - 103));
+                        $timeLbl.width('auto');
+                        $timeOperator.width(70);
+                        $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
                         // row4
                         const $offset = rule.find('.node-input-rule-offset');
                         const $multiplier = rule.find('.node-input-rule-multiplier');
@@ -806,10 +831,13 @@
                         $multiplier.width(multiplierWidth);
                         $offset.typedInput('width', (newWidth - multiplierWidth - 50));
                         // row5
-                        const levelLblField = rule.find('.node-input-rule-level-lbl');
+                        const $levelLbl = rule.find('.node-input-rule-level-lbl');
                         const $level = rule.find('.node-input-rule-level');
-                        levelLblField.width('auto');
-                        $level.typedInput('width', (newWidth - levelLblField.width() - 10));
+                        const $levelOperator = rule.find('.node-input-rule-level-operator');
+                        $levelLbl.width('auto');
+                        $levelOperator.show();
+                        $levelOperator.width(50);
+                        $level.typedInput('width', (newWidth - $levelLbl.width() - 70 - 10));
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -921,6 +949,15 @@
                             default: (data.levelType || types.LevelFix.value),
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
+                        const $levelOperator = $('<select/>', {
+                            class: 'node-input-rule-level-operator',
+                            id: 'node-input-rule-level-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo($row5);
+                        $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
+                        $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
+                        $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                        $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
                         $time.change(() => {
@@ -1053,6 +1090,11 @@
                     defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
+
+                setMultiplier(node, 'smoothTime', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
+                }, 60000);
                 // #endregion sun
                 // #region oversteering
                 // #region oversteer - 1
@@ -1316,23 +1358,22 @@
                     min: 0,
                     step: 1
                 });
-
-                setMultiplier(node,'smoothTime', (v) => {
-                    const n = parseFloat(v);
-                    return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
-                }, 60000);
-
-                $('.enhanced-row-toggle').on('click', () => {
-                    $('.enhanced-row').toggle(); // .hide();
-                });
-
-                if (chkVal('outputs', '1') &&
-                    (node.smoothTime==='' || chkVal('smoothTime', 0))) {
-                    $('.enhanced-row').hide();
-                    $('#time-control-smoothTime').val('');
-                } else {
-                    $('.enhanced-row').show();
-                }
+                /*
+                $('#node-input-enhancedSettings').on('change', (_type, _value) => {
+                    const items = $('#node-input-rule-container').editableList('items');
+                    if (items) {
+                        items.forEach(rule => resizeRule(rule));
+                    }
+                    /*
+                                        node.rules = saveRules($('#node-input-rule-container').editableList('items'));
+                                        $('#node-input-rule-container').editableList('empty');
+                                        if (node.rules) {
+                                            for (let i = 0; i < node.rules.length; i++) {
+                                                const rule = node.rules[i];
+                                                $('#node-input-rule-container').editableList('addItem', rule);
+                                            }
+                                        } */
+                //               });*/
                 // #endregion Enhanced settings
                 $('#node-input-sunControlMode').change();
             }; // setup
@@ -1356,6 +1397,8 @@
             const node = this;
 
             // #region rule-container
+            node.rules = saveRules($('#node-input-rule-container').editableList('items'));
+            /*
             node.rules = [];
             const rules = $('#node-input-rule-container').editableList('items');
             rules.each(function (_i) {
@@ -1367,6 +1410,8 @@
                     timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
                     levelValue: rule.find('.node-input-rule-level').typedInput('value'),
                     levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelOp: rule.find('.node-input-rule-level-operator').val(),
+                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     multiplier: rule.find('.node-input-rule-multiplier').val(),
@@ -1379,6 +1424,7 @@
                 };
                 node.rules.push(data);
             });
+            */
 
             const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
             if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {

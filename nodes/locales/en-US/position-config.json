@@ -25,7 +25,9 @@
             "suncalc":"sun calculation",
             "mooncalc":"moon calculation",
             "levelfix":"Level",
-            "levelfree": "Level entered"
+            "levelfree": "Level entered",
+            "levelfixMin": "minimum Level",
+            "levelfreeMin": "minimum Level entered"
         },
         "typeOptions": {
             "moonRise": "moon rise",

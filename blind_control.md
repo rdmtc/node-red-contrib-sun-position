@@ -25,6 +25,7 @@ Used to control a blind with many possibilities. This can be time-dependent and 
     * [Node Output](#node-output)
     * [Node Status](#node-status)
   * [rules](#rules)
+    * [rules with blind position minimum or maximum](#rules-with-blind-position-minimum-or-maximum)
     * [rules example](#rules-example)
   * [Samples](#samples)
     * [testing rules and overrides](#testing-rules-and-overrides)
@@ -227,6 +228,8 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * **12** - sun is in window (maximize mode), max blind position used
       * **13** - sun is not in window (maximize mode), min blind position used
       * **14** - change is below defined minimum delta
+      * **15** - blind position is below defined minimum blind position by rule
+      * **16** - blind position is above defined maximum blind position by rule
     * `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
     * `blindCtrl.reason.description` a text, describe the reason for the blind position
   * `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here
@@ -240,12 +243,22 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * `blindCtrl.blind.overwrite.expireDate` - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
   * `blindCtrl.rule` - exists only if no override is active
     * `blindCtrl.rule.active` - `true` if a rule applies
-    * `blindCtrl.rule.ruleId` - number of the rule who applies (is `-1` if no rule has applied)
+    * `blindCtrl.rule.id` - number of the rule who applies (is `-1` if no rule has applied)
     * `blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
     * `blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
     * `blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
     * `blindCtrl.rule.conditon` - __object__ with additional data about the condition [exists only if `blindCtrl.rule.conditional` is true] - good for debugging purpose
     * `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
+    * `blindCtrl.rule.mimimum` - exists only if a minimum rule exists
+      * `blindCtrl.rule.mimimum.id` - number of the minimum rule who applies
+      * `blindCtrl.rule.mimimum.level` - the minimum blind level defined by the rule
+      * `blindCtrl.rule.mimimum.conditon` - __object__ with additional data about the condition
+      * `blindCtrl.rule.mimimum.time` - __object__ with additional data about the time
+    * `blindCtrl.rule.maximum` - exists only if a maximum rule exists
+      * `blindCtrl.rule.maximum.id` - number of the maximum rule who applies
+      * `blindCtrl.rule.maximum.level` - the maximum blind level defined by the rule
+      * `blindCtrl.rule.maximum.conditon` - __object__ with additional data about the condition
+      * `blindCtrl.rule.maximum.time` - __object__ with additional data about the time
   * `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     * `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
     * `blindCtrl.sunPosition.oversteer` - object containing the active oversteer data
@@ -265,9 +278,9 @@ The shape indicates whether the blind is fully closed or not.
 
 ## rules
 
-The rules are not easy to understand.
+The rules are not easy to understand. For simplicity, in the following description, the type of the blind position is absolute.
 
-There are basically 4 types of rules:
+There are basically 4 generic types of rules (absolute blind position):
 
 * absolute rule
   * a rule with no time and no condition will be absolute. If such a rule is the first rule, no other rule will be active, no sun control will be done
@@ -296,6 +309,10 @@ a typically ruleset could be setup in a way like:
 * In the time between the rule 2 (last __until__) and the rule 3 (first __from__ rule) the blind will set to the default position which is setup normally to open. Only in this time the blind position can be controlled by sun.
 
 This simple example could be enhanced with additional conditional rules.
+
+### rules with blind position minimum or maximum
+
+
 
 ### rules example
 

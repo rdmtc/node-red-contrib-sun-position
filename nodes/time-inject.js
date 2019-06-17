@@ -24,7 +24,11 @@ module.exports = function (RED) {
     }
 
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days, next) {
-        if (typeof next === 'undefined' || next === null) { next = true; }
+        if (typeof next === 'undefined' || next === null || next === true || next === 'true') {
+            next = true;
+        } else if (next === 'false' || next === false) {
+            next = false;
+        }
         // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
         if (type !== 'none') {
             const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, next, days);
