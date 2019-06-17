@@ -30,7 +30,7 @@
 			"sunControlMaximize": "maximize sunlight (Winter)",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
-			"sunMinDelta": "mion delta",
+			"sunMinDelta": "min delta",
 			"oversteerValue": "oversteer",
 			"oversteerThreshold": "Threshold",
 			"oversteerBlindPos": "blind position",
@@ -78,7 +78,9 @@
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)",
 			"sunControlMaximization":"<ul><li>If no rule or override matches<ul><li>If the sun is <em>not</em> in the window the blind will set to defined <strong>min position</strong>. (oversteer will be ignored)</li><li>If the sun is in the window</li><li>If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.</li><li>otherwise the blind level is set to defined <strong>max position</strong>.</li></ul></li></ul>",
-			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room."
+			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.",
+			"sunCtrlLoF": "The limit to what extent direct sunlight is to be allowed into the room through the window, defined as a length on the floor.",
+			"sunCtrlRestrict": "Limit the frequency of changes by time and/or delta; set the minimum altitude (in degree) of the sun"
 		},
 		"typeOptions": {
 			"100": "open (max)",

@@ -94,11 +94,16 @@
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
     </div>
-    <hr class="form-row-sunControlActive" >
      <!-- sun ######################################################################## -->
+     <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
         <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
         <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
@@ -297,7 +302,7 @@
     }
     .ui-spinner input {
         border: none !important;
-        /* width: 95% !important; */
+        width: 95% !important;
     }
 </style>
 
@@ -836,8 +841,8 @@
                         const $levelOperator = rule.find('.node-input-rule-level-operator');
                         $levelLbl.width('auto');
                         $levelOperator.show();
-                        $levelOperator.width(50);
-                        $level.typedInput('width', (newWidth - $levelLbl.width() - 70 - 10));
+                        $levelOperator.width(40);
+                        $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -938,7 +943,7 @@
                         appendOptions(node, $multiplier, 'multiplier', (data) => (data.id > 0));
                         $multiplier.val(data.multiplier || 60000);
                         // #endregion row4
-                        // #region row5 - Blind Level -- [blind-level / open / closed]
+                        // #region row5 - Blind Level -- [blind-level / open / closed] [type]
                         addLabel($row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.ruleBlindLevel'));
                         $('<input/>', {
                             class: 'node-input-rule-level',
