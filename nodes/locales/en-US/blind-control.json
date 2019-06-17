@@ -21,12 +21,16 @@
 			"ruleTimeFrom": "from",
 			"ruleTimeUntil": "until",
 			"ruleBlindLevel": "blind position",
+			"ruleLevelAbs": "👌 - absolute",
+			"ruleLevelMin": "👇 - minimum",
+			"ruleLevelMax": "☝️ - maximum",
 			"sunControlMode": "mode",
 			"sunControlOff": "no restriction, no sun control",
 			"sunControlRestrict": "restrict sunlight (Summer)",
 			"sunControlMaximize": "maximize sunlight (Winter)",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
+			"sunMinDelta": "min delta",
 			"oversteerValue": "oversteer",
 			"oversteerThreshold": "Threshold",
 			"oversteerBlindPos": "blind position",
@@ -54,6 +58,7 @@
 			"OverwriteExpire": "(opt) the duration a manual setting will remain",
 			"sunFloorLength": "(opt) the extent to which direct sunlight is to be allowed into the room through the window, defined as a length on the floor",
 			"sunMinAltitude": "(opt) minimum altitude of the sun for determination of blind position",
+			"sunMinDelta": "(opt) define the minimum change of the blind position",
 			"oversteerValue": "value to compare",
 			"oversteerThreshold": "threshold for the compare",
 			"oversteerBlindPos": "blind position when the compare be the case",
@@ -73,7 +78,19 @@
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as weather (for example sky covered by clouds, lighting, ...)",
 			"sunControlMaximization":"<ul><li>If no rule or override matches<ul><li>If the sun is <em>not</em> in the window the blind will set to defined <strong>min position</strong>. (oversteer will be ignored)</li><li>If the sun is in the window</li><li>If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.</li><li>otherwise the blind level is set to defined <strong>max position</strong>.</li></ul></li></ul>",
-			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room."
+			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.",
+			"sunCtrlLoF": "The limit to what extent direct sunlight is to be allowed into the room through the window, defined as a length on the floor.",
+			"sunCtrlRestrict": "Limit the frequency of changes by time and/or delta; set the minimum altitude (in degree) of the sun"
+		},
+		"typeOptions": {
+			"100": "open (max)",
+			"75": "75%",
+			"66": "66%",
+			"50": "50%",
+			"33": "33%",
+			"25": "25%",
+			"10": "10%",
+			"0": "closed (min)"
 		},
 		"tips": {
 			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
@@ -87,6 +104,7 @@
 			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [rule __number__]",
 			"rule": "position by fixed rule __number__",
 			"sunMinAltitude": "sun below minimum altitude",
+			"sunMinDelta": "change is less ad min delta",
 			"sunNotInWin": "Sun not in window",
 			"sunCtrl": "sun control",
 			"sunCtrlMin": "__org__ (__level__ is below minimum)",
@@ -94,7 +112,9 @@
 			"oversteer": "sun position oversteers",
 			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)",
 			"sunInWinMax": "Sun in window (Level is maximum)",
-			"sunNotInWinMin": "Sun not in window (Level is minimum)"
+			"sunNotInWinMin": "Sun not in window (Level is minimum)",
+			"ruleMin": "__org__ (__level__ is below minimum) [rule __number__]",
+			"ruleMax": "__org__ (__level__ is above maximum) [rule __number__]"
 		},
 		"states": {
 			"overwriteNoExpire": "overwritten [prio=__prio__]",
@@ -105,6 +125,7 @@
 			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [rule __number__]",
 			"rule": "by fixed rule __number__",
 			"sunMinAltitude": "min altitude",
+			"sunMinDelta": "min delta",
 			"sunNotInWin": "no sun in window",
 			"sunCtrl": "sun control",
 			"sunCtrlMin": "__org__ (min)",
@@ -112,7 +133,9 @@
 			"oversteer": "oversteer",
 			"smooth": "block change to __pos__",
 			"sunInWinMax":"Sun in window (max)",
-			"sunNotInWinMin": "Sun not in window (min)"
+			"sunNotInWinMin": "Sun not in window (min)",
+			"ruleMin": "__org__ [min rule __number__]",
+			"ruleMax": "__org__ [max rule __number__]"
 		},
 		"errors": {
 			"internal": "Error: __message__",

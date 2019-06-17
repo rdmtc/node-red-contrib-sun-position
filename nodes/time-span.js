@@ -269,7 +269,7 @@ module.exports = function (RED) {
                     } else if (config.result1ValueType === 'operand2') {
                         resultObj = hlp.getFormattedDateOut(operand2, config.result1Format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
                     }
                     // to
 

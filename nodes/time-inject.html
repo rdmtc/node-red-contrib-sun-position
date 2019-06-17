@@ -142,6 +142,11 @@
         <input type="hidden" id="node-input-addPayload1OffsetType">
         <select id="node-input-addPayload1OffsetMultiplier" class="node-input-multiplier"></select>
     </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload1Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload1Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload1Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload1Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload1Next2"></span>
+    </div>
     <div class="form-row time-inject-row-addPayload1days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
         <div id="time-inject-addPayload1Days" class="time-inject-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
@@ -185,6 +190,11 @@
         <input type="hidden" id="node-input-addPayload2OffsetType">
         <select id="node-input-addPayload2OffsetMultiplier" class="node-input-multiplier"></select>
     </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload2Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload2Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload2Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload2Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload2Next2"></span>
+    </div>
     <div class="form-row time-inject-row-addPayload2days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
         <div id="time-inject-addPayload2Days" class="time-inject-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
@@ -226,6 +236,11 @@
         <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
         <input type="hidden" id="node-input-addPayload3OffsetType">
         <select id="node-input-addPayload3OffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload3Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload3Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload3Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload3Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload3Next2"></span>
     </div>
     <div class="form-row time-inject-row-addPayload3days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
         <div id="time-inject-addPayload3Days" class="time-inject-days" style="margin-top:5px">
@@ -679,6 +694,9 @@
                     );
                 }
             },
+            addPayload1Next: {
+                value: true
+            },
             addPayload1Days: {
                 value: '*',
                 required: true
@@ -740,6 +758,9 @@
                     );
                 }
             },
+            addPayload2Next: {
+                value: true
+            },
             addPayload2Days: {
                 value: '*',
                 required: true
@@ -800,6 +821,9 @@
                         typeof this.addPayload3Type === 'undefined'
                     );
                 }
+            },
+            addPayload3Next: {
+                value: true
             },
             addPayload3Days: {
                 value: '*',
@@ -979,6 +1003,22 @@
                 initializeValue(node, 'addPayload1Days', '*');
                 initializeValue(node, 'addPayload2Days', '*');
                 initializeValue(node, 'addPayload3Days', '*');
+
+                if (typeof node.addPayload1Next === 'undefined' || node.addPayload1Next === null || $('#node-input-addPayload1Next').prop('checked')) {
+                    $('#node-input-addPayload1Next').prop('checked', true);
+                } else {
+                    $('#node-input-addPayload1Next').prop('checked', false);
+                }
+                if (typeof node.addPayload2Next === 'undefined' || node.addPayload2Next === null || $('#node-input-addPayload2Next').prop('checked')) {
+                    $('#node-input-addPayload2Next').prop('checked', true);
+                } else {
+                    $('#node-input-addPayload2Next').prop('checked', false);
+                }
+                if (typeof node.addPayload3Next === 'undefined' || node.addPayload3Next === null || $('#node-input-addPayload3Next').prop('checked')) {
+                    $('#node-input-addPayload3Next').prop('checked', true);
+                } else {
+                    $('#node-input-addPayload3Next').prop('checked', false);
+                }
                 // #endregion initialize
                 // #region spinner
                 $('#node-input-once').change(() => {
@@ -1301,22 +1341,26 @@
                                 plVType === types.TimeMoon.value) {
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1Next').show();
                                 $('.time-inject-row-addPayload1days').show();
                             } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
                                        plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload1Format').show();
                                 $('.time-inject-row-addPayload1Offset').show();
+                                $('.time-inject-row-addPayload1Next').hide();
                                 $('.time-inject-row-addPayload1days').hide();
                             } else {
                                 $('.time-inject-row-addPayload1Format').hide();
                                 $('.time-inject-row-addPayload1Offset').hide();
+                                $('.time-inject-row-addPayload1Next').hide();
                                 $('.time-inject-row-addPayload1days').hide();
                             }
                         } else {
                             $('.time-addPayload1Value').hide();
                             $('.time-inject-row-addPayload1Format').hide();
                             $('.time-inject-row-addPayload1Offset').hide();
+                            $('.time-inject-row-addPayload1Next').hide();
                             $('.time-inject-row-addPayload1days').hide();
                             $('.time-addPayload2').hide();
                         }
@@ -1420,22 +1464,26 @@
                                 plVType === types.TimeMoon.value) {
                                 $('.time-inject-row-addPayload2Format').show();
                                 $('.time-inject-row-addPayload2Offset').show();
+                                $('.time-inject-row-addPayload2Next').show();
                                 $('.time-inject-row-addPayload2days').show();
                             } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
                                        plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload2Format').show();
                                 $('.time-inject-row-addPayload2Offset').show();
+                                $('.time-inject-row-addPayload2Next').hide();
                                 $('.time-inject-row-addPayload2days').hide();
                             } else {
                                 $('.time-inject-row-addPayload2Format').hide();
                                 $('.time-inject-row-addPayload2Offset').hide();
+                                $('.time-inject-row-addPayload2Next').hide();
                                 $('.time-inject-row-addPayload2days').hide();
                             }
                         } else {
                             $('.time-addPayload2Value').hide();
                             $('.time-inject-row-addPayload2Format').hide();
                             $('.time-inject-row-addPayload2Offset').hide();
+                            $('.time-inject-row-addPayload2Next').hide();
                             $('.time-inject-row-addPayload2days').hide();
                             $('.time-addPayload3').hide();
                         }
@@ -1537,22 +1585,26 @@
                                 plVType === types.TimeMoon.value) {
                                 $('.time-inject-row-addPayload3Format').show();
                                 $('.time-inject-row-addPayload3Offset').show();
+                                $('.time-inject-row-addPayload3Next').show();
                                 $('.time-inject-row-addPayload3days').show();
                             } else if (plVType === types.DateSpecific.value ||
                                        plVType === types.DateEntered.value ||
                                        plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-addPayload3Format').show();
                                 $('.time-inject-row-addPayload3Offset').show();
+                                $('.time-inject-row-addPayload3Next').hide();
                                 $('.time-inject-row-addPayload3days').hide();
                             } else {
                                 $('.time-inject-row-addPayload3Format').hide();
                                 $('.time-inject-row-addPayload3Offset').hide();
+                                $('.time-inject-row-addPayload3Next').hide();
                                 $('.time-inject-row-addPayload3days').hide();
                             }
                         } else {
                             $('.time-addPayload3Value').hide();
                             $('.time-inject-row-addPayload3Format').hide();
                             $('.time-inject-row-addPayload3Offset').hide();
+                            $('.time-inject-row-addPayload3Next').hide();
                             $('.time-inject-row-addPayload3days').hide();
                         }
                     }

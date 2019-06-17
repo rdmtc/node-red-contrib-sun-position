@@ -23,10 +23,15 @@ module.exports = function (RED) {
         return millisec;
     }
 
-    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days) {
+    function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days, next) {
+        if (typeof next === 'undefined' || next === null || next === true || next === 'true') {
+            next = true;
+        } else if (next === 'false' || next === false) {
+            next = false;
+        }
         // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
         if (type !== 'none') {
-            const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, days);
+            const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, next, days);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + valueType + '.' + value);
             } else if (res.error) {
@@ -98,7 +103,7 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, 1, node.timeDays);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, true, node.timeDays);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextTime = null;
@@ -118,7 +123,7 @@ module.exports = function (RED) {
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
                 // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, 1, node.timeAltDays);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, true, node.timeAltDays);
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.nextTimeAlt = null;
@@ -261,7 +266,7 @@ module.exports = function (RED) {
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier);
+                const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier, true);
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
@@ -271,11 +276,11 @@ module.exports = function (RED) {
                 }
 
                 tsSetAddProp(this, msg, config.addPayload1Type, config.addPayload1, config.addPayload1ValueType, config.addPayload1Value,
-                    config.addPayload1Format, config.addPayload1Offset, config.addPayload1OffsetType, config.addPayload1OffsetMultiplier, config.addPayload1Days);
+                    config.addPayload1Format, config.addPayload1Offset, config.addPayload1OffsetType, config.addPayload1OffsetMultiplier, config.addPayload1Days, config.addPayload1Next);
                 tsSetAddProp(this, msg, config.addPayload2Type, config.addPayload2, config.addPayload2ValueType, config.addPayload2Value,
-                    config.addPayload2Format, config.addPayload2Offset, config.addPayload2OffsetType, config.addPayload2OffsetMultiplier, config.addPayload2Days);
+                    config.addPayload2Format, config.addPayload2Offset, config.addPayload2OffsetType, config.addPayload2OffsetMultiplier, config.addPayload2Days, config.addPayload2Next);
                 tsSetAddProp(this, msg, config.addPayload3Type, config.addPayload3, config.addPayload3ValueType, config.addPayload3Value,
-                    config.addPayload3Format, config.addPayload3Offset, config.addPayload3OffsetType, config.addPayload3OffsetMultiplier, config.addPayload3Days);
+                    config.addPayload3Format, config.addPayload3Offset, config.addPayload3OffsetType, config.addPayload3OffsetMultiplier, config.addPayload3Days, config.addPayload3Next);
 
                 node.send(msg);
             } catch (err) {

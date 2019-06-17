@@ -185,13 +185,27 @@ function clipStrLength(v, l) {
  * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} first day of given month
  */
-function _getFirstDayOfMonth(year, month, dayOfWeek) {
+/* function _getFirstDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month, 1);
     dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
         d.setDate(d.getDate() + 1);
     }
     return d;
+} */
+
+/**
+ * get a date for the specific day of week in the given month
+ * @param {number} year year to check
+ * @param {number} month month to check
+ * @param {number} dayOfWeek day of week 0=Sunday, 1=Monday, ..., 6=Saturday
+ * @param {number} n the nTh Numer of the day of week - 0 based
+ */
+function _getNthWeekdayOfMonth(year, month, dayOfWeek, n) {
+    const date = new Date(year, month, 1);
+    const add = (dayOfWeek - date.getDay() + 7) % 7 + n * 7;
+    date.setDate(1 + add);
+    return date;
 }
 
 /**
@@ -219,33 +233,33 @@ function _getLastDayOfMonth(year, month, dayOfWeek) {
  */
 function getSpecialDayOfMonth(year, month, dayName) {
     switch (dayName) {
-        case 'first Monday':
-            return _getFirstDayOfMonth(year, month, 1);
-        case 'first Tuesday':
-            return _getFirstDayOfMonth(year, month, 2);
-        case 'first Wednesday':
-            return _getFirstDayOfMonth(year, month, 3);
-        case 'first Thursday':
-            return _getFirstDayOfMonth(year, month, 4);
-        case 'first Friday':
-            return _getFirstDayOfMonth(year, month, 5);
-        case 'first Saturday':
-            return _getFirstDayOfMonth(year, month, 6);
-        case 'first Sunday':
-            return _getFirstDayOfMonth(year, month, 0);
-        case 'last Monday':
+        case 'fMon':
+            return _getNthWeekdayOfMonth(year, month, 1, 0);
+        case 'fTue':
+            return _getNthWeekdayOfMonth(year, month, 2, 0);
+        case 'fWed':
+            return _getNthWeekdayOfMonth(year, month, 3, 0);
+        case 'fThu':
+            return _getNthWeekdayOfMonth(year, month, 4, 0);
+        case 'fFri':
+            return _getNthWeekdayOfMonth(year, month, 5, 0);
+        case 'fSat':
+            return _getNthWeekdayOfMonth(year, month, 6, 0);
+        case 'fSun':
+            return _getNthWeekdayOfMonth(year, month, 0, 0);
+        case 'lMon':
             return _getLastDayOfMonth(year, month, 1);
-        case 'last Tuesday':
+        case 'lTue':
             return _getLastDayOfMonth(year, month, 2);
-        case 'last Wednesday':
+        case 'lWed':
             return _getLastDayOfMonth(year, month, 3);
-        case 'last Thursday':
+        case 'lThu':
             return _getLastDayOfMonth(year, month, 4);
-        case 'last Friday':
+        case 'lFri':
             return _getLastDayOfMonth(year, month, 5);
-        case 'last Saturday':
+        case 'lSat':
             return _getLastDayOfMonth(year, month, 6);
-        case 'last Sunday':
+        case 'lSun':
             return _getLastDayOfMonth(year, month, 0);
     }
     return null;
@@ -482,13 +496,13 @@ function calcDayOffset(days, daystart) {
 function normalizeDate(d, offset, multiplier, next, days) {
     // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
-    if (next && !isNaN(next)) {
+    if (next) {
         const now = new Date();
         d.setMilliseconds(0);
         now.setMilliseconds(600); // security
         const cmp = now.getTime();
-        if (d.getTime() <= cmp) {
-            d.setDate(d.getDate() + Number(next));
+        while (d.getTime() <= cmp) {
+            d.setDate(d.getDate() + 1);
         }
     }
 

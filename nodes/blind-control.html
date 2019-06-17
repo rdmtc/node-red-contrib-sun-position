@@ -94,15 +94,34 @@
         <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
     </div>
-    <hr class="form-row-sunControlActive" >
      <!-- sun ######################################################################## -->
+     <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
         <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
     </div>
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
         <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
+        <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
+        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-smoothTime">
     </div>
     <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
         <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
@@ -153,21 +172,25 @@
         <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteer2BlindPosType">
     </div>
+    <div class="form-row row-oversteer3Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3Value"> <i class="fa fa-tint fa-fw"></i> <span data-i18n="blind-control.label.oversteer3Value"></span></label>
+        <input type="text" id="node-input-oversteer3Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3ValueType">
+        <select id="node-input-oversteer3Compare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteer3Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteer3Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer3Threshold"></span></label>
+        <input type="text" id="node-input-oversteer3Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteer3ThresholdType">
+    </div>
+    <div class="form-row row-oversteer3BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer3BlindPos"></span></label>
+        <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3BlindPosType">
+    </div>
     <hr>
     <!-- #region Enhanced ######################################################################## -->
-    <div class="form-row block-noindent">
-        <a href="#" class="enhanced-row-toggle row-full-width"><span data-i18n="blind-control.label.showEnhSettings"></span></a>
-    </div>
-    <div class="form-row enhanced-row block-noindent" id="node-smoothTime" data-i18n="[title]blind-control.placeholder.smoothTime">
-        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-        </select>
-        <input type="hidden" id="node-input-smoothTime">
-    </div>
     <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
         <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
         <select id="node-input-outputs" class="row-full-width">
@@ -277,6 +300,10 @@
         max-width: 100px;
         margin-left: 5px;
     }
+    .ui-spinner input {
+        border: none !important;
+        width: 95% !important;
+    }
 </style>
 
 <script type="text/javascript">
@@ -299,6 +326,36 @@
                 (n <= getVal(node, 'blindOpenPos')) &&
                 (n >= getVal(node, 'blindClosedPos')) &&
                 Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
+    }
+
+    function saveRules(rules) {
+        const result = [];
+        if (rules) {
+            rules.each(function (_i) {
+                const rule = $(this);
+                const data = {
+                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
+                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
+                    timeOp: rule.find('.node-input-rule-time-operator').val(),
+                    timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
+                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
+                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelOp: rule.find('.node-input-rule-level-operator').val(),
+                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
+                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
+                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
+                    multiplier: rule.find('.node-input-rule-multiplier').val(),
+                    validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
+                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
+                    validOperator: rule.find('.node-input-rule-condOperator').val(),
+                    validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
+                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
+                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type')
+                };
+                result.push(data);
+            });
+        }
+        return result;
     }
 
     RED.nodes.registerType('blind-control', {
@@ -405,6 +462,18 @@
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
                             (RED.validators.number(v) && (n >= 0) && (n <= 90));
+                }
+            },
+            sunMinDelta: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    const n = parseFloat(v);
+                    return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
+                            (v === '') ||
+                            (n <= getVal(this, 'blindOpenPos')) &&
+                            (n >= getVal(this, 'blindClosedPos')) &&
+                            (n >= getVal(this, 'blindIncrement')) );
                 }
             },
             blindPosMin: {
@@ -544,6 +613,48 @@
             },
             oversteer2BlindPosType: {
                 value: 'levelFixed'
+            },
+            oversteer3Value: {
+                value: '',
+                required: false,
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3ValueType')(v);
+                }
+            },
+            oversteer3ValueType: {
+                value: 'none'
+            },
+            oversteer3Compare: {
+                value: 'gte'
+            },
+            oversteer3Threshold: {
+                value: '',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        (getVal(this, 'oversteer3ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3ThresholdType')(v);
+                }
+            },
+            oversteer3ThresholdType: {
+                value: 'num'
+            },
+            oversteer3BlindPos: {
+                value: 'open (max)',
+                validate: function (v) {
+                    return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        (getVal(this, 'oversteerValueType') === 'none') ||
+                        (getVal(this, 'oversteer2ValueType') === 'none') ||
+                        (getVal(this, 'oversteer3ValueType') === 'none') ||
+                        RED.validators.typedInput('oversteer3BlindPosType')(v);
+                }
+            },
+            oversteer3BlindPosType: {
+                value: 'levelFixed'
             }
             // #endregion oversteering settings
         },
@@ -599,16 +710,31 @@
                     value: 'levelFixed',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
                     icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
-                    options: [
-                        'open (max)',
-                        '75%',
-                        '66%',
-                        '50%',
-                        '33%',
-                        '25%',
-                        '10%',
-                        'closed (min)'
-                    ]
+                    options: [{
+                        value: 'open (max)',
+                        label: node._('blind-control.typeOptions.100')
+                    }, {
+                        value: '75%',
+                        label: node._('blind-control.typeOptions.75')
+                    }, {
+                        value: '66%',
+                        label: node._('blind-control.typeOptions.66')
+                    }, {
+                        value: '50%',
+                        label: node._('blind-control.typeOptions.50')
+                    }, {
+                        value: '33%',
+                        label: node._('blind-control.typeOptions.33')
+                    }, {
+                        value: '25%',
+                        label: node._('blind-control.typeOptions.25')
+                    }, {
+                        value: '10%',
+                        label: node._('blind-control.typeOptions.10')
+                    }, {
+                        value: 'closed (min)',
+                        label: node._('blind-control.typeOptions.0')
+                    }]
                 };
                 function setMultiplier(node, name, element, validate, defMultiplier) {
                     const c = Number(node[name]);
@@ -651,12 +777,6 @@
                     });
                     $('#time-control-' + name).change();
                 }
-                const chkVal = (name, val) => {
-                    return (node[name] === null) ||
-                        (typeof node[name] === 'undefined') ||
-                        ($('#node-input-' + name).val() === val) ||
-                        ($('#node-input-' + name).is(':checked') === val);
-                };
                 function getDefLevel(type, value, def) {
                     if (value) {
                         return value;
@@ -687,28 +807,28 @@
                     try {
                         const newWidth = rule.width() - 10;
                         // row1
-                        const validOperandALblField = rule.find('.node-input-rule-condOpA-lbl');
+                        const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
                         const $validOperandA = rule.find('.node-input-rule-condOpA');
                         const $validOperator = rule.find('.node-input-rule-condOperator');
-                        validOperandALblField.width('auto');
+                        $validOperandALbl.width('auto');
                         if ($validOperator.is(':visible')) {
                             $validOperator.width(100);
-                            $validOperandA.typedInput('width', (newWidth - validOperandALblField.width() - 135));
+                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
                         } else {
-                            $validOperandA.typedInput('width', (newWidth - validOperandALblField.width() - 15));
+                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
                         }
                         // row2
-                        const validOperandBLblField = rule.find('.node-input-rule-condOpB-lbl');
+                        const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
                         const $validOperandB = rule.find('.node-input-rule-condOpB');
-                        validOperandBLblField.width('auto');
-                        $validOperandB.typedInput('width', (newWidth - validOperandBLblField.width() - 10));
+                        $validOperandBLbl.width('auto');
+                        $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
                         // row3
-                        const timeLblField = rule.find('.node-input-rule-time-lbl');
-                        const timeOperatorField = rule.find('.node-input-rule-time-operator');
+                        const $timeLbl = rule.find('.node-input-rule-time-lbl');
+                        const $timeOperator = rule.find('.node-input-rule-time-operator');
                         const $time = rule.find('.node-input-rule-time');
-                        timeLblField.width('auto');
-                        timeOperatorField.width(70);
-                        $time.typedInput('width', (newWidth - timeLblField.width() - 103));
+                        $timeLbl.width('auto');
+                        $timeOperator.width(70);
+                        $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
                         // row4
                         const $offset = rule.find('.node-input-rule-offset');
                         const $multiplier = rule.find('.node-input-rule-multiplier');
@@ -716,10 +836,13 @@
                         $multiplier.width(multiplierWidth);
                         $offset.typedInput('width', (newWidth - multiplierWidth - 50));
                         // row5
-                        const levelLblField = rule.find('.node-input-rule-level-lbl');
+                        const $levelLbl = rule.find('.node-input-rule-level-lbl');
                         const $level = rule.find('.node-input-rule-level');
-                        levelLblField.width('auto');
-                        $level.typedInput('width', (newWidth - levelLblField.width() - 10));
+                        const $levelOperator = rule.find('.node-input-rule-level-operator');
+                        $levelLbl.width('auto');
+                        $levelOperator.show();
+                        $levelOperator.width(40);
+                        $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
                     } catch (ex) {
                         console.log(ex); // eslint-disable-line
                     }
@@ -820,7 +943,7 @@
                         appendOptions(node, $multiplier, 'multiplier', (data) => (data.id > 0));
                         $multiplier.val(data.multiplier || 60000);
                         // #endregion row4
-                        // #region row5 - Blind Level -- [blind-level / open / closed]
+                        // #region row5 - Blind Level -- [blind-level / open / closed] [type]
                         addLabel($row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.ruleBlindLevel'));
                         $('<input/>', {
                             class: 'node-input-rule-level',
@@ -831,6 +954,15 @@
                             default: (data.levelType || types.LevelFix.value),
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
                         });
+                        const $levelOperator = $('<select/>', {
+                            class: 'node-input-rule-level-operator',
+                            id: 'node-input-rule-level-operator' + containerIndex,
+                            style: 'margin-left: 5px;'
+                        }).appendTo($row5);
+                        $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
+                        $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
+                        $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                        $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
                         $time.change(() => {
@@ -858,7 +990,7 @@
                         $validOperandA.change(() => {
                             const propType = $validOperandA.typedInput('type');
                             if (propType === 'none') {
-                                $validOperator.val(selFields.comparator[0].id); // only true is valid for DayOfMonth
+                                $validOperator.val(selFields.comparator[0].id);
                                 $validOperator.hide();
                                 $row2.hide(); // condOpB
                             } else if ( propType === 'jsonata') {
@@ -941,6 +1073,9 @@
                         $('.row-oversteer2Value').hide();
                         $('.row-oversteer2Threshold').hide();
                         $('.row-oversteer2BlindPos').hide();
+                        $('.row-oversteer3Value').hide();
+                        $('.row-oversteer3Threshold').hide();
+                        $('.row-oversteer3BlindPos').hide();
                     }
                     $('#node-input-oversteerValue').change();
                 });
@@ -960,6 +1095,11 @@
                     defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
+
+                setMultiplier(node, 'smoothTime', (v) => {
+                    const n = parseFloat(v);
+                    return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
+                }, 60000);
                 // #endregion sun
                 // #region oversteering
                 // #region oversteer - 1
@@ -1092,6 +1232,7 @@
                         }
                         $('#node-input-oversteer2Threshold').change();
                         $('#node-input-oversteer2BlindPos').change();
+                        $('#node-input-oversteer3Value').change();
                     }
                 });
 
@@ -1116,6 +1257,88 @@
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 // #endregion oversteer - 2
+                // #region oversteer - 3
+                setupTInput(node, {
+                    typeProp: 'oversteer3ValueType',
+                    valueProp: 'oversteer3Value',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: '',
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    onChange: (_type, _value) => {
+                        const sunControlMode = Number($('#node-input-sunControlMode').val());
+                        const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
+                        const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
+
+                        if ((oversteer2ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            $('#node-input-oversteer3Value').typedInput('type', types.Undefined.value);
+                            $('.row-oversteer3Value').hide();
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Compare').hide();
+                            $('.row-oversteer3BlindPos').hide();
+                        } else if (oversteer3ValueType === types.Undefined.value) {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').hide();
+                            $('#node-input-oversteer3Compare').hide();
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 110px)');
+                        } else if (oversteer3ValueType === 'jsonata') {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').show();
+                            $('#node-input-oversteer3Compare').show();
+                            $('#node-input-oversteer3Compare').attr('disabled', true);
+                            $('#node-input-oversteer3Compare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('.row-oversteer3Threshold').hide();
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
+                        } else {
+                            $('.row-oversteer3Value').show();
+                            $('.row-oversteer3BlindPos').show();
+                            $('#node-input-oversteer3Compare').show();
+                            $('#node-input-oversteer3Compare').attr('disabled', false);
+                            $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
+                            const condOp = $('#node-input-oversteer3Compare').val();
+                            let operatorCount = 1;
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('.row-oversteer3Threshold').show(); // condOpB
+                            } else {
+                                $('.row-oversteer3Threshold').hide(); // condOpB
+                            }
+                        }
+                        $('#node-input-oversteer3Threshold').change();
+                        $('#node-input-oversteer3BlindPos').change();
+                    }
+                });
+
+                const $oversteer3Compare = $('#node-input-oversteer3Compare');
+                appendOptions(node, $oversteer3Compare, 'comparator');
+                $oversteer3Compare.val(node.oversteer3Compare || 'gte');
+                $oversteer3Compare.change(() => { $('#node-input-oversteer3Value').change(); });
+                setupTInput(node, {
+                    typeProp: 'oversteer3ThresholdType',
+                    valueProp: 'oversteer3Threshold',
+                    width: 'calc(100% - 120px)',
+                    defaultType: 'num',
+                    defaultValue: '',
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                });
+                setupTInput(node, {
+                    typeProp: 'oversteer3BlindPosType',
+                    valueProp: 'oversteer3BlindPos',
+                    width: 'calc(100% - 120px)',
+                    defaultType: types.LevelFix.value,
+                    defaultValue: getDefLevel(node.oversteer3BlindPosType, node.oversteer3BlindPos, 'open (max)'),
+                    types: [types.LevelFix, types.LevelEntered, 'env']
+                });
+                // #endregion oversteer - 3
                 // #endregion oversteering
                 // #region Enhanced settings
                 $('.spinner-noLimit').spinner();
@@ -1140,23 +1363,22 @@
                     min: 0,
                     step: 1
                 });
-
-                setMultiplier(node,'smoothTime', (v) => {
-                    const n = parseFloat(v);
-                    return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
-                }, 60000);
-
-                $('.enhanced-row-toggle').on('click', () => {
-                    $('.enhanced-row').toggle(); // .hide();
-                });
-
-                if (chkVal('outputs', '1') &&
-                    (node.smoothTime==='' || chkVal('smoothTime', 0))) {
-                    $('.enhanced-row').hide();
-                    $('#time-control-smoothTime').val('');
-                } else {
-                    $('.enhanced-row').show();
-                }
+                /*
+                $('#node-input-enhancedSettings').on('change', (_type, _value) => {
+                    const items = $('#node-input-rule-container').editableList('items');
+                    if (items) {
+                        items.forEach(rule => resizeRule(rule));
+                    }
+                    /*
+                                        node.rules = saveRules($('#node-input-rule-container').editableList('items'));
+                                        $('#node-input-rule-container').editableList('empty');
+                                        if (node.rules) {
+                                            for (let i = 0; i < node.rules.length; i++) {
+                                                const rule = node.rules[i];
+                                                $('#node-input-rule-container').editableList('addItem', rule);
+                                            }
+                                        } */
+                //               });*/
                 // #endregion Enhanced settings
                 $('#node-input-sunControlMode').change();
             }; // setup
@@ -1180,6 +1402,8 @@
             const node = this;
 
             // #region rule-container
+            node.rules = saveRules($('#node-input-rule-container').editableList('items'));
+            /*
             node.rules = [];
             const rules = $('#node-input-rule-container').editableList('items');
             rules.each(function (_i) {
@@ -1191,6 +1415,8 @@
                     timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
                     levelValue: rule.find('.node-input-rule-level').typedInput('value'),
                     levelType: rule.find('.node-input-rule-level').typedInput('type'),
+                    levelOp: rule.find('.node-input-rule-level-operator').val(),
+                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
                     offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
                     offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                     multiplier: rule.find('.node-input-rule-multiplier').val(),
@@ -1203,6 +1429,7 @@
                 };
                 node.rules.push(data);
             });
+            */
 
             const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
             if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {

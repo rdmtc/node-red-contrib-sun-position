@@ -21,6 +21,7 @@ In addition, there is now a blind controller, which can set blind position time 
 
 * [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
   * [Table of contents](#table-of-contents)
+  * [Preconditions](#preconditions)
   * [Installation](#installation)
   * [General](#general)
     * [Saving resources](#saving-resources)
@@ -60,6 +61,10 @@ In addition, there is now a blind controller, which can set blind position time 
   * [Bugs and Feedback](#bugs-and-feedback)
   * [LICENSE](#license)
   * [Other](#other)
+
+## Preconditions
+
+These nodes need at least Node-Red with Version 0.18! Any early Version of Node-Red will not work!
 
 ## Installation
 

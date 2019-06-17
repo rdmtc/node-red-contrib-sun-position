@@ -178,45 +178,139 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
-        TimePredefined: {
-            value: 'TimePredefined',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.timepredefined','fixed times'),
-            options: ['next midnight', 'next noon']
-        },
         DayOfMonth: {
             value: 'DayOfMonth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.dayofmonth','day of month'),
-            options: [
-                'first Monday',
-                'first Tuesday',
-                'first Wednesday',
-                'first Thursday',
-                'first Friday',
-                'first Saturday',
-                'first Sunday',
-                'last Monday',
-                'last Tuesday',
-                'last Wednesday',
-                'last Thursday',
-                'last Friday',
-                'last Saturday',
-                'last Sunday'
-            ]
+            options: [{
+                value: 'astronomicalDawn',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn')
+            }, {
+                value: 'fMon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fMon')
+            }, {
+                value: 'fTue',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fTue')
+            }, {
+                value: 'fWed',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fWed')
+            }, {
+                value: 'fThu',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fThu')
+            }, {
+                value: 'fFri',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fFri')
+            }, {
+                value: 'fSat',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fSat')
+            }, {
+                value: 'fSun',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fSun')
+            }, {
+                value: 'lMon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lMon')
+            }, {
+                value: 'lTue',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lTue')
+            }, {
+                value: 'lWed',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lWed')
+            }, {
+                value: 'lThu',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lThu')
+            }, {
+                value: 'lFri',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lFri')
+            }, {
+                value: 'lSat',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lSat')
+            }, {
+                value: 'lSun',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lSun')
+            }]
         },
         TimeSun: {
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
-            options: [ 'astronomicalDawn', 'amateurDawn', 'nauticalDawn', 'blueHourDawnStart', 'civilDawn', 'blueHourDawnEnd',
-                'goldenHourDawnStart', 'sunrise', 'sunriseEnd', 'goldenHourDawnEnd', 'solarNoon', 'goldenHourDuskStart',
-                'sunsetStart', 'sunset', 'goldenHourDuskEnd', 'blueHourDuskStart', 'civilDusk', 'blueHourDuskEnd',
-                'nauticalDusk', 'amateurDusk', 'astronomicalDusk', 'nadir']
+            options: [{
+                value: 'astronomicalDawn',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn')
+            }, {
+                value: 'amateurDawn',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn')
+            }, {
+                value: 'nauticalDawn',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn')
+            }, {
+                value: 'blueHourDawnStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart')
+            }, {
+                value: 'civilDawn',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn')
+            }, {
+                value: 'blueHourDawnEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd')
+            }, {
+                value: 'goldenHourDawnStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart')
+            }, {
+                value: 'sunrise',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise')
+            }, {
+                value: 'sunriseEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd')
+            }, {
+                value: 'goldenHourDawnEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd')
+            }, {
+                value: 'solarNoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon')
+            }, {
+                value: 'goldenHourDuskStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart')
+            }, {
+                value: 'sunsetStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart')
+            }, {
+                value: 'sunset',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset')
+            }, {
+                value: 'goldenHourDuskEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd')
+            }, {
+                value: 'blueHourDuskStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart')
+            }, {
+                value: 'civilDusk',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk')
+            }, {
+                value: 'blueHourDuskEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd')
+            }, {
+                value: 'nauticalDusk',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk')
+            }, {
+                value: 'amateurDusk',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk')
+            }, {
+                value: 'astronomicalDusk',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk')
+            }, {
+                value: 'nadir',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir')
+            }]
         },
         TimeMoon: {
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
-            options: ['rise', 'set']
+            options: [{
+                value: 'rise',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise')
+            }, {
+                value: 'set',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set')
+            }]
         },
         SunCalc: {
             value: 'pdsCalcData',
