@@ -183,7 +183,7 @@ module.exports = function (RED) {
                 }
             }
 
-            this.debug('getSunTime result=' + util.inspect(result));
+            // this.debug('getSunTime result=' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
@@ -487,7 +487,7 @@ module.exports = function (RED) {
                 }
                 result.value = new Date();
             }
-            _srcNode.debug('getTimeProp result=' + util.inspect(result));
+            // _srcNode.debug('getTimeProp result=' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
@@ -541,7 +541,7 @@ module.exports = function (RED) {
                 _srcNode.error(RED._('errors.notEvaluableProperty', { type: type, value: value }));
                 return null;
             }
-            _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
+            // _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/

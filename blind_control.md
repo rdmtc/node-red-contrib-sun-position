@@ -8,32 +8,32 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ### Table of contents
 
-* [Blind Controller](#blind-controller)
-  * [blind-control](#blind-control)
-    * [Table of contents](#table-of-contents)
-    * [The node](#the-node)
-    * [Node settings](#node-settings)
-      * [general settings](#general-settings)
-      * [blind settings](#blind-settings)
-      * [rule settings](#rule-settings)
-      * [overwrite settings](#overwrite-settings)
-      * [sun settings](#sun-settings)
-        * [maximize sunlight (Winter)](#maximize-sunlight-winter)
-        * [restrict sunlight (Summer)](#restrict-sunlight-summer)
-        * [sun position settings](#sun-position-settings)
-    * [Node Input](#node-input)
-    * [Node Output](#node-output)
-    * [Node Status](#node-status)
-  * [rules](#rules)
-    * [rules with blind position minimum or maximum](#rules-with-blind-position-minimum-or-maximum)
-    * [rules example](#rules-example)
-  * [Samples](#samples)
-    * [testing rules and overrides](#testing-rules-and-overrides)
-  * [Additional FAQ](#additional-faq)
-    * [Why is there no multi blind controller?](#why-is-there-no-multi-blind-controller)
-    * [How to define a Temperature Overwrite?](#how-to-define-a-temperature-overwrite)
-    * [How do I achieve that when opening a window the blind opens?](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens)
-  * [Other](#other)
+- [Blind Controller](#Blind-Controller)
+  - [blind-control](#blind-control)
+    - [Table of contents](#Table-of-contents)
+    - [The node](#The-node)
+    - [Node settings](#Node-settings)
+      - [general settings](#general-settings)
+      - [blind settings](#blind-settings)
+      - [rule settings](#rule-settings)
+      - [overwrite settings](#overwrite-settings)
+      - [sun settings](#sun-settings)
+        - [maximize sunlight (Winter)](#maximize-sunlight-Winter)
+        - [restrict sunlight (Summer)](#restrict-sunlight-Summer)
+        - [sun position settings](#sun-position-settings)
+    - [Node Input](#Node-Input)
+    - [Node Output](#Node-Output)
+    - [Node Status](#Node-Status)
+  - [rules](#rules)
+    - [rules with blind position minimum or maximum](#rules-with-blind-position-minimum-or-maximum)
+    - [rules example](#rules-example)
+  - [Samples](#Samples)
+    - [testing rules and overrides](#testing-rules-and-overrides)
+  - [Additional FAQ](#Additional-FAQ)
+    - [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
+    - [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
+    - [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
+  - [Other](#Other)
 
 ### The node
 
@@ -320,13 +320,11 @@ Rules that are not absolute dictate a minimum and maximum position with a very h
 
 As far as possible, only absolute rules should be used, as the use of the minimum and maximum rules further increases the complexity.
 
-Time and conditions are applied to these rules as well as to absolute rules. However, there is the restriction that these rules only apply until the appropriate absolute rule is chosen.
+Time and conditions apply to minimum and maximum rules in the same way as for absolute rules. The absolute, minimum and maximum rules are evaluated independently of each other. Thus, there can be a valid absolute, a minimum and a maximum rule at the same time. It is not possible to go below the blind level of a minimum rule with an absolute rule or to exceed the blind level of a maximum rule with an absolute rule.
 
-The restriction is:
+Minimum and maximum rules can be used primarily for conditional overrides on a rule basis. Example: These rules can be used to define at certain times a minimum level for the blind if a window opening contact reports an open window.
 
-* only minimum/maximum __until__ time - rules will be considered, until the first matching __until__ absolute rule is considered
-* only minimum/maximum __from__ time - rules will be considered which are later as the last matching __from__ absolute rule is considered
-* for non time rules only minimum/maximum rules will be considered which are before the first non time absolute rule is considered.
+Another Example will be the usage of minimum/maximum level at specific weather conditions which should also override absolute rules.
 
 ### rules example
 
@@ -386,17 +384,17 @@ So this example is ideal for testing setup in previous.
 
 ## Additional FAQ
 
-### Why is there no multi blind controller?
+### Why is there no multi blind controller? (FAQ)
 
 The approach is that there is a node for a blind. To reduce the setup overhead it is possible to create a sub-flow with the node per side of the house and thus only have to make the settings once. Settings such as overrides or times can still be configured individually, for example via sub-flow environment variables.
 
 Maybe in this case [node-red-contrib-blindcontroller](https://github.com/alisdairjsmyth/node-red-contrib-blindcontroller) is better suited here as well.
 
-### How to define a Temperature Overwrite?
+### How to define a Temperature Overwrite? (FAQ)
 
 To Overwrite the sun-.calculation by a temperature threshold can be archived by using a conditional rule.
 
-### How do I achieve that when opening a window the blind opens?
+### How do I achieve that when opening a window the blind opens? (FAQ)
 
 This can be archived in different ways:
 

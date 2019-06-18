@@ -1,9 +1,18 @@
 #### 0.4.1: Maintenance Release
 
+- fixed problems on RedMatic call of getBackendData
+  - tooltip with resolved time on typeInput now also available in RedMatic
+- optimized access to backend services
+- i18N reworked for compares (now using mathematical signs for equal, unequal, greater than, less than)
 - blind control
   - fixed error on empty ruleset
   - add clear button for rules
-  - add sort button for rules
+  - internal sort of rules and sort button for manual in UI
+    - sort order will be:
+      - 1 no time restriction
+      - 2 __until__ time restriction
+      - 3 __from__ time restriction
+    - inside a group of rules the original sort order will be preserved.
   - enhanced documentation
 
 #### 0.4.0: Maintenance Release

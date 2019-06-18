@@ -1,126 +1,124 @@
 /************************************************************************/
-const globSelectFields = {
-    operatorsGroups: [
-        {id: 'default', label: 'compare Timestamp'}
-    ],
-    operators: [
-        {id: 1, group: 'default', label: '==', text: 'equal'},
-        {id: 2, group: 'default', label: '!=', text: 'unequal'},
-        {id: 3, group: 'default', label: '>', text: 'greater'},
-        {id: 4, group: 'default', label: '>=', text: 'greater or equal'},
-        {id: 5, group: 'default', label: '<', text: 'lesser'},
-        {id: 6, group: 'default', label: '<=', text: 'lesser or equal'}
-    ], operatorTypesGroups: [
-        {id: 'default', label: 'include into compare'},
-        {id: 'spec', label: 'special'}
-    ], operatorTypes: [
-        {id: 11, group: 'default', label: 'Milliseconds'},
-        {id: 12, group: 'default', label: 'Seconds'},
-        {id: 13, group: 'default', label: 'Minutes'},
-        {id: 14, group: 'default', label: 'Hours'},
-        {id: 15, group: 'default', label: 'Day of Month'},
-        {id: 16, group: 'default', label: 'Month'},
-        {id: 17, group: 'default', label: 'Year'},
-        {id: 18, group: 'spec', label: 'Day of Week'}
-    ], outputTSFormatsGroups: [
-        {id: 'time', label: 'timestamp (number)'},
-        {id: 'timeRounded', label: 'timestamp rounded (number)'},
-        {id: 'string', label: 'Text'}
-    ], outputTSFormats: [
-        {id: 0, group: 'time', name: 'ms', label: 'milliseconds'},
-        {id: 1, group: 'time', name: 'sec', label: 'seconds'},
-        {id: 2, group: 'time', name: 'min', label: 'minutes'},
-        {id: 3, group: 'time', name: 'hour', label: 'hours'},
-        {id: 4, group: 'time', name: 'days', label: 'days'},
-        {id: 5, group: 'time', name: 'weeks', label: 'weeks'},
-        {id: 6, group: 'time', name: 'month', label: 'month'},
-        {id: 7, group: 'time', name: 'years', label: 'years'},
-        {id: 11, group: 'timeRounded', name: 'sec', label: 'seconds'},
-        {id: 12, group: 'timeRounded', name: 'min', label: 'minutes'},
-        {id: 13, group: 'timeRounded', name: 'hour', label: 'hours'},
-        {id: 14, group: 'timeRounded', name: 'days', label: 'days'},
-        {id: 15, group: 'timeRounded', name: 'weeks', label: 'weeks'},
-        {id: 16, group: 'timeRounded', name: 'month', label: 'month'},
-        {id: 17, group: 'timeRounded', name: 'years', label: 'years'},
-        {id: 99, group: 'string', name: 'Other', label: 'Other'}
-    ], outputFormatsGroups: [
-        {id: 'number', label: 'Number'},
-        {id: 'string', label: 'Text (string)'},
-        {id: 'time', label: 'time (number) since emit'},
-        {id: 'dayOfWeek', label: 'day of week'},
-        {id: 'other', label: 'Other'}
-    ], outputFormats: [
-        {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
-        {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS'},
-        {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS'},
-        {id: 1, group: 'string', name: 'UTC', label: 'UTC date and time' },
-        {id: 2, group: 'string', name: 'local', label: 'local date and time'},
-        {id: 3, group: 'string', name: 'localTime', label: 'local time'},
-        {id: 12, group: 'string', name: 'localDate', label: 'local date'},
-        {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
-        {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
-        {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
-        {id: 7, group: 'time', name: 'sec', label: 'seconds'},
-        {id: 8, group: 'time', name: 'min', label: 'minutes'},
-        {id: 9, group: 'time', name: 'hour', label: 'hours'},
-        {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
-        {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
-        {id: -1, group: 'other', name: 'object', label: 'as object'},
-        {id: 99, group: 'other', name: 'free definition', label: 'Other'}
-    ], parseFormatsGroups: [
-        {id: 'number', label: 'Number'},
-        {id: 'string', label: 'Text (string)'},
-        {id: 'other', label: 'Other'}
-    ], parseFormats: [
-        {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
-        {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-        {id: 2, group: 'string', label: 'try different text Formats, prefer day first like d/M/y (e.g. European format)', add: 'will try different formats, prefer European formats'},
-        {id: 3, group: 'string', label: 'try different text Formats, prefer month first like M/d/y (e.g. American format)', add: 'will try different formats, prefer American formats'},
-        {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
-        {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
-        {id: 98, group: 'other', label: 'various - try different Formats (object, number, text)', add: 'xxx'},
-        {id: 99, group: 'other', label: 'text - free definition', add: 'xxx'}
-    ], multiplierGroups: [
-        {id: 'default', label: 'Standard'},
-        {id: 'other', label: 'Special'}
-    ], multiplier: [
-        {id: 1, group: 'default', label: 'milliseconds'},
-        {id: 1000, group: 'default', label: 'seconds'},
-        {id: 60000, group: 'default', label: 'minutes'},
-        {id: 3600000, group: 'default', label: 'hours'},
-        {id: 86400000, group: 'default', label: 'days'},
-        // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
-        {id: -1, group: 'other', label: 'month'},
-        {id: -2, group: 'other', label: 'year'}
-    ], comparatorGroups: [
-        { id: 'simple', label: 'simple' },
-        { id: 'compare', label: 'compare' },
-        { id: 'enhanced', label: 'enhanced' }
-    ], comparator: [
-        { id: 'true', group: 'simple', label: 'true', operatorCount: 1 },
-        { id: 'false', group: 'simple', label: 'false', operatorCount: 1 },
-        { id: 'null', group: 'simple', label: 'null', operatorCount: 1 },
-        { id: 'nnull', group: 'simple', label: 'not null', operatorCount: 1 },
-        { id: 'empty', group: 'simple', label: 'empty', operatorCount: 1 },
-        { id: 'nempty', group: 'simple', label: 'not empty', operatorCount: 1 },
-        { id: 'true_expr', group: 'enhanced', label: 'true_expr', operatorCount: 1 },
-        { id: 'false_expr', group: 'enhanced', label: 'false_expr', operatorCount: 1 },
-        { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operatorCount: 1 },
-        { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operatorCount: 1 },
-        { id: 'equal', group: 'compare', label: 'equal', operatorCount: 2 },
-        { id: 'nequal', group: 'compare', label: 'not equal', operatorCount: 2 },
-        { id: 'lt', group: 'compare', label: 'less than', operatorCount: 2 },
-        { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
-        { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
-        { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
-        { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
-        { id: 'containSome', group: 'enhanced', label: 'containSome', operatorCount: 2 },
-        { id: 'containEvery', group: 'enhanced', label: 'containEvery', operatorCount: 2 }
-    ]
-};
-
 function getSelectFields() { // eslint-disable-line no-unused-vars
-    return globSelectFields;
+    return {
+        operatorsGroups: [
+            {id: 'default', label: 'compare Timestamp'}
+        ],
+        operators: [
+            {id: 1, group: 'default', label: '==', text: 'equal'},
+            {id: 2, group: 'default', label: '!=', text: 'unequal'},
+            {id: 3, group: 'default', label: '>', text: 'greater'},
+            {id: 4, group: 'default', label: '>=', text: 'greater or equal'},
+            {id: 5, group: 'default', label: '<', text: 'lesser'},
+            {id: 6, group: 'default', label: '<=', text: 'lesser or equal'}
+        ], operatorTypesGroups: [
+            {id: 'default', label: 'include into compare'},
+            {id: 'spec', label: 'special'}
+        ], operatorTypes: [
+            {id: 11, group: 'default', label: 'Milliseconds'},
+            {id: 12, group: 'default', label: 'Seconds'},
+            {id: 13, group: 'default', label: 'Minutes'},
+            {id: 14, group: 'default', label: 'Hours'},
+            {id: 15, group: 'default', label: 'Day of Month'},
+            {id: 16, group: 'default', label: 'Month'},
+            {id: 17, group: 'default', label: 'Year'},
+            {id: 18, group: 'spec', label: 'Day of Week'}
+        ], outputTSFormatsGroups: [
+            {id: 'time', label: 'timestamp (number)'},
+            {id: 'timeRounded', label: 'timestamp rounded (number)'},
+            {id: 'string', label: 'Text'}
+        ], outputTSFormats: [
+            {id: 0, group: 'time', name: 'ms', label: 'milliseconds'},
+            {id: 1, group: 'time', name: 'sec', label: 'seconds'},
+            {id: 2, group: 'time', name: 'min', label: 'minutes'},
+            {id: 3, group: 'time', name: 'hour', label: 'hours'},
+            {id: 4, group: 'time', name: 'days', label: 'days'},
+            {id: 5, group: 'time', name: 'weeks', label: 'weeks'},
+            {id: 6, group: 'time', name: 'month', label: 'month'},
+            {id: 7, group: 'time', name: 'years', label: 'years'},
+            {id: 11, group: 'timeRounded', name: 'sec', label: 'seconds'},
+            {id: 12, group: 'timeRounded', name: 'min', label: 'minutes'},
+            {id: 13, group: 'timeRounded', name: 'hour', label: 'hours'},
+            {id: 14, group: 'timeRounded', name: 'days', label: 'days'},
+            {id: 15, group: 'timeRounded', name: 'weeks', label: 'weeks'},
+            {id: 16, group: 'timeRounded', name: 'month', label: 'month'},
+            {id: 17, group: 'timeRounded', name: 'years', label: 'years'},
+            {id: 99, group: 'string', name: 'Other', label: 'Other'}
+        ], outputFormatsGroups: [
+            {id: 'number', label: 'Number'},
+            {id: 'string', label: 'Text (string)'},
+            {id: 'time', label: 'time (number) since emit'},
+            {id: 'dayOfWeek', label: 'day of week'},
+            {id: 'other', label: 'Other'}
+        ], outputFormats: [
+            {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
+            {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS'},
+            {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS'},
+            {id: 1, group: 'string', name: 'UTC', label: 'UTC date and time' },
+            {id: 2, group: 'string', name: 'local', label: 'local date and time'},
+            {id: 3, group: 'string', name: 'localTime', label: 'local time'},
+            {id: 12, group: 'string', name: 'localDate', label: 'local date'},
+            {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
+            {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
+            {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
+            {id: 7, group: 'time', name: 'sec', label: 'seconds'},
+            {id: 8, group: 'time', name: 'min', label: 'minutes'},
+            {id: 9, group: 'time', name: 'hour', label: 'hours'},
+            {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
+            {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
+            {id: -1, group: 'other', name: 'object', label: 'as object'},
+            {id: 99, group: 'other', name: 'free definition', label: 'Other'}
+        ], parseFormatsGroups: [
+            {id: 'number', label: 'Number'},
+            {id: 'string', label: 'Text (string)'},
+            {id: 'other', label: 'Other'}
+        ], parseFormats: [
+            {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
+            {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
+            {id: 2, group: 'string', label: 'try different text Formats, prefer day first like d/M/y (e.g. European format)', add: 'will try different formats, prefer European formats'},
+            {id: 3, group: 'string', label: 'try different text Formats, prefer month first like M/d/y (e.g. American format)', add: 'will try different formats, prefer American formats'},
+            {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
+            {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
+            {id: 98, group: 'other', label: 'various - try different Formats (object, number, text)', add: 'xxx'},
+            {id: 99, group: 'other', label: 'text - free definition', add: 'xxx'}
+        ], multiplierGroups: [
+            {id: 'default', label: 'Standard'},
+            {id: 'other', label: 'Special'}
+        ], multiplier: [
+            {id: 1, group: 'default', label: 'milliseconds'},
+            {id: 1000, group: 'default', label: 'seconds'},
+            {id: 60000, group: 'default', label: 'minutes'},
+            {id: 3600000, group: 'default', label: 'hours'},
+            {id: 86400000, group: 'default', label: 'days'},
+            // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
+            {id: -1, group: 'other', label: 'month'},
+            {id: -2, group: 'other', label: 'year'}
+        ], comparatorGroups: [
+            { id: 'simple', label: 'simple' },
+            { id: 'compare', label: 'compare' },
+            { id: 'enhanced', label: 'enhanced' }
+        ], comparator: [
+            { id: 'true', group: 'simple', label: 'true', operatorCount: 1 },
+            { id: 'false', group: 'simple', label: 'false', operatorCount: 1 },
+            { id: 'null', group: 'simple', label: 'null', operatorCount: 1 },
+            { id: 'nnull', group: 'simple', label: 'not null', operatorCount: 1 },
+            { id: 'empty', group: 'simple', label: 'empty', operatorCount: 1 },
+            { id: 'nempty', group: 'simple', label: 'not empty', operatorCount: 1 },
+            { id: 'true_expr', group: 'enhanced', label: 'true_expr', operatorCount: 1 },
+            { id: 'false_expr', group: 'enhanced', label: 'false_expr', operatorCount: 1 },
+            { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operatorCount: 1 },
+            { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operatorCount: 1 },
+            { id: 'equal', group: 'compare', label: 'equal', operatorCount: 2 },
+            { id: 'nequal', group: 'compare', label: 'not equal', operatorCount: 2 },
+            { id: 'lt', group: 'compare', label: 'less than', operatorCount: 2 },
+            { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
+            { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
+            { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
+            { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
+            { id: 'containSome', group: 'enhanced', label: 'containSome', operatorCount: 2 },
+            { id: 'containEvery', group: 'enhanced', label: 'containEvery', operatorCount: 2 }
+        ]
+    };
 }
 
 function getTypes(node) { // eslint-disable-line no-unused-vars
@@ -510,13 +508,13 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 
 function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
     // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
-    const groups = globSelectFields[elementName + 'Groups'];
+    const groups = getSelectFields()[elementName + 'Groups'];
     if (!groups) {
-        throw new Error('no group "' + elementName + 'Groups" in globSelectFields found!');
+        throw new Error('no group "' + elementName + 'Groups" in getSelectFields() found!');
     }
-    const elements = globSelectFields[elementName];
+    const elements = getSelectFields()[elementName];
     if (!groups) {
-        throw new Error('no elements "' + elementName + '" in globSelectFields found!');
+        throw new Error('no elements "' + elementName + '" in getSelectFields() found!');
     }
     const groupLength = groups.length;
     const elementsLength = elements.length;
@@ -680,7 +678,7 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
  * @param {*} id element id, e.g. 'node-input-rule-operatorType-1'
  */
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
-    const types = globSelectFields[elementName + 'Short'];
+    const types = getSelectFields()[elementName + 'Short'];
     const getSelection = function getCBText(parent) {
         const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
         const elements = value.map((_, el) => { return $(el).val(); }).get();
@@ -704,9 +702,9 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
         class: 'option-checkboxes'
     }).appendTo(multiselect);
     list.attr('expanded', 'false');
-    const groups = globSelectFields[elementName + 'Groups'];
+    const groups = getSelectFields()[elementName + 'Groups'];
     const groupLength = groups.length;
-    const elements = globSelectFields[elementName];
+    const elements = getSelectFields()[elementName];
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
         list.append($('<label></label>', {
@@ -745,8 +743,8 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
 }
 
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    console.log('getBackendData');  // eslint-disable-line
-    console.log(data);  // eslint-disable-line
+    // console.log('getBackendData');  // eslint-disable-line
+    // console.log(data);  // eslint-disable-line
     // data
     if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
         result({ value: data.type});
@@ -763,12 +761,12 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     } else if (data.type === 'msgValue') {
         result({ value: 'msg.value' });
     } else {
-        const url = '/sun-position/data?' + jQuery.param( data );
+        const url = 'sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
     }
 }
 
 function getDateData(result, data) { // eslint-disable-line no-unused-vars
-    const url = '/sun-position/data?kind=getDateData&' + jQuery.param( data );
+    const url = 'sun-position/data?kind=getDateData&' + jQuery.param( data );
     $.getJSON(url, result);
 }
