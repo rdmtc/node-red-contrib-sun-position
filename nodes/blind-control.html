@@ -27,6 +27,9 @@
         <div class="form-row node-input-rule-container-row row-full-width">
         <ol id="node-input-rule-container"></ol>
         </div>
+        <button type="button" id="node-button-clear" class="rdg-ui-btn"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
+        <button type="button" id="node-button-sort" class="rdg-ui-btn"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
+        <br>
     </div>
     <div class="form-row block-noindent is-to-show-initially">
         <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
@@ -689,13 +692,15 @@
                 $('.is-to-show-initially').show();
                 $('.is-to-hide-initially').hide();
             }, 300);
+            $('.rdg-ui-btn').button();
+
             this.outputs = this.outputs || 1;
             this.sunControlMode = this.sunControlMode || 0;
             const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
 
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeData */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData */
                 // #region initialize
                 const types = getTypes(node);
                 const selFields = getSelectFields();
@@ -866,6 +871,13 @@
 
                 $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                     addItem(containerRow, containerIndex, data) {
+                        data.index = containerIndex + 1;
+                        data.timeType = (data.timeType || types.TimeEntered.value);
+                        data.timeValue = (data.timeValue || '');
+                        data.timeLimited = (data.timeType !== 'none');
+
+                        data.conditional = (data.validOperandAType !== 'none');
+
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
                         const $row1 = $('<div/>').appendTo(containerRow);
                         const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
@@ -919,9 +931,9 @@
                             class: 'node-input-rule-time',
                             id: 'node-input-rule-time' + containerIndex,
                             type: 'text',
-                            value: (data.timeValue || '')
+                            value: data.timeValue
                         }).appendTo($row3).typedInput({
-                            default: (data.timeType || types.TimeEntered.value),
+                            default: data.timeType,
                             types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
                         // #endregion row3
@@ -943,7 +955,7 @@
                         appendOptions(node, $multiplier, 'multiplier', (data) => (data.id > 0));
                         $multiplier.val(data.multiplier || 60000);
                         // #endregion row4
-                        // #region row5 - Blind Level -- [blind-level / open / closed] [type]
+                        // #region row5 - Blind Level -- [blind-level / open / closed] [abs-min-max]
                         addLabel($row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.ruleBlindLevel'));
                         $('<input/>', {
                             class: 'node-input-rule-level',
@@ -972,12 +984,16 @@
                             } else {
                                 $row4.hide(); // offset
                             }
-                            getTimeData(d => {
+                            getBackendData(d => {
                                 if (d.value) {
                                     const dv = new Date(d.value);
+                                    console.log('getTimeData');
+                                    console.log(d.value);
+                                    console.log(dv);
                                     $row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
                                 }
                             }, {
+                                kind: 'getTimeData',
                                 config : $nodeConfig.val(),
                                 type: opType,
                                 value: $time.typedInput('value'),
@@ -1039,9 +1055,15 @@
                         resizeContainer();
                     },
                     sortItems: function(_rules) {
+                        console.log('sortItems');
+                        console.log(_rules);
+                        if (_rules) {
+                            _rules.forEach();
+                        }
                         const rules = $('#node-input-rule-container').editableList('items');
                         rules.each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
+                            _rules.data.index=i+1;
                         });
                     }
                 });
@@ -1052,6 +1074,58 @@
                         $('#node-input-rule-container').editableList('addItem', rule);
                     }
                 }
+
+                // #region Button
+                const $btnClear = $('#node-button-clear');
+                $btnClear.click(() => {
+                    $('#node-input-rule-container').editableList('empty');
+                });
+
+                const $btnSort = $('#node-button-sort');
+                $btnSort.click(() => {
+                    $('#node-input-rule-container').editableList('sort', (a, b) => {
+                        a.timeOp = (Number(a.timeOp) || 0);
+                        a.levelOp = (Number(a.levelOp) || 0);
+                        b.timeOp = (Number(a.timeOp) || 0);
+                        b.levelOp = (Number(a.levelOp) || 0);
+                        a.index = (Number(a.index) || 0);
+                        b.index = (Number(b.index) || 0);
+                        a.conditional = (a.validOperandAType !== 'none');
+                        a.timeLimited = (a.timeType !== 'none');
+                        b.conditional = (a.validOperandAType !== 'none');
+                        b.timeLimited = (a.timeType !== 'none');
+                        console.log('dataA - dataB - sort');
+                        console.log(a);
+                        console.log(b);
+
+                        const res = (a.timeLimited - b.timeLimited);
+                        if (res !== 0) { // one is not time limited
+                            return res; // not timeLimited before timeLimited (1-3)
+                        }
+                        const lta = ((a.levelOp > 0) ? 0 : 1);
+                        const ltb = ((b.levelOp > 0) ? 0 : 1);
+                        const lt = (lta - ltb);
+                        const pos = (a.index - b.index);
+                        if (!a.timeLimited && !b.timeLimited) { // both not time limited
+                            if (lt !== 0) { return lt; } // min/max before absolute (1)
+                            const cond = (a.conditional - b.conditional);
+                            if (cond !== 0) { return cond; } // not conditional before conditional
+                            return pos;
+                        }
+                        // both are time limited
+                        const top = (a.timeOp - b.timeOp);
+                        if (top !== 0) { // from/until type different
+                            return top; // from before until
+                        }
+                        // both same from/until type
+                        if (lt !== 0) { // min/max or absolute type different
+                            if (a.timeOp === 0) { return lt; } // from - min/max before absolute
+                            return -lt; // until - min/max after absolute
+                        }
+                        return pos;
+                    });
+                });
+                // #endregion Button
                 // #endregion rules
                 // #region sun
                 $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {

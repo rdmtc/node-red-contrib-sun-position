@@ -1,3 +1,11 @@
+#### 0.4.1: Maintenance Release
+
+- blind control
+  - fixed error on empty ruleset
+  - add clear button for rules
+  - add sort button for rules
+  - enhanced documentation
+
 #### 0.4.0: Maintenance Release
 
 - i18N for type-input options

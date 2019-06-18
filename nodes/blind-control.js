@@ -1062,17 +1062,62 @@ module.exports = function (RED) {
                     }
                 }
             }
-            node.rulesData.sort((a, b) => {
-                const res = (a.timeLimited - b.timeLimited);
-                if (res !== 0) {
-                    return res; // not timeLimited before timeLimited
-                }
-                if ((!a.timeLimited && !b.timeLimited) || (a.timeOp === b.timeOp)) {
-                    return a.pos - b.pos;
-                }
-                // both timeLimited:
-                return a.timeOp - b.timeOp;
-            });
+            if (node.rulesData) {
+                node.rulesData.sort((a, b) => {
+                    node.debug('sort ' + a + ' - ' + b);
+                    // value less than 0, itemDataA comes before itemDataB.
+
+                    // 1 min/max  - no time
+                    // 2 absolute - no time - no conditional
+                    // 3 absolute - no time - conditional
+                    // 4 min/max  - time    - until
+                    // 5 absolute - time    - until
+                    // 6 absolute - time    - from
+                    // 7 min/max  - time    - from
+
+                    const res = (a.timeLimited - b.timeLimited);
+                    if (res !== 0) { // one is not time limited
+                        return res; // not timeLimited before timeLimited (1-3)
+                    }
+                    const lta = ((a.levelOp > 0) ? 0 : 1);
+                    const ltb = ((b.levelOp > 0) ? 0 : 1);
+                    const lt = (lta - ltb);
+                    const pos = a.pos - b.pos;
+                    if (!a.timeLimited && !b.timeLimited) { // both not time limited
+                        if (lt !== 0) { return lt; } // min/max before absolute (1)
+                        const cond = (a.conditional - b.conditional);
+                        if (cond !== 0) { return cond; } // not conditional before conditional
+                        return pos;
+                    }
+                    // both are time limited
+                    const top = (a.timeOp - b.timeOp);
+                    if (top !== 0) { // from/until type different
+                        return top; // from before until
+                    }
+                    // both same from/until type
+
+                    if (lt !== 0) { // min/max or absolute type different
+                        if (a.timeOp === 0) { return lt; } // from - min/max before absolute
+                        return -lt; // until - min/max after absolute
+                    }
+                    return pos;
+                    /*
+                    if (a.timeOp === b.timeOp) { // both same from/until type
+                        const res2 = (a.conditional - b.conditional);
+                        if (res2 !== 0) {
+                            return res; // not conditional before conditional
+                        }
+                        return a.pos - b.pos;
+                    }
+
+                    // both timeLimited:
+                    const res3 = (a.timeOp - b.timeOp);
+                    if (res3 !== 0) {
+                        return res; // until before from
+                    }
+                    return a.pos - b.pos; */
+                });
+            }
         }
         initialize();
     }

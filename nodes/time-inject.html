@@ -968,7 +968,7 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getTimeData getOutDataData */
+                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
@@ -1085,7 +1085,7 @@
                             $('.time-inject-row-payloadTimeFormat').hide();
                             $('.time-inject-row-payloadOffset').hide();
                         }
-                        getOutDataData(d => {
+                        getBackendData(d => {
                             const $div = $('#node-input-payload-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d) {
@@ -1094,6 +1094,7 @@
                                 $div.attr('title', titleOrg);
                             }
                         }, {
+                            kind:       'getOutDataData',
                             config:     $nodeConfig.val(),
                             type:       plVType,
                             value:      $('#node-input-payload').typedInput('value'),
@@ -1147,7 +1148,7 @@
                             $('.time-inject-row-timeDays').show();
                             $('.time-inject-row-alt').show();
 
-                            getTimeData(d => {
+                            getBackendData(d => {
                                 const $div = $('#node-input-time-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1157,6 +1158,7 @@
                                     $div.attr('title', titleOrg);
                                 }
                             }, {
+                                kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       type,
                                 value:      $('#node-input-time').typedInput('value'),
@@ -1275,7 +1277,7 @@
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
                     onChange: (_type, _value) => {
                         if (!$('.time-inject-row-timeAlt').is(':hidden')) {
-                            getTimeData(d => {
+                            getBackendData(d => {
                                 const $div = $('#node-input-timeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d.value) {
@@ -1285,6 +1287,7 @@
                                     $div.attr('title', titleOrg);
                                 }
                             }, {
+                                kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-timeAlt').typedInput('type'),
                                 value:      $('#node-input-timeAlt').typedInput('value'),
@@ -1397,7 +1400,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload1').change();
                         if (!$('.time-addPayload1Value').is(':hidden')) {
-                            getOutDataData(d => {
+                            getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1406,6 +1409,7 @@
                                     $div.attr('title', titleOrg);
                                 }
                             }, {
+                                kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-addPayload1Value').typedInput('type'),
                                 value:      $('#node-input-addPayload1Value').typedInput('value'),
@@ -1520,7 +1524,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload2').change();
                         if (!$('.time-addPayload2Value').is(':hidden')) {
-                            getOutDataData(d => {
+                            getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1529,6 +1533,7 @@
                                     $div.attr('title', titleOrg);
                                 }
                             }, {
+                                kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-addPayload2Value').typedInput('type'),
                                 value:      $('#node-input-addPayload2Value').typedInput('value'),
@@ -1638,7 +1643,7 @@
                     onChange: (_type, _value) => {
                         $('#node-input-addPayload3').change();
                         if (!$('.time-addPayload3Value').is(':hidden')) {
-                            getOutDataData(d => {
+                            getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 if (d) {
@@ -1647,6 +1652,7 @@
                                     $div.attr('title', titleOrg);
                                 }
                             }, {
+                                kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-addPayload3Value').typedInput('type'),
                                 value:      $('#node-input-addPayload3Value').typedInput('value'),

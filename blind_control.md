@@ -75,7 +75,7 @@ All values could be floating point values.
 
 * **default position** The value which will be used if no other value given by condition, time or sun applies.
 
-![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/57134463-8d0dc780-6da6-11e9-9019-1cb4ed85e756.png)
+![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/59666684-9d8ecb80-91b5-11e9-8ea6-ddbe2293988b.png)
 
 * If a rule applies, the blind position defined by the rule will be used.
   * sun control will then not be active
@@ -95,15 +95,13 @@ All values could be floating point values.
 
 * **expire** the duration in minutes a manual setting will remain is place. If not defined, there will be no default expiring of overrides.
 
+![blind-control-settings-6](https://user-images.githubusercontent.com/12692680/57134466-8da65e00-6da6-11e9-84d2-425ca0be5e3d.png)
+
 #### sun settings
 
 Sun control is only active if no override and no rule applies!
 
-![blind-control-settings-6](https://user-images.githubusercontent.com/12692680/57134466-8da65e00-6da6-11e9-84d2-425ca0be5e3d.png)
-
 If sun-control checkbox is not checked, the defined **default position** will be used.
-
-![blind-control-settings-7](https://user-images.githubusercontent.com/12692680/57134469-8da65e00-6da6-11e9-979b-ca875da064d7.png)
 
 The sun control (maximize or restrict sunlight) is only active, if no other rule or override matches.
 
@@ -111,6 +109,8 @@ The sun control (maximize or restrict sunlight) is only active, if no other rule
   * Example: if the blind should set to a level if a temperature threshold exceeded, this could be setup as rule
 
 ##### maximize sunlight (Winter)
+
+![image](https://user-images.githubusercontent.com/12692680/59666961-34f41e80-91b6-11e9-8ad0-958a650565d1.png)
 
 In this mode if no rule or override matches:
 
@@ -121,6 +121,8 @@ In this mode if no rule or override matches:
     * otherwise the blind level is set to defined **max position**.
 
 ##### restrict sunlight (Summer)
+
+![image](https://user-images.githubusercontent.com/12692680/59667118-797fba00-91b6-11e9-9b7f-5837c7fd4a29.png)
 
 In this mode if no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
 
@@ -163,6 +165,7 @@ under the simplest assumption starting from the bearing representing the perpend
   * **blind position** the blind position which should be used instead of the calculated value by the sun if the defined expression for **oversteer** with **operator** (and maybe **Threshold**) is **true**.
   * can be used for overrides of sunPosition calculation by weather, cloud, temperature, UV-index, ... conditions
 * **oversteer2**, **oversteer2 Operator**, **Threshold** equal to **oversteer**, but an additional oversteer possibility. Lower priority than **oversteer**
+* **oversteer3**, **oversteer3 Operator**, **Threshold** equal to **oversteer** and **oversteer2**, but an additional oversteer possibility. Lower priority than **oversteer2**
 
 ### Node Input
 
@@ -283,10 +286,11 @@ The rules are not easy to understand. For simplicity, in the following descripti
 There are basically 4 generic types of rules (absolute blind position):
 
 * absolute rule
-  * a rule with no time and no condition will be absolute. If such a rule is the first rule, no other rule will be active, no sun control will be done
+  * a rule with no time and no condition will be absolute. If such a rule exists, no other rule will be active, no sun control will be done
   * such rules not really makes sense
 * a rule with a condition - conditional rule
   * a rule with a condition will only be active if the condition matches, otherwise the rule will be ignored
+  * rules with only a condition are evaluated before a rule with a time is evaluated
 * a rule with a given time - time rule
   * time rules differ again in 2 ways
     * __until__ time rules
@@ -312,7 +316,17 @@ This simple example could be enhanced with additional conditional rules.
 
 ### rules with blind position minimum or maximum
 
+Rules that are not absolute dictate a minimum and maximum position with a very high priority.
 
+As far as possible, only absolute rules should be used, as the use of the minimum and maximum rules further increases the complexity.
+
+Time and conditions are applied to these rules as well as to absolute rules. However, there is the restriction that these rules only apply until the appropriate absolute rule is chosen.
+
+The restriction is:
+
+* only minimum/maximum __until__ time - rules will be considered, until the first matching __until__ absolute rule is considered
+* only minimum/maximum __from__ time - rules will be considered which are later as the last matching __from__ absolute rule is considered
+* for non time rules only minimum/maximum rules will be considered which are before the first non time absolute rule is considered.
 
 ### rules example
 
@@ -346,10 +360,10 @@ There is a time between the *until* and the *from* rules, where no rules matches
 
 Example for a time-control to open blind on civilDawn, but not before 6 o'clock and close blind on civilDusk, but not later than 23:00 o clock:
 
-![blind-control-example-1](https://user-images.githubusercontent.com/12692680/57134447-867f5000-6da6-11e9-81dc-24fbf58dcd15.png)
+![blind-control-example-1](https://user-images.githubusercontent.com/12692680/59666579-61f40180-91b5-11e9-9d28-78e4060fb77d.png)
 
 ```json
-[{"id":"c4660958.801288","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"650223e.daba8dc","outputs":"1","blindIncrement":0.01,"blindOpenPos":1,"blindClosedPos":0,"blindPosReverse":false,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeType":"entered","timeValue":"6:00","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDawn","timeOp":"0","timeOpText":"until","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"pdsTime","timeValue":"civilDusk","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""},{"timeType":"entered","timeValue":"23:00","timeOp":"1","timeOpText":"from","levelType":"levelFixed","levelValue":"closed (min)","offsetType":"none","offsetValue":"","multiplier":"1","validOperandAType":"none","validOperandAValue":"","validOperator":"true","validOperatorText":"is true","validOperandBType":"num","validOperandBValue":""}],"sunControlMode":"0","sunFloorLength":"","sunMinAltitude":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","oversteerValue":"","oversteerValueType":"none","oversteerCompare":"gte","oversteerThreshold":"","oversteerThresholdType":"num","oversteerBlindPos":"open (max)","oversteerBlindPosType":"levelFixed","x":415,"y":3135,"wires":[["51d5763f.b879e8"]]},{"id":"8a367fde.6639","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":210,"y":3135,"wires":[["c4660958.801288"]]},{"id":"51d5763f.b879e8","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":630,"y":3135,"wires":[]},{"id":"c0eac267.02eb8","type":"comment","z":"d7bd7fb6.a0c13","name":"Example 1:","info":"","x":150,"y":3090,"wires":[]},{"id":"650223e.daba8dc","type":"position-config","z":"","name":"","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timezoneOffset":-60}]
+[{"id":"6ae5efb.281221","type":"blind-control","z":"d7bd7fb6.a0c13","name":"","topic":"","positionConfig":"650223e.daba8dc","outputs":"1","blindIncrement":0.01,"blindOpenPos":1,"blindClosedPos":0,"blindPosReverse":false,"blindPosDefault":"open (max)","blindPosDefaultType":"levelFixed","overwriteExpire":"7200000","rules":[{"timeValue":"6:00","timeType":"entered","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","levelOp":"0","levelOpText":"👌 - Absolut","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist true","validOperandBValue":"","validOperandBType":"num"},{"timeValue":"civilDawn","timeType":"pdsTime","timeOp":"0","timeOpText":"bis","levelValue":"closed (min)","levelType":"levelFixed","levelOp":"0","levelOpText":"👌 - Absolut","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist true","validOperandBValue":"","validOperandBType":"num"},{"timeValue":"civilDusk","timeType":"pdsTime","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","levelOp":"0","levelOpText":"👌 - Absolut","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist true","validOperandBValue":"","validOperandBType":"num"},{"timeValue":"23:00","timeType":"entered","timeOp":"1","timeOpText":"von","levelValue":"closed (min)","levelType":"levelFixed","levelOp":"0","levelOpText":"👌 - Absolut","offsetValue":"","offsetType":"none","multiplier":"1","validOperandAValue":"","validOperandAType":"none","validOperator":"true","validOperatorText":"ist true","validOperandBValue":"","validOperandBType":"num"}],"sunControlMode":"0","sunFloorLength":"","sunMinAltitude":"","sunMinDelta":"","blindPosMin":"closed (min)","blindPosMinType":"levelFixed","blindPosMax":"open (max)","blindPosMaxType":"levelFixed","smoothTime":"","windowTop":"","windowBottom":"","windowAzimuthStart":"","windowAzimuthEnd":"","oversteerValue":"","oversteerValueType":"none","oversteerCompare":"gte","oversteerThreshold":"","oversteerThresholdType":"num","oversteerBlindPos":"open (max)","oversteerBlindPosType":"levelFixed","oversteer2Value":"","oversteer2ValueType":"none","oversteer2Compare":"gte","oversteer2Threshold":"","oversteer2ThresholdType":"num","oversteer2BlindPos":"","oversteer2BlindPosType":"levelFixed","oversteer3Value":"","oversteer3ValueType":"none","oversteer3Compare":"gte","oversteer3Threshold":"","oversteer3ThresholdType":"num","oversteer3BlindPos":"","oversteer3BlindPosType":"levelFixed","x":415,"y":2430,"wires":[["d31309f7.35a698"]]},{"id":"2e391f9c.f974b","type":"inject","z":"d7bd7fb6.a0c13","name":"","topic":"","payload":"","payloadType":"date","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":210,"y":2430,"wires":[["6ae5efb.281221"]]},{"id":"d31309f7.35a698","type":"debug","z":"d7bd7fb6.a0c13","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"false","x":630,"y":2430,"wires":[]},{"id":"4368317d.414b3","type":"comment","z":"d7bd7fb6.a0c13","name":"Example 1:","info":"","x":150,"y":2385,"wires":[]},{"id":"650223e.daba8dc","type":"position-config","z":"","name":"","isValide":"true","longitude":"0","latitude":"0","angleType":"deg","timeZoneOffset":99,"timeZoneDST":0,"stateTimeFormat":"HH:mm:ss","stateDateFormat":"yyyy-MM-dd"}]
 ```
 
 similar example with additional different times for weekend:

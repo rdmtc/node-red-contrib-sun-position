@@ -506,7 +506,7 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getTypes getSelectFields appendOptions setupTInput initializeValue getTimeData */
+                /* global getTypes getSelectFields appendOptions setupTInput initializeValue getBackendData */
 
                 const types = getTypes(node);
                 const selFields = getSelectFields();
@@ -553,7 +553,7 @@
                         }
                     },
                     onChange: (_type, _value) => {
-                        getTimeData(d => {
+                        getBackendData(d => {
                             const $div = $('#node-input-startTime-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d.value) {
@@ -563,6 +563,7 @@
                                 $div.attr('title', titleOrg);
                             }
                         }, {
+                            kind:       'getTimeData',
                             config:     $nodeConfig.val(),
                             type:       $('#node-input-startTime').typedInput('type'),
                             value:      $('#node-input-startTime').typedInput('value'),
@@ -614,7 +615,7 @@
                         }
                     },
                     onChange: (_type, _value) => {
-                        getTimeData(d => {
+                        getBackendData(d => {
                             const $div = $('#node-input-endTime-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d.value) {
@@ -624,6 +625,7 @@
                                 $div.attr('title', titleOrg);
                             }
                         }, {
+                            kind:       'getTimeData',
                             config:     $nodeConfig.val(),
                             type:       $('#node-input-endTime').typedInput('type'),
                             value:      $('#node-input-endTime').typedInput('value'),
@@ -733,7 +735,7 @@
                     },
                     onChange: (_type, _value) => {
                         console.log('startTimeAlt');
-                        getTimeData(d => {
+                        getBackendData(d => {
                             console.log(d);
                             const $div = $('#node-input-startTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -744,6 +746,7 @@
                                 $div.attr('title', titleOrg);
                             }
                         }, {
+                            kind:       'getTimeData',
                             config:     $nodeConfig.val(),
                             type:       $('#node-input-startTimeAlt').typedInput('type'),
                             value:      $('#node-input-startTimeAlt').typedInput('value'),
@@ -854,7 +857,7 @@
                     },
                     onChange: (_type, _value) => {
                         console.log('endTimeAlt');
-                        getTimeData(d => {
+                        getBackendData(d => {
                             console.log(d);
                             const $div = $('#node-input-endTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -865,6 +868,7 @@
                                 $div.attr('title', titleOrg);
                             }
                         }, {
+                            kind:       'getTimeData',
                             config:     $nodeConfig.val(),
                             type:       $('#node-input-endTimeAlt').typedInput('type'),
                             value:      $('#node-input-endTimeAlt').typedInput('value'),

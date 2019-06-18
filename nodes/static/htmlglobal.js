@@ -744,7 +744,10 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     return multiselect;
 }
 
-function getTimeData(result, data) { // eslint-disable-line no-unused-vars
+function getBackendData(result, data) { // eslint-disable-line no-unused-vars
+    console.log('getBackendData');  // eslint-disable-line
+    console.log(data);  // eslint-disable-line
+    // data
     if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
         result({ value: data.type});
     } else if (data.type === 'num' || data.type === 'str' || data.type === 'bool') {
@@ -760,7 +763,7 @@ function getTimeData(result, data) { // eslint-disable-line no-unused-vars
     } else if (data.type === 'msgValue') {
         result({ value: 'msg.value' });
     } else {
-        const url = '/sun-position/data?kind=getTimeData&' + jQuery.param( data );
+        const url = '/sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
     }
 }
@@ -768,25 +771,4 @@ function getTimeData(result, data) { // eslint-disable-line no-unused-vars
 function getDateData(result, data) { // eslint-disable-line no-unused-vars
     const url = '/sun-position/data?kind=getDateData&' + jQuery.param( data );
     $.getJSON(url, result);
-}
-
-function getOutDataData(result, data) { // eslint-disable-line no-unused-vars
-    if (data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
-        result(data.type);
-    } else if (data.type === 'num' || data.type === 'str' || data.type === 'bool') {
-        result(data.value);
-    } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
-        result(data.type + '.' + data.value);
-    } else if (data.type === 'msgPayload') {
-        result('msg.payload');
-    } else if (data.type === 'msgTs') {
-        result('msg.ts');
-    } else if (data.type === 'msgLC') {
-        result('msg.lc');
-    } else if (data.type === 'msgValue') {
-        result('msg.value');
-    } else {
-        const url = '/sun-position/data?kind=getOutDataData&' + jQuery.param( data );
-        $.getJSON(url, result);
-    }
 }
