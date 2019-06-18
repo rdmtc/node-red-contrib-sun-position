@@ -3,7 +3,9 @@
 - fixed problems on RedMatic call of getBackendData
   - tooltip with resolved time on typeInput now also available in RedMatic
 - optimized access to backend services
-- i18N reworked for compares (now using mathematical signs for equal, unequal, greater than, less than)
+- i18N reworked
+  - for compares using mathematical signs for equal, unequal, greater than, less than
+  - added more Unicode symbols
 - blind control
   - fixed error on empty ruleset
   - add clear button for rules
