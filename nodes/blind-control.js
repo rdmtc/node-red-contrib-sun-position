@@ -66,7 +66,7 @@ function getNow_(node, msg) {
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
         return dto;
     }
-    node.error('Error can not get a valide timestamp from "' + value + '"! Will use current timestamp!');
+    node.error(`Error can not get a valide timestamp from "${value}"! Will use current timestamp!`);
     return new Date();
 }
 
@@ -147,23 +147,30 @@ function getSunPosition_(node, now) {
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * evaluate temporary Data
+     * @param {*} node   node Data
+     * @param {string} type  type of type input
+     * @param {string} value  value of typeinput
+     * @param {*} data  data to cache
+     * @returns {*}  data which was cached
+     */
     function evalTempData(node, type, value, data) {
         // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
         if (data === null || typeof data === 'undefined') {
-            const name = type + '.' + value;
+            const name = `${type}.${value}`;
             if (typeof node.tempData[name] !== 'undefined') {
-                node.log(RED._('blind-control.errors.usingTempValue', { type: type, value: value, usedValue: node.tempData[name] }));
+                node.log(RED._('blind-control.errors.usingTempValue', { type, value, usedValue: node.tempData[name] }));
                 return node.tempData[name];
             }
             if (node.nowarn[name]) {
                 return null; // only one error per run
             }
-            node.warn(RED._('blind-control.errors.notEvaluableProperty', { type: type, value: value, usedValue: 'null' }));
+            node.warn(RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }));
             node.nowarn[name] = true;
             return null;
         }
-        node.tempData[type + '.' + value] = data;
+        node.tempData[`${type}.${value}`] = data;
         return data;
     }
 
@@ -226,7 +233,7 @@ module.exports = function (RED) {
                     }
                     return (val / 100);
                 }
-                throw new Error('unknown value "'+ value + '" of type "' + type + '"' );
+                throw new Error(`unknown value "${value}" of type "${type}"` );
             }
             return node.positionConfig.getFloatProp(node, msg, type, value, def);
         } catch (err) {
@@ -279,7 +286,7 @@ module.exports = function (RED) {
         node.blindData.overwrite.expires = Number.isFinite(expire) && (expire > 0);
 
         if (!node.blindData.overwrite.expires) {
-            node.debug(`expireNever expire=${expire}` + (typeof expire) + ' - isNaN=' + isNaN(expire) + ' - finite=' + !isFinite(expire) + ' - min=' + (expire < 100));
+            node.debug(`expireNever expire=${expire} ${  typeof expire  } - isNaN=${  isNaN(expire)  } - finite=${  !isFinite(expire)  } - min=${  expire < 100}`);
             delete node.blindData.overwrite.expireTs;
             delete node.blindData.overwrite.expireDate;
             return;
@@ -313,8 +320,8 @@ module.exports = function (RED) {
         }
         if ((!prio) || (node.blindData.overwrite.priority <= prio)) {
             hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
-                (val) => {
-                    node.debug('reset val="' + util.inspect(val, { colors: true, compact: 10 }) + '"');
+                val => {
+                    node.debug(`reset val="${  util.inspect(val, { colors: true, compact: 10 })  }"`);
                     if (val) {
                         blindPosOverwriteReset(node);
                     }
@@ -353,7 +360,7 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], (p) => {
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], p => {
             checkOverrideReset(node, msg, now, p);
             return p;
         }, () => {
@@ -846,8 +853,8 @@ module.exports = function (RED) {
             }
             node.reason.stateComplete = (isNaN(node.blindData.level)) ? node.reason.state : node.blindData.level.toString() + ' - ' + node.reason.state;
             node.status({
-                fill: fill,
-                shape: shape,
+                fill,
+                shape,
                 text: node.reason.stateComplete
             });
         }
@@ -964,14 +971,14 @@ module.exports = function (RED) {
                     ruleId !== node.previousData.usedRule)) {
                     msg.payload = node.blindData.level;
                     if (node.outputs > 1) {
-                        node.send([msg, { topic: topic, payload: blindCtrl}]);
+                        node.send([msg, { topic, payload: blindCtrl}]);
                     } else {
                         msg.topic = topic || msg.topic;
                         msg.blindCtrl = blindCtrl;
                         node.send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    node.send([null, { topic: topic, payload: blindCtrl}]);
+                    node.send([null, { topic, payload: blindCtrl}]);
                 }
                 node.previousData.usedRule = ruleId;
                 return null;
@@ -984,6 +991,7 @@ module.exports = function (RED) {
                     text: 'internal error'
                 });
             }
+            return null;
         });
         // ####################################################################################################
         /**

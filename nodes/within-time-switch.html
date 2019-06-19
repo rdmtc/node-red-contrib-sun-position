@@ -278,7 +278,7 @@
             },
             startOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
@@ -304,7 +304,7 @@
             },
             endOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
@@ -333,7 +333,7 @@
             },
             propertyStartThreshold: {
                 value: '',
-                validate: function (v) {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyStartThresholdType')(v) ||
@@ -353,7 +353,7 @@
             startTimeAlt: {
                 value: '',
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('startTimeAltType')(v) || ($(
                         '#node-input-propertyStart').typedInput(
                         'type') === 'none');
@@ -364,7 +364,7 @@
             },
             startOffsetAlt: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
@@ -380,7 +380,7 @@
             startOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyStart').typedInput('type') === 'none') ||
                     ($('#node-input-startTimeAlt').typedInput('type') === 'none');
@@ -399,7 +399,7 @@
             },
             propertyEndThreshold: {
                 value: '',
-                validate: function (v) {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyEndThresholdType')(v) ||
@@ -419,7 +419,7 @@
             endTimeAlt: {
                 value: '',
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
                         'type') === 'none');
                 }
@@ -429,7 +429,7 @@
             },
             endOffsetAlt: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
@@ -445,7 +445,7 @@
             endOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');
@@ -513,7 +513,7 @@
                 // #region initialize
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', (data) => (data.id > 0));
+                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     } else {
@@ -734,9 +734,7 @@
                         }
                     },
                     onChange: (_type, _value) => {
-                        console.log('startTimeAlt');
                         getBackendData(d => {
-                            console.log(d);
                             const $div = $('#node-input-startTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d.value) {
@@ -856,9 +854,7 @@
                         }
                     },
                     onChange: (_type, _value) => {
-                        console.log('endTimeAlt');
                         getBackendData(d => {
-                            console.log(d);
                             const $div = $('#node-input-endTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
                             if (d.value) {

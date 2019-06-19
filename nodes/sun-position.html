@@ -161,7 +161,7 @@
             },
             startOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
@@ -178,7 +178,7 @@
             startOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -200,7 +200,7 @@
             },
             endOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
@@ -217,7 +217,7 @@
             endOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -266,7 +266,7 @@
                 // #region initialize
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', (data) => (data.id > 0));
+                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     }

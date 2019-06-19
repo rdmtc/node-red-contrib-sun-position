@@ -464,7 +464,7 @@
             },
             payloadOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.payloadOffsetType === 'undefined') ||
@@ -495,7 +495,7 @@
             },
             offset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.offsetType === 'undefined') ||
@@ -512,7 +512,7 @@
             offsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -527,7 +527,7 @@
             property: {
                 value: '',
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         typeof this.propertyType === 'undefined' ||
@@ -546,7 +546,7 @@
             },
             propertyThreshold: {
                 value: '',
-                validate: function (v) {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyThresholdType')(v) ||
@@ -566,7 +566,7 @@
             timeAlt: {
                 value: '',
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.typedInput('timeAltType')(v) ||
                         ($('#node-input-timeType').length ?
@@ -584,7 +584,7 @@
             },
             timeAltOffset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         (typeof this.timeAltOffsetType === 'undefined') ||
@@ -605,7 +605,7 @@
             timeAltOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -626,7 +626,7 @@
             },
             onceDelay: {
                 value: 0.1,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.number()(v) ||
                         v === '' ||
@@ -637,7 +637,7 @@
             },
             addPayload1: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof this.addPayload1Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -650,7 +650,7 @@
             },
             addPayload1Value: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.typedInput('addPayload1ValueType')(v) ||
                         $('#node-input-addPayload1').typedInput('type') === 'none' ||
@@ -666,7 +666,7 @@
             },
             addPayload1Offset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload1OffsetType === 'undefined') ||
@@ -684,7 +684,7 @@
             addPayload1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
@@ -703,7 +703,7 @@
             },
             addPayload2: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof this.addPayload2Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -716,7 +716,7 @@
             },
             addPayload2Value: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.typedInput('addPayload2ValueType')(v) ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
@@ -732,7 +732,7 @@
             },
             addPayload2Offset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload2OffsetType === 'undefined') ||
@@ -748,7 +748,7 @@
             addPayload2OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
@@ -767,7 +767,7 @@
             },
             addPayload3: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         typeof this.addPayload3Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -780,7 +780,7 @@
             },
             addPayload3Value: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.typedInput('addPayload3ValueType')(v) ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
@@ -796,7 +796,7 @@
             },
             addPayload3Offset: {
                 value: 0,
-                validate: (v) => {
+                validate: v => {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload3OffsetType === 'undefined') ||
@@ -812,7 +812,7 @@
             addPayload3OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
@@ -831,7 +831,7 @@
             },
             recalcTime: {
                 value: 2,
-                validate: (v) => {
+                validate: v => {
                     return (
                         RED.validators.number()(v) ||
                         v === '' ||
@@ -981,7 +981,7 @@
 
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', (data) => (data.id > 0));
+                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     } else {

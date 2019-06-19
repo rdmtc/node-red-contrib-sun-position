@@ -314,14 +314,14 @@
             inputFormat: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (v !== '');
                 }
             },
             inputOffset: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('inputOffsetType')(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
                 }
             },
@@ -331,7 +331,7 @@
             inputOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
                 }
             },
@@ -355,7 +355,7 @@
             },
             result1Value: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
@@ -365,14 +365,14 @@
             result1Format: {
                 value: 0,
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('result1OffsetType')(v) ||
                         $('#node-input-result1').typedInput('type') === 'none' ||
                         this.result1Type === 'undefined' ||
@@ -386,7 +386,7 @@
             result1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             }

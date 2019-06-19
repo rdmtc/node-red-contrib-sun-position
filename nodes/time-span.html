@@ -274,14 +274,14 @@
             operand1Format: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand1Offset: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
                 }
             },
@@ -291,7 +291,7 @@
             operand1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
                 }
             },
@@ -307,14 +307,14 @@
             operand2Format: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return (v !== '') || typeof v === 'undefined';
                 }
             },
             operand2Offset: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
                 }
             },
@@ -324,7 +324,7 @@
             operand2OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
                 }
             },
@@ -354,7 +354,7 @@
             },
             result1Value: {
                 value: '',
-                validate: (v) => {
+                validate: v => {
                     return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
@@ -364,21 +364,21 @@
             result1TSFormat: {
                 value: 1,
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Format: {
                 value: 0,
                 required: false,
-                validate: (v) => {
+                validate: v => {
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             },
@@ -388,7 +388,7 @@
             result1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate: v => {
                     return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             }
@@ -632,7 +632,7 @@
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo(row);
-                        appendOptions(node, multiplierField, 'multiplier', (data) => (data.id > 0) );
+                        appendOptions(node, multiplierField, 'multiplier', data => (data.id > 0) );
                         multiplierField.val(data.multiplier || 60000);
 
                         const finalspan = $('<span/>', {
