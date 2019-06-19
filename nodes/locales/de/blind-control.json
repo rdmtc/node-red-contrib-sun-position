@@ -42,8 +42,8 @@
 			"outputs": "Ausgänge",
 			"singleOutput": "einzeln (1)",
 			"splitOutput": "doppelt (2)",
-			"btnSort": "grob sortieren",
-			"btnSortAll": "sortieren",
+			"btnAdd": "hinzufügen",
+			"btnSort": "sortieren",
 			"btnClear": "leeren"
 		},
 		"placeholder": {
@@ -68,7 +68,10 @@
 			"smoothTime":"(opt) verhindert Änderungen durch Sonnenstandsänderung innerhalb der angegebenen Zeit",
 			"name": "Name",
 			"expiryperiod": "120",
-			"outputs": "Anzahl der Ausgänge"
+			"outputs": "Anzahl der Ausgänge",
+			"btnAdd": "neue leere Regel hinzufügen",
+			"btnSort": "alle Regeln sortieren, Achtung dies kann das Verhalten ändern!",
+			"btnClear": "alle Regeln entfernen"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",

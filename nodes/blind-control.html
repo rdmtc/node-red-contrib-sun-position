@@ -25,13 +25,13 @@
     <div class="is-to-show-initially">
         <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
         <div class="form-row node-input-rule-container-row row-full-width">
-        <ol id="node-input-rule-container"></ol>
+            <ol id="node-input-rule-container"></ol>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
         </div>
-        <button type="button" id="node-button-clear" class="rdg-ui-btn"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
-        <button type="button" id="node-button-sort" class="rdg-ui-btn"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
-        <button type="button" id="node-button-sortAll" class="rdg-ui-btn"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSortAll"></span></button>
-        <br>
     </div>
+
     <div class="form-row block-noindent is-to-show-initially">
         <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
     </div>
@@ -785,13 +785,14 @@
                     $('#time-control-' + name).change();
                 }
                 function getDefLevel(type, value, def) {
+                    // console.log(console.log(`getDefLevel "${type}", "${value}", "${def}"`);
                     if (value) {
                         return value;
                     }
                     if (!type || type === types.LevelFix.value) {
-                        return def || types.LevelFix.options[0];
+                        return def;
                     }
-                    return def || '';
+                    return def;
                 }
                 // #endregion initialize
                 // #region blind
@@ -963,7 +964,7 @@
                             class: 'node-input-rule-level',
                             id: 'node-input-rule-level' + containerIndex,
                             type: 'text',
-                            value: (data.levelValue || getDefLevel(data.levelTyp, data.levelValue, 'closed (min)'))
+                            value: getDefLevel(data.levelTyp, data.levelValue, 'closed (min)')
                         }).appendTo($row5).typedInput({
                             default: (data.levelType || types.LevelFix.value),
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
@@ -1047,6 +1048,7 @@
                         $validOperandA.change();
                         $time.change();
                     },
+                    addButton: false,
                     resizeItem: resizeRule,
                     sortable: true,
                     removable: true,
@@ -1079,9 +1081,15 @@
                 }
 
                 // #region Button
+                const $btnAdd = $('#node-button-add');
+                $btnAdd.click(() => {
+                    $('#node-input-rule-container').editableList('addItem', {});
+                });
+
                 const $btnClear = $('#node-button-clear');
                 $btnClear.click(() => {
                     $('#node-input-rule-container').editableList('empty');
+                    resizeContainer();
                 });
 
                 const $btnSort = $('#node-button-sort');
@@ -1094,6 +1102,7 @@
                         data.levelOp = (Number(data.levelOp) || 0);
                         data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
                         data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
+                        data.timeData = (parseFloat($(this).find('.node-input-rule-time').attr('timedata')) || 0);
                     });
                     /**
                      * 1 no time
@@ -1111,65 +1120,12 @@
                         }
                         // both are time limited
                         const top = (a.timeOp - b.timeOp);
-                        if (top !== 0) { // from/until type different
+                        if (top !== 0) {
                             return top; // from before until
                         }
                         // both same from/until type
-                        return pos;
-                    });
-                    const postrules = $('#node-input-rule-container').editableList('items');
-                    postrules.each(function(i) {
-                        $(this).find('.node-input-rule-index').html(i+1);
-                        const data = $(this).data('data');
-                        data.index = i;
-                    });
-                });
-
-                const $btnSortAll = $('#node-button-sortAll');
-                $btnSortAll.click(() => {
-                    const prerules = $('#node-input-rule-container').editableList('items');
-                    prerules.each(function(i) {
-                        const data = $(this).data('data');
-                        data.index = i;
-                        data.timeOp = (Number(data.timeOp) || 0);
-                        data.levelOp = (Number(data.levelOp) || 0);
-                        data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
-                        data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
-                        data.timeData = (parseFloat($(this).find('.node-input-rule-time').attr('timedata')) || 0);
-                    });
-                    /**
-                     * 1 min/max  - no time
-                     * 2 absolute - no time
-                     * 3 min/max  - time    - until
-                     * 4 absolute - time    - until
-                     * 5 absolute - time    - from
-                     * 6 min/max  - time    - from
-                     */
-                    $('#node-input-rule-container').editableList('sort', (a, b) => {
-                        const res = (a.timeLimited - b.timeLimited);
-                        if (res !== 0) { // one is not time limited
-                            return res; // not timeLimited before timeLimited (1-3)
-                        }
-                        const lta = ((a.levelOp > 0) ? 0 : 1);
-                        const ltb = ((b.levelOp > 0) ? 0 : 1);
-                        const lt = (lta - ltb);
-                        const pos = (a.index - b.index);
-                        if (!a.timeLimited && !b.timeLimited) { // both not time limited
-                            if (lt !== 0) { return lt; } // min/max before absolute (1)
-                            return pos;
-                        }
-                        // both are time limited
-                        const top = (a.timeOp - b.timeOp);
-                        if (top !== 0) { // from/until type different
-                            return top; // from before until
-                        }
-                        // both same from/until type
-                        if (lt !== 0) { // min/max or absolute type different
-                            if (a.timeOp === 0) { return lt; } // from - min/max before absolute
-                            return -lt; // until - min/max after absolute
-                        }
                         const time = a.timeData - b.timeData;
-                        if (time !== 0) {
+                        if ((a.timeData !== 0) && (b.timeData !== 0) && (time !== 0)) { // time is different
                             return time;
                         }
                         return pos;
@@ -1209,12 +1165,14 @@
                     }
                     $('#node-input-oversteerValue').change();
                 });
+                // blindPosMin "undefined", "", blindPosMax "levelFixed", ""
+                // console.log(`blindPosMin "${node.blindPosMinType}", "${node.blindPosMin}", blindPosMax "${node.blindPosMaxType}", "${node.blindPosMax}"`);
                 setupTInput(node, {
                     typeProp: 'blindPosMinType',
                     valueProp: 'blindPosMin',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'), // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'),
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 setupTInput(node, {
@@ -1222,7 +1180,7 @@
                     valueProp: 'blindPosMax',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'),
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
 

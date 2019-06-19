@@ -202,6 +202,7 @@ module.exports = function (RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
+        node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} `);
         def = def || NaN;
         if (type === 'none' || type === '') {
             return def;
@@ -214,6 +215,8 @@ module.exports = function (RED) {
                         return node.blindData.levelClosed;
                     } else if (value.includes('open')) {
                         return node.blindData.levelOpen;
+                    } else if (val === '') {
+                        return def;
                     }
                 } else {
                     if (val < 1) {
@@ -550,6 +553,7 @@ module.exports = function (RED) {
     function checkRules(node, msg, now) {
         const livingRuleData = {};
         const nowNr = now.getTime();
+        let lastUntilRule = -1;
         // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
         // pre-checking conditions to may be able to store temp data
         for (let i = 0; i < node.rulesCount; ++i) {
@@ -577,6 +581,9 @@ module.exports = function (RED) {
                     rule.conditonData.text += ' ' + rule.conditonData.thresholdValue;
                     rule.conditonData.textShort += ' ' + hlp.clipStrLength(rule.conditonData.thresholdValue, 10);
                 }
+            }
+            if (rule.timeLimited && (rule.timeOp === 0)) {
+                lastUntilRule = i; // from rule
             }
         }
 
@@ -612,23 +619,17 @@ module.exports = function (RED) {
         };
 
         let ruleSel = null;
-        let ruleSelMin = null;
-        let ruleSelMax = null;
+        // let ruleSelMin = null;
+        // let ruleSelMax = null;
         // node.debug('first loop ' + node.rulesCount);
-        for (let i = 0; i < node.rulesCount; ++i) {
+        for (let i = 0; i <= lastUntilRule; ++i) {
             const rule = node.rulesData[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-            if (rule.timeOp === 1) { break; } // { continue; } - Until timeOp === 0
+            if (rule.timeOp === 1) { continue; } // - Until timeOp === 0
             const res = fkt(rule, (r,h) => (r >= h));
             if (res) {
-                if (res.levelOp === 1 && (!ruleSelMin)) {
-                    ruleSelMin = res;
-                } else if (res.levelOp === 2 && (!ruleSelMax)) {
-                    ruleSelMax = res;
-                } else {
-                    ruleSel = res;
-                    break;
-                }
+                ruleSel = res;
+                break;
             }
         }
         if (!ruleSel || ruleSel.timeLimited) {
@@ -636,51 +637,41 @@ module.exports = function (RED) {
             for (let i = (node.rulesCount -1); i >= 0; --i) {
                 const rule = node.rulesData[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-                if (rule.timeOp === 0) { break; } // { continue; } - From timeOp === 1
+                if (rule.timeOp === 0) { continue; } // - From timeOp === 1
                 const res = fkt(rule, (r,h) => (r <= h));
                 if (res) {
-                    if (res.levelOp === 1 && (!ruleSelMin)) {
-                        ruleSelMin = res;
-                    } else if (res.levelOp === 2 && (!ruleSelMax)) {
-                        ruleSelMax = res;
-                    } else {
-                        ruleSel = res;
-                        break;
-                    }
+                    ruleSel = res;
+                    break;
                 }
             }
-        }
-        if (ruleSelMin) {
-            livingRuleData.minimum = {
-                id: ruleSelMin.pos,
-                level: getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault),
-                conditional: ruleSelMin.conditional,
-                timeLimited: ruleSelMin.timeLimited,
-                conditon: ruleSelMin.conditonData,
-                time: ruleSelMin.timeData
-            };
-        }
-        if (ruleSelMax) {
-            livingRuleData.maximum = {
-                id: ruleSelMax.pos,
-                level: getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault),
-                conditional: ruleSelMax.conditional,
-                timeLimited: ruleSelMax.timeLimited,
-                conditon: ruleSelMax.conditonData,
-                time: ruleSelMax.timeData
-            };
         }
         if (ruleSel) {
             // ruleSel.text = '';
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
             livingRuleData.id = ruleSel.pos;
-            livingRuleData.active = true;
-            livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+            if (ruleSel.levelOp === 0) { // absolute rule
+                livingRuleData.active = true;
+                livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+                livingRuleData.hasMinimum = false;
+                livingRuleData.hasMaximum = false;
+                node.reason.code = 4;
+            } else {
+                livingRuleData.active = false;
+                if (ruleSel.levelOp === 1) {
+                    livingRuleData.hasMinimum = true;
+                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+                } else {
+                    livingRuleData.hasMaximum = true;
+                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+                }
+                livingRuleData.level = node.blindData.levelDefault;
+                node.reason.code = 4;
+            }
+
             livingRuleData.conditional = ruleSel.conditional;
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.blindData.level = livingRuleData.level;
             node.blindData.levelInverse = getInversePos_(node, livingRuleData.level);
-            node.reason.code = 4;
             const data = { number: ruleSel.pos };
             let name = 'rule';
             if (ruleSel.conditional) {
@@ -909,16 +900,14 @@ module.exports = function (RED) {
                         // calc sun position:
                         blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
                     }
-                    if (blindCtrl.rule.minimum && (node.blindData.level < blindCtrl.rule.minimum.level)) {
-                        // min
+                    if (blindCtrl.rule.hasMinimum && (node.blindData.level < blindCtrl.rule.levelMinimum)) {
                         node.debug(`${node.blindData.level} is below rule minimum ${blindCtrl.rule.minimum.level}`);
                         node.reason.code = 15;
                         node.reason.state = RED._('blind-control.states.ruleMin', { org: node.reason.state, rule: blindCtrl.rule.minimum.id });
                         node.reason.description = RED._('blind-control.reasons.ruleMin', { org: node.reason.description, level: node.blindData.level, rule: blindCtrl.rule.minimum.id });
                         node.blindData.level = blindCtrl.rule.minimum.level;
                         node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
-                    } else if (blindCtrl.rule.maximum && (node.blindData.level > blindCtrl.rule.maximum.level)) {
-                        // max
+                    } else if (blindCtrl.rule.hasMaximum && (node.blindData.level > blindCtrl.rule.levelMaximum)) {
                         node.debug(`${node.blindData.level} is above rule maximum ${blindCtrl.rule.maximum.level}`);
                         node.reason.code = 26;
                         node.reason.state = RED._('blind-control.states.ruleMax', { org: node.reason.state, rule: blindCtrl.rule.maximum.id });
@@ -1062,45 +1051,18 @@ module.exports = function (RED) {
                     }
                 }
             }
-            if (node.rulesData) {
-                /**
-                 * 1 min/max  - no time
-                 * 2 absolute - no time
-                 * 3 min/max  - time    - until
-                 * 4 absolute - time    - until
-                 * 5 absolute - time    - from
-                 * 6 min/max  - time    - from
-                 */
+            /* if (node.rulesData) {
                 node.rulesData.sort((a, b) => {
-                    const tla = ((a.timeLimited) ? 1 : 0);
-                    const tlb = ((b.timeLimited) ? 1 : 0);
-                    const tl = (tla - tlb);
-                    if (tl !== 0) { // one is not time limited
-                        return tl; // not timeLimited before timeLimited (1-3)
-                    }
-                    const lta = ((a.levelOp > 0) ? 0 : 1);
-                    const ltb = ((b.levelOp > 0) ? 0 : 1);
-                    const lt = (lta - ltb);
-                    if (!a.timeLimited && !b.timeLimited) { // both not time limited
-                        if (lt !== 0) { return lt; } // min/max before absolute (1)
-                        // const cond = (a.conditional - b.conditional);
-                        // if (cond !== 0) { return cond; } // not conditional before conditional
-                        return a.pos - b.pos;
-                    }
-                    // both are time limited
-                    const top = (a.timeOp - b.timeOp);
-                    if (top !== 0) { // from/until type different
-                        return top; // from before until
-                    }
-                    // both same from/until type
-                    if (lt !== 0) { // min/max or absolute type different
-                        if (a.timeOp === 0) { return lt; } // from - min/max before absolute
-                        return -lt; // until - min/max after absolute
+                    if (a.timeLimited && b.timeLimited) { // both are time limited
+                        const top = (a.timeOp - b.timeOp);
+                        if (top !== 0) { // from/until type different
+                            return top; // from before until
+                        }
                     }
                     return a.pos - b.pos;
                 });
                 node.debug('node.rulesData =' + util.inspect(node.rulesData));
-            }
+            } */
         }
         initialize();
     }

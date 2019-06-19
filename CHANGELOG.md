@@ -9,13 +9,9 @@
 - blind control
   - fixed error on empty ruleset
   - add clear button for rules
-  - internal sort of rules and sort button for manual in UI
-    - sort order will be:
-      - 1 no time restriction
-      - 2 __until__ time restriction
-      - 3 __from__ time restriction
-    - inside a group of rules the original sort order will be preserved.
-  - enhanced documentation
+  - add sort button  in UI editor
+  - reworked minimum/maximum blind position settings by rule, enhanced in documentation
+- enhanced documentation
 
 #### 0.4.0: Maintenance Release
 
@@ -25,7 +21,7 @@
 - blind control
   - added additional oversteer settings (oversteer3)
   - added minimum delta for changes by sun control
-  - added minimum and maximum blind position settings by rule (only in enhanced mode)
+  - added minimum and maximum blind position settings by rule
   - enhanced documentation
 - start of changelog
 

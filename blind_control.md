@@ -8,32 +8,31 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ### Table of contents
 
-- [Blind Controller](#Blind-Controller)
-  - [blind-control](#blind-control)
-    - [Table of contents](#Table-of-contents)
-    - [The node](#The-node)
-    - [Node settings](#Node-settings)
-      - [general settings](#general-settings)
-      - [blind settings](#blind-settings)
-      - [rule settings](#rule-settings)
-      - [overwrite settings](#overwrite-settings)
-      - [sun settings](#sun-settings)
-        - [maximize sunlight (Winter)](#maximize-sunlight-Winter)
-        - [restrict sunlight (Summer)](#restrict-sunlight-Summer)
-        - [sun position settings](#sun-position-settings)
-    - [Node Input](#Node-Input)
-    - [Node Output](#Node-Output)
-    - [Node Status](#Node-Status)
-  - [rules](#rules)
-    - [rules with blind position minimum or maximum](#rules-with-blind-position-minimum-or-maximum)
-    - [rules example](#rules-example)
-  - [Samples](#Samples)
-    - [testing rules and overrides](#testing-rules-and-overrides)
-  - [Additional FAQ](#Additional-FAQ)
-    - [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
-    - [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
-    - [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
-  - [Other](#Other)
+* [Blind Controller](#blind-controller)
+  * [blind-control](#blind-control)
+    * [Table of contents](#table-of-contents)
+    * [The node](#the-node)
+    * [Node settings](#node-settings)
+      * [general settings](#general-settings)
+      * [blind settings](#blind-settings)
+      * [rule settings](#rule-settings)
+      * [overwrite settings](#overwrite-settings)
+      * [sun settings](#sun-settings)
+        * [maximize sunlight (Winter)](#maximize-sunlight-winter)
+        * [restrict sunlight (Summer)](#restrict-sunlight-summer)
+        * [sun position settings](#sun-position-settings)
+    * [Node Input](#node-input)
+    * [Node Output](#node-output)
+    * [Node Status](#node-status)
+  * [rules](#rules)
+    * [rules example](#rules-example)
+  * [Samples](#samples)
+    * [testing rules and overrides](#testing-rules-and-overrides)
+  * [Additional FAQ](#additional-faq)
+    * [Why is there no multi blind controller? (FAQ)](#why-is-there-no-multi-blind-controller-faq)
+    * [How to define a Temperature Overwrite? (FAQ)](#how-to-define-a-temperature-overwrite-faq)
+    * [How do I achieve that when opening a window the blind opens? (FAQ)](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens-faq)
+  * [Other](#other)
 
 ### The node
 
@@ -77,7 +76,7 @@ All values could be floating point values.
 
 ![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/59666684-9d8ecb80-91b5-11e9-8ea6-ddbe2293988b.png)
 
-* If a rule applies, the blind position defined by the rule will be used.
+* If a rule with a absolute blind position applies, the blind position defined by the rule will be used.
   * sun control will then not be active
 * If a rule has a condition, the rule only applies if the condition matches.
   * For some conditions a comparisons needs to be defined.
@@ -99,11 +98,11 @@ All values could be floating point values.
 
 #### sun settings
 
-Sun control is only active if no override and no rule applies!
+Sun control is only active if no override and no rule with an absolute blind position applies!
 
 If sun-control checkbox is not checked, the defined **default position** will be used.
 
-The sun control (maximize or restrict sunlight) is only active, if no other rule or override matches.
+The sun control (maximize or restrict sunlight) is only active, if no other rule (with an absolute blind position) or override matches.
 
 * Requirements that should be valid with a higher priority should be set up as rules.
   * Example: if the blind should set to a level if a temperature threshold exceeded, this could be setup as rule
@@ -112,19 +111,18 @@ The sun control (maximize or restrict sunlight) is only active, if no other rule
 
 ![image](https://user-images.githubusercontent.com/12692680/59666961-34f41e80-91b6-11e9-8ad0-958a650565d1.png)
 
-In this mode if no rule or override matches:
+In this mode if no override and no rule with an absolute blind position matches:
 
-* If no other rule or override matches
-  * If the sun is *not* in the window the blind will set to defined **min position**. (oversteer will be ignored)
-  * If the sun is in the window
-    * If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.
-    * otherwise the blind level is set to defined **max position**.
+* If the sun is *not* in the window the blind will set to defined **min position**. (oversteer will be ignored)
+* If the sun is in the window
+  * If any oversteer data are setup and oversteer conditions are fulfilled the blind will set to the defined oversteer blind position.
+  * otherwise the blind level is set to defined **max position**.
 
 ##### restrict sunlight (Summer)
 
 ![image](https://user-images.githubusercontent.com/12692680/59667118-797fba00-91b6-11e9-9b7f-5837c7fd4a29.png)
 
-In this mode if no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
+In this mode if no override and no rule with an absolute blind position matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.
 
 This calculation includes:
 
@@ -247,21 +245,15 @@ If the node is configured with two outputs this object is set as the `msg.payloa
   * `blindCtrl.rule` - exists only if no override is active
     * `blindCtrl.rule.active` - `true` if a rule applies
     * `blindCtrl.rule.id` - number of the rule who applies (is `-1` if no rule has applied)
-    * `blindCtrl.rule.level` - the blind level defined by the rule [exists only if a rule applies]
+    * `blindCtrl.rule.level` - the blind level defined by the rule if level type is __absolute__, otherwise the defined default blind position [exists only if a rule applies]
     * `blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
     * `blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
     * `blindCtrl.rule.conditon` - __object__ with additional data about the condition [exists only if `blindCtrl.rule.conditional` is true] - good for debugging purpose
     * `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
-    * `blindCtrl.rule.mimimum` - exists only if a minimum rule exists
-      * `blindCtrl.rule.mimimum.id` - number of the minimum rule who applies
-      * `blindCtrl.rule.mimimum.level` - the minimum blind level defined by the rule
-      * `blindCtrl.rule.mimimum.conditon` - __object__ with additional data about the condition
-      * `blindCtrl.rule.mimimum.time` - __object__ with additional data about the time
-    * `blindCtrl.rule.maximum` - exists only if a maximum rule exists
-      * `blindCtrl.rule.maximum.id` - number of the maximum rule who applies
-      * `blindCtrl.rule.maximum.level` - the maximum blind level defined by the rule
-      * `blindCtrl.rule.maximum.conditon` - __object__ with additional data about the condition
-      * `blindCtrl.rule.maximum.time` - __object__ with additional data about the time
+    * `blindCtrl.rule.hasMinimum` - is __true__ if the level type of the rule is __minimum__, otherwise __false__
+    * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMinimum` is __true__ and then contains then the blind level defined by the rule
+    * `blindCtrl.rule.hasMaximum` - is __true__ if the level type of the rule is __maximum__, otherwise __false__
+    * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMaximum` is __true__ and then contains then the blind level defined by the rule
   * `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     * `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
     * `blindCtrl.sunPosition.oversteer` - object containing the active oversteer data
@@ -281,50 +273,48 @@ The shape indicates whether the blind is fully closed or not.
 
 ## rules
 
-The rules are not easy to understand. For simplicity, in the following description, the type of the blind position is absolute.
+The rules are not easy to understand.
 
-There are basically 4 generic types of rules (absolute blind position):
+There are basically 4 generic types of rules:
 
-* absolute rule
-  * a rule with no time and no condition will be absolute. If such a rule exists, no other rule will be active, no sun control will be done
-  * such rules not really makes sense
+* no time and no condition rule
+  * a rule with no time and no condition will be always active if checked.
+  * such rules are evaluated in the order of time __until__ and time __from__ rules
 * a rule with a condition - conditional rule
   * a rule with a condition will only be active if the condition matches, otherwise the rule will be ignored
-  * rules with only a condition are evaluated before a rule with a time is evaluated
+  * rules with only a condition are evaluated in the order of time __until__ and time __from__ rules
 * a rule with a given time - time rule
   * time rules differ again in 2 ways
     * __until__ time rules
       * rules will be active from Midnight __until__ the given time
-      * the first matching __until__ rule of will be considered
+      * the first matching __until__ rule with a time later than the current time will be selected
     * __from__ time rules
       * rules will be active __from__ given time to Midnight
-      * the last matching __from__ rule of will be considered
+      * the last matching __from__ rule with a time earlier than the current time will be considered
+      * __from__ rules only considered if no __until__ rule was selected
 * a rule with a condition and a given time
   * these type of rules are a combination. The rules will only be considered if the condition matches and then it act as a normal time rule. Otherwise it will be ignored.
 
-a typically ruleset could be setup in a way like:
+the blind level of a rule could have 3 options:
 
-* 1 __until__ absolute time (e.g. early morning 6:00) blind will be closed
-* 2 __until__ sun rise time (e.g. sunrise) blind will be closed
+* __absolute__
+  * If a rule with a blind level of type absolute matches, the level would be set to the level defined in the rule. No sun control will be active as long this rule is active.
+* __minimum__
+  * If a rule with a blind level of type minimum matches, as the level the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used. If this level is below the given blind position by the rule, the position by the rule will be used.
+* __maximum__
+  * If a rule with a blind level of type maximum matches, as the level the the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used. If this level is above the given blind position by the rule, the position by the rule will be used.
+
+If there is a time where no rules matches, then as blind position the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used.
+
+a typically easy ruleset could be setup in a way like:
+
+* 1 __until__ absolute time (e.g. early morning 6:00) blind will be closed (absolute)
+* 2 __until__ sun rise time (e.g. sunrise) blind will be closed (absolute)
   * The previous absolute __until__ rule (rule 1) will consider that the blind is closed, even if the sun rise time (this rule 2) is earlier than the time of rule 1.
-* 3 __from__ sun set time (e.g. sunset) blind will be closed
-* 4 __from__ absolute time (e.g. late night 22:00) blind will be closed
+* 3 __from__ sun set time (e.g. sunset) blind will be closed (absolute)
+* 4 __from__ absolute time (e.g. late night 22:00) blind will be closed (absolute)
   * This rule 4 will be consider that the blind is closed, even if the sun set time (rule 3) is later than this absolute time.
 * In the time between the rule 2 (last __until__) and the rule 3 (first __from__ rule) the blind will set to the default position which is setup normally to open. Only in this time the blind position can be controlled by sun.
-
-This simple example could be enhanced with additional conditional rules.
-
-### rules with blind position minimum or maximum
-
-Rules that are not absolute dictate a minimum and maximum position with a very high priority.
-
-As far as possible, only absolute rules should be used, as the use of the minimum and maximum rules further increases the complexity.
-
-Time and conditions apply to minimum and maximum rules in the same way as for absolute rules. The absolute, minimum and maximum rules are evaluated independently of each other. Thus, there can be a valid absolute, a minimum and a maximum rule at the same time. It is not possible to go below the blind level of a minimum rule with an absolute rule or to exceed the blind level of a maximum rule with an absolute rule.
-
-Minimum and maximum rules can be used primarily for conditional overrides on a rule basis. Example: These rules can be used to define at certain times a minimum level for the blind if a window opening contact reports an open window.
-
-Another Example will be the usage of minimum/maximum level at specific weather conditions which should also override absolute rules.
 
 ### rules example
 

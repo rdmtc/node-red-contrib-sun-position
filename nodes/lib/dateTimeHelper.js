@@ -8,6 +8,8 @@ module.exports = {
     isBool,
     isTrue,
     isFalse,
+    XOR,
+    XAND,
     pad2,
     pad,
     clipStrLength,
@@ -72,6 +74,26 @@ function isTrue(val) {
 function isFalse(val) {
     val = (val+'').toLowerCase();
     return (['false', 'no', 'off', 'nein'].includes(val) || (!isNaN(val) && (Number(val) <= 0)));
+}
+
+/**
+ * Exclusive OR
+ * @param {*} a  -  operand one
+ * @param {*} b  -  operand two
+ * @returns {boolean}  -  **true** if the a expression or b expression is **true** (like ||), but not if both are **true**
+ */
+function XOR(a,b) {
+    return (!a !== !b); // (a || b) && !(a && b); // ( a && !b ) || ( !a && b )
+}
+
+/**
+ * Exclusive AND
+ * @param {*} a  -  operand one
+ * @param {*} b  -  operand two
+ * @returns {boolean}  -  **true** if the a expression and b expression is **true** (like &&) or if both are **false**
+ */
+function XAND(a, b) {
+    return (!a === !b); // (a && b) || !(a || b); // (a && b) || (!a && !b);
 }
 
 /**

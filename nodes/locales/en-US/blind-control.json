@@ -42,8 +42,8 @@
 			"outputs": "Outputs",
 			"singleOutput": "single (1)",
 			"splitOutput": "dual (2)",
-			"btnSort": "sort roughly",
-			"btnSortAll": "sort",
+			"btnAdd": "add",
+			"btnSort": "sort",
 			"btnClear": "clear"
 		},
 		"placeholder": {
@@ -68,7 +68,10 @@
 			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
-			"outputs": "number of outputs"
+			"outputs": "number of outputs",
+			"btnAdd": "add new empty rule",
+			"btnSort": "sort all rules, Attention this can change the behavior!",
+			"btnClear": "removes all rules from list"
 		},
 		"text": {
 			"blind": "blind settings",
