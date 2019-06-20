@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="time-inject">
     <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -352,11 +353,25 @@
 </style>
 
 <script type="text/javascript">
+    /**
+     * clip a value to a defined length
+     * @param {string} v - the value
+     * @param {number} [l] - the desired length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function clipValueLength(v, l) {
         l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
-
+    /**
+     * get the label for a typed input vlaue
+     * @param {*} node - the node object for getting i18N Data (node._())
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [offset] - a optional offset to the value
+     * @param {number} [l] - the desired maximum length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function getValueLabel(node, t, v, offset, l) {
         l = l || 20;
         let suffix = '';
@@ -436,6 +451,17 @@
 
         return clipValueLength(v, l) + suffix;
     }
+    /**
+     * get the value for the day checkbox array
+     * @param {jQuery} value - the checkbox array
+     * @returns {string} the value of the checkboxes
+     */
+    function getDaysStr(value) {
+        const days = value.map((_, el) => { return $(el).val(); }).get();
+        if (days.length === 0) { return ''; }
+        if (days.length === 7) { return '*'; }
+        return days.join(',');
+    }
 
     RED.nodes.registerType('time-inject', {
         category: 'time and astro',
@@ -464,7 +490,7 @@
             },
             payloadOffset: {
                 value: 0,
-                validate: v => {
+                validate(v) {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.payloadOffsetType === 'undefined') ||
@@ -495,7 +521,7 @@
             },
             offset: {
                 value: 0,
-                validate: v => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.offsetType === 'undefined') ||
@@ -512,7 +538,7 @@
             offsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -527,7 +553,7 @@
             property: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         typeof this.propertyType === 'undefined' ||
@@ -546,7 +572,7 @@
             },
             propertyThreshold: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyThresholdType')(v) ||
@@ -566,7 +592,7 @@
             timeAlt: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.typedInput('timeAltType')(v) ||
                         ($('#node-input-timeType').length ?
@@ -584,7 +610,7 @@
             },
             timeAltOffset: {
                 value: 0,
-                validate: v => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         (typeof this.timeAltOffsetType === 'undefined') ||
@@ -605,7 +631,7 @@
             timeAltOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -626,7 +652,7 @@
             },
             onceDelay: {
                 value: 0.1,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.number()(v) ||
                         v === '' ||
@@ -637,7 +663,7 @@
             },
             addPayload1: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         typeof this.addPayload1Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -650,7 +676,7 @@
             },
             addPayload1Value: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.typedInput('addPayload1ValueType')(v) ||
                         $('#node-input-addPayload1').typedInput('type') === 'none' ||
@@ -666,7 +692,7 @@
             },
             addPayload1Offset: {
                 value: 0,
-                validate: v => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload1OffsetType === 'undefined') ||
@@ -684,7 +710,7 @@
             addPayload1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
@@ -703,7 +729,7 @@
             },
             addPayload2: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         typeof this.addPayload2Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -716,7 +742,7 @@
             },
             addPayload2Value: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.typedInput('addPayload2ValueType')(v) ||
                         $('#node-input-addPayload2').typedInput('type') === 'none' ||
@@ -732,7 +758,7 @@
             },
             addPayload2Offset: {
                 value: 0,
-                validate: v => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload2OffsetType === 'undefined') ||
@@ -748,7 +774,7 @@
             addPayload2OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
@@ -767,7 +793,7 @@
             },
             addPayload3: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         typeof this.addPayload3Type === 'undefined' ||
                         typeof v === 'undefined' ||
@@ -780,7 +806,7 @@
             },
             addPayload3Value: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.typedInput('addPayload3ValueType')(v) ||
                         $('#node-input-addPayload3').typedInput('type') === 'none' ||
@@ -796,7 +822,7 @@
             },
             addPayload3Offset: {
                 value: 0,
-                validate: v => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.addPayload3OffsetType === 'undefined') ||
@@ -812,7 +838,7 @@
             addPayload3OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.number()(v) ||
                         $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
@@ -831,7 +857,7 @@
             },
             recalcTime: {
                 value: 2,
-                validate: v => {
+                validate(v){
                     return (
                         RED.validators.number()(v) ||
                         v === '' ||
@@ -972,13 +998,12 @@
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
-                function getDaysStr(value) {
-                    const days = value.map((_, el) => { return $(el).val(); }).get();
-                    if (days.length === 0) { return ''; }
-                    if (days.length === 7) { return '*'; }
-                    return days.join(',');
-                }
-
+                /**
+                * update multiplier settings from a previous version
+                * @param {number} mp - the multiplier value
+                * @param {string} name - the name of the element
+                * @returns {number} the updated multiplier value
+                */
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', data => (data.id > 0));
@@ -1073,7 +1098,7 @@
                         types.SunCalc,
                         types.MoonCalc
                     ],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const plVType = $('#node-input-payload').typedInput('type');
                         if (plVType ===  types.TimeEntered.value ||
                             plVType === types.TimeSun.value ||
@@ -1115,7 +1140,7 @@
                     defaultType: (node.payloadOffset === 0 || node.payloadOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-payloadOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-payloadOffsetMultiplier').prop('disabled', true);
@@ -1133,7 +1158,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-time').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('.time-inject-row-offset').hide();
@@ -1160,7 +1185,7 @@
                             }, {
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
-                                type:       type,
+                                type,
                                 value:      $('#node-input-time').typedInput('value'),
                                 offsetType: $('#node-input-offset').typedInput('type'),
                                 offset:     $('#node-input-offset').typedInput('value'),
@@ -1182,7 +1207,7 @@
                     defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-offset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-offsetMultiplier').prop('disabled', true);
@@ -1200,7 +1225,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const timeType = $('#node-input-time').typedInput('type');
                         const propType = $('#node-input-property').typedInput('type');
                         if ( timeType === types.Undefined.value || propType === types.Undefined.value ) {
@@ -1275,7 +1300,7 @@
                     defaultType: 'entered',
                     defaultValue: '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange (_type, _value) {
                         if (!$('.time-inject-row-timeAlt').is(':hidden')) {
                             getBackendData(d => {
                                 const $div = $('#node-input-timeAlt-div');
@@ -1311,7 +1336,7 @@
                     defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-timeAltOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-timeAltOffsetMultiplier').prop('disabled', true);
@@ -1333,7 +1358,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const plType = $('#node-input-addPayload1').typedInput('type');
                         if (plType !== types.Undefined.value) {
                             $('.time-addPayload1Value').show();
@@ -1397,7 +1422,7 @@
                         types.SunCalc,
                         types.MoonCalc
                     ],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         $('#node-input-addPayload1').change();
                         if (!$('.time-addPayload1Value').is(':hidden')) {
                             getBackendData(d => {
@@ -1435,7 +1460,7 @@
                     defaultType: (node.addPayload1Offset === 0 || node.addPayload1Offset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-addPayload1Offset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-addPayload1OffsetMultiplier').prop('disabled', true);
@@ -1457,7 +1482,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const plType = $('#node-input-addPayload2').typedInput('type');
                         if (plType !== types.Undefined.value) {
                             $('.time-addPayload2Value').show();
@@ -1521,7 +1546,7 @@
                         types.SunCalc,
                         types.MoonCalc
                     ],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         $('#node-input-addPayload2').change();
                         if (!$('.time-addPayload2Value').is(':hidden')) {
                             getBackendData(d => {
@@ -1558,7 +1583,7 @@
                     defaultType: (node.addPayload2Offset === 0 || node.addPayload2Offset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-addPayload2Offset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-addPayload2OffsetMultiplier').prop('disabled', true);
@@ -1580,7 +1605,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const plType = $('#node-input-addPayload3').typedInput('type');
                         if (plType !== types.Undefined.value) {
                             $('.time-addPayload3Value').show();
@@ -1640,7 +1665,7 @@
                         types.SunCalc,
                         types.MoonCalc
                     ],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         $('#node-input-addPayload3').change();
                         if (!$('.time-addPayload3Value').is(':hidden')) {
                             getBackendData(d => {
@@ -1677,7 +1702,7 @@
                     defaultType: (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-addPayload3Offset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-addPayload3OffsetMultiplier').prop('disabled', true);
@@ -1715,12 +1740,6 @@
                 });
         },
         oneditsave() {
-            function getDaysStr(value) {
-                const days = value.map((_, el) => { return $(el).val(); }).get();
-                if (days.length === 0) { return ''; }
-                if (days.length === 7) { return '*'; }
-                return days.join(',');
-            }
             // this.payloadType = $("#node-input-payload").typedInput("type");
             // this.timeType = $("#node-input-time").typedInput("type");
             this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
@@ -1753,10 +1772,10 @@
             }
         },
         button: {
-            enabled: function() {
+            enabled: function() { // eslint-disable-line object-shorthand
                 return !this.changed;
             },
-            onclick: function() {
+            onclick: function() { // eslint-disable-line object-shorthand
                 if (this.changed) {
                     return RED.notify(RED._('node-red:notification.warning', { message: RED._('node-red:notification.warnings.undeployedChanges') }), 'warning');
                 }
@@ -1775,10 +1794,10 @@
                 $.ajax({
                     url: 'time-inject/' + this.id,
                     type: 'POST',
-                    success: function(_resp) {
-                        RED.notify(node._('node-red:inject.success',{label:label}),{type:'success',id:'inject'});
+                    success(_resp) {
+                        RED.notify(node._('node-red:inject.success',{label}),{type:'success',id:'inject'});
                     },
-                    error: function(jqXHR, textStatus, _errorThrown) {
+                    error(jqXHR, textStatus, _errorThrown) {
                         if (jqXHR.status === 404) {
                             RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
                         } else if (jqXHR.status === 500) {
@@ -1790,6 +1809,7 @@
                         }
                     }
                 });
+                return undefined;
             }
         }
     });</script>

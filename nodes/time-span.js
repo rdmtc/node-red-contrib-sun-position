@@ -15,6 +15,12 @@ const perHour = 3600000;
 const perDay = 86400000;
 const perWeek = 604800000;
 
+/**
+ * get the differense between two month relative
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in month between the two dates
+ */
 function getMonthDiff(d1,d2) {
     let months = (d2.getFullYear() - d1.getFullYear()) * 12;
     months -= d1.getMonth() + 1;
@@ -26,6 +32,12 @@ function getMonthDiff(d1,d2) {
     return months;
 }
 
+/**
+ * get the differense between two month absolute
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in month between the two dates
+ */
 function getMonthDiffAbs(d1,d2) {
     let months = (d2.getFullYear() - d1.getFullYear()) * 12;
     months -= d1.getMonth() + 1;
@@ -35,6 +47,12 @@ function getMonthDiffAbs(d1,d2) {
     return months;
 }
 
+/**
+ * get the differense between years absolute
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in years between the two dates
+ */
 function getYearDiffAbs(d1,d2) {
     let years = (d2.getFullYear() - d1.getFullYear());
     if (d2.getMonth() >= d1.getMonth()) {
@@ -43,6 +61,13 @@ function getYearDiffAbs(d1,d2) {
     return years;
 }
 
+/**
+ * format timespan
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @param {string} format - the out format
+ * @returns {string} differences in years between the two dates
+ */
 function formatTS(d1, d2, format) {
     const token = /[yMw]{1,2}|t?[dhHkKms]{1,2}|t?l{1,3}|[tT]{1,2}|S|L|"[^"]*"|'[^']*'/g;
 
@@ -135,6 +160,13 @@ function formatTS(d1, d2, format) {
     });
 }
 
+/**
+ * get a formated timespan
+ * @param {Date} date1 - Date 1
+ * @param {Date} date2 - Date 2
+ * @param {string} format - the out format
+ * @returns {string} the formatet timespan
+ */
 function getFormattedTimeSpanOut(date1, date2, format) {
     format = format || 0;
     if (isNaN(format)) {
@@ -198,7 +230,7 @@ function getFormattedTimeSpanOut(date1, date2, format) {
             timeUTCStr: date2.toUTCString(),
             timeISOStr: date2.toISOString()
         },
-        timeSpan: timeSpan,
+        timeSpan,
         timeSpanAbs: {
             ms: timeSpan % 1000,
             sec: Math.floor(timeSpan / perSecond) % 60,
@@ -223,7 +255,10 @@ function getFormattedTimeSpanOut(date1, date2, format) {
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * timeSpanNode
+     * @param {*} config - configuration
+     */
     function timeSpanNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -370,6 +405,7 @@ module.exports = function (RED) {
                 });
                 throw err;
             }
+            return null;
         });
     }
 

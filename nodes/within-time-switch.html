@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="within-time-switch">
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -163,11 +164,25 @@
 </style>
 
 <script type="text/javascript">
+    /**
+     * clip a value to a defined length
+     * @param {string} v - the value
+     * @param {number} [l] - the desired length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function clipValueLength(v, l) {
         l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
-
+    /**
+     * get the label for a typed input vlaue
+     * @param {*} node - the node object for getting i18N Data (node._())
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [offset] - a optional offset to the value
+     * @param {number} [l] - the desired maximum length (default = 20)
+     * @returns {string} the value clipped to the given length
+     */
     function getValueLabel(node, t, v, offset, l) {
         l = l || 20;
         let suffix = '';
@@ -278,7 +293,7 @@
             },
             startOffset: {
                 value: 0,
-                validate: v => {
+                validate(v) {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
@@ -304,7 +319,7 @@
             },
             endOffset: {
                 value: 0,
-                validate: v => {
+                validate(v) {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
@@ -333,7 +348,7 @@
             },
             propertyStartThreshold: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyStartThresholdType')(v) ||
@@ -353,7 +368,7 @@
             startTimeAlt: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return RED.validators.typedInput('startTimeAltType')(v) || ($(
                         '#node-input-propertyStart').typedInput(
                         'type') === 'none');
@@ -364,7 +379,7 @@
             },
             startOffsetAlt: {
                 value: 0,
-                validate: v => {
+                validate(v) {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
@@ -380,7 +395,7 @@
             startOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v) {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyStart').typedInput('type') === 'none') ||
                     ($('#node-input-startTimeAlt').typedInput('type') === 'none');
@@ -399,7 +414,7 @@
             },
             propertyEndThreshold: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.typedInput('propertyEndThresholdType')(v) ||
@@ -419,7 +434,7 @@
             endTimeAlt: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
                         'type') === 'none');
                 }
@@ -429,7 +444,7 @@
             },
             endOffsetAlt: {
                 value: 0,
-                validate: v => {
+                validate(v) {
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetAltType === 'undefined') ||
@@ -445,7 +460,7 @@
             endOffsetAltMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v) {
                     return RED.validators.number()(v) ||
                     ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
                     ($('#node-input-endTimeAlt').typedInput('type') === 'none');
@@ -511,6 +526,12 @@
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
+                /**
+                * update multiplier settings from a previous version
+                * @param {number} mp - the multiplier value
+                * @param {string} name - the name of the element
+                * @returns {number} the updated multiplier value
+                */
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
                     appendOptions(node, field, 'multiplier', data => (data.id > 0));
@@ -538,7 +559,7 @@
                     defaultType: node.startTimeType || types.TimeEntered.value,
                     defaultValue: node.startTime || '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
+                    onFocus(_type, _value) {
                         const plVType = $('#node-input-startTime').typedInput('type');
                         const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
                         if (plVType ===  'msg' ||
@@ -552,7 +573,7 @@
                             $('.msg-start-out-row').show();
                         }
                     },
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         getBackendData(d => {
                             const $div = $('#node-input-startTime-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -582,7 +603,7 @@
                     defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-startOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-startOffsetMultiplier').prop('disabled', true);
@@ -600,7 +621,7 @@
                     defaultType: node.endTimeType || types.TimeEntered.value,
                     defaultValue: node.endTime || '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
+                    onFocus(_type, _value) {
                         const plVType = $('#node-input-endTime').typedInput('type');
                         const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
                         if (plVType ===  'msg' ||
@@ -614,7 +635,7 @@
                             $('.msg-end-out-row').show();
                         }
                     },
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         getBackendData(d => {
                             const $div = $('#node-input-endTime-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -644,7 +665,7 @@
                     defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-endOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-endOffsetMultiplier').prop('disabled', true);
@@ -662,7 +683,7 @@
                     defaultType: node.propertyStartType  || types.Undefined.value,
                     defaultValue: node.propertyStartValue || '' ,
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const propCompare = $('#node-input-propertyStartCompare');
                         const propType = $('#node-input-propertyStart').typedInput('type');
                         if (propType === 'none') {
@@ -725,7 +746,7 @@
                     defaultType: 'entered',
                     defaultValue: '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
+                    onFocus(_type, _value) {
                         if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                             ($('#node-input-propertyStart').typedInput('type') === 'none')) {
                             $('.alternate-time-start-offset').hide();
@@ -733,7 +754,7 @@
                             $('.alternate-time-start-offset').show();
                         }
                     },
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         getBackendData(d => {
                             const $div = $('#node-input-startTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -763,7 +784,7 @@
                     defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-startTimeAltOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
@@ -781,7 +802,7 @@
                     defaultType: node.propertyEndType  || types.Undefined.value,
                     defaultValue: node.propertyEndValue || '' ,
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const propCompare = $('#node-input-propertyEndCompare');
                         const propType = $('#node-input-propertyEnd').typedInput('type');
 
@@ -845,7 +866,7 @@
                     defaultType: 'entered',
                     defaultValue: '',
                     types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus: (_type, _value) => {
+                    onFocus(_type, _value) {
                         if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                             ($('#node-input-propertyStart').typedInput('type') === 'none')) {
                             $('.alternate-time-start-offset').hide();
@@ -853,7 +874,7 @@
                             $('.alternate-time-start-offset').show();
                         }
                     },
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         getBackendData(d => {
                             const $div = $('#node-input-endTimeAlt-div');
                             const titleOrg = $div.attr('titleOrg');
@@ -883,7 +904,7 @@
                     defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-endTimeAltOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);

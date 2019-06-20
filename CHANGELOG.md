@@ -2,7 +2,6 @@
 
 - fixed problems on RedMatic call of getBackendData
   - tooltip with resolved time on typeInput now also available in RedMatic
-- optimized access to backend services
 - i18N reworked
   - for compares using mathematical signs for equal, unequal, greater than, less than
   - added more Unicode symbols
@@ -12,6 +11,9 @@
   - add sort button  in UI editor
   - reworked minimum/maximum blind position settings by rule, enhanced in documentation
 - enhanced documentation
+- optimized code to ES6
+  - fixed a lot of wrong usages of arrow function for data validation
+- optimized access to backend services
 
 #### 0.4.0: Maintenance Release
 

@@ -8,7 +8,10 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * timeCompNode
+     * @param {*} config - configuration
+     */
     function timeCompNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -16,7 +19,7 @@ module.exports = function (RED) {
         // this.debug('initialize time Node ' + util.inspect(config));
         const node = this;
 
-        this.on('input', msg => {
+        this.on('input', msg => { // eslint-disable-line complexity
             if (node.positionConfig === null ||
                 config.operator === null ||
                 config.inputType === null) {

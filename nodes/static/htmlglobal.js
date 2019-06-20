@@ -1,4 +1,8 @@
 /************************************************************************/
+/**
+ * get selection firlds
+ * @returns {Object} Object for selection fields
+ */
 function getSelectFields() { // eslint-disable-line no-unused-vars
     return {
         operatorsGroups: [
@@ -121,6 +125,11 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
     };
 }
 
+/**
+ * get types for typeInputs
+ * @param {*} node - node representation for access to i18N function (node._())
+ * @returns {Object} object of types
+ */
 function getTypes(node) { // eslint-disable-line no-unused-vars
     return {
         Unlimited: {
@@ -325,6 +334,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
     };
 }
 
+/**
+ * get auto complete formats
+ * @returns {Object} object of auto complete formats
+ */
 function getAutocompleteFormats() {
     return {
         dateParseFormat : [
@@ -442,10 +455,14 @@ function getAutocompleteFormats() {
 }
 
 // #region functions
+/**
+ * getcurrent cursor position
+ * @returns {number|undefined} current cursor position
+ */
 $.fn.getCursorPosition = function () {
     const input = this.get(0);
     if (!input) {
-        return;
+        return undefined;
     } // No (input) element found
 
     if ('selectionStart' in input) {
@@ -460,8 +477,15 @@ $.fn.getCursorPosition = function () {
         sel.moveStart('character', -input.value.length);
         return sel.text.length - selLen;
     }
+    return undefined;
 };
 
+/**
+ *initializes a value
+ * @param {*} data - object containing property
+ * @param {string} id - id of the property
+ * @param {*} newVal returns the new value
+ */
 function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-vars
     if (data[id] === null || typeof data[id] === 'undefined') {
         // let idHtml = "#node-input-" + id;
@@ -471,6 +495,11 @@ function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-va
     }
 }
 
+/**
+ * initializes an inputbos with autocomplete
+ * @param {jQuery} inputBox - jsQuery selector of the input box
+ * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
+ */
 function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-vars
     const dataList = getAutocompleteFormats()[dataListID];
     // don't navigate away from the field on tab when selecting an item
@@ -508,7 +537,14 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
     });
 }
 
-function appendOptions(node, parent, elementName, limit) { // eslint-disable-line no-unused-vars
+/**
+ * append options to a select field
+ * @param {*} node - node representation for access to i18N function (node._())
+ * @param {jQuery} parent - jQuery selector of the parent element (<select> - field)
+ * @param {string} elementName - name of the element from getSelectFields()
+ * @param {Function} filter - function for filter the elements
+ */
+function appendOptions(node, parent, elementName, filter) { // eslint-disable-line no-unused-vars
     // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
     const groups = getSelectFields()[elementName + 'Groups'];
     if (!groups) {
@@ -524,8 +560,8 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
         const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:common.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
-                if (limit) {
-                    if (limit(elements[eIndex])) {
+                if (filter) {
+                    if (filter(elements[eIndex])) {
                         group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
                     }
                 } else {
@@ -536,6 +572,24 @@ function appendOptions(node, parent, elementName, limit) { // eslint-disable-lin
     }
 }
 
+/**
+* @typedef {Object} tiData
+* @property {string} valueProp - the name of the value property
+* @property {string} typeProp - the name of the type property
+* @property {string} [defaultValue] - value for the default value
+* @property {string} [defaultType] - value for the default type
+* @property {string} [tooltip] - a tootlip for the input field
+* @property {string} [width] - width of the input field
+* @property {string} [onChange] - on change function
+* @property {string} [onFocus] - on focus / focus lost function
+*/
+
+/**
+ * setup a typedInput for node-red
+ * @param {*} node - node representation for access to i18N function (node._())
+ * @param {tiData} data - data of the typed input
+ * @returns {jQuery} jQuery selector of the typeInput field - ideal for chaining
+ */
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     const $inputField = $('#node-input-' + data.valueProp);
     const $typeField = $('#node-input-' + data.typeProp);
@@ -595,11 +649,21 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
 }
 
 // ************************************************************************************************
-
-function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName, value, baseWidth, timeFormat) { // eslint-disable-line no-unused-vars
+/**
+ * initializes a combobox (combination of input and select box)
+ * @param {*} node - node representation for access to i18N function (node._())
+ * @param {jQuery} $inputSelect - jQuery selector of the select element
+ * @param {jQuery} $inputBox - jQuery selector of the input element
+ * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
+ * @param {string} optionElementName - name of the element from getSelectFields()
+ * @param {string} value - value of the input/select field
+ * @param {number} baseWidth - base widtrh of the field combination
+ * @param {string} [timeFormat] - name of tzhe timeformat from position-config:common.timeFormat...
+ */
+function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementName, value, baseWidth, timeFormat) { // eslint-disable-line no-unused-vars
     // console.log('initCombobox node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     appendOptions(node, $inputSelect, optionElementName);
-    autocomplete($inputBox, dataList);
+    autocomplete($inputBox, dataListID);
     const valueNum = Number(value);
     timeFormat = timeFormat || 'default';
     if (isNaN(valueNum)) {
@@ -630,8 +694,16 @@ function initCombobox(node, $inputSelect, $inputBox, dataList, optionElementName
 }
 // ************************************************************************************************
 
-function addLabel(row, forEl, symb, text) { // eslint-disable-line no-unused-vars
-    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(row);
+/**
+ * add a label to a html element
+ * @param {jQuery} parent - element (row) to append the label
+ * @param {string} forEl - name of the element to what the label is
+ * @param {string} [symb] - class name of the symbol e.g. 'fa fa-clock'
+ * @param {string} [text] - text of the label
+ * @returns {jQuery} jQuery selector of the new label
+ */
+function addLabel(parent, forEl, symb, text) { // eslint-disable-line no-unused-vars
+    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(parent);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
     }
@@ -645,18 +717,37 @@ function addLabel(row, forEl, symb, text) { // eslint-disable-line no-unused-var
     return lbl;
 }
 
+/**
+* @typedef {Object} multiselectTypes
+* @property {string} label - the name of the type property
+* @property {regex} selection - regular expression selector
+*/
+
+/**
+ * return the label who matches the regex selector for types
+ * @param {string} val - value to test
+ * @param {number} [length] - optional output if nothing is found
+ * @param {multiselectTypes[]} types - array of types
+ * @returns {string} the selected label or the given length or 'NA'
+ */
 function getMultiselectText(val, length, types) { // eslint-disable-line no-unused-vars
     for (let index = 0; index < types.length; index++) {
         if (types[index].selection.test(val)) {
             return types[index].label;
         }
     }
-    if (length > 0) {
+    if (length && (length > 0)) {
         return length;
     }
     return 'NA';
 }
 
+/**
+ * set the checkboxes in a multiselect combo box to a value
+ * @param {string} value - value of the array
+ * @param {jQuery} field - parent jquery selector element
+ * @param {multiselectTypes[]} types - array of types
+ */
 function setMultiselect(value, field, types) { // eslint-disable-line no-unused-vars
     if (value === '*' || typeof value === 'undefined') {
         field.find('#option-checkboxes input[type=checkbox]').prop('checked', true);
@@ -673,11 +764,12 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
 
 /**
  * adds a multiselect combo box to the form
- * @param {*} node Node Red Source Node
- * @param {*} parent Parent jQuery Element to add multiselect
- * @param {*} elementName Name of the element in the node, e.g. 'operatorTypes'
- * @param {*} i18N i18N element name, e.g. 'time-comp.operatorTypes'
- * @param {*} id element id, e.g. 'node-input-rule-operatorType-1'
+ * @param {*} node - Node Red Source Node
+ * @param {jQuery} parent - parent jQuery selector to add multiselect
+ * @param {string} elementName - Name of the element in the node, e.g. 'operatorTypes'
+ * @param {string} i18N - i18N element name, e.g. 'time-comp.operatorTypes'
+ * @param {string} id - element id, e.g. 'node-input-rule-operatorType-1'
+ * @returns {jQuery} jQuery selector of the multiselect
  */
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
     const types = getSelectFields()[elementName + 'Short'];
@@ -744,6 +836,26 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     return multiselect;
 }
 
+/**
+* @typedef {Object} backendData
+* @property {string} config - the config object
+* @property {('getTimeData'|'getDateData'|'getOutDataData')} kind - kind of request
+* @property {string} type - type input type
+* @property {string} value - type input value
+* @property {string} [offsetType] - type input type for offset
+* @property {string} [offset] - type input value for offset
+* @property {number} [multiplier] - multiplier to value
+* @property {boolean} [next] - identifier if the next should be output
+* @property {string} [days] - allowed days identifier
+* @property {string} [format] - output format
+*/
+
+/**
+ * get type Data from the backend
+ * @param {*} result
+ * @param {backendData} data
+ * @returns {*} object based on the request
+ */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     // console.log('getBackendData');  // eslint-disable-line
     // console.log(data);  // eslint-disable-line
@@ -766,9 +878,4 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
         const url = 'sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
     }
-}
-
-function getDateData(result, data) { // eslint-disable-line no-unused-vars
-    const url = 'sun-position/data?kind=getDateData&' + jQuery.param( data );
-    $.getJSON(url, result);
 }

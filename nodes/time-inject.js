@@ -11,6 +11,12 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 module.exports = function (RED) {
     'use strict';
 
+    /**
+     * get the schedule time
+     * @param {Date} time - time to schedule
+     * @param {number} [limit] - minimal time limit to schedule
+     * @returns {number} milliseconds until the defined Date
+     */
     function tsGetScheduleTime(time, limit) {
         const now = new Date();
         let millisec = time.getTime() - now.getTime();
@@ -23,6 +29,21 @@ module.exports = function (RED) {
         return millisec;
     }
 
+    /**
+     *
+     * @param {*} node
+     * @param {*} msg
+     * @param {*} type
+     * @param {*} name
+     * @param {*} valueType
+     * @param {*} value
+     * @param {*} format
+     * @param {*} offset
+     * @param {*} offsetType
+     * @param {*} multiplier
+     * @param {*} days
+     * @param {*} next
+     */
     function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days, next) {
         if (typeof next === 'undefined' || next === null || next === true || next === 'true') {
             next = true;
@@ -53,6 +74,10 @@ module.exports = function (RED) {
         }
     }
 
+    /**
+     * timeInjectNode
+     * @param {*} config - configuration
+     */
     function timeInjectNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -90,6 +115,12 @@ module.exports = function (RED) {
         this.nextTimeAltData = null;
         const node = this;
 
+        /**
+         * creates the timeout
+         * @param {*} node - the node representation
+         * @param {boolean} [_onInit] - _true_ if is in initialisation
+         * @returns {object} state or error
+         */
         function doCreateTimeout(node, _onInit) {
             let errorStatus = '';
             let isAltFirst = false;
@@ -200,6 +231,7 @@ module.exports = function (RED) {
                         msg.timeData = node.nextTimeData;
                     }
                     node.emit('input', msg);
+                    return { state: 'emit', done: true };
                 }, millisec, isAlt, isAltFirst);
             }
 

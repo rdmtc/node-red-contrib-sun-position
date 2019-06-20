@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="blind-control">
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -311,6 +312,12 @@
 </style>
 
 <script type="text/javascript">
+    /**
+     * get a value
+     * @param {*} node - the node representation
+     * @param {string} name - name of the value
+     * @returns {*} the value of th element
+     */
     function getVal(node,name) {
         const v = $('#node-input-' + name).val();
         if (v === undefined) {
@@ -318,10 +325,20 @@
         }
         return v;
     }
+    /**
+     * count decimals
+     * @param {number} value - a floating point number
+     * @returns {number} number of decimals
+     */
     function countDecimals(value) {
         return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
     }
-
+    /**
+     * validates a blind position
+     * @param {*} node - the node representation
+     * @param {number} v - the blind position to validate
+     * @returns {boolean} __true__ if the blind position is valide
+     */
     function validateBlindPos(node, v) {
         const n = parseFloat(v);
         const inc = getVal(node, 'blindIncrement');
@@ -331,7 +348,11 @@
                 (n >= getVal(node, 'blindClosedPos')) &&
                 Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
     }
-
+    /**
+     * save rules
+     * @param {number} rules - output of the editableList
+     * @returns {number} number of decimals
+     */
     function saveRules(rules) {
         const result = [];
         if (rules) {
@@ -388,7 +409,7 @@
             blindIncrement: {
                 value: 0.01,
                 required: true,
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return (RED.validators.number(v) &&
                             (n <= getVal(this, 'blindOpenPos')) &&
@@ -398,17 +419,17 @@
             blindOpenPos: {
                 value: 1.00,
                 required: true,
-                validate: v => {
+                validate(v) { // eslint-disable-line request-shorthand
                     const n = parseFloat(v);
                     return RED.validators.number(v) &&
-                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                            (n > getVal(this, 'blindClosedPos'));
+                        (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                        (n > getVal(this, 'blindClosedPos'));
                 }
             },
             blindClosedPos: {
                 value: 0.00,
                 required: true,
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return RED.validators.number(v) &&
                             (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
@@ -430,7 +451,7 @@
             overwriteExpire: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                 }
@@ -445,7 +466,7 @@
             sunControlMode: {
                 value: '0',
                 required: true,
-                validate: v => {
+                validate(v) {
                     const n = Number(v);
                     return (RED.validators.number(v) && (n >= 0) && (n <= 2));
                 }
@@ -453,7 +474,7 @@
             sunFloorLength: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
                             (v !== '' && RED.validators.number(v));
@@ -462,7 +483,7 @@
             sunMinAltitude: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
@@ -472,7 +493,7 @@
             sunMinDelta: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
@@ -483,7 +504,7 @@
             },
             blindPosMin: {
                 value: 'closed (min)',
-                validate: v => {
+                validate(v) {
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
                         RED.validators.typedInput('blindPosMinType')(v));
                 }
@@ -493,7 +514,7 @@
             },
             blindPosMax: {
                 value: 'open (max)',
-                validate: v => {
+                validate(v) {
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
                     RED.validators.typedInput('blindPosMaxType')(v));
                 }
@@ -503,7 +524,7 @@
             },
             smoothTime: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     const n = parseFloat(v);
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) || (v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                 }
@@ -512,21 +533,21 @@
             // #region window settings
             windowTop: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowBottom: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowAzimuthStart: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     const n = Number(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
@@ -535,7 +556,7 @@
             },
             windowAzimuthEnd: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     const n = Number(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
@@ -547,7 +568,7 @@
             oversteerValue: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             RED.validators.typedInput('oversteerValueType')(v);
                 }
@@ -560,7 +581,7 @@
             },
             oversteerThreshold: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (getVal(this, 'oversteerValueType') === 'none') ||
                             RED.validators.typedInput('oversteerThresholdType')(v);
@@ -571,7 +592,7 @@
             },
             oversteerBlindPos: {
                 value: 'open (max)',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (getVal(this, 'oversteerValueType') === 'none') ||
                             RED.validators.typedInput('oversteerBlindPosType')(v); // validateBlindPos(this, v);
@@ -583,7 +604,7 @@
             oversteer2Value: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         RED.validators.typedInput('oversteer2ValueType')(v);
@@ -597,7 +618,7 @@
             },
             oversteer2Threshold: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -609,7 +630,7 @@
             },
             oversteer2BlindPos: {
                 value: 'open (max)',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -622,7 +643,7 @@
             oversteer3Value: {
                 value: '',
                 required: false,
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -637,7 +658,7 @@
             },
             oversteer3Threshold: {
                 value: '',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -650,7 +671,7 @@
             },
             oversteer3BlindPos: {
                 value: 'open (max)',
-                validate: v => {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -711,7 +732,7 @@
                     value: 'num',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
                     icon: 'red/images/typedInput/09.png',
-                    validate: v => { return validateBlindPos(this, v); }
+                    validate(v) { return validateBlindPos(this, v); }
                 };
                 types.LevelFix = {
                     value: 'levelFixed',
@@ -743,6 +764,14 @@
                         label: node._('blind-control.typeOptions.0')
                     }]
                 };
+                /**
+                 * save rules
+                 * @param {*} node - the node representation
+                 * @param {string} name - the node representation
+                 * @param {*} element - the node representation
+                 * @param {number} rules - output of the editableList
+                 * @returns {number} number of decimals
+                */
                 function setMultiplier(node, name, element, validate, defMultiplier) {
                     const c = Number(node[name]);
                     if (node[name] !== '' && !isNaN(c)) {
@@ -784,6 +813,13 @@
                     });
                     $('#time-control-' + name).change();
                 }
+                /**
+                 * get the default level
+                 * @param {string} type - the type value
+                 * @param {string} value - value
+                 * @param {string} def - the default value
+                 * @returns {string} the default value for the level
+                */
                 function getDefLevel(type, value, def) {
                     // console.log(console.log(`getDefLevel "${type}", "${value}", "${def}"`);
                     if (value) {
@@ -811,6 +847,10 @@
 
                 // #endregion blind
                 // #region rules
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
                 function resizeRule(rule) {
                     try {
                         const newWidth = rule.width() - 10;
@@ -855,7 +895,9 @@
                         console.log(ex); // eslint-disable-line
                     }
                 }
-
+                /**
+                 * resizes a rule container
+                 */
                 function resizeContainer() {
                     try {
                         const editorRow = $('.node-input-rule-container-row ol');
@@ -1053,7 +1095,7 @@
                     sortable: true,
                     removable: true,
                     scrollOnAdd: true,
-                    removeItem: function(_opt) {
+                    removeItem(_opt) {
                         const rules = $('#node-input-rule-container').editableList('items');
                         rules.each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
@@ -1062,7 +1104,7 @@
                         });
                         resizeContainer();
                     },
-                    sortItems: function(_rules) {
+                    sortItems(_rules) {
                         const rules = $('#node-input-rule-container').editableList('items');
                         rules.each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
@@ -1198,7 +1240,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
                         if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
@@ -1270,7 +1312,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
@@ -1353,7 +1395,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
                         const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
@@ -1492,17 +1534,5 @@
             } else {
                 $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
             }
-        },
-        oneditresize(size) {
-            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-            let height = size.height;
-            for (let i = 0; i < rows.size(); i++) {
-                height -= $(rows[i]).outerHeight(true);
-            }
-
-            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-            height -= 50;
-            $('#node-input-rule-container').editableList('height', height);
         }
     });</script>

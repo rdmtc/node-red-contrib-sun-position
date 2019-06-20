@@ -427,6 +427,11 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
 }
 
 /*******************************************************************************************************/
+/**
+ * get the standard timezone offset without DST
+ * @param {Date} d - Date to check
+ * @returns {number} minutes of the timezone offset
+ */
 function getStdTimezoneOffset(d) {
     d = d || new Date();
     const jan = new Date(d.getFullYear(),0,1);
@@ -434,6 +439,11 @@ function getStdTimezoneOffset(d) {
     return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
 }
 
+/**
+ * check mif a given Date is DST
+ * @param {Date} d - Date to check
+ * @returns {boolean} _true_ if the given Date has DST
+ */
 function isDSTObserved(d) {
     d = d || new Date();
     return d.getTimezoneOffset() < getStdTimezoneOffset(d);
@@ -594,7 +604,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  * @param {boolean} [utc] define if the time should be in utc
  */
-function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
+function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-disable-line complexity
     // console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
@@ -715,7 +725,7 @@ const _dateFormat = (function () {
     // const timezoneClip = /[^-+\dA-Z]/g;
 
     // Regexes and supporting functions are cached through closure
-    return function (date, mask, utc, timeZoneOffset) {
+    return function (date, mask, utc, timeZoneOffset) { // eslint-disable-line complexity
         const dF = _dateFormat;
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
@@ -831,9 +841,9 @@ _dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', '
  */
 function initializeParser(dayNames, monthNames, dayDiffNames) {
     _dateFormat.i18n = {
-        dayNames : dayNames,
-        monthNames : monthNames,
-        dayDiffNames : dayDiffNames
+        dayNames,
+        monthNames,
+        dayDiffNames
     };
 }
 
@@ -918,7 +928,7 @@ _dateFormat.format = [
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormattedDateOut(date, format, utc, timeZoneOffset) {
+function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disable-line complexity
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (timeZoneOffset === 0) {
         utc = true;
@@ -1165,7 +1175,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
-function _getDateFromFormat(val, format, utc, timeZoneOffset) {
+function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disable-line complexity
     // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 
@@ -1443,6 +1453,7 @@ function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
  */
 function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+    /** mixes two lists */
     function mix(lst1, lst2, result) {
         for (let i = 0; i < lst1.length; i++) {
             for (let j = 0; j < lst2.length; j++) {
@@ -1583,6 +1594,12 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     return res;
 }
 
+/**
+ * replaces placeholder in a string
+ * @param {string} topic - the topic
+ * @param {object} topicAttrs - an object with different propertys who are allowed as placeholders
+ * @returns {string} the topic with replaced placeholders
+ */
 function topicReplace(topic, topicAttrs) {
     if (!topic || typeof topicAttrs !== 'object') {
         return topic;

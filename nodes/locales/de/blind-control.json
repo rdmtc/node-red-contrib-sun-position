@@ -99,7 +99,7 @@
 			"0": "geschlossen (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
+			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",
@@ -140,6 +140,8 @@
 			"sunNotInWinMin": "Sonne scheint nicht ins Fenster (min)"
 		},
 		"errors": {
+			"error": "Fehler: __message__",
+			"warning": "Warnung: __message__",
 			"internal": "Fehler: __message__",
 			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
 			"invalid-blind-level": "Rollladenposition __pos__ ist keine gültige Position!",

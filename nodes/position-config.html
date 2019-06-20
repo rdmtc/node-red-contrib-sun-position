@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="position-config">
     <div class="form-row">
         <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
@@ -167,7 +168,7 @@
                 type: 'text',
                 value: '',
                 required: true,
-                validate: v => {
+                validate(v){
                     const n = Number(v);
                     return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
                 }
@@ -176,7 +177,7 @@
                 type: 'text',
                 value: '',
                 required: true,
-                validate: v => {
+                validate(v){
                     const n = Number(v);
                     return RED.validators.number()(v) && ((n >= -90) && (n <= 90));
                 }
@@ -190,7 +191,7 @@
             isValide: {
                 value: false,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (v === true) || (v === 'true');
                 }
             },
@@ -205,7 +206,7 @@
             angleType: {
                 value: 'deg',
                 required: true,
-                validate: v => {
+                validate(v){
                     return (v === 'rad' || v === 'deg');
                 }
             },

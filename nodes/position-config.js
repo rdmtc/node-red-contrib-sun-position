@@ -282,7 +282,7 @@ module.exports = function (RED) {
                 data = this.getPropValue(_srcNode, msg, type, value, opCallback);
             }
             if (data === null || typeof data === 'undefined') {
-                throw new Error(RED._('errors.notEvaluableProperty', {type:type, value:value}));
+                throw new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', {type, value}) }));
             }
             data = parseFloat(data);
             if (isNaN(data)) {
@@ -381,7 +381,7 @@ module.exports = function (RED) {
                         }
                         return result.value;
                     }
-                    throw new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
+                    throw new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:vType, value, err:result.error})}) );
                 } else if (vType === 'entered' || vType === 'dateEntered') {
                     result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
                     const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
@@ -406,6 +406,7 @@ module.exports = function (RED) {
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
             }
+            return null;
         }
         /*******************************************************************************************************/
         getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
@@ -470,12 +471,12 @@ module.exports = function (RED) {
                         }
                         // this.debug(String(res) + '  --  ' + result.value);
                     } else {
-                        result.error = RED._('errors.notEvaluableProperty', {type:vType, value:value});
+                        result.error = RED._('errors.notEvaluableProperty', {type:vType, value});
                     }
                 }
             } catch (err) {
                 _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:vType, value:value, err:result.error}));
+                const e = new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:vType, value, err:result.error}) }) );
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
@@ -538,14 +539,14 @@ module.exports = function (RED) {
             if (typeof callback === 'function') {
                 return callback(type, value, result, addID);
             } else if (result === null || typeof result === 'undefined') {
-                _srcNode.error(RED._('errors.notEvaluableProperty', { type: type, value: value }));
+                _srcNode.error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', { type, value }) }) );
                 return null;
             }
             // _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) { // eslint-disable-line complexity
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
@@ -644,8 +645,8 @@ module.exports = function (RED) {
                 angleType: this.angleType,
                 azimuth: (this.angleType === 'deg') ? azimuthDegrees : sunPos.azimuth,
                 altitude: (this.angleType === 'deg') ? altitudeDegrees : sunPos.altitude, // elevation = altitude
-                altitudeDegrees: altitudeDegrees,
-                azimuthDegrees: azimuthDegrees,
+                altitudeDegrees,
+                azimuthDegrees,
                 altitudeRadians: sunPos.altitude,
                 azimuthRadians: sunPos.azimuth
             };

@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="time-comp">
   <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -194,11 +195,25 @@
 </style>
 
 <script type="text/javascript">
+    /**
+     * clip a value to a defined length
+     * @param {string} v - the value
+     * @param {number} [l] - the desired length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
-
+    /**
+     * get the label for a typed input vlaue
+     * @param {*} node - the node object for getting i18N Data (node._())
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [offset] - a optional offset to the value
+     * @param {number} [l] - the desired maximum length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function getValueLabel(node, t, v, offset, l) {
         l = l || 15;
         let suffix = '';
@@ -314,14 +329,14 @@
             inputFormat: {
                 value: 0,
                 required: true,
-                validate: v => {
+                validate(v){
                     return (v !== '');
                 }
             },
             inputOffset: {
                 value: 0,
                 required: true,
-                validate: v => {
+                validate(v){
                     return RED.validators.typedInput('inputOffsetType')(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
                 }
             },
@@ -331,7 +346,7 @@
             inputOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return RED.validators.number()(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
                 }
             },
@@ -355,7 +370,7 @@
             },
             result1Value: {
                 value: '',
-                validate: v => {
+                validate(v){
                     return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
@@ -365,14 +380,14 @@
             result1Format: {
                 value: 0,
                 required: false,
-                validate: v => {
+                validate(v){
                     return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: false,
-                validate: v => {
+                validate(v){
                     return RED.validators.typedInput('result1OffsetType')(v) ||
                         $('#node-input-result1').typedInput('type') === 'none' ||
                         this.result1Type === 'undefined' ||
@@ -386,7 +401,7 @@
             result1OffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: v => {
+                validate(v){
                     return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
                 }
             }
@@ -473,7 +488,7 @@
                         types.DayOfMonth,
                         'env'
                     ],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const opType = $('#node-input-input').typedInput('type');
                         if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
@@ -511,7 +526,7 @@
                     width: 'calc(100% - 255px)',
                     defaultType: types.Undefined.value,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-inputOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-inputOffsetMultiplier').prop('disabled', true);
@@ -523,6 +538,10 @@
 
                 // #endregion input
                 // #region rule-container
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
                 function resizeRule(rule) {
                     const newWidth = rule.width() - 10;
                     // const operatorField = rule.find('.node-input-rule-operator');
@@ -560,7 +579,9 @@
                     propertyField.typedInput('width', (newWidth - lblwidth - 10));
                     propertyLblField.width(lblwidth);
                 }
-
+                /**
+                 * resizes the container
+                 */
                 function resizeContainer() {
                     const editorRow = $('.node-input-rule-container-row ol');
                     const height =  editorRow.outerHeight(true);
@@ -737,7 +758,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
                             $('.time-result1Value').show();
                             const plVType = $('#node-input-result1Value').typedInput('type');
@@ -790,7 +811,7 @@
                         types.SunCalc,
                         types.MoonCalc
                     ],
-                    onChange: (_type, _value) => { $('#node-input-result1').change(); }
+                    onChange(_type, _value) { $('#node-input-result1').change(); }
                 }).change();
                 /********************************************************/
                 initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
@@ -804,7 +825,7 @@
                     width: 'calc(100% - 265px)',
                     defaultType: types.Undefined.value,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-result1Offset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-result1OffsetMultiplier').prop('disabled', true);
@@ -830,6 +851,11 @@
                 });
         },
         oneditsave() {
+            /**
+             * get the selections in the multiselect
+             * @param {jQuery} value - the jQuery selector of the elements
+             * @returns {string} the value for the elements
+             */
             function getMultiSelStr(value) {
                 const elements = value.map((_, el) => { return $(el).val(); }).get();
                 if (elements.length === 0) { return ''; }

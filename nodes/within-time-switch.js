@@ -10,6 +10,13 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
+    /**
+     * get the Data for compare Date
+     * @param {number} comparetype - type of compare
+     * @param {*} msg - message object
+     * @param {*} node - node object
+     * @returns {*} Date value
+     */
     function getDate(comparetype, msg, node) {
         let id = '';
         let value = '';
@@ -42,6 +49,13 @@ module.exports = function (RED) {
         return new Date();
     }
 
+    /**
+     * set the node state
+     * @param {*} node - the niode Data
+     * @param {*} data - the state data
+     * @param {boolean} [_onInit] - indicates if the node in in initialisation
+     * @returns {boolean}
+     */
     function setstate(node, data, _onInit) {
         if (data.error) {
             node.status({
@@ -83,6 +97,13 @@ module.exports = function (RED) {
         return false;
     }
 
+    /**
+     * calc the start and end times
+     * @param {*} node - thje noide data
+     * @param {*} msg - the messege object
+     * @param {*} config - the configuration
+     * @returns {object} containing start and end Dates
+     */
     function calcWithinTimes(node, msg, config) {
         // node.debug('calcWithinTimes');
         const result = {
@@ -146,6 +167,11 @@ module.exports = function (RED) {
         return result;
     }
 
+    /**
+     * get the schedule time
+     * @param {Date} time - time to schedule
+     * @returns {number} milliseconds until the defined Date
+     */
     function getScheduleTime(time) {
         const now = new Date();
         let millis = time.getTime() - now.getTime();
@@ -156,6 +182,13 @@ module.exports = function (RED) {
         return millis;
     }
 
+    /**
+     * check if message should be resend
+     * @param {boolean} isActive - define if resend is active
+     * @param {*} node - thew node Data
+     * @param {Date} time - the time to schedule
+     * @param {*} msg - the message object
+     */
     function checkReSendMsgDelayed(isActive, node, time, msg) {
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
@@ -177,7 +210,10 @@ module.exports = function (RED) {
             }, millis);
         }
     }
-
+    /**
+     * withinTimeSwitchNode
+     * @param {*} config - configuration
+     */
     function withinTimeSwitchNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -242,6 +278,7 @@ module.exports = function (RED) {
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
             }
+            return null;
         });
 
         try {
@@ -271,6 +308,7 @@ module.exports = function (RED) {
             node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
         }
+        return null;
     }
 
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);

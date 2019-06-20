@@ -55,26 +55,63 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     const e = rad * 23.4397; // obliquity of the Earth
 
+    /**
+     * get right ascension
+     * @param {number} l
+     * @param {number} b
+     * @returns {number}
+     */
     function rightAscension(l, b) {
         return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
     }
 
+    /**
+     * get declination
+     * @param {number} l
+     * @param {number} b
+     * @returns {number}
+     */
     function declination(l, b) {
         return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
     }
 
+    /**
+    * get azimuth
+    * @param {number} H
+    * @param {number} phi
+    * @param {number} dec
+    * @returns {number}
+    */
     function azimuth(H, phi, dec) {
         return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
     }
 
+    /**
+    * get altitude
+    * @param {number} H
+    * @param {number} phi
+    * @param {number} dec
+    * @returns {number}
+    */
     function altitude(H, phi, dec) {
         return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
     }
 
+    /**
+     * side real time
+     * @param {number} d
+     * @param {number} lw
+     * @returns {number}
+     */
     function siderealTime(d, lw) {
         return rad * (280.16 + 360.9856235 * d) - lw;
     }
 
+    /**
+     * get astro refraction
+     * @param {number} h
+     * @returns {number}
+     */
     function astroRefraction(h) {
         if (h < 0) { // the following formula works for positive altitudes only.
             h = 0;
@@ -85,10 +122,20 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
     }
     // general sun calculations
+    /**
+     * get solar mean anomaly
+     * @param {number} d
+     * @returns {number}
+     */
     function solarMeanAnomaly(d) {
         return rad * (357.5291 + 0.98560028 * d);
     }
 
+    /**
+     * ecliptic longitude
+     * @param {number} M
+     * @returns {number}
+     */
     function eclipticLongitude(M) {
         const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
         // equation of center
@@ -96,6 +143,17 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return M + C + P + PI;
     }
 
+    /**
+    * @typedef {Object} sunCoordsObj
+    * @property {number} dec - The declination of the sun
+    * @property {number} ra - The right ascension of the sun
+    */
+
+    /**
+     * sun coordinates
+     * @param {number} d
+     * @returns {sunCoordsObj}
+     */
     function sunCoords(d) {
         const M = solarMeanAnomaly(d);
         const L = eclipticLongitude(M);
@@ -230,18 +288,45 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     const J0 = 0.0009;
 
+    /**
+     * julian cycle
+     * @param {number} d
+     * @param {number} lw
+     * @returns {number}
+     */
     function julianCycle(d, lw) {
         return Math.round(d - J0 - lw / (2 * PI));
     }
 
+    /**
+     * approx transit
+     * @param {number} Ht
+     * @param {number} lw
+     * @param {number} n
+     * @returns {number}
+     */
     function approxTransit(Ht, lw, n) {
         return J0 + (Ht + lw) / (2 * PI) + n;
     }
 
+    /**
+     * solar transit in julian
+     * @param {number} ds
+     * @param {number} M
+     * @param {number} L
+     * @returns {number}
+     */
     function solarTransitJ(ds, M, L) {
         return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L);
     }
 
+    /**
+     * hour angle
+     * @param {number} h
+     * @param {number} phi
+     * @param {number} d
+     * @returns {number}
+     */
     function hourAngle(h, phi, d) {
         return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
     }
@@ -516,6 +601,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         };
     };
 
+    /**
+     * add hours to a date
+     * @param {date} date - date object to add hours
+     * @param {number} h - hours to add
+     * @returns {Date} new Date with added hours
+     */
     function hoursLater(date, h) {
         return new Date(date.valueOf() + h * dayMs / 24);
     }

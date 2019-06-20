@@ -99,7 +99,7 @@
 			"0": "closed (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
+			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "position is overwritten with priority __prio__",
@@ -144,6 +144,8 @@
 			"ruleMax": "__org__ [max rule __number__]"
 		},
 		"errors": {
+			"error": "Error: __message__",
+			"warning": "Warning: __message__",
 			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
@@ -152,7 +154,7 @@
 			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
 			"smoothTimeToolong":"The selected smooth is too long!!",
 			"usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!",
-			"notEvaluableProperty": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!"
+			"notEvaluableProperty": "could not evaluate __type__.__value__, using \"__usedValue__\"!"
 		}
 	}
 }

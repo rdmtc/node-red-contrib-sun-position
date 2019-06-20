@@ -1,7 +1,7 @@
 /********************************************
  * moon-position:
  *********************************************/
-
+'use strict';
 const path = require('path');
 
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
@@ -9,7 +9,10 @@ const util = require('util');
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * moonPositionNode
+     * @param {*} config - configuration
+     */
     function moonPositionNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -45,7 +48,7 @@ module.exports = function (RED) {
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');
                     this.send(ports);
-                    return;
+                    return null;
                 }
 
                 ports[0].payload.pos = [];
@@ -86,9 +89,9 @@ module.exports = function (RED) {
                         fill = 'grey';
                     }
                     this.status({
-                        fill: fill,
+                        fill,
                         shape:  'dot',
-                        text: text
+                        text
                     });
                 }
                 this.send(ports); // Warning change msg object!!
@@ -102,8 +105,17 @@ module.exports = function (RED) {
                     text: 'internal error'
                 });
             }
+            return null;
         });
 
+        /**
+         * get the value ofd a numeric property
+         * @param {*} srcNode - source node
+         * @param {*} msg - message object
+         * @param {string} vType - type
+         * @param {string} value - value
+         * @returns {number} the result value for the type and value
+         */
         function getNumProp(srcNode, msg, vType, value) {
             try {
                 if (vType === 'none') {

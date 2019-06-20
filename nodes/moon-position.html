@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="moon-position">
   <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
       <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -66,30 +67,39 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
+    /**
+     * clip a value to a defined length
+     * @param {string} v - the value
+     * @param {number} [l] - the desired length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
-    function prop2name(key) {
-        const result = RED.utils.parseContextKey(key);
-        return result.key;
-    }
-
-    function getValueLabel(t, v) {
+    /**
+     * get the label for a typed input vlaue
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [l] - the desired maximum length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
+    function getValueLabel(t, v, l) {
         if (t === 'str') {
-            return '"' + clipValueLength(v) + '"';
+            return '"' + clipValueLength(v, l) + '"';
         }
 
         if (t === 'msg') {
-            return t + '.' + clipValueLength(v);
+            return t + '.' + clipValueLength(v, l);
         }
 
         if (t === 'flow' || t === 'global') {
-            return t + '.' + clipValueLength(prop2name(v));
+            const result = RED.utils.parseContextKey(v);
+            return t + '.' + clipValueLength(result.key, l);
         }
 
-        return clipValueLength(v);
+        return clipValueLength(v, l);
     }
 
     RED.nodes.registerType('moon-position', {
@@ -131,6 +141,7 @@
             if (rule) {
                 return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType, rule.valueHigh);
             }
+            return undefined;
         },
         label() {
             if (this.name) {
@@ -157,7 +168,10 @@
 
                 const btwnLabel = node._('moon-position.label.between');
                 const andLabel = node._('moon-position.label.and');
-
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
                 function resizeRule(rule) {
                     const newWidth = rule.width();
                     const btwnField1 = rule.find('.node-input-rule-btwn-value');
@@ -312,6 +326,8 @@
             const editorRow = $('#dialog-form>div.node-input-rule-container-row');
             height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
             height -= 50;
-            $('#node-input-rule-container').editableList('height', height);
+            if (typeof $().editableList !== 'undefined') {
+                $('#node-input-rule-container').editableList('height', height);
+            }
         }
     });</script>

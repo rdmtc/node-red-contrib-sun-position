@@ -10,7 +10,7 @@ const util = require('util');
 /**
  * check if a level has a valid value
  * @param {*} node the node data
- * @param {*} level the level to check
+ * @param {number} level the level to check
  * @returns {boolean} true if the level is valid, otherwise false
  */
 function validPosition_(node, level, allowRound) {
@@ -166,7 +166,7 @@ module.exports = function (RED) {
             if (node.nowarn[name]) {
                 return null; // only one error per run
             }
-            node.warn(RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }));
+            node.warn(RED._('blind-control.errors.warning', { message: RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
             node.nowarn[name] = true;
             return null;
         }
@@ -983,7 +983,7 @@ module.exports = function (RED) {
                 node.previousData.usedRule = ruleId;
                 return null;
             } catch (err) {
-                node.error(RED._('blind-control.errors.internal', err));
+                node.error(RED._('blind-control.errors.error', err));
                 node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
