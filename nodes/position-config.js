@@ -279,7 +279,7 @@ module.exports = function (RED) {
             } else if (type === 'none') {
                 return def || NaN;
             } else {
-                data = this.getPropValue(_srcNode, msg, type, value, opCallback);
+                data = this.getPropValue(_srcNode, msg, { type, value, callback:opCallback });
             }
             if (data === null || typeof data === 'undefined') {
                 throw new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', {type, value}) }));
@@ -291,6 +291,7 @@ module.exports = function (RED) {
             return data;
         }
         /*******************************************************************************************************/
+        // getOutDataProp(_srcNode, msg, data) {
         getOutDataProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier, next, days) {
             _srcNode.debug(`getOutDataProp type=${vType} value=${value} format=${format} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} next=${next} days=${days} tzOffset=${this.tzOffset}`);
             let result = null;
@@ -337,7 +338,7 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            return this.getPropValue(_srcNode, msg, vType, value);
+            return this.getPropValue(_srcNode, msg, { type: vType, value });
         }
         /*******************************************************************************************************/
         getDateFromProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier) {
@@ -388,7 +389,7 @@ module.exports = function (RED) {
                     return hlp.addOffset(result, offsetX, multiplier);
                 } else {
                     // msg, flow, global, str, num, env
-                    result = this.getPropValue(_srcNode, msg, vType, value);
+                    result = this.getPropValue(_srcNode, msg, { type: vType, value });
                 }
                 if (result !== null && typeof result !== 'undefined') {
                     _srcNode.log(result);
@@ -409,74 +410,100 @@ module.exports = function (RED) {
             return null;
         }
         /*******************************************************************************************************/
-        getTimeProp(_srcNode, msg, vType, value, offsetType, offset, multiplier, next, days) {
-            _srcNode.debug(`getTimeProp vType=${vType} value=${value} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} next=${next} days=${days} tzOffset=${this.tzOffset}`);
+        /**
+        * @typedef {Object} timePropType
+        * @property {string} type - type name of the type input
+        * @property {string} value - value of the type input
+        * @property {string} [offset] - value of the offset type input
+        * @property {string} [offsetType] - type name of the offset type input
+        * @property {number} [multiplier] - multiplier to the time
+        * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
+        * @property {string} [days] - valide days
+        * @property {Date} [now] - base date, current time as default
+        */
+
+        /**
+        * @typedef {Object} timePropResultType
+        * @property {Date} value - the Date value
+        * @property {string} [error] - error message if an error has occured
+        * @property {boolean} [fix] - indicator if the given time value is a fix date
+        */
+
+        /**
+         * get the time Data from a typed input
+         * @param {*} _srcNode - source node for logging
+         * @param {*} [msg] - the message object
+         * @param {timePropType} data - a Data object
+         * @returns {timePropResultType} value of the type input
+         */
+        getTimeProp(_srcNode, msg, data) {
+            _srcNode.debug(`getTimeProp type=${data.type} value=${data.value} offset=${data.offset} offsetType=${data.offsetType} multiplier=${data.multiplier} next=${data.next} days=${data.days} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
                 fix: true
             };
             try {
-                if (days === '') {
+                if (data.days === '') {
                     result.error = 'No valid Days given!';
-                } else if (vType === '' || vType === 'none') {
-                    result.error = 'wrong type "' + vType + '"="' + value+'"';
-                } else if (vType === 'date') {
-                    result.value = new Date();
+                } else if (data.type === '' || data.type === 'none') {
+                    result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
+                } else if (data.type === 'date') {
+                    result.value = (data.now || new Date());
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
-                } else if (vType === 'dateSpecific') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result.value = hlp.normalizeDate((new Date()), offsetX, multiplier, next, days);
+                } else if (data.type === 'dateSpecific') {
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result.value = hlp.normalizeDate((data.now || new Date()), offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value);
                     }
                     result.fix = true;
-                } else if (vType === 'entered') {
-                    result.value = hlp.getTimeOfText(String(value), (new Date()), (this.tzOffset === 0), this.tzOffset);
+                } else if (data.type === 'entered') {
+                    result.value = hlp.getTimeOfText(String(data.value), (data.now || new Date()), (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null) {
-                        const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                        result.value = hlp.normalizeDate(result.value, offsetX, multiplier, next, days);
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     }
                     result.fix = true;
-                } else if (vType === 'pdsTime') {
+                } else if (data.type === 'pdsTime') {
                     // sun
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getSunTime((new Date()), value, offsetX, multiplier, next, days);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = this.getSunTime((data.now || new Date()), data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
-                } else if (vType === 'pdmTime') {
+                } else if (data.type === 'pdmTime') {
                     // moon
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getMoonTime((new Date()), value, offsetX, multiplier, next, days);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = this.getMoonTime((data.now || new Date()), data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
                 } else {
                     // can handle context, json, jsonata, env, ...
-                    result.fix = (vType === 'json'); // is not a fixed time if can be changed
-                    const res = this.getPropValue(_srcNode, msg, vType, value);
+                    result.fix = (data.type === 'json'); // is not a fixed time if can be changed
+                    const res = this.getPropValue(_srcNode, msg, data);
 
                     if (res) {
                         result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
-                        const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                        result.value = hlp.normalizeDate(result.value, offsetX, multiplier, next, days);
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                         if (this.tzOffset) {
                             result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                         }
                         // this.debug(String(res) + '  --  ' + result.value);
                     } else {
-                        result.error = RED._('errors.notEvaluableProperty', {type:vType, value});
+                        result.error = RED._('errors.notEvaluableProperty', {type:data.type, value: data.value});
                     }
                 }
             } catch (err) {
                 _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:vType, value, err:result.error}) }) );
+                const e = new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:result.error}) }) );
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
@@ -484,62 +511,66 @@ module.exports = function (RED) {
 
             if (!result.value) {
                 if (!result.error) {
-                    result.error = 'Can not get time for ' + vType + '=' + value;
+                    result.error = 'Can not get time for ' + data.type + '=' + data.value;
                 }
-                result.value = new Date();
+                result.value = (data.now || new Date());
             }
             // _srcNode.debug('getTimeProp result=' + util.inspect(result));
             return result;
         }
         /*******************************************************************************************************/
         /**
+        * @typedef {Object} propValueType
+        * @property {string} type - type name of the type input
+        * @property {string} value - value of the type input
+        * @property {function} [callback] - function which should be called after value was recived
+        */
+
+        /**
         * get a property value from a type input in Node-Red
         * @param {*} _srcNode - source node information
         * @param {*} msg - message object
-        * @param {string} type - type name of the type input
-        * @param {*} value - value of the type input
-        * @param {function} [callback] - function which should be called after value was recived
-        * @param {*} [addID] - additional parameter for the callback
+        * @param {propValueType} data - data object with more information
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
-        getPropValue(_srcNode, msg, type, value, callback, addID) {
-            // _srcNode.debug(`getPropValue ${type}.${value} (${addID})`);
+        getPropValue(_srcNode, msg, data) {
+            // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID})`);
             let result = null;
-            if (type === '' || type === 'none' || typeof type === 'undefined' || type === null) {
+            if (data.type === '' || data.type === 'none' || typeof data.type === 'undefined' || data.type === null) {
                 result = null;
-            } else if (type === 'num') {
-                result = Number(value);
-            } else if (type === 'str') {
-                result = ''+value;
-            } else if (type === 'bool') {
-                result = /^true$/i.test(value);
-            } else if (type === 'date') {
+            } else if (data.type === 'num') {
+                result = Number(data.value);
+            } else if (data.type === 'str') {
+                result = ''+data.value;
+            } else if (data.type === 'bool') {
+                result = /^true$/i.test(data.value);
+            } else if (data.type === 'date') {
                 result = Date.now();
-            } else if (type === 'msgPayload') {
+            } else if (data.type === 'msgPayload') {
                 result = msg.payload;
-            } else if (type === 'msgValue') {
+            } else if (data.type === 'msgValue') {
                 result = msg.value;
-            } else if (type === 'msgTs') {
+            } else if (data.type === 'msgTs') {
                 result =  msg.ts;
-            } else if (type === 'msgLc') {
+            } else if (data.type === 'msgLc') {
                 result = msg.lc;
-            } else if (type === 'pdsCalcData') {
+            } else if (data.type === 'pdsCalcData') {
                 result = this.getSunCalc(msg.ts);
-            } else if (type === 'pdmCalcData') {
+            } else if (data.type === 'pdmCalcData') {
                 result = this.getMoonCalc(msg.ts);
-            } else if (type === 'entered' || type === 'dateEntered') {
-                result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
+            } else if (data.type === 'entered' || data.type === 'dateEntered') {
+                result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
             } else {
                 try {
-                    result = RED.util.evaluateNodeProperty(value, type, _srcNode, msg);
+                    result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
-            if (typeof callback === 'function') {
-                return callback(type, value, result, addID);
+            if (typeof data.callback === 'function') {
+                return data.callback(data.type, data.value, result, data);
             } else if (result === null || typeof result === 'undefined') {
-                _srcNode.error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', { type, value }) }) );
+                _srcNode.error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
                 return null;
             }
             // _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
@@ -552,7 +583,7 @@ module.exports = function (RED) {
                 return false;
             }
 
-            const a = this.getPropValue(_srcNode, msg, opTypeA, opValueA, opCallback, 1);
+            const a = this.getPropValue(_srcNode, msg, { type: opTypeA, value: opValueA, callback: opCallback, addID: 1 });
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -585,26 +616,26 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
+                    return (a == this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));  // eslint-disable-line eqeqeq
+                    return (a != this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
+                    return (a < this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
                 case 'lte':
-                    return (a <= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
+                    return (a <= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
                 case 'gt':
-                    return (a > this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
+                    return (a > this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
                 case 'gte':
-                    return (a >= this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2));
+                    return (a >= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
                 case 'contain':
-                    return ((a + '').includes(this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2)));
+                    return ((a + '').includes(this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 })));
                 case 'containSome': {
-                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = this.getPropValue(_srcNode, msg, opTypeB, opValueB, opCallback, 2).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
@@ -858,7 +889,7 @@ module.exports = function (RED) {
             switch (req.query.kind) {
                 case 'getTimeData': {
                     try {
-                        obj = posConfig.getTimeProp(posConfig, undefined, req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

@@ -134,7 +134,16 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, true, node.timeDays);
+                // node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, true, node.timeDays);
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
+                    type: node.timeType,
+                    value : node.time,
+                    offsetType : node.offsetType,
+                    offset : node.offset,
+                    multiplier : node.offsetMultiplier,
+                    next : true,
+                    days : node.timeDays
+                });
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextTime = null;
@@ -154,7 +163,17 @@ module.exports = function (RED) {
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
                 // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, true, node.timeAltDays);
+                // node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, true, node.timeAltDays);
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, {
+                    type: node.timeAltType,
+                    value : node.timeAlt,
+                    offsetType : node.timeAltOffsetType,
+                    offset : node.timeAltOffset,
+                    multiplier : node.timeAltOffsetMultiplier,
+                    next : true,
+                    days : node.timeAltDays
+                });
+
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
                     node.nextTimeAlt = null;

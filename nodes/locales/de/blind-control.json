@@ -150,7 +150,7 @@
 			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
 			"smoothTimeToolong":"Die gewählte zeit ist zu groß!!",
 			"usingTempValue": "Wert von __type__.__value__ kann nicht ermitteln werden und es wird der gespeicherte Wert \"__usedValue__\" verwendet!",
-			"notEvaluableProperty": "Fehler: kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
+			"notEvaluableProperty": "kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
 		}
 	}
 }
