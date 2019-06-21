@@ -64,6 +64,7 @@ function getNow_(node, msg) {
     }
     const dto = new Date(msg.ts);
     if (dto !== 'Invalid Date' && !isNaN(dto)) {
+        node.debug(dto.toISOString());
         return dto;
     }
     node.error(`Error can not get a valide timestamp from "${value}"! Will use current timestamp!`);
@@ -551,18 +552,13 @@ module.exports = function (RED) {
     }
     /******************************************************************************************/
     /**
-       * calculates the times
-       * @param {*} node node data
-       * @param {*} msg the message object
-       * @param {*} config the configuration object
-       * @returns the active rule or null
-       */
-    function checkRules(node, msg, now) {
-        const livingRuleData = {};
-        const nowNr = now.getTime();
+     * pre-checking conditions to may be able to store temp data
+     * @param {*} node node data
+     * @param {*} msg the message object
+     * @returns the last until rule number
+     */
+    function prepareRules(node, msg) {
         let lastUntilRule = -1;
-        // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
-        // pre-checking conditions to may be able to store temp data
         for (let i = 0; i < node.rulesCount; ++i) {
             const rule = node.rulesData[i];
             if (rule.conditional) {
@@ -593,6 +589,21 @@ module.exports = function (RED) {
                 lastUntilRule = i; // from rule
             }
         }
+        return lastUntilRule;
+    }
+
+    /**
+       * calculates the times
+       * @param {*} node node data
+       * @param {*} msg the message object
+       * @param {*} config the configuration object
+       * @returns the active rule or null
+       */
+    function checkRules(node, msg, now) {
+        const livingRuleData = {};
+        const nowNr = now.getTime();
+        const lastUntilRule = prepareRules(node,msg);
+        // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
 
         const fkt = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -610,7 +621,16 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.timeType, rule.timeValue, rule.offsetType, rule.offsetValue, rule.multiplier, false);
+            rule.timeData = node.positionConfig.getTimeProp(node, msg, {
+                type: rule.timeType,
+                value : rule.timeValue,
+                offsetType : rule.offsetType,
+                offset : rule.offsetValue,
+                multiplier : rule.multiplier,
+                next : false,
+                now
+            });
+
             if (rule.timeData.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;
@@ -618,7 +638,7 @@ module.exports = function (RED) {
                 throw new Error('Error can not calc time!');
             }
             rule.timeData.num = rule.timeData.value.getTime();
-            node.debug('rule.timeData=' + util.inspect(rule.timeData));
+            // node.debug('rule.timeData=' + util.inspect(rule.timeData));
             if (cmp(rule.timeData.num, nowNr)) {
                 return rule;
             }
@@ -936,15 +956,16 @@ module.exports = function (RED) {
 
                 if (node.oversteer.active && !node.oversteer.isChecked) {
                     node.oversteerData.forEach(el => {
-                        node.positionConfig.getPropValue(node, msg,
-                            el.valueType,
-                            el.value,
-                            el.operator,
-                            (type, value, data, _id) => {
+                        node.positionConfig.getPropValue(node, msg, {
+                            type: el.valueType,
+                            value: el.value,
+                            callback: (type, value, data, _ip) => {
                                 if (data !== null && typeof data !== 'undefined') {
                                     node.tempData[type + '.' + value] = data;
                                 }
-                            });
+                            },
+                            operator: el.operator
+                        });
                     });
                 }
                 node.debug(`result pos=${node.blindData.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
