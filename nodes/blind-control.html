@@ -383,6 +383,54 @@
         }
         return result;
     }
+    /**
+     * resizes a rule
+     * @param {jQuery} rule - the jQuery selector of the rule
+     */
+    function resizeRule(rule) {
+        try {
+            const newWidth = rule.width() - 10;
+            // row1
+            const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
+            const $validOperandA = rule.find('.node-input-rule-condOpA');
+            const $validOperator = rule.find('.node-input-rule-condOperator');
+            $validOperandALbl.width('auto');
+            if ($validOperator.is(':visible')) {
+                $validOperator.width(100);
+                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
+            } else {
+                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
+            }
+            // row2
+            const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
+            const $validOperandB = rule.find('.node-input-rule-condOpB');
+            $validOperandBLbl.width('auto');
+            $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
+            // row3
+            const $timeLbl = rule.find('.node-input-rule-time-lbl');
+            const $timeOperator = rule.find('.node-input-rule-time-operator');
+            const $time = rule.find('.node-input-rule-time');
+            $timeLbl.width('auto');
+            $timeOperator.width(70);
+            $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
+            // row4
+            const $offset = rule.find('.node-input-rule-offset');
+            const $multiplier = rule.find('.node-input-rule-multiplier');
+            const multiplierWidth = 125;
+            $multiplier.width(multiplierWidth);
+            $offset.typedInput('width', (newWidth - multiplierWidth - 50));
+            // row5
+            const $levelLbl = rule.find('.node-input-rule-level-lbl');
+            const $level = rule.find('.node-input-rule-level');
+            const $levelOperator = rule.find('.node-input-rule-level-operator');
+            $levelLbl.width('auto');
+            $levelOperator.show();
+            $levelOperator.width(40);
+            $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
+        } catch (ex) {
+                        console.log(ex); // eslint-disable-line
+        }
+    }
 
     RED.nodes.registerType('blind-control', {
         category: 'advanced-input',
@@ -847,54 +895,7 @@
 
                 // #endregion blind
                 // #region rules
-                /**
-                 * resizes a rule
-                 * @param {jQuery} rule - the jQuery selector of the rule
-                 */
-                function resizeRule(rule) {
-                    try {
-                        const newWidth = rule.width() - 10;
-                        // row1
-                        const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
-                        const $validOperandA = rule.find('.node-input-rule-condOpA');
-                        const $validOperator = rule.find('.node-input-rule-condOperator');
-                        $validOperandALbl.width('auto');
-                        if ($validOperator.is(':visible')) {
-                            $validOperator.width(100);
-                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
-                        } else {
-                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
-                        }
-                        // row2
-                        const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
-                        const $validOperandB = rule.find('.node-input-rule-condOpB');
-                        $validOperandBLbl.width('auto');
-                        $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
-                        // row3
-                        const $timeLbl = rule.find('.node-input-rule-time-lbl');
-                        const $timeOperator = rule.find('.node-input-rule-time-operator');
-                        const $time = rule.find('.node-input-rule-time');
-                        $timeLbl.width('auto');
-                        $timeOperator.width(70);
-                        $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
-                        // row4
-                        const $offset = rule.find('.node-input-rule-offset');
-                        const $multiplier = rule.find('.node-input-rule-multiplier');
-                        const multiplierWidth = 125;
-                        $multiplier.width(multiplierWidth);
-                        $offset.typedInput('width', (newWidth - multiplierWidth - 50));
-                        // row5
-                        const $levelLbl = rule.find('.node-input-rule-level-lbl');
-                        const $level = rule.find('.node-input-rule-level');
-                        const $levelOperator = rule.find('.node-input-rule-level-operator');
-                        $levelLbl.width('auto');
-                        $levelOperator.show();
-                        $levelOperator.width(40);
-                        $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
-                    } catch (ex) {
-                        console.log(ex); // eslint-disable-line
-                    }
-                }
+
                 /**
                  * resizes a rule container
                  */
@@ -1086,9 +1087,9 @@
                         });
                         $validOperator.change(() => { $validOperandA.change(); });
                         // #endregion fields changes
-                        resizeRule(containerRow);
                         $validOperandA.change();
                         $time.change();
+                        resizeRule(containerRow);
                     },
                     addButton: false,
                     resizeItem: resizeRule,
@@ -1533,6 +1534,14 @@
                 $('#node-input-smoothTime').val('');
             } else {
                 $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
+            }
+        },
+        oneditresize(_size) {
+            if (typeof $().editableList !== 'undefined') {
+                const postrules = $('#node-input-rule-container').editableList('items');
+                postrules.each(function(_i) {
+                    resizeRule($(this));
+                });
             }
         }
     });</script>
