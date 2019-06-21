@@ -42,7 +42,7 @@ module.exports = function (RED) {
         }
         node.debug('compare time to ' + id + ' = "' + value + '"');
         const dto = new Date(msg.ts);
-        if (dto !== 'Invalid Date' && !isNaN(dto)) {
+        if (hlp.isValidDate(dto)) {
             return dto;
         }
         node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');

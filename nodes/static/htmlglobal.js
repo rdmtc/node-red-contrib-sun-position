@@ -839,7 +839,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
 /**
 * @typedef {Object} backendData
 * @property {string} config - the config object
-* @property {('getTimeData'|'getDateData'|'getOutDataData')} kind - kind of request
+* @property {('getTimeData'|'getOutDataData')} kind - kind of request
 * @property {string} type - type input type
 * @property {string} value - type input value
 * @property {string} [offsetType] - type input type for offset

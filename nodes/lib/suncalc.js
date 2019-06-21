@@ -205,8 +205,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @typedef {Object} suntime
     * @property {string} name - The Name of the time
     * @property {Date} value - Date object with the calculated sun-time
+    * @property {number} ts - The time as unix timestamp
     * @property {number} pos - The position of the sun on the time
     * @property {number} angle - Angle of the sun on the time
+    * @property {number} julian - The time as julian calendar
+    * @property {boolean} valid - indicates if the time is valid or not
     */
 
     /**

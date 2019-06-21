@@ -25,6 +25,7 @@ module.exports = {
     addOffset,
     calcDayOffset,
     convertDateTimeZone,
+    isValidDate,
     normalizeDate,
     getTimeOfText,
     getDateOfText,
@@ -462,6 +463,16 @@ function convertDateTimeZone(date, timeZoneOffset) {
     const destTime = utc + (60000*timeZoneOffset);
     return new Date(destTime);
 }
+
+/**
+ * checks if a value is a valid Date object
+ * @param {*} d - a value to check
+ * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
+ */
+function isValidDate(d) {
+    return d instanceof Date && !isNaN(d);
+    // d !== 'Invalid Date' && !isNaN(d)
+}
 /*******************************************************************************************************/
 /**
  * adds an offset to a given Date object
@@ -660,7 +671,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
         dto = convertDateTimeZone(dto, timeZoneOffset);
     }
 
-    if (dto !== 'Invalid Date' && !isNaN(dto)) {
+    if (isValidDate(dto)) {
         return dto;
     }
 
@@ -736,10 +747,10 @@ const _dateFormat = (function () {
         // Passing date through Date applies Date.parse, if necessary
         const now = new Date();
         date = date ? new Date(date) : now;
-        const dayDiff = (date.getDate() - now.getDate());
-        if (isNaN(date)) {
+        if (!isValidDate(date)) {
             throw new SyntaxError('invalid date');
         }
+        const dayDiff = (date.getDate() - now.getDate());
         if (timeZoneOffset === 0) {
             utc = true;
         } else if (timeZoneOffset) {
@@ -1525,7 +1536,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
             }
             if (!isNaN(val) && _isTimestamp(val)) {
                 const dto = new Date(val);
-                if (dto !== 'Invalid Date' && !isNaN(dto)) {
+                if (isValidDate(dto)) {
                     return dto;
                 }
             }
@@ -1587,7 +1598,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
             }
         }
         // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
-        if (res === 'Invalid Date' || isNaN(res) || res === null) {
+        if (!isValidDate(res)) {
             throw new Error('could not evaluate format of ' + date + ' (' + format + ')');
         }
     }

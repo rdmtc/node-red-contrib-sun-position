@@ -62,8 +62,8 @@ function getNow_(node, msg) {
     } else {
         return new Date();
     }
-    const dto = new Date(msg.ts);
-    if (dto !== 'Invalid Date' && !isNaN(dto)) {
+    const dto = new Date(value);
+    if (hlp.isValidDate(dto)) {
         node.debug(dto.toISOString());
         return dto;
     }
@@ -603,7 +603,8 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = now.getTime();
         const lastUntilRule = prepareRules(node,msg);
-        // node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount}`); // {colors:true, compact:10}
+        node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount} , lastUntilRule=${lastUntilRule}`); // {colors:true, compact:10}
+        node.debug('node.rulesData ' + util.inspect(node.rulesData, {colors:true, compact:10}));
 
         const fkt = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -639,7 +640,7 @@ module.exports = function (RED) {
             }
             rule.timeData.num = rule.timeData.value.getTime();
             // node.debug('rule.timeData=' + util.inspect(rule.timeData));
-            if (cmp(rule.timeData.num, nowNr)) {
+            if (cmp(rule.timeData.num)) {
                 return rule;
             }
             return null;
@@ -653,24 +654,26 @@ module.exports = function (RED) {
             const rule = node.rulesData[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.timeOp === 1) { continue; } // - Until timeOp === 0
-            const res = fkt(rule, (r,h) => (r >= h));
+            const res = fkt(rule, r => (r >= nowNr));
             if (res) {
                 ruleSel = res;
                 break;
             }
         }
+        node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
         if (!ruleSel || ruleSel.timeLimited) {
-            // node.debug('second loop ' + node.rulesCount);
+            node.debug('second loop ' + node.rulesCount);
             for (let i = (node.rulesCount -1); i >= 0; --i) {
                 const rule = node.rulesData[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
                 if (rule.timeOp === 0) { continue; } // - From timeOp === 1
-                const res = fkt(rule, (r,h) => (r <= h));
+                const res = fkt(rule, r => (r <= nowNr));
                 if (res) {
                     ruleSel = res;
                     break;
                 }
             }
+            node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
         }
         if (ruleSel) {
             // ruleSel.text = '';

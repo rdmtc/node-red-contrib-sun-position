@@ -69,10 +69,11 @@ Date.prototype.addDays = function (days) {
 module.exports = function (RED) {
     'use strict';
 
+    /** generic configuration Node */
     class positionConfigurationNode {
         /**
-         *
-         * @param config
+         * creates a new instance of the settings node and initializes them
+         * @param {*} config - configuration of the node
          */
         constructor(config) {
             RED.nodes.createNode(this, config);
@@ -126,7 +127,7 @@ module.exports = function (RED) {
 
         /**
          * register a node as child
-         * @param node node to register as child node
+         * @param {*} node node to register as child node
          */
         register(node) {
             this.users[node.id] = node;
@@ -134,9 +135,9 @@ module.exports = function (RED) {
 
         /**
          * remove a previous registered node as child
-         * @param node node to remove
-         * @param done function which should be executed after deregister
-         * @returns {function}
+         * @param {*} node node to remove
+         * @param {function} done function which should be executed after deregister
+         * @returns {*} result of the function
          */
         deregister(node, done) {
             delete node.users[node.id];
@@ -144,10 +145,19 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-        * @typedef {Object} timeresult
-        * @property {Date} value - a Date object of the neesed date/time
-        * @property {string} [error] - string of an error message if an error occurs
-        */
+         * @typedef {Object} timeresult
+         * @property {Date} value - a Date object of the neesed date/time
+         * @property {number} ts - The time as unix timestamp
+         * @property {number} pos - The position of the sun on the time
+         * @property {number} angle - Angle of the sun on the time
+         * @property {number} julian - The time as julian calendar
+         * @property {boolean} valid - indicates if the time is valid or not
+         */
+
+        /**
+         * @typedef {Object} erroresult
+         * @property {string} error - string of an error message if an error occurs
+         */
 
         /**
          * gets sun time
@@ -157,7 +167,7 @@ module.exports = function (RED) {
          * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
          * @param {number} [next] if greater than 0 the number of days in the future
          * @param {string} [days] days for which should be calculated the sun time
-         * @return {timeresult} result object of sunTime
+         * @return {timeresult|erroresult} result object of sunTime
          */
         getSunTime(now, value, offset, multiplier, next, days) {
             // this.debug('getSunTime value=' + value + ' offset=' + offset + ' multiplier=' + multiplier + ' next=' + next + ' days=' + days);
@@ -170,7 +180,7 @@ module.exports = function (RED) {
             }
 
             if (days && (days !== '*') && (days !== '')) {
-                // this.debug('move days ' + days + ' result=' + util.inspect(result));
+                // this.debug('move days ' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 const dayx = hlp.calcDayOffset(days, result.value.getDay());
                 if (dayx > 0) {
                     this._checkCoordinates();
@@ -178,15 +188,20 @@ module.exports = function (RED) {
                     result = Object.assign(result, sunCalc.getSunTimes(date, this.latitude, this.longitude)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 } else if (dayx < 0) {
-                    // this.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result));
+                    // this.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                     result.error = 'No valid day of week found!';
                 }
             }
 
-            // this.debug('getSunTime result=' + util.inspect(result));
+            // this.debug('getSunTime result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
         /*******************************************************************************************************/
+        /**
+         * @typedef {Object} moontime
+         * @property {Date|NaN} value - a Date object of the neesed date/time
+         */
+
         /**
         * gets moon time
         * @param {Date} now current time
@@ -195,7 +210,7 @@ module.exports = function (RED) {
         * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
         * @param {number} [next] if greater than 0 the number of days in the future
         * @param {string} [days] days for which should be calculated the moon time
-        * @return {timeresult} result object of moon time
+        * @return {moontime|erroresult} result object of moon time
         */
         getMoonTime(now, value, offset, multiplier, next, days) {
             // this.debug('getMoonTime value=' + value + ' offset=' + offset + ' next=' + next + ' days=' + days);
@@ -291,129 +306,83 @@ module.exports = function (RED) {
             return data;
         }
         /*******************************************************************************************************/
-        // getOutDataProp(_srcNode, msg, data) {
-        getOutDataProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier, next, days) {
-            _srcNode.debug(`getOutDataProp type=${vType} value=${value} format=${format} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} next=${next} days=${days} tzOffset=${this.tzOffset}`);
+        /**
+        * @typedef {Object} outPropType
+        * @property {string} type - type name of the type input
+        * @property {string} value - value of the type input
+        * @property {string|number} format - format of the input
+        * @property {string} [offset] - value of the offset type input
+        * @property {string} [offsetType] - type name of the offset type input
+        * @property {number} [multiplier] - multiplier to the time
+        * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
+        * @property {string} [days] - valide days
+        * @property {Date} [now] - base date, current time as default
+        */
+
+        /**
+         * get the time Data prepared for output
+         * @param {*} _srcNode - source node for logging
+         * @param {*} [msg] - the message object
+         * @param {outPropType} data - a Data object
+         * @returns {*} output Data
+         */
+        getOutDataProp(_srcNode, msg, data) {
+            _srcNode.debug(`getOutDataProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getOutDataProp type=${data.type} value=${data.value} format=${data.format} offset=${data.offset} offsetType=${data.offsetType} multiplier=${data.multiplier} next=${data.next} days=${data.days} tzOffset=${this.tzOffset}`);
+            let now = new Date(data.now);
+            if (!hlp.isValidDate(data.now)) { now = new Date(); }
             let result = null;
-            if (vType === null || vType === 'none' || vType === '' || (typeof vType === 'undefined')) {
-                if (value === '' || (typeof value === 'undefined')) {
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = hlp.addOffset((new Date()), offsetX, multiplier);
-                    return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
+            if (data.type === null || data.type === 'none' || data.type === '' || (typeof data.type === 'undefined')) {
+                if (data.value === '' || (typeof data.value === 'undefined')) {
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = hlp.addOffset(now, offsetX, data.multiplier);
+                    return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
-                return value;
-            } else if (vType === 'date') {
+                return data.value;
+            } else if (data.type === 'date') {
                 if (this.tzOffset) {
                     return hlp.convertDateTimeZone(Date.now(), this.tzOffset);
                 }
                 return Date.now();
-            } else if (vType === 'dateSpecific') {
-                const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                result = hlp.addOffset((new Date()), offsetX, multiplier);
-                return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
-            } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
-                if (vType === 'pdsTime') { // sun
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getSunTime((new Date()), value, offsetX, multiplier, next, days);
-                } else if (vType === 'pdmTime') { // moon
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = this.getMoonTime((new Date()), value, offsetX, multiplier, next, days);
+            } else if (data.type === 'dateSpecific') {
+                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                result = hlp.addOffset(now, offsetX, data.multiplier);
+                return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+            } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
+                if (data.type === 'pdsTime') { // sun
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = this.getSunTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
+                } else if (data.type === 'pdmTime') { // moon
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = this.getMoonTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
                 }
                 if (result && result.value && !result.error) {
-                    return hlp.getFormattedDateOut(result.value, format, (this.tzOffset === 0), this.tzOffset);
+                    return hlp.getFormattedDateOut(result.value, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
-            } else if (vType === 'entered' || vType === 'dateEntered') {
-                result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
-                const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                result = hlp.normalizeDate(result, offsetX, multiplier, next, days);
-                return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
-            } else if (vType === 'dayOfMonth') {
+            } else if (data.type === 'entered' || data.type === 'dateEntered') {
+                result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
+                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
+                return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+            } else if (data.type === 'dayOfMonth') {
                 result = new Date();
-                result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), value);
+                result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), data.value);
                 if (result !== null && typeof result !== 'undefined') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = hlp.addOffset(result, offsetX, multiplier);
-                    return hlp.getFormattedDateOut(result, format, (this.tzOffset === 0), this.tzOffset);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
+                    return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
             }
-            return this.getPropValue(_srcNode, msg, { type: vType, value });
-        }
-        /*******************************************************************************************************/
-        getDateFromProp(_srcNode, msg, vType, value, format, offset, offsetType, multiplier) {
-            _srcNode.debug(`getDateFromProp type=${vType} value=${value} format=${format} offset=${offset} offsetType=${offsetType} multiplier=${multiplier} tzOffset=${this.tzOffset}`);
-            let result = null;
-            try {
-                if (vType === null || vType === 'none' || vType === '' || vType === 'date') {
-                    if (this.tzOffset) {
-                        return hlp.convertDateTimeZone(new Date(), this.tzOffset);
-                    }
-                    return new Date();
-                } else if (vType === 'dateSpecific') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    let d = new Date();
-                    if (this.tzOffset) {
-                        d = hlp.convertDateTimeZone(d, this.tzOffset);
-                    }
-                    return hlp.addOffset(d, offsetX, multiplier);
-                } else if (vType === 'dayOfMonth') {
-                    let d = new Date();
-                    d = hlp.getSpecialDayOfMonth(d.getFullYear(),d.getMonth(), value);
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    if (this.tzOffset) {
-                        return hlp.addOffset(hlp.convertDateTimeZone((new Date()), this.tzOffset), offsetX, multiplier);
-                    }
-                    return hlp.addOffset(d, offsetX, multiplier);
-                } else if ((vType === 'pdsTime') || (vType === 'pdmTime')) {
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    if (vType === 'pdsTime') {
-                        // sun
-                        result = this.getSunTime((new Date()), value, offsetX, multiplier);
-                        result.fix = true;
-                    } else if (vType === 'pdmTime') {
-                        // moon
-                        result = this.getMoonTime((new Date()), value, offsetX, multiplier);
-                        result.fix = true;
-                    }
-                    if (result && result.value && !result.error) {
-                        if (this.tzOffset) {
-                            return hlp.convertDateTimeZone(result.value, this.tzOffset);
-                        }
-                        return result.value;
-                    }
-                    throw new Error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:vType, value, err:result.error})}) );
-                } else if (vType === 'entered' || vType === 'dateEntered') {
-                    result = hlp.getDateOfText(String(value), (this.tzOffset === 0), this.tzOffset);
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    return hlp.addOffset(result, offsetX, multiplier);
-                } else {
-                    // msg, flow, global, str, num, env
-                    result = this.getPropValue(_srcNode, msg, { type: vType, value });
-                }
-                if (result !== null && typeof result !== 'undefined') {
-                    _srcNode.log(result);
-                    const offsetX = this.getFloatProp(_srcNode, msg, offsetType, offset, 0);
-                    result = hlp.parseDateFromFormat(result, format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
-                    if (this.tzOffset) {
-                        result = hlp.convertDateTimeZone(result, this.tzOffset);
-                    }
-                    return hlp.addOffset(result, offsetX, multiplier);
-                }
-            } catch (err) {
-                _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(`Exception "${err.message}", on try to evaluate ${vType}.${value}`);
-                e.original = err;
-                e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
-                throw e;
-            }
-            return null;
+            return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
         /*******************************************************************************************************/
         /**
         * @typedef {Object} timePropType
         * @property {string} type - type name of the type input
         * @property {string} value - value of the type input
+        * @property {string|number} [format] - format of the input
         * @property {string} [offset] - value of the offset type input
         * @property {string} [offsetType] - type name of the offset type input
         * @property {number} [multiplier] - multiplier to the time
@@ -425,8 +394,8 @@ module.exports = function (RED) {
         /**
         * @typedef {Object} timePropResultType
         * @property {Date} value - the Date value
-        * @property {string} [error] - error message if an error has occured
-        * @property {boolean} [fix] - indicator if the given time value is a fix date
+        * @property {string} error - error message if an error has occured
+        * @property {boolean} fix - indicator if the given time value is a fix date
         */
 
         /**
@@ -437,32 +406,49 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            _srcNode.debug(`getTimeProp type=${data.type} value=${data.value} offset=${data.offset} offsetType=${data.offsetType} multiplier=${data.multiplier} next=${data.next} days=${data.days} tzOffset=${this.tzOffset}`);
+            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getTimeProp type=${data.type} value=${data.value} format=${data.format} offset=${data.offset} offsetType=${data.offsetType} multiplier=${data.multiplier} next=${data.next} days=${data.days} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
                 fix: true
             };
+            let now = new Date(data.now);
+            if (!hlp.isValidDate(data.now)) { now = new Date(); }
             try {
                 if (data.days === '') {
                     result.error = 'No valid Days given!';
-                } else if (data.type === '' || data.type === 'none') {
+                } else if (data.type === '' || data.type === 'none' || data.type === null) {
                     result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
                 } else if (data.type === 'date') {
-                    result.value = (data.now || new Date());
+                    result.value = now;
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
                 } else if (data.type === 'dateSpecific') {
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result.value = hlp.normalizeDate((data.now || new Date()), offsetX, data.multiplier, data.next, data.days);
+                    result.value = hlp.normalizeDate(now, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value);
                     }
                     result.fix = true;
+                } else if (data.type === 'dayOfMonth') {
+                    result.value = hlp.getSpecialDayOfMonth(now.getFullYear(), now.getMonth(), data.value);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value);
+                    }
                 } else if (data.type === 'entered') {
-                    result.value = hlp.getTimeOfText(String(data.value), (data.now || new Date()), (this.tzOffset === 0), this.tzOffset);
+                    result.value = hlp.getTimeOfText(String(data.value), now, (this.tzOffset === 0), this.tzOffset);
+                    if (result.value !== null) {
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
+                    }
+                    result.fix = true;
+                } else if (data.type === 'dateEntered') {
+                    result.value =  hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null) {
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
@@ -471,7 +457,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdsTime') {
                     // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getSunTime((data.now || new Date()), data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getSunTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -479,7 +465,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdmTime') {
                     // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getMoonTime((data.now || new Date()), data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getMoonTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -488,9 +474,12 @@ module.exports = function (RED) {
                     // can handle context, json, jsonata, env, ...
                     result.fix = (data.type === 'json'); // is not a fixed time if can be changed
                     const res = this.getPropValue(_srcNode, msg, data);
-
                     if (res) {
-                        result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
+                        if (data.format) {
+                            result.value = hlp.parseDateFromFormat(result.value, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                        } else {
+                            result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
+                        }
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                         if (this.tzOffset) {
@@ -513,9 +502,9 @@ module.exports = function (RED) {
                 if (!result.error) {
                     result.error = 'Can not get time for ' + data.type + '=' + data.value;
                 }
-                result.value = (data.now || new Date());
+                result.value = now;
             }
-            // _srcNode.debug('getTimeProp result=' + util.inspect(result));
+            _srcNode.debug('getTimeProp result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
         /*******************************************************************************************************/
@@ -573,7 +562,7 @@ module.exports = function (RED) {
                 _srcNode.error(RED._('blind-control.errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
                 return null;
             }
-            // _srcNode.debug('getPropValue result=' + util.inspect(result) + ' - ' + typeof result);
+            // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
@@ -650,7 +639,7 @@ module.exports = function (RED) {
             if (typeof date === 'string') {
                 // this.debug('getSunCalc for date ' + date);
                 const dto = new Date(date);
-                if (dto !== 'Invalid Date' && !isNaN(dto)) {
+                if (hlp.isValidDate(dto)) {
                     date = dto;
                 }
             }
@@ -683,13 +672,13 @@ module.exports = function (RED) {
             };
 
             if (noTimes) {
-                // this.debug('no times result= ' + util.inspect(result));
+                // this.debug('no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 return result;
             }
             this._sunTimesCheck();
             result.times = this.sunTimesToday;
             this.lastSunCalc = result;
-            // this.debug('result= ' + util.inspect(result));
+            // this.debug('result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 
@@ -697,7 +686,7 @@ module.exports = function (RED) {
         getMoonCalc(date, noTimes) {
             if (typeof date === 'string') {
                 const dto = new Date(date);
-                if (dto !== 'Invalid Date' && !isNaN(dto)) {
+                if (hlp.isValidDate(dto)) {
                     date = dto;
                 }
             }
@@ -897,19 +886,9 @@ module.exports = function (RED) {
                     res.status(200).send(JSON.stringify(obj));
                     break;
                 }
-                case 'getDateData': {
-                    try {
-                        obj = posConfig.getDateFromProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier);
-                    } catch(err) {
-                        obj.value = NaN;
-                        obj.error = err;
-                    }
-                    res.status(200).send(JSON.stringify(obj));
-                    break;
-                }
                 case 'getOutDataData': {
                     try {
-                        obj = posConfig.getOutDataProp(posConfig, undefined, req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getOutDataProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err;

@@ -428,7 +428,7 @@
             $levelOperator.width(40);
             $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
         } catch (ex) {
-                        console.log(ex); // eslint-disable-line
+            console.log(ex); // eslint-disable-line
         }
     }
 
@@ -869,7 +869,7 @@
                  * @returns {string} the default value for the level
                 */
                 function getDefLevel(type, value, def) {
-                    // console.log(console.log(`getDefLevel "${type}", "${value}", "${def}"`);
+                    // console.log(`getDefLevel "${type}", "${value}", "${def}"`);
                     if (value) {
                         return value;
                     }
@@ -903,7 +903,6 @@
                     try {
                         const editorRow = $('.node-input-rule-container-row ol');
                         const height = editorRow.outerHeight(true);
-
                         const rows = $('#node-input-rule-container').editableList('items');
                         if (rows.size() > 0) {
                             $('#node-input-rule-container').editableList('height', height + 40);
@@ -1515,7 +1514,6 @@
         },
         oneditsave() {
             const node = this;
-
             node.rules = saveRules($('#node-input-rule-container').editableList('items'));
 
             const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
