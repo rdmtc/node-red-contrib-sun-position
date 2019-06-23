@@ -938,7 +938,7 @@
                             value: (data.validOperandAValue || '')
                         }).appendTo($row1).typedInput({
                             default: (data.validOperandAType || types.Unlimited.value),
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon]
                         });
                         const $validOperator = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -1055,7 +1055,7 @@
                                 $validOperator.val(selFields.comparator[0].id);
                                 $validOperator.hide();
                                 $row2.hide(); // condOpB
-                            } else if ( propType === 'jsonata') {
+                            } else if ( propType === 'jsonata' || propType === types.PhaseMoon.value) {
                                 $validOperator.show();
                                 $validOperator.attr('disabled', true);
                                 $validOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
@@ -1239,7 +1239,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1248,7 +1248,7 @@
                             $('#node-input-oversteerCompare').hide();
                             $('.row-oversteerThreshold').hide();
                             $('#node-input-oversteerValue').typedInput('width','calc(100% - 110px)');
-                        } else if (oversteerValueType === 'jsonata') {
+                        } else if (oversteerValueType === 'jsonata' || oversteerValueType === types.PhaseMoon.value) {
                             $('.row-oversteerBlindPos').show();
                             $('#node-input-oversteerCompare').show();
                             $('#node-input-oversteerCompare').attr('disabled', true);
@@ -1311,7 +1311,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1329,7 +1329,7 @@
                             $('#node-input-oversteer2Compare').hide();
                             $('.row-oversteer2Threshold').hide();
                             $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 110px)');
-                        } else if (oversteer2ValueType === 'jsonata') {
+                        } else if (oversteer2ValueType === 'jsonata' || oversteer2ValueType === types.PhaseMoon.value) {
                             $('.row-oversteer2Value').show();
                             $('.row-oversteer2BlindPos').show();
                             $('#node-input-oversteer2Compare').show();
@@ -1394,7 +1394,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
@@ -1412,7 +1412,7 @@
                             $('#node-input-oversteer3Compare').hide();
                             $('.row-oversteer3Threshold').hide();
                             $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 110px)');
-                        } else if (oversteer3ValueType === 'jsonata') {
+                        } else if (oversteer3ValueType === 'jsonata' || oversteer3ValueType === types.PhaseMoon.value) {
                             $('.row-oversteer3Value').show();
                             $('.row-oversteer3BlindPos').show();
                             $('#node-input-oversteer3Compare').show();

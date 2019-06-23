@@ -210,7 +210,7 @@ module.exports = function (RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} `);
+        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} `);
         def = def || NaN;
         if (type === 'none' || type === '') {
             return def;
@@ -604,7 +604,6 @@ module.exports = function (RED) {
         const nowNr = now.getTime();
         const lastUntilRule = prepareRules(node,msg);
         node.debug(`checkRules nowNr=${nowNr}, node.rulesCount=${node.rulesCount} , lastUntilRule=${lastUntilRule}`); // {colors:true, compact:10}
-        node.debug('node.rulesData ' + util.inspect(node.rulesData, {colors:true, compact:10}));
 
         const fkt = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -639,7 +638,7 @@ module.exports = function (RED) {
                 throw new Error('Error can not calc time!');
             }
             rule.timeData.num = rule.timeData.value.getTime();
-            // node.debug('rule.timeData=' + util.inspect(rule.timeData));
+            // node.debug('rule.timeData ' + util.inspect(rule.timeData, { colors: true, compact: 40 }));
             if (cmp(rule.timeData.num)) {
                 return rule;
             }
@@ -657,10 +656,10 @@ module.exports = function (RED) {
             const res = fkt(rule, r => (r >= nowNr));
             if (res) {
                 ruleSel = res;
+                node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
                 break;
             }
         }
-        node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
         if (!ruleSel || ruleSel.timeLimited) {
             node.debug('second loop ' + node.rulesCount);
             for (let i = (node.rulesCount -1); i >= 0; --i) {
@@ -670,10 +669,10 @@ module.exports = function (RED) {
                 const res = fkt(rule, r => (r <= nowNr));
                 if (res) {
                     ruleSel = res;
+                    node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
                     break;
                 }
             }
-            node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
         }
         if (ruleSel) {
             // ruleSel.text = '';

@@ -277,6 +277,10 @@
             return '{moon position}' + suffix;
         }
 
+        if (t === 'pdmPhase') {
+            return '{moon phase}' + suffix;
+        }
+
         if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
@@ -809,7 +813,8 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
-                        types.MoonCalc
+                        types.MoonCalc,
+                        types.MoonPhase
                     ],
                     onChange(_type, _value) { $('#node-input-result1').change(); }
                 }).change();

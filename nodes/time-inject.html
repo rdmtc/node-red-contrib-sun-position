@@ -400,7 +400,6 @@
         }
 
         if (t === 'dateSpecific') {
-
             return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
         }
 
@@ -434,6 +433,10 @@
 
         if (t === 'pdmCalcData') {
             return '{moon position}' + suffix;
+        }
+
+        if (t === 'pdmPhase') {
+            return '{moon phase}' + suffix;
         }
 
         if (t === 'pdsTime') {
@@ -1096,7 +1099,8 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
-                        types.MoonCalc
+                        types.MoonCalc,
+                        types.MoonPhase
                     ],
                     onChange(_type, _value) {
                         const plVType = $('#node-input-payload').typedInput('type');
@@ -1224,7 +1228,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const timeType = $('#node-input-time').typedInput('type');
                         const propType = $('#node-input-property').typedInput('type');
@@ -1235,7 +1239,7 @@
                             $('#node-input-propertyCompare').hide();
                             $('.row-propertyThreshold').hide();
                             $('#node-input-property').typedInput('width', 'calc(100% - 110px)');
-                        } else if(propType === 'jsonata') {
+                        } else if(propType === 'jsonata' || propType === types.PhaseMoon.value) {
                             $('.time-inject-row-timeAlt').show();
                             $('.time-inject-row-timeAltOffset').show();
                             $('.time-inject-row-timeAltDays').show();
@@ -1420,7 +1424,8 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
-                        types.MoonCalc
+                        types.MoonCalc,
+                        types.MoonPhase
                     ],
                     onChange(_type, _value) {
                         $('#node-input-addPayload1').change();
@@ -1544,7 +1549,8 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
-                        types.MoonCalc
+                        types.MoonCalc,
+                        types.MoonPhase
                     ],
                     onChange(_type, _value) {
                         $('#node-input-addPayload2').change();
@@ -1663,7 +1669,8 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
-                        types.MoonCalc
+                        types.MoonCalc,
+                        types.MoonPhase
                     ],
                     onChange(_type, _value) {
                         $('#node-input-addPayload3').change();

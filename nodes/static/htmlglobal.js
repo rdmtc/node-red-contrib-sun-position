@@ -330,6 +330,42 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
             hasValue: false
+        },
+        MoonPhase: {
+            value: 'pdmPhase',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.moonPhase','moon phase'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase.png',
+            hasValue: false
+        },
+        PhaseMoon: {
+            value: 'pdmPhaseCheck',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.moonPhaseCheck','moon phase'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase.png',
+            options: [{
+                value: 'newMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.newMoon')
+            }, {
+                value: 'waxingCrescentMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.waxingCrescentMoon')
+            }, {
+                value: 'firstQuarterMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.firstQuarterMoon')
+            }, {
+                value: 'waxingGibbousMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.waxingGibbousMoon')
+            }, {
+                value: 'fullMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fullMoon')
+            }, {
+                value: 'waningGibbousMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.waningGibbousMoon')
+            }, {
+                value: 'lastQuarterMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lastQuarterMoon')
+            }, {
+                value: 'waningCrescentMoon',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.waningCrescentMoon')
+            }]
         }
     };
 }

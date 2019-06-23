@@ -24,6 +24,8 @@
             "timemoon":"moon time",
             "suncalc":"sun calculation",
             "mooncalc":"moon calculation",
+            "moonPhase":"moon phase",
+            "moonPhaseCheck": "moon phase",
             "levelfix":"Level",
             "levelfree": "Level entered",
             "levelfixMin": "minimum Level",
@@ -67,7 +69,15 @@
             "lThu": "last Thursday",
             "lFri": "last Friday",
             "lSat": "last Saturday",
-            "lSun": "last Sunday"
+            "lSun": "last Sunday",
+            "newMoon" : "New Moon 🌚",
+            "waxingCrescentMoon": "Waxing Crescent 🌒",
+            "firstQuarterMoon": "First Quarter 🌓",
+            "waxingGibbousMoon": "Waxing Gibbous 🌔",
+            "fullMoon": "Full Moon 🌝",
+            "waningGibbousMoon": "Waning Gibbous 🌖",
+            "lastQuarterMoon": "Last Quarter 🌗",
+            "waningCrescentMoon": "Waning Crescent 🌘"
         },
         "multiselectLbl": {
             "operatorTypes": "include into compare"
@@ -260,10 +270,20 @@
             "contain": "contain",
             "containSome": "containSome",
             "containEvery": "containEvery"
+        },
+        "moonPhases": {
+            "new" : "New Moon 🌚",
+            "waxing_crescent": "Waxing Crescent 🌒",
+            "first_quarter": "First Quarter 🌓",
+            "waxing_gibbous": "Waxing Gibbous 🌔",
+            "full": "Full Moon 🌝",
+            "waning_gibbous": "Waning Gibbous 🌖",
+            "last_quarter": "Last Quarter 🌗",
+            "waning_crescent": "Waning Crescent 🌘"
         }
     },
     "errors": {
-        "error": "<strong>Error</strong>: __message__",
+        "error": "Error: __message__",
         "error-title": "internal error",
         "error-init": "error '__message__', retry in __time__min",
         "warn-init": "warning '__message__', retry in __time__min",

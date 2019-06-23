@@ -246,6 +246,10 @@
             return '{moon position}' + suffix;
         }
 
+        if (t === 'pdmPhase') {
+            return '{moon phase}' + suffix;
+        }
+
         if (t === 'pdsTime') {
             const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
             return clipValueLength(res, l) + suffix;
@@ -682,7 +686,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: node.propertyStartType  || types.Undefined.value,
                     defaultValue: node.propertyStartValue || '' ,
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const propCompare = $('#node-input-propertyStartCompare');
                         const propType = $('#node-input-propertyStart').typedInput('type');
@@ -692,7 +696,7 @@
                             propCompare.hide();
                             $('.row-propertyStartThreshold').hide();
                             $('#node-input-propertyStart').typedInput('width', 'calc(100% - 110px)');
-                        } else if (propType === 'jsonata') {
+                        } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
                             $('.alternate-time-start').show();
                             propCompare.show();
                             propCompare.attr('disabled', true);
@@ -801,7 +805,7 @@
                     width: 'calc(100% - 110px)',
                     defaultType: node.propertyEndType  || types.Undefined.value,
                     defaultValue: node.propertyEndValue || '' ,
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                     onChange(_type, _value) {
                         const propCompare = $('#node-input-propertyEndCompare');
                         const propType = $('#node-input-propertyEnd').typedInput('type');
@@ -812,7 +816,7 @@
                             propCompare.hide();
                             $('.row-propertyEndThreshold').hide();
                             $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 110px)');
-                        } else if (propType === 'jsonata') {
+                        } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
                             $('.alternate-time-end').show();
                             propCompare.show();
                             propCompare.attr('disabled', true);
