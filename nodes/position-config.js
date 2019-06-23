@@ -248,7 +248,7 @@ module.exports = function (RED) {
         * @return {moontime|erroresult} result object of moon time
         */
         getMoonTime(now, value, offset, multiplier, next, days) {
-            let result = {};
+            const result = {};
             const datebase = new Date(now);
             const dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._moonTimesCheck(); // refresh if needed, get dayId

@@ -164,8 +164,16 @@
       "eqeqeq": "error",
       "no-else-return": "error",
       "prefer-arrow-callback": "error",
-      "no-confusing-arrow": ["error", {"allowParens": true}],
-      "arrow-parens": ["error", "as-needed"],
+      "no-confusing-arrow": [
+        "error",
+        {
+          "allowParens": true
+        }
+      ],
+      "arrow-parens": [
+        "error",
+        "as-needed"
+      ],
       "no-console": "warn",
       "no-unused-vars": [
         "error",
@@ -185,16 +193,25 @@
         }
       ],
       "no-var": "error",
-      "object-shorthand": ["error", "always"],
+      "object-shorthand": [
+        "error",
+        "always"
+      ],
       "prefer-const": "error",
       "prefer-rest-params": "error",
       "no-useless-concat": "error",
       "no-template-curly-in-string": "error",
       "require-jsdoc": "warn",
-      "rest-spread-spacing": ["error", "never"],
+      "rest-spread-spacing": [
+        "error",
+        "never"
+      ],
       "symbol-description": "error",
       "array-callback-return": "error",
-      "complexity": ["warn", 35],
+      "complexity": [
+        "warn",
+        35
+      ],
       "consistent-return": "error",
       "no-lone-blocks": "error",
       "linebreak-style": [
