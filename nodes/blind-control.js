@@ -646,8 +646,8 @@ module.exports = function (RED) {
         };
 
         let ruleSel = null;
-        // let ruleSelMin = null;
-        // let ruleSelMax = null;
+        const ruleSelMin = null;
+        const ruleSelMax = null;
         // node.debug('first loop ' + node.rulesCount);
         for (let i = 0; i <= lastUntilRule; ++i) {
             const rule = node.rulesData[i];

@@ -1,5 +1,7 @@
 #### 0.4.1 / 0.4.2: Maintenance Release
 
+#### 0.4.1 / 0.4.2: Maintenance Release
+
 - fixed problems on RedMatic call of getBackendData
   - tooltip with resolved time on typeInput now also available in RedMatic
 - i18N reworked
