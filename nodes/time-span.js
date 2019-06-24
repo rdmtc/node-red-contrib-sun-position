@@ -15,6 +15,12 @@ const perHour = 3600000;
 const perDay = 86400000;
 const perWeek = 604800000;
 
+/**
+ * get the differense between two month relative
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in month between the two dates
+ */
 function getMonthDiff(d1,d2) {
     let months = (d2.getFullYear() - d1.getFullYear()) * 12;
     months -= d1.getMonth() + 1;
@@ -26,6 +32,12 @@ function getMonthDiff(d1,d2) {
     return months;
 }
 
+/**
+ * get the differense between two month absolute
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in month between the two dates
+ */
 function getMonthDiffAbs(d1,d2) {
     let months = (d2.getFullYear() - d1.getFullYear()) * 12;
     months -= d1.getMonth() + 1;
@@ -35,6 +47,12 @@ function getMonthDiffAbs(d1,d2) {
     return months;
 }
 
+/**
+ * get the differense between years absolute
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @returns {number} differences in years between the two dates
+ */
 function getYearDiffAbs(d1,d2) {
     let years = (d2.getFullYear() - d1.getFullYear());
     if (d2.getMonth() >= d1.getMonth()) {
@@ -43,6 +61,13 @@ function getYearDiffAbs(d1,d2) {
     return years;
 }
 
+/**
+ * format timespan
+ * @param {Date} d1 - Date 1
+ * @param {Date} d1 - Date 2
+ * @param {string} format - the out format
+ * @returns {string} differences in years between the two dates
+ */
 function formatTS(d1, d2, format) {
     const token = /[yMw]{1,2}|t?[dhHkKms]{1,2}|t?l{1,3}|[tT]{1,2}|S|L|"[^"]*"|'[^']*'/g;
 
@@ -135,6 +160,13 @@ function formatTS(d1, d2, format) {
     });
 }
 
+/**
+ * get a formated timespan
+ * @param {Date} date1 - Date 1
+ * @param {Date} date2 - Date 2
+ * @param {string} format - the out format
+ * @returns {string} the formatet timespan
+ */
 function getFormattedTimeSpanOut(date1, date2, format) {
     format = format || 0;
     if (isNaN(format)) {
@@ -198,7 +230,7 @@ function getFormattedTimeSpanOut(date1, date2, format) {
             timeUTCStr: date2.toUTCString(),
             timeISOStr: date2.toISOString()
         },
-        timeSpan: timeSpan,
+        timeSpan,
         timeSpanAbs: {
             ms: timeSpan % 1000,
             sec: Math.floor(timeSpan / perSecond) % 60,
@@ -223,7 +255,10 @@ function getFormattedTimeSpanOut(date1, date2, format) {
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * timeSpanNode
+     * @param {*} config - configuration
+     */
     function timeSpanNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -243,14 +278,38 @@ module.exports = function (RED) {
             }
 
             try {
-                const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetType, config.operand1OffsetMultiplier);
+                /*  const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetType, config.operand1OffsetMultiplier);
                 if (operand1 === null) {
                     return null;
+                } */
+                const operand1 = node.positionConfig.getTimeProp(node, msg, {
+                    type: config.operand1Type,
+                    value: config.operand1,
+                    format: config.operand1Format,
+                    offsetType: config.operand1OffsetType,
+                    offset: config.operand1Offset,
+                    multiplier: config.operand1OffsetMultiplier
+                });
+                if (operand1.error) {
+                    throw new Error(operand1.error);
                 }
-                const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetType, config.operand2OffsetMultiplier);
+
+                /* const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetType, config.operand2OffsetMultiplier);
                 if (operand2 === null) {
                     return null;
+                } */
+                const operand2 = node.positionConfig.getTimeProp(node, msg, {
+                    type: config.operand2Type,
+                    value: config.operand2,
+                    format: config.operand2Format,
+                    offsetType: config.operand2OffsetType,
+                    offset: config.operand2Offset,
+                    multiplier: config.operand2OffsetMultiplier
+                });
+                if (operand2.error) {
+                    throw new Error(operand2.error);
                 }
+
                 let timeSpan = operand1.getTime() - operand2.getTime();
                 if (config.operand === 0) {
                     timeSpan = Math.abs(timeSpan);
@@ -259,17 +318,26 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
                     if (config.result1ValueType === 'timespan') {
-                        resultObj = getFormattedTimeSpanOut(operand1, operand2, config.result1TSFormat);
+                        resultObj = getFormattedTimeSpanOut(operand1.value, operand2.value, config.result1TSFormat);
                         resultObj.start.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.start.date);
                         resultObj.start.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.start.date);
                         resultObj.end.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.end.date);
                         resultObj.end.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.end.date);
                     } else if (config.result1ValueType === 'operand1') {
-                        resultObj = hlp.getFormattedDateOut(operand1, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(operand1.value, config.result1Format);
                     } else if (config.result1ValueType === 'operand2') {
-                        resultObj = hlp.getFormattedDateOut(operand2, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(operand2.value, config.result1Format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
+                        // resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, {
+                            type: config.result1ValueType,
+                            value: config.result1Value,
+                            format: config.result1Format,
+                            offsetType: config.result1OffsetType,
+                            offset: config.result1Offset,
+                            multiplier: config.result1Multiplier,
+                            next: true
+                        });
                     }
                     // to
 
@@ -339,7 +407,7 @@ module.exports = function (RED) {
                         }
                     } catch (err) {
                         node.error(err.message);
-                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                         node.status({
                             fill: 'red',
                             shape: 'ring',
@@ -357,12 +425,12 @@ module.exports = function (RED) {
 
                 resObj.push(msg);
                 node.status({
-                    text: (operand1.getTime() - operand2.getTime()) / 1000 + 's'
+                    text: (operand1.value.getTime() - operand2.value.getTime()) / 1000 + 's'
                 });
 
                 node.send(resObj);
             } catch (err) {
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -370,6 +438,7 @@ module.exports = function (RED) {
                 });
                 throw err;
             }
+            return null;
         });
     }
 

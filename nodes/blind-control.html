@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="blind-control">
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -25,9 +26,13 @@
     <div class="is-to-show-initially">
         <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
         <div class="form-row node-input-rule-container-row row-full-width">
-        <ol id="node-input-rule-container"></ol>
+            <ol id="node-input-rule-container"></ol>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
         </div>
     </div>
+
     <div class="form-row block-noindent is-to-show-initially">
         <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
     </div>
@@ -307,6 +312,12 @@
 </style>
 
 <script type="text/javascript">
+    /**
+     * get a value
+     * @param {*} node - the node representation
+     * @param {string} name - name of the value
+     * @returns {*} the value of th element
+     */
     function getVal(node,name) {
         const v = $('#node-input-' + name).val();
         if (v === undefined) {
@@ -314,10 +325,20 @@
         }
         return v;
     }
+    /**
+     * count decimals
+     * @param {number} value - a floating point number
+     * @returns {number} number of decimals
+     */
     function countDecimals(value) {
         return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
     }
-
+    /**
+     * validates a blind position
+     * @param {*} node - the node representation
+     * @param {number} v - the blind position to validate
+     * @returns {boolean} __true__ if the blind position is valide
+     */
     function validateBlindPos(node, v) {
         const n = parseFloat(v);
         const inc = getVal(node, 'blindIncrement');
@@ -327,13 +348,18 @@
                 (n >= getVal(node, 'blindClosedPos')) &&
                 Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
     }
-
+    /**
+     * save rules
+     * @param {number} rules - output of the editableList
+     * @returns {number} number of decimals
+     */
     function saveRules(rules) {
         const result = [];
         if (rules) {
             rules.each(function (_i) {
                 const rule = $(this);
                 const data = {
+                    index: _i,
                     timeValue: rule.find('.node-input-rule-time').typedInput('value'),
                     timeType: rule.find('.node-input-rule-time').typedInput('type'),
                     timeOp: rule.find('.node-input-rule-time-operator').val(),
@@ -356,6 +382,54 @@
             });
         }
         return result;
+    }
+    /**
+     * resizes a rule
+     * @param {jQuery} rule - the jQuery selector of the rule
+     */
+    function resizeRule(rule) {
+        try {
+            const newWidth = rule.width() - 10;
+            // row1
+            const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
+            const $validOperandA = rule.find('.node-input-rule-condOpA');
+            const $validOperator = rule.find('.node-input-rule-condOperator');
+            $validOperandALbl.width('auto');
+            if ($validOperator.is(':visible')) {
+                $validOperator.width(100);
+                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
+            } else {
+                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
+            }
+            // row2
+            const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
+            const $validOperandB = rule.find('.node-input-rule-condOpB');
+            $validOperandBLbl.width('auto');
+            $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
+            // row3
+            const $timeLbl = rule.find('.node-input-rule-time-lbl');
+            const $timeOperator = rule.find('.node-input-rule-time-operator');
+            const $time = rule.find('.node-input-rule-time');
+            $timeLbl.width('auto');
+            $timeOperator.width(70);
+            $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
+            // row4
+            const $offset = rule.find('.node-input-rule-offset');
+            const $multiplier = rule.find('.node-input-rule-multiplier');
+            const multiplierWidth = 125;
+            $multiplier.width(multiplierWidth);
+            $offset.typedInput('width', (newWidth - multiplierWidth - 50));
+            // row5
+            const $levelLbl = rule.find('.node-input-rule-level-lbl');
+            const $level = rule.find('.node-input-rule-level');
+            const $levelOperator = rule.find('.node-input-rule-level-operator');
+            $levelLbl.width('auto');
+            $levelOperator.show();
+            $levelOperator.width(40);
+            $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
+        } catch (ex) {
+            console.log(ex); // eslint-disable-line
+        }
     }
 
     RED.nodes.registerType('blind-control', {
@@ -383,7 +457,7 @@
             blindIncrement: {
                 value: 0.01,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return (RED.validators.number(v) &&
                             (n <= getVal(this, 'blindOpenPos')) &&
@@ -393,17 +467,17 @@
             blindOpenPos: {
                 value: 1.00,
                 required: true,
-                validate: function (v) {
+                validate(v) { // eslint-disable-line request-shorthand
                     const n = parseFloat(v);
                     return RED.validators.number(v) &&
-                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                            (n > getVal(this, 'blindClosedPos'));
+                        (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
+                        (n > getVal(this, 'blindClosedPos'));
                 }
             },
             blindClosedPos: {
                 value: 0.00,
                 required: true,
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return RED.validators.number(v) &&
                             (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
@@ -425,7 +499,7 @@
             overwriteExpire: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                 }
@@ -440,7 +514,7 @@
             sunControlMode: {
                 value: '0',
                 required: true,
-                validate: function(v) {
+                validate(v) {
                     const n = Number(v);
                     return (RED.validators.number(v) && (n >= 0) && (n <= 2));
                 }
@@ -448,7 +522,7 @@
             sunFloorLength: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
                             (v !== '' && RED.validators.number(v));
@@ -457,7 +531,7 @@
             sunMinAltitude: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
@@ -467,7 +541,7 @@
             sunMinDelta: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
                             (v === '') ||
@@ -478,7 +552,7 @@
             },
             blindPosMin: {
                 value: 'closed (min)',
-                validate: function (v) {
+                validate(v) {
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
                         RED.validators.typedInput('blindPosMinType')(v));
                 }
@@ -488,7 +562,7 @@
             },
             blindPosMax: {
                 value: 'open (max)',
-                validate: function(v) {
+                validate(v) {
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
                     RED.validators.typedInput('blindPosMaxType')(v));
                 }
@@ -498,7 +572,7 @@
             },
             smoothTime: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     const n = parseFloat(v);
                     return ((Number(getVal(this, 'sunControlMode')) <= 0) || (v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                 }
@@ -507,21 +581,21 @@
             // #region window settings
             windowTop: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowBottom: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (v !== '' && RED.validators.number(v));
                 }
             },
             windowAzimuthStart: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     const n = Number(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
@@ -530,7 +604,7 @@
             },
             windowAzimuthEnd: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     const n = Number(v);
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
@@ -542,7 +616,7 @@
             oversteerValue: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             RED.validators.typedInput('oversteerValueType')(v);
                 }
@@ -555,7 +629,7 @@
             },
             oversteerThreshold: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (getVal(this, 'oversteerValueType') === 'none') ||
                             RED.validators.typedInput('oversteerThresholdType')(v);
@@ -566,7 +640,7 @@
             },
             oversteerBlindPos: {
                 value: 'open (max)',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                             (getVal(this, 'oversteerValueType') === 'none') ||
                             RED.validators.typedInput('oversteerBlindPosType')(v); // validateBlindPos(this, v);
@@ -578,7 +652,7 @@
             oversteer2Value: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         RED.validators.typedInput('oversteer2ValueType')(v);
@@ -592,7 +666,7 @@
             },
             oversteer2Threshold: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -604,7 +678,7 @@
             },
             oversteer2BlindPos: {
                 value: 'open (max)',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -617,7 +691,7 @@
             oversteer3Value: {
                 value: '',
                 required: false,
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -632,7 +706,7 @@
             },
             oversteer3Threshold: {
                 value: '',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -645,7 +719,7 @@
             },
             oversteer3BlindPos: {
                 value: 'open (max)',
-                validate: function (v) {
+                validate(v) {
                     return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                         (getVal(this, 'oversteerValueType') === 'none') ||
                         (getVal(this, 'oversteer2ValueType') === 'none') ||
@@ -689,13 +763,15 @@
                 $('.is-to-show-initially').show();
                 $('.is-to-hide-initially').hide();
             }, 300);
+            $('.rdg-ui-btn').button();
+
             this.outputs = this.outputs || 1;
             this.sunControlMode = this.sunControlMode || 0;
             const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
 
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel getTimeData */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData */
                 // #region initialize
                 const types = getTypes(node);
                 const selFields = getSelectFields();
@@ -704,7 +780,7 @@
                     value: 'num',
                     label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
                     icon: 'red/images/typedInput/09.png',
-                    validate: function(v) { return validateBlindPos(this, v); }
+                    validate(v) { return validateBlindPos(this, v); }
                 };
                 types.LevelFix = {
                     value: 'levelFixed',
@@ -736,6 +812,14 @@
                         label: node._('blind-control.typeOptions.0')
                     }]
                 };
+                /**
+                 * save rules
+                 * @param {*} node - the node representation
+                 * @param {string} name - the node representation
+                 * @param {*} element - the node representation
+                 * @param {number} rules - output of the editableList
+                 * @returns {number} number of decimals
+                */
                 function setMultiplier(node, name, element, validate, defMultiplier) {
                     const c = Number(node[name]);
                     if (node[name] !== '' && !isNaN(c)) {
@@ -777,18 +861,26 @@
                     });
                     $('#time-control-' + name).change();
                 }
+                /**
+                 * get the default level
+                 * @param {string} type - the type value
+                 * @param {string} value - value
+                 * @param {string} def - the default value
+                 * @returns {string} the default value for the level
+                */
                 function getDefLevel(type, value, def) {
+                    // console.log(`getDefLevel "${type}", "${value}", "${def}"`);
                     if (value) {
                         return value;
                     }
                     if (!type || type === types.LevelFix.value) {
-                        return def || types.LevelFix.options[0];
+                        return def;
                     }
-                    return def || '';
+                    return def;
                 }
                 // #endregion initialize
                 // #region blind
-                setMultiplier(node,'overwriteExpire', (v) => {
+                setMultiplier(node,'overwriteExpire', v => {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                 }, 3600000);
@@ -803,56 +895,14 @@
 
                 // #endregion blind
                 // #region rules
-                function resizeRule(rule) {
-                    try {
-                        const newWidth = rule.width() - 10;
-                        // row1
-                        const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
-                        const $validOperandA = rule.find('.node-input-rule-condOpA');
-                        const $validOperator = rule.find('.node-input-rule-condOperator');
-                        $validOperandALbl.width('auto');
-                        if ($validOperator.is(':visible')) {
-                            $validOperator.width(100);
-                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
-                        } else {
-                            $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
-                        }
-                        // row2
-                        const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
-                        const $validOperandB = rule.find('.node-input-rule-condOpB');
-                        $validOperandBLbl.width('auto');
-                        $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
-                        // row3
-                        const $timeLbl = rule.find('.node-input-rule-time-lbl');
-                        const $timeOperator = rule.find('.node-input-rule-time-operator');
-                        const $time = rule.find('.node-input-rule-time');
-                        $timeLbl.width('auto');
-                        $timeOperator.width(70);
-                        $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
-                        // row4
-                        const $offset = rule.find('.node-input-rule-offset');
-                        const $multiplier = rule.find('.node-input-rule-multiplier');
-                        const multiplierWidth = 125;
-                        $multiplier.width(multiplierWidth);
-                        $offset.typedInput('width', (newWidth - multiplierWidth - 50));
-                        // row5
-                        const $levelLbl = rule.find('.node-input-rule-level-lbl');
-                        const $level = rule.find('.node-input-rule-level');
-                        const $levelOperator = rule.find('.node-input-rule-level-operator');
-                        $levelLbl.width('auto');
-                        $levelOperator.show();
-                        $levelOperator.width(40);
-                        $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
-                    } catch (ex) {
-                        console.log(ex); // eslint-disable-line
-                    }
-                }
 
+                /**
+                 * resizes a rule container
+                 */
                 function resizeContainer() {
                     try {
                         const editorRow = $('.node-input-rule-container-row ol');
                         const height = editorRow.outerHeight(true);
-
                         const rows = $('#node-input-rule-container').editableList('items');
                         if (rows.size() > 0) {
                             $('#node-input-rule-container').editableList('height', height + 40);
@@ -866,6 +916,13 @@
 
                 $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                     addItem(containerRow, containerIndex, data) {
+                        data.index = containerIndex;
+                        data.timeType = (data.timeType || types.TimeEntered.value);
+                        data.timeValue = (data.timeValue || '');
+                        data.timeLimited = (data.timeType !== 'none');
+
+                        data.conditional = (data.validOperandAType !== 'none');
+
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
                         const $row1 = $('<div/>').appendTo(containerRow);
                         const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
@@ -881,7 +938,7 @@
                             value: (data.validOperandAValue || '')
                         }).appendTo($row1).typedInput({
                             default: (data.validOperandAType || types.Unlimited.value),
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata']
+                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon]
                         });
                         const $validOperator = $('<select/>', {
                             class: 'node-input-rule-condOperator',
@@ -919,9 +976,9 @@
                             class: 'node-input-rule-time',
                             id: 'node-input-rule-time' + containerIndex,
                             type: 'text',
-                            value: (data.timeValue || '')
+                            value: data.timeValue
                         }).appendTo($row3).typedInput({
-                            default: (data.timeType || types.TimeEntered.value),
+                            default: data.timeType,
                             types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
                         // #endregion row3
@@ -940,16 +997,16 @@
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo($row4);
-                        appendOptions(node, $multiplier, 'multiplier', (data) => (data.id > 0));
+                        appendOptions(node, $multiplier, 'multiplier', data => (data.id > 0));
                         $multiplier.val(data.multiplier || 60000);
                         // #endregion row4
-                        // #region row5 - Blind Level -- [blind-level / open / closed] [type]
+                        // #region row5 - Blind Level -- [blind-level / open / closed] [abs-min-max]
                         addLabel($row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.ruleBlindLevel'));
                         $('<input/>', {
                             class: 'node-input-rule-level',
                             id: 'node-input-rule-level' + containerIndex,
                             type: 'text',
-                            value: (data.levelValue || getDefLevel(data.levelTyp, data.levelValue, 'closed (min)'))
+                            value: getDefLevel(data.levelTyp, data.levelValue, 'closed (min)')
                         }).appendTo($row5).typedInput({
                             default: (data.levelType || types.LevelFix.value),
                             types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
@@ -972,12 +1029,17 @@
                             } else {
                                 $row4.hide(); // offset
                             }
-                            getTimeData(d => {
-                                if (d.value) {
+                            getBackendData(d => {
+                                if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
                                     $row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
+                                    $time.attr('timedata', dv.getTime());
+                                } else {
+                                    $row3.attr('title', d.value);
+                                    $time.attr('timedata', '0');
                                 }
                             }, {
+                                kind: 'getTimeData',
                                 config : $nodeConfig.val(),
                                 type: opType,
                                 value: $time.typedInput('value'),
@@ -993,7 +1055,7 @@
                                 $validOperator.val(selFields.comparator[0].id);
                                 $validOperator.hide();
                                 $row2.hide(); // condOpB
-                            } else if ( propType === 'jsonata') {
+                            } else if ( propType === 'jsonata' || propType === types.PhaseMoon.value) {
                                 $validOperator.show();
                                 $validOperator.attr('disabled', true);
                                 $validOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
@@ -1024,24 +1086,30 @@
                         });
                         $validOperator.change(() => { $validOperandA.change(); });
                         // #endregion fields changes
-                        resizeRule(containerRow);
                         $validOperandA.change();
                         $time.change();
+                        resizeRule(containerRow);
                     },
+                    addButton: false,
                     resizeItem: resizeRule,
                     sortable: true,
                     removable: true,
-                    removeItem: function(_opt) {
+                    scrollOnAdd: true,
+                    removeItem(_opt) {
                         const rules = $('#node-input-rule-container').editableList('items');
                         rules.each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
+                            const data = $(this).data('data');
+                            data.index = i;
                         });
                         resizeContainer();
                     },
-                    sortItems: function(_rules) {
+                    sortItems(_rules) {
                         const rules = $('#node-input-rule-container').editableList('items');
                         rules.each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
+                            const data = $(this).data('data');
+                            data.index = i;
                         });
                     }
                 });
@@ -1049,9 +1117,69 @@
                 if (node.rules) {
                     for (let i = 0; i < node.rules.length; i++) {
                         const rule = node.rules[i];
+                        // rule.index = i;
                         $('#node-input-rule-container').editableList('addItem', rule);
                     }
                 }
+
+                // #region Button
+                const $btnAdd = $('#node-button-add');
+                $btnAdd.click(() => {
+                    $('#node-input-rule-container').editableList('addItem', {});
+                });
+
+                const $btnClear = $('#node-button-clear');
+                $btnClear.click(() => {
+                    $('#node-input-rule-container').editableList('empty');
+                    resizeContainer();
+                });
+
+                const $btnSort = $('#node-button-sort');
+                $btnSort.click(() => {
+                    const prerules = $('#node-input-rule-container').editableList('items');
+                    prerules.each(function(i) {
+                        const data = $(this).data('data');
+                        data.index = i;
+                        data.timeOp = (Number(data.timeOp) || 0);
+                        data.levelOp = (Number(data.levelOp) || 0);
+                        data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
+                        data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
+                        data.timeData = (parseFloat($(this).find('.node-input-rule-time').attr('timedata')) || 0);
+                    });
+                    /**
+                     * 1 no time
+                     * 2 time    - until
+                     * 3 time    - from
+                     */
+                    $('#node-input-rule-container').editableList('sort', (a, b) => {
+                        const res = (a.timeLimited - b.timeLimited);
+                        if (res !== 0) { // one is not time limited
+                            return res; // not timeLimited before timeLimited (1-3)
+                        }
+                        const pos = (a.index - b.index);
+                        if (!a.timeLimited && !b.timeLimited) { // both not time limited
+                            return pos;
+                        }
+                        // both are time limited
+                        const top = (a.timeOp - b.timeOp);
+                        if (top !== 0) {
+                            return top; // from before until
+                        }
+                        // both same from/until type
+                        const time = a.timeData - b.timeData;
+                        if ((a.timeData !== 0) && (b.timeData !== 0) && (time !== 0)) { // time is different
+                            return time;
+                        }
+                        return pos;
+                    });
+                    const postrules = $('#node-input-rule-container').editableList('items');
+                    postrules.each(function(i) {
+                        $(this).find('.node-input-rule-index').html(i+1);
+                        const data = $(this).data('data');
+                        data.index = i;
+                    });
+                });
+                // #endregion Button
                 // #endregion rules
                 // #region sun
                 $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
@@ -1079,12 +1207,14 @@
                     }
                     $('#node-input-oversteerValue').change();
                 });
+                // blindPosMin "undefined", "", blindPosMax "levelFixed", ""
+                // console.log(`blindPosMin "${node.blindPosMinType}", "${node.blindPosMin}", blindPosMax "${node.blindPosMaxType}", "${node.blindPosMax}"`);
                 setupTInput(node, {
                     typeProp: 'blindPosMinType',
                     valueProp: 'blindPosMin',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'), // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'),
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
                 setupTInput(node, {
@@ -1092,11 +1222,11 @@
                     valueProp: 'blindPosMax',
                     width: 'calc(100% - 120px)',
                     defaultType: types.LevelFix.value,
-                    defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'), // types.LevelFix.options[0],
+                    defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'),
                     types: [types.LevelFix, types.LevelEntered, 'env']
                 });
 
-                setMultiplier(node, 'smoothTime', (v) => {
+                setMultiplier(node, 'smoothTime', v => {
                     const n = parseFloat(v);
                     return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
                 }, 60000);
@@ -1109,8 +1239,8 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
                         if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
@@ -1118,7 +1248,7 @@
                             $('#node-input-oversteerCompare').hide();
                             $('.row-oversteerThreshold').hide();
                             $('#node-input-oversteerValue').typedInput('width','calc(100% - 110px)');
-                        } else if (oversteerValueType === 'jsonata') {
+                        } else if (oversteerValueType === 'jsonata' || oversteerValueType === types.PhaseMoon.value) {
                             $('.row-oversteerBlindPos').show();
                             $('#node-input-oversteerCompare').show();
                             $('#node-input-oversteerCompare').attr('disabled', true);
@@ -1181,8 +1311,8 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
@@ -1199,7 +1329,7 @@
                             $('#node-input-oversteer2Compare').hide();
                             $('.row-oversteer2Threshold').hide();
                             $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 110px)');
-                        } else if (oversteer2ValueType === 'jsonata') {
+                        } else if (oversteer2ValueType === 'jsonata' || oversteer2ValueType === types.PhaseMoon.value) {
                             $('.row-oversteer2Value').show();
                             $('.row-oversteer2BlindPos').show();
                             $('#node-input-oversteer2Compare').show();
@@ -1264,8 +1394,8 @@
                     width: 'calc(100% - 110px)',
                     defaultType: types.Undefined.value,
                     defaultValue: '',
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'jsonata', 'env'],
-                    onChange: (_type, _value) => {
+                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                    onChange(_type, _value) {
                         const sunControlMode = Number($('#node-input-sunControlMode').val());
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
                         const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
@@ -1282,7 +1412,7 @@
                             $('#node-input-oversteer3Compare').hide();
                             $('.row-oversteer3Threshold').hide();
                             $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 110px)');
-                        } else if (oversteer3ValueType === 'jsonata') {
+                        } else if (oversteer3ValueType === 'jsonata' || oversteer3ValueType === types.PhaseMoon.value) {
                             $('.row-oversteer3Value').show();
                             $('.row-oversteer3BlindPos').show();
                             $('#node-input-oversteer3Compare').show();
@@ -1363,22 +1493,6 @@
                     min: 0,
                     step: 1
                 });
-                /*
-                $('#node-input-enhancedSettings').on('change', (_type, _value) => {
-                    const items = $('#node-input-rule-container').editableList('items');
-                    if (items) {
-                        items.forEach(rule => resizeRule(rule));
-                    }
-                    /*
-                                        node.rules = saveRules($('#node-input-rule-container').editableList('items'));
-                                        $('#node-input-rule-container').editableList('empty');
-                                        if (node.rules) {
-                                            for (let i = 0; i < node.rules.length; i++) {
-                                                const rule = node.rules[i];
-                                                $('#node-input-rule-container').editableList('addItem', rule);
-                                            }
-                                        } */
-                //               });*/
                 // #endregion Enhanced settings
                 $('#node-input-sunControlMode').change();
             }; // setup
@@ -1400,36 +1514,7 @@
         },
         oneditsave() {
             const node = this;
-
-            // #region rule-container
             node.rules = saveRules($('#node-input-rule-container').editableList('items'));
-            /*
-            node.rules = [];
-            const rules = $('#node-input-rule-container').editableList('items');
-            rules.each(function (_i) {
-                const rule = $(this);
-                const data = {
-                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
-                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
-                    timeOp: rule.find('.node-input-rule-time-operator').val(),
-                    timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
-                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
-                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
-                    levelOp: rule.find('.node-input-rule-level-operator').val(),
-                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
-                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
-                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
-                    multiplier: rule.find('.node-input-rule-multiplier').val(),
-                    validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
-                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
-                    validOperator: rule.find('.node-input-rule-condOperator').val(),
-                    validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
-                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
-                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type')
-                };
-                node.rules.push(data);
-            });
-            */
 
             const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
             if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
@@ -1448,18 +1533,13 @@
             } else {
                 $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
             }
-            // #endregion result-container
         },
-        oneditresize(size) {
-            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-            let height = size.height;
-            for (let i = 0; i < rows.size(); i++) {
-                height -= $(rows[i]).outerHeight(true);
+        oneditresize(_size) {
+            if (typeof $().editableList !== 'undefined') {
+                const postrules = $('#node-input-rule-container').editableList('items');
+                postrules.each(function(_i) {
+                    resizeRule($(this));
+                });
             }
-
-            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-            height -= 50;
-            $('#node-input-rule-container').editableList('height', height);
         }
     });</script>

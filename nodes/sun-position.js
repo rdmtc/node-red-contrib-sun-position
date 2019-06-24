@@ -8,7 +8,10 @@ const util = require('util');
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * sunPositionNode
+     * @param {*} config - configuration
+     */
     function sunPositionNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -38,6 +41,10 @@ module.exports = function (RED) {
                 if (typeof msg.ts !== 'undefined') {
                     now = new Date(msg.time);
                 }
+                if (!hlp.isValidDate(now)) {
+                    now = new Date();
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalidParameter', { param: 'msg.ts', type: 'Date', newValue: now }));
+                }
                 if (!this.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
@@ -55,13 +62,22 @@ module.exports = function (RED) {
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');
                     this.send(ports);
-                    return;
+                    return null;
                 }
 
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
                 if (node.startType !== 'none') {
-                    const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffsetType, node.startOffset, node.startOffsetMultiplier);
+                    // const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffsetType, node.startOffset, node.startOffsetMultiplier);
+                    const startTime = node.positionConfig.getTimeProp(node, msg, {
+                        type: node.startType,
+                        value : node.start,
+                        offsetType : node.startOffsetType,
+                        offset : node.startOffset,
+                        multiplier : node.startOffsetMultiplier,
+                        now
+                    });
+
                     node.debug('startTime: ' + util.inspect(startTime));
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
@@ -73,7 +89,16 @@ module.exports = function (RED) {
                 }
 
                 if (node.endType !== 'none') {
-                    const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffsetType, node.endOffset, node.endOffsetMultiplier);
+                    // const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffsetType, node.endOffset, node.endOffsetMultiplier);
+                    const endTime = node.positionConfig.getTimeProp(node, msg, {
+                        type: node.endType,
+                        value : node.end,
+                        offsetType : node.endOffsetType,
+                        offset : node.endOffset,
+                        multiplier : node.endOffsetMultiplier,
+                        now
+                    });
+
                     node.debug('endTime: ' + util.inspect(endTime));
                     if (endTime.error) {
                         errorStatus = 'could not evaluate end time';
@@ -139,24 +164,33 @@ module.exports = function (RED) {
                         fill = 'grey';
                     }
                     this.status({
-                        fill: fill,
+                        fill,
                         shape:  'dot',
-                        text: text
+                        text
                     });
                 }
                 this.send(ports); // Warning change msg object!!
                 return null;
             } catch (err) {
                 node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text: 'internal error'
                 });
             }
+            return null;
         });
 
+        /**
+         * get the value ofd a numeric property
+         * @param {*} srcNode - source node
+         * @param {*} msg - message object
+         * @param {string} vType - type
+         * @param {string} value - value
+         * @returns {number} the result value for the type and value
+         */
         function getNumProp(srcNode, msg, vType, value) {
             try {
                 if (vType === 'none') {

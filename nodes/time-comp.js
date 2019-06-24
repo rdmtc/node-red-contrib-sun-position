@@ -8,7 +8,10 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
-
+    /**
+     * timeCompNode
+     * @param {*} config - configuration
+     */
     function timeCompNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -16,7 +19,7 @@ module.exports = function (RED) {
         // this.debug('initialize time Node ' + util.inspect(config));
         const node = this;
 
-        this.on('input', msg => {
+        this.on('input', msg => { // eslint-disable-line complexity
             if (node.positionConfig === null ||
                 config.operator === null ||
                 config.inputType === null) {
@@ -29,13 +32,34 @@ module.exports = function (RED) {
             }
 
             try {
-                const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetType, config.inputOffsetMultiplier);
+                // const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetType, config.inputOffsetMultiplier);
+                const inputData = node.positionConfig.getTimeProp(node, msg, {
+                    type: config.inputType,
+                    value: config.input,
+                    format: config.inputFormat,
+                    offsetType: config.inputOffsetType,
+                    offset: config.inputOffset,
+                    multiplier: config.inputOffsetMultiplier
+                });
+                if (inputData.error) {
+                    throw new Error(inputData.error);
+                }
+
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
                     if (config.result1ValueType === 'input') {
-                        resultObj = hlp.getFormattedDateOut(inputData, config.result1Format);
+                        resultObj = hlp.getFormattedDateOut(inputData.value, config.result1Format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
+                        // resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, {
+                            type: config.result1ValueType,
+                            value: config.result1Value,
+                            format: config.result1Format,
+                            offsetType: config.result1OffsetType,
+                            offset: config.result1Offset,
+                            multiplier: config.result1Multiplier,
+                            next: true
+                        });
                     }
 
                     if (resultObj === null) {
@@ -73,10 +97,27 @@ module.exports = function (RED) {
                         if (rule.format === 'time-calc.timeFormat.default') {
                             rule.format = 0;
                         }
-                        const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
+                        /* const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
                         if (!ruleoperand) {
                             continue;
+                        } */
+                        let ruleoperand = null;
+                        try {
+                            ruleoperand = node.positionConfig.getTimeProp(node, msg, {
+                                type: rule.operandType,
+                                value: rule.operandValue,
+                                format: rule.format,
+                                offsetType: 'num',
+                                offset: rule.offsetValue,
+                                multiplier: rule.multiplier
+                            });
+                        } catch (ex) {
+                            continue;
                         }
+                        if (!ruleoperand || ruleoperand.error) {
+                            continue;
+                        }
+                        ruleoperand = ruleoperand.value;
                         // node.debug('operand=' + util.inspect(ruleoperand));
                         // node.debug('operator=' + util.inspect(rule.operator));
 
@@ -104,7 +145,7 @@ module.exports = function (RED) {
 
                         let result = false;
                         if (compare) {
-                            const inputOperant = new Date(inputData);
+                            const inputOperant = new Date(inputData.value);
                             // node.debug('inputOperant=' + util.inspect(inputOperant));
                             // node.debug('operatorType=' + util.inspect(rule.operatorType));
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
@@ -199,11 +240,11 @@ module.exports = function (RED) {
 
                 resObj.push(msg);
                 node.status({
-                    text: inputData.toISOString()
+                    text: inputData.value.toISOString()
                 });
                 node.send(resObj);
             } catch (err) {
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

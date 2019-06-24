@@ -18,12 +18,12 @@
 			"overwriteExpire": "verfällt",
 			"ruleCondition": "nur wenn",
 			"ruleConditionThreshold": "Schwelle",
-			"ruleTimeFrom": "von",
-			"ruleTimeUntil": "bis",
+			"ruleTimeFrom": "↧ von",
+			"ruleTimeUntil": "↥ bis",
 			"ruleBlindLevel": "Rollladenposition",
-			"ruleLevelAbs": "👌 - Absolut",
-			"ruleLevelMin": "👇 - Minimum",
-			"ruleLevelMax": "☝️ - Maximum",
+			"ruleLevelAbs": "↕  Absolut",
+			"ruleLevelMin": "⭳  Minimum",
+			"ruleLevelMax": "⭱️  Maximum",
 			"sunControlMode": "Modus",
 			"sunControlOff": "keine Beschränkung, Sonnenstands unabhängig",
 			"sunControlRestrict": "Sonnenlicht beschränken (Sommer)",
@@ -41,7 +41,10 @@
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"outputs": "Ausgänge",
 			"singleOutput": "einzeln (1)",
-			"splitOutput": "doppelt (2)"
+			"splitOutput": "doppelt (2)",
+			"btnAdd": "hinzufügen",
+			"btnSort": "sortieren",
+			"btnClear": "leeren"
 		},
 		"placeholder": {
 			"windowTop": "Oberkante Fenster",
@@ -65,7 +68,10 @@
 			"smoothTime":"(opt) verhindert Änderungen durch Sonnenstandsänderung innerhalb der angegebenen Zeit",
 			"name": "Name",
 			"expiryperiod": "120",
-			"outputs": "Anzahl der Ausgänge"
+			"outputs": "Anzahl der Ausgänge",
+			"btnAdd": "neue leere Regel hinzufügen",
+			"btnSort": "alle Regeln sortieren, Achtung dies kann das Verhalten ändern!",
+			"btnClear": "alle Regeln entfernen"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
@@ -93,7 +99,7 @@
 			"0": "geschlossen (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
+			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",
@@ -134,6 +140,8 @@
 			"sunNotInWinMin": "Sonne scheint nicht ins Fenster (min)"
 		},
 		"errors": {
+			"error": "Fehler: __message__",
+			"warning": "Warnung: __message__",
 			"internal": "Fehler: __message__",
 			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
 			"invalid-blind-level": "Rollladenposition __pos__ ist keine gültige Position!",
@@ -142,7 +150,7 @@
 			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
 			"smoothTimeToolong":"Die gewählte zeit ist zu groß!!",
 			"usingTempValue": "Wert von __type__.__value__ kann nicht ermitteln werden und es wird der gespeicherte Wert \"__usedValue__\" verwendet!",
-			"notEvaluableProperty": "Fehler: kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
+			"notEvaluableProperty": "kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
 		}
 	}
 }

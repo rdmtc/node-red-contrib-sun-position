@@ -10,6 +10,13 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 module.exports = function (RED) {
     'use strict';
+    /**
+     * get the Data for compare Date
+     * @param {number} comparetype - type of compare
+     * @param {*} msg - message object
+     * @param {*} node - node object
+     * @returns {*} Date value
+     */
     function getDate(comparetype, msg, node) {
         let id = '';
         let value = '';
@@ -35,13 +42,20 @@ module.exports = function (RED) {
         }
         node.debug('compare time to ' + id + ' = "' + value + '"');
         const dto = new Date(msg.ts);
-        if (dto !== 'Invalid Date' && !isNaN(dto)) {
+        if (hlp.isValidDate(dto)) {
             return dto;
         }
         node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
         return new Date();
     }
 
+    /**
+     * set the node state
+     * @param {*} node - the niode Data
+     * @param {*} data - the state data
+     * @param {boolean} [_onInit] - indicates if the node in in initialisation
+     * @returns {boolean}
+     */
     function setstate(node, data, _onInit) {
         if (data.error) {
             node.status({
@@ -83,6 +97,13 @@ module.exports = function (RED) {
         return false;
     }
 
+    /**
+     * calc the start and end times
+     * @param {*} node - thje noide data
+     * @param {*} msg - the messege object
+     * @param {*} config - the configuration
+     * @returns {object} containing start and end Dates
+     */
     function calcWithinTimes(node, msg, config) {
         // node.debug('calcWithinTimes');
         const result = {
@@ -105,7 +126,7 @@ module.exports = function (RED) {
                     type: node.propertyStartType,
                     value: node.propertyStart
                 }), err);
-                node.debug(util.inspect(err));
+                node.log(util.inspect(err));
             }
         }
 
@@ -120,32 +141,65 @@ module.exports = function (RED) {
                     type: node.propertyEndType,
                     value: node.propertyEnd
                 }), err);
-                node.debug(util.inspect(err));
             }
         }
 
         if (result.altStartTime && config.startTimeAltType !== 'none') {
             // node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAltType, config.startOffsetAlt, config.startOffsetAltMultiplier);
+            // result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAltType, config.startOffsetAlt, config.startOffsetAltMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, {
+                type: config.startTimeAltType,
+                value : config.startTimeAlt,
+                offsetType : config.startOffsetAltType,
+                offset : config.startOffsetAlt,
+                multiplier : config.startOffsetAltMultiplier
+            });
+
             result.startSuffix = '⎇ ';
         } else {
             // node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffsetType, config.startOffset, config.startOffsetMultiplier);
+            // result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffsetType, config.startOffset, config.startOffsetMultiplier);
+            result.start = node.positionConfig.getTimeProp(node, msg, {
+                type: config.startTimeType,
+                value : config.startTime,
+                offsetType : config.startOffsetType,
+                offset : config.startOffset,
+                multiplier : config.startOffsetMultiplier
+            });
         }
 
         if (result.altEndTime && config.endTimeAltType !== 'none') {
             // node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAltType, config.endOffsetAlt, config.endOffsetAltMultiplier);
+            // result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAltType, config.endOffsetAlt, config.endOffsetAltMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, {
+                type: config.endTimeAltType,
+                value : config.endTimeAlt,
+                offsetType : config.endOffsetAltType,
+                offset : config.endOffsetAlt,
+                multiplier : config.endOffsetAltMultiplier
+            });
             result.endSuffix = ' ⎇';
         } else {
             // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffsetType, config.endOffset, config.endOffsetMultiplier);
+            // result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffsetType, config.endOffset, config.endOffsetMultiplier);
+            result.end = node.positionConfig.getTimeProp(node, msg, {
+                type: config.endTimeType,
+                value : config.endTime,
+                offsetType : config.endOffsetType,
+                offset : config.endOffset,
+                multiplier : config.endOffsetMultiplier
+            });
         }
 
         // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
         return result;
     }
 
+    /**
+     * get the schedule time
+     * @param {Date} time - time to schedule
+     * @returns {number} milliseconds until the defined Date
+     */
     function getScheduleTime(time) {
         const now = new Date();
         let millis = time.getTime() - now.getTime();
@@ -156,6 +210,13 @@ module.exports = function (RED) {
         return millis;
     }
 
+    /**
+     * check if message should be resend
+     * @param {boolean} isActive - define if resend is active
+     * @param {*} node - thew node Data
+     * @param {Date} time - the time to schedule
+     * @param {*} msg - the message object
+     */
     function checkReSendMsgDelayed(isActive, node, time, msg) {
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
@@ -177,7 +238,10 @@ module.exports = function (RED) {
             }, millis);
         }
     }
-
+    /**
+     * withinTimeSwitchNode
+     * @param {*} config - configuration
+     */
     function withinTimeSwitchNode(config) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -239,9 +303,10 @@ module.exports = function (RED) {
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
                 node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
             }
+            return null;
         });
 
         try {
@@ -261,16 +326,17 @@ module.exports = function (RED) {
                         setstate(this, result);
                     } catch (err) {
                         node.error(err.message);
-                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                         setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
                     }
                 }, 360000); // 6 Minuten
             }
         } catch (err) {
             node.error(err.message);
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
         }
+        return null;
     }
 
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);

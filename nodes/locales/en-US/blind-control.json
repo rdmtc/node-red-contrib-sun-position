@@ -18,16 +18,16 @@
 			"overwriteExpire": "expire",
 			"ruleCondition": "only if",
 			"ruleConditionThreshold": "threshold",
-			"ruleTimeFrom": "from",
-			"ruleTimeUntil": "until",
+			"ruleTimeFrom": "↧ from",
+			"ruleTimeUntil": "↥ until",
 			"ruleBlindLevel": "blind position",
-			"ruleLevelAbs": "👌 - absolute",
-			"ruleLevelMin": "👇 - minimum",
-			"ruleLevelMax": "☝️ - maximum",
+			"ruleLevelAbs": "↕  absolute",
+			"ruleLevelMin": "⭳  minimum",
+			"ruleLevelMax": "⭱️  maximum",
 			"sunControlMode": "mode",
 			"sunControlOff": "no restriction, no sun control",
-			"sunControlRestrict": "restrict sunlight (Summer)",
-			"sunControlMaximize": "maximize sunlight (Winter)",
+			"sunControlRestrict": "restrict sunlight (🌞 Summer)",
+			"sunControlMaximize": "maximize sunlight (⛄ Winter)",
 			"sunFloorLength": "length on the floor",
 			"sunMinAltitude": "min altitude threshold",
 			"sunMinDelta": "min delta",
@@ -41,7 +41,10 @@
 			"showEnhSettings": "Enhanced settings",
 			"outputs": "Outputs",
 			"singleOutput": "single (1)",
-			"splitOutput": "dual (2)"
+			"splitOutput": "dual (2)",
+			"btnAdd": "add",
+			"btnSort": "sort",
+			"btnClear": "clear"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
@@ -65,7 +68,10 @@
 			"smoothTime":"(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
-			"outputs": "number of outputs"
+			"outputs": "number of outputs",
+			"btnAdd": "add new empty rule",
+			"btnSort": "sort all rules, Attention this can change the behavior!",
+			"btnClear": "removes all rules from list"
 		},
 		"text": {
 			"blind": "blind settings",
@@ -93,7 +99,7 @@
 			"0": "closed (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https: //github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
+			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "position is overwritten with priority __prio__",
@@ -138,6 +144,8 @@
 			"ruleMax": "__org__ [max rule __number__]"
 		},
 		"errors": {
+			"error": "Error: __message__",
+			"warning": "Warning: __message__",
 			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
@@ -146,7 +154,7 @@
 			"getPropertyData": "error getting condition data: \"__message__\" skipping time",
 			"smoothTimeToolong":"The selected smooth is too long!!",
 			"usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!",
-			"notEvaluableProperty": "Error: could not evaluate __type__.__value__, using \"__usedValue__\"!"
+			"notEvaluableProperty": "could not evaluate __type__.__value__, using \"__usedValue__\"!"
 		}
 	}
 }

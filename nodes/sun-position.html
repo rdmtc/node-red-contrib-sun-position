@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <script type="text/x-red" data-template-name="sun-position">
     <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -96,30 +97,39 @@
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
+    /**
+     * clip a value to a defined length
+     * @param {string} v - the value
+     * @param {number} [l] - the desired length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
     function clipValueLength(v, l) {
-        l = l || 15;
+        l = l || 18;
         return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
     }
 
-    function prop2name(key) {
-        const result = RED.utils.parseContextKey(key);
-        return result.key;
-    }
-
-    function getValueLabel(t, v) {
+    /**
+     * get the label for a typed input vlaue
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [l] - the desired maximum length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
+    function getValueLabel(t, v, l) {
         if (t === 'str') {
-            return '"' + clipValueLength(v) + '"';
+            return '"' + clipValueLength(v, l) + '"';
         }
 
         if (t === 'msg') {
-            return t + '.' + clipValueLength(v);
+            return t + '.' + clipValueLength(v, l);
         }
 
         if (t === 'flow' || t === 'global') {
-            return t + '.' + clipValueLength(prop2name(v));
+            const result = RED.utils.parseContextKey(v);
+            return t + '.' + clipValueLength(result.key, l);
         }
 
-        return clipValueLength(v);
+        return clipValueLength(v, l);
     }
 
     RED.nodes.registerType('sun-position', {
@@ -161,7 +171,7 @@
             },
             startOffset: {
                 value: 0,
-                validate: (v) => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.startOffsetType === 'undefined') ||
@@ -178,7 +188,7 @@
             startOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -200,7 +210,7 @@
             },
             endOffset: {
                 value: 0,
-                validate: (v) => {
+                validate(v){
                     return (
                         (typeof v === 'undefined') ||
                         (typeof this.endOffsetType === 'undefined') ||
@@ -217,7 +227,7 @@
             endOffsetMultiplier: {
                 value: 60000,
                 required: true,
-                validate: (v) => {
+                validate(v){
                     return (
                         typeof v === 'undefined' ||
                         RED.validators.number()(v) ||
@@ -239,6 +249,7 @@
             if (rule) {
                 return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType, rule.valueHigh);
             }
+            return undefined;
         },
         label() {
             if (this.name) {
@@ -264,9 +275,15 @@
                 /* global getTypes appendOptions setupTInput */
                 const types = getTypes(node);
                 // #region initialize
+                /**
+                * update multiplier settings from a previous version
+                * @param {number} mp - the multiplier value
+                * @param {string} name - the name of the element
+                * @returns {number} the updated multiplier value
+                */
                 function multiplierUpdate(mp, name) {
                     const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', (data) => (data.id > 0));
+                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
                     if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                         mp = 60000;
                     }
@@ -282,7 +299,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
                             $('.sun-position-row-startOffset').hide();
                         } else {
@@ -301,7 +318,7 @@
                     defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-startOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-startOffsetMultiplier').prop('disabled', true);
@@ -320,7 +337,7 @@
                     defaultType: types.Undefined.value,
                     defaultValue: '',
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
                             $('.sun-position-row-endOffset').hide();
                         } else {
@@ -339,7 +356,7 @@
                     defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                     defaultValue: 0,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange: (_type, _value) => {
+                    onChange(_type, _value) {
                         const type = $('#node-input-endOffset').typedInput('type');
                         if (type === types.Undefined.value) {
                             $('#node-input-endOffsetMultiplier').prop('disabled', true);
@@ -354,7 +371,10 @@
 
                 const btwnLabel = node._('sun-position.label.between');
                 const andLabel = node._('sun-position.label.and');
-
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
                 function resizeRule(rule) {
                     const newWidth = rule.width();
                     const btwnField1 = rule.find('.node-input-rule-btwn-value');
@@ -510,6 +530,8 @@
             const editorRow = $('#dialog-form>div.node-input-rule-container-row');
             height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
             height -= 50;
-            $('#node-input-rule-container').editableList('height', height);
+            if (typeof $().editableList !== 'undefined') {
+                $('#node-input-rule-container').editableList('height', height);
+            }
         }
     });</script>
