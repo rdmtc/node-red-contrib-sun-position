@@ -244,7 +244,7 @@ module.exports = function (RED) {
                 });
                 node.send(resObj);
             } catch (err) {
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

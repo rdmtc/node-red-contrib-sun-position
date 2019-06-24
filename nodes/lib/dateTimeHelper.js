@@ -161,7 +161,7 @@ function handleError(node, messageText, err, stateText) {
 
     if (node && messageText) {
         node.error(messageText);
-        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         node.status({
             fill: 'red',
             shape: 'ring',
@@ -170,7 +170,7 @@ function handleError(node, messageText, err, stateText) {
     } else if (console) {
         /* eslint-disable no-console */
         console.error(messageText);
-        console.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+        console.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         console.trace();
         /* eslint-enable no-console */
     }

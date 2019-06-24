@@ -27,9 +27,7 @@
             "moonPhase":"moon phase",
             "moonPhaseCheck": "moon phase",
             "levelfix":"Level",
-            "levelfree": "Level entered",
-            "levelfixMin": "minimum Level",
-            "levelfreeMin": "minimum Level entered"
+            "levelfree": "Level entered"
         },
         "typeOptions": {
             "moonRise": "moon rise",
@@ -270,16 +268,6 @@
             "contain": "contain",
             "containSome": "containSome",
             "containEvery": "containEvery"
-        },
-        "moonPhases": {
-            "new" : "New Moon 🌚",
-            "waxing_crescent": "Waxing Crescent 🌒",
-            "first_quarter": "First Quarter 🌓",
-            "waxing_gibbous": "Waxing Gibbous 🌔",
-            "full": "Full Moon 🌝",
-            "waning_gibbous": "Waning Gibbous 🌖",
-            "last_quarter": "Last Quarter 🌗",
-            "waning_crescent": "Waning Crescent 🌘"
         }
     },
     "errors": {
@@ -292,7 +280,8 @@
         "unknownPropertyOperator": "error, the used property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
         "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown!",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
-        "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__"
+        "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__",
+        "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)"
     },
     "position-config": {
         "label": {

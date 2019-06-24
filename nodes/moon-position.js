@@ -32,6 +32,12 @@ module.exports = function (RED) {
                 if (typeof msg.ts !== 'undefined') {
                     now = new Date(msg.time);
                 }
+                if (!hlp.isValidDate(now)) {
+                    now = new Date();
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalidParameter', { param: 'msg.ts', type: 'Date', newValue:now}));
+                }
+
+
                 if (!this.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
@@ -98,7 +104,7 @@ module.exports = function (RED) {
                 return null;
             } catch (err) {
                 node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

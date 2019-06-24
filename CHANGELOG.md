@@ -22,6 +22,7 @@
   - changed esLint rules to be more restrictive
   - fixed a lot of wrong usages of arrow function for data validation
 - optimized access to backend services
+- changed lot of UTC time compare problems [#34](https://github.com/rdmtc/node-red-contrib-sun-position/issues/34)
 
 #### 0.4.0: Maintenance Release
 

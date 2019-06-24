@@ -196,7 +196,7 @@ module.exports = function (RED) {
                 }));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
         // node.debug('node.oversteerData=' + util.inspect(node.oversteerData));
         return undefined;
@@ -239,7 +239,7 @@ module.exports = function (RED) {
             return node.positionConfig.getFloatProp(node, msg, type, value, def);
         } catch (err) {
             node.error(RED._('blind-control.errors.getBlindPosData', err));
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
         return def;
     }
@@ -656,7 +656,7 @@ module.exports = function (RED) {
             const res = fkt(rule, r => (r >= nowNr));
             if (res) {
                 ruleSel = res;
-                node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
+                // node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
                 break;
             }
         }
@@ -669,7 +669,7 @@ module.exports = function (RED) {
                 const res = fkt(rule, r => (r <= nowNr));
                 if (res) {
                     ruleSel = res;
-                    node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
+                    // node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
                     break;
                 }
             }
@@ -1007,7 +1007,7 @@ module.exports = function (RED) {
                 return null;
             } catch (err) {
                 node.error(RED._('blind-control.errors.error', err));
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

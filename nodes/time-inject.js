@@ -235,7 +235,7 @@ module.exports = function (RED) {
                                 doCreateTimeout(node);
                             } catch (err) {
                                 node.error(err.message);
-                                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                                 node.status({
                                     fill: 'red',
                                     shape: 'ring',
@@ -378,7 +378,7 @@ module.exports = function (RED) {
                 node.send(msg);
             } catch (err) {
                 node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -415,7 +415,7 @@ module.exports = function (RED) {
                         doCreateTimeout(node);
                     } catch (err) {
                         node.error(err.message);
-                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                         node.status({
                             fill: 'red',
                             shape: 'ring',
@@ -431,7 +431,7 @@ module.exports = function (RED) {
             }
         } catch (err) {
             node.error(err.message);
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             node.status({
                 fill: 'red',
                 shape: 'ring',

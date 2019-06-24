@@ -11,19 +11,22 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 
     // shortcuts for easier to read formulas
-    const PI = Math.PI;
-    const sin = Math.sin;
-    const cos = Math.cos;
-    const tan = Math.tan;
-    const asin = Math.asin;
-    const atan = Math.atan2;
-    const acos = Math.acos;
-    const rad = PI / 180;
+    const rad = Math.PI / 180;
 
     // date/time constants and conversions
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
     const J1970 = 2440587.5;
     const J2000 = 2451545;
+
+    /**
+     * checks if a value is a valid Date object
+     * @param {*} d - a value to check
+     * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
+     */
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+        // d !== 'Invalid Date' && !isNaN(d)
+    }
 
     /**
      * convert date from Julian calendar
@@ -62,7 +65,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function rightAscension(l, b) {
-        return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
+        return Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
     }
 
     /**
@@ -72,7 +75,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function declination(l, b) {
-        return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
+        return Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
     }
 
     /**
@@ -83,7 +86,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @returns {number}
     */
     function azimuth(H, phi, dec) {
-        return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
+        return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
     }
 
     /**
@@ -94,7 +97,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @returns {number}
     */
     function altitude(H, phi, dec) {
-        return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
+        return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
     }
 
     /**
@@ -118,7 +121,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         } // if h = -0.08901179 a div/0 would occur.
 
         // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-        // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
+        // 1.02 / Math.tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
         return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
     }
     // general sun calculations
@@ -137,10 +140,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function eclipticLongitude(M) {
-        const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
+        const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
         // equation of center
         const P = rad * 102.9372; // perihelion of the Earth
-        return M + C + P + PI;
+        return M + C + P + Math.PI;
     }
 
     /**
@@ -186,6 +189,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
+        }
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
         }
 
         const lw = rad * -lng;
@@ -298,7 +304,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function julianCycle(d, lw) {
-        return Math.round(d - J0 - lw / (2 * PI));
+        return Math.round(d - J0 - lw / (2 * Math.PI));
     }
 
     /**
@@ -309,7 +315,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function approxTransit(Ht, lw, n) {
-        return J0 + (Ht + lw) / (2 * PI) + n;
+        return J0 + (Ht + lw) / (2 * Math.PI) + n;
     }
 
     /**
@@ -320,7 +326,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function solarTransitJ(ds, M, L) {
-        return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L);
+        return J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
     }
 
     /**
@@ -331,10 +337,20 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function hourAngle(h, phi, d) {
-        return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
+        return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
     }
 
-    /** returns set time for the given sun altitude */
+    /**
+     * returns set time for the given sun altitude
+     * @param {*} h
+     * @param {*} lw - rad * -lng
+     * @param {*} phi -  rad * lat;
+     * @param {*} dec - declination
+     * @param {*} n - julian cycle
+     * @param {*} M - solar mean anomal
+     * @param {*} L - ecliptic longitude
+     * @returns
+     */
     function getSetJ(h, lw, phi, dec, n, M, L) {
         const w = hourAngle(h, phi, dec);
 
@@ -357,6 +373,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
+        }
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
         }
 
         const lw = rad * -lng;
@@ -465,6 +484,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         if (isNaN(sunAngle)) {
             throw new Error('angle missing');
         }
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
+        }
 
         const lw = rad * -lng;
         const phi = rad * lat;
@@ -514,14 +536,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const F = rad * (93.272 + 13.229350 * d);
         // mean distance
 
-        const l = L + rad * 6.289 * sin(M);
+        const l = L + rad * 6.289 * Math.sin(M);
         // longitude
 
-        const b = rad * 5.128 * sin(F);
+        const b = rad * 5.128 * Math.sin(F);
         // latitude
 
-        const dt = 385001 - 20905 * cos(M); // distance to the moon in km
-
+        const dt = 385001 - 20905 * Math.cos(M); // distance to the moon in km
         return {
             ra: rightAscension(l, b),
             dec: declination(l, b),
@@ -546,6 +567,16 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {moonposition} result object of moon-position
      */
     SunCalc.getMoonPosition = function (date, lat, lng, inUTC) {
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
+        }
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
+
         const lw = rad * -lng;
         const phi = rad * lat;
         const d = toDays(date, inUTC);
@@ -553,7 +584,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const H = siderealTime(d, lw) - c.ra;
         let h = altitude(H, phi, c.dec);
         // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-        const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
+        const pa = Math.atan2(Math.sin(H), Math.tan(phi) * Math.cos(c.dec) - Math.sin(c.dec) * Math.cos(H));
 
         h += astroRefraction(h); // altitude correction for refraction
 
@@ -581,6 +612,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {moonillumination} result object of moon-illumination
      */
     SunCalc.getMoonIllumination = function (date, inUTC) {
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
+        }
+
         const d = toDays(date, inUTC);
 
         const s = sunCoords(d);
@@ -590,15 +625,15 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const sdist = 149598000;
         // distance from Earth to Sun in km
 
-        const phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra));
+        const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra));
 
-        const inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
+        const inc = Math.atan2(sdist * Math.sin(phi), m.dist - sdist * Math.cos(phi));
 
-        const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
-                cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
+        const angle = Math.atan2(Math.cos(s.dec) * Math.sin(s.ra - m.ra), Math.sin(s.dec) * Math.cos(m.dec) -
+                Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
 
         return {
-            fraction: (1 + cos(inc)) / 2,
+            fraction: (1 + Math.cos(inc)) / 2,
             phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
             angle
         };
@@ -631,6 +666,16 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {moontimes} result object of sunTime
      */
     SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
+        if (!isValidDate(date)) {
+            throw new Error('date is invalid!');
+        }
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
+
         const t = new Date(date);
         if (inUTC === false) {
             t.setHours(0, 0, 0, 0);

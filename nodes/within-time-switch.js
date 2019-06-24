@@ -126,7 +126,7 @@ module.exports = function (RED) {
                     type: node.propertyStartType,
                     value: node.propertyStart
                 }), err);
-                node.debug(util.inspect(err));
+                node.log(util.inspect(err));
             }
         }
 
@@ -141,7 +141,6 @@ module.exports = function (RED) {
                     type: node.propertyEndType,
                     value: node.propertyEnd
                 }), err);
-                node.debug(util.inspect(err));
             }
         }
 
@@ -304,7 +303,7 @@ module.exports = function (RED) {
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
             } catch (err) {
                 node.error(err.message);
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
             }
             return null;
@@ -327,14 +326,14 @@ module.exports = function (RED) {
                         setstate(this, result);
                     } catch (err) {
                         node.error(err.message);
-                        node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                         setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
                     }
                 }, 360000); // 6 Minuten
             }
         } catch (err) {
             node.error(err.message);
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
         }
         return null;
