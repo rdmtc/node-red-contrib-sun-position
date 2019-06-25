@@ -616,7 +616,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @param {boolean} [utc] define if the time should be in utc
  */
 function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-disable-line complexity
-    // console.log('getDateOfText dt=' + util.inspect(dt)); // eslint-disable-line
+    // console.log('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
@@ -1496,7 +1496,7 @@ function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
  * @returns {Date} a Date object or throws an error if no patterns match.
  */
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset) {
-    // console.debug('parseDateFromFormat date=' + util.inspect(date) + ' - format=' + util.inspect(format) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
+    // console.debug('parseDateFromFormat date=' + util.inspect(date, { colors: true, compact: 10, breakLength: Infinity }) + ' - format=' + util.inspect(format, { colors: true, compact: 10, breakLength: Infinity }) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
         _dateFormat.i18n.dayNames = dayNames;
     }
@@ -1523,7 +1523,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
         res = res.value;
     } else {
         const tryparse = (val, preferMonthFirst) => {
-            // console.debug('try parse ' + util.inspect(val) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+            // console.debug('try parse ' + util.inspect(val, { colors: true, compact: 10, breakLength: Infinity }) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
             let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset);
             if (res !== null) { return res; }
             res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset);
@@ -1597,7 +1597,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 break;
             }
         }
-        // console.debug('result='+ util.inspect(res) + ' ' + isNaN(res)); // eslint-disable-line
+        // console.debug('result='+ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) + ' ' + isNaN(res)); // eslint-disable-line
         if (!isValidDate(res)) {
             throw new Error('could not evaluate format of ' + date + ' (' + format + ')');
         }

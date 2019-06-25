@@ -372,9 +372,9 @@ module.exports = function (RED) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
                         /*
-                        node.debug('operand ' + util.inspect(ruleoperand));
-                        node.debug('operator ' + util.inspect(rule.operator));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType)); */
+                        node.debug('operand ' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+                        node.debug('operator ' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
+                        node.debug('operatorType ' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity })); */
 
                         let result = false;
                         switch (rule.operator) {

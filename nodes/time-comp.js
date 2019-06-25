@@ -16,7 +16,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize time Node ' + util.inspect(config));
+        // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         const node = this;
 
         this.on('input', msg => { // eslint-disable-line complexity
@@ -118,8 +118,8 @@ module.exports = function (RED) {
                             continue;
                         }
                         ruleoperand = ruleoperand.value;
-                        // node.debug('operand=' + util.inspect(ruleoperand));
-                        // node.debug('operator=' + util.inspect(rule.operator));
+                        // node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+                        // node.debug('operator=' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
 
                         let compare = null;
                         switch (Number(rule.operator)) {
@@ -146,8 +146,8 @@ module.exports = function (RED) {
                         let result = false;
                         if (compare) {
                             const inputOperant = new Date(inputData.value);
-                            // node.debug('inputOperant=' + util.inspect(inputOperant));
-                            // node.debug('operatorType=' + util.inspect(rule.operatorType));
+                            // node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
+                            // node.debug('operatorType=' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity }));
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
@@ -215,11 +215,11 @@ module.exports = function (RED) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
 
-                                        // node.debug('inputData=' + util.inspect(inputData));
-                                        // node.debug('operand=' + util.inspect(ruleoperand));
+                                        // node.debug('inputData=' + util.inspect(inputData, { colors: true, compact: 10, breakLength: Infinity }));
+                                        // node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
                                         break;
                                 }
-                                // node.debug('result=' + util.inspect(result));
+                                // node.debug('result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                             }
                         }
 

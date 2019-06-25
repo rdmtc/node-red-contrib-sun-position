@@ -84,7 +84,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize timeInjectNode ' + util.inspect(config));
+        // this.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
 
         this.time = config.time;
         this.timeType = config.timeType || 'none';
@@ -153,7 +153,7 @@ module.exports = function (RED) {
                     if (_onInit === true) {
                         return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeData.error};
                     }
-                    node.debug('node.nextTimeData=' + util.inspect(node.nextTimeData));
+                    node.debug('node.nextTimeData=' + util.inspect(node.nextTimeData, { colors: true, compact: 10, breakLength: Infinity }));
                     node.error(node.nextTimeData.error);
                 } else {
                     node.nextTime = node.nextTimeData.value;
@@ -183,7 +183,7 @@ module.exports = function (RED) {
                     if (_onInit === true) {
                         return { state:'error', done: false, statusMsg: errorStatus, errorMsg: node.nextTimeAltData.error};
                     }
-                    node.debug('node.nextTimeAltData=' + util.inspect(node.nextTimeAltData));
+                    node.debug('node.nextTimeAltData=' + util.inspect(node.nextTimeAltData, { colors: true, compact: 10, breakLength: Infinity }));
                     node.error(node.nextTimeAltData.error);
                 } else {
                     node.nextTimeAlt = node.nextTimeAltData.value;
