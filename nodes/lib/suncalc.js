@@ -45,13 +45,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      */
     function toDays(date, inUTC) {
         date = date || new Date();
+        const y2k = new Date(2000, 0, 1);
         if (inUTC === false) {
-            return ((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / dayMs) + J1970) - J2000;
+            return Math.trunc((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - y2k.getTime()) / dayMs) + 0.5;
         }
-        return ((date.valueOf() / dayMs) + J1970) - J2000;
-        // return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / dayMs + J1970 - J2000;
-
-        // return toJulianDay(date) - J2000;
+        return Math.trunc((Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - y2k.getTime()) / dayMs) + 0.5;
     }
 
     // general calculations for position
@@ -304,7 +302,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function julianCycle(d, lw) {
-        return Math.round(d - J0 - lw / (2 * Math.PI));
+        return Math.trunc(d - J0 - lw / (2 * Math.PI));
     }
 
     /**
@@ -380,7 +378,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const lw = rad * -lng;
         const phi = rad * lat;
-
         const d = toDays(date, inUTC);
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
@@ -390,10 +387,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const Jnoon = solarTransitJ(ds, M, L);
 
         const noonVal = fromJulianDay(Jnoon);
-        const nadirVal = fromJulianDay(Jnoon + 0.5);
+        const nadirVal = fromJulianDay(Jnoon - 0.5);
+
 
         const result = {
-            solarNoon : {
+            solarNoon: {
                 value: noonVal,
                 ts: noonVal.getTime(),
                 pos: sunTimesDefault.solarNoon,
@@ -461,7 +459,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 result[time[0]] = result[time[1]];
             }
         }
-
         return result;
     };
 
@@ -490,7 +487,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const lw = rad * -lng;
         const phi = rad * lat;
-
+        console.log('getSunTime ' + date);
         const d = toDays(date, inUTC);
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
@@ -630,7 +627,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const inc = Math.atan2(sdist * Math.sin(phi), m.dist - sdist * Math.cos(phi));
 
         const angle = Math.atan2(Math.cos(s.dec) * Math.sin(s.ra - m.ra), Math.sin(s.dec) * Math.cos(m.dec) -
-                Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
+            Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
 
         return {
             fraction: (1 + Math.cos(inc)) / 2,
@@ -754,5 +751,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return result;
     };
 
-    module.exports = SunCalc;
+    // export as Node module / AMD module / browser variable
+    if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
+    // else if (typeof define === 'function' && define.amd) define(SunCalc);
+    else window.SunCalc = SunCalc;
+
 })();

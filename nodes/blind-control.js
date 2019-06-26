@@ -638,7 +638,7 @@ module.exports = function (RED) {
                 throw new Error('Error can not calc time!');
             }
             rule.timeData.num = rule.timeData.value.getTime();
-            // node.debug('rule.timeData ' + util.inspect(rule.timeData, { colors: true, compact: 40 }));
+            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (cmp(rule.timeData.num)) {
                 return rule;
             }
@@ -655,7 +655,7 @@ module.exports = function (RED) {
             if (rule.timeOp === 1) { continue; } // - Until: timeOp === 0
             const res = fkt(rule, r => (r >= nowNr));
             if (res) {
-                // node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 if (res.levelOp === 3 && (!ruleSelMin)) {
                     ruleSelMin = res;
                 } else if (res.levelOp === 4 && (!ruleSelMax)) {
@@ -667,14 +667,14 @@ module.exports = function (RED) {
             }
         }
         if (!ruleSel || ruleSel.timeLimited) {
-            node.debug('second loop ' + node.rulesCount);
+            // node.debug('--------- starting second loop ' + node.rulesCount);
             for (let i = (node.rulesCount -1); i >= 0; --i) {
                 const rule = node.rulesData[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
                 if (rule.timeOp === 0) { continue; } // - From: timeOp === 1
                 const res = fkt(rule, r => (r <= nowNr));
                 if (res) {
-                    // node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
+                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     if (res.levelOp === 3 && (!ruleSelMin || ruleSelMin.timeOp === 0)) {
                         ruleSelMin = res;
                     } else if (res.levelOp === 4 && (!ruleSelMax || ruleSelMax.timeOp === 0)) {
