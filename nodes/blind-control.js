@@ -139,10 +139,11 @@ function angleNorm_(angle) {
  * @param {*} now the current timestamp
  */
 function getSunPosition_(node, now) {
-    const sunPosition = node.positionConfig.getSunCalc(now);
+    const sunPosition = node.positionConfig.getSunCalc(now, true);
     // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
     sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
+    node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
     return sunPosition;
 }
 
@@ -443,7 +444,7 @@ module.exports = function (RED) {
      * @returns the sun position object
      */
     function calcBlindSunPosition(node, msg, now) {
-        // node.debug('calcBlindSunPosition: calculate blind position by sun');
+        node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, now);
         const winterMode = 1;

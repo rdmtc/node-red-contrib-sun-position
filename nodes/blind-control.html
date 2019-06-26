@@ -463,6 +463,7 @@
             /**
              * save dialog data back to rule
              */
+            /*
             function _dialogSaveData() {
                 console.log('dialogSaveData'); // eslint-disable-line
                 if (!$dialogConnFields) { return; }
@@ -510,11 +511,11 @@
                         }
                     }
                 } */
-                $dialog.dialog('close');
+            /*  $dialogRule.dialog('close');
             }
             const $dialogConnFields = {};
 
-            const $dialog = $('#dialog-edit-rule').dialog({
+            const $dialogRule = $('#dialog-edit-rule').dialog({
                 title: node._('blind-control.label.dialogtitle'),
                 autoOpen: false,
                 resizable: true,
@@ -525,10 +526,17 @@
                 buttons: {
                     Ok: _dialogSaveData,
                     Cancel: () => {
-                        $dialog.dialog('close');
+                        $dialogRule.dialog('close');
                     }
                 }
             });
+
+            const $dialogCtx = $('#dialog-select-context').dialog({
+                autoOpen: false,
+                height: 400,
+                width: 600,
+                modal: true
+            }); */
             // #endregion Dialog
 
             const setup = function(node) {
@@ -710,6 +718,13 @@
                         $validOperator.val(data.validOperator || selFields.comparator[0].id);
                         const finalspan = $('<span/>',{style:'float: right;margin-top: 6px;'}).appendTo($row1);
                         finalspan.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
+
+                        /*
+                        const $btn = $('<a />', {
+                            class: 'node-button-item-edit btn ui-button ui-widget ui-corner-all'
+                        }).append('<i class= "fa fa-pencil-square-o" >').appendTo(row);
+                        */
+
                         // #endregion row1
                         // #region row2 - property threshold -- lbl - [none / Bedingung]
                         addLabel($row2, 'node-input-rule-condOpB', 'fa fa-ellipsis-h', node._('blind-control.label.ruleConditionThreshold'));
@@ -1578,6 +1593,10 @@
         <div>
             <label id="dialog-label-date-out"></label>
         </div>
+    </div>
+
+    <div id="dialog-select-context" title="Select Channel and Datapoint">
+        <div id="config-lookup-tree"></div>
     </div>
 </script>
 <style>

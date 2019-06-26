@@ -704,7 +704,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         getSunCalc(date, noTimes) {
-            // this.debug(`getSunCalc for date="${date}" noTimes="${noTimes}"`);
+            this.debug(`getSunCalc for date="${date}" noTimes="${noTimes}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -738,13 +738,13 @@ module.exports = function (RED) {
             };
 
             if (noTimes) {
-                // this.debug('no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                this.debug('no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 return result;
             }
             this._sunTimesCheck();
             result.times = this.sunTimesToday;
             this.lastSunCalc = result;
-            // this.debug('result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            this.debug('result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 
@@ -1016,6 +1016,8 @@ module.exports = function (RED) {
                     break;
                 }
             }
+        } else {
+            res.status(500).send(JSON.stringify({}));
         }
     });
 };
