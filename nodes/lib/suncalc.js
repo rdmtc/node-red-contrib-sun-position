@@ -487,7 +487,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const lw = rad * -lng;
         const phi = rad * lat;
-        console.log('getSunTime ' + date);
         const d = toDays(date, inUTC);
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
