@@ -140,7 +140,7 @@ function angleNorm_(angle) {
  */
 function getSunPosition_(node, now) {
     const sunPosition = node.positionConfig.getSunCalc(now);
-    // node.debug('sunPosition: ' + util.inspect(sunPosition, Object.getOwnPropertyNames(sunPosition)));
+    // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
     sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
     return sunPosition;
@@ -198,7 +198,7 @@ module.exports = function (RED) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
-        // node.debug('node.oversteerData=' + util.inspect(node.oversteerData));
+        // node.debug('node.oversteerData=' + util.inspect(node.oversteerData, { colors: true, compact: 10, breakLength: Infinity }));
         return undefined;
     }
     /******************************************************************************************/
@@ -322,7 +322,7 @@ module.exports = function (RED) {
         if ((!prio) || (node.blindData.overwrite.priority <= prio)) {
             hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
                 val => {
-                    node.debug(`reset val="${  util.inspect(val, { colors: true, compact: 10 })  }"`);
+                    node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
                     if (val) {
                         blindPosOverwriteReset(node);
                     }
@@ -494,7 +494,7 @@ module.exports = function (RED) {
             return sunPosition;
         }
 
-        // node.debug('node.windowSettings: ' + util.inspect(node.windowSettings, Object.getOwnPropertyNames(node.windowSettings)));
+        // node.debug('node.windowSettings: ' + util.inspect(node.windowSettings, { colors: true, compact: 10 }));
         const height = Math.tan(sunPosition.altitudeRadians) * node.sunData.floorLength;
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${node.sunData.floorLength}`);
         if (height <= node.windowSettings.bottom) {
@@ -638,7 +638,7 @@ module.exports = function (RED) {
                 throw new Error('Error can not calc time!');
             }
             rule.timeData.num = rule.timeData.value.getTime();
-            // node.debug('rule.timeData ' + util.inspect(rule.timeData, { colors: true, compact: 40 }));
+            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (cmp(rule.timeData.num)) {
                 return rule;
             }
@@ -646,31 +646,43 @@ module.exports = function (RED) {
         };
 
         let ruleSel = null;
-        // let ruleSelMin = null;
-        // let ruleSelMax = null;
+        let ruleSelMin = null;
+        let ruleSelMax = null;
         // node.debug('first loop ' + node.rulesCount);
         for (let i = 0; i <= lastUntilRule; ++i) {
             const rule = node.rulesData[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-            if (rule.timeOp === 1) { continue; } // - Until timeOp === 0
+            if (rule.timeOp === 1) { continue; } // - Until: timeOp === 0
             const res = fkt(rule, r => (r >= nowNr));
             if (res) {
-                ruleSel = res;
-                // node.debug('1. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
-                break;
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.levelOp === 3 && (!ruleSelMin)) {
+                    ruleSelMin = res;
+                } else if (res.levelOp === 4 && (!ruleSelMax)) {
+                    ruleSelMax = res;
+                } else {
+                    ruleSel = res;
+                    break;
+                }
             }
         }
         if (!ruleSel || ruleSel.timeLimited) {
-            node.debug('second loop ' + node.rulesCount);
+            // node.debug('--------- starting second loop ' + node.rulesCount);
             for (let i = (node.rulesCount -1); i >= 0; --i) {
                 const rule = node.rulesData[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10}));
-                if (rule.timeOp === 0) { continue; } // - From timeOp === 1
+                if (rule.timeOp === 0) { continue; } // - From: timeOp === 1
                 const res = fkt(rule, r => (r <= nowNr));
                 if (res) {
-                    ruleSel = res;
-                    // node.debug('2. ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10 }));
-                    break;
+                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    if (res.levelOp === 3 && (!ruleSelMin || ruleSelMin.timeOp === 0)) {
+                        ruleSelMin = res;
+                    } else if (res.levelOp === 4 && (!ruleSelMax || ruleSelMax.timeOp === 0)) {
+                        ruleSelMax = res;
+                    } else {
+                        ruleSel = res;
+                        break;
+                    }
                 }
             }
         }
@@ -681,17 +693,64 @@ module.exports = function (RED) {
             if (ruleSel.levelOp === 0) { // absolute rule
                 livingRuleData.active = true;
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
-                livingRuleData.hasMinimum = false;
-                livingRuleData.hasMaximum = false;
+                livingRuleData.hasMinimum = (ruleSelMin);
+                livingRuleData.hasMaximum = (ruleSelMax);
                 node.reason.code = 4;
+                if (livingRuleData.hasMinimum) {
+                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault);
+                    livingRuleData.minimum = {
+                        id: ruleSelMin.pos,
+                        conditional: ruleSelMin.conditional,
+                        timeLimited: ruleSelMin.timeLimited,
+                        conditon: ruleSelMin.conditonData,
+                        time: ruleSelMin.timeData
+                    };
+                }
+                if (livingRuleData.hasMaximum) {
+                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault);
+                    livingRuleData.maximum = {
+                        id: ruleSelMax.pos,
+                        conditional: ruleSelMax.conditional,
+                        timeLimited: ruleSelMax.timeLimited,
+                        conditon: ruleSelMax.conditonData,
+                        time: ruleSelMax.timeData
+                    };
+                }
             } else {
                 livingRuleData.active = false;
+                livingRuleData.hasMinimum = (ruleSelMin);
+                livingRuleData.hasMaximum = (ruleSelMax);
+                node.reason.code = 4;
+                if (livingRuleData.hasMinimum) {
+                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault);
+                    livingRuleData.minimum = {
+                        id: ruleSelMin.pos,
+                        conditional: ruleSelMin.conditional,
+                        timeLimited: ruleSelMin.timeLimited,
+                        conditon: ruleSelMin.conditonData,
+                        time: ruleSelMin.timeData
+                    };
+                } else {
+                    livingRuleData.levelMinimum = -Infinity;
+                }
+                if (livingRuleData.hasMaximum) {
+                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault);
+                    livingRuleData.maximum = {
+                        id: ruleSelMax.pos,
+                        conditional: ruleSelMax.conditional,
+                        timeLimited: ruleSelMax.timeLimited,
+                        conditon: ruleSelMax.conditonData,
+                        time: ruleSelMax.timeData
+                    };
+                } else {
+                    livingRuleData.levelMaximum = Infinity;
+                }
                 if (ruleSel.levelOp === 1) {
                     livingRuleData.hasMinimum = true;
-                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+                    livingRuleData.levelMinimum = Math.max(livingRuleData.levelMinimum, getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault));
                 } else {
                     livingRuleData.hasMaximum = true;
-                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
+                    livingRuleData.levelMaximum = Math.min(livingRuleData.levelMaximum, getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault));
                 }
                 livingRuleData.level = node.blindData.levelDefault;
                 node.reason.code = 4;
@@ -887,7 +946,7 @@ module.exports = function (RED) {
         this.on('input', function (msg) {
             try {
                 node.debug(`input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                // node.debug('input ' + util.inspect(msg, {colors:true, compact:10})); // Object.getOwnPropertyNames(msg)
+                // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
@@ -1092,7 +1151,7 @@ module.exports = function (RED) {
                     }
                     return a.pos - b.pos;
                 });
-                node.debug('node.rulesData =' + util.inspect(node.rulesData));
+                node.debug('node.rulesData =' + util.inspect(node.rulesData, { colors: true, compact: 10, breakLength: Infinity }));
             } */
         }
         initialize();

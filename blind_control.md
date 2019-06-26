@@ -8,31 +8,31 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ### Table of contents
 
-- [Blind Controller](#Blind-Controller)
-  - [blind-control](#blind-control)
-    - [Table of contents](#Table-of-contents)
-    - [The node](#The-node)
-    - [Node settings](#Node-settings)
-      - [general settings](#general-settings)
-      - [blind settings](#blind-settings)
-      - [rule settings](#rule-settings)
-      - [overwrite settings](#overwrite-settings)
-      - [sun settings](#sun-settings)
-        - [maximize sunlight (Winter)](#maximize-sunlight-Winter)
-        - [restrict sunlight (Summer)](#restrict-sunlight-Summer)
-        - [sun position settings](#sun-position-settings)
-    - [Node Input](#Node-Input)
-    - [Node Output](#Node-Output)
-    - [Node Status](#Node-Status)
-  - [rules](#rules)
-    - [rules example](#rules-example)
-  - [Samples](#Samples)
-    - [testing rules and overrides](#testing-rules-and-overrides)
-  - [Additional FAQ](#Additional-FAQ)
-    - [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
-    - [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
-    - [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
-  - [Other](#Other)
+* [Blind Controller](#Blind-Controller)
+  * [blind-control](#blind-control)
+    * [Table of contents](#Table-of-contents)
+    * [The node](#The-node)
+    * [Node settings](#Node-settings)
+      * [general settings](#general-settings)
+      * [blind settings](#blind-settings)
+      * [rule settings](#rule-settings)
+      * [overwrite settings](#overwrite-settings)
+      * [sun settings](#sun-settings)
+        * [maximize sunlight (Winter)](#maximize-sunlight-Winter)
+        * [restrict sunlight (Summer)](#restrict-sunlight-Summer)
+        * [sun position settings](#sun-position-settings)
+    * [Node Input](#Node-Input)
+    * [Node Output](#Node-Output)
+    * [Node Status](#Node-Status)
+  * [rules](#rules)
+    * [rules example](#rules-example)
+  * [Samples](#Samples)
+    * [testing rules and overrides](#testing-rules-and-overrides)
+  * [Additional FAQ](#Additional-FAQ)
+    * [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
+    * [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
+    * [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
+  * [Other](#Other)
 
 ### The node
 
@@ -252,9 +252,9 @@ If the node is configured with two outputs this object is set as the `msg.payloa
     * `blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
     * `blindCtrl.rule.conditon` - __object__ with additional data about the condition [exists only if `blindCtrl.rule.conditional` is true] - good for debugging purpose
     * `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
-    * `blindCtrl.rule.hasMinimum` - is __true__ if the level type of the rule is __minimum__, otherwise __false__
+    * `blindCtrl.rule.hasMinimum` - is __true__ if to the level of the rule an additional __minimum__ rule will be active, otherwise __false__
     * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMinimum` is __true__ and then contains then the blind level defined by the rule
-    * `blindCtrl.rule.hasMaximum` - is __true__ if the level type of the rule is __maximum__, otherwise __false__
+    * `blindCtrl.rule.hasMaximum` - is __true__ if  to the level of the rule an additional __maximum__ rule will be active, otherwise __false__
     * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMaximum` is __true__ and then contains then the blind level defined by the rule
   * `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
     * `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
@@ -301,10 +301,14 @@ the blind level of a rule could have 3 options:
 
 * __absolute__
   * If a rule with a blind level of type absolute matches, the level would be set to the level defined in the rule. No sun control will be active as long this rule is active.
-* __minimum__
-  * If a rule with a blind level of type minimum matches, as the level the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used. If this level is below the given blind position by the rule, the position by the rule will be used.
-* __maximum__
-  * If a rule with a blind level of type maximum matches, as the level the the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used. If this level is above the given blind position by the rule, the position by the rule will be used.
+* __minimum (absolute - default)__ / __maximum (absolute - default)__
+  * If a rule with a blind level of this type matches, as the level the the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used. If this level is above (maximum) or below (minimum) the given blind position by the rule, the position by the rule will be used.
+* __minimum (additional oversteer)__ / __maximum (additional oversteer)__
+  * a rule of this type never acts alone. These types of rules act in addition to the identified rule.
+    * a type of this rule will not considered,
+      * if it comes after an active absolute __until__ time rule
+      * if it comes before an active absolute __from__ time rule
+      * if no rule is active (default blind position or sun-control is active)
 
 If there is a time where no rules matches, then as blind position the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used.
 

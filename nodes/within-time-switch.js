@@ -126,7 +126,7 @@ module.exports = function (RED) {
                     type: node.propertyStartType,
                     value: node.propertyStart
                 }), err);
-                node.log(util.inspect(err));
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             }
         }
 
@@ -191,7 +191,7 @@ module.exports = function (RED) {
             });
         }
 
-        // node.debug(util.inspect(result, Object.getOwnPropertyNames(result)));
+        // node.debug(util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
         return result;
     }
 
@@ -246,7 +246,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config));
+        // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
 
         this.propertyStart = config.propertyStart || '';
         this.propertyStartType = config.propertyStartType || 'none';
@@ -270,9 +270,9 @@ module.exports = function (RED) {
                     setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')});
                     return null;
                 }
-                // this.debug('starting ' + util.inspect(msg, Object.getOwnPropertyNames(msg)));
-                // this.debug('self ' + util.inspect(this, Object.getOwnPropertyNames(this)));
-                // this.debug('config ' + util.inspect(config, Object.getOwnPropertyNames(config)));
+                // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
+                // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
+                // this.debug('config ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
                 const result = calcWithinTimes(this, msg, config);
                 const now = getDate(config.tsCompare, msg, node);
 

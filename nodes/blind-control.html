@@ -1,315 +1,4 @@
 <!DOCTYPE HTML>
-<script type="text/x-red" data-template-name="blind-control">
-    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" class="row-full-width" id="node-input-positionConfig">
-    </div>
-    <hr>
-    <!-- #region blind ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
-        <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement"/>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindOpenPos">
-        <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos"/>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindClosedPos">
-        <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos"/>
-    </div>
-    <hr>
-    <!-- #region time ######################################################################## -->
-    <div class="is-to-show-initially">
-        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
-        <div class="form-row node-input-rule-container-row row-full-width">
-            <ol id="node-input-rule-container"></ol>
-            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
-            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
-            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
-        </div>
-    </div>
-
-    <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
-    </div>
-    <div class="form-row block-noindent is-to-show-initially" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
-        <label for="node-input-blindPosDefault"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelDefault"></span></label>
-        <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
-        <input type="hidden" id="node-input-blindPosDefaultType">
-    </div>
-    <hr>
-    <!-- #region overwrite blind ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span>
-    </div>
-    <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
-        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
-        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value=""/>
-        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-        </select>
-        <input type="hidden" id="node-input-overwriteExpire">
-    </div>
-    <hr>
-    <!-- #region sun ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
-        <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
-        <select id="node-input-sunControlMode" class="row-full-width">
-            <option value="0" data-i18n="[html]blind-control.label.sunControlOff"></option>
-            <option value="1" data-i18n="[html]blind-control.label.sunControlMaximize"></option>
-            <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
-        </select>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-noindent">
-        <span data-i18n="[html]blind-control.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlMaximization block-noindent">
-        <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <hr class="form-row-sunControlActive" >
-    <!-- window ######################################################################## -->
-    <div class="form-row form-row-sunControlActive block-noindent">
-        <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
-        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
-        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
-        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
-        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-noindent">
-        <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
-        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
-        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
-    </div>
-     <!-- sun ######################################################################## -->
-     <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-        <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-        <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
-        <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
-        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-        </select>
-        <input type="hidden" id="node-input-smoothTime">
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
-        <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
-        <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
-        <input type="hidden" id="node-input-blindPosMinType">
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMax">
-        <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMax"></span></label>
-        <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMax"/>
-        <input type="hidden" id="node-input-blindPosMaxType">
-    </div>
-    <hr class="form-row-sunControlActive" >
-    <!-- #region oversteering ######################################################################## -->
-    <div class="form-row form-row-sunControlActive block-noindent">
-        <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteerValue"> <i class="fa fa-thermometer-three-quarters fa-fw"></i> </i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
-        <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteerValueType">
-        <select id="node-input-oversteerCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteerThreshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteerThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteerThreshold"></span></label>
-        <input type="text" id="node-input-oversteerThreshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteerThresholdType">
-    </div>
-    <div class="form-row row-oversteerBlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
-        <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteerBlindPosType">
-    </div>
-    <div class="form-row row-oversteer2Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer2Value"> <i class="fa fa-cloud fa-fw"></i> <span data-i18n="blind-control.label.oversteer2Value"></span></label>
-        <input type="text" id="node-input-oversteer2Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer2ValueType">
-        <select id="node-input-oversteer2Compare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteer2Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteer2Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer2Threshold"></span></label>
-        <input type="text" id="node-input-oversteer2Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteer2ThresholdType">
-    </div>
-    <div class="form-row row-oversteer2BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer2BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer2BlindPos"></span></label>
-        <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer2BlindPosType">
-    </div>
-    <div class="form-row row-oversteer3Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer3Value"> <i class="fa fa-tint fa-fw"></i> <span data-i18n="blind-control.label.oversteer3Value"></span></label>
-        <input type="text" id="node-input-oversteer3Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer3ValueType">
-        <select id="node-input-oversteer3Compare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteer3Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteer3Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer3Threshold"></span></label>
-        <input type="text" id="node-input-oversteer3Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteer3ThresholdType">
-    </div>
-    <div class="form-row row-oversteer3BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer3BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer3BlindPos"></span></label>
-        <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer3BlindPosType">
-    </div>
-    <hr>
-    <!-- #region Enhanced ######################################################################## -->
-    <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
-        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
-        <select id="node-input-outputs" class="row-full-width">
-            <option value="1" data-i18n="blind-control.label.singleOutput"></option>
-            <option value="2" data-i18n="blind-control.label.splitOutput"></option>
-        </select>
-    </div>
-    <hr>
-    <!-- #region End ######################################################################## -->
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
-    </div>
-    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
-    </div>
-    <div class="form-tips is-to-show-initially">
-        <span data-i18n="[html]blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
-    </div>
-</script>
-<style>
-    hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .form-row-sunControlActive {
-        display:none
-    }
-    .form-row-sunControlRestriction {
-        display:none
-    }
-    .form-row-sunControlMaximization {
-        display:none
-    }
-    .form-tips {
-        width: 90%
-    }
-    .block-indent1 {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: 100%
-    }
-    .block-indent1-noadd {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: 100%
-    }
-    .input-error {
-        border-color: #d6615f !important;
-        background-color: #ffcccc !important;
-    }
-
-    .block-indent2 {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: 100%
-    }
-    .block-indent2-noadd {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: 100%
-    }
-    .block-noindent .row-full-width {
-        width : calc(100% - 110px);
-    }
-    .block-indent1 .row-full-width {
-        width : calc(100% - 120px);
-    }
-    .block-indent2 .row-full-width {
-        width : calc(100% - 130px);
-    }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 245px);
-    }
-    .block-indent1 .ui-spinner {
-        width : calc(100% - 255px);
-    }
-    .block-indent2 .ui-spinner {
-        width : calc(100% - 265px);
-    }
-    .block-noindent-noadd .ui-spinner {
-        width : calc(100% - 110px);
-    }
-    .block-indent1-noadd .ui-spinner {
-        width : calc(100% - 120px);
-    }
-    .block-indent2-noadd .ui-spinner {
-        width : calc(100% - 130px);
-    }
-    .node-input-multiplier {
-        width: 125px;
-        max-width: 125px;
-        margin-left: 5px;
-    }
-    .node-input-addOn {
-        width: 100px;
-        max-width: 100px;
-        margin-left: 5px;
-    }
-    .ui-spinner input {
-        border: none !important;
-        width: 95% !important;
-    }
-</style>
 
 <script type="text/javascript">
     /**
@@ -770,6 +459,78 @@
             const $nodeConfig = $('#node-input-positionConfig');
             const node = this;
 
+            // #region Dialog
+            /**
+             * save dialog data back to rule
+             */
+            function _dialogSaveData() {
+                console.log('dialogSaveData'); // eslint-disable-line
+                if (!$dialogConnFields) { return; }
+                /*
+                $dialogConnFields.find('.node-input-item-id').val($dialogId.val());
+                $dialogConnFields.find('.node-input-item-name').val($dialogName.val());
+                $dialogConnFields.find('.node-input-item-nameAlt').val($dialogNameAlt.val());
+                $dialogConnFields.find('.node-input-item-character').val($dialogCharacter.val());
+                switch ($dialogDateType.val()) {
+                    case 'easter':
+                        $dialogConnFields.find('.node-input-item-month').val('-1');
+                        $dialogConnFields.find('.node-input-item-day').val($dialogDaysRel.val());
+                        break;
+                    case 'advent':
+                        $dialogConnFields.find('.node-input-item-month').val('-2');
+                        $dialogConnFields.find('.node-input-item-day').val($dialogDaysRel.val());
+                        break;
+                    case 'weekdayfirst': {
+                        $dialogConnFields.find('.node-input-item-month').val(String(parseInt($dialogMonth.val()) + 12));
+                        const nth = (parseInt($dialogNthdow.val()) - 1);
+                        $dialogConnFields.find('.node-input-item-nth').val(String(nth));
+                        $dialogConnFields.find('.node-input-item-dow').val($dialogDayofweek.val());
+
+                        const val = (nth * 7 + parseInt($dialogDayofweek.val()));
+                        $dialogDaysRel.val(String(val));
+                        $dialogConnFields.find('.node-input-item-day').val(String(val));
+                        break;
+                    }
+                    case 'weekdaylast': {
+                        $dialogConnFields.find('.node-input-item-month').val(String(parseInt($dialogMonth.val()) + 24));
+                        const nth = (parseInt($dialogNthdow.val()) - 1);
+                        $dialogConnFields.find('.node-input-item-nth').val(String(nth));
+                        $dialogConnFields.find('.node-input-item-dow').val($dialogDayofweek.val());
+
+                        const val = (nth * 7 + parseInt($dialogDayofweek.val()));
+                        $dialogDaysRel.val(String(val));
+                        $dialogConnFields.find('.node-input-item-day').val(String(val));
+                        break;
+                    }
+                    default: {
+                        const date = $dialogDate.datepicker('getDate');
+                        if (date !== null) {
+                            $dialogConnFields.find('.node-input-item-month').val(String(date.getUTCMonth() + 1));
+                            $dialogConnFields.find('.node-input-item-day').val(date.getUTCDate());
+                        }
+                    }
+                } */
+                $dialog.dialog('close');
+            }
+            const $dialogConnFields = {};
+
+            const $dialog = $('#dialog-edit-rule').dialog({
+                title: node._('blind-control.label.dialogtitle'),
+                autoOpen: false,
+                resizable: true,
+                height: Math.min(580, $(window).height() * 0.8),
+                width: Math.min(530, $(window).width() * 0.8),
+                modal: true,
+                closeOnEscape: true,
+                buttons: {
+                    Ok: _dialogSaveData,
+                    Cancel: () => {
+                        $dialog.dialog('close');
+                    }
+                }
+            });
+            // #endregion Dialog
+
             const setup = function(node) {
                 /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData */
                 // #region initialize
@@ -1019,6 +780,8 @@
                         $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                         $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                         $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                        $levelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelMinAdd')));
+                        $levelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelMaxAdd')));
                         $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
@@ -1166,6 +929,12 @@
                             return top; // from before until
                         }
                         // both same from/until type
+                        if ((a.levelOp > 2) && (b.levelOp <= 2)) { // time is different
+                            return 1; // a after b
+                        } else if ((b.levelOp > 2) && (a.levelOp <= 2)) {
+                            return -1; // a before b
+                        }
+
                         const time = a.timeData - b.timeData;
                         if ((a.timeData !== 0) && (b.timeData !== 0) && (time !== 0)) { // time is different
                             return time;
@@ -1543,3 +1312,364 @@
             }
         }
     });</script>
+
+<script type="text/x-red" data-template-name="blind-control">
+    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" class="row-full-width" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <!-- blind ######################################################################## -->
+    <div class="form-row block-noindent is-to-show-initially">
+        <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span>
+    </div>
+    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
+        <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement"/>
+    </div>
+    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindOpenPos">
+        <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos"/>
+    </div>
+    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindClosedPos">
+        <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos"/>
+    </div>
+    <hr>
+    <!-- time ######################################################################## -->
+    <div class="is-to-show-initially">
+        <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
+        <div class="form-row node-input-rule-container-row row-full-width">
+            <ol id="node-input-rule-container"></ol>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
+        </div>
+    </div>
+
+    <div class="form-row block-noindent is-to-show-initially">
+        <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
+    </div>
+    <div class="form-row block-noindent is-to-show-initially" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
+        <label for="node-input-blindPosDefault"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelDefault"></span></label>
+        <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
+        <input type="hidden" id="node-input-blindPosDefaultType">
+    </div>
+    <hr>
+    <!-- overwrite blind ######################################################################## -->
+    <div class="form-row block-noindent is-to-show-initially">
+        <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span>
+    </div>
+    <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
+        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
+        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value=""/>
+        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-overwriteExpire">
+    </div>
+    <hr>
+    <!-- sun ######################################################################## -->
+    <div class="form-row block-noindent is-to-show-initially">
+        <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
+        <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
+        <select id="node-input-sunControlMode" class="row-full-width">
+            <option value="0" data-i18n="[html]blind-control.label.sunControlOff"></option>
+            <option value="1" data-i18n="[html]blind-control.label.sunControlMaximize"></option>
+            <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
+        </select>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-noindent">
+        <span data-i18n="[html]blind-control.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlMaximization block-noindent">
+        <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <hr class="form-row-sunControlActive" >
+    <!-- window ######################################################################## -->
+    <div class="form-row form-row-sunControlActive block-noindent">
+        <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
+        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
+        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
+        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-noindent">
+        <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
+        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
+        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
+    </div>
+     <!-- sun ######################################################################## -->
+     <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
+        <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
+        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
+        <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
+        <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
+        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
+        <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
+        <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
+    </div>
+    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
+        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
+            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+        </select>
+        <input type="hidden" id="node-input-smoothTime">
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
+        <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
+        <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
+        <input type="hidden" id="node-input-blindPosMinType">
+    </div>
+    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMax">
+        <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMax"></span></label>
+        <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMax"/>
+        <input type="hidden" id="node-input-blindPosMaxType">
+    </div>
+    <hr class="form-row-sunControlActive" >
+    <!-- oversteering ######################################################################## -->
+    <div class="form-row form-row-sunControlActive block-noindent">
+        <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteerValue"> <i class="fa fa-thermometer-three-quarters fa-fw"></i> </i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
+        <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteerValueType">
+        <select id="node-input-oversteerCompare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteerThreshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteerThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteerThreshold"></span></label>
+        <input type="text" id="node-input-oversteerThreshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteerThresholdType">
+    </div>
+    <div class="form-row row-oversteerBlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
+        <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteerBlindPosType">
+    </div>
+    <div class="form-row row-oversteer2Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer2Value"> <i class="fa fa-cloud fa-fw"></i> <span data-i18n="blind-control.label.oversteer2Value"></span></label>
+        <input type="text" id="node-input-oversteer2Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer2ValueType">
+        <select id="node-input-oversteer2Compare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteer2Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteer2Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer2Threshold"></span></label>
+        <input type="text" id="node-input-oversteer2Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteer2ThresholdType">
+    </div>
+    <div class="form-row row-oversteer2BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer2BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer2BlindPos"></span></label>
+        <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer2BlindPosType">
+    </div>
+    <div class="form-row row-oversteer3Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3Value"> <i class="fa fa-tint fa-fw"></i> <span data-i18n="blind-control.label.oversteer3Value"></span></label>
+        <input type="text" id="node-input-oversteer3Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3ValueType">
+        <select id="node-input-oversteer3Compare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row row-oversteer3Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
+        <label for="node-input-oversteer3Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer3Threshold"></span></label>
+        <input type="text" id="node-input-oversteer3Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
+        <input type="hidden" id="node-input-oversteer3ThresholdType">
+    </div>
+    <div class="form-row row-oversteer3BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
+        <label for="node-input-oversteer3BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer3BlindPos"></span></label>
+        <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
+        <input type="hidden" id="node-input-oversteer3BlindPosType">
+    </div>
+    <hr>
+    <!-- Enhanced ######################################################################## -->
+    <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
+        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
+        <select id="node-input-outputs" class="row-full-width">
+            <option value="1" data-i18n="blind-control.label.singleOutput"></option>
+            <option value="2" data-i18n="blind-control.label.splitOutput"></option>
+        </select>
+    </div>
+    <hr>
+    <!-- End ######################################################################## -->
+    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+    </div>
+    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
+    </div>
+    <div class="form-tips is-to-show-initially">
+        <span data-i18n="[html]blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
+    </div>
+
+    <!-- DIALOG ######################################################################## -->
+    <div id="dialog-edit-rule" class="red-ui-editor">
+        <div class="form-row">
+            <label for="dialog-input-id">includes</label>
+            <input type="text" name="dialog-input-id" id="dialog-input-id" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="form-row">
+            <label for="dialog-input-name">name</label>
+            <input type="text" name="dialog-input-name" id="dialog-input-name" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="form-row">
+            <label for="dialog-input-nameAlt">name alternate</label>
+            <input type="text" name="dialog-input-nameAlt" id="dialog-input-nameAlt" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="form-row">
+            <label for="dialog-input-character">character</label>
+            <select type="text" id="dialog-input-character" name="dialog-input-character" style="width:70%" >
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="dialog-input-date-type">type</label>
+            <select type="text" id="dialog-input-date-type" name="dialog-input-date-type" style="width:70%" >
+            </select>
+        </div>
+
+        <div class="form-row dialog-input-date-row">
+            <label for="dialog-input-date">date</label>
+            <input type="text" name="dialog-input-date" id="dialog-input-date" min="1" max="31" step="1" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="form-row dialog-input-daysRel-row">
+            <label for="dialog-input-daysRel">days</label>
+            <input type="number" name="dialog-input-daysRel" id="dialog-input-daysRel" min="-370" max="370" step="1" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div class="form-row dialog-input-month-row">
+            <label for="dialog-input-month">month</label>
+            <select type="text" id="dialog-input-month" name="dialog-input-month" class="text ui-widget-content ui-corner-all" style="width:70%" >
+            </select>
+        </div>
+        <div class="form-row dialog-input-dowRel-row">
+            <label for="dialog-input-nthdow">relative</label>
+            <input type="number" id="dialog-input-nthdow" name="dialog-input-nthdow" min="1" max="5" step="1" class="text ui-widget-content ui-corner-all" style="width:30%">
+            <select type="text" id="dialog-input-dayofweek" name="dialog-input-dayofweek" style="width:40%" >
+            </select>
+        </div>
+        <div>
+            <label id="dialog-label-date-out"></label>
+        </div>
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
+    }
+    .form-row-sunControlActive {
+        display:none
+    }
+    .form-row-sunControlRestriction {
+        display:none
+    }
+    .form-row-sunControlMaximization {
+        display:none
+    }
+    .form-tips {
+        width: 90%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent1-noadd {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .input-error {
+        border-color: #d6615f !important;
+        background-color: #ffcccc !important;
+    }
+
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-indent2-noadd {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .block-noindent-noadd .ui-spinner {
+        width : calc(100% - 110px);
+    }
+    .block-indent1-noadd .ui-spinner {
+        width : calc(100% - 120px);
+    }
+    .block-indent2-noadd .ui-spinner {
+        width : calc(100% - 130px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        max-width: 125px;
+        margin-left: 5px;
+    }
+    .node-input-addOn {
+        width: 100px;
+        max-width: 100px;
+        margin-left: 5px;
+    }
+    .ui-spinner input {
+        border: none !important;
+        width: 95% !important;
+    }
+</style>

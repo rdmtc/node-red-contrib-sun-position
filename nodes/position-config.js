@@ -94,7 +94,6 @@ module.exports = function (RED) {
         constructor(config) {
             RED.nodes.createNode(this, config);
             try {
-                this.debug('initialize');
                 this.name = config.name;
                 this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
@@ -113,6 +112,7 @@ module.exports = function (RED) {
                     this.tzOffset = null;
                     // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
                 }
+                this.debug(`initialize longitude=${this.longitude} latitude=${this.latitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
@@ -186,17 +186,18 @@ module.exports = function (RED) {
          * @return {timeresult|erroresult} result object of sunTime
          */
         getSunTime(now, value, offset, multiplier, next, days) {
-            // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now}`);
-
             let result;
             const dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
+            this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
+                this.debug('getSunTime sunTimesToday');
                 result = Object.assign({}, this.sunTimesToday[value]); // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
+                this.debug('getSunTime sunTimesTomorow');
                 result = Object.assign({},this.sunTimesTomorow[value]); // needed for a object copy
             } else {
-                // this.debug('calc extra times ');
+                this.debug('getSunTime calc extra time');
                 result = Object.assign({},sunCalc.getSunTimes(now, this.latitude, this.longitude, false)[value]); // needed for a object copy
             }
 
@@ -895,21 +896,22 @@ module.exports = function (RED) {
             this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
             this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
             this.sunDayId = dayId;
-            this.debug(`sunTimesRefresh - calculate sun times - dayId=${ dayId }, today=${ today.toISOString() }, tomorrow=${ tomorrow.toISOString() } `); //  + util.inspect(this.sunTimesToday, { colors: true, compact: 40 }));
+            this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
         }
 
         _sunTimesCheck(force) {
             // this.debug('_sunTimesCheck');
-            const calcDate = new Date();
-            const dayId = this._getDayId(calcDate); // _getUTCDayId(calcDate);
+            const today = new Date();
+            const dayId = this._getDayId(today); // _getUTCDayId(today);
+            // this.debug(`_sunTimesCheck ${this.sunDayId} - ${dayId}`);
             if (force || this.sunDayId !== dayId) {
-                this.debug(`_sunTimesCheck - need refresh - force=${ force }, base-dayId=${ this.sunDayId } current-dayId=${ dayId }`);
+                this.debug(`_sunTimesCheck - need refresh - force=${force}, base-dayId=${this.sunDayId} current-dayId=${dayId} today=${today}`);
                 const tomorrow = (new Date()).addDays(1);
-                this._sunTimesRefresh(calcDate, tomorrow, dayId);
+                this._sunTimesRefresh(today, tomorrow, dayId);
             }
 
             return {
-                calcDate,
+                today,
                 dayId
             };
         }
@@ -945,16 +947,16 @@ module.exports = function (RED) {
 
         _moonTimesCheck(force) {
             // this.debug('moonTimesCheck');
-            const calcDate = new Date();
-            const dayId = this._getDayId(calcDate); // this._getUTCDayId(dateb);
+            const today = new Date();
+            const dayId = this._getDayId(today); // this._getUTCDayId(dateb);
             if (force || this.moonDayId !== dayId) {
                 this.debug(`_moonTimesCheck - need refresh - force=${ force }, base-dayId=${ this.moonDayId } current-dayId=${ dayId }`);
                 const tomorrow = (new Date()).addDays(1);
-                this._moonTimesRefresh(calcDate, tomorrow, dayId);
+                this._moonTimesRefresh(today, tomorrow, dayId);
             }
 
             return {
-                calcDate,
+                today,
                 dayId
             };
         }

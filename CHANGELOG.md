@@ -1,3 +1,7 @@
+#### 0.4.3: Maintenance Release
+
+- fixed critical problem in calculating Julian cycle which leads into wrong sun times if it is calculated at certain times [#37](https://github.com/rdmtc/node-red-contrib-sun-position/issues/37)
+
 #### 0.4.1 / 0.4.2: Maintenance Release
 
 - fixed problems on RedMatic call of getBackendData
