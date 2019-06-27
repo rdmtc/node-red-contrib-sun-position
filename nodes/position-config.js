@@ -736,13 +736,13 @@ module.exports = function (RED) {
             };
 
             if (noTimes) {
-                this.debug('no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                this.debug('getSunCalc - no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 return result;
             }
             this._sunTimesCheck();
             result.times = this.sunTimesToday;
             this.lastSunCalc = result;
-            this.debug('result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 
@@ -823,7 +823,7 @@ module.exports = function (RED) {
                 altitudeRadians: moonPos.altitude,
                 azimuthRadians: moonPos.azimuth,
                 distance: moonPos.distance,
-                parallacticAngle: (this.angleType === 'deg') ? 180 / Math.PI * moonPos.parallacticAngle : moonPos.parallacticAngle,
+                parallacticAngle: (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
                 illumination: {
                     angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
                     fraction: moonIllum.fraction,
@@ -895,8 +895,8 @@ module.exports = function (RED) {
 
         _sunTimesRefresh(today, tomorrow, dayId) {
             this._checkCoordinates();
-            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude);
-            this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude);
+            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
+            this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
             this.sunDayId = dayId;
             this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
         }

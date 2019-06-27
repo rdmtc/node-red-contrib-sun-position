@@ -382,7 +382,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         date = date || new Date();
         if (inUTC === false) {
-            date = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+            date = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
         }
 
         const lw = rad * -lng;
@@ -396,7 +396,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const Jnoon = solarTransitJ(ds, M, L);
         const noonVal = fromJulianDay(Jnoon);
         const nadirVal = fromJulianDay(Jnoon + 0.5);
-        // console.log(`getSunTimes ${date.toISOString()} - Jnoon=${Jnoon} - JulianNoon=${noonVal.toISOString()} - JulianNadir=${nadirVal.toISOString()} ds=${ds}, M=${M}, L=${L}, n=${n}, d=${d}, lw=${lw}, phi=${phi}`);
+        console.log(`getSunTimes ${date.toISOString()} - Jnoon=${Jnoon} - JulianNoon=${noonVal.toISOString()} - JulianNadir=${nadirVal.toISOString()} ds=${ds}, M=${M}, L=${L}, n=${n}, d=${d}, lw=${lw}, phi=${phi}`);
 
         const result = {
             solarNoon: {
@@ -495,7 +495,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         date = date || new Date();
         if (inUTC === false) {
-            date = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+            date = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
         }
 
         const lw = rad * -lng;
@@ -605,7 +605,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             azimuthDegrees: 180 + 180 / PI * azimuthr,
             altitudeDegrees: 180 / PI * h,
             distance: c.dist,
-            parallacticAngle: pa
+            parallacticAngle: pa,
+            parallacticAngleDegrees: 180 / PI * pa
         };
     };
 
