@@ -719,9 +719,7 @@ module.exports = function (RED) {
                 return this.lastSunCalc;
             }
 
-            const sunPos = sunCalc.getPosition(date, this.latitude, this.longitude, false);
-            const azimuthDegrees = 180 + 180 / Math.PI * sunPos.azimuth;
-            const altitudeDegrees = 180 / Math.PI * sunPos.altitude; // elevation = altitude
+            const sunPos = sunCalc.getPosition(date, this.latitude, this.longitude);
 
             const result = {
                 ts: date.getTime(),
@@ -729,10 +727,10 @@ module.exports = function (RED) {
                 latitude: this.latitude,
                 longitude: this.longitude,
                 angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? azimuthDegrees : sunPos.azimuth,
-                altitude: (this.angleType === 'deg') ? altitudeDegrees : sunPos.altitude, // elevation = altitude
-                altitudeDegrees,
-                azimuthDegrees,
+                azimuth: (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
+                altitude: (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
+                altitudeDegrees: sunPos.altitudeDegrees,
+                azimuthDegrees: sunPos.azimuthDegrees,
                 altitudeRadians: sunPos.altitude,
                 azimuthRadians: sunPos.azimuth
             };
@@ -759,7 +757,7 @@ module.exports = function (RED) {
                 }
             }
 
-            const moonIllum = sunCalc.getMoonIllumination(date, false);
+            const moonIllum = sunCalc.getMoonIllumination(date);
             const result = Object.assign({}, moonIllum);
 
             if (moonIllum.phase < 0.01) {
@@ -809,7 +807,7 @@ module.exports = function (RED) {
                 return this.lastMoonCalc;
             }
 
-            const moonPos = sunCalc.getMoonPosition(date, this.latitude, this.longitude, false);
+            const moonPos = sunCalc.getMoonPosition(date, this.latitude, this.longitude);
             const moonIllum = this.getMoonIllumination(date);
 
             const result = {
@@ -818,8 +816,12 @@ module.exports = function (RED) {
                 latitude: this.latitude,
                 longitude: this.longitude,
                 angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? 180 + 180 / Math.PI * moonPos.azimuth : moonPos.azimuth,
-                altitude: (this.angleType === 'deg') ? 180 / Math.PI * moonPos.altitude : moonPos.altitude, // elevation = altitude
+                azimuth: (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
+                altitude: (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
+                altitudeDegrees: moonPos.altitudeDegrees,
+                azimuthDegrees: moonPos.azimuthDegrees,
+                altitudeRadians: moonPos.altitude,
+                azimuthRadians: moonPos.azimuth,
                 distance: moonPos.distance,
                 parallacticAngle: (this.angleType === 'deg') ? 180 / Math.PI * moonPos.parallacticAngle : moonPos.parallacticAngle,
                 illumination: {
@@ -893,8 +895,8 @@ module.exports = function (RED) {
 
         _sunTimesRefresh(today, tomorrow, dayId) {
             this._checkCoordinates();
-            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
-            this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
+            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude);
+            this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude);
             this.sunDayId = dayId;
             this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
         }

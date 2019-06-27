@@ -23,16 +23,17 @@ function validPosition_(node, level, allowRound) {
         node.warn(`Position: "${level}" is NaN!`);
         return false;
     }
-    if (level < node.blindData.levelClosed) {
-        node.warn(`Position: "${level}" < levelClosed ${node.blindData.levelClosed}`);
+
+    if (level < node.blindData.levelBottom) {
+        node.warn(`Position: "${level}" < levelBottom ${node.blindData.levelBottom}`);
         return false;
     }
-    if (level > node.blindData.levelOpen) {
-        node.warn(`Position: "${level}" > levelOpen ${node.blindData.levelOpen}`);
+    if (level > node.blindData.levelTop) {
+        node.warn(`Position: "${level}" > levelTop ${node.blindData.levelTop}`);
         return false;
     }
-    if (Number.isInteger(node.blindData.levelOpen) &&
-        Number.isInteger(node.blindData.levelClosed) &&
+    if (Number.isInteger(node.blindData.levelTop) &&
+        Number.isInteger(node.blindData.levelBottom) &&
         Number.isInteger(node.blindData.increment) &&
         ((level % node.blindData.increment !== 0) ||
         !Number.isInteger(level) )) {
@@ -78,7 +79,7 @@ function getNow_(node, msg) {
  * @param {*} percentPos the level in percentage (0-1)
  */
 function posPrcToAbs_(node, levelPercent) {
-    return posRound_(node, ((node.blindData.levelOpen - node.blindData.levelClosed) * levelPercent) + node.blindData.levelClosed);
+    return posRound_(node, ((node.blindData.levelTop - node.blindData.levelBottom) * levelPercent) + node.blindData.levelBottom);
 }
 /**
  * get the percentage level from absolute level  (0-1)
@@ -86,7 +87,7 @@ function posPrcToAbs_(node, levelPercent) {
  * @param {*} levelAbsolute the level absolute
  */
 function posAbsToPrc_(node, levelAbsolute) {
-    return (levelAbsolute - node.blindData.levelClosed) / (node.blindData.levelOpen - node.blindData.levelClosed);
+    return (levelAbsolute - node.blindData.levelBottom) / (node.blindData.levelTop - node.blindData.levelBottom);
 }
 
 /**
@@ -109,11 +110,11 @@ function posRound_(node, pos) {
     // pos = Math.floor(pos / node.blindData.increment) * node.blindData.increment;
     pos = Math.round(pos / node.blindData.increment) * node.blindData.increment;
     pos = Number(pos.toFixed(hlp.countDecimals(node.blindData.increment)));
-    if (pos > node.blindData.levelOpen) {
-        pos = node.blindData.levelOpen;
+    if (pos > node.blindData.levelTop) {
+        pos = node.blindData.levelTop;
     }
-    if (pos < node.blindData.levelClosed) {
-        pos = node.blindData.levelClosed;
+    if (pos < node.blindData.levelBottom) {
+        pos = node.blindData.levelBottom;
     }
     // node.debug(`levelPrcToAbs_ result ${pos}`);
     return pos;
@@ -221,17 +222,17 @@ module.exports = function (RED) {
                 const val = parseFloat(value);
                 if (isNaN(val)) {
                     if (value.includes('close')) {
-                        return node.blindData.levelClosed;
+                        return node.blindData.levelBottom;
                     } else if (value.includes('open')) {
-                        return node.blindData.levelOpen;
+                        return node.blindData.levelTop;
                     } else if (val === '') {
                         return def;
                     }
                 } else {
                     if (val < 1) {
-                        return node.blindData.levelClosed;
+                        return node.blindData.levelBottom;
                     } else if (val > 99) {
-                        return node.blindData.levelOpen;
+                        return node.blindData.levelTop;
                     }
                     return (val / 100);
                 }
@@ -499,11 +500,11 @@ module.exports = function (RED) {
         const height = Math.tan(sunPosition.altitudeRadians) * node.sunData.floorLength;
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${node.sunData.floorLength}`);
         if (height <= node.windowSettings.bottom) {
-            node.blindData.level = node.blindData.levelClosed;
-            node.blindData.levelInverse = node.blindData.levelOpen;
+            node.blindData.level = node.blindData.levelBottom;
+            node.blindData.levelInverse = node.blindData.levelTop;
         } else if (height >= node.windowSettings.top) {
-            node.blindData.level = node.blindData.levelOpen;
-            node.blindData.levelInverse = node.blindData.levelClosed;
+            node.blindData.level = node.blindData.levelTop;
+            node.blindData.levelInverse = node.blindData.levelBottom;
         } else {
             node.blindData.level = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
             node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
@@ -518,10 +519,10 @@ module.exports = function (RED) {
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: node.blindData.level.toString()});
             node.blindData.level = node.previousData.level;
             node.blindData.levelInverse = node.previousData.levelInverse;
-        } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.blindData.level > node.blindData.levelClosed) && (node.blindData.level < node.blindData.levelOpen)) {
+        } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.blindData.level > node.blindData.levelBottom) && (node.blindData.level < node.blindData.levelTop)) {
             node.reason.code = 14;
             node.reason.state = RED._('blind-control.states.sunMinDelta', { pos: node.blindData.level.toString()});
-            node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: node.blindData.level.toString()});
+            node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: node.blindData.level.toString() });
             node.blindData.level = node.previousData.level;
             node.blindData.levelInverse = node.previousData.levelInverse;
         } else {
@@ -681,6 +682,12 @@ module.exports = function (RED) {
                     } else if (res.levelOp === 4 && (!ruleSelMax || ruleSelMax.timeOp === 0)) {
                         ruleSelMax = res;
                     } else {
+                        if (ruleSelMin && ruleSelMin.timeOp === 0) {
+                            ruleSelMin = null;
+                        }
+                        if (ruleSelMax && ruleSelMax.timeOp === 0) {
+                            ruleSelMax = null;
+                        }
                         ruleSel = res;
                         break;
                     }
@@ -689,72 +696,52 @@ module.exports = function (RED) {
         }
         if (ruleSel) {
             // ruleSel.text = '';
-            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10}));
+            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
+            node.reason.code = 4;
             livingRuleData.id = ruleSel.pos;
+            livingRuleData.hasMinimum = false;
+            livingRuleData.hasMaximum = false;
+            node.reason.code = 4;
+            if (ruleSelMin) {
+                livingRuleData.hasMinimum = true;
+                livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault);
+                livingRuleData.minimum = {
+                    id: ruleSelMin.pos,
+                    conditional: ruleSelMin.conditional,
+                    timeLimited: ruleSelMin.timeLimited,
+                    conditon: ruleSelMin.conditonData,
+                    time: ruleSelMin.timeData
+                };
+            } else {
+                livingRuleData.levelMinimum = -Infinity;
+            }
+            if (ruleSelMax) {
+                livingRuleData.hasMaximum = true;
+                livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault);
+                livingRuleData.maximum = {
+                    id: ruleSelMax.pos,
+                    conditional: ruleSelMax.conditional,
+                    timeLimited: ruleSelMax.timeLimited,
+                    conditon: ruleSelMax.conditonData,
+                    time: ruleSelMax.timeData
+                };
+            } else {
+                livingRuleData.levelMaximum = Infinity;
+            }
+
             if (ruleSel.levelOp === 0) { // absolute rule
                 livingRuleData.active = true;
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
-                livingRuleData.hasMinimum = (ruleSelMin);
-                livingRuleData.hasMaximum = (ruleSelMax);
-                node.reason.code = 4;
-                if (livingRuleData.hasMinimum) {
-                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault);
-                    livingRuleData.minimum = {
-                        id: ruleSelMin.pos,
-                        conditional: ruleSelMin.conditional,
-                        timeLimited: ruleSelMin.timeLimited,
-                        conditon: ruleSelMin.conditonData,
-                        time: ruleSelMin.timeData
-                    };
-                }
-                if (livingRuleData.hasMaximum) {
-                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault);
-                    livingRuleData.maximum = {
-                        id: ruleSelMax.pos,
-                        conditional: ruleSelMax.conditional,
-                        timeLimited: ruleSelMax.timeLimited,
-                        conditon: ruleSelMax.conditonData,
-                        time: ruleSelMax.timeData
-                    };
-                }
             } else {
                 livingRuleData.active = false;
-                livingRuleData.hasMinimum = (ruleSelMin);
-                livingRuleData.hasMaximum = (ruleSelMax);
-                node.reason.code = 4;
-                if (livingRuleData.hasMinimum) {
-                    livingRuleData.levelMinimum = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, node.blindData.levelDefault);
-                    livingRuleData.minimum = {
-                        id: ruleSelMin.pos,
-                        conditional: ruleSelMin.conditional,
-                        timeLimited: ruleSelMin.timeLimited,
-                        conditon: ruleSelMin.conditonData,
-                        time: ruleSelMin.timeData
-                    };
-                } else {
-                    livingRuleData.levelMinimum = -Infinity;
-                }
-                if (livingRuleData.hasMaximum) {
-                    livingRuleData.levelMaximum = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, node.blindData.levelDefault);
-                    livingRuleData.maximum = {
-                        id: ruleSelMax.pos,
-                        conditional: ruleSelMax.conditional,
-                        timeLimited: ruleSelMax.timeLimited,
-                        conditon: ruleSelMax.conditonData,
-                        time: ruleSelMax.timeData
-                    };
-                } else {
-                    livingRuleData.levelMaximum = Infinity;
-                }
+                livingRuleData.level = node.blindData.levelDefault;
                 if (ruleSel.levelOp === 1) {
                     livingRuleData.hasMinimum = true;
                     livingRuleData.levelMinimum = Math.max(livingRuleData.levelMinimum, getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault));
-                } else {
+                } else if (ruleSel.levelOp === 2) {
                     livingRuleData.hasMaximum = true;
                     livingRuleData.levelMaximum = Math.min(livingRuleData.levelMaximum, getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault));
                 }
-                livingRuleData.level = node.blindData.levelDefault;
-                node.reason.code = 4;
             }
 
             livingRuleData.conditional = ruleSel.conditional;
@@ -784,8 +771,7 @@ module.exports = function (RED) {
             }
             node.reason.state= RED._('blind-control.states.'+name, data);
             node.reason.description = RED._('blind-control.reasons.'+name, data);
-            // node.debug('checkRules end: livingRuleData=' + util.inspect(livingRuleData,{colors:true, compact:10}));
-            node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
+            node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -795,8 +781,7 @@ module.exports = function (RED) {
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
-        // node.debug('checkRules end default: livingRuleData=' + util.inspect(livingRuleData, {colors:true, compact:10}));
-        node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description}`);
+        node.debug(`checkRules end pos=${node.blindData.level} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -852,8 +837,6 @@ module.exports = function (RED) {
             /** The Level of the window */
             level: NaN, // unknown
             levelInverse: NaN,
-            levelOpen: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
-            levelClosed: Number(hlp.chkValueFilled(config.blindClosedPos, 0)),
             increment: Number(hlp.chkValueFilled(config.blindIncrement, 1)),
             levelDefault: NaN,
             levelMin: NaN,
@@ -865,9 +848,19 @@ module.exports = function (RED) {
                 priority: 0
             }
         };
-        node.blindData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.levelOpen);
-        node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.levelClosed);
-        node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelOpen);
+
+        node.blindData.levelTop = Number(hlp.chkValueFilled(config.blindOpenPos, 100));
+        node.blindData.levelBottom = Number(hlp.chkValueFilled(config.blindClosedPos, 0));
+        if (node.blindData.levelTop < node.blindData.levelBottom) {
+            const tmp = node.blindData.levelBottom;
+            node.blindData.levelBottom = node.blindData.levelTop;
+            node.blindData.levelTop = tmp;
+            node.blindData.levelReverse = true;
+        }
+
+        node.blindData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.blindData.levelTop);
+        node.blindData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.blindData.levelBottom);
+        node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelTop);
         node.oversteer = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
             isChecked: false
@@ -880,7 +873,7 @@ module.exports = function (RED) {
                 operator: config.oversteerCompare,
                 thresholdValue: config.oversteerThreshold || '',
                 thresholdType: config.oversteerThresholdType,
-                blindPos: getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelOpen)
+                blindPos: getBlindPosFromTI(node, undefined, config.oversteerBlindPosType, config.oversteerBlindPos, node.blindData.levelTop)
             });
             if ((typeof config.oversteer2ValueType !== 'undefined') && (config.oversteer2ValueType !== 'none')) {
                 node.oversteerData.push({
@@ -889,7 +882,7 @@ module.exports = function (RED) {
                     operator: config.oversteer2Compare,
                     thresholdValue: config.oversteer2Threshold || '',
                     thresholdType: config.oversteer2ThresholdType,
-                    blindPos: getBlindPosFromTI(node, undefined, config.oversteer2BlindPosType, config.oversteer2BlindPos, node.blindData.levelOpen)
+                    blindPos: getBlindPosFromTI(node, undefined, config.oversteer2BlindPosType, config.oversteer2BlindPos, node.blindData.levelTop)
                 });
             }
             if ((typeof config.oversteer3ValueType !== 'undefined') && (config.oversteer3ValueType !== 'none')) {
@@ -899,7 +892,7 @@ module.exports = function (RED) {
                     operator: config.oversteer3Compare,
                     thresholdValue: config.oversteer3Threshold || '',
                     thresholdType: config.oversteer3ThresholdType,
-                    blindPos: getBlindPosFromTI(node, undefined, config.oversteer3BlindPosType, config.oversteer3BlindPos, node.blindData.levelOpen)
+                    blindPos: getBlindPosFromTI(node, undefined, config.oversteer3BlindPosType, config.oversteer3BlindPos, node.blindData.levelTop)
                 });
             }
         }
@@ -922,7 +915,7 @@ module.exports = function (RED) {
                 code = node.previousData.reasonCode;
             }
 
-            if (node.blindData.level === node.blindData.levelOpen) {
+            if (node.blindData.level === node.blindData.levelTop) {
                 shape = 'dot';
             }
 
@@ -990,29 +983,29 @@ module.exports = function (RED) {
                         blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now);
                     }
                     if (blindCtrl.rule.hasMinimum && (node.blindData.level < blindCtrl.rule.levelMinimum)) {
-                        node.debug(`${node.blindData.level} is below rule minimum ${blindCtrl.rule.minimum.level}`);
+                        node.debug(`${node.blindData.level} is below rule minimum ${blindCtrl.rule.levelMinimum}`);
                         node.reason.code = 15;
-                        node.reason.state = RED._('blind-control.states.ruleMin', { org: node.reason.state, rule: blindCtrl.rule.minimum.id });
-                        node.reason.description = RED._('blind-control.reasons.ruleMin', { org: node.reason.description, level: node.blindData.level, rule: blindCtrl.rule.minimum.id });
-                        node.blindData.level = blindCtrl.rule.minimum.level;
+                        node.reason.state = RED._('blind-control.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id });
+                        node.reason.description = RED._('blind-control.reasons.ruleMin', { org: node.reason.description, level: node.blindData.level, number: blindCtrl.rule.minimum.id });
+                        node.blindData.level = blindCtrl.rule.levelMinimum;
                         node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
                     } else if (blindCtrl.rule.hasMaximum && (node.blindData.level > blindCtrl.rule.levelMaximum)) {
-                        node.debug(`${node.blindData.level} is above rule maximum ${blindCtrl.rule.maximum.level}`);
+                        node.debug(`${node.blindData.level} is above rule maximum ${blindCtrl.rule.levelMaximum}`);
                         node.reason.code = 26;
-                        node.reason.state = RED._('blind-control.states.ruleMax', { org: node.reason.state, rule: blindCtrl.rule.maximum.id });
-                        node.reason.description = RED._('blind-control.reasons.ruleMax', { org: node.reason.description, level: node.blindData.level, rule: blindCtrl.rule.maximum.id });
-                        node.blindData.level = blindCtrl.rule.maximum.level;
+                        node.reason.state = RED._('blind-control.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id });
+                        node.reason.description = RED._('blind-control.reasons.ruleMax', { org: node.reason.description, level: node.blindData.level, number: blindCtrl.rule.maximum.id });
+                        node.blindData.level = blindCtrl.rule.levelMaximum;
                         node.blindData.levelInverse = getInversePos_(node, node.blindData.level);
                     }
-                    if (node.blindData.level < node.blindData.levelClosed) {
-                        node.debug(`${node.blindData.level} is below ${node.blindData.levelClosed}`);
-                        node.blindData.level = node.blindData.levelClosed;
-                        node.blindData.levelInverse = node.blindData.levelOpen;
+                    if (node.blindData.level < node.blindData.levelBottom) {
+                        node.debug(`${node.blindData.level} is below ${node.blindData.levelBottom}`);
+                        node.blindData.level = node.blindData.levelBottom;
+                        node.blindData.levelInverse = node.blindData.levelTop;
                     }
-                    if (node.blindData.level > node.blindData.levelOpen) {
-                        node.debug(`${node.blindData.level} is above ${node.blindData.levelClosed}`);
-                        node.blindData.level = node.blindData.levelOpen;
-                        node.blindData.levelInverse = node.blindData.levelClosed;
+                    if (node.blindData.level > node.blindData.levelTop) {
+                        node.debug(`${node.blindData.level} is above ${node.blindData.levelBottom}`);
+                        node.blindData.level = node.blindData.levelTop;
+                        node.blindData.levelInverse = node.blindData.levelBottom;
                     }
                 }
 
