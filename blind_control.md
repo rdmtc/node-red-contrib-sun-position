@@ -230,7 +230,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * **8** - Sun is not in window, default blind position is used
       * **9** - blind position calculated by sun position
       * **10** - defined oversteer condition applies
-      * **11** - (enhanced settings) blind position calculated by sun position was not used caused by smooth settings
+      * **11** - blind position calculated by sun position was not used caused by smooth settings
       * **12** - sun is in window (maximize mode), max blind position used
       * **13** - sun is not in window (maximize mode), min blind position used
       * **14** - change is below defined minimum delta

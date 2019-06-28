@@ -939,11 +939,12 @@ module.exports = function (RED) {
 
             if (code <= 3) {
                 fill = 'blue'; // override
-            } else if (code === 4) {
+            } else if (code === 4 || code === 15 || code === 16) {
                 fill = 'grey'; // rule
             } else if (code === 1 || code === 8) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
+
             node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : getRealLevel_(node).toString() + ' - ' + node.reason.state;
             node.status({
                 fill,
