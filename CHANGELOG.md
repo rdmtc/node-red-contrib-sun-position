@@ -1,9 +1,8 @@
-#### 0.4.3: Maintenance Release
+#### 0.4.4-beta: Maintenance Release
 
-- fixed critical problem in calculating Julian cycle which leads into wrong sun times if it is calculated at certain times [#37](https://github.com/rdmtc/node-red-contrib-sun-position/issues/37)
-
-#### 0.4.1 / 0.4.2: Maintenance Release
-
+- fixed critical problem in sun - calculating Julian cycle which leads into wrong sun times if it is calculated at certain times
+  - [#37](https://github.com/rdmtc/node-red-contrib-sun-position/issues/37)
+  - [#39](https://github.com/rdmtc/node-red-contrib-sun-position/issues/39)
 - fixed problems on RedMatic call of getBackendData
   - tooltip with resolved time on typeInput now also available in RedMatic
 - i18N reworked
@@ -16,9 +15,11 @@
   - add clear button for rules
   - add sort button  in UI editor
   - reworked minimum/maximum blind position settings by rule, enhanced in documentation
+    - addresses [#36](https://github.com/rdmtc/node-red-contrib-sun-position/issues/36)
 - enhanced documentation
   - fix [#31](https://github.com/rdmtc/node-red-contrib-sun-position/issues/31)
   - fix [#33](https://github.com/rdmtc/node-red-contrib-sun-position/issues/33)
+- added possibility for inverted open / close settings [#40](https://github.com/rdmtc/node-red-contrib-sun-position/issues/40)
 - changed lot of internal
   - cleanup procedures
   - fixed problems with test function [#32](https://github.com/rdmtc/node-red-contrib-sun-position/issues/32)
@@ -27,6 +28,14 @@
   - fixed a lot of wrong usages of arrow function for data validation
 - optimized access to backend services
 - changed lot of UTC time compare problems [#34](https://github.com/rdmtc/node-red-contrib-sun-position/issues/34)
+
+#### 0.4.3: Maintenance Release
+
+- Version was unpublished due to critical Bugs
+
+#### 0.4.1 / 0.4.2: Maintenance Release
+
+- Version was unpublished due to critical Bugs
 
 #### 0.4.0: Maintenance Release
 

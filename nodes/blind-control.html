@@ -32,9 +32,7 @@
         let max = getVal(node, 'blindOpenPos');
         let min = getVal(node, 'blindClosedPos');
         if (max < min) {
-            const tmp = min;
-            min = max;
-            max = tmp;
+            [min, max] = [max, min];
         }
         return { min, max };
     }
@@ -119,8 +117,12 @@
             const $timeOperator = rule.find('.node-input-rule-time-operator');
             const $time = rule.find('.node-input-rule-time');
             $timeLbl.width('auto');
-            $timeOperator.width(70);
-            $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
+            if ($timeOperator.is(':visible')) {
+                $timeOperator.width(70);
+                $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
+            } else {
+                $time.typedInput('width', (newWidth - $timeLbl.width() - 33));
+            }
             // row4
             const $offset = rule.find('.node-input-rule-offset');
             const $multiplier = rule.find('.node-input-rule-multiplier');
@@ -132,7 +134,6 @@
             const $level = rule.find('.node-input-rule-level');
             const $levelOperator = rule.find('.node-input-rule-level-operator');
             $levelLbl.width('auto');
-            $levelOperator.show();
             $levelOperator.width(40);
             $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
         } catch (ex) {
@@ -485,53 +486,11 @@
             /**
              * save dialog data back to rule
              */
+            /*
             function _dialogSaveData() {
                 console.log('dialogSaveData'); // eslint-disable-line
                 if (!$dialogConnFields) { return; }
-                /*
-                $dialogConnFields.find('.node-input-item-id').val($dialogId.val());
-                $dialogConnFields.find('.node-input-item-name').val($dialogName.val());
-                $dialogConnFields.find('.node-input-item-nameAlt').val($dialogNameAlt.val());
-                $dialogConnFields.find('.node-input-item-character').val($dialogCharacter.val());
-                switch ($dialogDateType.val()) {
-                    case 'easter':
-                        $dialogConnFields.find('.node-input-item-month').val('-1');
-                        $dialogConnFields.find('.node-input-item-day').val($dialogDaysRel.val());
-                        break;
-                    case 'advent':
-                        $dialogConnFields.find('.node-input-item-month').val('-2');
-                        $dialogConnFields.find('.node-input-item-day').val($dialogDaysRel.val());
-                        break;
-                    case 'weekdayfirst': {
-                        $dialogConnFields.find('.node-input-item-month').val(String(parseInt($dialogMonth.val()) + 12));
-                        const nth = (parseInt($dialogNthdow.val()) - 1);
-                        $dialogConnFields.find('.node-input-item-nth').val(String(nth));
-                        $dialogConnFields.find('.node-input-item-dow').val($dialogDayofweek.val());
-
-                        const val = (nth * 7 + parseInt($dialogDayofweek.val()));
-                        $dialogDaysRel.val(String(val));
-                        $dialogConnFields.find('.node-input-item-day').val(String(val));
-                        break;
-                    }
-                    case 'weekdaylast': {
-                        $dialogConnFields.find('.node-input-item-month').val(String(parseInt($dialogMonth.val()) + 24));
-                        const nth = (parseInt($dialogNthdow.val()) - 1);
-                        $dialogConnFields.find('.node-input-item-nth').val(String(nth));
-                        $dialogConnFields.find('.node-input-item-dow').val($dialogDayofweek.val());
-
-                        const val = (nth * 7 + parseInt($dialogDayofweek.val()));
-                        $dialogDaysRel.val(String(val));
-                        $dialogConnFields.find('.node-input-item-day').val(String(val));
-                        break;
-                    }
-                    default: {
-                        const date = $dialogDate.datepicker('getDate');
-                        if (date !== null) {
-                            $dialogConnFields.find('.node-input-item-month').val(String(date.getUTCMonth() + 1));
-                            $dialogConnFields.find('.node-input-item-day').val(date.getUTCDate());
-                        }
-                    }
-                } */
+                // ...
                 $dialogRule.dialog('close');
             }
             const $dialogConnFields = {};
@@ -558,6 +517,7 @@
                 width: 600,
                 modal: true
             });
+            /* */
             // #endregion Dialog
 
             const setup = function(node) {
@@ -816,16 +776,19 @@
                         $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                         $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                         $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
-                        $levelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelMinAdd')));
-                        $levelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelMaxAdd')));
                         $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
                         $time.change(() => {
                             const opType = $time.typedInput('type');
-                            if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            if (opType === types.Undefined.value) {
+                                $timeOperator.hide();
+                                $row4.hide(); // offset
+                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                                $timeOperator.show();
                                 $row4.show(); // offset
                             } else {
+                                $timeOperator.show();
                                 $row4.hide(); // offset
                             }
                             getBackendData(d => {
@@ -939,11 +902,11 @@
                     prerules.each(function(i) {
                         const data = $(this).data('data');
                         data.index = i;
-                        data.timeOp = (Number(data.timeOp) || 0);
                         data.levelOp = (Number(data.levelOp) || 0);
                         data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
                         data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
                         data.timeData = (parseFloat($(this).find('.node-input-rule-time').attr('timedata')) || 0);
+                        data.timeOp = (data.timeLimited) ? (Number(data.timeOp) || 0) : -1;
                     });
                     /**
                      * 1 no time
@@ -951,10 +914,6 @@
                      * 3 time    - from
                      */
                     $('#node-input-rule-container').editableList('sort', (a, b) => {
-                        const res = (a.timeLimited - b.timeLimited);
-                        if (res !== 0) { // one is not time limited
-                            return res; // not timeLimited before timeLimited (1-3)
-                        }
                         const pos = (a.index - b.index);
                         if (!a.timeLimited && !b.timeLimited) { // both not time limited
                             return pos;
@@ -962,14 +921,15 @@
                         // both are time limited
                         const top = (a.timeOp - b.timeOp);
                         if (top !== 0) {
-                            return top; // from before until
+                            return top; // from before until; not timeLimited before timeLimited (1-3)
                         }
                         // both same from/until type
+                        /*
                         if ((a.levelOp > 2) && (b.levelOp <= 2)) { // time is different
                             return 1; // a after b
                         } else if ((b.levelOp > 2) && (a.levelOp <= 2)) {
                             return -1; // a before b
-                        }
+                        } */
 
                         const time = a.timeData - b.timeData;
                         if ((a.timeData !== 0) && (b.timeData !== 0) && (time !== 0)) { // time is different
@@ -1568,6 +1528,7 @@
     </div>
 
     <!-- DIALOG ######################################################################## -->
+    <!--
     <div id="dialog-edit-rule" class="red-ui-editor">
         <div class="form-row">
             <label for="dialog-input-id">includes</label>
@@ -1619,6 +1580,7 @@
     <div id="dialog-select-context" title="Select Channel and Datapoint">
         <div id="config-lookup-tree"></div>
     </div>
+    -->
 </script>
 <style>
     hr {

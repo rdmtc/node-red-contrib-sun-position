@@ -189,7 +189,7 @@ module.exports = function (RED) {
             let result;
             const dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
                 this.debug('getSunTime sunTimesToday');
                 result = Object.assign({}, this.sunTimesToday[value]); // needed for a object copy
@@ -898,7 +898,7 @@ module.exports = function (RED) {
             this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
             this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
             this.sunDayId = dayId;
-            this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
         }
 
         _sunTimesCheck(force) {
@@ -944,7 +944,7 @@ module.exports = function (RED) {
             }
 
             this.moonDayId = dayId;
-            this.debug(`moonTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()} `); //  + util.inspect(this.sunTimesToday, { colors: true, compact: 40 }));
+            // this.debug(`moonTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()} `); //  + util.inspect(this.sunTimesToday, { colors: true, compact: 40 }));
         }
 
         _moonTimesCheck(force) {
@@ -1019,7 +1019,7 @@ module.exports = function (RED) {
                 }
             }
         } else {
-            res.status(500).send(JSON.stringify({}));
+            res.status(200).send(JSON.stringify({}));
         }
     });
 };
