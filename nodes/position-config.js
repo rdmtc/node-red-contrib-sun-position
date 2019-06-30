@@ -539,7 +539,7 @@ module.exports = function (RED) {
                     const res = this.getPropValue(_srcNode, msg, data);
                     if (res) {
                         if (data.format) {
-                            result.value = hlp.parseDateFromFormat(result.value, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                            result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
                             result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
                         }

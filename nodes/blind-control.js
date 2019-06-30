@@ -687,7 +687,7 @@ module.exports = function (RED) {
                 }
             }
         }
-        if (!ruleSel || ruleSel.timeLimited) {
+        if (!ruleSel) { //  || ruleSel.timeLimited
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
