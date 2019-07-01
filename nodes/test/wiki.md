@@ -8,29 +8,29 @@ Hinweis: Der Artikel ist noch im Entstehen und wird in den nächsten tagen / Woc
 
 ## Inhalt
 
-* [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rollläden-Jalousien-Markisen-mit-Node-Red-steuern)
-	* [Einleitung](#Einleitung)
-	* [Inhalt](#Inhalt)
-	* [Konzept](#Konzept)
-	* [Vorbereitungen](#Vorbereitungen)
-		* [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
-			* [die Nodes des Flows](#die-Nodes-des-Flows)
-				* [Inject Node](#Inject-Node)
-				* [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
-	* [Die Steuerung](#Die-Steuerung)
-		* [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rollläden-nach-Zeit)
-		* [erweiterte Steuerung der Rollläden nach Zeit](#erweiterte-Steuerung-der-Rollläden-nach-Zeit)
-			* [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-für-Wochenende-und-Feiertage)
-			* [Rollladensteuerung - Früh](#Rollladensteuerung---Früh)
-			* [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
-			* [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
-		* [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rollläden-Sonnenstands-abhängig)
-		* [Manuelles Überschreiben](#Manuelles-Überschreiben)
-			* [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
-			* [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-öffnen)
-		* [Betrachten von Fensteröffnung](#Betrachten-von-Fensteröffnung)
-	* [Beispiel Erweitert](#Beispiel-Erweitert)
-	* [weiterführende Links:](#weiterführende-Links)
+- [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rolll%C3%A4den-Jalousien-Markisen-mit-Node-Red-steuern)
+	- [Einleitung](#Einleitung)
+	- [Inhalt](#Inhalt)
+	- [Konzept](#Konzept)
+	- [Vorbereitungen](#Vorbereitungen)
+		- [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
+			- [die Nodes des Flows](#die-Nodes-des-Flows)
+				- [Inject Node](#Inject-Node)
+				- [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
+	- [Die Steuerung](#Die-Steuerung)
+		- [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rolll%C3%A4den-nach-Zeit)
+		- [erweiterte Steuerung der Rollläden nach Zeit](#erweiterte-Steuerung-der-Rolll%C3%A4den-nach-Zeit)
+			- [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-f%C3%BCr-Wochenende-und-Feiertage)
+			- [Rollladensteuerung - Früh](#Rollladensteuerung---Fr%C3%BCh)
+			- [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
+			- [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
+		- [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rolll%C3%A4den-Sonnenstands-abh%C3%A4ngig)
+		- [Manuelles Überschreiben](#Manuelles-%C3%9Cberschreiben)
+			- [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
+			- [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-%C3%B6ffnen)
+		- [Betrachten von Fensteröffnung](#Betrachten-von-Fenster%C3%B6ffnung)
+	- [Beispiel Erweitert](#Beispiel-Erweitert)
+	- [weiterführende Links:](#weiterf%C3%BChrende-Links)
 
 ## Konzept
 
@@ -315,7 +315,11 @@ In der Homematic-Welt will man diese manuelle Steuerung typischerweise aktiviere
 
 Dazu kann man anstelle der gewünschten Rollladenposition auch den Wert `-1` als Payload mit dem Topic `levelOverwrite` an die Rolllasen-node senden und erreicht damit das gewünschte Verhalten.
 
-tbd - Beispiel Flow manuelles überschreiben bei Homematic
+![homematic-override](https://user-images.githubusercontent.com/12692680/60466794-f601a680-9c54-11e9-9604-b5ca9a013033.png)
+
+Die change Node ist dabei sehr einfach:
+
+![homematic-override-change](https://user-images.githubusercontent.com/12692680/60466820-07e34980-9c55-11e9-9059-e0b1ea7983a6.png)
 
 #### Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen
 
@@ -327,18 +331,26 @@ Beim Reset des Übersteuerns mittels Topic `resetOverwrite` kann man ebenfalls e
 
 Die einstellbare Zeit für den Verfall des Überschreibens ist nur für Überschreiben von der Priorität des Wertes 1. (Bei Bedarf kann das automatische verfallen aber auch der Nachricht für das Überschrieben mitgegeben werden und so je nach Anwendungsfall eine andere Verfallszeit genutzt werden.)
 
-tbd - Beispiel Flow für Feueralarm
+![image](https://user-images.githubusercontent.com/12692680/60467008-a079c980-9c55-11e9-8775-885f78bb6702.png)
+
+Die Change Node kann dabei wie folgt konfiguriert werden:
+
+![image](https://user-images.githubusercontent.com/12692680/60466931-60b2e200-9c55-11e9-902f-0aa714df7c1f.png)
 
 ### Betrachten von Fensteröffnung
 
 Wenn es spezielle Anforderungen für ein offenes/geschlossenes Fenster gibt, so kann dies auf verschiedene Weise umgesetzt werden.
+
+* als override
+* mit zusätzlicher Logik nach der Node
+*
 
 tbd - weiter
 
 
 ## Beispiel Erweitert
 
-Der einfache Flow bildet die Ausgangslage zu dem reell genutzten Flow. Für das Testen hat er jedoch den Nachteil, das man hiermit nicht das Verhalten der Einstellungen zu verschiedenen Tageszeiten testen kann. Die Rollanden node bietet dafür die Möglichkeit in der Eingangsnachricht einen zeitstempel mitzugeben als `msg.ts`. Damit kann eine bestimmter Zeitpunkt vorgegeben werden.
+Der einfache Flow bildet die Ausgangslage zu dem reell genutzten Flow. Für das Testen hat er jedoch den Nachteil, das man hiermit nicht das Verhalten der Einstellungen zu verschiedenen Tageszeiten testen kann. Die Rollanden node bietet dafür die Möglichkeit in der Eingangsnachricht einen Zeitpunkt mitzugeben als `msg.ts`. Damit kann eine bestimmter Zeitpunkt vorgegeben werden.
 
 Mit Hilfe des folgenden Flows kann man jetzt dies testen. Beim Inject über Start wird bei 0 Uhr die Zeit gestartet und in 30 Minuten Schritten jeweils pro Sekunde hochgezählt. Mittels Stop kann man das stoppen.
 
