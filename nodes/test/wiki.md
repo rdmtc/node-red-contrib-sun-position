@@ -8,29 +8,33 @@ Hinweis: Der Artikel ist noch im Entstehen und wird in den nächsten tagen / Woc
 
 ## Inhalt
 
-- [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rolll%C3%A4den-Jalousien-Markisen-mit-Node-Red-steuern)
-	- [Einleitung](#Einleitung)
-	- [Inhalt](#Inhalt)
-	- [Konzept](#Konzept)
-	- [Vorbereitungen](#Vorbereitungen)
-		- [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
-			- [die Nodes des Flows](#die-Nodes-des-Flows)
-				- [Inject Node](#Inject-Node)
-				- [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
-	- [Die Steuerung](#Die-Steuerung)
-		- [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rolll%C3%A4den-nach-Zeit)
-		- [erweiterte Steuerung der Rollläden nach Zeit](#erweiterte-Steuerung-der-Rolll%C3%A4den-nach-Zeit)
-			- [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-f%C3%BCr-Wochenende-und-Feiertage)
-			- [Rollladensteuerung - Früh](#Rollladensteuerung---Fr%C3%BCh)
-			- [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
-			- [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
-		- [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rolll%C3%A4den-Sonnenstands-abh%C3%A4ngig)
-		- [Manuelles Überschreiben](#Manuelles-%C3%9Cberschreiben)
-			- [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
-			- [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-%C3%B6ffnen)
-		- [Betrachten von Fensteröffnung](#Betrachten-von-Fenster%C3%B6ffnung)
-	- [Beispiel Erweitert](#Beispiel-Erweitert)
-	- [weiterführende Links:](#weiterf%C3%BChrende-Links)
+* [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rollläden-Jalousien-Markisen-mit-Node-Red-steuern)
+	* [Einleitung](#Einleitung)
+	* [Inhalt](#Inhalt)
+	* [Konzept](#Konzept)
+	* [Vorbereitungen](#Vorbereitungen)
+		* [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
+			* [die Nodes des Flows](#die-Nodes-des-Flows)
+				* [Inject Node](#Inject-Node)
+				* [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
+	* [Die Steuerung](#Die-Steuerung)
+		* [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rollläden-nach-Zeit)
+		* [Steuerung der Rollläden nach Zeit mit Wochenende](#Steuerung-der-Rollläden-nach-Zeit-mit-Wochenende)
+			* [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-für-Wochenende-und-Feiertage)
+			* [Rollladensteuerung - Früh](#Rollladensteuerung---Früh)
+			* [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
+			* [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
+		* [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rollläden-Sonnenstands-abhängig)
+		* [Manuelles Überschreiben](#Manuelles-Überschreiben)
+			* [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
+			* [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-öffnen)
+				* [zusätzlicher Logik nach der Node](#zusätzlicher-Logik-nach-der-Node)
+				* [Überschreiben der Rollladenposition](#Überschreiben-der-Rollladenposition)
+		* [Die Regelausführung, Caching, Bsp. Betrachten von Fensteröffnung](#Die-Regelausführung-Caching-Bsp-Betrachten-von-Fensteröffnung)
+			* [Nachrichteneigenschaften](#Nachrichteneigenschaften)
+			* [Wie die Regelauswertung funktioniert](#Wie-die-Regelauswertung-funktioniert)
+	* [Beispiel Erweitert](#Beispiel-Erweitert)
+	* [weiterführende Links:](#weiterführende-Links)
 
 ## Konzept
 
@@ -143,9 +147,15 @@ Folgendes ist dafür einzustellen:
 2. Die 2. Regel soll den Rollladen ab 19 Uhr schließen. Dafür stellen Sie die Regel auf "von" (3) und als Zeit 19:00 (4)
 3. In der restlichen Zeit soll der Rollladen geöffnet sein. Hierfür wird der Standard auf offen festgelegt.
 
+Bitte beachten Sie das alle Regeln vom Typ absolut eingestellt sind. Dies sit die Standard Einstellung:
+
+![blind-config-rule-absolut](https://user-images.githubusercontent.com/12692680/60526780-4890a080-9cf1-11e9-8f58-5d4d113626af.png)
+
+Für Regeln vom Typ Minimum oder Maximum ist das Verhalten grundsätzlich anders.
+
 Damit ist das gewünschte Verhalten bereits erfüllt. Vergessen Sie nicht die Änderung zu speichern und den Flow zu deployen.
 
-### erweiterte Steuerung der Rollläden nach Zeit
+### Steuerung der Rollläden nach Zeit mit Wochenende
 
 In diesem Beispiel soll der Rollladen früh 30 Minuten nach Sonnenaufgang öffnen, jedoch in der Woche nicht vor 6:30 Uhr und am Wochenende/Feiertag nicht vor 7 Uhr.
 Am Abend soll der Rollladen 10 Minuten nach Sonnenuntergang schließen, jedoch nicht nach 22:30 Uhr in der Woche und wenn am nächsten Tag Wochenende/Feiertag ist nicht nach 23:00 Uhr.
@@ -240,6 +250,7 @@ Wenn die Regeln in dieser Art formuliert werden, sind diese sehr einfach auch in
 * Die zweite Regel ist nur aktiv, wenn der Wert von `global.day.today.isWeekendOrHoliday` den Wert `true` besitzt. Mit dem zuvor aufgebauten Flow mit der [node-red-contrib-german-holidays](https://flows.nodered.org/node/node-red-contrib-german-holidays) Node ist dies sehr einfach umgesetzt. Hier kann man auch eine andere Bedingung verwenden.
 * Die dritte Regel ist die Steuerung abhängig vom Sonnenaufgang.
 
+Für Regeln vom Typ Absolut gilt:
 Die __bis__ Zeit-Regeln werden der Reihen nach aufsteigend abgearbeitet. Die erste Regel, deren Zeit größer ist als die aktuelle Zeit wird gewählt. Nachfolgende Regeln werden nicht mehr betrachtet. Damit wird die 3. Regel mit der Sonnensteuerung nur aktiv, wenn die Zeit dieser Regel nach der Zeit der vorhergehenden Regeln ist.
 
 Damit sind die Regeln für Früh bereits fertig.
@@ -262,7 +273,7 @@ Dreht man diese Regel, kann man das mit Regeln vom Typ von genauso aufsetzen:
 * Die fünfte Regel ist nur aktiv, wenn der Wert von `global.day.tomorrow.isWeekendOrHoliday` den Wert `false` besitzt. Damit ist diese nut in der Woche aktiv.
 * Die vierte Regel ist bis 10 Minuten nach dem Ende des Sonnenunterganges aktiv und schließt ab dann den Rollladen.
 
-Zu beachten ist, das diese Regeln alle vom Typ __von__ sind. Für die __von__ Regeln gilt, dass diese nur betrachtet werden, wenn zuvor keinen der __bis__ Regeln gewählt wurde. Dabei werden die __von__ Regeln absteigend von der letzten Regel ausgewertet. Die dabei erste Regel deren Zeit kleiner als die aktuelle Zeit ist wird gewählt.
+Zu beachten ist, das diese Regeln alle vom Typ __von__ (und Absolut) sind. Für die __von__ Regeln gilt, dass diese nur betrachtet werden, wenn zuvor keinen der __bis__ Regeln gewählt wurde. Dabei werden die __von__ Regeln absteigend von der letzten Regel ausgewertet. Die dabei erste Regel deren Zeit kleiner als die aktuelle Zeit ist wird gewählt.
 Anders formuliert: Es ist immer die _letzte_ __von__ Regel aktiv, deren Zeit größer als die aktuelle Zeit ist. Damit wird die 4. Regel mit der Sonnensteuerung nur aktiv, wenn die Zeit dieser Regel vor der Zeit der nachfolgenden Regeln ist.
 
 #### Rollladensteuerung - Flow
@@ -323,7 +334,27 @@ Die change Node ist dabei sehr einfach:
 
 #### Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen
 
-Eine ähnliche Anforderung ist es das bei einem Feueralarm die Rollläden öffnen sollen. Auch dies ist mit dem Überschreiben der Rollladenposition einfach realisierbar. Hier möchte man aber vielleicht kein automatisches Zurücksetzen und kein anderes Übersteuern zulassen.
+Eine Anforderung ist es oft, dass bei einem Feueralarm die Rollläden öffnen sollen. Die Node ist so ausgelegt, das man verschiedenste Anforderungen sehr flexibel umsetzen kann.
+
+Für jegliche Anforderungen gibt es im Grunde meist 3 Mögliche Lösungswege:
+
+* Mit zusätzlicher Logik nach der Node.
+* Mittels Überschreiben der Rollladenposition
+* Mittels Regeln
+
+Die ersten beiden Lösungsmöglichkeiten sollen hier beschrieben werden. Die letzte wird dann folgend an einer anderen Anforderung erläutert.
+
+##### zusätzlicher Logik nach der Node
+
+Um die Anforderung mittels extra Logik nach der Node zu realisieren und den Aktor direkt anzusteuern kann man eine Logik wie hier abgebildet ist verwenden:
+
+![blind-control-alarm-1](https://user-images.githubusercontent.com/12692680/60504124-47e01600-9cc1-11e9-9bdd-6e4159ee5982.png)
+
+Hier wird im Falle eines Feueralarms über den Switch-Node verhindert, das die Rollladen-Node eine Position vorgeben kann, solange der Alarm noch nicht quittiert wurde. Über einen extra Pfad wird der Rollladen Aktor geöffnet. Bei Homematic Aktoren wäre für das Öffnen auch eine Direktverknüpfung mit einem virtuellen Kanal der CCU eine sehr gute Möglichkeit.
+
+##### Überschreiben der Rollladenposition
+
+Eine andere Möglichkeit die Anforderung umzusetzen ist ebenfalls dies mit dem Überschreiben der Rollladenposition zu realisieren. Hier möchte man aber vielleicht kein automatisches Zurücksetzen und kein anderes Übersteuern zulassen.
 
 Dafür gibt es die Möglichkeit beim Übersteuerung zusätzlich eine Priorität in Form einer Nachrichteneigenschaft `msg.priority` mit einer Zahl größer 0 mitzugeben. Dabei gilt,je höher diese Zahl ist, desto höher ist die Priorität. Nachrichten ohne Priorität besitzen intern die Priorität des Wertes 1.
 
@@ -331,22 +362,71 @@ Beim Reset des Übersteuerns mittels Topic `resetOverwrite` kann man ebenfalls e
 
 Die einstellbare Zeit für den Verfall des Überschreibens ist nur für Überschreiben von der Priorität des Wertes 1. (Bei Bedarf kann das automatische verfallen aber auch der Nachricht für das Überschrieben mitgegeben werden und so je nach Anwendungsfall eine andere Verfallszeit genutzt werden.)
 
-![image](https://user-images.githubusercontent.com/12692680/60467008-a079c980-9c55-11e9-8775-885f78bb6702.png)
+![blind-control-alarm-2](https://user-images.githubusercontent.com/12692680/60467008-a079c980-9c55-11e9-8775-885f78bb6702.png)
 
 Die Change Node kann dabei wie folgt konfiguriert werden:
 
-![image](https://user-images.githubusercontent.com/12692680/60466931-60b2e200-9c55-11e9-902f-0aa714df7c1f.png)
+![blind-control-alarm-3](https://user-images.githubusercontent.com/12692680/60466931-60b2e200-9c55-11e9-902f-0aa714df7c1f.png)
 
-### Betrachten von Fensteröffnung
+### Die Regelausführung, Caching, Bsp. Betrachten von Fensteröffnung
 
-Wenn es spezielle Anforderungen für ein offenes/geschlossenes Fenster gibt, so kann dies auf verschiedene Weise umgesetzt werden.
+Oft möchte man bei einem offenen Fenster eine spezielle Anforderung realisieren:
 
-* als override
-* mit zusätzlicher Logik nach der Node
-*
+* Bei einer Tür soll der Rollladen sich nicht schließen, wenn diese offen ist.
+* Bei einem Fenster sollen die Rollladen auf bestimmte Belüftungs-Positionen fahren, wenn das Fenster geöffnet ist.
 
-tbd - weiter
+Die Umsetzung der Anforderungen kann man hier genauso wie beim Feueralarm beschrieben mit Logik nach der Node oder mit einem Überschreiben realisieren.
 
+Da dies bereits beschrieben ist, soll hier die Variante über Regeln beschrieben werden. Dafür müssen aber erst noch ein par weitere Grundlagen erläutert werden.
+
+#### Nachrichteneigenschaften
+
+Als Bedingung für eine Regel kann auch eine Eigenschaft einer Nachricht ausgewertet werden, welcher an die Rollladen Node gesendet wird:
+
+![blind-control-open-1](https://user-images.githubusercontent.com/12692680/60505637-6b589000-9cc4-11e9-9c8a-98d66a294d3b.png)
+
+Dabei wird beim Erhalt einer Nachricht die Eigenschaft zwischengespeichert. Es muss damit nicht jede Eingangs-Nachricht die betreffende Eigenschaft haben, sondern es braucht nur bei Änderung des Zustandes eine Nachricht mit der betreffenden Eigenschaft gesendet werden.
+
+Ist dem Node eine Eigenschaft nicht bekannt (weil noch nie eine Nachricht mit der entsprechenden Eigenschaft empfangen wurde), wird ein Standard-Wert (meist null) angenommen und eine Warnung ausgegeben:
+
+![blind-control-open-2](https://user-images.githubusercontent.com/12692680/60505993-284aec80-9cc5-11e9-9bef-6b087f13ec42.png)
+
+Daher sollte sichergestellt werden, das beim Start von Node red initial alle aktuellen Stati übermittelt werden. Für Homematic kann man es so einstellen, das die Nodes beim Start den der CCU bekannten Status aussenden.
+
+#### Wie die Regelauswertung funktioniert
+
+Neben den Zeit-Regeln gibt es auch die Möglichkeit Regeln ohne Zeit-Beschränkung, nur mit einer Bedingung aufzusetzen. Diese Regeln werden entsprechend der Reihenfolge mit den Zeit-Regeln ausgewertet.
+
+Die genaue Logik ist wie folgt:
+
+1. Das System wertet von der ersten Regel an beginnend der Reihen nach aufsteigend bis zur letzten __bis__ Regel (oder falls es keine __bis__ Regel gibt bis zur letzten Regel) aus.
+   * Regeln deren Bedingung nicht zutreffen werden übersprungen.
+   * Regeln vom Zeit-Typ __von__ werden übersprungen.
+   * Die erste Regel vom Level Typ c, die keinerlei Zeit-Einschränkung hat oder deren Zeit größer ist als die aktuelle Zeit wird gewählt.
+   * Nachfolgende Regeln werden nicht mehr betrachtet, auch nicht wenn diese keine Zeit-Einschränkung haben.
+2. Wenn unter 1. keine Regel gefunden wurde, wertet das System die Regeln absteigend von der letzten Regel aus.
+   * Regeln deren Bedingung nicht zutreffen werden übersprungen.
+   * Regeln vom Typ __bis__ werden übersprungen.
+   * Die dabei erste Regel vom Level Typ __absolut__ die keinerlei Zeit-Einschränkung hat oder deren Zeit kleiner als die aktuelle Zeit ist  wird gewählt.
+   * Weitere Regeln werden nicht ausgewertet, auch nicht wenn diese keine Zeit-Einschränkung haben.
+3. Wenn mit 1.und 2. keine Regel gefunden wurde, wird der standard-Wert für die Rollladensteuerung genommen und die Sonnensteuerung kann aktiv gehen.
+
+Neben den Regeln vom Level Typ __absolut__ gibt es noch die Regeln vom Typ Minimum, Maximum und Minimum, Maximum reset. Diese Regeln werden Grundsätzlich genauso ausgewertet.
+Wenn eine der Regeln zutrifft, wird jedoch die Auswertung fortgesetzt und bei der Minimum, bzw. Maximum Regel merkt sich das System die jeweils letzte Regel der jeweiligen Art (letzte Minimum, letzte Maximum). Wenn bei der Auswertung eine der Zurücksetzen Regeln zutrifft, wird die gemerkte Regel verworfen. Die am Ende übrig gebliebene Regel vom Typ Minimum und die übrig gebliebene Regel vom Typ Maximum wird angewendet. Bei der Anwendung dieser Minimum/Maximum Regeln ist es egal durch was die Rollladenposition (Regel, Sonnenposition, default,...) bestimmt wurde.
+
+Gerade für den Anwendungsfall der Fensteröffnung lässt sich dies gut nutzen.
+Möchte man das bei offenem Fenster der Rollladen mindestens 10% geöffnet wird, kann man damit beispielsweise folgende Regel als 1. Regel vom level-Typ Minimum setzen:
+
+![blind-control-open-3](https://user-images.githubusercontent.com/12692680/60526960-a1f8cf80-9cf1-11e9-83e0-043361af7736.png)
+
+Damit wird sichergestellt, das bei offenem Fenster der Rollladen immer 10% geöffnet ist.
+
+Möchte man das diese Regel nur Nachts aktiv geht, kann man nach der letzten __bis__ Regel und vor der ersten __von__ Regel dies auch wieder zurücksetzen:
+
+![image](https://user-images.githubusercontent.com/12692680/60527555-c0ab9600-9cf2-11e9-9cba-cc856eb56f32.png)
+
+
+tbd
 
 ## Beispiel Erweitert
 

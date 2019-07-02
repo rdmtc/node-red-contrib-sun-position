@@ -677,17 +677,21 @@ module.exports = function (RED) {
             const res = fkt(rule, r => (r >= nowNr));
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (res.levelOp === 1 && (!ruleSelMin)) {
+                if (res.levelOp === 1) {
                     ruleSelMin = res;
-                } else if (res.levelOp === 2 && (!ruleSelMax)) {
+                } else if (res.levelOp === 2) {
                     ruleSelMax = res;
+                } else if (res.levelOp === 3) {
+                    ruleSelMin = null;
+                } else if (res.levelOp === 4) {
+                    ruleSelMax = null;
                 } else {
                     ruleSel = res;
                     break;
                 }
             }
         }
-        if (!ruleSel) { //  || ruleSel.timeLimited
+        if (!ruleSel) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
@@ -697,20 +701,14 @@ module.exports = function (RED) {
                 if (res) {
                     node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     if (res.levelOp === 1) {
-                        if (!ruleSelMin || ruleSelMin.timeOp === 0) {
-                            ruleSelMin = res;
-                        }
+                        ruleSelMin = res;
                     } else if (res.levelOp === 2) {
-                        if (!ruleSelMax || ruleSelMax.timeOp === 0) {
-                            ruleSelMax = res;
-                        }
+                        ruleSelMax = res;
+                    } else if (res.levelOp === 3) {
+                        ruleSelMin = null;
+                    } else if (res.levelOp === 4) {
+                        ruleSelMax = null;
                     } else {
-                        if (ruleSelMin && ruleSelMin.timeOp === 0) {
-                            ruleSelMin = null;
-                        }
-                        if (ruleSelMax && ruleSelMax.timeOp === 0) {
-                            ruleSelMax = null;
-                        }
                         ruleSel = res;
                         break;
                     }
@@ -1139,6 +1137,10 @@ module.exports = function (RED) {
             };
             node.rules.count = node.rules.data.length;
             node.rules.lastUntil = node.rules.count -1;
+            node.rules.checkUntil = false;
+            node.rules.checkFrom = false;
+            node.rules.firstFrom = node.rules.lastUntil;
+
             for (let i = 0; i < node.rules.count; ++i) {
                 const rule = node.rules.data[i];
                 rule.pos = i + 1;
@@ -1167,6 +1169,11 @@ module.exports = function (RED) {
                 }
                 if (rule.timeOp === 0) {
                     node.rules.lastUntil = i; // from rule
+                    node.rules.checkUntil = true; // from rule
+                }
+                if (rule.timeOp === 1 && !node.rules.checkFrom) {
+                    node.rules.firstFrom = i;
+                    node.rules.checkFrom = true; // from rule
                 }
             }
             /* if (node.rules.data) {
