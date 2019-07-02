@@ -8,33 +8,33 @@ Hinweis: Der Artikel ist noch im Entstehen und wird in den nächsten tagen / Woc
 
 ## Inhalt
 
-* [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rollläden-Jalousien-Markisen-mit-Node-Red-steuern)
-	* [Einleitung](#Einleitung)
-	* [Inhalt](#Inhalt)
-	* [Konzept](#Konzept)
-	* [Vorbereitungen](#Vorbereitungen)
-		* [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
-			* [die Nodes des Flows](#die-Nodes-des-Flows)
-				* [Inject Node](#Inject-Node)
-				* [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
-	* [Die Steuerung](#Die-Steuerung)
-		* [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rollläden-nach-Zeit)
-		* [Steuerung der Rollläden nach Zeit mit Wochenende](#Steuerung-der-Rollläden-nach-Zeit-mit-Wochenende)
-			* [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-für-Wochenende-und-Feiertage)
-			* [Rollladensteuerung - Früh](#Rollladensteuerung---Früh)
-			* [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
-			* [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
-		* [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rollläden-Sonnenstands-abhängig)
-		* [Manuelles Überschreiben](#Manuelles-Überschreiben)
-			* [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
-			* [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-öffnen)
-				* [zusätzlicher Logik nach der Node](#zusätzlicher-Logik-nach-der-Node)
-				* [Überschreiben der Rollladenposition](#Überschreiben-der-Rollladenposition)
-		* [Die Regelausführung, Caching, Bsp. Betrachten von Fensteröffnung](#Die-Regelausführung-Caching-Bsp-Betrachten-von-Fensteröffnung)
-			* [Nachrichteneigenschaften](#Nachrichteneigenschaften)
-			* [Wie die Regelauswertung funktioniert](#Wie-die-Regelauswertung-funktioniert)
-	* [Beispiel Erweitert](#Beispiel-Erweitert)
-	* [weiterführende Links:](#weiterführende-Links)
+- [Rollläden, Jalousien, Markisen mit Node-Red steuern](#Rolll%C3%A4den-Jalousien-Markisen-mit-Node-Red-steuern)
+	- [Einleitung](#Einleitung)
+	- [Inhalt](#Inhalt)
+	- [Konzept](#Konzept)
+	- [Vorbereitungen](#Vorbereitungen)
+		- [Grundlagen - den Flow vorbereiten](#Grundlagen---den-Flow-vorbereiten)
+			- [die Nodes des Flows](#die-Nodes-des-Flows)
+				- [Inject Node](#Inject-Node)
+				- [Node zur Rollladensteuerung vorbereiten](#Node-zur-Rollladensteuerung-vorbereiten)
+	- [Die Steuerung](#Die-Steuerung)
+		- [einfache Steuerung der Rollläden nach Zeit](#einfache-Steuerung-der-Rolll%C3%A4den-nach-Zeit)
+		- [Steuerung der Rollläden nach Zeit mit Wochenende](#Steuerung-der-Rolll%C3%A4den-nach-Zeit-mit-Wochenende)
+			- [Vorbereitung für Wochenende und Feiertage](#Vorbereitung-f%C3%BCr-Wochenende-und-Feiertage)
+			- [Rollladensteuerung - Früh](#Rollladensteuerung---Fr%C3%BCh)
+			- [Rollladensteuerung - Abends](#Rollladensteuerung---Abends)
+			- [Rollladensteuerung - Flow](#Rollladensteuerung---Flow)
+		- [Steuerung der Rollläden Sonnenstands abhängig](#Steuerung-der-Rolll%C3%A4den-Sonnenstands-abh%C3%A4ngig)
+		- [Manuelles Überschreiben](#Manuelles-%C3%9Cberschreiben)
+			- [Manuelle Steuerung bei Homematic](#Manuelle-Steuerung-bei-Homematic)
+			- [Manuelle Steuerung erweitert, Bsp. Rollladen bei Feueralarm öffnen](#Manuelle-Steuerung-erweitert-Bsp-Rollladen-bei-Feueralarm-%C3%B6ffnen)
+				- [zusätzlicher Logik nach der Node](#zus%C3%A4tzlicher-Logik-nach-der-Node)
+				- [Überschreiben der Rollladenposition](#%C3%9Cberschreiben-der-Rollladenposition)
+		- [Die Regelausführung, Caching, Bsp. Betrachten von Fensteröffnung](#Die-Regelausf%C3%BChrung-Caching-Bsp-Betrachten-von-Fenster%C3%B6ffnung)
+			- [Nachrichteneigenschaften](#Nachrichteneigenschaften)
+			- [Wie die Regelauswertung funktioniert](#Wie-die-Regelauswertung-funktioniert)
+	- [Beispiel Erweitert](#Beispiel-Erweitert)
+	- [weiterführende Links](#weiterf%C3%BChrende-Links)
 
 ## Konzept
 
@@ -411,6 +411,8 @@ Die genaue Logik ist wie folgt:
    * Weitere Regeln werden nicht ausgewertet, auch nicht wenn diese keine Zeit-Einschränkung haben.
 3. Wenn mit 1.und 2. keine Regel gefunden wurde, wird der standard-Wert für die Rollladensteuerung genommen und die Sonnensteuerung kann aktiv gehen.
 
+Die Regeln im Bereich zwischen der letzten __bis__ Regel und der ersten __von__ Regel wird dabei nur ausgewertet, wenn keine andere Regel aktiv geht. Dies lässt sich nutzen um spezielle Steuerung während dieser Zeit zu ermöglichen.
+
 Neben den Regeln vom Level Typ __absolut__ gibt es noch die Regeln vom Typ Minimum, Maximum und Minimum, Maximum reset. Diese Regeln werden Grundsätzlich genauso ausgewertet.
 Wenn eine der Regeln zutrifft, wird jedoch die Auswertung fortgesetzt und bei der Minimum, bzw. Maximum Regel merkt sich das System die jeweils letzte Regel der jeweiligen Art (letzte Minimum, letzte Maximum). Wenn bei der Auswertung eine der Zurücksetzen Regeln zutrifft, wird die gemerkte Regel verworfen. Die am Ende übrig gebliebene Regel vom Typ Minimum und die übrig gebliebene Regel vom Typ Maximum wird angewendet. Bei der Anwendung dieser Minimum/Maximum Regeln ist es egal durch was die Rollladenposition (Regel, Sonnenposition, default,...) bestimmt wurde.
 
@@ -442,8 +444,7 @@ Mit Hilfe des folgenden Flows kann man jetzt dies testen. Beim Inject über Star
 
 In diesem Beispiel fehlt aber die Konfiguration-Node (gelbes Dreieck). Diese muss noch eingestellt werden.
 
-## weiterführende Links:
-* [engliche Beshreibung der Blind-control node](https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md)
+## weiterführende Links
+
+* [englische Beschreibung der Blind-control node](https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md)
 * [Tutorial zur Rollladensteuerung auf stall.biz](https://www.stall.biz/project/so-steuert-man-rolladen-jalousien-und-markisen-mit-der-homematic)
-
-
