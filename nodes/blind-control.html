@@ -484,78 +484,6 @@
 
             // #region Dialog
             /**
-             * save dialog data back to rule
-             */
-            function _dialogSaveData() {
-                console.log('dialogSaveData'); // eslint-disable-line
-                if (!$dialogConnFields) { return; }
-                // ...
-                $dialogRule.dialog('close');
-            }
-            let $dialogConnFields = {};
-
-            /**
-             * load dialog data from rule
-             */
-            function _dialogLoadData(rule) {
-                $dialogConnFields = rule;
-                /*
-                $dialogId.val(rule.find('.node-input-item-id').val());
-                $dialogName.val(rule.find('.node-input-item-name').val());
-                $dialogNameAlt.val(rule.find('.node-input-item-nameAlt').val());
-                $dialogCharacter.val(rule.find('.node-input-item-character').val());
-                $dialogDaysRel.val(rule.find('.node-input-item-day').val());
-
-                const month = parseInt(rule.find('.node-input-item-month').val());
-                const day = parseInt($dialogDaysRel.val());
-                $dialogNthdow.val(String(Math.trunc(day / 7) + 1));
-                $dialogDayofweek.val(String(day % 7));
-                $dialogDate.datepicker('setDate', null);
-                $dialogMonth.val('1');
-
-                if (month >= 1 && month <= 12) {
-                    $dialogDateType.val('date');
-                    const date = new Date();
-                    date.setUTCHours(0,0,0,0);
-                    date.setUTCMonth(month - 1,day);
-                    $dialogDate.datepicker('setDate', date);
-                } else if (month >= 13 && month <= 24) {
-                    $dialogDateType.val('weekdayfirst');
-                    $dialogMonth.val(String(month - 12));
-                } else if (month >= 25 && month <= 36) {
-                    $dialogDateType.val('weekdaylast');
-                    $dialogMonth.val(String(month - 24));
-                } else if (month === -1) {
-                    $dialogDateType.val('easter');
-                    $dialogMonth.val('-1');
-                } else if (month === -2) {
-                    $dialogDateType.val('advent');
-                    $dialogMonth.val('-2');
-                } else {
-                    $dialogDateType.val('date');
-                    $dialogDate.datepicker('setDate', null);
-                }
-                $dialogDateType.change(); */
-                $dialogRule.dialog('open');
-            }
-
-            const $dialogRule = $('#dialog-edit-rule').dialog({
-                title: node._('blind-control.label.dialogtitle'),
-                autoOpen: false,
-                resizable: true,
-                height: Math.min(580, $(window).height() * 0.8),
-                width: Math.min(530, $(window).width() * 0.8),
-                modal: true,
-                closeOnEscape: true,
-                buttons: {
-                    Ok: _dialogSaveData,
-                    Cancel: () => {
-                        $dialogRule.dialog('close');
-                    }
-                }
-            });
-
-            /**
             const $dialogCtx = $('#dialog-select-context').dialog({
                 autoOpen: false,
                 height: 400,
@@ -776,13 +704,6 @@
                             default: data.timeType,
                             types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                         });
-                        const $btn = $('<a />', {
-                            class: 'node-button-item-edit btn ui-button ui-widget ui-corner-all'
-                        }).append('<i class= "fa fa-pencil-square-o" >').appendTo($row3);
-                        $btn.button();
-                        $btn.click(() => {
-                            _dialogLoadData(containerRow);
-                        });
                         // #endregion row3
                         // #region row4 - time -- [offset] - [multiplier]
                         addLabel($row4, 'node-input-rule-offset', 'fa fa-plus');
@@ -922,14 +843,6 @@
                         });
                     }
                 });
-
-                if (node.rules) {
-                    for (let i = 0; i < node.rules.length; i++) {
-                        const rule = node.rules[i];
-                        // rule.index = i;
-                        $('#node-input-rule-container').editableList('addItem', rule);
-                    }
-                }
 
                 // #region Button
                 const $btnAdd = $('#node-button-add');
@@ -1306,7 +1219,22 @@
                     step: 1
                 });
                 // #endregion Enhanced settings
-                $('#node-input-sunControlMode').change();
+                // fill rules
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        // rule.index = i;
+                        $('#node-input-rule-container').editableList('addItem', rule);
+                    }
+                    setTimeout(() => {
+                        $('#node-input-sunControlMode').change();
+                        const postrules = $('#node-input-rule-container').editableList('items');
+                        postrules.each(function (_i) {
+                            resizeRule($(this));
+                        });
+                        resizeContainer();
+                    }, 1500);
+                }
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {
@@ -1576,62 +1504,6 @@
 
     <!-- DIALOG ######################################################################## -->
     <!--
-    <div id="dialog-edit-rule" class="red-ui-editor">
-        <div class="form-row">
-            <label for="dialog-rule-name">name</label>
-            <input type="text" name="dialog-rule-name" id="dialog-rule-name" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row">
-            <label for="dialog-rule-condOpA"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
-            <input type="text" id="dialog-rule-condOpA" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.ruleCondition"/>
-            <input type="hidden" id="dialog-rule-condOpAType">
-        </div>
-        <div class="form-row">
-            <label for="dialog-rule-condOperator"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.ruleConditionAnd"></span></label>
-            <select type="text" id="dialog-rule-condOperator" name="dialog-rule-condOperator" style="width:40%" >
-            </select>
-            <input type="text" id="dialog-rule-condOpB" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.ruleCondition"/>
-            <input type="hidden" id="dialog-rule-condOpBType">
-        </div>
-
-        <div class="form-row">
-            <label for="dialog-rule-condOpAAnd"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.ruleConditionAnd"></span></label>
-            <input type="text" id="dialog-rule-condOpAAnd" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.ruleConditionAnd"/>
-            <input type="hidden" id="dialog-rule-condOpATypeAnd">
-        </div>
-        <div class="form-row">
-            <label for="dialog-rule-condOperatorAnd"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.ruleConditionAnd"></span></label>
-            <select type="text" id="dialog-rule-condOperatorAnd" name="dialog-rule-condOperatorAnd" style="width:40%" >
-            </select>
-            <input type="text" id="dialog-rule-condOpBAnd" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.ruleConditionAnd"/>
-            <input type="hidden" id="dialog-rule-condOpBTypeAnd">
-        </div>
-
-        <div class="form-row">
-            <label for="dialog-rule-time"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.time"></span></label>
-            <select type="text" id="dialog-rule-condOperatorAnd" name="dialog-rule-condOperatorAnd" style="width:40%" >
-            </select>
-            <input type="text" id="dialog-rule-time" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.time"/>
-            <input type="hidden" id="dialog-rule-timeType">
-        </div>
-
-        <div class="form-row">
-            <label for="dialog-rule-offset"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dialog-rule-offset" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.offset"/>
-            <input type="hidden" id="dialog-rule-offset">
-            <select type="text" id="dialog-rule-multiplier" name="dialog-rule-multiplier" style="width:40%" >
-            </select>
-        </div>
-
-        <div class="form-row">
-            <label for="dialog-rule-level"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.level"></span></label>
-            <input type="text" id="dialog-rule-level" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.level"/>
-            <input type="hidden" id="dialog-rule-level">
-            <select type="text" id="dialog-rule-level-operator" name="dialog-rule-level-operator" style="width:40%" >
-            </select>
-        </div>
-    </div>
-
     <div id="dialog-select-context" title="Select Channel and Datapoint">
         <div id="config-lookup-tree"></div>
     </div>
