@@ -1,3 +1,9 @@
+#### 0.4.4: Maintenance Release
+
+- all previous changes
+- enhanced Documentation
+- redesigned minimum and maximum rule level types again
+
 #### 0.4.4-beta: Maintenance Release
 
 - fixed critical problem in sun - calculating Julian cycle which leads into wrong sun times if it is calculated at certain times
