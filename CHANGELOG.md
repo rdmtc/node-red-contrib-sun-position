@@ -1,7 +1,13 @@
 #### 0.4.5: Maintenance Release
 
-- time-compare + time-span node added option "otherwise"
-- dayOfMonth fixed wrong entry in type edit
+- time-compare
+  - node added option "otherwise"
+- time-span
+  - node added option "otherwise"
+  - fixed error time-span output
+- dayOfMonth
+  - fixed wrong entry in type edit
+- fixed exception on empty date in offset calculation
 
 #### 0.4.4: Maintenance Release
 

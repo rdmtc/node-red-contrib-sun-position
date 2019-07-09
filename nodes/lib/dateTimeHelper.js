@@ -482,6 +482,7 @@ function isValidDate(d) {
  * @return {Date}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
+    if (d === null || typeof d === 'undefined') { return d; }
     if (d.value) { d = d.value; }
     if (!(d instanceof Date)) { d = Date(d); }
 
@@ -1515,8 +1516,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     }
 
     let res = null;
-    console.log(format);
-    console.log(typeof format);
+
     if (isNaN(format)) { // timeparse_TextOther
         res = _getDateFromFormat(date, format, utc, timeZoneOffset);
         if (res.error) {

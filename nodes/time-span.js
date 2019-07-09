@@ -167,24 +167,24 @@ function formatTS(d1, d2, format) {
  * @param {string} format - the out format
  * @returns {string} the formatet timespan
  */
-function getFormattedTimeSpanOut(date1, date2, format) {
+function getFormattedTimeSpanOut(node, date1, date2, format) {
+    const timeSpan = date1.getTime() - date2.getTime();
+
     format = format || 0;
     if (isNaN(format)) {
         return formatTS(date1, date2, String(format));
     }
     switch (Number(format)) {
-        case 0: // milliseconds
-            return (date1.getTime() - date2.getTime());
         case 1: // sec
-            return (date1.getTime() - date2.getTime()) / perSecond;
+            return (timeSpan) / perSecond;
         case 2: // min
-            return (date1.getTime() - date2.getTime()) / perMinute;
+            return (timeSpan) / perMinute;
         case 3: // hour
-            return (date1.getTime() - date2.getTime()) / perHour;
+            return (timeSpan) / perHour;
         case 4: // days
-            return (date1.getTime() - date2.getTime()) / perDay;
+            return (timeSpan) / perDay;
         case 5: // weeks
-            return (date1.getTime() - date2.getTime()) / perWeek;
+            return (timeSpan) / perWeek;
         case 6: // month
             if (date1.getTime() > date2.getTime()) {
                 return getMonthDiff(date2, date1) * -1;
@@ -196,15 +196,15 @@ function getFormattedTimeSpanOut(date1, date2, format) {
             }
             return (getMonthDiff(date1, date2) / 12);
         case 11: // sec
-            return Math.floor((date1.getTime() - date2.getTime()) / perSecond);
+            return Math.floor((timeSpan) / perSecond);
         case 12: // min
-            return Math.floor((date1.getTime() - date2.getTime()) / perMinute);
+            return Math.floor((timeSpan) / perMinute);
         case 13: // hour
-            return Math.floor((date1.getTime() - date2.getTime()) / perHour);
+            return Math.floor((timeSpan) / perHour);
         case 14: // days
-            return Math.floor((date1.getTime() - date2.getTime()) / perDay);
+            return Math.floor((timeSpan) / perDay);
         case 15: // weeks
-            return Math.floor((date1.getTime() - date2.getTime()) / perWeek);
+            return Math.floor((timeSpan) / perWeek);
         case 16: // full month
             if (date1.getTime() > date2.getTime()) {
                 return getMonthDiffAbs(date2, date1) * -1;
@@ -216,19 +216,23 @@ function getFormattedTimeSpanOut(date1, date2, format) {
             }
             return getYearDiffAbs(date1, date2);
     }
-    const timeSpan = date1.getTime() - date2.getTime();
+
     return {
         start : {
             date: date1,
             ts: date1.getTime(),
             timeUTCStr: date1.toUTCString(),
-            timeISOStr: date1.toISOString()
+            timeISOStr: date1.toISOString(),
+            timeLocaleTimeStr: node.positionConfig.toTimeString(date1),
+            timeLocaleDateStr: node.positionConfig.toDateString(date1)
         },
         end: {
             date: date2,
             ts: date2.getTime(),
             timeUTCStr: date2.toUTCString(),
-            timeISOStr: date2.toISOString()
+            timeISOStr: date2.toISOString(),
+            timeLocaleTimeStr: node.positionConfig.toTimeString(date2),
+            timeLocaleDateStr: node.positionConfig.toDateString(date2)
         },
         timeSpan,
         timeSpanAbs: {
@@ -310,7 +314,10 @@ module.exports = function (RED) {
                     throw new Error(operand2.error);
                 }
 
-                let timeSpan = operand1.getTime() - operand2.getTime();
+                // node.debug('operand1=' + util.inspect(operand1, { colors: true, compact: 10, breakLength: Infinity }));
+                // node.debug('operand2=' + util.inspect(operand2, { colors: true, compact: 10, breakLength: Infinity }));
+
+                let timeSpan = operand1.value.getTime() - operand2.value.getTime();
                 if (config.operand === 0) {
                     timeSpan = Math.abs(timeSpan);
                 }
@@ -318,11 +325,7 @@ module.exports = function (RED) {
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
                     if (config.result1ValueType === 'timespan') {
-                        resultObj = getFormattedTimeSpanOut(operand1.value, operand2.value, config.result1TSFormat);
-                        resultObj.start.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.start.date);
-                        resultObj.start.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.start.date);
-                        resultObj.end.timeLocaleTimeStr = node.positionConfig.toTimeString(resultObj.end.date);
-                        resultObj.end.timeLocaleDateStr = node.positionConfig.toDateString(resultObj.end.date);
+                        resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, config.result1TSFormat);
                     } else if (config.result1ValueType === 'operand1') {
                         resultObj = hlp.getFormattedDateOut(operand1.value, config.result1Format);
                     } else if (config.result1ValueType === 'operand2') {
@@ -339,6 +342,7 @@ module.exports = function (RED) {
                             next: true
                         });
                     }
+                    // node.debug('resultObj=' + util.inspect(resultObj, { colors: true, compact: 10, breakLength: Infinity }));
                     // to
 
                     if (resultObj === null) {
