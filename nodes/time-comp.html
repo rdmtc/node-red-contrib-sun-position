@@ -214,8 +214,8 @@
      * @param {number} [l] - the desired maximum length (default = 18)
      * @returns {string} the value clipped to the given length
      */
-    function getValueLabel(node, t, v, offset, l) {
-        l = l || 15;
+    function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
+        l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
             suffix = '↷';
@@ -245,7 +245,7 @@
             return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
         }
 
-        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
+        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
             if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
             return '"' + clipValueLength(v, l) + '"' + suffix;
         }
@@ -260,7 +260,7 @@
             return String(v) + suffix;
         }
 
-        if (t === 'msg') {
+        if (t === 'msg' || t === 'env') {
             return t + '.' + clipValueLength(v, l) + suffix;
         }
 
@@ -484,8 +484,10 @@
                         types.MsgLc,
                         'flow',
                         'global',
+                        'date',
                         types.DateSpecific,
                         'num',
+                        'str',
                         types.DateEntered,
                         types.TimeSun,
                         types.TimeMoon,

@@ -662,17 +662,17 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
 
     if (!isNaN(dt)) {
         dt = Number(dt);
-    }
 
-    let dto = new Date(dt);
-    if (utc || timeZoneOffset === 0) {
-        dto = Date.UTC(dt);
-    } else if (timeZoneOffset) {
-        dto = convertDateTimeZone(dto, timeZoneOffset);
-    }
+        let dto = new Date(dt);
+        if (utc || timeZoneOffset === 0) {
+            dto = Date.UTC(dt);
+        } else if (timeZoneOffset) {
+            dto = convertDateTimeZone(dto, timeZoneOffset);
+        }
 
-    if (isValidDate(dto)) {
-        return dto;
+        if (isValidDate(dto)) {
+            return dto;
+        }
     }
 
     if (typeof dt === 'string') {
