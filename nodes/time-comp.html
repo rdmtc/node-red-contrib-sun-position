@@ -155,7 +155,7 @@
         top: 0;
         bottom: 0;
     }
-    #option-checkboxes {
+    .option-checkboxes {
         display: none;
         border: 1px #dadada solid;
         background: #ffffff;
@@ -164,19 +164,19 @@
         position: absolute;
         z-index: 90000;
     }
-    #option-checkboxes label {
+    .option-checkboxes label {
         display: block;
         width: auto;
         text-align: left;
         margin-right:15px;
         margin-left:5px;
     }
-    #option-checkboxes .header {
+    .option-checkboxes .header {
         background:#cccccc;
         margin-left:5px;
         margin-right:5px;
     }
-    #option-checkboxes input {
+    .option-checkboxes input {
         display: block;
         width: auto;
         margin-right:5px;
@@ -184,7 +184,7 @@
         float:left;
         /* clear: both; */
     }
-    #option-checkboxes label:hover {
+    .option-checkboxes label:hover {
         background-color: #1e90ff;
     }
     .node-input-addOn {
@@ -543,47 +543,6 @@
                 // #endregion input
                 // #region rule-container
                 /**
-                 * resizes a rule
-                 * @param {jQuery} rule - the jQuery selector of the rule
-                 */
-                function resizeRule(rule) {
-                    const newWidth = rule.width() - 10;
-                    // const operatorField = rule.find('.node-input-rule-operator');
-                    const operandField = rule.find('.node-input-rule-operand');
-                    const formatSelField = rule.find('.node-input-rule-operandFormatSel');
-                    const formatIpField = rule.find('.node-input-rule-operandFormatIp');
-                    const offsetField = rule.find('.node-input-rule-offset');
-                    const multiplierField = rule.find('.node-input-rule-multiplier');
-                    const propertyField = rule.find('.node-input-rule-property');
-                    const propertyLblSpanField = rule.find('.node-input-rule-property-span');
-                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
-                    const lblWidth = 25;
-                    // row1
-                    const operatorWidth = 120;
-                    operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
-                    // row2
-                    let formatWidth = (newWidth - lblWidth - 18);
-                    if (Number(formatSelField.val()) === 99) {
-                        formatIpField.show();
-                        formatWidth = Math.floor(formatWidth / 3);
-                        formatSelField.width(formatWidth - 5);
-                        formatIpField.width((formatWidth * 2) - 10);
-                    } else {
-                        formatIpField.hide();
-                        // formatIpField.width(0);
-                        formatSelField.width(formatWidth);
-                    }
-
-                    // row3
-                    const multiplierWidth = 125;
-                    multiplierField.width(multiplierWidth);
-                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 10));
-                    // row4
-                    const lblwidth = propertyLblSpanField.width() + 25;
-                    propertyField.typedInput('width', (newWidth - lblwidth - 10));
-                    propertyLblField.width(lblwidth);
-                }
-                /**
                  * resizes the container
                  */
                 function resizeContainer() {
@@ -598,31 +557,78 @@
                     }
                 }
 
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
+                function resizeRule(rule) {
+                    const newWidth = rule.width() - 10;
+                    const operatorField = rule.find('.node-input-rule-operator');
+                    const operandField = rule.find('.node-input-rule-operand');
+                    const formatSelField = rule.find('.node-input-rule-operandFormatSel');
+                    const formatIpField = rule.find('.node-input-rule-operandFormatIp');
+                    const offsetField = rule.find('.node-input-rule-offset');
+                    const multiplierField = rule.find('.node-input-rule-multiplier');
+                    const propertyField = rule.find('.node-input-rule-property');
+                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
+                    const propertyLblSpanField = propertyLblField.find('.node-input-rule-property-span');
+                    const lblWidth = 25;
+                    // row1
+                    if (Number(operatorField.val()) === 99) {
+                        operatorField.width(newWidth - lblWidth - 10);
+                    } else {
+                        operatorField.width(60);
+                        const operatorWidth = 120;
+                        operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
+                    }
+                    // row2
+                    let formatWidth = (newWidth - lblWidth - 18);
+                    if (Number(formatSelField.val()) === 99) {
+                        formatIpField.show();
+                        formatWidth = Math.floor(formatWidth / 3);
+                        formatSelField.width(formatWidth - 5);
+                        formatIpField.width((formatWidth * 2) - 34);
+                    } else {
+                        formatIpField.hide();
+                        // formatIpField.width(0);
+                        formatSelField.width(formatWidth);
+                    }
+
+                    // row3
+                    const multiplierWidth = 125;
+                    multiplierField.width(multiplierWidth);
+                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 40));
+                    // row4
+                    const lblwidth = propertyLblSpanField.width() + lblWidth;
+                    propertyField.typedInput('width', (newWidth - lblwidth - 30));
+                    propertyLblField.width(lblwidth);
+                }
+
                 $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
                     addItem(containerRow, containerIndex, data) {
                         containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                        const row = $('<div/>').appendTo(containerRow);
-                        const row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                        const row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                        const row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        const $row1 = $('<div/>').appendTo(containerRow);
+                        const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                         // row1
                         // operator
                         const operatorField = $('<select/>', {
                             class: 'node-input-rule-operator',
                             id: 'node-input-rule-operator' + containerIndex
-                        }).appendTo(row);
+                        }).appendTo($row1);
                         appendOptions(node, operatorField, 'operators');
-                        const operatorTypeField = multiselect(node, row, 'operatorTypes', 'node-red-contrib-sun-position/position-config:common.operatorTypes','node-input-rule-operatorType-' + containerIndex);
+                        const operatorTypeField = multiselect(node, $row1, 'operatorTypes', 'node-red-contrib-sun-position/position-config:common.operatorTypes','node-input-rule-operatorType-' + containerIndex);
                         operatorField.val(data.operator || selFields.operators[0].id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-
-                        addLabel(row, 'node-input-rule-operand', 'fa fa-clock-o');
+                        const $operandDiv = $('<span/>').appendTo($row1); // { style: 'display: inline-block;' }
+                        addLabel($operandDiv, 'node-input-rule-operand', 'fa fa-clock-o');
                         const operandField = $('<input/>', {
                             class: 'node-input-rule-operand',
                             id: 'node-input-rule-operand' + containerIndex,
                             type: 'text',
                             value: (data.operandValue || '')
-                        }).appendTo(row).typedInput({
+                        }).appendTo($operandDiv).typedInput({
                             default: (data.operandType || types.DateEntered.value),
                             types: [
                                 'msg',
@@ -630,6 +636,7 @@
                                 'global',
                                 types.DateSpecific,
                                 'num',
+                                'str',
                                 types.DateEntered,
                                 types.TimeSun,
                                 types.TimeMoon,
@@ -640,99 +647,84 @@
 
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
-                        }).appendTo(row);
+                        }).appendTo($row1);
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
                         // row2
                         const operandSelFieldName = 'node-input-rule-operandFormatSel';
-                        addLabel(row2, operandSelFieldName, 'fa fa-file-code-o');
-                        /*
-                        const formatSelField = $('<select/>', {
-                            class: operandSelFieldName,
-                            id: operandSelFieldName + containerIndex
-                        }).appendTo(row2);
-                        appendOptions(node, formatSelField, 'parseFormats');
-                        const formatIpField = $('<input/>', {
-                            class: 'node-input-rule-operandFormatIp',
-                            id: 'node-input-rule-operandFormatIp' + containerIndex,
-                            type: 'text',
-                            value: (data.format || selFields.parseFormats[0].id)
-                        }).appendTo(row2);
-                        formatSelField.change(() => {
-                            resizeRule(containerRow);
-                        });
-                        formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
-                        */
+                        addLabel($row2, operandSelFieldName, 'fa fa-file-code-o');
 
                         const formatSelField = $('<select/>', {
                             class: operandSelFieldName,
                             id: operandSelFieldName + containerIndex
-                        }).appendTo(row2);
+                        }).appendTo($row2);
                         const formatIpField = $('<input/>', {
                             class: 'node-input-rule-operandFormatIp',
                             id: 'node-input-rule-operandFormatIp' + containerIndex,
                             type: 'text'
-                        }).appendTo(row2);
+                        }).appendTo($row2);
                         initCombobox(node, formatSelField, formatIpField, 'dateParseFormat', 'parseFormats', data.format, 20);
 
                         // row3
-                        addLabel(row3, 'node-input-rule-offset', 'fa fa-plus');
+                        addLabel($row3, 'node-input-rule-offset', 'fa fa-plus');
                         $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
                             id: 'node-input-rule-offset' + containerIndex,
                             type: 'text',
                             value: (data.offsetValue || '')
-                        }).appendTo(row3).typedInput({
+                        }).appendTo($row3).typedInput({
                             default: (data.offsetType || types.Undefined.value),
                             types: [types.Undefined, 'num', 'msg', 'flow', 'global']
                         });
                         const multiplierField = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
-                        }).appendTo(row3);
+                        }).appendTo($row3);
                         appendOptions(node, multiplierField, 'multiplier');
                         multiplierField.val(data.multiplier || 60000);
                         // row4
-                        addLabel(row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
+                        addLabel($row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
                         $('<input/>', {
                             class: 'node-input-rule-property',
                             id: 'node-input-rule-property' + containerIndex,
                             type: 'text',
                             value: (data.propertyValue || '')
-                        }).appendTo(row4).typedInput({
+                        }).appendTo($row4).typedInput({
                             default: (data.propertyType || types.Unlimited.value),
                             types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
                         });
                         // changes
                         operandField.change(() => {
-                            operandField.show();
-                            const opType = operandField.typedInput('type');
-                            if (opType === types.TimeEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === types.DateSpecific.value) {
-                                row2.hide(); // format
-                                row3.show(); // offset
-                                row4.show(); // limit
-                            } else if (opType === types.DateEntered.value || opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
-                                row2.show(); // format
-                                row3.show(); // offset
-                                row4.show(); // limit
+                            // operandField.show();
+                            if (Number(operatorField.val()) === 99) {
+                                $operandDiv.hide();
+                                operatorTypeField.hide();
+                                $row2.hide(); // format
+                                $row3.hide(); // offset
+                                $row4.show(); // limit
+
                             } else {
-                                row2.hide(); // format
-                                row3.hide(); // offset
-                                row4.show(); // limit
+                                $operandDiv.show();
+                                operatorTypeField.show();
+                                const opType = operandField.typedInput('type');
+                                if (opType === types.TimeEntered.value || opType === types.DateEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === types.DateSpecific.value) {
+                                    $row2.hide(); // format
+                                    $row3.show(); // offset
+                                    $row4.show(); // limit
+                                } else if (opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
+                                    $row2.show(); // format
+                                    $row3.show(); // offset
+                                    $row4.show(); // limit
+                                } else {
+                                    $row2.hide(); // format
+                                    $row3.hide(); // offset
+                                    $row4.show(); // limit
+                                }
                             }
+                            resizeRule(containerRow);
                         });
-                        // setting defaultValues
-                        // operatorField.val(data.operator || selFields.operators[0].id);
-                        // setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-                        // operandField.typedInput('value', (data.operandValue || ''));
-                        // operandField.typedInput('type', (data.operandType || types.DateEntered.value));
-                        // formatIpField.val(data.format || 0);
-                        // formatSelField.val(data.formatSelection || selFields.parseFormats[0].id);
-                        // offsetField.typedInput('value', data.offsetValue || '');
-                        // offsetField.typedInput('type', data.offsetType || types.Undefined.value);
-                        // multiplierField.val(data.multiplier || 60000);
-                        // propertyField.typedInput('value', data.propertyValue || '');
-                        // propertyField.typedInput('type', data.propertyType || types.Unlimited.value);
-                        resizeRule(containerRow);
+                        operatorField.change(() => operandField.change());
+                        operandField.change();
+                        // resizeRule(containerRow);
                         autocomplete(formatIpField, 'dateParseFormat');
                         resizeContainer();
                     },
@@ -879,7 +871,7 @@
                 const rule = $(this);
                 const data = {
                     operator: rule.find('.node-input-rule-operator').val(),
-                    operatorType: getMultiSelStr(rule.find('#option-checkboxes input[type=checkbox]:checked')),
+                    operatorType: getMultiSelStr(rule.find('.option-checkboxes input[type=checkbox]:checked')),
                     operatorText: rule.find('.node-input-rule-operator option:selected').text(),
                     operandType: rule.find('.node-input-rule-operand').typedInput('type'),
                     operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
@@ -907,5 +899,18 @@
             node.result1ValueType = $('#node-input-result1Value').typedInput('type');
             node.result2Type = $('#node-input-result2').typedInput('type');
             node.result2ValueType = $('#node-input-result2Value').typedInput('type');
+        },
+        oneditresize(_size) {
+            if (typeof $().editableList !== 'undefined') {
+                const editorRow = $('.node-input-rule-container-row ol');
+                const height = editorRow.outerHeight(true);
+
+                const rows = $('#node-input-rule-container').editableList('items');
+                if (rows.size() > 0) {
+                    $('#node-input-rule-container').editableList('height', height + 40);
+                } else {
+                    $('#node-input-rule-container').editableList('height', 20);
+                }
+            }
         }
     });</script>

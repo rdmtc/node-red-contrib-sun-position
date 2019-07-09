@@ -1,3 +1,8 @@
+#### 0.4.5: Maintenance Release
+
+- time-compare + time-span node added option "otherwise"
+- dayOfMonth fixed wrong entry in type edit
+
 #### 0.4.4: Maintenance Release
 
 - all previous changes

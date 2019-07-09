@@ -396,6 +396,9 @@ module.exports = function (RED) {
                             case 6: // lesserOrEqual
                                 result = (timeSpan <= ruleoperand);
                                 break;
+                            case 99: // otherwise
+                                result = true;
+                                break;
                         }
                         if (result) {
                             resObj.push(msg);

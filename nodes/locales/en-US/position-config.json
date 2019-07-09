@@ -81,7 +81,8 @@
             "operatorTypes": "include into compare"
         },
         "operatorsGroups": [
-            "complete Timestamp"
+            "Timestamp compare",
+            "other"
         ],
         "operators": [
             "==     (equal)",
@@ -89,7 +90,8 @@
             ">      (greater)",
             ">=     (greater or equal)",
             "<      (lesser)",
-            "<=     (lesser or equal)"
+            "<=     (lesser or equal)",
+            "otherwise"
         ],
         "operatorTypesGroups": [
             "include into compare",

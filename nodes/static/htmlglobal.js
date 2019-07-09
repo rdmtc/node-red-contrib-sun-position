@@ -6,7 +6,8 @@
 function getSelectFields() { // eslint-disable-line no-unused-vars
     return {
         operatorsGroups: [
-            {id: 'default', label: 'compare Timestamp'}
+            {id: 'default', label: 'compare Timestamp'},
+            { id: 'other', label: 'always'}
         ],
         operators: [
             {id: 1, group: 'default', label: '==', text: 'equal'},
@@ -14,7 +15,8 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 3, group: 'default', label: '>', text: 'greater'},
             {id: 4, group: 'default', label: '>=', text: 'greater or equal'},
             {id: 5, group: 'default', label: '<', text: 'lesser'},
-            {id: 6, group: 'default', label: '<=', text: 'lesser or equal'}
+            {id: 6, group: 'default', label: '<=', text: 'lesser or equal'},
+            {id: 99, group: 'other', label: 'otherwise', text: 'otherwise'}
         ], operatorTypesGroups: [
             {id: 'default', label: 'include into compare'},
             {id: 'spec', label: 'special'}
@@ -186,12 +188,9 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
         DayOfMonth: {
-            value: 'DayOfMonth',
+            value: 'dayOfMonth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.dayofmonth','day of month'),
             options: [{
-                value: 'astronomicalDawn',
-                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn')
-            }, {
                 value: 'fMon',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.fMon')
             }, {
@@ -786,13 +785,13 @@ function getMultiselectText(val, length, types) { // eslint-disable-line no-unus
  */
 function setMultiselect(value, field, types) { // eslint-disable-line no-unused-vars
     if (value === '*' || typeof value === 'undefined') {
-        field.find('#option-checkboxes input[type=checkbox]').prop('checked', true);
+        field.find('.option-checkboxes input[type=checkbox]').prop('checked', true);
         field.find('.multiselect-option').text(getMultiselectText('*', 99, types));
     } else {
-        field.find('#option-checkboxes input[type=checkbox]').removeAttr('checked');
+        field.find('.option-checkboxes input[type=checkbox]').removeAttr('checked');
         const elm = value.split(',');
         elm.forEach(v => {
-            field.find('#option-checkboxes [value=' + v + ']').prop('checked', true);
+            field.find('.option-checkboxes [value=' + v + ']').prop('checked', true);
         });
         field.find('.multiselect-option').text(getMultiselectText(value, elm.length, types));
     }
@@ -810,7 +809,7 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
     const types = getSelectFields()[elementName + 'Short'];
     const getSelection = function getCBText(parent) {
-        const value = parent.find('#option-checkboxes input[type=checkbox]:checked');
+        const value = parent.find('.option-checkboxes input[type=checkbox]:checked');
         const elements = value.map((_, el) => { return $(el).val(); }).get();
         parent.find('.multiselect-option').text(getMultiselectText(elements.join(','), elements.length, types));
     };
@@ -818,7 +817,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     const selectbox = $('<div/>', {
         class: 'selectBox',
         html: $('<select/>', {
-            id: 'multiselect-select',
+            id: id+'multiselect-select',
             class: 'multiselect-select',
             html: $('<option></option>', {
                 id: 'multiselect-option',
@@ -828,7 +827,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     }).appendTo(multiselect);
     $('<div/>', {class: 'overSelect'}).appendTo(selectbox);
     const list = $('<div/>', {
-        id: 'option-checkboxes',
+        id: id +'option-checkboxes',
         class: 'option-checkboxes'
     }).appendTo(multiselect);
     list.attr('expanded', 'false');

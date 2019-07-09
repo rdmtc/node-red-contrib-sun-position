@@ -601,22 +601,6 @@
                 // #endregion operand2
                 // #region rule-container
                 /**
-                 * resizes a rule
-                 * @param {jQuery} rule - the jQuery selector of the rule
-                 */
-                function resizeRule(rule) {
-                    const newWidth = rule.width() - 10;
-                    // const operatorField = rule.find('.node-input-rule-operator');
-                    const operandField = rule.find('.node-input-rule-operand');
-                    const multiplierField = rule.find('.node-input-rule-multiplier');
-                    const lblWidth = 25;
-                    // row1
-                    const operatorWidth = 60;
-                    const multiplierWidth = 125;
-                    multiplierField.width(multiplierWidth);
-                    operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth- lblWidth - 20));
-                }
-                /**
                  * resizes a rule container
                  */
                 function resizeContainer() {
@@ -631,41 +615,73 @@
                     }
                 }
 
+                /**
+                 * resizes a rule
+                 * @param {jQuery} rule - the jQuery selector of the rule
+                 */
+                function resizeRule(rule) {
+                    const newWidth = rule.width() - 10;
+                    const operatorField = rule.find('.node-input-rule-operator');
+                    const operandField = rule.find('.node-input-rule-operand');
+                    const multiplierField = rule.find('.node-input-rule-multiplier');
+                    const lblWidth = 25;
+                    // row1
+                    if (Number(operatorField.val()) === 99) {
+                        operatorField.width(newWidth - lblWidth - 20);
+                    } else {
+                        const operatorWidth = 60;
+                        const multiplierWidth = 125;
+                        operatorField.width(operatorWidth);
+                        multiplierField.width(multiplierWidth);
+                        operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth - lblWidth - 45));
+                    }
+                }
+
                 $('#node-input-rule-container').css('min-height', '20px').css('min-width', '200px').editableList({
                     addItem(containerRow, containerIndex, data) {
                         containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                        const row = $('<div/>').appendTo(containerRow);
+                        const $row = $('<div/>').appendTo(containerRow);
                         // row1
                         // operator
                         const operatorField = $('<select/>', {
                             class: 'node-input-rule-operator',
                             id: 'node-input-rule-operator' + containerIndex
-                        }).appendTo(row);
+                        }).appendTo($row);
                         appendOptions(node, operatorField, 'operators');
                         operatorField.val(data.operator || selFields.operators[0].id);
+
+                        const $operandDiv = $('<span/>').appendTo($row); // , { style: 'display: inline-block;' }
 
                         $('<input/>', {
                             class: 'node-input-rule-operand',
                             id: 'node-input-rule-operand' + containerIndex,
                             type: 'text',
                             value: (data.operandValue || '')
-                        }).appendTo(row).typedInput({
+                        }).appendTo($operandDiv).typedInput({
                             default: (data.operandType || 'num'),
                             types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
                         });
                         const multiplierField = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
-                        }).appendTo(row);
+                        }).appendTo($operandDiv);
                         appendOptions(node, multiplierField, 'multiplier', data => (data.id > 0) );
                         multiplierField.val(data.multiplier || 60000);
 
                         const finalspan = $('<span/>', {
                             style: 'float: right; margin-top: 6px;'
-                        }).appendTo(row);
+                        }).appendTo($row);
                         finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-
-                        resizeRule(containerRow);
+                        operatorField.change(() => {
+                            if (Number(operatorField.val()) === 99) {
+                                $operandDiv.hide();
+                            } else {
+                                $operandDiv.show();
+                            }
+                            resizeRule(containerRow);
+                        });
+                        operatorField.change();
+                        // resizeRule(containerRow);
                         resizeContainer();
                     },
                     sortItems(rules) {
@@ -823,5 +839,16 @@
             const outputs = (node.rules) ? (node.rules.length + 1) : 1;
             $('#node-input-outputs').val(outputs);
             // #endregion result-container
+        },
+        oneditresize(_size) {
+            const editorRow = $('.node-input-rule-container-row ol');
+            const height = editorRow.outerHeight(true);
+
+            const rows = $('#node-input-rule-container').editableList('items');
+            if (rows.size() > 0) {
+                $('#node-input-rule-container').editableList('height', height + 40);
+            } else {
+                $('#node-input-rule-container').editableList('height', 20);
+            }
         }
     });</script>

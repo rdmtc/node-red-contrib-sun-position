@@ -117,11 +117,13 @@ module.exports = function (RED) {
                         if (!ruleoperand || ruleoperand.error) {
                             continue;
                         }
+                        node.debug('operand=' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+                        node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
                         ruleoperand = ruleoperand.value;
-                        // node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
                         // node.debug('operator=' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
 
                         let compare = null;
+                        let result = false;
                         switch (Number(rule.operator)) {
                             case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
                                 compare = (op1, op2) => op1 === op2;
@@ -141,13 +143,15 @@ module.exports = function (RED) {
                             case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
                                 compare = (op1, op2) => op1 <= op2;
                                 break;
+                            case 99: // otherwise
+                                result = true;
+                                break;
                         }
 
-                        let result = false;
                         if (compare) {
                             const inputOperant = new Date(inputData.value);
-                            // node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
-                            // node.debug('operatorType=' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity }));
+                            node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
+                            node.debug('operatorType=' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity }));
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
@@ -210,10 +214,14 @@ module.exports = function (RED) {
                                             ruleoperand.setFullYear(0);
                                         }
 
+                                        node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
+                                        node.debug('ruleoperand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+
                                         result = compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
+                                        node.debug('result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
 
                                         // node.debug('inputData=' + util.inspect(inputData, { colors: true, compact: 10, breakLength: Infinity }));
                                         // node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
