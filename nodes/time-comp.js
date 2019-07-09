@@ -97,30 +97,7 @@ module.exports = function (RED) {
                         if (rule.format === 'time-calc.timeFormat.default') {
                             rule.format = 0;
                         }
-                        /* const ruleoperand = node.positionConfig.getDateFromProp(node, msg, rule.operandType, rule.operandValue, rule.format, rule.offsetValue, 'num', rule.multiplier);
-                        if (!ruleoperand) {
-                            continue;
-                        } */
-                        let ruleoperand = null;
-                        try {
-                            ruleoperand = node.positionConfig.getTimeProp(node, msg, {
-                                type: rule.operandType,
-                                value: rule.operandValue,
-                                format: rule.format,
-                                offsetType: 'num',
-                                offset: rule.offsetValue,
-                                multiplier: rule.multiplier
-                            });
-                        } catch (ex) {
-                            continue;
-                        }
-                        if (!ruleoperand || ruleoperand.error) {
-                            continue;
-                        }
-                        node.debug('operand=' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
-                        node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
-                        ruleoperand = ruleoperand.value;
-                        // node.debug('operator=' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
+                        node.debug(i + ' rule=' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
 
                         let compare = null;
                         let result = false;
@@ -149,9 +126,29 @@ module.exports = function (RED) {
                         }
 
                         if (compare) {
+                            let ruleoperand = null;
+                            try {
+                                ruleoperand = node.positionConfig.getTimeProp(node, msg, {
+                                    type: rule.operandType,
+                                    value: rule.operandValue,
+                                    format: rule.format,
+                                    offsetType: 'num',
+                                    offset: rule.offsetValue,
+                                    multiplier: rule.multiplier
+                                });
+                            } catch (ex) {
+                                continue;
+                            }
+
+                            node.debug(i + ' operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+                            if (!ruleoperand || ruleoperand.error) {
+                                continue;
+                            }
+                            ruleoperand = ruleoperand.value;
+
                             const inputOperant = new Date(inputData.value);
-                            node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
-                            node.debug('operatorType=' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity }));
+                            node.debug(i + ' inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
+                            node.debug(i + ' operatorType=' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity }));
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
@@ -214,22 +211,21 @@ module.exports = function (RED) {
                                             ruleoperand.setFullYear(0);
                                         }
 
-                                        node.debug('inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
-                                        node.debug('ruleoperand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+                                        node.debug(i + ' inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
+                                        node.debug(i + ' ruleoperand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
 
                                         result = compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
-                                        node.debug('result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-
-                                        // node.debug('inputData=' + util.inspect(inputData, { colors: true, compact: 10, breakLength: Infinity }));
-                                        // node.debug('operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
+                                        // node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                                        // node.debug(i + ' inputData=' + util.inspect(inputData, { colors: true, compact: 10, breakLength: Infinity }));
+                                        // node.debug(i + ' operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
                                         break;
                                 }
-                                // node.debug('result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                             }
                         }
+                        node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
 
                         if (result) {
                             resObj.push(msg);
