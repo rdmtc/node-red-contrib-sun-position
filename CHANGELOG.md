@@ -1,3 +1,9 @@
+#### 0.4.6: Maintenance Release
+
+- fixed css for multiselect
+- time-comp added tooltip for time select fields
+- time-span added tooltip for time select fields
+
 #### 0.4.5: Maintenance Release
 
 - time-compare

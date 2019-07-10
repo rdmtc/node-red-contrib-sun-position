@@ -892,8 +892,8 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    // console.log('getBackendData');  // eslint-disable-line
-    // console.log(data);  // eslint-disable-line
+    console.log('getBackendData');  // eslint-disable-line
+    console.log(data);  // eslint-disable-line
     // data
     if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
         result({ value: data.type});

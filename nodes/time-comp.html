@@ -6,7 +6,7 @@
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row block-noindent time-input" data-i18n="[title]time-comp.placeholder.input">
+  <div id="node-input-input-div" class="form-row block-noindent time-input" data-i18n="[titleOrg]time-comp.placeholder.input">
       <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
       <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
       <input type="hidden" id="node-input-inputType">
@@ -42,7 +42,7 @@
       <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultValue">
+  <div id="node-input-result1Value-div" class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[titleOrg]time-comp.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
@@ -165,8 +165,8 @@
         z-index: 90000;
     }
     .option-checkboxes label {
-        display: block;
-        width: auto;
+        display: block !important;
+        width: auto !important;
         text-align: left;
         margin-right:15px;
         margin-left:5px;
@@ -177,8 +177,8 @@
         margin-right:5px;
     }
     .option-checkboxes input {
-        display: block;
-        width: auto;
+        display: block !important;
+        width: auto !important;
         margin-right:5px;
         margin-left:5px;
         float:left;
@@ -463,8 +463,9 @@
                 $('.is-to-hide-initially').hide();
             }, 300);
             const node = this;
+            const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect getBackendData */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 const operatorTypesShort = [
@@ -495,7 +496,8 @@
                         'env'
                     ],
                     onChange(_type, _value) {
-                        const opType = $('#node-input-input').typedInput('type');
+                        const $input = $('#node-input-input');
+                        const opType = $input.typedInput('type');
                         if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
@@ -518,8 +520,28 @@
                             $('.time-row-inputFormat').hide();
                             $('.time-row-inputOffset').hide();
                         }
+
+                        getBackendData(d => {
+                            const $div = $('#node-input-input-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, {
+                            kind:       'getTimeData',
+                            config:     $nodeConfig.val(),
+                            type:       opType,
+                            value:      $input.typedInput('value'),
+                            format:     $('#node-input-inputFormat').val(),
+                            offsetType: $('#node-input-inputOffset').typedInput('type'),
+                            offset:     $('#node-input-inputOffset').typedInput('value'),
+                            multiplier: $('#node-input-inputOffsetMultiplier').val()
+                        });
                     }
-                }).change();
+                });
 
                 initCombobox(node, $('#node-input-inputFormatsel'), $('#node-input-inputFormat'), 'dateParseFormat', 'parseFormats', node.inputFormat, 20);
 
@@ -539,6 +561,7 @@
                         } else {
                             $('#node-input-inputOffsetMultiplier').prop('disabled', false);
                         }
+                        $('#node-input-input').change();
                     }
                 }).change();
 
@@ -565,45 +588,45 @@
                  */
                 function resizeRule(rule) {
                     const newWidth = rule.width() - 10;
-                    const operatorField = rule.find('.node-input-rule-operator');
-                    const operandField = rule.find('.node-input-rule-operand');
-                    const formatSelField = rule.find('.node-input-rule-operandFormatSel');
-                    const formatIpField = rule.find('.node-input-rule-operandFormatIp');
-                    const offsetField = rule.find('.node-input-rule-offset');
-                    const multiplierField = rule.find('.node-input-rule-multiplier');
-                    const propertyField = rule.find('.node-input-rule-property');
-                    const propertyLblField = rule.find('.node-input-rule-property-lbl');
-                    const propertyLblSpanField = propertyLblField.find('.node-input-rule-property-span');
+                    const $operator = rule.find('.node-input-rule-operator');
+                    const $operand = rule.find('.node-input-rule-operand');
+                    const $formatSel = rule.find('.node-input-rule-operandFormatSel');
+                    const $formatIp = rule.find('.node-input-rule-operandFormatIp');
+                    const $offset = rule.find('.node-input-rule-offset');
+                    const $multiplier = rule.find('.node-input-rule-multiplier');
+                    const $property = rule.find('.node-input-rule-property');
+                    const $propertyLbl = rule.find('.node-input-rule-property-lbl');
+                    const $propertySpanLbl = $propertyLbl.find('.node-input-rule-property-span');
                     const lblWidth = 25;
                     // row1
-                    if (Number(operatorField.val()) === 99) {
-                        operatorField.width(newWidth - lblWidth - 10);
+                    if (Number($operator.val()) === 99) {
+                        $operator.width(newWidth - lblWidth - 10);
                     } else {
-                        operatorField.width(60);
+                        $operator.width(60);
                         const operatorWidth = 120;
-                        operandField.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
+                        $operand.typedInput('width', (newWidth - operatorWidth - lblWidth - 50));
                     }
                     // row2
                     let formatWidth = (newWidth - lblWidth - 18);
-                    if (Number(formatSelField.val()) === 99) {
-                        formatIpField.show();
+                    if (Number($formatSel.val()) === 99) {
+                        $formatIp.show();
                         formatWidth = Math.floor(formatWidth / 3);
-                        formatSelField.width(formatWidth - 5);
-                        formatIpField.width((formatWidth * 2) - 34);
+                        $formatSel.width(formatWidth - 5);
+                        $formatIp.width((formatWidth * 2) - 34);
                     } else {
-                        formatIpField.hide();
-                        // formatIpField.width(0);
-                        formatSelField.width(formatWidth);
+                        $formatIp.hide();
+                        // $formatIp.width(0);
+                        $formatSel.width(formatWidth);
                     }
 
                     // row3
                     const multiplierWidth = 125;
-                    multiplierField.width(multiplierWidth);
-                    offsetField.typedInput('width', (newWidth - multiplierWidth - lblWidth - 40));
+                    $multiplier.width(multiplierWidth);
+                    $offset.typedInput('width', (newWidth - multiplierWidth - lblWidth - 40));
                     // row4
-                    const lblwidth = propertyLblSpanField.width() + lblWidth;
-                    propertyField.typedInput('width', (newWidth - lblwidth - 30));
-                    propertyLblField.width(lblwidth);
+                    const lblwidth = $propertySpanLbl.width() + lblWidth;
+                    $property.typedInput('width', (newWidth - lblwidth - 30));
+                    $propertyLbl.width(lblwidth);
                 }
 
                 $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
@@ -615,17 +638,17 @@
                         const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                         // row1
                         // operator
-                        const operatorField = $('<select/>', {
+                        const $operator = $('<select/>', {
                             class: 'node-input-rule-operator',
                             id: 'node-input-rule-operator' + containerIndex
                         }).appendTo($row1);
-                        appendOptions(node, operatorField, 'operators');
+                        appendOptions(node, $operator, 'operators');
                         const operatorTypeField = multiselect(node, $row1, 'operatorTypes', 'node-red-contrib-sun-position/position-config:common.operatorTypes','node-input-rule-operatorType-' + containerIndex);
-                        operatorField.val(data.operator || selFields.operators[0].id);
+                        $operator.val(data.operator || selFields.operators[0].id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
                         const $operandDiv = $('<span/>').appendTo($row1); // { style: 'display: inline-block;' }
                         addLabel($operandDiv, 'node-input-rule-operand', 'fa fa-clock-o');
-                        const operandField = $('<input/>', {
+                        const $operand = $('<input/>', {
                             class: 'node-input-rule-operand',
                             id: 'node-input-rule-operand' + containerIndex,
                             type: 'text',
@@ -655,20 +678,20 @@
                         const operandSelFieldName = 'node-input-rule-operandFormatSel';
                         addLabel($row2, operandSelFieldName, 'fa fa-file-code-o');
 
-                        const formatSelField = $('<select/>', {
+                        const $formatSel = $('<select/>', {
                             class: operandSelFieldName,
                             id: operandSelFieldName + containerIndex
                         }).appendTo($row2);
-                        const formatIpField = $('<input/>', {
+                        const $formatIp = $('<input/>', {
                             class: 'node-input-rule-operandFormatIp',
                             id: 'node-input-rule-operandFormatIp' + containerIndex,
                             type: 'text'
                         }).appendTo($row2);
-                        initCombobox(node, formatSelField, formatIpField, 'dateParseFormat', 'parseFormats', data.format, 20);
+                        initCombobox(node, $formatSel, $formatIp, 'dateParseFormat', 'parseFormats', data.format, 20);
 
                         // row3
                         addLabel($row3, 'node-input-rule-offset', 'fa fa-plus');
-                        $('<input/>', {
+                        const $offset = $('<input/>', {
                             class: 'wg-offset-spinner node-input-rule-offset',
                             id: 'node-input-rule-offset' + containerIndex,
                             type: 'text',
@@ -677,12 +700,12 @@
                             default: (data.offsetType || types.Undefined.value),
                             types: [types.Undefined, 'num', 'msg', 'flow', 'global']
                         });
-                        const multiplierField = $('<select/>', {
+                        const $multiplier = $('<select/>', {
                             class: 'node-input-rule-multiplier',
                             id: 'node-input-rule-multiplier' + containerIndex
                         }).appendTo($row3);
-                        appendOptions(node, multiplierField, 'multiplier');
-                        multiplierField.val(data.multiplier || 60000);
+                        appendOptions(node, $multiplier, 'multiplier');
+                        $multiplier.val(data.multiplier || 60000);
                         // row4
                         addLabel($row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
                         $('<input/>', {
@@ -695,9 +718,10 @@
                             types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
                         });
                         // changes
-                        operandField.change(() => {
-                            // operandField.show();
-                            if (Number(operatorField.val()) === 99) {
+                        $operand.change(() => {
+                            // $operand.show();
+                            const opType = $operand.typedInput('type');
+                            if (Number($operator.val()) === 99) {
                                 $operandDiv.hide();
                                 operatorTypeField.hide();
                                 $row2.hide(); // format
@@ -707,7 +731,6 @@
                             } else {
                                 $operandDiv.show();
                                 operatorTypeField.show();
-                                const opType = operandField.typedInput('type');
                                 if (opType === types.TimeEntered.value || opType === types.DateEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === types.DateSpecific.value) {
                                     $row2.hide(); // format
                                     $row3.show(); // offset
@@ -722,12 +745,30 @@
                                     $row4.show(); // limit
                                 }
                             }
+                            getBackendData(d => {
+                                console.log(d);
+                                if (d) {
+                                    const dv = new Date(d.value);
+                                    $operandDiv.attr('title',  dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
+                                } else {
+                                    $operandDiv.attr('title', $operator.typedInput('value'));
+                                }
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       opType,
+                                value:      $operand.typedInput('value'),
+                                format:     $formatIp.val(),
+                                offsetType: $offset.typedInput('type'),
+                                offset:     $offset.typedInput('value'),
+                                multiplier: $multiplier.val()
+                            });
                             resizeRule(containerRow);
                         });
-                        operatorField.change(() => operandField.change());
-                        operandField.change();
+                        $operator.change(() => $operand.change());
+                        $operand.change();
                         // resizeRule(containerRow);
-                        autocomplete(formatIpField, 'dateParseFormat');
+                        autocomplete($formatIp, 'dateParseFormat');
                         resizeContainer();
                     },
                     sortItems(rules) {
@@ -781,6 +822,30 @@
                             $('.time-row-result1Format').hide();
                         }
                         $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
+
+                        if ($('#node-input-result1Value').typedInput('value') === 'input') {
+                            const $div = $('#node-input-result1Value-div');
+                            $div.attr('title', $('#node-input-input').attr('title') + ' - ' + $div.attr('titleOrg'));
+                        } else {
+                            getBackendData(d => {
+                                const $div = $('#node-input-result1Value-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                if (d) {
+                                    $div.attr('title', String(d) + ' - ' + titleOrg);
+                                } else {
+                                    $div.attr('title', titleOrg);
+                                }
+                            }, {
+                                kind:       'getOutDataData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-result1Value').typedInput('type'),
+                                value:      $('#node-input-result1Value').typedInput('value'),
+                                format:     $('#node-input-result1Format').val(),
+                                offsetType: $('#node-input-result1Offset').typedInput('type'),
+                                offset:     $('#node-input-result1Offset').typedInput('value'),
+                                multiplier: $('#node-input-result1OffsetMultiplier').val()
+                            });
+                        }
                     }
                 });
                 setupTInput(node, {
@@ -903,7 +968,7 @@
             node.result2ValueType = $('#node-input-result2Value').typedInput('type');
         },
         oneditresize(_size) {
-            if (typeof $().editableList !== 'undefined') {
+            try {
                 const editorRow = $('.node-input-rule-container-row ol');
                 const height = editorRow.outerHeight(true);
 
@@ -913,6 +978,8 @@
                 } else {
                     $('#node-input-rule-container').editableList('height', 20);
                 }
+            } catch (err) {
+                console.log(err);
             }
         }
     });</script>

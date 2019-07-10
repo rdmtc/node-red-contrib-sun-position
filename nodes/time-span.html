@@ -6,7 +6,7 @@
     <input type="hidden" id="node-input-outputs"/>
   </div>
   <hr>
-  <div class="form-row block-noindent time-operand1" data-i18n="[title]time-span.placeholder.operand">
+  <div id="node-input-operand1-div" class="form-row block-noindent time-operand1" data-i18n="[titleOrg]time-span.placeholder.operand">
       <label for="node-input-operand1"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand1"></span></label>
       <input type="text" id="node-input-operand1" data-i18n="[placeholder]time-span.placeholder.operand">
       <input type="hidden" id="node-input-operand1Type">
@@ -23,7 +23,7 @@
       <select id="node-input-operand1OffsetMultiplier" class="node-input-multiplier"></select>
   </div>
   <hr>
-  <div class="form-row block-noindent time-operand2" data-i18n="[title]time-span.placeholder.operand">
+  <div id="node-input-operand2-div" class="form-row block-noindent time-operand2" data-i18n="[titleOrg]time-span.placeholder.operand">
       <label for="node-input-operand2"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-span.label.operand2"></span></label>
       <input type="text" id="node-input-operand2" data-i18n="[placeholder]time-span.placeholder.operand">
       <input type="hidden" id="node-input-operand2Type"></input>
@@ -58,7 +58,7 @@
       <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-span.placeholder.result">
       <input type="hidden" id="node-input-result1Type">
   </div>
-  <div class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[title]time-span.placeholder.resultValue">
+  <div id="node-input-result1Value-div" class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[titleOrg]time-span.placeholder.resultValue">
       <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-span.label.result1Value"></span></label>
       <input type="text" id="node-input-result1Value" class="row-full-width" data-i18n="[placeholder]time-span.placeholder.resultValue">
       <input type="hidden" id="node-input-result1ValueType">
@@ -173,8 +173,6 @@
      * @returns {string} the value clipped to the given length
      */
     function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-        console.log(`getValueLabel t=${t} v=${v} v=${typeof v} offset=${offset} l=${l} `); // eslint-disable-line
-
         l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
@@ -457,8 +455,9 @@
         align: 'left',
         oneditprepare() {
             const node = this;
+            const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getSelectFields getTypes appendOptions setupTInput initCombobox */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox getBackendData */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region operand1
@@ -485,7 +484,8 @@
                         'env'
                     ],
                     onChange(_type, _value) {
-                        const opType = $('#node-input-operand1').typedInput('type');
+                        const $operand1 = $('#node-input-operand1');
+                        const opType = $operand1.typedInput('type');
                         if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
@@ -508,6 +508,26 @@
                             $('.time-row-operand1Format').hide();
                             $('.time-row-operand1Offset').hide();
                         }
+
+                        getBackendData(d => {
+                            const $div = $('#node-input-operand1-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, {
+                            kind:       'getTimeData',
+                            config:     $nodeConfig.val(),
+                            type:       opType,
+                            value:      $operand1.typedInput('value'),
+                            format:     $('#node-input-operand1Format').val(),
+                            offsetType: $('#node-input-operand1Offset').typedInput('type'),
+                            offset:     $('#node-input-operand1Offset').typedInput('value'),
+                            multiplier: $('#node-input-operand1OffsetMultiplier').val()
+                        });
                     }
                 }).change();
 
@@ -556,7 +576,8 @@
                         'env'
                     ],
                     onChange(_type, _value) {
-                        const opType = $('#node-input-operand2').typedInput('type');
+                        const $operand2 = $('#node-input-operand2');
+                        const opType = $operand2.typedInput('type');
                         if (opType === types.DateSpecific.value ||
                             opType === types.TimeEntered.value ||
                             opType === types.DateEntered.value ||
@@ -579,6 +600,26 @@
                             $('.time-row-operand2Format').hide();
                             $('.time-row-operand2Offset').hide();
                         }
+
+                        getBackendData(d => {
+                            const $div = $('#node-input-operand2-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            if (d) {
+                                const dv = new Date(d.value);
+                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
+                            } else {
+                                $div.attr('title', titleOrg);
+                            }
+                        }, {
+                            kind:       'getTimeData',
+                            config:     $nodeConfig.val(),
+                            type:       opType,
+                            value:      $operand2.typedInput('value'),
+                            format:     $('#node-input-operand2Format').val(),
+                            offsetType: $('#node-input-operand2Offset').typedInput('type'),
+                            offset:     $('#node-input-operand2Offset').typedInput('value'),
+                            multiplier: $('#node-input-operand2OffsetMultiplier').val()
+                        });
                     }
                 }).change();
 
@@ -742,6 +783,37 @@
                         }
                         $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
                         $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
+
+                        const val = $('#node-input-result1Value').typedInput('value');
+                        if (val === 'operand1') {
+                            const $div = $('#node-input-result1Value-div');
+                            $div.attr('title', $('#node-input-operand1').attr('title') + ' - ' + $div.attr('titleOrg'));
+                        } else if (val === 'operand2') {
+                            const $div = $('#node-input-result1Value-div');
+                            $div.attr('title', $('#node-input-operand2').attr('title') + ' - ' + $div.attr('titleOrg'));
+                        } else if (val === 'optimespanerand2') {
+                            const $div = $('#node-input-result1Value-div');
+                            $div.attr('title', 'timespan - ' + $div.attr('titleOrg'));
+                        } else {
+                            getBackendData(d => {
+                                const $div = $('#node-input-result1Value-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                if (d) {
+                                    $div.attr('title', String(d) + ' - ' + titleOrg);
+                                } else {
+                                    $div.attr('title', titleOrg);
+                                }
+                            }, {
+                                kind:       'getOutDataData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-result1Value').typedInput('type'),
+                                value:      $('#node-input-result1Value').typedInput('value'),
+                                format:     $('#node-input-result1Format').val(),
+                                offsetType: $('#node-input-result1Offset').typedInput('type'),
+                                offset:     $('#node-input-result1Offset').typedInput('value'),
+                                multiplier: $('#node-input-result1OffsetMultiplier').val()
+                            });
+                        }
                     }
                 });
 
