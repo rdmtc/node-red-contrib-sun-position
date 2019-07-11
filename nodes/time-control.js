@@ -193,7 +193,7 @@ module.exports = function (RED) {
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
-        let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
+        let newPos = hlp.getMsgNumberValue(msg, ['overwrite', 'oversteer'], ['manual', 'overwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (node.timeData.overwrite.active && isNaN(newPos)) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
@@ -211,7 +211,8 @@ module.exports = function (RED) {
         } else if (!isNaN(newPos)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos === -1) {
-                node.tempData.level = NaN;
+                node.tempData.outValue = NaN;
+                node.tempData.outType = 'none';
             } else if (!isNaN(newPos)) {
                 const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
                 if (!validPosition_(node, newPos, allowRound)) {

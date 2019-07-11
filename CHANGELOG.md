@@ -1,8 +1,13 @@
+# node-red-contrib-sun-position
+
 #### 0.4.6: Maintenance Release
 
-- fixed css for multiselect
-- time-comp added tooltip for time select fields
-- time-span added tooltip for time select fields
+- time-comp
+  - fixed css for multiselect in node-red Beta
+  - added tooltip for time select fields
+- time-span
+  - added tooltip for time select fields
+- enhanced readme and added links to changelog #43
 
 #### 0.4.5: Maintenance Release
 

@@ -19,48 +19,49 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ## Table of contents
 
-* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-NodeRED)
-  * [Table of contents](#Table-of-contents)
-  * [Preconditions](#Preconditions)
-  * [Installation](#Installation)
-  * [General](#General)
-    * [Saving resources](#Saving-resources)
-    * [second based accuracy](#second-based-accuracy)
-  * [Implemented Nodes](#Implemented-Nodes)
-    * [sun-position](#sun-position)
-      * [sun-position - Node settings](#sun-position---Node-settings)
-      * [Node Input](#Node-Input)
-      * [sun-position - Node Output](#sun-position---Node-Output)
-    * [moon-position](#moon-position)
-      * [moon-position - Node settings](#moon-position---Node-settings)
-      * [moon-position - Node Output](#moon-position---Node-Output)
-    * [time-inject](#time-inject)
-      * [time-inject - Node settings](#time-inject---Node-settings)
-      * [time-inject - Node Input](#time-inject---Node-Input)
-      * [time-inject - Node Output](#time-inject---Node-Output)
-    * [within-time](#within-time)
-      * [within-time - Node settings](#within-time---Node-settings)
-    * [time-comp](#time-comp)
-      * [time-comp - Node settings](#time-comp---Node-settings)
-    * [time-span](#time-span)
-      * [time-span - Node settings](#time-span---Node-settings)
-    * [blind-control](#blind-control)
-    * [Times definitions](#Times-definitions)
-      * [sun times](#sun-times)
-        * [remarks](#remarks)
-          * [blue hour](#blue-hour)
-          * [amateurDawn /amateurDusk](#amateurDawn-amateurDusk)
-          * [alternate properties](#alternate-properties)
-      * [moon times](#moon-times)
-      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-JSONATA-expression)
-    * [input parse formats](#input-parse-formats)
-    * [output timestamp formats](#output-timestamp-formats)
-    * [output timespan formats](#output-timespan-formats)
-    * [Conditions](#Conditions)
-  * [TODO](#TODO)
-  * [Bugs and Feedback](#Bugs-and-Feedback)
-  * [LICENSE](#LICENSE)
-  * [Other](#Other)
+- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-NodeRED)
+  - [Table of contents](#Table-of-contents)
+  - [Preconditions](#Preconditions)
+  - [Installation](#Installation)
+  - [General](#General)
+    - [Saving resources](#Saving-resources)
+    - [second based accuracy](#second-based-accuracy)
+  - [Implemented Nodes](#Implemented-Nodes)
+    - [sun-position](#sun-position)
+      - [sun-position - Node settings](#sun-position---Node-settings)
+      - [Node Input](#Node-Input)
+      - [sun-position - Node Output](#sun-position---Node-Output)
+    - [moon-position](#moon-position)
+      - [moon-position - Node settings](#moon-position---Node-settings)
+      - [moon-position - Node Output](#moon-position---Node-Output)
+    - [time-inject](#time-inject)
+      - [time-inject - Node settings](#time-inject---Node-settings)
+      - [time-inject - Node Input](#time-inject---Node-Input)
+      - [time-inject - Node Output](#time-inject---Node-Output)
+    - [within-time](#within-time)
+      - [within-time - Node settings](#within-time---Node-settings)
+    - [time-comp](#time-comp)
+      - [time-comp - Node settings](#time-comp---Node-settings)
+    - [time-span](#time-span)
+      - [time-span - Node settings](#time-span---Node-settings)
+    - [blind-control](#blind-control)
+    - [Times definitions](#Times-definitions)
+      - [sun times](#sun-times)
+        - [remarks](#remarks)
+          - [blue hour](#blue-hour)
+          - [amateurDawn /amateurDusk](#amateurDawn-amateurDusk)
+          - [alternate properties](#alternate-properties)
+      - [moon times](#moon-times)
+      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-JSONATA-expression)
+    - [input parse formats](#input-parse-formats)
+    - [output timestamp formats](#output-timestamp-formats)
+    - [output timespan formats](#output-timespan-formats)
+    - [Conditions](#Conditions)
+  - [CHANGELOG](#CHANGELOG)
+  - [TODO](#TODO)
+  - [Support, Bugs and Feedback](#Support-Bugs-and-Feedback)
+  - [LICENSE](#LICENSE)
+  - [Other](#Other)
 
 ## Preconditions
 
@@ -634,22 +635,26 @@ The operators are:
 * `false expression` - the condition is fulfilled if the *property* is a number and **not** less than or equal `0` or a Boolean which is **not** `false` or a string containing **none** of the following values `false`, `no`, `off`, `nein`.
 * `<`, `<=`, `==`, `!=`, `>`, `>=` - compares the value of the *property* with a *threshold*. Typically this makes only sense if the *property* and the *threshold* are numbers.
 * `contain` - the condition is fulfilled if the *property* contains the string defined in the *threshold*.
-* `containSome` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as only one of the seperated parts of the *threshold* string is is included in the *property* value.
-* `containEvery` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as all of the seperated parts of the *threshold* string are included in the *property* value.
+* `containSome` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as only one of the separated parts of the *threshold* string is is included in the *property* value.
+* `containEvery` - the *threshold* must be a string separated with comma `,`, semicolon `;` or pipe `|`. The condition is fulfilled as soon as all of the separated parts of the *threshold* string are included in the *property* value.
 
 A JSONata expression in the *property* must be always a boolean with value true, in this case the operator can not be chosen.
 
+## CHANGELOG
+
+- see [here the releases at npm](https://github.com/rdmtc/node-red-contrib-sun-position/releases).
+- see [here the changelog of master](https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/CHANGELOG.md)
+- see [here the changelog of dev](https://github.com/rdmtc/node-red-contrib-sun-position/blob/dev/CHANGELOG.md)
+
 ## TODO
 
-* [ ] add possibility to select input/output timezone
-  * [x] select auto add get info from getTimezoneOffset
-  * [x] solve problem of DST
-* [ ] Add more exception possibilities (oversteer) to Blind-control
+- [ ] add possibility to select input/output timezone
+- [ ] Add new node time-control as a stripped down node of the blind control with only rules for control other devices like dimmer and thermostats
 
-## Bugs and Feedback
+## Support, Bugs and Feedback
 
 For bugs, questions and feature requests please use the
-[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues).
+[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues), the [Homematic forum](https://homematic-forum.de/forum/viewforum.php?f=77) or the [RedMatic Slack](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
@@ -668,9 +673,11 @@ specific language governing permissions and limitations under the License.
 
 ## Other
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/rdmtc/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
-
-this node is published also here:
-
+* [npm Releases / changelog](https://github.com/rdmtc/node-red-contrib-sun-position/releases)
+* [RedMatic Slack](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU)
+* [newreleases.io](https://newreleases.io/npm/node-red-contrib-sun-position)
+* [![Greenkeeper badge](https://badges.greenkeeper.io/rdmtc/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
+* [RedMatic Slack (chat like WhatsApp or Facebook Messenger)](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU)
+* [Github](https://github.com/rdmtc/node-red-contrib-sun-position)
 * [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
 * [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)

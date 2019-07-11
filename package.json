@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
