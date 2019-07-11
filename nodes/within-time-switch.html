@@ -183,7 +183,7 @@
      * @param {number} [l] - the desired maximum length (default = 20)
      * @returns {string} the value clipped to the given length
      */
-    function getValueLabel(node, t, v, offset, l) {
+    function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
         l = l || 20;
         let suffix = '';
         if (offset && offset > 0) {
@@ -214,7 +214,7 @@
             return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
         }
 
-        if (t === 'string' || t === 'str' || t === 'DayOfMonth') {
+        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
             if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
             return '"' + clipValueLength(v, l) + '"' + suffix;
         }
@@ -229,7 +229,7 @@
             return String(v) + suffix;
         }
 
-        if (t === 'msg') {
+        if (t === 'msg' || t === 'env') {
             return t + '.' + clipValueLength(v, l) + suffix;
         }
 

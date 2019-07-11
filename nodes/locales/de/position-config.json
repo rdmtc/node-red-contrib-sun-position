@@ -16,7 +16,7 @@
             "undefined": "nicht verwendet",
             "datespecific": "Zeitpunkt (erweitert)",
             "timeentered": "Uhrzeit (nächste)",
-            "dateentered": "Datum (Zeitpunkt)",
+            "dateentered": "Datum (spezieller Zeitpunkt)",
             "timepredefined": "Uhrzeit speziell",
             "dayofmonth": "Monatstag",
             "dayofweek": "Wochentag",
@@ -81,7 +81,8 @@
             "operatorTypes": "in Vergleich einbeziehen"
         },
         "operatorsGroups": [
-            "kompletter Zeitpunkt"
+            "Zeitpunkt Vergleich",
+            "anderes"
         ],
         "operators": [
             "==     (gleich)",
@@ -89,7 +90,8 @@
             ">      (größer)",
             ">=     (größer or gleich)",
             "<      (kleiner)",
-            "<=     (kleiner or gleich)"
+            "<=     (kleiner or gleich)",
+            "Andernfalls"
         ],
         "operatorTypesGroups": [
             "in Vergleich einbezogen",

@@ -484,33 +484,6 @@
 
             // #region Dialog
             /**
-             * save dialog data back to rule
-             */
-            /*
-            function _dialogSaveData() {
-                console.log('dialogSaveData'); // eslint-disable-line
-                if (!$dialogConnFields) { return; }
-                // ...
-                $dialogRule.dialog('close');
-            }
-            const $dialogConnFields = {};
-
-            const $dialogRule = $('#dialog-edit-rule').dialog({
-                title: node._('blind-control.label.dialogtitle'),
-                autoOpen: false,
-                resizable: true,
-                height: Math.min(580, $(window).height() * 0.8),
-                width: Math.min(530, $(window).width() * 0.8),
-                modal: true,
-                closeOnEscape: true,
-                buttons: {
-                    Ok: _dialogSaveData,
-                    Cancel: () => {
-                        $dialogRule.dialog('close');
-                    }
-                }
-            });
-
             const $dialogCtx = $('#dialog-select-context').dialog({
                 autoOpen: false,
                 height: 400,
@@ -699,13 +672,6 @@
                         $validOperator.val(data.validOperator || selFields.comparator[0].id);
                         const finalspan = $('<span/>',{style:'float: right;margin-top: 6px;'}).appendTo($row1);
                         finalspan.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
-
-                        /*
-                        const $btn = $('<a />', {
-                            class: 'node-button-item-edit btn ui-button ui-widget ui-corner-all'
-                        }).append('<i class= "fa fa-pencil-square-o" >').appendTo(row);
-                        */
-
                         // #endregion row1
                         // #region row2 - property threshold -- lbl - [none / Bedingung]
                         addLabel($row2, 'node-input-rule-condOpB', 'fa fa-ellipsis-h', node._('blind-control.label.ruleConditionThreshold'));
@@ -776,6 +742,8 @@
                         $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                         $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                         $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                        $levelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelResetMin')));
+                        $levelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelResetMax')));
                         $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
@@ -875,14 +843,6 @@
                         });
                     }
                 });
-
-                if (node.rules) {
-                    for (let i = 0; i < node.rules.length; i++) {
-                        const rule = node.rules[i];
-                        // rule.index = i;
-                        $('#node-input-rule-container').editableList('addItem', rule);
-                    }
-                }
 
                 // #region Button
                 const $btnAdd = $('#node-button-add');
@@ -1259,7 +1219,22 @@
                     step: 1
                 });
                 // #endregion Enhanced settings
-                $('#node-input-sunControlMode').change();
+                // fill rules
+                if (node.rules) {
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        // rule.index = i;
+                        $('#node-input-rule-container').editableList('addItem', rule);
+                    }
+                    setTimeout(() => {
+                        $('#node-input-sunControlMode').change();
+                        const postrules = $('#node-input-rule-container').editableList('items');
+                        postrules.each(function (_i) {
+                            resizeRule($(this));
+                        });
+                        resizeContainer();
+                    }, 1500);
+                }
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
                 .done((_data, _textStatus, _jqxhr) => {
@@ -1529,54 +1504,6 @@
 
     <!-- DIALOG ######################################################################## -->
     <!--
-    <div id="dialog-edit-rule" class="red-ui-editor">
-        <div class="form-row">
-            <label for="dialog-input-id">includes</label>
-            <input type="text" name="dialog-input-id" id="dialog-input-id" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row">
-            <label for="dialog-input-name">name</label>
-            <input type="text" name="dialog-input-name" id="dialog-input-name" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row">
-            <label for="dialog-input-nameAlt">name alternate</label>
-            <input type="text" name="dialog-input-nameAlt" id="dialog-input-nameAlt" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row">
-            <label for="dialog-input-character">character</label>
-            <select type="text" id="dialog-input-character" name="dialog-input-character" style="width:70%" >
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="dialog-input-date-type">type</label>
-            <select type="text" id="dialog-input-date-type" name="dialog-input-date-type" style="width:70%" >
-            </select>
-        </div>
-
-        <div class="form-row dialog-input-date-row">
-            <label for="dialog-input-date">date</label>
-            <input type="text" name="dialog-input-date" id="dialog-input-date" min="1" max="31" step="1" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row dialog-input-daysRel-row">
-            <label for="dialog-input-daysRel">days</label>
-            <input type="number" name="dialog-input-daysRel" id="dialog-input-daysRel" min="-370" max="370" step="1" class="text ui-widget-content ui-corner-all">
-        </div>
-        <div class="form-row dialog-input-month-row">
-            <label for="dialog-input-month">month</label>
-            <select type="text" id="dialog-input-month" name="dialog-input-month" class="text ui-widget-content ui-corner-all" style="width:70%" >
-            </select>
-        </div>
-        <div class="form-row dialog-input-dowRel-row">
-            <label for="dialog-input-nthdow">relative</label>
-            <input type="number" id="dialog-input-nthdow" name="dialog-input-nthdow" min="1" max="5" step="1" class="text ui-widget-content ui-corner-all" style="width:30%">
-            <select type="text" id="dialog-input-dayofweek" name="dialog-input-dayofweek" style="width:40%" >
-            </select>
-        </div>
-        <div>
-            <label id="dialog-label-date-out"></label>
-        </div>
-    </div>
-
     <div id="dialog-select-context" title="Select Channel and Datapoint">
         <div id="config-lookup-tree"></div>
     </div>

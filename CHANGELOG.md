@@ -1,3 +1,31 @@
+# node-red-contrib-sun-position
+
+#### 0.4.6: Maintenance Release
+
+- time-comp
+  - fixed css for multiselect in node-red Beta
+  - added tooltip for time select fields
+- time-span
+  - added tooltip for time select fields
+- enhanced readme and added links to changelog #43
+
+#### 0.4.5: Maintenance Release
+
+- time-compare
+  - node added option "otherwise"
+- time-span
+  - node added option "otherwise"
+  - fixed error time-span output
+- dayOfMonth
+  - fixed wrong entry in type edit
+- fixed exception on empty date in offset calculation
+
+#### 0.4.4: Maintenance Release
+
+- all previous changes
+- enhanced Documentation
+- redesigned minimum and maximum rule level types again
+
 #### 0.4.4-beta: Maintenance Release
 
 - fixed critical problem in sun - calculating Julian cycle which leads into wrong sun times if it is calculated at certain times

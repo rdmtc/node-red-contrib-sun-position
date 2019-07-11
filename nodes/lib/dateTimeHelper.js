@@ -482,6 +482,7 @@ function isValidDate(d) {
  * @return {Date}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
+    if (d === null || typeof d === 'undefined') { return d; }
     if (d.value) { d = d.value; }
     if (!(d instanceof Date)) { d = Date(d); }
 
@@ -662,17 +663,17 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
 
     if (!isNaN(dt)) {
         dt = Number(dt);
-    }
 
-    let dto = new Date(dt);
-    if (utc || timeZoneOffset === 0) {
-        dto = Date.UTC(dt);
-    } else if (timeZoneOffset) {
-        dto = convertDateTimeZone(dto, timeZoneOffset);
-    }
+        let dto = new Date(dt);
+        if (utc || timeZoneOffset === 0) {
+            dto = Date.UTC(dt);
+        } else if (timeZoneOffset) {
+            dto = convertDateTimeZone(dto, timeZoneOffset);
+        }
 
-    if (isValidDate(dto)) {
-        return dto;
+        if (isValidDate(dto)) {
+            return dto;
+        }
     }
 
     if (typeof dt === 'string') {
@@ -1365,7 +1366,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
         }
     }
 
-    // console.log(`getDateFromFormat midFormat year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec} utc=${utc}`); // eslint-disable-line
+    console.log(`getDateFromFormat midFormat year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec} utc=${utc}`); // eslint-disable-line
 
     // If there are any trailing characters left in the value, it doesn't match
     if (i_val !== val.length) {
@@ -1397,13 +1398,13 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
         hour -= 12;
     }
 
+    console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec}`); // eslint-disable-line
     if (utc || timeZoneOffset === 0) {
         return { value : Date.UTC(year, month - 1, date, hour, min, sec, misec) };
     } else if (timeZoneOffset) {
         return {
             value: convertDateTimeZone(new Date(year, month - 1, date, hour, min, sec, misec), timeZoneOffset) };
     }
-    // console.log(`getDateFromFormat out year=${year} month=${month} date=${date} hour=${hour} min=${min} sec=${sec} misec=${misec}`); // eslint-disable-line
     return {
         value: new Date(year, month - 1, date, hour, min, sec, misec)
     };
@@ -1515,6 +1516,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     }
 
     let res = null;
+
     if (isNaN(format)) { // timeparse_TextOther
         res = _getDateFromFormat(date, format, utc, timeZoneOffset);
         if (res.error) {
