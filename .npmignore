@@ -13,3 +13,4 @@ backup/*
 .gitconfig
 .gitattributes
 .jsbeautifyrc
+dev_*
