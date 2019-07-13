@@ -301,7 +301,7 @@
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
+                    return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
                 }
             },
             operand1OffsetType: {
@@ -311,7 +311,7 @@
                 value: 60000,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-operand1OffsetType').typedInput('type') === 'none' || this.operand1OffsetType === 'none';
+                    return RED.validators.number()(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
                 }
             },
             // #endregion operand1
@@ -334,7 +334,7 @@
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
+                    return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
                 }
             },
             operand2OffsetType: {
@@ -344,7 +344,7 @@
                 value: 60000,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-operand2OffsetType').typedInput('type') === 'none' || this.operand2OffsetType === 'none';
+                    return RED.validators.number()(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
                 }
             },
             // #endregion operand2
@@ -374,7 +374,7 @@
             result1Value: {
                 value: '',
                 validate(v) {
-                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
+                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1ValueType: {
@@ -384,21 +384,21 @@
                 value: 1,
                 required: false,
                 validate(v) {
-                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
+                    return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Format: {
                 value: 0,
                 required: false,
                 validate(v) {
-                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
+                    return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1Offset: {
                 value: 0,
                 required: true,
                 validate(v) {
-                    return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
+                    return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
                 }
             },
             result1OffsetType: {
@@ -408,7 +408,7 @@
                 value: 60000,
                 required: true,
                 validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
+                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
                 }
             }
             // #endregion result1
@@ -457,7 +457,7 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getSelectFields getTypes appendOptions setupTInput initCombobox getBackendData */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox getBackendData bdDateToTime */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region operand1
@@ -512,12 +512,7 @@
                         getBackendData(d => {
                             const $div = $('#node-input-operand1-div');
                             const titleOrg = $div.attr('titleOrg');
-                            if (d) {
-                                const dv = new Date(d.value);
-                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
-                            } else {
-                                $div.attr('title', titleOrg);
-                            }
+                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                         }, {
                             kind:       'getTimeData',
                             config:     $nodeConfig.val(),
@@ -529,7 +524,7 @@
                             multiplier: $('#node-input-operand1OffsetMultiplier').val()
                         });
                     }
-                }).change();
+                });
 
                 initCombobox(node, $('#node-input-operand1Formatsel'), $('#node-input-operand1Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
@@ -549,6 +544,7 @@
                         } else {
                             $('#node-input-operand1OffsetMultiplier').prop('disabled', false);
                         }
+                        $('#node-input-operand1').change();
                     }
                 }).change();
                 // #endregion operand1
@@ -604,12 +600,7 @@
                         getBackendData(d => {
                             const $div = $('#node-input-operand2-div');
                             const titleOrg = $div.attr('titleOrg');
-                            if (d) {
-                                const dv = new Date(d.value);
-                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
-                            } else {
-                                $div.attr('title', titleOrg);
-                            }
+                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                         }, {
                             kind:       'getTimeData',
                             config:     $nodeConfig.val(),
@@ -621,7 +612,7 @@
                             multiplier: $('#node-input-operand2OffsetMultiplier').val()
                         });
                     }
-                }).change();
+                });
 
                 initCombobox(node, $('#node-input-operand2Formatsel'), $('#node-input-operand2Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
 
@@ -641,6 +632,7 @@
                         } else {
                             $('#node-input-operand2OffsetMultiplier').prop('disabled', false);
                         }
+                        $('#node-input-operand2').change();
                     }
                 }).change();
                 // #endregion operand2
@@ -651,7 +643,6 @@
                 function resizeContainer() {
                     const editorRow = $('.node-input-rule-container-row ol');
                     const height =  editorRow.outerHeight(true);
-
                     const rows = $('#node-input-rule-container').editableList('items');
                     if (rows.size() > 0) {
                         $('#node-input-rule-container').editableList('height', height + 40);
@@ -695,7 +686,7 @@
                         appendOptions(node, operatorField, 'operators');
                         operatorField.val(data.operator || selFields.operators[0].id);
 
-                        const $operandDiv = $('<span/>').appendTo($row); // , { style: 'display: inline-block;' }
+                        const $operandDiv = $('<span />').appendTo($row); // , { style: 'display: inline-block;' }
 
                         $('<input/>', {
                             class: 'node-input-rule-operand',
@@ -798,11 +789,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-result1Value-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d) {
-                                    $div.attr('title', String(d) + ' - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
@@ -846,7 +833,7 @@
                         types.MoonPhase
                     ],
                     onChange(_type, _value) { $('#node-input-result1').change(); }
-                }).change();
+                });
                 /********************************************************/
                 initCombobox(node, $('#node-input-result1TSFormatSel'), $('#node-input-result1TSFormat'), 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
                 /********************************************************/
@@ -870,6 +857,7 @@
                         }
                     }
                 }).change();
+                $('#node-input-result1Value').change();
                 // autocomplete($('#node-input-result1TSFormat'), 'dateOutTSFormat');
                 // autocomplete($('#node-input-result1Format'), 'dateOutFormat');
                 // #endregion result1
@@ -917,14 +905,17 @@
             // #endregion result-container
         },
         oneditresize(_size) {
-            const editorRow = $('.node-input-rule-container-row ol');
-            const height = editorRow.outerHeight(true);
-
-            const rows = $('#node-input-rule-container').editableList('items');
-            if (rows.size() > 0) {
-                $('#node-input-rule-container').editableList('height', height + 40);
-            } else {
-                $('#node-input-rule-container').editableList('height', 20);
+            try {
+                const editorRow = $('.node-input-rule-container-row ol');
+                const height = editorRow.outerHeight(true);
+                const rows = $('#node-input-rule-container').editableList('items');
+                if (rows.size() > 0) {
+                    $('#node-input-rule-container').editableList('height', height + 40);
+                } else {
+                    $('#node-input-rule-container').editableList('height', 20);
+                }
+            } catch (err) {
+                console.debug(err); // eslint-disable-line no-console
             }
         }
     });</script>

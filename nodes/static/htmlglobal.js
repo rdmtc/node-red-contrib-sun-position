@@ -580,7 +580,7 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
  * @param {Function} filter - function for filter the elements
  */
 function appendOptions(node, parent, elementName, filter) { // eslint-disable-line no-unused-vars
-    // console.log('appendOptions elementName='+ elementName + ' limit='+limit);
+    // console.log('[IN appendOptions] elementName='+ elementName + ' limit='+limit);
     const groups = getSelectFields()[elementName + 'Groups'];
     if (!groups) {
         throw new Error('no group "' + elementName + 'Groups" in getSelectFields() found!');
@@ -696,7 +696,7 @@ function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
  * @param {string} [timeFormat] - name of tzhe timeformat from position-config:common.timeFormat...
  */
 function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementName, value, baseWidth, timeFormat) { // eslint-disable-line no-unused-vars
-    // console.log('initCombobox node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+    // console.log('[IN initCombobox] node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
     appendOptions(node, $inputSelect, optionElementName);
     autocomplete($inputBox, dataListID);
     const valueNum = Number(value);
@@ -892,25 +892,64 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    console.log('getBackendData');  // eslint-disable-line
-    console.log(data);  // eslint-disable-line
-    // data
-    if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'jsonata' || data.type === 'bin') {
-        result({ value: data.type});
-    } else if (data.type === 'num' || data.type === 'str' || data.type === 'bool') {
-        result({ value: data.value });
+    // console.log('[IN getBackendData] ',data);  // eslint-disable-line
+    let res = '';
+    if (!data || data.type === 'none' || data.type === '' || data.type === 'jsonata' || data.type === 'json' || data.type === 'bin') {
+        res = data.type;
+    } else if ( data.type === 'bool') {
+        res = data.value;
     } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
-        result({ value: data.type + '.' + data.value });
+        res = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
-        result({ value: 'msg.payload' });
+        res = 'msg.payload';
     } else if (data.type === 'msgTs') {
-        result({ value: 'msg.ts' });
+        res = 'msg.ts';
     } else if (data.type === 'msgLC') {
-        result({ value: 'msg.lc' });
+        res = 'msg.lc';
     } else if (data.type === 'msgValue') {
-        result({ value: 'msg.value' });
+        res = 'msg.value';
     } else {
         const url = 'sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
+        return;
     }
+    if (data.kind === 'getTimeData') {
+        result({ value: res});
+    }
+    result(res);
+}
+
+
+/**
+ * checks if a value is a valid Date object
+ * @param {*} d - a value to check
+ * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
+ */
+function isValidDate(d) {
+    return d instanceof Date && !isNaN(d);
+    // d !== 'Invalid Date' && !isNaN(d)
+}
+
+/**
+ * formate Dtae to local time
+ * @param {*} d - Date
+ */
+function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
+    // console.log('[IN bdDateToTime]',d,add);
+    if (d) {
+        if (d.error) {
+            return add + 'Error: ' + d.error;
+        }
+        if (d.value) {
+            d = d.value;
+        }
+        const dv = new Date(d);
+        if (isValidDate(dv)) {
+            return dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')' + ((add) ? ' ' + add : '');
+        }
+    }
+    if (typeof d === 'string') {
+        return d + ((add) ? ' ' + add : '');
+    }
+    return ((add) ? add : '');
 }

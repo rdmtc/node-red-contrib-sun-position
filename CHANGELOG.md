@@ -1,5 +1,12 @@
 # node-red-contrib-sun-position
 
+#### 0.4.7: BugFix Release
+
+- fix problems
+  - if time tooltip has wrong format
+  - if not initialized
+  - on exception get backend data
+
 #### 0.4.6: Maintenance Release
 
 - time-comp
