@@ -674,10 +674,11 @@ specific language governing permissions and limitations under the License.
 ## Other
 
 * [npm Releases / changelog](https://github.com/rdmtc/node-red-contrib-sun-position/releases)
-* [RedMatic Slack](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU)
 * [newreleases.io](https://newreleases.io/npm/node-red-contrib-sun-position)
 * [![Greenkeeper badge](https://badges.greenkeeper.io/rdmtc/node-red-contrib-sun-position.svg)](https://greenkeeper.io/)
 * [RedMatic Slack (chat like WhatsApp or Facebook Messenger)](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU)
+* [RedMatic Forum](https://homematic-forum.de/forum/viewforum.php?f=77)
+* [RedMatic Wiki](https://github.com/rdmtc/RedMatic/wiki)
 * [Github](https://github.com/rdmtc/node-red-contrib-sun-position)
 * [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
 * [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)
