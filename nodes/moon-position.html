@@ -317,17 +317,21 @@
             $('#node-input-outputs').val(JSON.stringify(currentOutputs));
         },
         oneditresize(size) {
-            const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-            let height = size.height;
-            for (let i = 0; i < rows.size(); i++) {
-                height -= $(rows[i]).outerHeight(true);
-            }
+            try {
+                const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+                let height = size.height;
+                for (let i = 0; i < rows.size(); i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
 
-            const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-            height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-            height -= 50;
-            if (typeof $().editableList !== 'undefined') {
-                $('#node-input-rule-container').editableList('height', height);
+                const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+                height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
+                height -= 50;
+                if (typeof $().editableList !== 'undefined') {
+                    $('#node-input-rule-container').editableList('height', height);
+                }
+            } catch (err) {
+                console.debug(err); // eslint-disable-line no-console
             }
         }
     });</script>

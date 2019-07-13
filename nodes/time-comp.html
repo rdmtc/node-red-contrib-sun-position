@@ -341,7 +341,7 @@
                 value: 0,
                 required: true,
                 validate(v){
-                    return RED.validators.typedInput('inputOffsetType')(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
+                    return RED.validators.typedInput('inputOffsetType')(v) || $('#node-input-inputOffsetType').val() === 'none' || this.inputOffsetType === 'none';
                 }
             },
             inputOffsetType: {
@@ -351,7 +351,7 @@
                 value: 60000,
                 required: true,
                 validate(v){
-                    return RED.validators.number()(v) || $('#node-input-inputOffsetType').typedInput('type') === 'none' || this.inputOffsetType === 'none';
+                    return RED.validators.number()(v) || $('#node-input-inputOffsetType').val() === 'none' || this.inputOffsetType === 'none';
                 }
             },
             // #endregion input
@@ -375,7 +375,7 @@
             result1Value: {
                 value: '',
                 validate(v){
-                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
+                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
                 }
             },
             result1ValueType: {
@@ -385,7 +385,7 @@
                 value: 0,
                 required: false,
                 validate(v){
-                    return ((v !== '') || $('#node-input-result1').typedInput('type') === 'none' || this.result1Type === 'undefined');
+                    return ((v !== '') || this.result1Type === 'undefined' || $('#node-input-result1Type').val() === 'none');
                 }
             },
             result1Offset: {
@@ -393,9 +393,9 @@
                 required: false,
                 validate(v){
                     return RED.validators.typedInput('result1OffsetType')(v) ||
-                        $('#node-input-result1').typedInput('type') === 'none' ||
+                        $('#node-input-result1Type').val() === 'none' ||
                         this.result1Type === 'undefined' ||
-                        $('#node-input-result1OffsetType').typedInput('type') === 'none' ||
+                        $('#node-input-result1OffsetType').val() === 'none' ||
                         this.result1OffsetType === 'none';
                 }
             },
@@ -406,7 +406,7 @@
                 value: 60000,
                 required: true,
                 validate(v){
-                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').typedInput('type') === 'none' || this.result1OffsetType === 'none';
+                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
                 }
             }
             // #endregion result1
@@ -465,7 +465,7 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect getBackendData */
+                /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect getBackendData bdDateToTime */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 const operatorTypesShort = [
@@ -490,6 +490,7 @@
                         'num',
                         'str',
                         types.DateEntered,
+                        types.TimeEntered,
                         types.TimeSun,
                         types.TimeMoon,
                         types.DayOfMonth,
@@ -520,16 +521,10 @@
                             $('.time-row-inputFormat').hide();
                             $('.time-row-inputOffset').hide();
                         }
-
                         getBackendData(d => {
                             const $div = $('#node-input-input-div');
                             const titleOrg = $div.attr('titleOrg');
-                            if (d) {
-                                const dv = new Date(d.value);
-                                $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
-                            } else {
-                                $div.attr('title', titleOrg);
-                            }
+                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                         }, {
                             kind:       'getTimeData',
                             config:     $nodeConfig.val(),
@@ -646,7 +641,7 @@
                         const operatorTypeField = multiselect(node, $row1, 'operatorTypes', 'node-red-contrib-sun-position/position-config:common.operatorTypes','node-input-rule-operatorType-' + containerIndex);
                         $operator.val(data.operator || selFields.operators[0].id);
                         setMultiselect(data.operatorType, operatorTypeField, operatorTypesShort);
-                        const $operandDiv = $('<span/>').appendTo($row1); // { style: 'display: inline-block;' }
+                        const $operandDiv = $('<span />').appendTo($row1); // { style: 'display: inline-block;' }
                         addLabel($operandDiv, 'node-input-rule-operand', 'fa fa-clock-o');
                         const $operand = $('<input/>', {
                             class: 'node-input-rule-operand',
@@ -663,6 +658,7 @@
                                 'num',
                                 'str',
                                 types.DateEntered,
+                                types.TimeEntered,
                                 types.TimeSun,
                                 types.TimeMoon,
                                 types.DayOfMonth,
@@ -746,13 +742,7 @@
                                 }
                             }
                             getBackendData(d => {
-                                console.log(d);
-                                if (d) {
-                                    const dv = new Date(d.value);
-                                    $operandDiv.attr('title',  dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
-                                } else {
-                                    $operandDiv.attr('title', $operator.typedInput('value'));
-                                }
+                                $operandDiv.attr('title', bdDateToTime(d));
                             }, {
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
@@ -766,6 +756,10 @@
                             resizeRule(containerRow);
                         });
                         $operator.change(() => $operand.change());
+                        $multiplier.change(() => $operand.change());
+                        $offset.change(() => $operand.change());
+                        $formatSel.change(() => $operand.change());
+                        $formatIp.change(() => $operand.change());
                         $operand.change();
                         // resizeRule(containerRow);
                         autocomplete($formatIp, 'dateParseFormat');
@@ -830,11 +824,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-result1Value-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d) {
-                                    $div.attr('title', String(d) + ' - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
@@ -876,7 +866,7 @@
                         types.MoonPhase
                     ],
                     onChange(_type, _value) { $('#node-input-result1').change(); }
-                }).change();
+                });
                 /********************************************************/
                 initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
                 /********************************************************/
@@ -898,6 +888,7 @@
                         }
                     }
                 }).change();
+                $('#node-input-result1').change();
                 // #endregion result1
                 // #region spinner
                 $('.wg-offset-spinner').spinner({max: 1439, min: -1439});
@@ -979,7 +970,7 @@
                     $('#node-input-rule-container').editableList('height', 20);
                 }
             } catch (err) {
-                console.log(err);
+                console.debug('oneditresize',err); // eslint-disable-line no-console
             }
         }
     });</script>

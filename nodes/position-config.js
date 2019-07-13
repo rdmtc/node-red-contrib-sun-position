@@ -470,7 +470,7 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
@@ -533,9 +533,21 @@ module.exports = function (RED) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
+                } else if (data.type === 'str') {
+                    result.fix = true;
+                    if (data.format) {
+                        result.value = hlp.parseDateFromFormat(data.value, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                    } else {
+                        result.value = hlp.getDateOfText(data.value, (this.tzOffset === 0), this.tzOffset);
+                    }
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
+                    if (this.tzOffset) {
+                        result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
+                    }
                 } else {
                     // can handle context, json, jsonata, env, ...
-                    result.fix = (data.type === 'json'); // is not a fixed time if can be changed
+                    result.fix = false; // is not a fixed time if can be changed
                     const res = this.getPropValue(_srcNode, msg, data);
                     if (res) {
                         if (data.format) {
@@ -566,7 +578,7 @@ module.exports = function (RED) {
                 }
                 result.value = new Date(now);
             }
-            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
+            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
             return result;
         }
         /*******************************************************************************************************/
@@ -989,6 +1001,7 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
+        // console.log('RED.httpAdmin.get - result for getTimeData', req.query.config);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
@@ -1002,9 +1015,10 @@ module.exports = function (RED) {
                         obj = posConfig.getTimeProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
-                        obj.error = err;
+                        obj.error = err.message;
+                        obj.errorStack= err.stack;
                     }
-                    res.status(200).send(JSON.stringify(obj));
+                    res.status(200).send(JSON.stringify(obj,Object.getOwnPropertyNames(obj)));
                     break;
                 }
                 case 'getOutDataData': {
@@ -1012,14 +1026,15 @@ module.exports = function (RED) {
                         obj = posConfig.getOutDataProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
-                        obj.error = err;
+                        obj.error = err.message;
+                        obj.errorStack= err.stack;
                     }
-                    res.status(200).send(JSON.stringify(obj));
+                    res.status(200).send(JSON.stringify(obj,Object.getOwnPropertyNames(obj)));
                     break;
                 }
             }
         } else {
-            res.status(200).send(JSON.stringify({}));
+            res.status(200).send(JSON.stringify({value: '', error: 'no valid configuration!!'}));
         }
     });
 };

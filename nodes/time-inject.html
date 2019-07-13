@@ -1002,7 +1002,7 @@
             const node = this;
             const $nodeConfig = $('#node-input-positionConfig');
             const setup = function(node) {
-                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData */
+                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData bdDateToTime */
                 const types = getTypes(node);
                 const selFields = getSelectFields();
                 // #region initialize
@@ -1122,11 +1122,7 @@
                         getBackendData(d => {
                             const $div = $('#node-input-payload-div');
                             const titleOrg = $div.attr('titleOrg');
-                            if (d) {
-                                $div.attr('title', d + ' - ' + titleOrg);
-                            } else {
-                                $div.attr('title', titleOrg);
-                            }
+                            $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                         }, {
                             kind:       'getOutDataData',
                             config:     $nodeConfig.val(),
@@ -1185,12 +1181,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-time-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d.value) {
-                                    const dv = new Date(d.value);
-                                    $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
@@ -1314,12 +1305,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-timeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d.value) {
-                                    const dv = new Date(d.value);
-                                    $div.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ') - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
@@ -1438,11 +1424,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d) {
-                                    $div.attr('title', d + ' - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
@@ -1563,11 +1545,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d) {
-                                    $div.attr('title', d + ' - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
@@ -1683,11 +1661,7 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-addPayload1-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                if (d) {
-                                    $div.attr('title', d + ' - ' + titleOrg);
-                                } else {
-                                    $div.attr('title', titleOrg);
-                                }
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),

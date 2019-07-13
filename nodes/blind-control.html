@@ -494,7 +494,7 @@
             // #endregion Dialog
 
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData */
+                /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData bdDateToTime */
                 // #region initialize
                 const types = getTypes(node);
                 const selFields = getSelectFields();
@@ -762,7 +762,7 @@
                             getBackendData(d => {
                                 if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
-                                    $row3.attr('title', dv.toLocaleTimeString() + ' (' + dv.toISOString() + ')');
+                                    $row3.attr('title', bdDateToTime(dv));
                                     $time.attr('timedata', dv.getTime());
                                 } else {
                                     $row3.attr('title', d.value);
@@ -1275,11 +1275,13 @@
             }
         },
         oneditresize(_size) {
-            if (typeof $().editableList !== 'undefined') {
+            try {
                 const postrules = $('#node-input-rule-container').editableList('items');
                 postrules.each(function(_i) {
                     resizeRule($(this));
                 });
+            } catch (err) {
+                console.debug(err); // eslint-disable-line no-console
             }
         }
     });</script>
