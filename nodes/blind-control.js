@@ -400,9 +400,10 @@ module.exports = function (RED) {
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
+        const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);
         let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
-        if (node.blindData.overwrite.active && isNaN(newPos)) {
+        if (!onlyTrigger && node.blindData.overwrite.active && isNaN(newPos)) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
             if (Number.isFinite(expire)) {
                 // set to new expiring time
@@ -415,7 +416,7 @@ module.exports = function (RED) {
             setOverwriteReason(node);
             node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, newPos=${newPos}, expire=${expire}`);
             return true;
-        } else if (!isNaN(newPos)) {
+        } else if (!onlyTrigger && !isNaN(newPos)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
             if (newPos === -1) {
                 node.tempData.level = NaN;
