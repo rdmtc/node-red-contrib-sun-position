@@ -8,35 +8,35 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ### Table of contents
 
-* [Blind Controller](#Blind-Controller)
-  * [blind-control](#blind-control)
-    * [Table of contents](#Table-of-contents)
-    * [The node](#The-node)
-    * [Node settings](#Node-settings)
-      * [general settings](#general-settings)
-      * [blind settings](#blind-settings)
-      * [rule settings](#rule-settings)
-      * [overwrite settings](#overwrite-settings)
-      * [sun settings](#sun-settings)
-        * [maximize sunlight (Winter)](#maximize-sunlight-Winter)
-        * [restrict sunlight (Summer)](#restrict-sunlight-Summer)
-        * [sun position settings](#sun-position-settings)
-    * [Node Input](#Node-Input)
-    * [Node Output](#Node-Output)
-    * [Node Status](#Node-Status)
-  * [rules](#rules)
-    * [rules execution in detail](#rules-execution-in-detail)
-    * [rules example](#rules-example)
-  * [Samples](#Samples)
-    * [Example 1](#Example-1)
-    * [Example 2](#Example-2)
-    * [Example 3 - testing rules and overrides](#Example-3---testing-rules-and-overrides)
-    * [Example 4 - usage of message properties](#Example-4---usage-of-message-properties)
-  * [Additional FAQ](#Additional-FAQ)
-    * [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
-    * [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
-    * [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
-  * [Other](#Other)
+- [Blind Controller](#Blind-Controller)
+  - [blind-control](#blind-control)
+    - [Table of contents](#Table-of-contents)
+    - [The node](#The-node)
+    - [Node settings](#Node-settings)
+      - [general settings](#general-settings)
+      - [blind settings](#blind-settings)
+      - [rule settings](#rule-settings)
+      - [overwrite settings](#overwrite-settings)
+      - [sun settings](#sun-settings)
+        - [maximize sunlight (Winter)](#maximize-sunlight-Winter)
+        - [restrict sunlight (Summer)](#restrict-sunlight-Summer)
+        - [sun position settings](#sun-position-settings)
+    - [Node Input](#Node-Input)
+    - [Node Output](#Node-Output)
+    - [Node Status](#Node-Status)
+  - [rules](#rules)
+    - [rules execution in detail](#rules-execution-in-detail)
+    - [rules example](#rules-example)
+  - [Samples](#Samples)
+    - [Example 1](#Example-1)
+    - [Example 2](#Example-2)
+    - [Example 3 - testing rules and overrides](#Example-3---testing-rules-and-overrides)
+    - [Example 4 - usage of message properties](#Example-4---usage-of-message-properties)
+  - [Additional FAQ](#Additional-FAQ)
+    - [Why is there no multi blind controller? (FAQ)](#Why-is-there-no-multi-blind-controller-FAQ)
+    - [How to define a Temperature Overwrite? (FAQ)](#How-to-define-a-Temperature-Overwrite-FAQ)
+    - [How do I achieve that when opening a window the blind opens? (FAQ)](#How-do-I-achieve-that-when-opening-a-window-the-blind-opens-FAQ)
+  - [Other](#Other)
 
 ### The node
 
@@ -203,6 +203,7 @@ Useful to know:
 * an incoming message with `msg.mode`, `msg.payload.mode` or where the `msg.topic` contains `setMode` and the value of `msg.payload` is a valid number, will allow to set the mode of the sun control.
   * a value of `0` will deactivate sun control, `1` will set to maximize sunlight (Winter) and `2` will set to restrict sunlight (Summer).
   * The maximum adjustable mode is influenced by the settings of the node. The mode can not be set to restrict sunlight (`2`) if in the settings is setup only maximize sunlight (`1`).
+* A message where the topic contains `triggerOnly` or  or with an property `msg.trigger` which is true can not act as override.
 
 ### Node Output
 
