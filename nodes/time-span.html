@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<script type="text/x-red" data-template-name="time-span">
+<script type="text/html" data-template-name="time-span">
   <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
     <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
     <input type="text" id="node-input-positionConfig">
@@ -229,6 +229,10 @@
 
         if (t === 'pdsCalcData') {
             return '{sun position}' + suffix;
+        }
+
+        if (t === 'pdsCalcPercent') {
+            return '{sun in sky percent}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
@@ -829,6 +833,7 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
+                        types.SunInSky,
                         types.MoonCalc,
                         types.MoonPhase
                     ],

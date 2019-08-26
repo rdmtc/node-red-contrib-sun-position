@@ -160,7 +160,7 @@ function angleNorm_(angle) {
  * @param {*} now the current timestamp
  */
 function getSunPosition_(node, now) {
-    const sunPosition = node.positionConfig.getSunCalc(now, true);
+    const sunPosition = node.positionConfig.getSunCalc(now, false, false);
     // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
     sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);

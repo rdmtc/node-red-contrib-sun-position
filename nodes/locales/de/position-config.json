@@ -21,6 +21,7 @@
             "dayofmonth": "Monatstag",
             "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
+            "suninsky":"Sonne am Himmel (Prozent)",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "suncalc": "Sonnenposition",
             "mooncalc": "Mondposition",

@@ -49,7 +49,7 @@ module.exports = function (RED) {
                 }
                 const ports = new Array(this.rules.length);
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getMoonCalc(now);
+                ports[0].payload = this.positionConfig.getMoonCalc(now,false);
                 ports[0].topic = this.topic;
                 if (!ports[0].payload.azimuth) {
                     this.error('Azimuth could not calculated!');

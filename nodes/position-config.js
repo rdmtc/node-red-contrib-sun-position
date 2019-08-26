@@ -618,9 +618,11 @@ module.exports = function (RED) {
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
             } else if (data.type === 'pdsCalcData') {
-                result = this.getSunCalc(msg.ts);
+                result = this.getSunCalc(msg.ts, true);
+            } else if (data.type === 'pdsCalcPercent') {
+                result = this.getSunInSky(msg.ts);
             } else if (data.type === 'pdmCalcData') {
-                result = this.getMoonCalc(msg.ts);
+                result = this.getMoonCalc(msg.ts, true);
             } else if (data.type === 'pdmPhase') {
                 result = this.getMoonPhase(msg.ts);
             } else if (data.type === 'pdmPhaseCheck') {
@@ -715,8 +717,8 @@ module.exports = function (RED) {
             }
         }
         /**************************************************************************************************************/
-        getSunCalc(date, noTimes) {
-            this.debug(`getSunCalc for date="${date}" noTimes="${noTimes}"`);
+        getSunCalc(date, calcTimes, sunInSky) {
+            this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -747,17 +749,49 @@ module.exports = function (RED) {
                 azimuthRadians: sunPos.azimuth
             };
 
-            if (noTimes) {
+            if (!calcTimes) {
                 this.debug('getSunCalc - no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 return result;
             }
-            this._sunTimesCheck();
-            result.times = this.sunTimesToday;
+
+            const dayid = this._getDayId(date); // this._getUTCDayId(now);
+            const today = this._sunTimesCheck(); // refresh if needed, get dayId
+            let sunSolarNoonPos = null;
+            // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            if (dayid === today.dayId) {
+                this.debug('getSunTime sunTimesToday');
+                result.times =this.sunTimesToday; // needed for a object copy
+                sunSolarNoonPos = this.sunSolarNoonToday;
+            } else if (dayid === (today.dayId + 1)) {
+                this.debug('getSunTime sunTimesTomorow');
+                result.times = this.sunTimesTomorow; // needed for a object copy
+                sunSolarNoonPos = this.sunSolarNoonTomorow;
+            } else {
+                this.debug('getSunTime calc extra time');
+                result.times = sunCalc.getSunTimes(date, this.latitude, this.longitude, false); // needed for a object copy
+                if (sunInSky && result.times.solarNoon.valid) {
+                    sunSolarNoonPos = sunCalc.getPosition(result.times.solarNoon, this.latitude, this.longitude);
+                }
+            }
+
+            if (sunSolarNoonPos && result.times.solarNoon.valid) {
+                if (result.altitude > 0) {
+                    result.altitudePercent = (result.altitude / sunSolarNoonPos.altitude) * 100;
+                } else {
+                    result.altitudePercent = 0;
+                }
+            }
+
             this.lastSunCalc = result;
             this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 
+        /**************************************************************************************************************/
+        getSunInSky(date) {
+            const result = this.getSunCalc(date, true, true);
+            return result.altitudePercent;
+        }
         /**************************************************************************************************************/
         getMoonIllumination(date) {
             if (!hlp.isValidDate(date)) {
@@ -804,7 +838,7 @@ module.exports = function (RED) {
             return result;
         }
 
-        getMoonCalc(date, noTimes) {
+        getMoonCalc(date, calcTimes) {
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -844,7 +878,7 @@ module.exports = function (RED) {
                 }
             };
 
-            if (noTimes) { return result; }
+            if (!calcTimes) { return result; }
             this._sunTimesCheck();
             result.times = this.moonTimesToday;
             // getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
@@ -907,8 +941,16 @@ module.exports = function (RED) {
 
         _sunTimesRefresh(today, tomorrow, dayId) {
             this._checkCoordinates();
-            this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
+            if (this.sunDayId === (dayId + 1)) {
+                this.sunTimesToday = this.sunTimesTomorow;
+                this.sunSolarNoonToday = this.sunSolarNoonTomorow;
+            } else {
+                this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
+                this.sunSolarNoonToday = sunCalc.getPosition(this.sunTimesToday.solarNoon, this.latitude, this.longitude);
+            }
             this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
+            this.sunSolarNoonTomorow = sunCalc.getPosition(this.sunTimesTomorow.solarNoon, this.latitude, this.longitude);
+
             this.sunDayId = dayId;
             // this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
         }

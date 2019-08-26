@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<script type="text/x-red" data-template-name="time-inject">
+<script type="text/html" data-template-name="time-inject">
     <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
@@ -429,6 +429,10 @@
 
         if (t === 'pdsCalcData') {
             return '{sun position}' + suffix;
+        }
+
+        if (t === 'pdsCalcPercent') {
+            return '{sun in sky percent}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
@@ -885,11 +889,19 @@
                 global: 'global context',
                 bin: 'binary data',
                 date: 'timestamp',
+                dateSpecific: 'timestamp',
+                entered: 'timestamp',
+                dateEntered: 'timestamp',
                 env: 'Environment variable',
                 jsonata: 'result of jsonata expression',
-                pdmTime: 'time',
-                typeSunCalc: 'object of sun position',
-                typeMoonCalc: 'object of moon position'
+                dayOfMonth: 'timestamp',
+                pdsTime: 'sun time',
+                pdmTime: 'moon time',
+                pdsCalcPercent: 'percent of sun in the sky',
+                pdsCalcData: 'object of sun position',
+                pdmCalcData: 'object of moon position',
+                pdmPhase: 'object of moon phase',
+                pdmPhaseCheck: 'boolean indicates if moon in specific phase'
             };
             let lab = labels[this.payloadType] || this.payloadType;
             if (lab === 'object') {
@@ -1104,6 +1116,7 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
+                        types.SunInSky,
                         types.MoonCalc,
                         types.MoonPhase
                     ],
@@ -1415,6 +1428,7 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
+                        types.SunInSky,
                         types.MoonCalc,
                         types.MoonPhase
                     ],
@@ -1536,6 +1550,7 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
+                        types.SunInSky,
                         types.MoonCalc,
                         types.MoonPhase
                     ],
@@ -1652,6 +1667,7 @@
                         'env',
                         'jsonata',
                         types.SunCalc,
+                        types.SunInSky,
                         types.MoonCalc,
                         types.MoonPhase
                     ],

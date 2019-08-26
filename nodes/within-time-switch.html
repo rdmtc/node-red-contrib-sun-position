@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<script type="text/x-red" data-template-name="within-time-switch">
+<script type="text/html" data-template-name="within-time-switch">
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
@@ -240,6 +240,10 @@
 
         if (t === 'pdsCalcData') {
             return '{sun position}' + suffix;
+        }
+
+        if (t === 'pdsCalcPercent') {
+            return '{sun in sky percent}' + suffix;
         }
 
         if (t === 'pdmCalcData') {
