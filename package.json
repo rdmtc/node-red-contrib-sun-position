@@ -89,7 +89,7 @@
       "blind-control": "nodes/blind-control.js"
     }
   },
-  "dependencies": {
+  "peerDependencies": {
     "util": ">=0.8.0"
   },
   "devDependencies": {
