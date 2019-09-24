@@ -3,6 +3,10 @@
 #### 0.4.9: small enhancement
 
 - implemented #52 as height of the sun in the sky in percent (0~100 with 100% being at solarnoon and 0% being completely down) - altithudePercent
+- fixed bug for #53, no longer send blind position in override mode
+- updated dependencies
+- more changes for node-red 1.0 (https://nodered.org/blog/2019/09/20/node-done)
+- added node-red 0.19.0 as required version
 
 #### 0.4.8: Maintenance Release
 
