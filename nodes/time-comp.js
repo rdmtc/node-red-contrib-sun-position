@@ -17,9 +17,18 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        this.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
         const node = this;
 
-        this.on('input', msg => { // eslint-disable-line complexity
+        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
             if (node.positionConfig === null ||
                 config.operator === null ||
                 config.inputType === null) {
@@ -246,16 +255,22 @@ module.exports = function (RED) {
                 node.status({
                     text: inputData.value.toISOString()
                 });
-                node.send(resObj);
+
+                send(resObj); node.send(resObj);
+                done();
+                return null;
             } catch (err) {
+                node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text:  RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
-                throw err;
+                done('internal error time-comp:' + err.message, msg);
+                // throw err;
             }
+            return null;
         });
     }
 

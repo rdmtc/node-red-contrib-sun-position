@@ -267,9 +267,19 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        this.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
         const node = this;
 
-        this.on('input', msg => {
+        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
+
             if (node.positionConfig === null ||
                 config.operand1Type === null ||
                 config.operand2Type === null) {
@@ -435,15 +445,19 @@ module.exports = function (RED) {
                     text: (operand1.value.getTime() - operand2.value.getTime()) / 1000 + 's'
                 });
 
-                node.send(resObj);
+                send(resObj); // node.send(resObj);
+                done();
+                return null;
             } catch (err) {
+                node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text:  RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
-                throw err;
+                done('internal error time-span:' + err.message, msg);
+                // throw err;
             }
             return null;
         });

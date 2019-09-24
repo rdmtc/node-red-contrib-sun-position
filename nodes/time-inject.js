@@ -309,8 +309,17 @@ module.exports = function (RED) {
             }
             // tidy up any state
         });
+        this.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
 
-        this.on('input', msg => {
+        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
             try {
                 msg._srcid = node.id;
                 node.debug('input ');
@@ -375,16 +384,20 @@ module.exports = function (RED) {
                     days: config.addPayload3Days
                 });
 
-                node.send(msg);
+                send(msg); // node.send(msg);
+                done();
+                return null;
             } catch (err) {
-                node.error(err.message);
+                node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
+                done('internal error time-inject:' + err.message, msg);
             }
+            return null;
         });
 
         node.status({});

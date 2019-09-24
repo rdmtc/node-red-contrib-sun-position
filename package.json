@@ -78,6 +78,7 @@
   },
   "homepage": "https://github.com/rdmtc/node-red-contrib-sun-position#readme",
   "node-red": {
+    "version": ">=0.19.0",
     "nodes": {
       "position-config": "nodes/position-config.js",
       "sun-position": "nodes/sun-position.js",
