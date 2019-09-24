@@ -10,7 +10,7 @@
 
 #### 0.4.8: Maintenance Release
 
-- update dependencied
+- update dependencies
 
 #### 0.4.7: BugFix Release
 
