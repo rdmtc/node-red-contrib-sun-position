@@ -261,9 +261,18 @@ module.exports = function (RED) {
         this.propertyEndThresholdType = config.propertyEndThresholdType;
         this.timeOutObj = null;
         this.lastMsgObj = null;
+        this.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
         const node = this;
 
-        this.on('input', msg => {
+        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
             try {
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
@@ -287,24 +296,29 @@ module.exports = function (RED) {
                 if (startNr < endNr) {
                     if (cmpNow >= startNr && cmpNow < endNr) {
                         this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
-                        this.send([msg, null]);
+                        send([msg, null]); // this.send([msg, null]);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
+                        done();
                         return null;
                     }
                 } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
                     this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
-                    this.send([msg, null]);
+                    send([msg, null]); // this.send([msg, null]);
                     checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
+                    done();
                     return null;
                 }
 
                 this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
-                this.send([null, msg]);
+                send([null, msg]); // this.send([null, msg]);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
+                done();
+                return null;
             } catch (err) {
-                node.error(err.message);
+                node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
+                done('internal error within-time-switch:' + err.message, msg);
             }
             return null;
         });

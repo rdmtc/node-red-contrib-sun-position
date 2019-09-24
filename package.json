@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -78,6 +78,7 @@
   },
   "homepage": "https://github.com/rdmtc/node-red-contrib-sun-position#readme",
   "node-red": {
+    "version": ">=0.19.0",
     "nodes": {
       "position-config": "nodes/position-config.js",
       "sun-position": "nodes/sun-position.js",
@@ -89,7 +90,7 @@
       "blind-control": "nodes/blind-control.js"
     }
   },
-  "dependencies": {
+  "peerDependencies": {
     "util": ">=0.8.0"
   },
   "devDependencies": {

@@ -324,6 +324,12 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
             hasValue: false
         },
+        SunInSky: {
+            value: 'pdsCalcPercent',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.suninsky','sun in the sky (percent)'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.png',
+            hasValue: false
+        },
         MoonCalc: {
             value: 'pdmCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),

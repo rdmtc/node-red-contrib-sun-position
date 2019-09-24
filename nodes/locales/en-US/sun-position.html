@@ -1,4 +1,4 @@
-<script type="text/x-red" data-help-name="sun-position">
+<script type="text/html" data-help-name="sun-position">
     <h3>About</h3>
     <p>Gets the position of the sun</p>
 
@@ -67,6 +67,8 @@
             <dd> if a end time is defined the end timestamp (inclusive of offset).</dd>
             <dt>sunInSky <span class="property-type">boolean</span></dt>
             <dd> if a start and an end time is defined a boolean value indicating whether it is currently considered daylight hours.</dd>
+            <dt>altitudePercent <span class="property-type">number</span></dt>
+            <dd> gives the altitude in percent between horizon (0%) and solar noon (100%) (will not calculated if sun position for a time is calculated which is not today or tomorrow).</dd>
         </dl>
         Example of the first output
         <pre>

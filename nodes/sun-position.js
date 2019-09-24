@@ -29,9 +29,18 @@ module.exports = function (RED) {
         this.endOffset = config.endOffset || 0;
         this.endOffsetType = config.endOffsetType || 'none';
         this.endOffsetMultiplier = config.endOffsetMultiplier || 60;
+        this.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
         const node = this;
 
-        this.on('input', function (msg) {
+        this.on('input', function (msg, send, done) {
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
             try {
                 let errorStatus = '';
                 let now = new Date();
@@ -46,22 +55,24 @@ module.exports = function (RED) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalidParameter', { param: 'msg.ts', type: 'Date', newValue: now }));
                 }
                 if (!this.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
+                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
                         text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
                     });
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
                     return null;
                 }
                 const ports = new Array(this.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getSunCalc(now);
+                ports[0].payload = this.positionConfig.getSunCalc(now, true, false);
                 ports[0].topic = this.topic;
                 if (!ports[0].payload.azimuth) {
-                    this.error('Azimuth could not calculated!');
-                    this.send(ports);
+                    // this.error('Azimuth could not calculated!');
+                    send(ports); // this.send(ports);
+                    done('Azimuth could not calculated!', msg);
                     return null;
                 }
 
@@ -169,16 +180,18 @@ module.exports = function (RED) {
                         text
                     });
                 }
-                this.send(ports); // Warning change msg object!!
+                send(ports); // this.send(ports); // Warning change msg object!!
+                done();
                 return null;
             } catch (err) {
-                node.error(err.message);
+                node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text: 'internal error'
                 });
+                done('internal error sun-position:' + err.message, msg);
             }
             return null;
         });

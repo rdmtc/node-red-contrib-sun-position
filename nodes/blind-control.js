@@ -160,7 +160,7 @@ function angleNorm_(angle) {
  * @param {*} now the current timestamp
  */
 function getSunPosition_(node, now) {
-    const sunPosition = node.positionConfig.getSunCalc(now, true);
+    const sunPosition = node.positionConfig.getSunCalc(now, false, false);
     // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
     sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
@@ -952,20 +952,30 @@ module.exports = function (RED) {
             });
         }
 
+        node.done = (text, msg) => {
+            if (text) {
+                return this.error(text, msg);
+            }
+            return null;
+        };
         /**
          * handles the input of a message object to the node
          */
-        this.on('input', function (msg) {
+        this.on('input', function (msg, send, done) {
+            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
+            send = send || this.send;
+            done = done || this.done;
             try {
                 node.debug(`input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
+                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
                         text: 'Node not properly configured!!'
                     });
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
                     return null;
                 }
                 node.nowarn = {};
@@ -983,7 +993,7 @@ module.exports = function (RED) {
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
                 // check if the message contains any oversteering data
-                let ruleId = NaN;
+                let ruleId = -1; // NaN;
 
                 const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
                 if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
@@ -1067,31 +1077,34 @@ module.exports = function (RED) {
                     };
                     topic = hlp.topicReplace(config.topic, topicAttrs);
                 }
+
                 if ((!isNaN(node.tempData.level)) &&
-                    (node.tempData.level !== node.previousData.level ||
-                    node.reason.code !== node.previousData.reasonCode ||
-                    ruleId !== node.previousData.usedRule)) {
+                    ((node.tempData.level !== node.previousData.level) ||
+                    (node.reason.code !== node.previousData.reasonCode) ||
+                    (ruleId !== node.previousData.usedRule))) {
                     msg.payload = blindCtrl.level;
                     if (node.outputs > 1) {
-                        node.send([msg, { topic, payload: blindCtrl}]);
+                        send([msg, { topic, payload: blindCtrl}]); // node.send([msg, { topic, payload: blindCtrl}]);
                     } else {
                         msg.topic = topic || msg.topic;
                         msg.blindCtrl = blindCtrl;
-                        node.send(msg, null);
+                        send(msg, null); // node.send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    node.send([null, { topic, payload: blindCtrl}]);
+                    send([null, { topic, payload: blindCtrl}]); // node.send([null, { topic, payload: blindCtrl}]);
                 }
                 node.previousData.usedRule = ruleId;
+                done();
                 return null;
             } catch (err) {
-                node.error(RED._('blind-control.errors.error', err));
+                // node.error(RED._('blind-control.errors.error', err));
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text: 'internal error'
                 });
+                done(RED._('blind-control.errors.error', err), msg);
             }
             return null;
         });

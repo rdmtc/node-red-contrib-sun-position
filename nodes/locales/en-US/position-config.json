@@ -23,6 +23,7 @@
             "timesun":"sun time",
             "timemoon":"moon time",
             "suncalc":"sun calculation",
+            "suninsky":"sun in the sky (percent)",
             "mooncalc":"moon calculation",
             "moonPhase":"moon phase",
             "moonPhaseCheck": "moon phase",
