@@ -6,6 +6,13 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const util = require('util');
 
+const cRuleUntil = 0;
+const cRuleFrom = 1;
+const cRuleAbsolute = 0;
+const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
+const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
+const cRuleMinReset = 3; // ⭳✋ reset minimum
+const cRuleMaxReset = 4; // ⭱️✋ reset maximum
 /*************************************************************************************************************************/
 /**
  * check if a level has a valid value
@@ -339,13 +346,13 @@ module.exports = function (RED) {
      * @param {*} msg message object
      * @param {*} now current timestamp
      */
-    function checkOverrideReset(node, msg, now, prio) {
+    function checkOverrideReset(node, msg, now, prioOk) {
         if (node.blindData.overwrite &&
             node.blindData.overwrite.expires &&
             (node.blindData.overwrite.expireTs < now.getTime())) {
             blindPosOverwriteReset(node);
         }
-        if ((!prio) || (node.blindData.overwrite.priority <= prio)) {
+        if (prioOk) {
             hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
                 val => {
                     node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
@@ -387,14 +394,23 @@ module.exports = function (RED) {
      */
     function checkBlindPosOverwrite(node, msg, now) {
         node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority'], ['prio', 'alarm'], p => {
-            checkOverrideReset(node, msg, now, p);
+        let priook = false;
+        const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
+            if (prioMustEqual) {
+                priook = (node.blindData.overwrite.priority === p);
+            } else {
+                priook = (node.blindData.overwrite.priority <= p);
+            }
+            checkOverrideReset(node, msg, now, priook);
             return p;
         }, () => {
-            checkOverrideReset(node, msg, now);
+            checkOverrideReset(node, msg, now, true);
             return 0;
         });
-        if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
+
+        if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && !priook) {
+        // if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             setOverwriteReason(node);
             node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
@@ -444,7 +460,8 @@ module.exports = function (RED) {
             if (Number.isFinite(expire) || (prio <= 0)) {
                 // will set expiring if prio is 0 or if expire is explizit defined
                 setExpiringOverwrite(node, now, expire);
-            } else if ((prio > node.blindData.overwrite.priority) || (!node.blindData.overwrite.expireTs)) {
+            } else if ((!prioMustEqual && (node.blindData.overwrite.priority < prio)) || (!node.blindData.overwrite.expireTs)) {
+                // priook
                 // no expiring on prio change or no existing expiring
                 setExpiringOverwrite(node, now, -1);
             }
@@ -673,49 +690,72 @@ module.exports = function (RED) {
         // node.debug('first loop ' + node.rules.count);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 1) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (rule.timeOp === 1) { continue; } // - Until: timeOp === 0
-            const res = fkt(rule, r => (r >= nowNr));
+            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            // if (rule.timeOp === cRuleFrom) { continue; }
+            let res = null;
+            if (rule.timeOp === cRuleFrom) {
+                res = fkt(rule, r => (r <= nowNr));
+            } else {
+                res = fkt(rule, r => (r >= nowNr));
+            }
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (res.levelOp === 1) {
+                if (ruleSel && res.timeOp === cRuleUntil) {
+                    // es gibt bereits eine treffende Regel
+                    // nachfolgende BIS Regel wird nicht mehr ausgeführt
+                    // nachfolgende VON Regeln werden ausgeführt (wenn sie zeitlich passen)
+                    break;
+                }
+                if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
-                } else if (res.levelOp === 2) {
+                } else if (res.levelOp === cRuleMaxOversteer) {
                     ruleSelMax = res;
-                } else if (res.levelOp === 3) {
+                } else if (res.levelOp === cRuleMinReset) {
                     ruleSelMin = null;
-                } else if (res.levelOp === 4) {
+                } else if (res.levelOp === cRuleMaxReset) {
                     ruleSelMax = null;
                 } else {
                     ruleSel = res;
-                    break;
                 }
             }
         }
-        if (!ruleSel) {
+
+        if (!ruleSel || (ruleSel.timeOp === cRuleFrom) ) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== 0) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                if (rule.timeOp === 0) { continue; } // - From: timeOp === 1
-                const res = fkt(rule, r => (r <= nowNr));
+                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                // if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                // const res = fkt(rule, r => (r <= nowNr));
+                let res = null;
+                if (rule.timeOp === cRuleUntil) {
+                    res = fkt(rule, r => (r >= nowNr));
+                } else {
+                    res = fkt(rule, r => (r <= nowNr));
+                }
                 if (res) {
                     node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (res.levelOp === 1) {
+                    if (ruleSel && rule.timeOp === cRuleFrom) {
+                        // es gibt bereits eine treffende Regel
+                        // vorhergehende VON Regel wird nicht mehr ausgeführt
+                        // vorhergehende BIS Regeln werden ausgeführt (wenn sie zeitlich passen)
+                        break;
+                    }
+                    if (res.levelOp === cRuleMinOversteer) {
                         ruleSelMin = res;
-                    } else if (res.levelOp === 2) {
+                    } else if (res.levelOp === cRuleMaxOversteer) {
                         ruleSelMax = res;
-                    } else if (res.levelOp === 3) {
+                    } else if (res.levelOp === cRuleMinReset) {
                         ruleSelMin = null;
-                    } else if (res.levelOp === 4) {
+                    } else if (res.levelOp === cRuleMaxReset) {
                         ruleSelMax = null;
                     } else {
                         ruleSel = res;
-                        break;
                     }
                 }
             }
         }
+
         if (ruleSelMin) {
             node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             livingRuleData.hasMinimum = true;
@@ -751,7 +791,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             node.reason.code = 4;
 
-            if (ruleSel.levelOp === 0) { // absolute rule
+            if (ruleSel.levelOp === cRuleAbsolute) { // absolute rule
                 livingRuleData.active = true;
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, node.blindData.levelDefault);
             } else {
@@ -1153,8 +1193,8 @@ module.exports = function (RED) {
             for (let i = 0; i < node.rules.count; ++i) {
                 const rule = node.rules.data[i];
                 rule.pos = i + 1;
-                rule.timeOp = Number(rule.timeOp) || 0;
-                rule.levelOp = Number(rule.levelOp) || 0;
+                rule.timeOp = Number(rule.timeOp) || cRuleUntil;
+                rule.levelOp = Number(rule.levelOp) || cRuleAbsolute;
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
                 if (!rule.timeLimited) {

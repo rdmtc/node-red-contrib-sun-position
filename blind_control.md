@@ -174,10 +174,11 @@ under the simplest assumption starting from the bearing representing the perpend
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
 * **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is equal or higher then the priority of the existing override. The message priority can be defined by
-    * a property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority` with a valid numeric value
-    * or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
+  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is __equal or higher__ then the priority of the existing override. The message priority can be defined by
+    * a property `msg.prio`, `msg.payload.prio`, `msg.priority`, `msg.payload.priority`, `msg.privilege` or `msg.payload.privilege` with a valid numeric value
+    * or when the `msg.topic` contains `prio`, `privilege` or `alarm` and the value of `msg.payload` is a valid numeric value
     * a higher number is a higher priority. So prio 1 is the lowest priority
+    * If in the message a property  `msg.exactPriority`, `msg.payload.exactPriority`, `msg.exactPrivilege` or `msg.payload.exactPrivilege` is set to true or when the `msg.topic` contains `exactPrio` or `exactPrivilege` then the existing override will only reset if the absolute value of the priority of the message is __equal__ then the priority of the existing override.
 * **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
   * If an override is already active a new message changes the blind level if the **priority** of the existing override allows this.
     * The override could also limited if  a property `msg.ignoreSameValue`, `msg.payload.ignoreSameValue` is set to true an existing override will only be changed if the position value differs from the active override position.
@@ -185,8 +186,8 @@ The Input is for triggering the calculation and for setting overwrites of the bl
   * The **position** of the special value of `-1` will set the node in override mode without sending any message out until override **position** is changed, override is **expired** or **reset**.
     * Example: This could be useful if a blind is controlled by an external button, where not known the blind position after button press. In this case the Button-event can used to trigger the override-mode of the node without knowing the real **position** of the blind.
 * **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
-  * A message property `msg.prio`, `msg.payload.prio`, `msg.priority` or `msg.payload.priority` with a valid numeric value
-  * or when the `msg.topic` contains `prio` or `alarm` and the value of `msg.payload` is a valid numeric value
+  * A message property  `msg.prio`, `msg.payload.prio`, `msg.priority`, `msg.payload.priority`, `msg.privilege` or `msg.payload.privilege` with a valid numeric value
+  * or when the `msg.topic` contains`prio`, `privilege` or `alarm`  and the value of `msg.payload` is a valid numeric value
   * A `boolean` value `true` is considered as numeric `1`
   * a higher number is a higher priority. So prio 1 is the lowest priority
 * **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
@@ -199,6 +200,7 @@ Useful to know:
 
 * If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
 * An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
+  * if additional **exactPrio** is defined, then the message priority must be __equal__ to the existing priority.
 * There are a special configuration for rules with a condition, with which it can be prevented to allow overrides.
 * an incoming message with `msg.mode`, `msg.payload.mode` or where the `msg.topic` contains `setMode` and the value of `msg.payload` is a valid number, will allow to set the mode of the sun control.
   * a value of `0` will deactivate sun control, `1` will set to maximize sunlight (Winter) and `2` will set to restrict sunlight (Summer).

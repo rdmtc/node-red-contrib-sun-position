@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 0.5.1: enhancement release
+
+- add possibility to have a exact priority comparisons (e.g. only reset a specific priority)
+- ...
+
 #### 0.4.10: critical bug fix
 
 - fixed bug #57 with the code prepared for Node-Red 1.0. The recommend way for be backward compatible doesn't work. This is [also](https://discourse.nodered.org/t/knowing-when-a-node-is-done-new-node-api/15737/9) confirmed by @knolleary.
