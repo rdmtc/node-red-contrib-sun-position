@@ -962,9 +962,10 @@ module.exports = function (RED) {
          * handles the input of a message object to the node
          */
         this.on('input', function (msg, send, done) {
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || this.send;
-            done = done || this.done;
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) {if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
+
             try {
                 node.debug(`input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
@@ -1084,14 +1085,14 @@ module.exports = function (RED) {
                     (ruleId !== node.previousData.usedRule))) {
                     msg.payload = blindCtrl.level;
                     if (node.outputs > 1) {
-                        send([msg, { topic, payload: blindCtrl}]); // node.send([msg, { topic, payload: blindCtrl}]);
+                        send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);
                     } else {
                         msg.topic = topic || msg.topic;
                         msg.blindCtrl = blindCtrl;
                         send(msg, null); // node.send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    send([null, { topic, payload: blindCtrl}]); // node.send([null, { topic, payload: blindCtrl}]);
+                    send([null, { topic, payload: blindCtrl }]); // node.send([null, { topic, payload: blindCtrl }]);
                 }
                 node.previousData.usedRule = ruleId;
                 done();

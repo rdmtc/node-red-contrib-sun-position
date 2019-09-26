@@ -302,24 +302,21 @@ module.exports = function (RED) {
         this.on('close', () => {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
+                node.timeOutObj = null;
             }
 
             if (node.intervalObj) {
                 clearInterval(node.intervalObj);
+                node.intervalObj = null;
             }
             // tidy up any state
         });
-        this.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
 
         this.on('input', function (msg, send, done) { // eslint-disable-line complexity
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || this.send;
-            done = done || this.done;
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
+
             try {
                 msg._srcid = node.id;
                 node.debug('input ');
@@ -383,7 +380,6 @@ module.exports = function (RED) {
                     next: config.addPayload3Next,
                     days: config.addPayload3Days
                 });
-
                 send(msg); // node.send(msg);
                 done();
                 return null;
@@ -454,6 +450,19 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('time-inject', timeInjectNode);
+
+    timeInjectNode.prototype.close = function () {
+        if (this.timeOutObj) {
+            clearTimeout(this.onceTimeout);
+            this.onceTimeout = null;
+            if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
+        }
+        if (this.intervalObj) {
+            clearInterval(this.intervalObj);
+            this.intervalObj = null;
+            if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
+        }
+    };
 
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
         const node = RED.nodes.getNode(req.params.id);

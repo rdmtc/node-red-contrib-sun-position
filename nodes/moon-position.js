@@ -20,18 +20,13 @@ module.exports = function (RED) {
         this.topic = config.topic || '';
         this.rules = config.rules || [];
         this.azimuthPos = {};
-        this.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
         const node = this;
 
         this.on('input', function (msg, send, done) {
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || this.send;
-            done = done || this.done;
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
+
             try {
                 const errorStatus = '';
                 let now = new Date();
@@ -111,7 +106,7 @@ module.exports = function (RED) {
                         text
                     });
                 }
-                send(ports); // this.send(ports); // Warning change msg object!!
+                send(ports); // this.send(ports);
                 done();
                 return null;
             } catch (err) {
