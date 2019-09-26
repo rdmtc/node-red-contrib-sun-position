@@ -952,12 +952,6 @@ module.exports = function (RED) {
             });
         }
 
-        node.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
         /**
          * handles the input of a message object to the node
          */

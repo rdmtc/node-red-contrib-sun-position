@@ -1,5 +1,9 @@
 # node-red-contrib-sun-position
 
+#### 0.4.10: critical bug fix
+
+- fixed bug with the code prepared for Node-Red 1.0. The recommend way for be backward compatible doesn't work. This is [also](https://discourse.nodered.org/t/knowing-when-a-node-is-done-new-node-api/15737/9) confirmed by @knolleary.
+
 #### 0.4.9: small enhancement
 
 - implemented #52 as height of the sun in the sky in percent (0~100 with 100% being at solarnoon and 0% being completely down) - altithudePercent
