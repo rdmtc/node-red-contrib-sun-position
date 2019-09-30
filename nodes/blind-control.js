@@ -353,7 +353,7 @@ module.exports = function (RED) {
             blindPosOverwriteReset(node);
         }
         if (prioOk) {
-            hlp.getMsgBoolValue(msg, 'reset', 'resetOverwrite',
+            hlp.getMsgBoolValue(msg, ['reset','resetOverwrite'], 'resetOverwrite',
                 val => {
                     node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
                     if (val) {
