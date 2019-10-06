@@ -647,11 +647,20 @@
                         data.conditional = (data.validOperandAType !== 'none');
 
                         containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
+                        const $row0 = $('<div/>').appendTo(containerRow);
                         const $row1 = $('<div/>').appendTo(containerRow);
                         const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const $row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const $row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
                         const $row5 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+                        // #region row0
+                        addLabel($row0, 'node-input-rule-name', 'fa fa-ellipsis-h', ((data.name && data.name.length > 0)? data.name : 'rule ' + containerIndex));
+                        const $btn = $('<a />', {
+                            class: 'node-button-item-edit btn ui-button ui-widget ui-corner-all'
+                        }).append('<i class= "fa fa-pencil-square-o" >').appendTo($row0);
+                        const finalspan1 = $('<span/>',{style:'float: right;margin-top: 6px;'}).appendTo($row0);
+                        finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
+                        // #endregion row0
                         // #region row1 - property -- lbl - [none / Bedingung] - [compare]
                         addLabel($row1, 'node-input-rule-condOpA', 'fa fa-puzzle-piece', node._('blind-control.label.ruleCondition'));
                         const $validOperandA = $('<input/>', {
@@ -747,6 +756,11 @@
                         $levelOperator.val(data.levelOp || 0);
                         // #endregion row5
                         // #region fields changes
+                        $btn.button();
+                        $btn.click(() => {
+                            console.log('$btn.click');
+                            _dialogLoadData(containerIndex, containerRow, data);
+                        });
                         $time.change(() => {
                             const opType = $time.typedInput('type');
                             if (opType === types.Undefined.value) {
@@ -1235,9 +1249,248 @@
                         resizeContainer();
                     }, 1500);
                 }
+
+                // #region dialog
+                const $dialog = $('#dialog-edit-rule').dialog({
+                    title: node._('german-holidays.label.dialogtitle'),
+                    autoOpen: false,
+                    resizable: true,
+                    height: Math.min(900, $(window).height() * 0.8),
+                    width: Math.min(850, $(window).width() * 0.8),
+                    modal: true,
+                    closeOnEscape: true,
+                    buttons: {
+                        Ok: _dialogSaveData,
+                        Cancel() {
+                            $dialog.dialog( 'close' );
+                        }
+                    },
+                    close() {
+                        // document.forms["dialog-edit-day-form"].reset();
+                        // $dialogForm[0].reset();
+                    }
+                });
+                /* const $dialogForm = $dialog.find( 'form' );
+                $dialogForm.on( 'submit', event => {
+                    event.preventDefault();
+                    _dialogSaveData();
+                }); */
+                // #endregion dialog
+
+                const $dialogName = $('#dialog-input-rule-name');
+                const $dialogCondOperator = $('#dialog-input-rule-condAOperator');
+                const $dialogCondAOperand = $('#dialog-input-rule-condAOperand');
+                const $dialogCondBOperand = $('#dialog-input-rule-condBOperand');
+                const $dialogTimeOperator = $('#dialog-input-rule-time-operator');
+                const $dialogTime = $('#dialog-input-rule-time');
+                const $dialogOffset = $('#dialog-input-rule-offset');
+                const $dialogMultiplier = $('#dialog-input-rule-multiplier');
+                const $dialogLevel = $('#dialog-input-rule-level');
+                const $dialogLevelOperator = $('#dialog-input-rule-level-operator');
+                let dialogData = null;
+                let dialogDataIndex = -1;
+                let dialogInitialized = false;
+                /**
+                 * Build the dialog
+                 */
+                function initDialog() {
+                    console.log('initDialog');
+                    if (dialogInitialized) {
+                        return;
+                    }
+                    $dialogCondAOperand.typedInput({
+                        default: types.Unlimited.value,
+                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon]
+                    });
+                    $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
+
+                    appendOptions(node, $dialogCondOperator, 'comparator');
+
+                    $dialogCondBOperand.typedInput({
+                        default: 'num',
+                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                    });
+                    $dialogCondBOperand.typedInput('width', '70%');
+
+                    $dialogTimeOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
+                    $dialogTimeOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
+
+                    $dialogTime.typedInput({
+                        default: types.Undefined,
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                    });
+                    $dialogTime.typedInput('width', '40%');
+
+                    $dialogOffset.typedInput({
+                        default: (types.Undefined.value),
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                    }).change(() => { $dialogTime.change(); });
+                    $dialogOffset.typedInput('width', '40%');
+
+                    appendOptions(node, $dialogMultiplier, 'multiplier', data => (data.id > 0));
+
+                    $dialogLevel.typedInput({
+                        default: types.LevelFix.value,
+                        types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
+                    });
+                    $dialogLevel.typedInput('width', '40%');
+
+                    $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
+                    $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
+                    $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    $dialogLevelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelResetMin')));
+                    $dialogLevelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelResetMax')));
+
+                    $dialogTime.change(() => {
+                        const opType = $dialogTime.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            $dialogTimeOperator.hide();
+                            $('#dialog-row-offset').hide();
+                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $dialogTimeOperator.show();
+                            $('#dialog-row-offset').show();
+                        } else {
+                            $dialogTimeOperator.show();
+                            $('#dialog-row-offset').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $dialogTime.attr('timedata', dv.getTime());
+                            } else {
+                                $('#dialog-row-time').attr('title', d.value);
+                                $dialogTime.attr('timedata', '0');
+                            }
+                        }, {
+                            kind: 'getTimeData',
+                            config : $nodeConfig.val(),
+                            type: opType,
+                            value: $dialogTime.typedInput('value'),
+                            offsetType: $dialogOffset.typedInput('type'),
+                            offset: $dialogOffset.typedInput('value'),
+                            multiplier: $dialogMultiplier.val()
+                        });
+                        resizeContainer();
+                    });
+                    $dialogCondAOperand.change(() => {
+                        const propType = $dialogCondAOperand.typedInput('type');
+                        if (propType === 'none') {
+                            $dialogCondOperator.val(selFields.comparator[0].id);
+                            $dialogCondOperator.hide();
+                            $('#dialog-row-condB').hide();
+                        } else if ( propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                            $dialogCondOperator.show();
+                            $dialogCondOperator.attr('disabled', true);
+                            $dialogCondOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('#dialog-row-condB').hide();
+                        } else {
+                            $dialogCondOperator.show();
+                            $dialogCondOperator.attr('disabled', false);
+                            const condOp = $dialogCondOperator.val();
+                            let operatorCount = 1;
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('#dialog-row-condB').show();
+                            } else {
+                                $('#dialog-row-condB').hide();
+                            }
+
+                        }
+                        $dialogCondBOperand.change();
+                        resizeContainer();
+                    });
+                    $dialogCondOperator.change(() => { $dialogCondAOperand.change(); });
+
+                    dialogInitialized=true;
+                }
+
+                /**
+                 * load the data from the rule
+                 */
+                function _dialogLoadData(containerIndex, containerRow, data) {
+                    dialogData = containerRow;
+                    dialogDataIndex = containerIndex;
+                    console.log('_dialogLoadData');
+                    if (!dialogInitialized) {
+                        initDialog();
+                    }
+                    console.log('_dialogLoadData load');
+
+                    $dialogName.val(data.name || 'rule ' + containerIndex);
+                    $dialogCondOperator.val(data.validOperator || selFields.comparator[0].id);
+                    console.log('_dialogLoadData 1');
+
+                    $dialogCondAOperand.typedInput('type',data.validOperandAType);
+                    $dialogCondAOperand.typedInput('value',data.validOperandAValue);
+                    console.log('_dialogLoadData 2');
+
+                    $dialogCondBOperand.typedInput('type',data.validOperandBType);
+                    $dialogCondBOperand.typedInput('value',data.validOperandBValue);
+                    console.log('_dialogLoadData 3');
+
+                    $dialogTimeOperator.val(data.timeOp || 0);
+                    console.log('_dialogLoadData 4');
+
+                    $dialogTime.typedInput('type',data.timeType);
+                    $dialogTime.typedInput('value',data.timeValue);
+                    console.log('_dialogLoadData 5');
+
+                    $dialogOffset.typedInput('type',data.offsetType);
+                    $dialogOffset.typedInput('value',data.offsetValue);
+                    console.log('_dialogLoadData 6');
+
+                    $dialogMultiplier.val(data.multiplier || 60000);
+                    $dialogLevel.typedInput('type',data.levelType);
+                    $dialogLevel.typedInput('value',data.levelValue);
+                    $dialogLevelOperator.val(data.levelOp || 0);
+
+                    console.log('_dialogLoadData change');
+                    $dialogCondAOperand.change();
+                    $dialogTime.change();
+                    console.log('_dialogLoadData open');
+                    $dialog.dialog('open');
+                }
+
+                /**
+                 * save the data of the rule back
+                 */
+                function _dialogSaveData() {
+                    const data = {
+                        index: dialogDataIndex,
+                        name:$dialogName.val(),
+                        timeValue: $dialogTime.typedInput('value'),
+                        timeType: $dialogTime.typedInput('type'),
+                        timeOp: $dialogTimeOperator.val(),
+                        timeOpText: $dialogTimeOperator.find('option:selected').text(),
+                        levelValue: $dialogLevel.typedInput('value'),
+                        levelType: $dialogLevel.typedInput('type'),
+                        levelOp: $dialogLevelOperator.val(),
+                        levelOpText: $dialogLevelOperator.find('option:selected').text(),
+                        offsetValue: $dialogOffset.typedInput('value'),
+                        offsetType: $dialogOffset.typedInput('type'),
+                        multiplier:  $dialogMultiplier.val(),
+                        validOperandAValue: $dialogCondAOperand.typedInput('value'),
+                        validOperandAType: $dialogCondAOperand.typedInput('type'),
+                        validOperator: $dialogCondOperator.val(),
+                        validOperatorText: $dialogCondOperator.find('option:selected').text(),
+                        validOperandBValue: $dialogCondBOperand.typedInput('value'),
+                        validOperandBType: $dialogCondBOperand.typedInput('type')
+                    };
+                    jQuery.data( dialogData, 'foo', JSON.stringify(data) );
+                }
+            // #endregion dialog
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
+                .done((_data, _textStatus,  _bmvfj) => {
                     try {
                         setup(node);
                     } catch (err) {
@@ -1506,11 +1759,44 @@
     </div>
 
     <!-- DIALOG ######################################################################## -->
-    <!--
-    <div id="dialog-select-context" title="Select Channel and Datapoint">
+    <div id="dialog-select-context" class="red-ui-editor" title="Select Channel and Datapoint">
         <div id="config-lookup-tree"></div>
     </div>
-    -->
+
+    <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
+        <div class="dialog-row">
+            <label for="dialog-input-rule-name"><span data-i18n="blind-control.label.name"></span></label>
+            <input type="text" name="dialog-input-rule-name" id="dialog-input-rule-name" class="ipalone">
+        </div>
+        <div class="dialog-row" id="dialog-row-condA">
+            <label for="dialog-input-rule-condAOperand"><i class="fa fa-puzzle-piece"></i><span data-i18n="blind-control.label.ruleCondition"></span></label>
+            <input type="text" name="dialog-input-rule-condAOperand" id="dialog-input-rule-condAOperand" class="ipMain">
+            <select class="ipadd dialog-input-rule-condOperator" id="dialog-input-rule-condAOperator">
+            </select>
+        </div>
+        <div class="dialog-row" id="dialog-row-condB">
+            <label for="dialog-input-rule-condBOperand"><i class="fa fa-ellipsis-h"></i><span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
+            <input  class="ipMain" type="text" name="dialog-input-rule-condBOperand" id="dialog-input-rule-condBOperand">
+        </div>
+        <div class="dialog-row" id="dialog-row-time">
+            <label for="dialog-input-rule-time"><i class="fa fa-clock-o"></i><span data-i18n="blind-control.label.time"></span></label>
+            <select class="ipadd dialog-input-rule-time-operator" id="dialog-input-rule-time-operator" >
+            </select>
+            <input type="text" name="dialog-input-rule-time" class="ipMain dialog-input-rule-time" id="ipMain dialog-input-rule-time" value="">
+        </div>
+        <div class="dialog-row" id="dialog-row-offset">
+            <label for="dialog-input-rule-offset"><i class="fa fa-plus"></i><span data-i18n="blind-control.label.offset"></span></label>
+            <input type="text" id="dialog-input-rule-offset" name="dialog-input-rule-offset" class="ipMain dialog-input-rule-offset" value="">
+            <select class="ipadd dialog-input-rule-multiplier" id="dialog-input-rule-multiplier" >
+            </select>
+        </div>
+        <div class="dialog-row" id="dialog-row-level">
+            <label for="dialog-input-rule-level"><i class="fa fa-window-maximize"></i><span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
+            <input type="text" name="dialog-input-rule-level" id="dialog-input-rule-level" class="ipMain">
+            <select class="ipadd dialog-input-rule-level-operator" id="dialog-input-rule-level-operator">
+            </select>
+        </div>
+    </div>
 </script>
 <style>
     hr {
@@ -1603,5 +1889,28 @@
     .ui-spinner input {
         border: none !important;
         width: 95% !important;
+    }
+
+    .dialog-row {
+        clear: both;
+        color: #555;
+        margin-bottom: 10px;
+    }
+    .dialog-row label {
+        display: inline-block;
+        width: 20%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ipalone {
+        width: 75%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ipMain {
+        width: 50%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ipadd {
+        width: 25%;
+        margin-bottom: 0px !important;
     }
 </style>
