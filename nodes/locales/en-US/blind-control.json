@@ -49,7 +49,8 @@
 			"splitOutput": "dual (2)",
 			"btnAdd": "add",
 			"btnSort": "sort",
-			"btnClear": "clear"
+			"btnClear": "clear",
+			"dialogtitle":"Edit Rule"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",

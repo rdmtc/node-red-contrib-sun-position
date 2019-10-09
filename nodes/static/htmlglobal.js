@@ -749,9 +749,10 @@ function addLabel(parent, forEl, symb, text) { // eslint-disable-line no-unused-
         lbl.append('<i class= "' + symb + '" >');
     }
     if (text) {
-        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;*/">' + text + '</span>');
+        const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;">' + text + '</span>');
         lbl.append(span);
-        lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
+        // lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
+        lbl.attr('style', 'margin-left: 5px; width:auto;');
     } else {
         lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:20px');
     }
