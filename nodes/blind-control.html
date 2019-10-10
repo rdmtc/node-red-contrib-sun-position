@@ -252,8 +252,19 @@
             result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
             result += data.timeOpText;
             result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
-            if (data.offsetType !== 'none') {
+            if (data.offsetType && data.offsetType !== 'none') {
                 result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
+                result += ' * ' + data.multiplier/1000 + 's';
+            }
+
+            if (data.timeBType && data.timeBType !== 'none') {
+                result += ' ' + data.timeBOpText + ' ';
+                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                result += ' ' + getValueLabel(node, data.timeBType, data.timeBValue);
+                if (data.offsetBType && data.offsetBType !== 'none') {
+                    result += ' offset ' + getValueLabel(node, data.offsetBType, data.offsetBValue);
+                    result += ' * ' + data.multiplierB/1000 + 's';
+                }
             }
             result += '</div>';
         }
@@ -272,6 +283,8 @@
      * @param {jQuery} rule - the jQuery selector of the rule
      */
     function resizeRule(rule) {
+        return;
+        /*
         try {
             const newWidth = rule.width() - 10;
             // row1
@@ -317,6 +330,7 @@
         } catch (ex) {
             console.log(ex); // eslint-disable-line
         }
+        /* */
     }
 
     RED.nodes.registerType('blind-control', {
@@ -824,7 +838,10 @@
                         data.index = containerIndex;
                         data.timeType = (data.timeType || types.TimeEntered.value);
                         data.timeValue = (data.timeValue || '');
-                        data.timeLimited = (data.timeType !== 'none');
+                        data.timeBType = (data.timeBType || types.Undefined.value);
+                        data.timeBValue = (data.timeValue || '');
+                        data.timeBOp = (data.timeBOp || 0);
+
                         data.name = data.name || 'rule ' + (containerIndex + 1);
                         if (!data.description) {
                             data.description = getRuleDescription(node, selFields, data);
@@ -1288,20 +1305,8 @@
                         Cancel() {
                             $dialog.dialog( 'close' );
                         }
-                    },
-                    close() {
-                        // $dialog.dialog('destroy').remove();
-                        // document.forms["dialog-edit-day-form"].reset();
-                        // $dialogForm[0].reset();
                     }
                 });
-
-                /* const $dialogForm = $dialog.find( 'form' );
-                $dialogForm.on( 'submit', event => {
-                    event.preventDefault();
-                    _dialogSaveData();
-                }); */
-
 
                 const $dialogName = $dialog.find('#dlg-ip-blindctl-rule-name');
                 let $dialogData = null;
@@ -1317,42 +1322,65 @@
                 });
                 $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
-                console.log('finished ',$dialogCondAOperand);
                 const $dialogCondOperator = $dialog.find('#dlg-ip-blindctl-rule-condAOperator');
                 appendOptions(node, $dialogCondOperator, 'comparator');
                 const $dialogCondBOperand = $dialog.find('#dlg-ip-blindctl-rule-condBOperand');
-                if ($dialogCondBOperand.typedInput( 'instance' ) !== undefined) {
+                /* if ($dialogCondBOperand.typedInput( 'instance' ) !== undefined) {
                     $dialogCondBOperand.typedInput('destroy').remove();
-                }
+                } */
                 $dialogCondBOperand.typedInput({
                     default: 'num',
                     types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                 });
                 $dialogCondBOperand.typedInput('width', '70%');
 
-                const $dialogTimeOperator = $dialog.find('#dlg-ip-blindctl-rule-time-operator');
-                $dialogTimeOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
-                $dialogTimeOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
+                const $dialogTimeAOperator = $dialog.find('#dlg-ip-blindctl-rule-timeA-operator');
+                $dialogTimeAOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
+                $dialogTimeAOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
 
-                const $dialogTimeInput = $dialog.find('#dlg-ip-blindctl-rule-time');
-                if ($dialogTimeInput.typedInput( 'instance' ) !== undefined) {
-                    $dialogTimeInput.typedInput('destroy');
-                }
-                $dialogTimeInput.typedInput({
+                const $dialogTimeAInput = $dialog.find('#dlg-ip-blindctl-rule-timeA');
+                /* if ($dialogTimeAInput.typedInput( 'instance' ) !== undefined) {
+                    $dialogTimeAInput.typedInput('destroy');
+                } */
+                $dialogTimeAInput.typedInput({
                     default: types.Undefined,
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                 });
-                $dialogTimeInput.typedInput('width', '40%');
+                $dialogTimeAInput.typedInput('width', '40%');
 
-                const $dialogOffset = $dialog.find('#dlg-ip-blindctl-rule-offset');
-                $dialogOffset.typedInput({
+                const $dialogTimeAOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeA');
+                $dialogTimeAOffset.typedInput({
                     default: (types.Undefined.value),
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
-                }).change(() => { $dialogTimeInput.change(); });
-                $dialogOffset.typedInput('width', '40%');
+                }).change(() => { $dialogTimeAInput.change(); });
+                $dialogTimeAOffset.typedInput('width', '40%');
 
-                const $dialogMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier');
-                appendOptions(node, $dialogMultiplier, 'multiplier', data => (data.id > 0));
+                const $dialogTimeAMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeA');
+                appendOptions(node, $dialogTimeAMultiplier, 'multiplier', data => (data.id > 0));
+
+                const $dialogTimeBOperator = $dialog.find('#dlg-ip-blindctl-rule-timeB-operator');
+                $dialogTimeBOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeLatest')));
+                $dialogTimeBOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeEarliest')));
+
+                const $dialogTimeBInput = $dialog.find('#dlg-ip-blindctl-rule-timeB');
+                /* if ($dialogTimeBInput.typedInput('instance') !== undefined) {
+                    $dialogTimeBInput.typedInput('destroy');
+                } */
+                $dialogTimeBInput.typedInput({
+                    default: types.Undefined,
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                });
+                $dialogTimeBInput.typedInput('width', '40%');
+
+                const $dialogTimeBOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeB');
+                $dialogTimeBOffset.typedInput({
+                    default: (types.Undefined.value),
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                }).change(() => { $dialogTimeBInput.change(); });
+                $dialogTimeBOffset.typedInput('width', '40%');
+
+                const $dialogTimeBMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeB');
+                appendOptions(node, $dialogTimeBMultiplier, 'multiplier', data => (data.id > 0));
 
                 const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
                 $dialogLevel.typedInput({
@@ -1368,45 +1396,84 @@
                 $dialogLevelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelResetMin')));
                 $dialogLevelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelResetMax')));
 
-                $dialogTimeInput.change(() => {
-                    const opType = $dialogTimeInput.typedInput('type');
+                $dialogTimeAInput.change(() => {
+                    const opType = $dialogTimeAInput.typedInput('type');
                     if (opType === types.Undefined.value) {
-                        $dialogTimeOperator.hide();
-                        $('#dialog-row-offset').hide();
+                        $dialogTimeAOperator.hide();
+                        $('#dialog-row-offset-timeA').hide();
                     } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                        $dialogTimeOperator.show();
-                        $('#dialog-row-offset').show();
+                        $dialogTimeAOperator.show();
+                        $('#dialog-row-offset-timeA').show();
                     } else {
-                        $dialogTimeOperator.show();
-                        $('#dialog-row-offset').hide();
+                        $dialogTimeAOperator.show();
+                        $('#dialog-row-offset-timeA').hide();
                     }
                     getBackendData(d => {
                         if (d.value && d.value !== 'none') {
                             const dv = new Date(d.value);
                             $('#dialog-row-time').attr('title', bdDateToTime(dv));
-                            $dialogTimeInput.attr('timedata', dv.getTime());
+                            $dialogTimeAInput.attr('timedata', dv.getTime());
                         } else {
                             $('#dialog-row-time').attr('title', d.value);
-                            $dialogTimeInput.attr('timedata', '0');
+                            $dialogTimeAInput.attr('timedata', '0');
                         }
                     }, {
                         kind: 'getTimeData',
                         config : $nodeConfig.val(),
                         type: opType,
-                        value: $dialogTimeInput.typedInput('value'),
-                        offsetType: $dialogOffset.typedInput('type'),
-                        offset: $dialogOffset.typedInput('value'),
-                        multiplier: $dialogMultiplier.val()
+                        value: $dialogTimeAInput.typedInput('value'),
+                        offsetType: $dialogTimeAOffset.typedInput('type'),
+                        offset: $dialogTimeAOffset.typedInput('value'),
+                        multiplier: $dialogTimeAMultiplier.val()
                     });
-                    resizeContainer();
+                    $dialogTimeBInput.change();
                 });
+
+                $dialogTimeBInput.change(() => {
+                    const opAType = $dialogTimeAInput.typedInput('type');
+                    if (opAType === types.Undefined.value) {
+                        $dialogTimeBInput.typedInput('type', types.Undefined.value);
+                        $('#dialog-row-offset-timeB').hide();
+                    } else {
+                        const opType = $dialogTimeBInput.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            $dialogTimeBOperator.hide();
+                            $('#dialog-row-offset-timeB').hide();
+                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $dialogTimeBOperator.show();
+                            $('#dialog-row-offset-timeB').show();
+                        } else {
+                            $dialogTimeBOperator.show();
+                            $('#dialog-row-offset-timeB').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $dialogTimeBInput.attr('timedata', dv.getTime());
+                            } else {
+                                $('#dialog-row-time').attr('title', d.value);
+                                $dialogTimeBInput.attr('timedata', '0');
+                            }
+                        }, {
+                            kind: 'getTimeData',
+                            config: $nodeConfig.val(),
+                            type: opType,
+                            value: $dialogTimeBInput.typedInput('value'),
+                            offsetType: $dialogTimeBOffset.typedInput('type'),
+                            offset: $dialogTimeBOffset.typedInput('value'),
+                            multiplier: $dialogTimeBMultiplier.val()
+                        });
+                    }
+                });
+
                 $dialogCondAOperand.change(() => {
                     const propType = $dialogCondAOperand.typedInput('type');
                     if (propType === 'none') {
                         $dialogCondOperator.val(selFields.comparator[0].id);
                         $dialogCondOperator.hide();
                         $('#dialog-row-condB').hide();
-                    } else if ( propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                    } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
                         $dialogCondOperator.show();
                         $dialogCondOperator.attr('disabled', true);
                         $dialogCondOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
@@ -1433,7 +1500,6 @@
 
                     }
                     $dialogCondBOperand.change();
-                    resizeContainer();
                 });
                 $dialogCondOperator.change(() => { $dialogCondAOperand.change(); });
 
@@ -1447,21 +1513,42 @@
                     console.log('_dialogLoadData',data);
                     $dialogName.val(data.name);
                     $dialogCondOperator.val(data.validOperator || selFields.comparator[0].id);
+                    console.log('_dialogLoadData dialogCondAOperand');
                     $dialogCondAOperand.typedInput('type',data.validOperandAType);
                     $dialogCondAOperand.typedInput('value',data.validOperandAValue);
+                    console.log('_dialogLoadData dialogCondBOperand');
                     $dialogCondBOperand.typedInput('type',data.validOperandBType);
                     $dialogCondBOperand.typedInput('value',data.validOperandBValue);
-                    $dialogTimeOperator.val(data.timeOp || 0);
-                    $dialogTimeInput.typedInput('type',data.timeType);
-                    $dialogTimeInput.typedInput('value',data.timeValue);
-                    $dialogOffset.typedInput('type',data.offsetType);
-                    $dialogOffset.typedInput('value',data.offsetValue);
-                    $dialogMultiplier.val(data.multiplier || 60000);
+                    console.log('_dialogLoadData dialogTimeAOperator');
+                    $dialogTimeAOperator.val(data.timeOp || 0);
+                    console.log('_dialogLoadData dialogTimeAInput', data.timeType, data.timeValue);
+                    $dialogTimeAInput.typedInput('type',data.timeType);
+                    $dialogTimeAInput.typedInput('value',data.timeValue);
+                    console.log('_dialogLoadData dialogTimeAOffset');
+                    $dialogTimeAOffset.typedInput('type',data.offsetType);
+                    $dialogTimeAOffset.typedInput('value',data.offsetValue);
+                    console.log('_dialogLoadData dialogTimeAMultiplier');
+                    $dialogTimeAMultiplier.val(data.multiplier || 60000);
+                    console.log('_dialogLoadData dialogTimeBOperator');
+                    $dialogTimeBOperator.val(data.timeBOp || 0);
+                    console.log('_dialogLoadData dialogTimeBInput');
+                    $dialogTimeBInput.typedInput('type', data.timeBType);
+                    $dialogTimeBInput.typedInput('value', data.timeBValue);
+                    console.log('_dialogLoadData dialogTimeBOffset');
+                    $dialogTimeBOffset.typedInput('type', data.offsetBType);
+                    $dialogTimeBOffset.typedInput('value', data.offsetBValue);
+                    console.log('_dialogLoadData dialogTimeBMultiplier');
+                    $dialogTimeBMultiplier.val(data.multiplierB || 60000);
+                    console.log('_dialogLoadData dialogLevel');
                     $dialogLevel.typedInput('type',data.levelType);
                     $dialogLevel.typedInput('value',data.levelValue);
+                    console.log('_dialogLoadData dialogLevelOperator');
                     $dialogLevelOperator.val(data.levelOp || 0);
                     $dialogCondAOperand.change();
-                    $dialogTimeInput.change();
+                    console.log('_dialogLoadData dialogTimeAInput change');
+                    $dialogTimeAInput.change();
+                    $dialogTimeBInput.change();
+                    console.log('_dialogLoadData ende');
                     $dialog.dialog('open');
                 }
 
@@ -1472,17 +1559,24 @@
                     const data = {
                         index: dialogDataIndex,
                         name:$dialogName.val(),
-                        timeValue: $dialogTimeInput.typedInput('value'),
-                        timeType: $dialogTimeInput.typedInput('type'),
-                        timeOp: $dialogTimeOperator.val(),
-                        timeOpText: $dialogTimeOperator.find('option:selected').text(),
+                        timeValue: $dialogTimeAInput.typedInput('value'),
+                        timeType: $dialogTimeAInput.typedInput('type'),
+                        timeOp: $dialogTimeAOperator.val(),
+                        timeOpText: $dialogTimeAOperator.find('option:selected').text(),
+                        offsetValue: $dialogTimeAOffset.typedInput('value'),
+                        offsetType: $dialogTimeAOffset.typedInput('type'),
+                        multiplier:  $dialogTimeAMultiplier.val(),
+                        timeBValue: $dialogTimeBInput.typedInput('value'),
+                        timeBType: $dialogTimeBInput.typedInput('type'),
+                        timeBOp: $dialogTimeBOperator.val(),
+                        timeBOpText: $dialogTimeBOperator.find('option:selected').text(),
+                        offsetBValue: $dialogTimeBOffset.typedInput('value'),
+                        offsetBType: $dialogTimeBOffset.typedInput('type'),
+                        multiplierB: $dialogTimeBMultiplier.val(),
                         levelValue: $dialogLevel.typedInput('value'),
                         levelType: $dialogLevel.typedInput('type'),
                         levelOp: $dialogLevelOperator.val(),
                         levelOpText: $dialogLevelOperator.find('option:selected').text(),
-                        offsetValue: $dialogOffset.typedInput('value'),
-                        offsetType: $dialogOffset.typedInput('type'),
-                        multiplier:  $dialogMultiplier.val(),
                         validOperandAValue: $dialogCondAOperand.typedInput('value'),
                         validOperandAType: $dialogCondAOperand.typedInput('type'),
                         validOperator: $dialogCondOperator.val(),
@@ -1494,6 +1588,7 @@
                     $dialogData.data('ruleData', JSON.stringify(data));
                     $('#rule-name-'+dialogDataIndex).text(data.name);
                     $('#rule-description-'+dialogDataIndex).html(data.description);
+                    resizeContainer();
                 }
             // #endregion dialog
             }; // setup
@@ -1793,16 +1888,28 @@
             <label for="dlg-ip-blindctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
             <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" >
         </div>
-        <div class="dialog-row" id="dialog-row-time">
-            <label for="dlg-ip-blindctl-rule-time"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
-            <select id="dlg-ip-blindctl-rule-time-operator" class="ipadd dlg-ip-blindctl-rule-time-operator" >
+        <div class="dialog-row" id="dialog-row-timeA">
+            <label for="dlg-ip-blindctl-rule-timeA"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
+            <select id="dlg-ip-blindctl-rule-timeA-operator" class="ipadd dlg-ip-blindctl-rule-timeA-operator" >
             </select>
-            <input type="text" id="dlg-ip-blindctl-rule-time" class="ipMain dlg-ip-blindctl-rule-time" value="">
+            <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="">
         </div>
-        <div class="dialog-row" id="dialog-row-offset">
-            <label for="dlg-ip-blindctl-rule-offset"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset"class="ipMain dlg-ip-blindctl-rule-offset" value="">
-            <select  id="dlg-ip-blindctl-rule-multiplier" class="ipadd dlg-ip-blindctl-rule-multiplier" >
+        <div class="dialog-row" id="dialog-row-offset-timeA">
+            <label for="dlg-ip-blindctl-rule-offset-timeA"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeA" class="ipadd dlg-ip-blindctl-rule-multiplier-timeA" >
+            </select>
+        </div>
+        <div class="dialog-row" id="dialog-row-timeB">
+            <label for="dlg-ip-blindctl-rule-timeB"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.timeB"></span></label>
+            <select id="dlg-ip-blindctl-rule-timeB-operator" class="ipadd dlg-ip-blindctl-rule-timeB-operator" >
+            </select>
+            <input type="text" id="dlg-ip-blindctl-rule-timeB" class="ipMain dlg-ip-blindctl-rule-timeB" value="">
+        </div>
+        <div class="dialog-row" id="dialog-row-offset-timeB">
+            <label for="dlg-ip-blindctl-rule-offset-timeB"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeB"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeB"class="ipMain dlg-ip-blindctl-rule-offset-timeB" value="">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeB" class="ipadd dlg-ip-blindctl-rule-multiplier-timeB" >
             </select>
         </div>
         <div class="dialog-row" id="dialog-row-level">
@@ -1933,12 +2040,12 @@
     }
     .blind-rule-name-span {
         /* font-weight: bolder; */
-        width: 120px;
+        width: 30%; /* width: 120px; */
         float: left;
     }
     .blind-rule-description-span {
         font-size: 10px;
-        margin-left: 122px;
+        margin-left: 30%; /* margin-left: 122px; */
         margin-right: 5px;
     }
     .blind-rule-finalspan {

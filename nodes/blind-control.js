@@ -9,6 +9,8 @@ const util = require('util');
 const cRuleUntil = 0;
 const cRuleFrom = 1;
 const cRuleAbsolute = 0;
+const cRuleEarliest = 0;
+const cRuleLatest = 1;
 const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
 const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
 const cRuleMinReset = 3; // ⭳✋ reset minimum
@@ -669,14 +671,35 @@ module.exports = function (RED) {
                 next : false,
                 now
             });
-
             if (rule.timeData.error) {
                 hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
                 return null;
             } else if (!rule.timeData.value) {
                 throw new Error('Error can not calc time!');
             }
-            rule.timeData.num = rule.timeData.value.getTime();
+            if (rule.timeBType !== 'none') {
+                rule.timeAltData = node.positionConfig.getTimeProp(node, msg, {
+                    type: rule.timeBType,
+                    value: rule.timeBValue,
+                    offsetType: rule.offsetBType,
+                    offset: rule.offsetBValue,
+                    multiplier: rule.multiplierB,
+                    next: false,
+                    now
+                });
+                if (rule.timeAltData.error) {
+                    hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeAltData.error }), undefined, rule.timeAltData.error);
+                    rule.timeData.num = rule.timeData.value.getTime();
+                } else if (!rule.timeAltData.value) {
+                    throw new Error('Error can not calc Alt time!');
+                } else if (rule.timeBOp === cRuleLatest) {
+                    rule.timeData.num = Math.max(rule.timeData.value.getTime(), rule.timeAltData.value.getTime());
+                } else {
+                    rule.timeData.num = Math.min(rule.timeData.value.getTime(), rule.timeAltData.value.getTime());
+                }
+            } else {
+                rule.timeData.num = rule.timeData.value.getTime();
+            }
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (cmp(rule.timeData.num)) {
                 return rule;
@@ -691,21 +714,23 @@ module.exports = function (RED) {
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            // if (rule.timeOp === cRuleFrom) { continue; }
+            if (rule.timeOp === cRuleFrom) { continue; }
+            const res = fkt(rule, r => (r >= nowNr));
+            /*
             let res = null;
             if (rule.timeOp === cRuleFrom) {
                 res = fkt(rule, r => (r <= nowNr));
             } else {
                 res = fkt(rule, r => (r >= nowNr));
-            }
+            } */
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (ruleSel && res.timeOp === cRuleUntil) {
+                /* if (ruleSel && res.timeOp === cRuleUntil) {
                     // es gibt bereits eine treffende Regel
                     // nachfolgende BIS Regel wird nicht mehr ausgeführt
                     // nachfolgende VON Regeln werden ausgeführt (wenn sie zeitlich passen)
                     break;
-                }
+                } */
                 if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
                 } else if (res.levelOp === cRuleMaxOversteer) {
@@ -716,6 +741,7 @@ module.exports = function (RED) {
                     ruleSelMax = null;
                 } else {
                     ruleSel = res;
+                    break;
                 }
             }
         }
@@ -725,22 +751,22 @@ module.exports = function (RED) {
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                // if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
-                // const res = fkt(rule, r => (r <= nowNr));
-                let res = null;
+                if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                const res = fkt(rule, r => (r <= nowNr));
+                /* let res = null;
                 if (rule.timeOp === cRuleUntil) {
                     res = fkt(rule, r => (r >= nowNr));
                 } else {
                     res = fkt(rule, r => (r <= nowNr));
-                }
+                } */
                 if (res) {
                     node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (ruleSel && rule.timeOp === cRuleFrom) {
+                    /* if (ruleSel && rule.timeOp === cRuleFrom) {
                         // es gibt bereits eine treffende Regel
                         // vorhergehende VON Regel wird nicht mehr ausgeführt
                         // vorhergehende BIS Regeln werden ausgeführt (wenn sie zeitlich passen)
                         break;
-                    }
+                    } */
                     if (res.levelOp === cRuleMinOversteer) {
                         ruleSelMin = res;
                     } else if (res.levelOp === cRuleMaxOversteer) {
@@ -751,6 +777,7 @@ module.exports = function (RED) {
                         ruleSelMax = null;
                     } else {
                         ruleSel = res;
+                        break;
                     }
                 }
             }
@@ -1195,11 +1222,20 @@ module.exports = function (RED) {
                 rule.pos = i + 1;
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
                 rule.levelOp = Number(rule.levelOp) || cRuleAbsolute;
+                rule.timeBOp = Number(rule.timeBOp) || cRuleEarliest;
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
+                rule.multiplier = rule.multiplier || 60000;
+                rule.multiplierB = rule.multiplierB || 60000;
+                rule.offsetType = rule.offsetType || 'none';
+                rule.offsetBType = rule.offsetBType || 'none';
+                rule.timeBType = rule.timeBType || 'none';
+                rule.timeBValue = (rule.timeValue || '');
+
                 if (!rule.timeLimited) {
                     rule.timeOp = -1;
                 }
+
                 if (rule.conditional) {
                     rule.conditonData = {
                         result: false,
@@ -1216,13 +1252,13 @@ module.exports = function (RED) {
                         rule.conditonData.thresholdNameShort = getNameShort(rule.validOperandBType, rule.validOperandBValue);
                     }
                 }
-                if (rule.timeOp === 0) {
-                    node.rules.lastUntil = i; // from rule
-                    node.rules.checkUntil = true; // from rule
+                if (rule.timeOp === cRuleUntil) {
+                    node.rules.lastUntil = i;
+                    node.rules.checkUntil = true;
                 }
-                if (rule.timeOp === 1 && !node.rules.checkFrom) {
+                if (rule.timeOp === cRuleFrom && !node.rules.checkFrom) {
                     node.rules.firstFrom = i;
-                    node.rules.checkFrom = true; // from rule
+                    node.rules.checkFrom = true;
                 }
             }
             /* if (node.rules.data) {
