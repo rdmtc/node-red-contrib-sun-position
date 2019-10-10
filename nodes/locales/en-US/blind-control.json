@@ -49,6 +49,7 @@
 			"showEnhSettings": "Enhanced settings",
 			"outputs": "Outputs",
 			"offset":"time offset",
+			"offset-timeB":"alt. time offset",
 			"singleOutput": "single (1)",
 			"splitOutput": "dual (2)",
 			"btnAdd": "add",

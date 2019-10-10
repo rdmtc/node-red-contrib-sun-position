@@ -99,6 +99,7 @@
      */
     function clipValueLength(v, l) {
         l = l || 15;
+        v = String(v);
         if (v.length > l) {
             return v.slice(0, (l - 3)) + '...';
         }
@@ -112,6 +113,7 @@
      */
     function clipValueLengthRight(v, l) {
         l = l || 15;
+        v = String(v);
         if (v.length > l) {
             return '...' + v.slice(-(l - 3));
         }
@@ -130,12 +132,21 @@
     function getValueLabel(node, t, v, l) { // eslint-disable-line complexity
         l = l || 20;
 
+        if (t === 'levelFixed') {
+            if (!v) {
+                return '?%';
+            }
+            return String(v);
+        }
+
         if (t === 'jsonata') {
+            v = String(v);
             if (v.length < l) { return v; }
             return node._('node-red-contrib-sun-position/position-config:common.label.jsonata');
         }
 
         if (t === 'json') {
+            v = String(v);
             if (v.length < l) { return  v; }
             return node._('node-red-contrib-sun-position/position-config:common.label.json');
         }
@@ -225,112 +236,63 @@
      */
     function getRuleDescription(node, selFields, data) {
         let result = '';
-        if (data.validOperandAType && data.validOperandAType !== 'none') {
-            result += '<div>';
-            result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
-            result += getValueLabel(node, data.validOperandAType,data.validOperandAValue);
-            // result += RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
-            result += ' ' + data.validOperatorText;
-            let operatorCount = 1;
-            const fields = selFields.comparator;
-            const fieldsLength = fields.length;
-            for (let index = 0; index < fieldsLength; index++) {
-                const el = fields[index];
-                if (el.id === data.validOperator) {
-                    operatorCount = el.operatorCount;
-                    break;
-                }
-            }
-
-            if (operatorCount > 1) {
-                result += ' ' + getValueLabel(node, data.validOperandBType, data.validOperandBValue);
-            }
-            result += '</div>';
-        }
-        if (data.timeType && data.timeType !== 'none') {
-            result += '<div>';
-            result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
-            result += data.timeOpText;
-            result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
-            if (data.offsetType && data.offsetType !== 'none') {
-                result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
-                result += ' * ' + data.multiplier/1000 + 's';
-            }
-
-            if (data.timeBType && data.timeBType !== 'none') {
-                result += ' ' + data.timeBOpText + ' ';
-                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
-                result += ' ' + getValueLabel(node, data.timeBType, data.timeBValue);
-                if (data.offsetBType && data.offsetBType !== 'none') {
-                    result += ' offset ' + getValueLabel(node, data.offsetBType, data.offsetBValue);
-                    result += ' * ' + data.multiplierB/1000 + 's';
-                }
-            }
-            result += '</div>';
-        }
-        result += '<div>';
-        if (typeof data.levelType !== 'undefined') {
-            result += data.levelOpText + ' ' + getValueLabel(node, data.levelType, data.levelValue);
-        } else {
-            result += '-';
-        }
-        result += '</div>';
-        return result;
-    }
-
-    /**
-     * resizes a rule
-     * @param {jQuery} rule - the jQuery selector of the rule
-     */
-    function resizeRule(rule) {
-        return;
-        /*
         try {
-            const newWidth = rule.width() - 10;
-            // row1
-            const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
-            const $validOperandA = rule.find('.node-input-rule-condOpA');
-            const $validOperator = rule.find('.node-input-rule-condOperator');
-            $validOperandALbl.width('auto');
-            if ($validOperator.is(':visible')) {
-                $validOperator.width(100);
-                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
-            } else {
-                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
+            if (data.validOperandAType && data.validOperandAType !== 'none') {
+                result += '<div>';
+                result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
+                result += getValueLabel(node, data.validOperandAType,data.validOperandAValue);
+                // result += RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
+                result += ' ' + data.validOperatorText;
+                let operatorCount = 1;
+                const fields = selFields.comparator;
+                const fieldsLength = fields.length;
+                for (let index = 0; index < fieldsLength; index++) {
+                    const el = fields[index];
+                    if (el.id === data.validOperator) {
+                        operatorCount = el.operatorCount;
+                        break;
+                    }
+                }
+
+                if (operatorCount > 1) {
+                    result += ' ' + getValueLabel(node, data.validOperandBType, data.validOperandBValue);
+                }
+                result += '</div>';
             }
-            // row2
-            const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
-            const $validOperandB = rule.find('.node-input-rule-condOpB');
-            $validOperandBLbl.width('auto');
-            $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
-            // row3
-            const $timeLbl = rule.find('.node-input-rule-time-lbl');
-            const $timeOperator = rule.find('.node-input-rule-time-operator');
-            const $time = rule.find('.node-input-rule-time');
-            $timeLbl.width('auto');
-            if ($timeOperator.is(':visible')) {
-                $timeOperator.width(70);
-                $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
-            } else {
-                $time.typedInput('width', (newWidth - $timeLbl.width() - 33));
+            if (data.timeType && data.timeType !== 'none') {
+                result += '<div>';
+                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                result += data.timeOpText;
+                result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
+                if (data.offsetType && data.offsetType !== 'none') {
+                    result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
+                    result += ' * ' + data.multiplier/1000 + 's';
+                }
+
+                if (data.timeBType && data.timeBType !== 'none') {
+                    result += ' ' + data.timeBOpText + ' ';
+                    result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                    result += ' ' + getValueLabel(node, data.timeBType, data.timeBValue);
+                    if (data.offsetBType && data.offsetBType !== 'none') {
+                        result += ' offset ' + getValueLabel(node, data.offsetBType, data.offsetBValue);
+                        result += ' * ' + data.multiplierB/1000 + 's';
+                    }
+                }
+                result += '</div>';
             }
-            // row4
-            const $offset = rule.find('.node-input-rule-offset');
-            const $multiplier = rule.find('.node-input-rule-multiplier');
-            const multiplierWidth = 125;
-            $multiplier.width(multiplierWidth);
-            $offset.typedInput('width', (newWidth - multiplierWidth - 50));
-            // row5
-            const $levelLbl = rule.find('.node-input-rule-level-lbl');
-            const $level = rule.find('.node-input-rule-level');
-            const $levelOperator = rule.find('.node-input-rule-level-operator');
-            $levelLbl.width('auto');
-            $levelOperator.width(40);
-            $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
-        } catch (ex) {
-            console.log(ex); // eslint-disable-line
+            result += '<div>';
+            if (typeof data.levelType !== 'undefined') {
+                result += data.levelOpText + ' ' + getValueLabel(node, data.levelType, data.levelValue);
+            } else {
+                result += '-';
+            }
+            result += '</div>';
+        } catch (err) {
+            console.log(err.message); // eslint-disable-line no-console
+            console.log(err.stack); // eslint-disable-line no-console
+            result = 'Error: "' + err.message + '"';
         }
-        /* */
+        return result;
     }
 
     RED.nodes.registerType('blind-control', {
@@ -836,16 +798,23 @@
                             data.name = 'empty';
                         }
                         data.index = containerIndex;
-                        data.timeType = (data.timeType || types.TimeEntered.value);
+                        data.name = data.name || 'rule ' + (containerIndex + 1);
+                        data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
+                        data.validOperandBType = (data.validOperandBType || types.Unlimited.value);
+                        data.timeOp = (data.timeOp || 0);
+                        data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
                         data.timeValue = (data.timeValue || '');
+                        data.offsetType = (data.offsetType || types.Undefined.value);
+                        data.multiplier = (data.multiplier || 60000);
                         data.timeBType = (data.timeBType || types.Undefined.value);
                         data.timeBValue = (data.timeValue || '');
                         data.timeBOp = (data.timeBOp || 0);
-
-                        data.name = data.name || 'rule ' + (containerIndex + 1);
-                        if (!data.description) {
-                            data.description = getRuleDescription(node, selFields, data);
-                        }
+                        data.offsetBType = (data.offsetBType || types.Undefined.value);
+                        data.multiplierB = (data.multiplierB || 60000);
+                        data.levelType = (data.levelType || types.LevelFix.value);
+                        data.levelValue = (data.levelValue || 'closed (min)');
+                        data.levelOp = (data.levelOp || 0);
+                        data.levelOpText = data.levelOpText ||  node._('blind-control.label.ruleLevelAbs');
                         containerRow.data('ruleData', JSON.stringify(data));
                         containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
                         const $row0 = $('<div/>').appendTo(containerRow);
@@ -856,6 +825,9 @@
                             id: 'rule-name-'+containerIndex,
                             class: 'blind-rule-name-span'
                         }).append(data.name).appendTo( $div );
+                        if (!data.description) {
+                            data.description = getRuleDescription(node, selFields, data);
+                        }
                         $('<div />', {
                             id: 'rule-description-'+containerIndex,
                             class: 'blind-rule-description-span'
@@ -873,7 +845,6 @@
                         });
                     },
                     addButton: false,
-                    resizeItem: resizeRule,
                     sortable: true,
                     removable: true,
                     scrollOnAdd: true,
@@ -1280,10 +1251,6 @@
                     }
                     setTimeout(() => {
                         $('#node-input-sunControlMode').change();
-                        const postrules = $('#node-input-rule-container').editableList('items');
-                        postrules.each(function (_i) {
-                            resizeRule($(this));
-                        });
                         resizeContainer();
                     }, 1500);
                 }
@@ -1315,7 +1282,6 @@
                  * Build the dialog
                  */
                 const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
-                console.log('init 1 ',$dialogCondAOperand,$dialogCondAOperand.typedInput( 'instance' ));
                 $dialogCondAOperand.typedInput({
                     default: types.Unlimited.value,
                     types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon]
@@ -1325,9 +1291,6 @@
                 const $dialogCondOperator = $dialog.find('#dlg-ip-blindctl-rule-condAOperator');
                 appendOptions(node, $dialogCondOperator, 'comparator');
                 const $dialogCondBOperand = $dialog.find('#dlg-ip-blindctl-rule-condBOperand');
-                /* if ($dialogCondBOperand.typedInput( 'instance' ) !== undefined) {
-                    $dialogCondBOperand.typedInput('destroy').remove();
-                } */
                 $dialogCondBOperand.typedInput({
                     default: 'num',
                     types: ['num', 'str', 'bool', 'flow', 'global', 'env']
@@ -1339,9 +1302,6 @@
                 $dialogTimeAOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
 
                 const $dialogTimeAInput = $dialog.find('#dlg-ip-blindctl-rule-timeA');
-                /* if ($dialogTimeAInput.typedInput( 'instance' ) !== undefined) {
-                    $dialogTimeAInput.typedInput('destroy');
-                } */
                 $dialogTimeAInput.typedInput({
                     default: types.Undefined,
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -1363,18 +1323,15 @@
                 $dialogTimeBOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeEarliest')));
 
                 const $dialogTimeBInput = $dialog.find('#dlg-ip-blindctl-rule-timeB');
-                /* if ($dialogTimeBInput.typedInput('instance') !== undefined) {
-                    $dialogTimeBInput.typedInput('destroy');
-                } */
                 $dialogTimeBInput.typedInput({
-                    default: types.Undefined,
+                    default: types.Undefined.value,
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                 });
                 $dialogTimeBInput.typedInput('width', '40%');
 
                 const $dialogTimeBOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeB');
                 $dialogTimeBOffset.typedInput({
-                    default: (types.Undefined.value),
+                    default: types.Undefined.value,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
                 }).change(() => { $dialogTimeBInput.change(); });
                 $dialogTimeBOffset.typedInput('width', '40%');
@@ -1431,10 +1388,13 @@
 
                 $dialogTimeBInput.change(() => {
                     const opAType = $dialogTimeAInput.typedInput('type');
-                    if (opAType === types.Undefined.value) {
+                    if (!opAType || opAType === types.Undefined.value) {
                         $dialogTimeBInput.typedInput('type', types.Undefined.value);
+                        $dialogTimeBOperator.hide();
+                        $('#dialog-row-timeB').hide();
                         $('#dialog-row-offset-timeB').hide();
                     } else {
+                        $('#dialog-row-timeB').show();
                         const opType = $dialogTimeBInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             $dialogTimeBOperator.hide();
@@ -1507,48 +1467,40 @@
                  * load the data from the rule
                  */
                 function _dialogLoadData(containerIndex, containerRow) {
-                    $dialogData = containerRow;
-                    dialogDataIndex = containerIndex;
-                    const data = JSON.parse($dialogData.data('ruleData'));
-                    console.log('_dialogLoadData',data);
-                    $dialogName.val(data.name);
-                    $dialogCondOperator.val(data.validOperator || selFields.comparator[0].id);
-                    console.log('_dialogLoadData dialogCondAOperand');
-                    $dialogCondAOperand.typedInput('type',data.validOperandAType);
-                    $dialogCondAOperand.typedInput('value',data.validOperandAValue);
-                    console.log('_dialogLoadData dialogCondBOperand');
-                    $dialogCondBOperand.typedInput('type',data.validOperandBType);
-                    $dialogCondBOperand.typedInput('value',data.validOperandBValue);
-                    console.log('_dialogLoadData dialogTimeAOperator');
-                    $dialogTimeAOperator.val(data.timeOp || 0);
-                    console.log('_dialogLoadData dialogTimeAInput', data.timeType, data.timeValue);
-                    $dialogTimeAInput.typedInput('type',data.timeType);
-                    $dialogTimeAInput.typedInput('value',data.timeValue);
-                    console.log('_dialogLoadData dialogTimeAOffset');
-                    $dialogTimeAOffset.typedInput('type',data.offsetType);
-                    $dialogTimeAOffset.typedInput('value',data.offsetValue);
-                    console.log('_dialogLoadData dialogTimeAMultiplier');
-                    $dialogTimeAMultiplier.val(data.multiplier || 60000);
-                    console.log('_dialogLoadData dialogTimeBOperator');
-                    $dialogTimeBOperator.val(data.timeBOp || 0);
-                    console.log('_dialogLoadData dialogTimeBInput');
-                    $dialogTimeBInput.typedInput('type', data.timeBType);
-                    $dialogTimeBInput.typedInput('value', data.timeBValue);
-                    console.log('_dialogLoadData dialogTimeBOffset');
-                    $dialogTimeBOffset.typedInput('type', data.offsetBType);
-                    $dialogTimeBOffset.typedInput('value', data.offsetBValue);
-                    console.log('_dialogLoadData dialogTimeBMultiplier');
-                    $dialogTimeBMultiplier.val(data.multiplierB || 60000);
-                    console.log('_dialogLoadData dialogLevel');
-                    $dialogLevel.typedInput('type',data.levelType);
-                    $dialogLevel.typedInput('value',data.levelValue);
-                    console.log('_dialogLoadData dialogLevelOperator');
-                    $dialogLevelOperator.val(data.levelOp || 0);
-                    $dialogCondAOperand.change();
-                    console.log('_dialogLoadData dialogTimeAInput change');
-                    $dialogTimeAInput.change();
-                    $dialogTimeBInput.change();
-                    console.log('_dialogLoadData ende');
+                    try {
+                        // console.log('_dialogLoadData',containerIndex,containerRow);
+                        $dialogData = containerRow;
+                        dialogDataIndex = containerIndex;
+                        const data = JSON.parse($dialogData.data('ruleData'));
+                        $dialogName.val(data.name);
+                        $dialogCondOperator.val(data.validOperator || selFields.comparator[0].id);
+                        $dialogCondAOperand.typedInput('type',data.validOperandAType);
+                        $dialogCondAOperand.typedInput('value',data.validOperandAValue);
+                        $dialogCondBOperand.typedInput('type',data.validOperandBType);
+                        $dialogCondBOperand.typedInput('value',data.validOperandBValue);
+                        $dialogTimeAOperator.val(data.timeOp || 0);
+                        $dialogTimeAInput.typedInput('type',data.timeType);
+                        $dialogTimeAInput.typedInput('value',data.timeValue);
+                        $dialogTimeAOffset.typedInput('type',data.offsetType);
+                        $dialogTimeAOffset.typedInput('value',data.offsetValue);
+                        $dialogTimeAMultiplier.val(data.multiplier || 60000);
+                        $dialogTimeBOperator.val(data.timeBOp || 0);
+                        $dialogTimeBInput.typedInput('type', data.timeBType);
+                        $dialogTimeBInput.typedInput('value', data.timeBValue);
+                        $dialogTimeBOffset.typedInput('type', data.offsetBType);
+                        $dialogTimeBOffset.typedInput('value', data.offsetBValue);
+                        $dialogTimeBMultiplier.val(data.multiplierB || 60000);
+                        $dialogLevel.typedInput('type',data.levelType);
+                        $dialogLevel.typedInput('value',data.levelValue);
+                        $dialogLevelOperator.val(data.levelOp || 0);
+                        $dialogCondAOperand.change();
+                        $dialogTimeAInput.change();
+                        $dialogTimeBInput.change();
+                    } catch (err) {
+                        console.log(err.message); // eslint-disable-line no-console
+                        console.log(err.stack); // eslint-disable-line no-console
+                        $dialogName.val(err.message);
+                    }
                     $dialog.dialog('open');
                 }
 
@@ -1636,16 +1588,6 @@
         },
         oneditdelete() {
             $('#dialog-edit-rule').dialog('destroy').remove();
-        },
-        oneditresize(_size) {
-            try {
-                const postrules = $('#node-input-rule-container').editableList('items');
-                postrules.each(function(_i) {
-                    resizeRule($(this));
-                });
-            } catch (err) {
-                console.debug(err); // eslint-disable-line no-console
-            }
         }
     });</script>
 
