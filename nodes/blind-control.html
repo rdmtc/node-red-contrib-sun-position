@@ -130,7 +130,7 @@
      * @returns {string} the value clipped to the given length
      */
     function getValueLabel(node, t, v, l) { // eslint-disable-line complexity
-        l = l || 20;
+        l = l || 30;
 
         if (t === 'levelFixed') {
             if (!v) {
@@ -655,13 +655,13 @@
 
                 types.LevelEntered = {
                     value: 'num',
-                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),
                     icon: 'red/images/typedInput/09.png',
                     validate(v) { return validateBlindPos(this, v); }
                 };
                 types.LevelFix = {
                     value: 'levelFixed',
-                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix'),
                     icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
                     options: [{
                         value: 'open (max)',
@@ -688,6 +688,13 @@
                         value: 'closed (min)',
                         label: node._('blind-control.typeOptions.0')
                     }]
+                };
+                types.LevelDefSun = {
+                    value: 'levelDefaultOrSun',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.leveldefsun'),
+                    icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
+                    validate(v) { return validateBlindPos(this, v); },
+                    hasValue: false
                 };
                 /**
                  * save rules
@@ -798,7 +805,6 @@
                             data.name = 'empty';
                         }
                         data.index = containerIndex;
-                        data.name = data.name || 'rule ' + (containerIndex + 1);
                         data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
                         data.validOperandBType = (data.validOperandBType || types.Unlimited.value);
                         data.timeOp = (data.timeOp || 0);
@@ -824,7 +830,7 @@
                         $('<span />', {
                             id: 'rule-name-'+containerIndex,
                             class: 'blind-rule-name-span'
-                        }).append(data.name).appendTo( $div );
+                        }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
                         if (!data.description) {
                             data.description = getRuleDescription(node, selFields, data);
                         }
@@ -1342,7 +1348,7 @@
                 const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
                 $dialogLevel.typedInput({
                     default: types.LevelFix.value,
-                    types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
+                    types: [types.LevelFix, types.LevelEntered, types.LevelDefSun,'msg', 'flow', 'global', 'env']
                 });
                 $dialogLevel.typedInput('width', '40%');
 
@@ -1538,7 +1544,7 @@
                     };
                     data.description = getRuleDescription(node, selFields, data);
                     $dialogData.data('ruleData', JSON.stringify(data));
-                    $('#rule-name-'+dialogDataIndex).text(data.name);
+                    $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
                     $('#rule-description-'+dialogDataIndex).html(data.description);
                     resizeContainer();
                 }
@@ -1818,27 +1824,27 @@
     <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
         <div class="dialog-row">
             <label for="dlg-ip-blindctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-name" class="ipalone">
+            <input type="text" id="dlg-ip-blindctl-rule-name" class="ipalone" data-i18n="[placeholder]blind-control.placeholder.name">
         </div>
         <div class="dialog-row" id="dialog-row-condA">
             <label for="dlg-ip-blindctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-condAOperand" class="ipMain">
+            <input type="text" id="dlg-ip-blindctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
             <select id="dlg-ip-blindctl-rule-condAOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row" id="dialog-row-condB">
             <label for="dlg-ip-blindctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" >
+            <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
         </div>
         <div class="dialog-row" id="dialog-row-timeA">
             <label for="dlg-ip-blindctl-rule-timeA"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
             <select id="dlg-ip-blindctl-rule-timeA-operator" class="ipadd dlg-ip-blindctl-rule-timeA-operator" >
             </select>
-            <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="">
+            <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.time">
         </div>
         <div class="dialog-row" id="dialog-row-offset-timeA">
             <label for="dlg-ip-blindctl-rule-offset-timeA"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="">
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
             <select  id="dlg-ip-blindctl-rule-multiplier-timeA" class="ipadd dlg-ip-blindctl-rule-multiplier-timeA" >
             </select>
         </div>
@@ -1846,17 +1852,17 @@
             <label for="dlg-ip-blindctl-rule-timeB"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.timeB"></span></label>
             <select id="dlg-ip-blindctl-rule-timeB-operator" class="ipadd dlg-ip-blindctl-rule-timeB-operator" >
             </select>
-            <input type="text" id="dlg-ip-blindctl-rule-timeB" class="ipMain dlg-ip-blindctl-rule-timeB" value="">
+            <input type="text" id="dlg-ip-blindctl-rule-timeB" class="ipMain dlg-ip-blindctl-rule-timeB" value="" data-i18n="[placeholder]blind-control.placeholder.time">
         </div>
         <div class="dialog-row" id="dialog-row-offset-timeB">
             <label for="dlg-ip-blindctl-rule-offset-timeB"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeB"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeB"class="ipMain dlg-ip-blindctl-rule-offset-timeB" value="">
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeB"class="ipMain dlg-ip-blindctl-rule-offset-timeB" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
             <select  id="dlg-ip-blindctl-rule-multiplier-timeB" class="ipadd dlg-ip-blindctl-rule-multiplier-timeB" >
             </select>
         </div>
         <div class="dialog-row" id="dialog-row-level">
             <label for="dlg-ip-blindctl-rule-level"><i class="fa fa-window-maximize"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain">
+            <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>

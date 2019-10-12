@@ -28,7 +28,8 @@
             "moonPhase":"moon phase",
             "moonPhaseCheck": "moon phase",
             "levelfix":"Level",
-            "levelfree": "Level entered"
+            "levelfree": "Level entered",
+            "leveldefsun": "Level Default Or Sun control"
         },
         "typeOptions": {
             "moonRise": "moon rise",
