@@ -173,6 +173,11 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: 'msg.value',
             hasValue: false
         },
+        MsgPayloadByTopic: {
+            value: 'msgPayloadByTopic',
+            label: 'msg.payload if topic contains',
+            hasValue: true
+        },
         TimeEntered: {
             value: 'entered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
@@ -908,6 +913,8 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
         res = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
+        res = 'msg.payload';
+    } else if (data.type === 'msgPayloadByTopic') {
         res = 'msg.payload';
     } else if (data.type === 'msgTs') {
         res = 'msg.ts';

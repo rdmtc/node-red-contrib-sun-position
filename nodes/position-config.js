@@ -617,6 +617,10 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
+            } else if (data.type === 'msgPayloadByTopic') {
+                if (msg.topic && msg.topic.includes(msg.value)) {
+                    result = msg.payload;
+                }
             } else if (data.type === 'pdsCalcData') {
                 result = this.getSunCalc(msg.ts, true);
             } else if (data.type === 'pdsCalcPercent') {
@@ -712,7 +716,7 @@ module.exports = function (RED) {
                     return vals.every(v => txt.includes(v));
                 }
                 default:
-                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
+                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare, opTypeA, opValueA, opTypeB, opValueB }));
                     return hlp.isTrue(a);
             }
         }

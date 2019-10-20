@@ -1,9 +1,25 @@
 # node-red-contrib-sun-position
 
-#### 0.5.1: enhancement release
+#### 0.5.0-alpha: mayor release for blind control
 
-- add possibility to have a exact priority comparisons (e.g. only reset a specific priority)
-- ...
+- blind control
+  - fixed #61 by removing misleading angle
+  - fixed #62 `setMode` can now deactivate sun control
+  - added `resetOverwrite` additional property #54
+  - add possibility to have a exact priority comparisons (e.g. only reset a specific priority)
+  - redesigned rule input by dialog
+  - removed previous reset option for level operator, will now be done by new special level type
+  - added new type of Level: NotDefined, where for absolute rules default or sunControl will be used and for min/max the rule will be reset.
+    - This will allow to have only one type of time rules (until/from) which could cover whole day.
+    - Hopefully this makes rules easier.
+  - added per rule two different times and two different conditions
+    - allows to define more scenarios
+    - allows to reduce amount of needed rules.
+  - change in the logic of rule execution: From rules within Until rules will now considered.
+    - change will have no affect if rule setup is equal to the examples, that time restricted rules separated in first only until and afterwards only from rules
+
+TODO: rework Documentation, pictures, examples
+
 
 #### 0.4.10: critical bug fix
 

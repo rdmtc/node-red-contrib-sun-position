@@ -18,8 +18,15 @@
 			"overwriteExpire": "verfällt",
 			"ruleCondition": "nur wenn",
 			"ruleConditionThreshold": "Schwelle",
+			"ruleAndOr": "und/oder",
+			"ruleCondNone": "N/A",
+			"ruleCondAnd": "und",
+			"ruleCondOr": "oder",
 			"ruleTimeFrom": "↧ von",
 			"ruleTimeUntil": "↥ bis",
+			"ruleTimeNone": "N/A",
+			"ruleTimeLatest": "späteste (max)",
+			"ruleTimeEarliest": "früheste (min)",
 			"ruleBlindLevel": "Rollladenposition",
 			"ruleLevelAbs": "↕  Absolut",
 			"ruleLevelMin": "⭳❗  Minimum (übersteuernd)",
@@ -33,6 +40,9 @@
 			"sunFloorLength": "Länge auf dem Boden",
 			"sunMinAltitude": "Minimaler Höhenwinkel",
 			"sunMinDelta": "Mindeständerung",
+			"time":"Zeit",
+			"timeB": "alt. Zeit",
+			"name":"name",
 			"oversteerValue": "Übersteuerung",
 			"oversteerThreshold": "Schwelle",
 			"oversteerBlindPos": "Rollladenposition",
@@ -42,11 +52,14 @@
 			"smoothTime": "glätten",
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"outputs": "Ausgänge",
+			"offset":"Zeit offset",
+			"offset-timeB":"alt. Zeit offset",
 			"singleOutput": "einzeln (1)",
 			"splitOutput": "doppelt (2)",
 			"btnAdd": "hinzufügen",
 			"btnSort": "sortieren",
-			"btnClear": "leeren"
+			"btnClear": "leeren",
+			"dialogtitle":"Regel bearbeiten"
 		},
 		"placeholder": {
 			"windowTop": "Oberkante Fenster",
@@ -73,7 +86,11 @@
 			"outputs": "Anzahl der Ausgänge",
 			"btnAdd": "neue leere Regel hinzufügen",
 			"btnSort": "alle Regeln sortieren, Achtung dies kann das Verhalten ändern!",
-			"btnClear": "alle Regeln entfernen"
+			"btnClear": "alle Regeln entfernen",
+			"condoperand":"operand",
+			"time":"Zeit",
+			"offset":"Zeit offset",
+			"level": "Behanghöhe"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
@@ -106,7 +123,7 @@
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",
 			"overwriteExpire": "manuell überschrieben (Priorität __prio__), verfällt __dateISO__",
-			"default": "Position ist auf Standard gesetzt, eil keine Regel zutrifft",
+			"default": "Position ist auf Standard gesetzt, weil keine Regel zutrifft",
 			"ruleTime": "Position durch Zeitregel - rule __timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "Position durch bedingte Regel __text__ [rule __number__]",
 			"ruleTimeCond": "Position durch Zeit Regel __timeOp__ __timeLocal__ und Bedingung __text__ [rule __number__]",
@@ -120,7 +137,9 @@
 			"oversteer": "Sonder Bedingung erfüllt",
 			"smooth": "Rollladenposition wird nicht geändert zu __pos__ weil die letzte Änderung nicht lang genug her ist",
 			"sunInWinMax": "Die Sonne scheint ins Fenster und die maximale Rollladenposition ist gesetzt",
-			"sunNotInWinMin": "Die Sonne scheint nicht ins Fenster und die minimale Rollladenposition ist gesetzt"
+			"sunNotInWinMin": "Die Sonne scheint nicht ins Fenster und die minimale Rollladenposition ist gesetzt",
+			"ruleMin": "__org__ (__level__ ist unter minimum) [__number__] __name__",
+			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__"
 		},
 		"states": {
 			"overwriteNoExpire": "überschrieben [Prio=__prio__]",
