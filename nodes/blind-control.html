@@ -244,7 +244,7 @@
 
 
                 result += getValueLabel(node, data.validOperandAType,data.validOperandAValue);
-                // result += RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
+                // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
                 result += ' ' + data.validOperatorText;
                 let operatorCount = 1;
                 const fields = selFields.comparator;
@@ -286,22 +286,25 @@
                 result += '<div>';
                 result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
                 result += data.timeOpText;
-
-                if (data.timeBType && data.timeBType !== 'none') {
-                    result += ' ' + data.timeBOpText + '<div class="indent-time-text">';
-                }
-
                 result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
                 if (data.offsetType && data.offsetType !== 'none') {
                     result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
                     result += ' * ' + data.multiplier/1000 + 's';
                 }
 
-                if (data.timeBType && data.timeBType !== 'none') {
-                    result += ' <b>' + node._('blind-control.label.or') + '</b> ' + getValueLabel(node, data.timeBType, data.timeBValue);
-                    if (data.offsetBType && data.offsetBType !== 'none') {
-                        result += ' offset ' + getValueLabel(node, data.offsetBType, data.offsetBValue);
-                        result += ' * ' + data.multiplierB/1000 + 's';
+                if (data.timeMinType && data.timeMinType !== 'none') {
+                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMin') + '</span> ' + getValueLabel(node, data.timeMinType, data.timeMinValue);
+                    if (data.offsetMinType && data.offsetMinType !== 'none') {
+                        result += ' offset ' + getValueLabel(node, data.offsetMinType, data.offsetMinValue);
+                        result += ' * ' + data.multiplierMin/1000 + 's';
+                    }
+                    result += '</div>';
+                }
+                if (data.timeMaxType && data.timeMaxType !== 'none') {
+                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMax') + '</span> ' + getValueLabel(node, data.timeMaxType, data.timeMaxValue);
+                    if (data.offsetMaxType && data.offsetMaxType !== 'none') {
+                        result += ' offset ' + getValueLabel(node, data.offsetMaxType, data.offsetMaxValue);
+                        result += ' * ' + data.multiplierMax/1000 + 's';
                     }
                     result += '</div>';
                 }
@@ -852,11 +855,19 @@
                         data.timeValue = (data.timeValue || '');
                         data.offsetType = (data.offsetType || types.Undefined.value);
                         data.multiplier = (parseInt(data.multiplier) || 60000);
-                        data.timeBType = (data.timeBType || types.Undefined.value);
-                        data.timeBValue = (data.timeBValue || '');
-                        data.timeBOp = (parseInt(data.timeBOp) || 0);
-                        data.offsetBType = (data.offsetBType || types.Undefined.value);
-                        data.multiplierB = (parseInt(data.multiplierB) || 60000);
+
+                        data.timeMinType = (data.timeMinType || types.Undefined.value);
+                        data.timeMinValue = (data.timeMinValue || '');
+                        data.timeMinOp = (parseInt(data.timeMinOp) || 0);
+                        data.offsetMinType = (data.offsetMinType || types.Undefined.value);
+                        data.multiplierMin = (parseInt(data.multiplierMin) || 60000);
+
+                        data.timeMaxType = (data.timeMaxType || types.Undefined.value);
+                        data.timeMaxValue = (data.timeMaxValue || '');
+                        data.timeMaxOp = (parseInt(data.timeMaxOp) || 0);
+                        data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
+                        data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
+
                         data.levelType = (data.levelType || types.LevelFix.value);
                         data.levelValue = (data.levelValue || 'closed (min)');
                         data.levelOp = (parseInt(data.levelOp) || 0);
@@ -1333,6 +1344,7 @@
                 /**
                  * Build the dialog
                  */
+                // #region dialogCond1
                 const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
                 $dialogCondAOperand.typedInput({
                     default: types.Unlimited.value,
@@ -1348,7 +1360,8 @@
                     types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                 });
                 $dialogCondBOperand.typedInput('width', '70%');
-
+                // #endregion dialogCond1
+                // #region dialogCond2
                 const $dialogCond2LogOperator = $dialog.find('#dlg-ip-blindctl-rule-cond2LogOperator');
                 $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleCondNone')));
                 $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleCondOr')));
@@ -1369,7 +1382,8 @@
                     types: ['num', 'str', 'bool', 'flow', 'global', 'env']
                 });
                 $dialogCond2BOperand.typedInput('width', '70%');
-
+                // #endregion dialogCond2
+                // #region dialogTimeA
                 const $dialogTimeAOperator = $dialog.find('#dlg-ip-blindctl-rule-timeA-operator');
                 $dialogTimeAOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
                 $dialogTimeAOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
@@ -1390,28 +1404,44 @@
 
                 const $dialogTimeAMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeA');
                 appendOptions(node, $dialogTimeAMultiplier, 'multiplier', data => (data.id > 0));
-
-                const $dialogTimeBOperator = $dialog.find('#dlg-ip-blindctl-rule-timeB-operator');
-                $dialogTimeBOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeLatest')));
-                $dialogTimeBOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeEarliest')));
-
-                const $dialogTimeBInput = $dialog.find('#dlg-ip-blindctl-rule-timeB');
-                $dialogTimeBInput.typedInput({
+                // #endregion dialogTimeA
+                // #region dialogTimeMin
+                const $dialogTimeMinInput = $dialog.find('#dlg-ip-blindctl-rule-timeMin');
+                $dialogTimeMinInput.typedInput({
                     default: types.Undefined.value,
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                 });
-                $dialogTimeBInput.typedInput('width', '40%');
+                $dialogTimeMinInput.typedInput('width', '40%');
 
-                const $dialogTimeBOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeB');
-                $dialogTimeBOffset.typedInput({
+                const $dialogTimeMinOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMin');
+                $dialogTimeMinOffset.typedInput({
                     default: types.Undefined.value,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
-                }).change(() => { $dialogTimeBInput.change(); });
-                $dialogTimeBOffset.typedInput('width', '40%');
+                }).change(() => { $dialogTimeMinInput.change(); });
+                $dialogTimeMinOffset.typedInput('width', '40%');
 
-                const $dialogTimeBMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeB');
-                appendOptions(node, $dialogTimeBMultiplier, 'multiplier', data => (data.id > 0));
+                const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMin');
+                appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
+                // #endregion dialogTimeMin
+                // #region dialogTimeMax
+                const $dialogTimeMaxInput = $dialog.find('#dlg-ip-blindctl-rule-timeMax');
+                $dialogTimeMaxInput.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                });
+                $dialogTimeMaxInput.typedInput('width', '40%');
 
+                const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMax');
+                $dialogTimeMaxOffset.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                }).change(() => { $dialogTimeMaxInput.change(); });
+                $dialogTimeMaxOffset.typedInput('width', '40%');
+
+                const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMax');
+                appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
+                // #endregion dialogTimeMax
+                // #region dialogLevel
                 const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
                 $dialogLevel.typedInput({
                     default: types.LevelFix.value,
@@ -1423,7 +1453,8 @@
                 $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                 $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                 $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
-
+                // #endregion dialogLevel
+                // #region dialogChange
                 $dialogTimeAInput.change(() => {
                     const opType = $dialogTimeAInput.typedInput('type');
                     if (opType === types.Undefined.value) {
@@ -1454,50 +1485,82 @@
                         offset: $dialogTimeAOffset.typedInput('value'),
                         multiplier: parseInt($dialogTimeAMultiplier.val())
                     });
-                    $dialogTimeBInput.change();
+                    $dialogTimeMinInput.change();
+                    $dialogTimeMaxInput.change();
                 });
 
-                $dialogTimeBInput.change(() => {
+                $dialogTimeMinInput.change(() => {
                     const opAType = $dialogTimeAInput.typedInput('type');
                     if (!opAType || opAType === types.Undefined.value) {
-                        $dialogTimeBInput.typedInput('type', types.Undefined.value);
-                        $dialogTimeBOperator.hide();
-                        $('#dialog-row-timeB').hide();
-                        $('#dialog-row-offset-timeB').hide();
+                        $dialogTimeMinInput.typedInput('type', types.Undefined.value);
+                        $('#dialog-row-timeMin').hide();
+                        $('#dialog-row-offset-timeMin').hide();
                     } else {
-                        $('#dialog-row-timeB').show();
-                        const opType = $dialogTimeBInput.typedInput('type');
+                        $('#dialog-row-timeMin').show();
+                        const opType = $dialogTimeMinInput.typedInput('type');
                         if (opType === types.Undefined.value) {
-                            $dialogTimeBOperator.hide();
-                            $('#dialog-row-offset-timeB').hide();
+                            $('#dialog-row-offset-timeMin').hide();
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                            $dialogTimeBOperator.show();
-                            $('#dialog-row-offset-timeB').show();
+                            $('#dialog-row-offset-timeMin').show();
                         } else {
-                            $dialogTimeBOperator.show();
-                            $('#dialog-row-offset-timeB').hide();
+                            $('#dialog-row-offset-timeMin').hide();
                         }
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
                                 $('#dialog-row-time').attr('title', bdDateToTime(dv));
-                                $dialogTimeBInput.attr('timedata', dv.getTime());
+                                $dialogTimeMinInput.attr('timedata', dv.getTime());
                             } else {
                                 $('#dialog-row-time').attr('title', d.value);
-                                $dialogTimeBInput.attr('timedata', '0');
+                                $dialogTimeMinInput.attr('timedata', '0');
                             }
                         }, {
                             kind: 'getTimeData',
                             config: $nodeConfig.val(),
                             type: opType,
-                            value: $dialogTimeBInput.typedInput('value'),
-                            offsetType: $dialogTimeBOffset.typedInput('type'),
-                            offset: $dialogTimeBOffset.typedInput('value'),
-                            multiplier: parseInt($dialogTimeBMultiplier.val())
+                            value: $dialogTimeMinInput.typedInput('value'),
+                            offsetType: $dialogTimeMinOffset.typedInput('type'),
+                            offset: $dialogTimeMinOffset.typedInput('value'),
+                            multiplier: parseInt($dialogTimeMinMultiplier.val())
                         });
                     }
                 });
-                $dialogTimeBOperator.change(() => { $dialogTimeBInput.change(); });
+                $dialogTimeMaxInput.change(() => {
+                    const opAType = $dialogTimeAInput.typedInput('type');
+                    if (!opAType || opAType === types.Undefined.value) {
+                        $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
+                        $('#dialog-row-timeMax').hide();
+                        $('#dialog-row-offset-timeMax').hide();
+                    } else {
+                        $('#dialog-row-timeMax').show();
+                        const opType = $dialogTimeMaxInput.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            $('#dialog-row-offset-timeMax').hide();
+                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $('#dialog-row-offset-timeMax').show();
+                        } else {
+                            $('#dialog-row-offset-timeMax').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $dialogTimeMaxInput.attr('timedata', dv.getTime());
+                            } else {
+                                $('#dialog-row-time').attr('title', d.value);
+                                $dialogTimeMaxInput.attr('timedata', '0');
+                            }
+                        }, {
+                            kind: 'getTimeData',
+                            config: $nodeConfig.val(),
+                            type: opType,
+                            value: $dialogTimeMaxInput.typedInput('value'),
+                            offsetType: $dialogTimeMaxOffset.typedInput('type'),
+                            offset: $dialogTimeMaxOffset.typedInput('value'),
+                            multiplier: parseInt($dialogTimeMaxMultiplier.val())
+                        });
+                    }
+                });
 
                 $dialogCondAOperand.change(() => {
                     const propType = $dialogCondAOperand.typedInput('type');
@@ -1586,6 +1649,7 @@
                 });
                 $dialogCond2LogOperator.change(() => { $dialogCond2AOperand.change(); });
                 $dialogCond2AOperator.change(() => { $dialogCond2AOperand.change(); });
+                // #endregion dialogChange
                 /**
                  * load the data from the rule
                  */
@@ -1616,12 +1680,17 @@
                         $dialogTimeAOffset.typedInput('value',data.offsetValue);
                         $dialogTimeAMultiplier.val(data.multiplier || 60000);
 
-                        $dialogTimeBOperator.val(data.timeBOp || 0);
-                        $dialogTimeBInput.typedInput('type', data.timeBType);
-                        $dialogTimeBInput.typedInput('value', data.timeBValue);
-                        $dialogTimeBOffset.typedInput('type', data.offsetBType);
-                        $dialogTimeBOffset.typedInput('value', data.offsetBValue);
-                        $dialogTimeBMultiplier.val(data.multiplierB || 60000);
+                        $dialogTimeMinInput.typedInput('type', data.timeMinType);
+                        $dialogTimeMinInput.typedInput('value', data.timeMinValue);
+                        $dialogTimeMinOffset.typedInput('type', data.offsetMinType);
+                        $dialogTimeMinOffset.typedInput('value', data.offsetMinValue);
+                        $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
+
+                        $dialogTimeMaxInput.typedInput('type', data.timeMaxType);
+                        $dialogTimeMaxInput.typedInput('value', data.timeMaxValue);
+                        $dialogTimeMaxOffset.typedInput('type', data.offsetMaxType);
+                        $dialogTimeMaxOffset.typedInput('value', data.offsetMaxValue);
+                        $dialogTimeMaxMultiplier.val(data.multiplierMax || 60000);
 
                         $dialogLevel.typedInput('type',data.levelType);
                         $dialogLevel.typedInput('value',data.levelValue);
@@ -1629,7 +1698,6 @@
 
                         $dialogCondAOperand.change();
                         $dialogTimeAInput.change();
-                        $dialogTimeBInput.change();
                     } catch (err) {
                         console.log(err.message); // eslint-disable-line no-console
                         console.log(err.stack); // eslint-disable-line no-console
@@ -1654,13 +1722,17 @@
                         offsetType: $dialogTimeAOffset.typedInput('type'),
                         multiplier:   parseInt($dialogTimeAMultiplier.val()),
 
-                        timeBValue: $dialogTimeBInput.typedInput('value'),
-                        timeBType: $dialogTimeBInput.typedInput('type'),
-                        timeBOp: parseInt($dialogTimeBOperator.val()),
-                        timeBOpText: $dialogTimeBOperator.find('option:selected').text(),
-                        offsetBValue: $dialogTimeBOffset.typedInput('value'),
-                        offsetBType: $dialogTimeBOffset.typedInput('type'),
-                        multiplierB:  parseInt($dialogTimeBMultiplier.val()),
+                        timeMinValue: $dialogTimeMinInput.typedInput('value'),
+                        timeMinType: $dialogTimeMinInput.typedInput('type'),
+                        offsetMinValue: $dialogTimeMinOffset.typedInput('value'),
+                        offsetMinType: $dialogTimeMinOffset.typedInput('type'),
+                        multiplierMin:  parseInt($dialogTimeMinMultiplier.val()),
+
+                        timeMaxValue: $dialogTimeMaxInput.typedInput('value'),
+                        timeMaxType: $dialogTimeMaxInput.typedInput('type'),
+                        offsetMaxValue: $dialogTimeMaxOffset.typedInput('value'),
+                        offsetMaxType: $dialogTimeMaxOffset.typedInput('type'),
+                        multiplierMax:  parseInt($dialogTimeMaxMultiplier.val()),
 
                         levelValue: $dialogLevel.typedInput('value'),
                         levelType: $dialogLevel.typedInput('type'),
@@ -1973,22 +2045,22 @@
             <select id="dlg-ip-blindctl-rule-condAOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
             </select>
         </div>
-        <div class="dialog-row" id="dialog-row-condB">
+        <div class="dialog-row block-indent1" id="dialog-row-condB">
             <label for="dlg-ip-blindctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
             <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
         </div>
-        <div class="dialog-row" id="dialog-row-cond2LogOperator">
+        <div class="dialog-row block-indent1" id="dialog-row-cond2LogOperator">
             <label for="dlg-ip-blindctl-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleAndOr"></span></label>
             <select id="dlg-ip-blindctl-rule-cond2LogOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
             </select>
         </div>
-        <div class="dialog-row" id="dialog-row-cond2A">
+        <div class="dialog-row block-indent1" id="dialog-row-cond2A">
             <label for="dlg-ip-blindctl-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
             <select id="dlg-ip-blindctl-rule-cond2AOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
             </select>
         </div>
-        <div class="dialog-row" id="dialog-row-cond2B">
+        <div class="dialog-row block-indent2" id="dialog-row-cond2B">
             <label for="dlg-ip-blindctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
             <input id="dlg-ip-blindctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
         </div>
@@ -1998,22 +2070,32 @@
             </select>
             <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.time">
         </div>
-        <div class="dialog-row" id="dialog-row-offset-timeA">
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeA">
             <label for="dlg-ip-blindctl-rule-offset-timeA"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
             <select  id="dlg-ip-blindctl-rule-multiplier-timeA" class="ipadd dlg-ip-blindctl-rule-multiplier-timeA" >
             </select>
         </div>
-        <div class="dialog-row" id="dialog-row-timeB">
-            <label for="dlg-ip-blindctl-rule-timeB"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.timeB"></span></label>
-            <select id="dlg-ip-blindctl-rule-timeB-operator" class="ipadd dlg-ip-blindctl-rule-timeB-operator" >
-            </select>
-            <input type="text" id="dlg-ip-blindctl-rule-timeB" class="ipMain dlg-ip-blindctl-rule-timeB" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+        <div class="dialog-row block-indent1" id="dialog-row-timeMin">
+            <label for="dlg-ip-blindctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMin"></span></label>
+            <!-- select id="dlg-ip-blindctl-rule-timeMax-operator" class="ipadd dlg-ip-blindctl-rule-timeMax-operator" >
+            </select -->
+            <input type="text" id="dlg-ip-blindctl-rule-timeMin" class="ipMain dlg-ip-blindctl-rule-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.time">
         </div>
-        <div class="dialog-row" id="dialog-row-offset-timeB">
-            <label for="dlg-ip-blindctl-rule-offset-timeB"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeB"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeB"class="ipMain dlg-ip-blindctl-rule-offset-timeB" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
-            <select  id="dlg-ip-blindctl-rule-multiplier-timeB" class="ipadd dlg-ip-blindctl-rule-multiplier-timeB" >
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
+            <label for="dlg-ip-blindctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMin"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMin"class="ipMain dlg-ip-blindctl-rule-offset-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeMin" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMin" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-timeMax">
+            <label for="dlg-ip-blindctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-timeMax" class="ipMain dlg-ip-blindctl-rule-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
+            <label for="dlg-ip-blindctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMax"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMax"class="ipMain dlg-ip-blindctl-rule-offset-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
             </select>
         </div>
         <div class="dialog-row" id="dialog-row-level">

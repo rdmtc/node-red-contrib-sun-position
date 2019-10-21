@@ -10,8 +10,6 @@ const cRuleUntil = 0;
 const cRuleFrom = 1;
 const cRuleAbsolute = 0;
 const cRuleNone = 0;
-const cRuleEarliest = 0;
-const cRuleLatest = 1;
 const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
 const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
 const cRuleLogOperatorAnd = 2;
@@ -715,29 +713,51 @@ module.exports = function (RED) {
             } else if (!rule.timeData.value) {
                 throw new Error('Error can not calc time!');
             }
-            rule.timeData.sourde = 1;
+            rule.timeData.source = 'Default';
             let num = rule.timeData.value.getTime();
-            if (rule.timeBType !== 'none') {
-                rule.timeDataAlt = node.positionConfig.getTimeProp(node, msg, {
-                    type: rule.timeBType,
-                    value: rule.timeBValue,
-                    offsetType: rule.offsetBType,
-                    offset: rule.offsetBValue,
-                    multiplier: rule.multiplierB,
+            if (rule.timeMinType !== 'none') {
+                rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, {
+                    type: rule.timeMinType,
+                    value: rule.timeMinValue,
+                    offsetType: rule.offsetMinType,
+                    offset: rule.offsetMinValue,
+                    multiplier: rule.multiplierMin,
                     next: false,
                     now
                 });
-                const num2 = rule.timeDataAlt.value.getTime();
-                rule.timeDataAlt.sourde = 2;
-                if (rule.timeDataAlt.error) {
-                    hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataAlt.error }), undefined, rule.timeDataAlt.error);
-                } else if (!rule.timeDataAlt.value) {
+                const num2 = rule.timeDataMin.value.getTime();
+                rule.timeDataMin.source = 'Min';
+                if (rule.timeDataMin.error) {
+                    hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
+                } else if (!rule.timeDataMin.value) {
                     throw new Error('Error can not calc Alt time!');
-                } else if ((rule.timeBOp === cRuleLatest && (num2 > num)) ||
-                           (rule.timeBOp !== cRuleLatest && (num2 < num))) {
+                } else if (num2 < num) {
                     const tmp = rule.timeData;
-                    rule.timeData = rule.timeDataAlt;
-                    rule.timeDataAlt = tmp;
+                    rule.timeData = rule.timeDataMin;
+                    rule.timeDataMin = tmp;
+                    num = num2;
+                }
+            }
+            if (rule.timeMaxType !== 'none') {
+                rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, {
+                    type: rule.timeMaxType,
+                    value: rule.timeMaxValue,
+                    offsetType: rule.offsetMaxType,
+                    offset: rule.offsetMaxValue,
+                    multiplier: rule.multiplierMax,
+                    next: false,
+                    now
+                });
+                const num2 = rule.timeDataMax.value.getTime();
+                rule.timeDataMax.source = 'Max';
+                if (rule.timeDataMax.error) {
+                    hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
+                } else if (!rule.timeDataMax.value) {
+                    throw new Error('Error can not calc Alt time!');
+                } else if (num2 > num) {
+                    const tmp = rule.timeData;
+                    rule.timeData = rule.timeDataMax;
+                    rule.timeDataMax = tmp;
                     num = num2;
                 }
             }
@@ -1281,15 +1301,20 @@ module.exports = function (RED) {
                     rule.levelType = 'levelND';
                     rule.levelValue = '';
                 }
-                rule.timeBOp = Number(rule.timeBOp) || cRuleEarliest;
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
-                rule.multiplier = rule.multiplier || 60000;
-                rule.multiplierB = rule.multiplierB || 60000;
                 rule.offsetType = rule.offsetType || 'none';
-                rule.offsetBType = rule.offsetBType || 'none';
-                rule.timeBType = rule.timeBType || 'none';
-                rule.timeBValue = (rule.timeValue || '');
+                rule.multiplier = rule.multiplier || 60000;
+
+                rule.timeMinType = rule.timeMinType || 'none';
+                rule.timeMinValue = (rule.timeMinValue || '');
+                rule.offsetMinType = rule.offsetMinType || 'none';
+                rule.multiplierMin = rule.multiplierMin || 60000;
+
+                rule.timeMaxType = rule.timeMaxType || 'none';
+                rule.timeMaxValue = (rule.timeMaxValue || '');
+                rule.offsetMaxType = rule.offsetMaxType || 'none';
+                rule.multiplierMax = rule.multiplierMax || 60000;
 
                 if (!rule.timeLimited) {
                     rule.timeOp = -1;
