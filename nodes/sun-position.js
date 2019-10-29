@@ -43,7 +43,7 @@ module.exports = function (RED) {
                     now = new Date(msg.time);
                 }
                 if (typeof msg.ts !== 'undefined') {
-                    now = new Date(msg.time);
+                    now = new Date(msg.ts);
                 }
                 if (!hlp.isValidDate(now)) {
                     now = new Date();

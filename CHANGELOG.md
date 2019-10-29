@@ -2,6 +2,18 @@
 
 #### 0.5.0-alpha: mayor release for blind control
 
+- configuration
+  - switched latitude and longitude and added openstreetmap link/map for the position to prevent issues caused by latitude and longitude (maybe cause of #55)
+  - added german translation for latitude and longitude
+
+- sun-position
+  - fixed #52 bug with implementation
+    - added `positionAtSolarNoon` as additional payload property with the position data of the sun at solar noon
+  - fixed problem with msg.ts not considered as used timestamp
+
+- moon-position
+  - fixed problem with msg.ts not considered as used timestamp
+
 - blind control
   - fixed #61 by removing misleading angle
   - fixed #62 `setMode` can now deactivate sun control

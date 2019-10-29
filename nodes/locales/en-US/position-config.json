@@ -320,8 +320,8 @@
             "timeZoneOffset": "If for the timezone OS Standard is choosen the standard timezone including daylight saving switch is used. If is not chosen this setting, but a special time zone then no change of the daylightsaving is done! Formatchanges to time could taken time until it will get any effect."
         },
         "errors": {
-            "longitude-missing": "Longitude is missing or wrong!",
             "latitude-missing": "Latitude is missing or wrong!",
+            "longitude-missing": "Longitude is missing or wrong!",
             "coordinates-missing": "Latitude and Longitude is wrong!"
         }
     }

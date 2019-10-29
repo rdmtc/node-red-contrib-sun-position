@@ -524,21 +524,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {number} d number of days
      */
     function moonCoords(d) {
-        const L = rad * (218.316 + 13.176396 * d);
-        // ecliptic longitude
-
-        const M = rad * (134.963 + 13.064993 * d);
-        // mean anomaly
-
-        const F = rad * (93.272 + 13.229350 * d);
-        // mean distance
-
-        const l = L + rad * 6.289 * sin(M);
-        // longitude
-
-        const b = rad * 5.128 * sin(F);
-        // latitude
-
+        const L = rad * (218.316 + 13.176396 * d); // ecliptic longitude
+        const M = rad * (134.963 + 13.064993 * d); // mean anomaly
+        const F = rad * (93.272 + 13.229350 * d); // mean distance
+        const l = L + rad * 6.289 * sin(M); // longitude
+        const b = rad * 5.128 * sin(F); // latitude
         const dt = 385001 - 20905 * cos(M); // distance to the moon in km
 
         return {

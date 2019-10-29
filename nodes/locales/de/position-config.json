@@ -274,8 +274,8 @@
     "position-config": {
         "label": {
             "position": "Position",
-            "latitude": "Latitude",
-            "longitude": "Longitude",
+            "latitude": "Breitengrad",
+            "longitude": "Längengrad",
             "angleType": "Winkel Typ",
             "timeZoneOffset": "Zeitzone",
             "name": "Name",
@@ -305,9 +305,9 @@
             "timeZoneOffset":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen."
         },
         "errors": {
-            "longitude-missing": "Koordinate Longitude fehlt oder ist falsch!",
-            "latitude-missing": "Koordinate Latitude fehlt oder ist falsch!",
-            "coordinates-missing": "Koordinaten Latitude and Longitude ist falsch!"
+            "latitude-missing": "Koordinate für den Breitengrad fehlt oder ist falsch!",
+            "longitude-missing": "Koordinate für den Längengrad fehlt oder ist falsch!",
+            "coordinates-missing": "Koordinaten für den Breitengrad und Längengrad ist falsch!"
         }
     }
 }
