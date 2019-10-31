@@ -1047,7 +1047,7 @@ module.exports = function (RED) {
             let code = node.reason.code;
             let shape = 'ring';
             let fill = 'yellow';
-            if (code === 10) { // smooth;
+            if (code === 10 && previousData) { // smooth;
                 code = previousData.reasonCode;
             }
 
@@ -1097,13 +1097,13 @@ module.exports = function (RED) {
                     reason : node.reason,
                     blind: node.blindData
                 };
-                const tempData = node.context().get('cacheData',node.storeName);
-                const previousData = node.context().get('previous',node.storeName);
+                const tempData = node.context().get('cacheData',node.storeName) || {};
+                const previousData = node.context().get('previous',node.storeName) || {};
                 previousData.level = node.level.current;
                 previousData.levelInverse = node.level.currentInverse;
-                previousData.reasonCode= node.reason.code;
-                previousData.reasonState= node.reason.state;
-                previousData.reasonDescription= node.reason.description;
+                previousData.reasonCode = node.reason.code;
+                previousData.reasonState = node.reason.state;
+                previousData.reasonDescription = node.reason.description;
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
@@ -1233,11 +1233,11 @@ module.exports = function (RED) {
          */
         function initialize() {
             node.debug('initialize');
-            if (!node.context().get('cacheData',node.storeName)) {
+            if (!node.context().get('cacheData', node.storeName)) {
                 node.context().set('cacheData', { }, node.storeName);
             }
 
-            if (!node.context().get('previous',node.storeName)) {
+            if (!node.context().get('previous', node.storeName)) {
                 node.context().set('previous', {
                     level: NaN, // unknown
                     reasonCode: -1,
