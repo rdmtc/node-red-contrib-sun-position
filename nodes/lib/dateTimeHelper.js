@@ -628,25 +628,25 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
     }
 
     if (typeof dt === 'object') {
-        if (dt.hasOwnProperty('now')) {
+        if (Object.prototype.hasOwnProperty.call(dt, 'now')) {
             dt = dt.now;
-        } else if (dt.hasOwnProperty('date')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'date')) {
             dt = dt.date;
-        } else if (dt.hasOwnProperty('time')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'time')) {
             dt = dt.time;
-        } else if (dt.hasOwnProperty('ts')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'ts')) {
             dt = dt.ts;
-        } else if (dt.hasOwnProperty('lc')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'lc')) {
             dt = dt.lc;
-        } else if (dt.hasOwnProperty('value')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'value')) {
             dt = dt.lc;
-        } else if (dt.hasOwnProperty('payload')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'payload')) {
             dt = dt.payload;
-        } else if (dt.hasOwnProperty('timeStamp')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'timeStamp')) {
             dt = dt.timeStamp;
-        } else if (dt.hasOwnProperty('created')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'created')) {
             dt = dt.created;
-        } else if (dt.hasOwnProperty('changed')) {
+        } else if (Object.prototype.hasOwnProperty.call(dt, 'changed')) {
             dt = dt.changed;
         } else {
             dt = String(dt);
