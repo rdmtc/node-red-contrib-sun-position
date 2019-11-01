@@ -113,6 +113,7 @@
             "Text",
             "Zeit (Zahl) seit since emit",
             "Wochentag",
+            "Woche",
             "freier Text"
         ],
         "outputFormats": [
@@ -131,6 +132,8 @@
             "Stunden",
             "Tag Name, Bsp. Montag, 22.12.",
             "Tag relativ, Bsp. Heute, 22.12.",
+            "Kalenderwoche (KW)",
+            "Kalenderwoche gerade",
             "als Objekt",
             "Anderes"
         ],

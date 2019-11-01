@@ -6,6 +6,10 @@
   - switched latitude and longitude and added openstreetmap link/map for the position to prevent issues caused by latitude and longitude (maybe cause of #55)
   - added german translation for latitude and longitude
 
+- time inject
+  - added output of week number to enhanced date output
+  - enhanced name output for enhanced date output
+
 - sun-position
   - fixed #52 bug with implementation
     - added `positionAtSolarNoon` as additional payload property with the position data of the sun at solar noon

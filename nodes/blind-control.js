@@ -6,6 +6,7 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const util = require('util');
 
+const cRuleNoTime = -1;
 const cRuleUntil = 0;
 const cRuleFrom = 1;
 const cRuleAbsolute = 0;
@@ -785,7 +786,7 @@ module.exports = function (RED) {
             }
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (ruleSel && res.timeOp === cRuleUntil) {
+                if (ruleSel && res.timeOp !== cRuleFrom) {
                     // es gibt bereits eine treffende Regel
                     // nachfolgende BIS Regel wird nicht mehr ausgeführt
                     // nachfolgende VON Regeln werden ausgeführt (wenn sie zeitlich passen)
@@ -797,7 +798,6 @@ module.exports = function (RED) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
-                    // break;
                 }
             }
         }
@@ -809,20 +809,8 @@ module.exports = function (RED) {
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
                 if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = fkt(rule, r => (r <= nowNr));
-                /* let res = null;
-                if (rule.timeOp === cRuleUntil) {
-                    res = fkt(rule, r => (r >= nowNr));
-                } else {
-                    res = fkt(rule, r => (r <= nowNr));
-                } */
                 if (res) {
                     node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    /* if (ruleSel && rule.timeOp === cRuleFrom) {
-                        // es gibt bereits eine treffende Regel
-                        // vorhergehende VON Regel wird nicht mehr ausgeführt
-                        // vorhergehende BIS Regeln werden ausgeführt (wenn sie zeitlich passen)
-                        break;
-                    } */
                     if (res.levelOp === cRuleMinOversteer) {
                         ruleSelMin = res;
                     } else if (res.levelOp === cRuleMaxOversteer) {
@@ -1317,7 +1305,7 @@ module.exports = function (RED) {
                 rule.multiplierMax = rule.multiplierMax || 60000;
 
                 if (!rule.timeLimited) {
-                    rule.timeOp = -1;
+                    rule.timeOp = cRuleNoTime;
                 }
 
                 if (rule.conditional) {

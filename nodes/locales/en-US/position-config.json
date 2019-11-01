@@ -114,10 +114,11 @@
             "Text (string)",
             "time (number) since emit",
             "day of week",
+            "week",
             "Text free"
         ],
         "outputFormats": [
-            "milliseconds UNIX timestamp",
+            "UNIX timestamp (ms)",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
             "UTC date and time",
@@ -132,6 +133,8 @@
             "hours",
             "Day Name, e.g. Monday, 22.12.",
             "Day in relative, e.g. Today, 22.12.",
+            "Week Number",
+            "is week even",
             "as object",
             "Other"
         ],

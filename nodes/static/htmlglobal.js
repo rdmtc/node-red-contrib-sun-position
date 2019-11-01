@@ -55,6 +55,7 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 'string', label: 'Text (string)'},
             {id: 'time', label: 'time (number) since emit'},
             {id: 'dayOfWeek', label: 'day of week'},
+            {id: 'Week', label: 'info about week'},
             {id: 'other', label: 'Other'}
         ], outputFormats: [
             {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
@@ -72,6 +73,8 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 9, group: 'time', name: 'hour', label: 'hours'},
             {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
             {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
+            {id: 19, group: 'Week', name: 'week number', label: 'Number of week e.g. 22'},
+            {id: 20, group: 'Week', name: 'is week even', label: 'Boolean if week is even'},
             {id: -1, group: 'other', name: 'object', label: 'as object'},
             {id: 99, group: 'other', name: 'free definition', label: 'Other'}
         ], parseFormatsGroups: [
@@ -491,6 +494,7 @@ function getAutocompleteFormats() {
             {label: 'tt   AM/PM (2 digits - Lowercase)', value: 'tt'},
             {label: 'T    AM/PM (1 digit - Uppercase)', value: 'T'},
             {label: 'TT   AM/PM (2 digits - Uppercase)', value: 'TT'},
+            {label: 'ww   workweek (number)', value: 'ww'},
             {label: 'Z    time zone (abbr.)', value: 'Z'},
             {label: 'o    time zone offset (abbr.)', value: 'o'},
             {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'},
@@ -719,7 +723,7 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
         $inputSelect.val(valueNum);
     }
 
-    $inputSelect.on('change', (_type, _value) => {
+    $inputSelect.on('change focus focusout', (_type, _value) => {
         if (Number($inputSelect.val()) === 99) {
             $inputSelect.css({ width: '100px' });
             const width = (205 + baseWidth);

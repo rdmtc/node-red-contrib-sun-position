@@ -287,6 +287,26 @@ function getSpecialDayOfMonth(year, month, dayName) {
     }
     return null;
 }
+
+/**
+ * get the week number for a a date
+ * @param {Date} date date to get week number
+ * @returns {Number} week number
+ */
+function getWeekNumber(date) {
+    const dt = new Date(date);
+    const target = new Date(dt.valueOf());
+    const dayNumber = (dt.getUTCDay() + 6) % 7;
+
+    target.setUTCDate(target.getUTCDate() - dayNumber + 3);
+    const firstThursday = target.valueOf();
+    target.setUTCMonth(0, 1);
+
+    if (target.getUTCDay() !== 4) {
+        target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+    }
+    return Math.ceil((firstThursday - target) /  (7 * 24 * 3600 * 1000)) + 1;
+}
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
 /*******************************************************************************************************/
@@ -731,7 +751,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
  * @return {string}   date as depending on the given Format
  */
 const _dateFormat = (function () {
-    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|"[^"]*"|'[^']*'/g;
+    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|ww|"[^"]*"|'[^']*'/g;
 
     // const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
     // const timezoneClip = /[^-+\dA-Z]/g;
@@ -813,6 +833,7 @@ const _dateFormat = (function () {
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
             TT: H < 12 ? 'AM' : 'PM',
+            ww: getWeekNumber(date),
             Z: utc ? 'UTC' : /.*\s(.+)/.exec(date.toLocaleTimeString([], { timeZoneName: 'short' }))[1],
             z: utc ? '' : (String(date).match(/\b(?:GMT|UTC)(?:[-+]\d{4})?\b/g) || ['']).pop(),
             zz: utc ? '' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
@@ -1060,6 +1081,10 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
                 + pad2(date.getUTCSeconds())
                 + (offset === 0 ? 'Z' : (offset < 0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
         }
+        case 19: // workweek
+            return getWeekNumber(date);
+        case 20: // workweek even
+            return !Boolean(getWeekNumber(date) % 2); // eslint-disable-line no-extra-boolean-cast
     }
 
     const now = new Date();
@@ -1071,7 +1096,8 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
         timeISOStr: date.toISOString(),
         delay,
         delaySec: Math.round(delay / 1000),
-        lc: now.getTime()
+        lc: now.getTime(),
+        getWeekNumber(date)
     };
 }
 // ===================================================================
