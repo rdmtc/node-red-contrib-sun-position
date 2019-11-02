@@ -97,7 +97,7 @@
   },
   "disabledSettings": {
     "devDependencies-disabled": {
-      "eslint-plugin-jsdoc": "^16.1.1"
+      "eslint-plugin-jsdoc": "^17.0.0"
     },
     "plugins-disabled": [
       "jsdoc"

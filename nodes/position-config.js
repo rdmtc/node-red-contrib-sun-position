@@ -379,7 +379,7 @@ module.exports = function (RED) {
         * @property {string} [offsetType] - type name of the offset type input
         * @property {number} [multiplier] - multiplier to the time
         * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valide days
+        * @property {string} [days] - valid days
         * @property {Date} [now] - base date, current time as default
         */
 
@@ -451,7 +451,7 @@ module.exports = function (RED) {
         * @property {string} [offsetType] - type name of the offset type input
         * @property {number} [multiplier] - multiplier to the time
         * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valide days
+        * @property {string} [days] - valid days
         * @property {Date} [now] - base date, current time as default
         */
 

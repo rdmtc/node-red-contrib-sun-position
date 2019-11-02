@@ -1097,7 +1097,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
         delay,
         delaySec: Math.round(delay / 1000),
         lc: now.getTime(),
-        getWeekNumber(date)
+        week: getWeekNumber(date)
     };
 }
 // ===================================================================

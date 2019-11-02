@@ -85,7 +85,7 @@ function getNow_(node, msg) {
         node.debug(dto.toISOString());
         return dto;
     }
-    node.error(`Error can not get a valide timestamp from "${value}"! Will use current timestamp!`);
+    node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
     return new Date();
 }
 
