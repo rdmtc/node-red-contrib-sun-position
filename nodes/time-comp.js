@@ -27,7 +27,7 @@ module.exports = function (RED) {
 
         this.on('input', function (msg, send, done) { // eslint-disable-line complexity
             // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || this.send;
+            send = send || function() { node.send.apply(node, arguments) };
             done = done || this.done;
             if (node.positionConfig === null ||
                 config.operator === null ||

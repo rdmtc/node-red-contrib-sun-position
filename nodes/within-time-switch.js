@@ -45,13 +45,13 @@ module.exports = function (RED) {
         if (hlp.isValidDate(dto)) {
             return dto;
         }
-        node.error('Error can not get a valide timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
+        node.error('Error can not get a valid timestamp from ' + id + '="' + value + '"! Will use current timestamp!');
         return new Date();
     }
 
     /**
      * set the node state
-     * @param {*} node - the niode Data
+     * @param {*} node - the node Data
      * @param {*} data - the state data
      * @param {boolean} [_onInit] - indicates if the node in in initialisation
      * @returns {boolean}
@@ -271,7 +271,7 @@ module.exports = function (RED) {
 
         this.on('input', function (msg, send, done) { // eslint-disable-line complexity
             // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || this.send;
+            send = send || function() { node.send.apply(node, arguments) };
             done = done || this.done;
             try {
                 if (!node.positionConfig) {
