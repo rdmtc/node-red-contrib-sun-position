@@ -198,7 +198,7 @@
         }
 
         if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgPayloadByTopic') { return 'msg.payload if topic contains "' + clipValueLength(v, l) + '"'; }
+        if (t === 'PlT') { return 'msg.payload if topic contains "' + clipValueLength(v, l) + '"'; }
         if (t === 'msgTs') { return 'msg.ts'; }
         if (t === 'msgLc') { return 'msg.lc'; }
         if (t === 'msgValue') { return 'msg.value'; }

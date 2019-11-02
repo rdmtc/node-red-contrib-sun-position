@@ -177,7 +177,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: false
         },
         MsgPayloadByTopic: {
-            value: 'msgPayloadByTopic',
+            value: 'PlT',
             label: 'msg.payload if topic contains',
             hasValue: true
         },
@@ -918,7 +918,7 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
         res = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
         res = 'msg.payload';
-    } else if (data.type === 'msgPayloadByTopic') {
+    } else if (data.type === 'PlT') {
         res = 'msg.payload';
     } else if (data.type === 'msgTs') {
         res = 'msg.ts';

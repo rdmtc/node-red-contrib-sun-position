@@ -192,7 +192,9 @@ module.exports = function (RED) {
         if (data === null || typeof data === 'undefined') {
             const name = `${type}.${value}`;
             if (typeof tempData[name] !== 'undefined') {
-                node.log(RED._('blind-control.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
+                if (type !== 'PlT') {
+                    node.log(RED._('blind-control.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
+                }
                 return tempData[name];
             }
             if (node.nowarn[name]) {
@@ -222,8 +224,8 @@ module.exports = function (RED) {
                 el.operator,
                 el.thresholdType,
                 el.thresholdValue,
-                (type, value, data, _id) => { // opCallback
-                    return evalTempData(node, type, value, data, tempData);
+                (result, _obj) => { // opCallback
+                    return evalTempData(node, _obj.type, _obj.value, result, tempData);
                 }));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
@@ -616,13 +618,13 @@ module.exports = function (RED) {
                     rule.validOperator,
                     rule.validOperandBType,
                     rule.validOperandBValue,
-                    (type, value, data, _id) => { // opCallback
-                        if (_id === 1) {
-                            rule.conditonData[0].operandValue = value;
-                        } else if (_id === 2) {
-                            rule.conditonData[0].thresholdValue = value;
+                    (result, _obj) => { // opCallback
+                        if (_obj.addID === 1) {
+                            rule.conditonData[0].operandValue = _obj.value;
+                        } else if (_obj.addID === 2) {
+                            rule.conditonData[0].thresholdValue = _obj.value;
                         }
-                        return evalTempData(node, type, value, data, tempData);
+                        return evalTempData(node, _obj.type, _obj.value, result, tempData);
                     }
                 );
                 rule.conditon = {
@@ -645,13 +647,13 @@ module.exports = function (RED) {
                         rule.valid2Operator,
                         rule.valid2OperandBType,
                         rule.valid2OperandBValue,
-                        (type, value, data, _id) => { // opCallback
-                            if (_id === 1) {
-                                rule.conditonData[1].operandValue = value;
-                            } else if (_id === 2) {
-                                rule.conditonData[1].thresholdValue = value;
+                        (result, _obj) => { // opCallback
+                            if (_obj.addID === 1) {
+                                rule.conditonData[0].operandValue = _obj.value;
+                            } else if (_obj.addID === 2) {
+                                rule.conditonData[0].thresholdValue = _obj.value;
                             }
-                            return evalTempData(node, type, value, data, tempData);
+                            return evalTempData(node, _obj.type, _obj.value, result, tempData);
                         }
                     );
 
@@ -666,6 +668,7 @@ module.exports = function (RED) {
                         }
                     }
                 }
+                // console.log(util.inspect(rule, Object.getOwnPropertyNames(rule)));
             }
         }
     }
@@ -678,12 +681,13 @@ module.exports = function (RED) {
        * @returns the active rule or null
        */
     function checkRules(node, msg, now, tempData) {
+        node.debug('----------------------------------------------------------------------------');
         const livingRuleData = {};
         const nowNr = now.getTime();
         prepareRules(node, msg, tempData);
         node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
-        const fkt = (rule, cmp) => {
+        const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
@@ -776,28 +780,30 @@ module.exports = function (RED) {
         for (let i = 0; i < node.rules.count; ++i) { //  node.rules.lastUntil
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            // if (rule.timeOp === cRuleFrom) { continue; }
-            // const res = fkt(rule, r => (r >= nowNr));
-            let res = null;
+            if (rule.timeOp === cRuleFrom) { continue; }
+            const res = fktCheck(rule, r => (r >= nowNr));
+            /* let res = null;
             if (rule.timeOp === cRuleFrom) {
-                res = fkt(rule, r => (r <= nowNr));
+                res = fktCheck(rule, r => (r <= nowNr));
             } else {
-                res = fkt(rule, r => (r >= nowNr));
-            }
+                res = fktCheck(rule, r => (r >= nowNr));
+            } */
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (ruleSel && res.timeOp !== cRuleFrom) {
+                /* if (Boolean(ruleSel) && res.timeOp === cRuleUntil) {
+                    node.debug('break');
                     // es gibt bereits eine treffende Regel
                     // nachfolgende BIS Regel wird nicht mehr ausgeführt
                     // nachfolgende VON Regeln werden ausgeführt (wenn sie zeitlich passen)
                     break;
-                }
+                } */
                 if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
                 } else if (res.levelOp === cRuleMaxOversteer) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
+                    break;
                 }
             }
         }
@@ -808,7 +814,7 @@ module.exports = function (RED) {
                 const rule = node.rules.data[i];
                 // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
                 if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
-                const res = fkt(rule, r => (r <= nowNr));
+                const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
                     node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     if (res.levelOp === cRuleMinOversteer) {
@@ -1146,9 +1152,9 @@ module.exports = function (RED) {
                         node.positionConfig.getPropValue(node, msg, {
                             type: el.valueType,
                             value: el.value,
-                            callback: (type, value, data, _ip) => {
-                                if (data !== null && typeof data !== 'undefined') {
-                                    tempData[type + '.' + value] = data;
+                            callback: (result, _obj) => {
+                                if (result !== null && typeof result !== 'undefined') {
+                                    tempData[_obj.type + '.' + _obj.value] = result;
                                 }
                             },
                             operator: el.operator

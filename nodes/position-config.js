@@ -470,7 +470,7 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
@@ -578,7 +578,7 @@ module.exports = function (RED) {
                 }
                 result.value = new Date(now);
             }
-            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
+            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
             return result;
         }
         /*******************************************************************************************************/
@@ -617,9 +617,11 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
-            } else if (data.type === 'msgPayloadByTopic') {
-                if (msg.topic && msg.topic.includes(msg.value)) {
+            } else if (data.type === 'PlT') {
+                if (msg.topic && msg.value && msg.topic.includes(msg.value)) {
                     result = msg.payload;
+                } else {
+                    result = null;
                 }
             } else if (data.type === 'pdsCalcData') {
                 result = this.getSunCalc(msg.ts, true);
@@ -642,7 +644,7 @@ module.exports = function (RED) {
                 }
             }
             if (typeof data.callback === 'function') {
-                return data.callback(data.type, data.value, result, data);
+                return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
                 _srcNode.error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
                 return null;
