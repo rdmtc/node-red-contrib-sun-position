@@ -1,6 +1,6 @@
 # node-red-contrib-sun-position
 
-#### 0.5.0-alpha: mayor release for blind control
+#### 0.5.0: mayor release for blind control
 
 - configuration
   - switched latitude and longitude and added openstreetmap link/map for the position to prevent issues caused by latitude and longitude (maybe cause of #55)
@@ -13,10 +13,10 @@
 - sun-position
   - fixed #52 bug with implementation
     - added `positionAtSolarNoon` as additional payload property with the position data of the sun at solar noon
-  - fixed problem with msg.ts not considered as used timestamp
+  - fixed problem with `msg.ts` not considered as used timestamp
 
 - moon-position
-  - fixed problem with msg.ts not considered as used timestamp
+  - fixed problem with `msg.ts` not considered as used timestamp
 
 - blind control
   - fixed #61 by removing misleading angle
@@ -25,17 +25,12 @@
   - add possibility to have a exact priority comparisons (e.g. only reset a specific priority)
   - redesigned rule input by dialog
   - removed previous reset option for level operator, will now be done by new special level type
-  - added new type of Level: NotDefined, where for absolute rules default or sunControl will be used and for min/max the rule will be reset.
+  - added new type of Level: `NotDefined`, where for absolute rules default or sunControl will be used and for min/max the rule will be reset.
     - This will allow to have only one type of time rules (until/from) which could cover whole day.
     - Hopefully this makes rules easier.
   - added per rule two different times and two different conditions
     - allows to define more scenarios
     - allows to reduce amount of needed rules.
-  - change in the logic of rule execution: From rules within Until rules will now considered.
-    - change will have no affect if rule setup is equal to the examples, that time restricted rules separated in first only until and afterwards only from rules
-
-TODO: rework Documentation, pictures, examples
-
 
 #### 0.4.10: critical bug fix
 
