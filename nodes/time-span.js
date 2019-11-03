@@ -267,18 +267,12 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        this.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
         const node = this;
 
-        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || function() { node.send.apply(node, arguments) };
-            done = done || this.done;
+        this.on('input', (msg, send, done) => { // eslint-disable-line complexity
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
 
             if (node.positionConfig === null ||
                 config.operand1Type === null ||
@@ -444,7 +438,6 @@ module.exports = function (RED) {
                 node.status({
                     text: (operand1.value.getTime() - operand2.value.getTime()) / 1000 + 's'
                 });
-
                 send(resObj); // node.send(resObj);
                 done();
                 return null;

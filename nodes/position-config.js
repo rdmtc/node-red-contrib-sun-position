@@ -95,8 +95,8 @@ module.exports = function (RED) {
             RED.nodes.createNode(this, config);
             try {
                 this.name = config.name;
-                this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
+                this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
                 this.angleType = config.angleType;
                 this.tzOffset = parseInt(config.timeZoneOffset || 99);
                 this.tzDST = parseInt(config.timeZoneDST || 0);
@@ -112,11 +112,11 @@ module.exports = function (RED) {
                     this.tzOffset = null;
                     // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
                 }
-                this.debug(`initialize longitude=${this.longitude} latitude=${this.latitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
+                this.debug(`initialize latitude=${this.latitude} longitude=${this.longitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
-                // this.debug('load position-config ' + this.name + ' long:' + this.longitude + ' latitude:' + this.latitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
+                // this.debug('load position-config ' + this.name + ' latitude:' + this.latitude + ' long:' + this.longitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
                 this.lastSunCalc = {
                     ts: 0
                 };
@@ -379,7 +379,7 @@ module.exports = function (RED) {
         * @property {string} [offsetType] - type name of the offset type input
         * @property {number} [multiplier] - multiplier to the time
         * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valide days
+        * @property {string} [days] - valid days
         * @property {Date} [now] - base date, current time as default
         */
 
@@ -451,7 +451,7 @@ module.exports = function (RED) {
         * @property {string} [offsetType] - type name of the offset type input
         * @property {number} [multiplier] - multiplier to the time
         * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valide days
+        * @property {string} [days] - valid days
         * @property {Date} [now] - base date, current time as default
         */
 
@@ -470,7 +470,7 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
@@ -578,7 +578,7 @@ module.exports = function (RED) {
                 }
                 result.value = new Date(now);
             }
-            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
+            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${ util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
             return result;
         }
         /*******************************************************************************************************/
@@ -617,6 +617,12 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
+            } else if (data.type === 'PlT') {
+                if (msg.topic && msg.value && msg.topic.includes(msg.value)) {
+                    result = msg.payload;
+                } else {
+                    result = null;
+                }
             } else if (data.type === 'pdsCalcData') {
                 result = this.getSunCalc(msg.ts, true);
             } else if (data.type === 'pdsCalcPercent') {
@@ -638,7 +644,7 @@ module.exports = function (RED) {
                 }
             }
             if (typeof data.callback === 'function') {
-                return data.callback(data.type, data.value, result, data);
+                return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
                 _srcNode.error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
                 return null;
@@ -712,7 +718,7 @@ module.exports = function (RED) {
                     return vals.every(v => txt.includes(v));
                 }
                 default:
-                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare }));
+                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare, opTypeA, opValueA, opTypeB, opValueB }));
                     return hlp.isTrue(a);
             }
         }
@@ -756,27 +762,26 @@ module.exports = function (RED) {
 
             const dayid = this._getDayId(date); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            let sunSolarNoonPos = null;
             // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
                 this.debug('getSunTime sunTimesToday');
                 result.times =this.sunTimesToday; // needed for a object copy
-                sunSolarNoonPos = this.sunSolarNoonToday;
+                result.positionAtSolarNoon = this.sunSolarNoonToday;
             } else if (dayid === (today.dayId + 1)) {
                 this.debug('getSunTime sunTimesTomorow');
                 result.times = this.sunTimesTomorow; // needed for a object copy
-                sunSolarNoonPos = this.sunSolarNoonTomorow;
+                result.positionAtSolarNoon = this.sunSolarNoonTomorow;
             } else {
                 this.debug('getSunTime calc extra time');
                 result.times = sunCalc.getSunTimes(date, this.latitude, this.longitude, false); // needed for a object copy
                 if (sunInSky && result.times.solarNoon.valid) {
-                    sunSolarNoonPos = sunCalc.getPosition(result.times.solarNoon, this.latitude, this.longitude);
+                    result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value, this.latitude, this.longitude);
                 }
             }
 
-            if (sunSolarNoonPos && result.times.solarNoon.valid) {
-                if (result.altitude > 0) {
-                    result.altitudePercent = (result.altitude / sunSolarNoonPos.altitude) * 100;
+            if (result.positionAtSolarNoon && result.times.solarNoon.valid) {
+                if (result.altitudeDegrees > 0) {
+                    result.altitudePercent = (result.altitudeDegrees / result.positionAtSolarNoon.altitudeDegrees) * 100;
                 } else {
                     result.altitudePercent = 0;
                 }
@@ -928,11 +933,11 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         _checkCoordinates() {
-            if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
-                throw new Error(RED._('position-config.errors.longitude-missing'));
-            }
             if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
                 throw new Error(RED._('position-config.errors.latitude-missing'));
+            }
+            if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
+                throw new Error(RED._('position-config.errors.longitude-missing'));
             }
             if ((this.latitude === 0) && (this.longitude === 0)) {
                 throw new Error(RED._('position-config.errors.coordinates-missing'));
@@ -946,10 +951,10 @@ module.exports = function (RED) {
                 this.sunSolarNoonToday = this.sunSolarNoonTomorow;
             } else {
                 this.sunTimesToday = sunCalc.getSunTimes(today, this.latitude, this.longitude, false);
-                this.sunSolarNoonToday = sunCalc.getPosition(this.sunTimesToday.solarNoon, this.latitude, this.longitude);
+                this.sunSolarNoonToday = sunCalc.getPosition(this.sunTimesToday.solarNoon.value, this.latitude, this.longitude);
             }
             this.sunTimesTomorow = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false);
-            this.sunSolarNoonTomorow = sunCalc.getPosition(this.sunTimesTomorow.solarNoon, this.latitude, this.longitude);
+            this.sunSolarNoonTomorow = sunCalc.getPosition(this.sunTimesTomorow.solarNoon.value, this.latitude, this.longitude);
 
             this.sunDayId = dayId;
             // this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, tomorrow=${tomorrow.toISOString()}  this.sunTimesToday=${util.inspect(this.sunTimesToday, { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -1029,8 +1034,8 @@ module.exports = function (RED) {
     /**************************************************************************************************************/
     RED.nodes.registerType('position-config', positionConfigurationNode, {
         credentials: {
-            posLongitude: {type: 'text' },
-            posLatitude: { type: 'text' }
+            posLatitude: { type: 'text' },
+            posLongitude: {type: 'text' }
         }
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -90,17 +90,14 @@
       "blind-control": "nodes/blind-control.js"
     }
   },
-  "peerDependencies": {
-    "util": ">=0.8.0"
-  },
   "devDependencies": {
     "camo-purge": "^1.0.2",
-    "eslint": "^5.15.3",
-    "eslint-plugin-html": "^5.0.3"
+    "eslint": "^6.6.0",
+    "eslint-plugin-html": "^6.0.0"
   },
   "disabledSettings": {
     "devDependencies-disabled": {
-      "eslint-plugin-jsdoc": "^4.4.3"
+      "eslint-plugin-jsdoc": "^17.0.0"
     },
     "plugins-disabled": [
       "jsdoc"

@@ -41,7 +41,7 @@
      * validates a blind position
      * @param {*} node - the node representation
      * @param {number} v - the blind position to validate
-     * @returns {boolean} __true__ if the blind position is valide
+     * @returns {boolean} __true__ if the blind position is valid
      */
     function validateBlindPos(node, v) {
         const n = parseFloat(v);
@@ -64,81 +64,256 @@
         if (rules) {
             rules.each(function (_i) {
                 const rule = $(this);
-                const data = {
-                    index: _i,
-                    timeValue: rule.find('.node-input-rule-time').typedInput('value'),
-                    timeType: rule.find('.node-input-rule-time').typedInput('type'),
-                    timeOp: rule.find('.node-input-rule-time-operator').val(),
-                    timeOpText: rule.find('.node-input-rule-time-operator option:selected').text(),
-                    levelValue: rule.find('.node-input-rule-level').typedInput('value'),
-                    levelType: rule.find('.node-input-rule-level').typedInput('type'),
-                    levelOp: rule.find('.node-input-rule-level-operator').val(),
-                    levelOpText: rule.find('.node-input-rule-level-operator option:selected').text(),
-                    offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
-                    offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
-                    multiplier: rule.find('.node-input-rule-multiplier').val(),
-                    validOperandAValue: rule.find('.node-input-rule-condOpA').typedInput('value'),
-                    validOperandAType: rule.find('.node-input-rule-condOpA').typedInput('type'),
-                    validOperator: rule.find('.node-input-rule-condOperator').val(),
-                    validOperatorText: rule.find('.node-input-rule-condOperator option:selected').text(),
-                    validOperandBValue: rule.find('.node-input-rule-condOpB').typedInput('value'),
-                    validOperandBType: rule.find('.node-input-rule-condOpB').typedInput('type')
-                };
+                const data = JSON.parse(rule.data('ruleData'));
+                data.index= _i;
                 result.push(data);
             });
         }
         return result;
     }
+
     /**
-     * resizes a rule
-     * @param {jQuery} rule - the jQuery selector of the rule
+     * clip a test to a maximum length
+     * @param {string} v text to clip
+     * @param {number} l length to clip the text
      */
-    function resizeRule(rule) {
-        try {
-            const newWidth = rule.width() - 10;
-            // row1
-            const $validOperandALbl = rule.find('.node-input-rule-condOpA-lbl');
-            const $validOperandA = rule.find('.node-input-rule-condOpA');
-            const $validOperator = rule.find('.node-input-rule-condOperator');
-            $validOperandALbl.width('auto');
-            if ($validOperator.is(':visible')) {
-                $validOperator.width(100);
-                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 135));
-            } else {
-                $validOperandA.typedInput('width', (newWidth - $validOperandALbl.width() - 15));
-            }
-            // row2
-            const $validOperandBLbl = rule.find('.node-input-rule-condOpB-lbl');
-            const $validOperandB = rule.find('.node-input-rule-condOpB');
-            $validOperandBLbl.width('auto');
-            $validOperandB.typedInput('width', (newWidth - $validOperandBLbl.width() - 10));
-            // row3
-            const $timeLbl = rule.find('.node-input-rule-time-lbl');
-            const $timeOperator = rule.find('.node-input-rule-time-operator');
-            const $time = rule.find('.node-input-rule-time');
-            $timeLbl.width('auto');
-            if ($timeOperator.is(':visible')) {
-                $timeOperator.width(70);
-                $time.typedInput('width', (newWidth - $timeLbl.width() - 103));
-            } else {
-                $time.typedInput('width', (newWidth - $timeLbl.width() - 33));
-            }
-            // row4
-            const $offset = rule.find('.node-input-rule-offset');
-            const $multiplier = rule.find('.node-input-rule-multiplier');
-            const multiplierWidth = 125;
-            $multiplier.width(multiplierWidth);
-            $offset.typedInput('width', (newWidth - multiplierWidth - 50));
-            // row5
-            const $levelLbl = rule.find('.node-input-rule-level-lbl');
-            const $level = rule.find('.node-input-rule-level');
-            const $levelOperator = rule.find('.node-input-rule-level-operator');
-            $levelLbl.width('auto');
-            $levelOperator.width(40);
-            $level.typedInput('width', (newWidth - $levelLbl.width() - 60 - 10));
-        } catch (ex) {
-            console.log(ex); // eslint-disable-line
+    function clipValueLength(v, l) {
+        l = l || 15;
+        v = String(v);
+        if (v.length > l) {
+            return v.slice(0, (l - 3)) + '...';
         }
+        return v;
+    }
+
+    /**
+     * clip a test to a maximum length
+     * @param {string} v text to clip
+     * @param {number} l length to clip the text
+     */
+    function clipValueLengthRight(v, l) {
+        l = l || 15;
+        v = String(v);
+        if (v.length > l) {
+            return '...' + v.slice(-(l - 3));
+        }
+        return v;
+    }
+
+    /**
+     * get the label for a typed input vlaue
+     * @param {*} node - the node object for getting i18N Data (node._())
+     * @param {string} t - the type of the value
+     * @param {string} v - the value
+     * @param {number} [offset] - a optional offset to the value
+     * @param {number} [l] - the desired maximum length (default = 18)
+     * @returns {string} the value clipped to the given length
+     */
+    function getValueLabel(node, t, v, l) { // eslint-disable-line complexity
+        l = l || 30;
+
+        if (t === 'levelFixed') {
+            if (!v) {
+                return '?%';
+            }
+            return String(v);
+        }
+
+        if (t === 'jsonata') {
+            v = String(v);
+            if (v.length < l) { return v; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata');
+        }
+
+        if (t === 'json') {
+            v = String(v);
+            if (v.length < l) { return  v; }
+            return node._('node-red-contrib-sun-position/position-config:common.label.json');
+        }
+
+        if (t === 'bin') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.binary');
+        }
+
+        if (t === 'date') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp');
+        }
+
+        if (t === 'dateSpecific') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+';
+        }
+
+        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
+            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank'); }
+            return '"' + clipValueLength(v, l) + '"';
+        }
+
+        if (t === 'num') {
+            if (v === '') { return '0'; }
+            return String(v);
+        }
+
+        if (t === 'bool') {
+            if (v === '') { return 'false'; }
+            return String(v);
+        }
+
+        if (t === 'msg' || t === 'env') {
+            return t + '.' + clipValueLengthRight(v, l);
+        }
+
+        if (t === 'flow' || t === 'global') {
+            const result = RED.utils.parseContextKey(v);
+            // special for Homematic Devices
+            if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
+                result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                return t + '.' + clipValueLengthRight(result.key, l);
+            }
+            return t + '.' + clipValueLengthRight(result.key, l);
+        }
+
+        if (t === 'pdsCalcData') {
+            return '{sun position}';
+        }
+
+        if (t === 'pdsCalcPercent') {
+            return '{sun in sky percent}';
+        }
+
+        if (t === 'pdmCalcData') {
+            return '{moon position}';
+        }
+
+        if (t === 'pdmPhase') {
+            return '{moon phase}';
+        }
+
+        if (t === 'pdsTime') {
+            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+            return clipValueLength(res, l);
+        }
+
+        if (t === 'pdmTime') {
+            return 'moon' + v;
+        }
+
+        if (t === 'msgPayload') { return 'msg.payload'; }
+        if (t === 'PlT') { return 'msg.payload if topic contains "' + clipValueLength(v, l) + '"'; }
+        if (t === 'msgTs') { return 'msg.ts'; }
+        if (t === 'msgLc') { return 'msg.lc'; }
+        if (t === 'msgValue') { return 'msg.value'; }
+
+        if (v === '') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+        }
+
+        return clipValueLength(v, l);
+    }
+
+    /**
+     * get a description of the rule rules
+     * @param {object} data - a rule description
+     * @returns {steing} description of the rule
+     */
+    function getRuleDescription(node, selFields, data) {
+        let result = '';
+        try {
+            if (data.validOperandAType && data.validOperandAType !== 'none') {
+                result += '<div>';
+                result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
+
+
+                result += getValueLabel(node, data.validOperandAType,data.validOperandAValue);
+                // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
+                result += ' ' + data.validOperatorText;
+                let operatorCount = 1;
+                const fields = selFields.comparator;
+                const fieldsLength = fields.length;
+                for (let index = 0; index < fieldsLength; index++) {
+                    const el = fields[index];
+                    if (el.id === data.validOperator) {
+                        operatorCount = el.operatorCount;
+                        break;
+                    }
+                }
+
+                if (operatorCount > 1) {
+                    result += ' ' + getValueLabel(node, data.validOperandBType, data.validOperandBValue);
+                }
+                if (data.valid2LogOperator > 0 && data.valid2OperandAType !== 'none') {
+                    result += ' <b>' + data.valid2LogOperatorText + '</b> ';
+
+                    result += getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue);
+                    result += ' ' + data.valid2OperatorText;
+                    let operatorCount = 1;
+                    const fields = selFields.comparator;
+                    const fieldsLength = fields.length;
+                    for (let index = 0; index < fieldsLength; index++) {
+                        const el = fields[index];
+                        if (el.id === data.valid2Operator) {
+                            operatorCount = el.operatorCount;
+                            break;
+                        }
+                    }
+
+                    if (operatorCount > 1) {
+                        result += ' ' + getValueLabel(node, data.valid2OperandBType, data.valid2OperandBValue);
+                    }
+                }
+                result += '</div>';
+            }
+            if (data.timeType && data.timeType !== 'none') {
+                result += '<div>';
+                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                result += data.timeOpText;
+                result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
+                if (data.offsetType && data.offsetType !== 'none') {
+                    result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
+                    result += ' * ' + data.multiplier/1000 + 's';
+                }
+
+                if (data.timeMinType && data.timeMinType !== 'none') {
+                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMin') + '</span> ' + getValueLabel(node, data.timeMinType, data.timeMinValue);
+                    if (data.offsetMinType && data.offsetMinType !== 'none') {
+                        result += ' offset ' + getValueLabel(node, data.offsetMinType, data.offsetMinValue);
+                        result += ' * ' + data.multiplierMin/1000 + 's';
+                    }
+                    result += '</div>';
+                }
+                if (data.timeMaxType && data.timeMaxType !== 'none') {
+                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMax') + '</span> ' + getValueLabel(node, data.timeMaxType, data.timeMaxValue);
+                    if (data.offsetMaxType && data.offsetMaxType !== 'none') {
+                        result += ' offset ' + getValueLabel(node, data.offsetMaxType, data.offsetMaxValue);
+                        result += ' * ' + data.multiplierMax/1000 + 's';
+                    }
+                    result += '</div>';
+                }
+                result += '</div>';
+            }
+            result += '<div>';
+            if (typeof data.levelType !== 'undefined') {
+                if (data.levelType === 'levelND') {
+                    if (data.levelOp === 1) {
+                        result += node._('blind-control.label.ruleLevelResetMin');
+                    } else if (data.levelOp === 2) {
+                        result += node._('blind-control.label.ruleLevelResetMax');
+                    } else {
+                        result += node._('blind-control.label.ruleLevelND');
+                    }
+                } else {
+                    result += data.levelOpText + ' ' + getValueLabel(node, data.levelType, data.levelValue);
+                }
+            } else {
+                result += '-';
+            }
+
+            result += '</div>';
+        } catch (err) {
+            console.log(err.message); // eslint-disable-line no-console
+            console.log(err.stack); // eslint-disable-line no-console
+            result = 'Error: "' + err.message + '"';
+        }
+        return result;
     }
 
     RED.nodes.registerType('blind-control', {
@@ -178,7 +353,7 @@
             blindOpenPos: {
                 value: 1.00,
                 required: true,
-                validate(v) { // eslint-disable-line request-shorthand
+                validate(v) {
                     const n = parseFloat(v);
                     return RED.validators.number(v) &&
                         (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
@@ -494,20 +669,20 @@
             // #endregion Dialog
 
             const setup = function(node) {
-                /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData bdDateToTime */
+                /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime */
                 // #region initialize
                 const types = getTypes(node);
                 const selFields = getSelectFields();
 
                 types.LevelEntered = {
                     value: 'num',
-                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree', 'time (next)'),
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),
                     icon: 'red/images/typedInput/09.png',
                     validate(v) { return validateBlindPos(this, v); }
                 };
                 types.LevelFix = {
                     value: 'levelFixed',
-                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix', 'time (next)'),
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix'),
                     icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
                     options: [{
                         value: 'open (max)',
@@ -534,6 +709,12 @@
                         value: 'closed (min)',
                         label: node._('blind-control.typeOptions.0')
                     }]
+                };
+                types.LevelND= {
+                    value: 'levelND',
+                    label: node._('node-red-contrib-sun-position/position-config:common.types.levelND'),
+                    icon: 'icons/node-red-contrib-sun-position/inputTypeNone2.png',
+                    hasValue: false
                 };
                 /**
                  * save rules
@@ -639,189 +820,74 @@
 
                 $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                     addItem(containerRow, containerIndex, data) {
+                        if (data === {}) {
+                            data.description = 'please edit rule';
+                            data.name = 'empty';
+                        }
                         data.index = containerIndex;
-                        data.timeType = (data.timeType || types.TimeEntered.value);
+                        data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
+                        data.validOperandBType = (data.validOperandBType || 'num');
+                        data.valid2LogOperator = (parseInt(data.valid2LogOperator) || 0);
+                        data.valid2OperandAType = (data.valid2OperandAType || 'msg');
+                        data.valid2OperandBType = (data.valid2OperandBType || 'num');
+                        data.timeOp = (parseInt(data.timeOp) || 0);
+                        data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
                         data.timeValue = (data.timeValue || '');
-                        data.timeLimited = (data.timeType !== 'none');
+                        data.offsetType = (data.offsetType || types.Undefined.value);
+                        data.multiplier = (parseInt(data.multiplier) || 60000);
 
-                        data.conditional = (data.validOperandAType !== 'none');
+                        data.timeMinType = (data.timeMinType || types.Undefined.value);
+                        data.timeMinValue = (data.timeMinValue || '');
+                        data.timeMinOp = (parseInt(data.timeMinOp) || 0);
+                        data.offsetMinType = (data.offsetMinType || types.Undefined.value);
+                        data.multiplierMin = (parseInt(data.multiplierMin) || 60000);
 
-                        containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
-                        const $row1 = $('<div/>').appendTo(containerRow);
-                        const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        const $row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        const $row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        const $row5 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                        // #region row1 - property -- lbl - [none / Bedingung] - [compare]
-                        addLabel($row1, 'node-input-rule-condOpA', 'fa fa-puzzle-piece', node._('blind-control.label.ruleCondition'));
-                        const $validOperandA = $('<input/>', {
-                            class: 'node-input-rule-condOpA',
-                            id: 'node-input-rule-condOpA' + containerIndex,
-                            type: 'text',
-                            value: (data.validOperandAValue || '')
-                        }).appendTo($row1).typedInput({
-                            default: (data.validOperandAType || types.Unlimited.value),
-                            types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon]
-                        });
-                        const $validOperator = $('<select/>', {
-                            class: 'node-input-rule-condOperator',
-                            id: 'node-input-rule-condOperator' + containerIndex,
-                            style: 'margin-left: 5px;'
-                        }).appendTo($row1);
-                        appendOptions(node, $validOperator, 'comparator');
-                        $validOperator.val(data.validOperator || selFields.comparator[0].id);
-                        const finalspan = $('<span/>',{style:'float: right;margin-top: 6px;'}).appendTo($row1);
-                        finalspan.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
-                        // #endregion row1
-                        // #region row2 - property threshold -- lbl - [none / Bedingung]
-                        addLabel($row2, 'node-input-rule-condOpB', 'fa fa-ellipsis-h', node._('blind-control.label.ruleConditionThreshold'));
-                        const $validOperandB = $('<input/>', {
-                            class: 'node-input-rule-condOpB',
-                            id: 'node-input-rule-condOpB' + containerIndex,
-                            type: 'text',
-                            value: (data.validOperandBValue || '')
-                        }).appendTo($row2).typedInput({
-                            default: (data.validOperandBType || 'num'),
-                            types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                        });
-                        // #endregion row2
-                        // #region row3 - time -- lbl - [from-to] - [start - time]
-                        addLabel($row3, 'node-input-rule-time', 'fa fa-clock-o');
-                        const $timeOperator = $('<select/>', {
-                            class: 'node-input-rule-time-operator',
-                            id: 'node-input-rule-time-operator' + containerIndex,
-                            style: 'margin-left: 5px;'
-                        }).appendTo($row3);
-                        $timeOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
-                        $timeOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
-                        $timeOperator.val(data.timeOp || 0);
-                        const $time = $('<input/>', {
-                            class: 'node-input-rule-time',
-                            id: 'node-input-rule-time' + containerIndex,
-                            type: 'text',
-                            value: data.timeValue
-                        }).appendTo($row3).typedInput({
-                            default: data.timeType,
-                            types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
-                        });
-                        // #endregion row3
-                        // #region row4 - time -- [offset] - [multiplier]
-                        addLabel($row4, 'node-input-rule-offset', 'fa fa-plus');
-                        const $offset = $('<input/>', {
-                            class: 'node-input-rule-offset',
-                            // id: 'node-input-rule-offset' + containerIndex,
-                            type: 'text',
-                            value: (data.offsetValue || '')
-                        }).appendTo($row4).typedInput({
-                            default: (data.offsetType || types.Undefined.value),
-                            types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
-                        }).change(() => { $time.change(); });
-                        const $multiplier = $('<select/>', {
-                            class: 'node-input-rule-multiplier',
-                            id: 'node-input-rule-multiplier' + containerIndex
-                        }).appendTo($row4);
-                        appendOptions(node, $multiplier, 'multiplier', data => (data.id > 0));
-                        $multiplier.val(data.multiplier || 60000);
-                        // #endregion row4
-                        // #region row5 - Blind Level -- [blind-level / open / closed] [abs-min-max]
-                        addLabel($row5, 'node-input-rule-level', 'fa fa-window-maximize', node._('blind-control.label.ruleBlindLevel'));
-                        $('<input/>', {
-                            class: 'node-input-rule-level',
-                            id: 'node-input-rule-level' + containerIndex,
-                            type: 'text',
-                            value: getDefLevel(data.levelTyp, data.levelValue, 'closed (min)')
-                        }).appendTo($row5).typedInput({
-                            default: (data.levelType || types.LevelFix.value),
-                            types: [types.LevelFix, types.LevelEntered, 'msg', 'flow', 'global', 'env']
-                        });
-                        const $levelOperator = $('<select/>', {
-                            class: 'node-input-rule-level-operator',
-                            id: 'node-input-rule-level-operator' + containerIndex,
-                            style: 'margin-left: 5px;'
-                        }).appendTo($row5);
-                        $levelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
-                        $levelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
-                        $levelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
-                        $levelOperator.append($('<option></option>').val(3).text(node._('blind-control.label.ruleLevelResetMin')));
-                        $levelOperator.append($('<option></option>').val(4).text(node._('blind-control.label.ruleLevelResetMax')));
-                        $levelOperator.val(data.levelOp || 0);
-                        // #endregion row5
-                        // #region fields changes
-                        $time.change(() => {
-                            const opType = $time.typedInput('type');
-                            if (opType === types.Undefined.value) {
-                                $timeOperator.hide();
-                                $row4.hide(); // offset
-                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                                $timeOperator.show();
-                                $row4.show(); // offset
-                            } else {
-                                $timeOperator.show();
-                                $row4.hide(); // offset
-                            }
-                            getBackendData(d => {
-                                if (d.value && d.value !== 'none') {
-                                    const dv = new Date(d.value);
-                                    $row3.attr('title', bdDateToTime(dv));
-                                    $time.attr('timedata', dv.getTime());
-                                } else {
-                                    $row3.attr('title', d.value);
-                                    $time.attr('timedata', '0');
-                                }
-                            }, {
-                                kind: 'getTimeData',
-                                config : $nodeConfig.val(),
-                                type: opType,
-                                value: $time.typedInput('value'),
-                                offsetType: $offset.typedInput('type'),
-                                offset: $offset.typedInput('value'),
-                                multiplier: $multiplier.val()
-                            });
-                            resizeContainer();
-                        });
-                        $validOperandA.change(() => {
-                            const propType = $validOperandA.typedInput('type');
-                            if (propType === 'none') {
-                                $validOperator.val(selFields.comparator[0].id);
-                                $validOperator.hide();
-                                $row2.hide(); // condOpB
-                            } else if ( propType === 'jsonata' || propType === types.PhaseMoon.value) {
-                                $validOperator.show();
-                                $validOperator.attr('disabled', true);
-                                $validOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $row2.hide(); // condOpB
-                            } else {
-                                $validOperator.show();
-                                $validOperator.attr('disabled', false);
-                                const condOp = $validOperator.val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-                                if (operatorCount > 1) {
-                                    $row2.show(); // condOpB
-                                } else {
-                                    $row2.hide(); // condOpB
-                                }
+                        data.timeMaxType = (data.timeMaxType || types.Undefined.value);
+                        data.timeMaxValue = (data.timeMaxValue || '');
+                        data.timeMaxOp = (parseInt(data.timeMaxOp) || 0);
+                        data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
+                        data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
 
-                            }
-                            $validOperandB.change();
-                            resizeContainer();
+                        data.levelType = (data.levelType || types.LevelFix.value);
+                        data.levelValue = (data.levelValue || 'closed (min)');
+                        data.levelOp = (parseInt(data.levelOp) || 0);
+                        if ((data.levelOp === 3) || (data.levelOp === 4)) {
+                            data.levelType = types.LevelND.value;
+                            data.levelValue = '';
+                            data.levelOp = data.levelOp - 2;
+                        }
+
+                        data.levelOpText = data.levelOpText || node._('blind-control.label.ruleLevelAbs');
+                        containerRow.data('ruleData', JSON.stringify(data));
+                        containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
+                        const $row0 = $('<div/>').appendTo(containerRow);
+                        const $div = $('<div/>', {
+                            class: 'blind-rule-mainblock'
+                        }).appendTo($row0);
+                        $('<span />', {
+                            id: 'rule-name-'+containerIndex,
+                            class: 'blind-rule-name-span'
+                        }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
+                        if (!data.description) {
+                            data.description = getRuleDescription(node, selFields, data);
+                        }
+                        $('<div />', {
+                            id: 'rule-description-'+containerIndex,
+                            class: 'blind-rule-description-span'
+                        }).append(data.description).appendTo( $div );
+                        const finalspan1 = $('<span/>',{
+                            class:'blind-rule-finalspan'
+                        }).appendTo($row0);
+                        finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
+                        const $btn = $('<a />', {
+                            class: 'red-ui-button red-ui-button-small blind-rule-editBtn'
+                        }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
+                        // $btn.button();
+                        $btn.click(() => {
+                            _dialogLoadData(containerIndex, containerRow);
                         });
-                        $validOperator.change(() => { $validOperandA.change(); });
-                        // #endregion fields changes
-                        $validOperandA.change();
-                        $time.change();
-                        resizeRule(containerRow);
                     },
                     addButton: false,
-                    resizeItem: resizeRule,
                     sortable: true,
                     removable: true,
                     scrollOnAdd: true,
@@ -1043,6 +1109,7 @@
                         const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
 
                         if ((oversteer1ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            // $('#node-input-oversteer2Value').typedInput('value','');
                             $('#node-input-oversteer2Value').typedInput('type', types.Undefined.value);
                             $('.row-oversteer2Value').hide();
                             $('.row-oversteer2Threshold').hide();
@@ -1126,6 +1193,7 @@
                         const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
 
                         if ((oversteer2ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                            // $('#node-input-oversteer3Value').typedInput('value','');
                             $('#node-input-oversteer3Value').typedInput('type', types.Undefined.value);
                             $('.row-oversteer3Value').hide();
                             $('.row-oversteer3Threshold').hide();
@@ -1228,16 +1296,483 @@
                     }
                     setTimeout(() => {
                         $('#node-input-sunControlMode').change();
-                        const postrules = $('#node-input-rule-container').editableList('items');
-                        postrules.each(function (_i) {
-                            resizeRule($(this));
-                        });
                         resizeContainer();
                     }, 1500);
                 }
+
+                // #region dialog
+                const $dialog = $('#dialog-edit-rule').dialog({
+                    title: node._('blind-control.label.dialogtitle'),
+                    autoOpen: false,
+                    resizable: true,
+                    height: Math.min(900, $(window).height() * 0.8),
+                    width: Math.min(850, $(window).width() * 0.8),
+                    modal: true,
+                    closeOnEscape: true,
+                    classes : {
+                        'ui-dialog': 'ui-dialog-rdg ',
+                        'ui-dialog-content': 'ui-dialog-content-rdg ',
+                        'ui-dialog-titlebar': 'ui-dialog-titlebar-rdg'
+                    },
+                    buttons: {
+                        Ok() {
+                            _dialogSaveData();
+                            $dialog.dialog( 'close' );
+                        },
+                        Cancel() {
+                            $dialog.dialog( 'close' );
+                        }
+                    }
+                });
+
+                const $dialogName = $dialog.find('#dlg-ip-blindctl-rule-name');
+                let dialogData = null;
+                let dialogDataOnLoading = false;
+                let dialogDataIndex = -1;
+                /**
+                 * Build the dialog
+                 */
+                // #region dialogCond1
+                const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
+                $dialogCondAOperand.typedInput({
+                    default: types.Unlimited.value,
+                    types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic]
+                });
+                $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
+
+                const $dialogCondAOperator = $dialog.find('#dlg-ip-blindctl-rule-condAOperator');
+                appendOptions(node, $dialogCondAOperator, 'comparator');
+                const $dialogCondBOperand = $dialog.find('#dlg-ip-blindctl-rule-condBOperand');
+                $dialogCondBOperand.typedInput({
+                    default: 'num',
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                });
+                $dialogCondBOperand.typedInput('width', '70%');
+                // #endregion dialogCond1
+                // #region dialogCond2
+                const $dialogCond2LogOperator = $dialog.find('#dlg-ip-blindctl-rule-cond2LogOperator');
+                $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleCondNone')));
+                $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleCondOr')));
+                $dialogCond2LogOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleCondAnd')));
+
+                const $dialogCond2AOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperand');
+                $dialogCond2AOperand.typedInput({
+                    default: 'msg',
+                    types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic]
+                });
+                $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
+
+                const $dialogCond2AOperator = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperator');
+                appendOptions(node, $dialogCond2AOperator, 'comparator');
+                const $dialogCond2BOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2BOperand');
+                $dialogCond2BOperand.typedInput({
+                    default: 'num',
+                    types: ['num', 'str', 'bool', 'flow', 'global', 'env']
+                });
+                $dialogCond2BOperand.typedInput('width', '70%');
+                // #endregion dialogCond2
+                // #region dialogTimeReg
+                const $dialogTimeRegOperator = $dialog.find('#dlg-ip-blindctl-rule-timeA-operator');
+                $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
+                $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
+
+                const $dialogTimeRegInput = $dialog.find('#dlg-ip-blindctl-rule-timeA');
+                $dialogTimeRegInput.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                });
+                $dialogTimeRegInput.typedInput('width', '40%');
+
+                const $dialogTimeRegOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeA');
+                $dialogTimeRegOffset.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                }).change(() => { $dialogTimeRegInput.change(); });
+                $dialogTimeRegOffset.typedInput('width', '40%');
+
+                const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeA');
+                appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
+                // #endregion dialogTimeReg
+                // #region dialogTimeMin
+                const $dialogTimeMinInput = $dialog.find('#dlg-ip-blindctl-rule-timeMin');
+                $dialogTimeMinInput.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                });
+                $dialogTimeMinInput.typedInput('width', '40%');
+
+                const $dialogTimeMinOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMin');
+                $dialogTimeMinOffset.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                }).change(() => { $dialogTimeMinInput.change(); });
+                $dialogTimeMinOffset.typedInput('width', '40%');
+
+                const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMin');
+                appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
+                // #endregion dialogTimeMin
+                // #region dialogTimeMax
+                const $dialogTimeMaxInput = $dialog.find('#dlg-ip-blindctl-rule-timeMax');
+                $dialogTimeMaxInput.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                });
+                $dialogTimeMaxInput.typedInput('width', '40%');
+
+                const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMax');
+                $dialogTimeMaxOffset.typedInput({
+                    default: types.Undefined.value,
+                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                }).change(() => { $dialogTimeMaxInput.change(); });
+                $dialogTimeMaxOffset.typedInput('width', '40%');
+
+                const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMax');
+                appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
+                // #endregion dialogTimeMax
+                // #region dialogLevel
+                const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
+                $dialogLevel.typedInput({
+                    default: types.LevelFix.value,
+                    types: [types.LevelFix, types.LevelEntered, types.LevelND,'msg', 'flow', 'global', 'env']
+                });
+                $dialogLevel.typedInput('width', '40%');
+                const $dialogLevelOperator = $dialog.find('#dlg-ip-blindctl-rule-level-operator');
+                $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
+                $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
+                $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                // #endregion dialogLevel
+                // #region dialogChange
+                $dialogTimeRegInput.change(() => {
+                    if (dialogDataOnLoading) { return; }
+                    const opType = $dialogTimeRegInput.typedInput('type');
+                    if (opType === types.Undefined.value) {
+                        $('#dialog-row-time').attr('title', 'N/A');
+                        $dialogTimeRegInput.attr('timedata', '0');
+                        $dialogTimeRegOperator.hide();
+                        $('#dialog-row-offset-timeA').hide();
+
+                        $('#dialog-row-timeMin').hide();
+                        $('#dialog-row-timeMax').hide();
+                        $('#dialog-row-offset-timeMin').hide();
+                        $('#dialog-row-offset-timeMax').hide();
+                        // $dialogTimeMinInput.typedInput('value','');
+                        if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
+                            $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
+                        }
+                        // $dialogTimeMaxInput.typedInput('value','');
+                        if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
+                            $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
+                        }
+                        return;
+                    } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                        $dialogTimeRegOperator.show();
+                        $('#dialog-row-offset-timeA').show();
+                    } else {
+                        $dialogTimeRegOperator.show();
+                        $('#dialog-row-offset-timeA').hide();
+                    }
+                    getBackendData(d => {
+                        if (d.value && d.value !== 'none') {
+                            const dv = new Date(d.value);
+                            $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                            $dialogTimeRegInput.attr('timedata', dv.getTime());
+                        } else {
+                            $('#dialog-row-time').attr('title', d.value);
+                            $dialogTimeRegInput.attr('timedata', '0');
+                        }
+                    }, {
+                        kind: 'getTimeData',
+                        config : $nodeConfig.val(),
+                        type: opType,
+                        value: $dialogTimeRegInput.typedInput('value'),
+                        offsetType: $dialogTimeRegOffset.typedInput('type'),
+                        offset: $dialogTimeRegOffset.typedInput('value'),
+                        multiplier: parseInt($dialogTimeRegMultiplier.val())
+                    });
+                    $dialogTimeMinInput.change();
+                    $dialogTimeMaxInput.change();
+                });
+                $dialogTimeMinInput.change(() => {
+                    if (dialogDataOnLoading) { return; }
+                    const opAType = $dialogTimeRegInput.typedInput('type');
+                    if (opAType && opAType !== types.Undefined.value) {
+                        $('#dialog-row-timeMin').show();
+                        const opType = $dialogTimeMinInput.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            $('#dialog-row-offset-timeMin').hide();
+                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $('#dialog-row-offset-timeMin').show();
+                        } else {
+                            $('#dialog-row-offset-timeMin').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $dialogTimeMinInput.attr('timedata', dv.getTime());
+                            } else {
+                                $('#dialog-row-time').attr('title', d.value);
+                                $dialogTimeMinInput.attr('timedata', '0');
+                            }
+                        }, {
+                            kind: 'getTimeData',
+                            config: $nodeConfig.val(),
+                            type: opType,
+                            value: $dialogTimeMinInput.typedInput('value'),
+                            offsetType: $dialogTimeMinOffset.typedInput('type'),
+                            offset: $dialogTimeMinOffset.typedInput('value'),
+                            multiplier: parseInt($dialogTimeMinMultiplier.val())
+                        });
+                    }
+                });
+                $dialogTimeMaxInput.change(() => {
+                    if (dialogDataOnLoading) { return; }
+                    const opAType = $dialogTimeRegInput.typedInput('type');
+                    if (opAType && opAType !== types.Undefined.value) {
+                        $('#dialog-row-timeMax').show();
+                        const opType = $dialogTimeMaxInput.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            $('#dialog-row-offset-timeMax').hide();
+                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $('#dialog-row-offset-timeMax').show();
+                        } else {
+                            $('#dialog-row-offset-timeMax').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $dialogTimeMaxInput.attr('timedata', dv.getTime());
+                            } else {
+                                $('#dialog-row-time').attr('title', d.value);
+                                $dialogTimeMaxInput.attr('timedata', '0');
+                            }
+                        }, {
+                            kind: 'getTimeData',
+                            config: $nodeConfig.val(),
+                            type: opType,
+                            value: $dialogTimeMaxInput.typedInput('value'),
+                            offsetType: $dialogTimeMaxOffset.typedInput('type'),
+                            offset: $dialogTimeMaxOffset.typedInput('value'),
+                            multiplier: parseInt($dialogTimeMaxMultiplier.val())
+                        });
+                    }
+                });
+
+                $dialogCondAOperand.change(() => {
+                    if (dialogDataOnLoading) { return; }
+                    const propType = $dialogCondAOperand.typedInput('type');
+                    if (propType === 'none') {
+                        $dialogCondAOperator.val(selFields.comparator[0].id);
+                        $dialogCondAOperator.hide();
+                        $('#dialog-row-condB').hide();
+
+                        $dialogCond2LogOperator.val(0);
+                        $('#dialog-row-cond2LogOperator').hide();
+                    } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                        $dialogCondAOperator.show();
+                        $dialogCondAOperator.attr('disabled', true);
+                        $dialogCondAOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
+                        $('#dialog-row-condB').hide();
+                        $('#dialog-row-cond2LogOperator').show();
+                    } else {
+                        $dialogCondAOperator.show();
+                        $dialogCondAOperator.attr('disabled', false);
+                        const condOp = $dialogCondAOperator.val();
+                        let operatorCount = 1;
+                        const fields = selFields.comparator;
+                        const fieldsLength = fields.length;
+                        for (let index = 0; index < fieldsLength; index++) {
+                            const el = fields[index];
+                            if (el.id === condOp) {
+                                operatorCount = el.operatorCount;
+                                break;
+                            }
+                        }
+                        if (operatorCount > 1) {
+                            $('#dialog-row-condB').show();
+                        } else {
+                            $('#dialog-row-condB').hide();
+                        }
+                        $('#dialog-row-cond2LogOperator').show();
+                    }
+                    $dialogCondBOperand.change();
+                    $dialogCond2AOperand.change();
+                });
+                $dialogCondAOperator.change(() => { $dialogCondAOperand.change(); });
+
+                $dialogCond2AOperand.change(() => {
+                    const op2 = parseInt($dialogCond2LogOperator.val());
+                    if (isNaN(op2) || op2 === 0) {
+                        $dialogCond2AOperator.val(selFields.comparator[0].id);
+                        $dialogCond2AOperator.hide();
+                        $('#dialog-row-cond2A').hide();
+                        $('#dialog-row-cond2B').hide();
+                    } else {
+                        $dialogCond2AOperator.show();
+                        $('#dialog-row-cond2A').show();
+                        const propType = $dialogCond2AOperand.typedInput('type');
+                        if (propType === 'none') {
+                            $dialogCond2AOperator.val(selFields.comparator[0].id);
+                            $dialogCond2AOperator.hide();
+                            $('#dialog-row-cond2B').hide();
+                        } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                            $dialogCond2AOperator.show();
+                            $dialogCond2AOperator.attr('disabled', true);
+                            $dialogCond2AOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
+                            $('#dialog-row-cond2B').hide();
+                        } else {
+                            $dialogCond2AOperator.show();
+                            $dialogCond2AOperator.attr('disabled', false);
+                            const condOp = $dialogCond2AOperator.val();
+                            let operatorCount = 1;
+                            const fields = selFields.comparator;
+                            const fieldsLength = fields.length;
+                            for (let index = 0; index < fieldsLength; index++) {
+                                const el = fields[index];
+                                if (el.id === condOp) {
+                                    operatorCount = el.operatorCount;
+                                    break;
+                                }
+                            }
+                            if (operatorCount > 1) {
+                                $('#dialog-row-cond2B').show();
+                            } else {
+                                $('#dialog-row-cond2B').hide();
+                            }
+
+                        }
+                    }
+                    $dialogCond2BOperand.change();
+                });
+                $dialogCond2LogOperator.change(() => { $dialogCond2AOperand.change(); });
+                $dialogCond2AOperator.change(() => { $dialogCond2AOperand.change(); });
+                // #endregion dialogChange
+                // #region dialogload & save
+                /**
+                 * set Data for typed input
+                 */
+                function setTI($field, value, type) {
+                    // $field.typedInput('value', value);
+                    if (type === 'flow' || type === 'global') {
+                        $field.typedInput('type', 'env'); // env haben alle, bug fix
+                        $field.typedInput('value', value);
+                        $field.typedInput('type', type);
+                    } else {
+                        $field.typedInput('type', type);
+                        $field.typedInput('value', value);
+                    }
+                    // $field.typedInput('type', type);
+                }
+                /**
+                 * load the data from the rule
+                 */
+                function _dialogLoadData(containerIndex, containerRow) {
+                    try {
+                        dialogData = containerRow;
+                        dialogDataIndex = containerIndex;
+                        const data = JSON.parse(dialogData.data('ruleData'));
+                        $dialogName.val(data.name);
+                        dialogDataOnLoading = true;
+
+                        $dialogCondAOperator.val(data.validOperator || selFields.comparator[0].id);
+                        setTI($dialogCondAOperand, data.validOperandAValue, data.validOperandAType);
+                        setTI($dialogCondBOperand, data.validOperandBValue, data.validOperandBType);
+
+                        $dialogCond2LogOperator.val(data.valid2LogOperator || 0);
+                        $dialogCond2AOperator.val(data.valid2Operator || selFields.comparator[0].id);
+                        setTI($dialogCond2AOperand, data.valid2OperandAValue, data.valid2OperandAType);
+                        setTI($dialogCond2BOperand, data.valid2OperandBValue, data.valid2OperandBType);
+
+                        $dialogTimeRegOperator.val(data.timeOp || 0);
+                        $dialogTimeRegMultiplier.val(data.multiplier || 60000);
+                        setTI($dialogTimeRegInput, data.timeValue, data.timeType);
+                        setTI($dialogTimeRegOffset, data.offsetValue, data.offsetType);
+
+                        $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
+                        setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
+                        setTI($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
+
+                        $dialogTimeMaxMultiplier.val(data.multiplierMax || 60000);
+                        setTI($dialogTimeMaxInput, data.timeMaxValue, data.timeMaxType);
+                        setTI($dialogTimeMaxOffset, data.offsetMaxValue, data.offsetMaxType);
+
+                        $dialogLevelOperator.val(data.levelOp || 0);
+                        setTI($dialogLevel, data.levelValue, data.levelType);
+                        $dialogLevel.typedInput('value',data.levelValue);
+                        $dialogLevel.typedInput('type',data.levelType);
+
+                        dialogDataOnLoading = false;
+                        $dialogCondAOperand.change();
+                        $dialogTimeRegInput.change();
+                    } catch (err) {
+                        console.log(err.message); // eslint-disable-line no-console
+                        console.log(err.stack); // eslint-disable-line no-console
+                        $dialogName.val(err.message);
+                    }
+                    $dialog.dialog('open');
+                }
+
+                /**
+                 * save the data of the rule back
+                 */
+                function _dialogSaveData() {
+                    const data = {
+                        index: dialogDataIndex,
+                        name:$dialogName.val(),
+
+                        timeValue: $dialogTimeRegInput.typedInput('value'),
+                        timeType: $dialogTimeRegInput.typedInput('type'),
+                        timeOp: parseInt($dialogTimeRegOperator.val()),
+                        timeOpText: $dialogTimeRegOperator.find('option:selected').text(),
+                        offsetValue: $dialogTimeRegOffset.typedInput('value'),
+                        offsetType: $dialogTimeRegOffset.typedInput('type'),
+                        multiplier:   parseInt($dialogTimeRegMultiplier.val()),
+
+                        timeMinValue: $dialogTimeMinInput.typedInput('value'),
+                        timeMinType: $dialogTimeMinInput.typedInput('type'),
+                        offsetMinValue: $dialogTimeMinOffset.typedInput('value'),
+                        offsetMinType: $dialogTimeMinOffset.typedInput('type'),
+                        multiplierMin:  parseInt($dialogTimeMinMultiplier.val()),
+
+                        timeMaxValue: $dialogTimeMaxInput.typedInput('value'),
+                        timeMaxType: $dialogTimeMaxInput.typedInput('type'),
+                        offsetMaxValue: $dialogTimeMaxOffset.typedInput('value'),
+                        offsetMaxType: $dialogTimeMaxOffset.typedInput('type'),
+                        multiplierMax:  parseInt($dialogTimeMaxMultiplier.val()),
+
+                        levelValue: $dialogLevel.typedInput('value'),
+                        levelType: $dialogLevel.typedInput('type'),
+                        levelOp: parseInt($dialogLevelOperator.val()),
+                        levelOpText: $dialogLevelOperator.find('option:selected').text(),
+
+                        validOperandAValue: $dialogCondAOperand.typedInput('value'),
+                        validOperandAType: $dialogCondAOperand.typedInput('type'),
+                        validOperator: $dialogCondAOperator.val(),
+                        validOperatorText: $dialogCondAOperator.find('option:selected').text(),
+                        validOperandBValue: $dialogCondBOperand.typedInput('value'),
+                        validOperandBType: $dialogCondBOperand.typedInput('type'),
+
+                        valid2LogOperator: parseInt($dialogCond2LogOperator.val()),
+                        valid2LogOperatorText: $dialogCond2LogOperator.find('option:selected').text(),
+                        valid2OperandAValue: $dialogCond2AOperand.typedInput('value'),
+                        valid2OperandAType: $dialogCond2AOperand.typedInput('type'),
+                        valid2Operator: $dialogCond2AOperator.val(),
+                        valid2OperatorText: $dialogCond2AOperator.find('option:selected').text(),
+                        valid2OperandBValue: $dialogCond2BOperand.typedInput('value'),
+                        valid2OperandBType: $dialogCond2BOperand.typedInput('type')
+                    };
+                    data.description = getRuleDescription(node, selFields, data);
+                    dialogData.data('ruleData', JSON.stringify(data));
+                    $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
+                    $('#rule-description-'+dialogDataIndex).html(data.description);
+                    resizeContainer();
+                }
+                // #endregion dialogload & save
+                // #endregion dialog
             }; // setup
             $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
+                .done((_data, _textStatus,  _bmvfj) => {
                     try {
                         setup(node);
                     } catch (err) {
@@ -1273,16 +1808,13 @@
             } else {
                 $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
             }
+            $('#dialog-edit-rule').dialog('destroy').remove();
         },
-        oneditresize(_size) {
-            try {
-                const postrules = $('#node-input-rule-container').editableList('items');
-                postrules.each(function(_i) {
-                    resizeRule($(this));
-                });
-            } catch (err) {
-                console.debug(err); // eslint-disable-line no-console
-            }
+        oneditcancel() {
+            $('#dialog-edit-rule').dialog('destroy').remove();
+        },
+        oneditdelete() {
+            $('#dialog-edit-rule').dialog('destroy').remove();
         }
     });</script>
 
@@ -1294,7 +1826,7 @@
     <hr>
     <!-- blind ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-        <label><i class="fa fa-window-maximize"></i> <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span></span></label>
+        <span><i class="fa fa-window-maximize"></i> <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span></span></span>
     </div>
     <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
         <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
@@ -1311,7 +1843,7 @@
     <hr>
     <!-- time ######################################################################## -->
     <div class="is-to-show-initially">
-        <label><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></label>
+        <span><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></span>
         <div class="form-row node-input-rule-container-row row-full-width">
             <ol id="node-input-rule-container"></ol>
             <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
@@ -1331,7 +1863,7 @@
     <hr>
     <!-- overwrite blind ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-        <label><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></label>
+        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
     </div>
     <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
         <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
@@ -1346,7 +1878,7 @@
     <hr>
     <!-- sun ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-            <label><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></label>
+            <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
             <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
@@ -1506,45 +2038,115 @@
     </div>
 
     <!-- DIALOG ######################################################################## -->
-    <!--
-    <div id="dialog-select-context" title="Select Channel and Datapoint">
+    <div id="dialog-select-context" class="red-ui-editor" title="Select Channel and Datapoint">
         <div id="config-lookup-tree"></div>
     </div>
-    -->
+
+    <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
+        <div class="dialog-row">
+            <label for="dlg-ip-blindctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-name" class="ipalone" data-i18n="[placeholder]blind-control.placeholder.name">
+        </div>
+        <div class="dialog-row pt-2" id="dialog-row-condA">
+            <label for="dlg-ip-blindctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+            <select id="dlg-ip-blindctl-rule-condAOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-condB">
+            <label for="dlg-ip-blindctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-cond2LogOperator">
+            <label for="dlg-ip-blindctl-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleAndOr"></span></label>
+            <select id="dlg-ip-blindctl-rule-cond2LogOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-cond2A">
+            <label for="dlg-ip-blindctl-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+            <select id="dlg-ip-blindctl-rule-cond2AOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-cond2B">
+            <label for="dlg-ip-blindctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-blindctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+        </div>
+        <div class="dialog-row pt-2" id="dialog-row-timeA">
+            <label for="dlg-ip-blindctl-rule-timeA"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
+            <select id="dlg-ip-blindctl-rule-timeA-operator" class="ipadd dlg-ip-blindctl-rule-timeA-operator" >
+            </select>
+            <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeA">
+            <label for="dlg-ip-blindctl-rule-offset-timeA"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeA" class="ipadd dlg-ip-blindctl-rule-multiplier-timeA" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-timeMin">
+            <label for="dlg-ip-blindctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMin"></span></label>
+            <!-- select id="dlg-ip-blindctl-rule-timeMax-operator" class="ipadd dlg-ip-blindctl-rule-timeMax-operator" >
+            </select -->
+            <input type="text" id="dlg-ip-blindctl-rule-timeMin" class="ipMain dlg-ip-blindctl-rule-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
+            <label for="dlg-ip-blindctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMin"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMin"class="ipMain dlg-ip-blindctl-rule-offset-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeMin" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMin" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-timeMax">
+            <label for="dlg-ip-blindctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-timeMax" class="ipMain dlg-ip-blindctl-rule-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
+            <label for="dlg-ip-blindctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMax"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMax"class="ipMain dlg-ip-blindctl-rule-offset-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
+            </select>
+        </div>
+        <div class="dialog-row pt-2" id="dialog-row-level">
+            <label for="dlg-ip-blindctl-rule-level"><i class="fa fa-window-maximize"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
+            <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
+            </select>
+        </div>
+    </div>
 </script>
 <style>
-    hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .form-row-sunControlActive {
-        display:none
-    }
-    .form-row-sunControlRestriction {
-        display:none
-    }
-    .form-row-sunControlMaximization {
-        display:none
-    }
-    .form-tips {
-        width: 90%
-    }
+    hr { width: 100% }
+    .mt-0 { margin-top:0 !important; }
+    .mb-0 { margin-bottom:0 !important; }
+    .pt-1 { padding-top:0.5rem !important; }
+    .pb-1 { padding-bottom:0.5rem !important; }
+    .pl-1 { padding-left:0.5rem !important; }
+    .pr-1 { padding-right:0.5rem !important; }
+    .pt-2 { padding-top:1.0rem !important; }
+    .pb-2 { padding-bottom:1.0rem !important; }
+    .pl-2 { padding-left:1.0rem !important; }
+    .pr-2 { padding-right:1.0rem !important; }
+    .pt-3 { padding-top:1.25rem !important; }
+    .pb-3 { padding-bottom:1.25rem !important; }
+    .pl-3 { padding-left:1.25rem !important; }
+    .pr-3 { padding-right:1.25rem !important; }
+    .is-to-show-initially { display:none }
+    .is-initial-hidden { display:none }
+    .form-row-sunControlActive { display:none }
+    .form-row-sunControlRestriction { display:none }
+    .form-row-sunControlMaximization { display:none }
+    .form-tips { width: 90% }
     .block-indent1 {
         float: left;
         min-height: 1px;
-        margin-left: 10px;
-        width: 100%
+        margin-left: 2%; /* 10px; */
+        width: 98%
     }
     .block-indent1-noadd {
         float: left;
         min-height: 1px;
-        margin-left: 10px;
-        width: 100%
+        margin-left: 2%; /* 10px; */
+        width: 98%
     }
     .input-error {
         border-color: #d6615f !important;
@@ -1554,14 +2156,14 @@
     .block-indent2 {
         float: left;
         min-height: 1px;
-        margin-left: 20px;
-        width: 100%
+        margin-left: 4%; /* 20px; */
+        width: 96%
     }
     .block-indent2-noadd {
         float: left;
         min-height: 1px;
-        margin-left: 20px;
-        width: 100%
+        margin-left: 4%; /* 20px; */
+        width: 96%
     }
     .block-noindent .row-full-width {
         width : calc(100% - 110px);
@@ -1590,6 +2192,9 @@
     .block-indent2-noadd .ui-spinner {
         width : calc(100% - 130px);
     }
+    .indent-time-text {
+        text-indent:10px;
+    }
     .node-input-multiplier {
         width: 125px;
         max-width: 125px;
@@ -1603,5 +2208,85 @@
     .ui-spinner input {
         border: none !important;
         width: 95% !important;
+    }
+
+    .dialog-row {
+        clear: both;
+        color: #555;
+        margin-bottom: 5px;
+    }
+    .ui-dialog-rdg .ui-dialog-content-rdg {
+        padding: 25px 25px 10px 25px !important;
+    }
+    .dialog-row label {
+        display: inline-block;
+        /* width: 9rem; */
+        width: 25%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row.block-indent1 label {
+        /* width: 11rem; */
+        width: 23%;
+    }
+    .dialog-row.block-indent2 label {
+        /* width: 13rem; */
+        width: 22%;
+    }
+
+    .dialog-row .ipalone {
+        /* width: calc(90% - 9rem); */
+        width: 70%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ipMain {
+        /* width: calc(60% - 9rem); */
+        width: 45%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ipadd {
+        /* width: calc(20% - 9rem);*/
+        width: 20%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row.block-indent1 .ipalone {
+        width: 70%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row.block-indent1 .ipMain {
+        width: 45%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row.block-indent2 .ipalone {
+        width: 70%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row.block-indent2 .ipMain {
+        width: 45%;
+        margin-bottom: 0px !important;
+    }npm
+    .blind-rule-mainblock {
+        margin-right: 28px;
+    }
+    .blind-rule-name-span {
+        /* font-weight: bolder; */
+        width: 30%; /* width: 120px; */
+        float: left;
+    }
+    .blind-rule-description-span {
+        font-size: 10px;
+        margin-left: 30%; /* margin-left: 122px; */
+        margin-right: 5px;
+    }
+    .blind-rule-finalspan {
+        top: 50%;
+        position: absolute;
+        right: 66px;
+        margin-top: -9px;
+    }
+    .blind-rule-editBtn {
+        top: 50%;
+        position: absolute;
+        right: 28px;
+        margin-top: -9px !important;
     }
 </style>

@@ -28,7 +28,8 @@
             "moonPhase":"moon phase",
             "moonPhaseCheck": "moon phase",
             "levelfix":"Level",
-            "levelfree": "Level entered"
+            "levelfree": "Level entered",
+            "levelND": "N/D - use default, sun control or reset"
         },
         "typeOptions": {
             "moonRise": "moon rise",
@@ -113,10 +114,11 @@
             "Text (string)",
             "time (number) since emit",
             "day of week",
+            "week",
             "Text free"
         ],
         "outputFormats": [
-            "milliseconds UNIX timestamp",
+            "UNIX timestamp (ms)",
             "YYYYMMDDHHMMSS",
             "YYYYMMDD.HHMMSS",
             "UTC date and time",
@@ -131,6 +133,8 @@
             "hours",
             "Day Name, e.g. Monday, 22.12.",
             "Day in relative, e.g. Today, 22.12.",
+            "Week Number",
+            "is week even",
             "as object",
             "Other"
         ],
@@ -281,7 +285,7 @@
         "pos-config": "Node not properly configured!! Missing or wrong position configuration!",
         "pos-config-state": "Node not properly configured!!",
         "unknownPropertyOperator": "error, the used property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
-        "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown!",
+        "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown! (\"__opTypeA__.__opValueA__\" compare to \"__opTypeB__.__opValueB__\")",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__",
         "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)"
@@ -319,8 +323,8 @@
             "timeZoneOffset": "If for the timezone OS Standard is choosen the standard timezone including daylight saving switch is used. If is not chosen this setting, but a special time zone then no change of the daylightsaving is done! Formatchanges to time could taken time until it will get any effect."
         },
         "errors": {
-            "longitude-missing": "Longitude is missing or wrong!",
             "latitude-missing": "Latitude is missing or wrong!",
+            "longitude-missing": "Longitude is missing or wrong!",
             "coordinates-missing": "Latitude and Longitude is wrong!"
         }
     }

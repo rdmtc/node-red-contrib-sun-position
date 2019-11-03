@@ -400,7 +400,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 ts: noonVal.getTime(),
                 pos: sunTimesDefault.solarNoon,
                 name: 'solarNoon',
-                angle: 90,
+                // elevation: 90,
                 julian: Jnoon,
                 valid: !isNaN(Jnoon)
             },
@@ -409,7 +409,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 ts: nadirVal.getTime(),
                 pos: sunTimesDefault.nadir,
                 name: 'nadir',
-                angle: 270,
+                // elevation: 270,
                 julian: Jnoon + 0.5,
                 valid: !isNaN(Jnoon)
             }
@@ -441,7 +441,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 ts: v1.getTime(),
                 pos: time[4],
                 name: time[2],
-                angle: sa,
+                elevation: sa,
                 julian: Jset,
                 valid
             };
@@ -450,7 +450,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 ts: v2.getTime(),
                 pos: time[3],
                 name: time[1],
-                angle: (180 + (sa * -1)),
+                elevation: sa, // (180 + (sa * -1)),
                 julian: Jrise,
                 valid
             };
@@ -472,19 +472,19 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {Date} date Date object with the  for calculating sun-times
      * @param {number} lat latitude for calculating sun-times
      * @param {number} lng longitude for calculating sun-times
-     * @param {number} sunAngle sun angle for calculating sun-time
+     * @param {number} elevationAngle sun angle for calculating sun-time
      * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
      * @return {suntimes} result object of sunTime
      */
-    SunCalc.getSunTime = function (date, lat, lng, sunAngle, inUTC) {
+    SunCalc.getSunTime = function (date, lat, lng, elevationAngle, inUTC) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
         }
-        if (isNaN(sunAngle)) {
-            throw new Error('angle missing');
+        if (isNaN(elevationAngle)) {
+            throw new Error('elevationAngle missing');
         }
         const lw = rad * -lng;
         const phi = rad * lat;
@@ -496,7 +496,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const dec = declination(L, 0);
         const Jnoon = solarTransitJ(ds, M, L);
 
-        const Jset = getSetJ(sunAngle * rad, lw, phi, dec, n, M, L);
+        const Jset = getSetJ(elevationAngle * rad, lw, phi, dec, n, M, L);
         const Jrise = Jnoon - (Jset - Jnoon);
         const v1 = fromJulianDay(Jset);
         const v2 = fromJulianDay(Jrise);
@@ -505,13 +505,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             set: {
                 value: v1,
                 ts: v1.getTime(),
-                angle: sunAngle,
+                elevation: elevationAngle,
                 julian: Jset
             },
             rise: {
                 value: v2,
                 ts: v2.getTime(),
-                angle: (180 + (sunAngle * -1)),
+                elevation: elevationAngle, // (180 + (elevationAngle * -1)),
                 julian: Jrise
             }
         };
@@ -524,21 +524,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {number} d number of days
      */
     function moonCoords(d) {
-        const L = rad * (218.316 + 13.176396 * d);
-        // ecliptic longitude
-
-        const M = rad * (134.963 + 13.064993 * d);
-        // mean anomaly
-
-        const F = rad * (93.272 + 13.229350 * d);
-        // mean distance
-
-        const l = L + rad * 6.289 * sin(M);
-        // longitude
-
-        const b = rad * 5.128 * sin(F);
-        // latitude
-
+        const L = rad * (218.316 + 13.176396 * d); // ecliptic longitude
+        const M = rad * (134.963 + 13.064993 * d); // mean anomaly
+        const F = rad * (93.272 + 13.229350 * d); // mean distance
+        const l = L + rad * 6.289 * sin(M); // longitude
+        const b = rad * 5.128 * sin(F); // latitude
         const dt = 385001 - 20905 * cos(M); // distance to the moon in km
 
         return {

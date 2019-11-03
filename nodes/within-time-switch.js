@@ -261,18 +261,13 @@ module.exports = function (RED) {
         this.propertyEndThresholdType = config.propertyEndThresholdType;
         this.timeOutObj = null;
         this.lastMsgObj = null;
-        this.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
         const node = this;
 
         this.on('input', function (msg, send, done) { // eslint-disable-line complexity
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || function() { node.send.apply(node, arguments) };
-            done = done || this.done;
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
+
             try {
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));

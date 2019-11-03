@@ -485,6 +485,9 @@
             name: {
                 value: ''
             },
+            nameInt: {
+                value: ''
+            },
             positionConfig: {
                 value: '',
                 type: 'position-config',
@@ -889,7 +892,7 @@
                 global: 'global context',
                 bin: 'binary data',
                 date: 'timestamp',
-                dateSpecific: 'timestamp',
+                dateSpecific: 'special timestamp',
                 entered: 'timestamp',
                 dateEntered: 'timestamp',
                 env: 'Environment variable',
@@ -985,13 +988,13 @@
             };
 
             if (this.timeType === 'none' || this.timeType === '') {
-                result += getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12);
+                result += (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12, this.payloadTimeFormat));
             } else {
                 const timeTxt = getTimeId();
                 if (timeTxt.length > 26) {
                     result += timeTxt + ' =...';
                 } else {
-                    result += timeTxt + ' = ' + getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 14);
+                    result += timeTxt + ' = ' + (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 14));
                 }
             }
 
@@ -1742,31 +1745,33 @@
                 });
         },
         oneditsave() {
-            // this.payloadType = $("#node-input-payload").typedInput("type");
-            // this.timeType = $("#node-input-time").typedInput("type");
+            const plt = $('#node-input-payload').typedInput('type');
+            if (plt === 'dateSpecific') {
+                if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
+                    this.nameInt = clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
+                } else {
+                    let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
+                    txt = $.trim(txt.split(',')[0]);
+                    this.nameInt = clipValueLength(txt, 20);
+                }
+            } else {
+                this.nameInt = getValueLabel(this, plt,
+                    $('#node-input-payload').typedInput('value'),
+                    $('#node-input-payloadOffset').typedInput('value'),
+                    20);
+            }
             this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
-            // this.propertyType = $("#node-input-property").typedInput("type");
-            // this.timeAltType = $("#node-input-timeAlt").typedInput("type");
             this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
-
-            // this.addPayload1Type = $("#node-input-addPayload1").typedInput("type");
-            // this.addPayload1ValueType = $("#node-input-addPayload1Value").typedInput("type");
             this.addPayload1Days = getDaysStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'));
             if (Number($('#node-input-addPayload1Formatsel').val()) !== 99) {
                 $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
                 this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
             }
-
-            // this.addPayload2Type = $("#node-input-addPayload2").typedInput("type");
-            // this.addPayload2ValueType = $("#node-input-addPayload2Value").typedInput("type");
             this.addPayload2Days = getDaysStr($('#time-inject-addPayload2Days input[type=checkbox]:checked'));
             if (Number($('#node-input-addPayload2Formatsel').val()) !== 99) {
                 $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
                 this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
             }
-
-            // this.addPayload3Type = $("#node-input-addPayload3").typedInput("type");
-            // this.addPayload3ValueType = $("#node-input-addPayload3Value").typedInput("type");
             this.addPayload3Days = getDaysStr($('#time-inject-addPayload3Days input[type=checkbox]:checked'));
             if (Number($('#node-input-addPayload3Formatsel').val()) !== 99) {
                 $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());

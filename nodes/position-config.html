@@ -1,16 +1,21 @@
 <!DOCTYPE HTML>
 <script type="text/html" data-template-name="position-config">
     <div class="form-row">
+        <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
+        <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
+        <input  type="hidden" id="node-config-input-latitude">
+    </div>
+
+    <div class="form-row">
         <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
         <input type="text" id="node-config-input-posLongitude" data-i18n="[placeholder]position-config.placeholder.longitude">
         <input  type="hidden" id="node-config-input-longitude">
         <input  type="hidden" id="node-config-input-isValide">
     </div>
 
-    <div class="form-row">
-        <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
-        <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
-        <input  type="hidden" id="node-config-input-latitude">
+    <div class="form-row" id="node-config-map-row">
+        <div id="node-config-map-link">Karte</div>
+        <iframe id="node-config-map-content" src="about:blank" width="100%" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border: 1px solid black"></iframe>
     </div>
 
     <div class="form-row form-tips is-to-show-initially" data-i18n="[html]position-config.tips.config"></div>
@@ -164,15 +169,6 @@
     RED.nodes.registerType('position-config', {
         category: 'config',
         credentials: {
-            posLongitude: {
-                type: 'text',
-                value: '',
-                required: true,
-                validate(v){
-                    const n = Number(v);
-                    return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
-                }
-            },
             posLatitude: {
                 type: 'text',
                 value: '',
@@ -180,6 +176,15 @@
                 validate(v){
                     const n = Number(v);
                     return RED.validators.number()(v) && ((n >= -90) && (n <= 90));
+                }
+            },
+            posLongitude: {
+                type: 'text',
+                value: '',
+                required: true,
+                validate(v){
+                    const n = Number(v);
+                    return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
                 }
             }
         },
@@ -231,7 +236,7 @@
                 $('.is-to-show-initially').show();
                 $('.is-to-hide-initially').hide();
             }, 300);
-
+            $('#node-config-map-row').hide();
             const node = this;
             let tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
             if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
@@ -262,6 +267,7 @@
             $('#node-config-input-isValide').val(false);
             const $lat = $('#node-config-input-posLatitude');
             const $lon = $('#node-config-input-posLongitude');
+
             const latOldVal = parseFloat($('#node-config-input-latitude').val());
             const lonOldVal = parseFloat($('#node-config-input-longitude').val());
             let latVal = parseFloat($lat.val());
@@ -270,8 +276,23 @@
             const coordChanged = (_type, _value) => {
                 const lat = $('#node-config-input-posLatitude').val();
                 const lon = $('#node-config-input-posLongitude').val();
+
                 const isValid = !isNaN(lat) && !isNaN(lon) && (lat !== '') && (lon !== '') && (lat !== 0) && (lon !== 0);
                 $('#node-config-input-isValide').val(isValid);
+
+                if (isValid) {
+                    $('#node-config-map-row').show();
+                    const clat = parseFloat(lat);
+                    const clon = parseFloat(lon);
+                    $('#node-config-map-content').attr('src', `https://www.openstreetmap.org/export/embed.html?bbox=${(clon-0.004).toFixed(14)}%2C${(clat-0.004).toFixed(14)}%2C${(clon+0.004).toFixed(14)}%2C${(clat+0.004).toFixed(14)}&amp;layer=mapnik&amp;marker=${lat}%2C${lon}`);
+                    // src="https://www.openstreetmap.org/export/embed.html?bbox=13.630465865135195%2C51.088954687366886%2C13.633700609207155%2C51.09019968648441&amp;layer=mapnik&amp;marker=51.089577967896076%2C13.632082700696628
+                    // src="https://www.openstreetmap.org/export/embed.html?bbox=13.61883000000000%2C51.08226000000000%2C13.62883000000000%2C51.09226000000000&amp;layer=mapnik&amp;marker=51.08726%2C13.62383"
+                    //      https://www.openstreetmap.org/export/embed.html?bbox=13.62281000000000%2C51.08621          %2C13.62481          %2C51.08821         &amp;layer=mapnik&amp;marker=51.08721%2C13.62381
+                    // src="https://www.openstreetmap.org/export/embed.html?bbox=51.07726%2C13.61383%2C51.087260.01%2C13.623830.01&amp;layer=mapnik
+                    $('#node-config-map-link').html(`<a href="https://www.openstreetmap.org/#map=17/${lat}/${lon}" target="_blank">Openstreetmap</a>`);
+                } else {
+                    $('#node-config-map-row').hide();
+                }
             };
             $lat.on('change focus focusin focusout', coordChanged);
             $lon.on('change focus focusin focusout', coordChanged);

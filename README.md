@@ -271,6 +271,8 @@ Injects a message into a flow either manually or at timestamps which can also de
       * number - seconds since emit
       * number - minutes since emit
       * number - hour since emit
+      * number - week number
+      * boolean - true if week number is even, otherwise false
       * as object
 
 time-inject-settings-addProp1
@@ -579,6 +581,7 @@ The formats are:
 | tt          | Lowercase, two-character time marker string: am or pm.                                                                                                        |
 | T           | Uppercase, single-character time marker string: A or P.                                                                                                       |
 | TT          | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
+| ww          | workweek, number                                                                                                                                              |
 | Z           | timezone abbreviation, e.g. EST, MDT, MESZ or MEZ.                                                                                                            |
 | z           | timezone offset, e.g. GMT-0500                                                                                                                                |
 | zz          | timezone offset - nothing for GMT/UTC, e.g. -0500 or +0230.                                                                                                   |

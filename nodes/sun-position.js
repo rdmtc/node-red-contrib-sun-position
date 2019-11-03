@@ -29,18 +29,13 @@ module.exports = function (RED) {
         this.endOffset = config.endOffset || 0;
         this.endOffsetType = config.endOffsetType || 'none';
         this.endOffsetMultiplier = config.endOffsetMultiplier || 60;
-        this.done = (text, msg) => {
-            if (text) {
-                return this.error(text, msg);
-            }
-            return null;
-        };
         const node = this;
 
         this.on('input', function (msg, send, done) {
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || function() { node.send.apply(node, arguments) };
-            done = done || this.done;
+            // If this is pre-1.0, 'done' will be undefined
+            done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
+            send = send || function (...args) { node.send.apply(node, args); };
+
             try {
                 let errorStatus = '';
                 let now = new Date();
@@ -48,7 +43,7 @@ module.exports = function (RED) {
                     now = new Date(msg.time);
                 }
                 if (typeof msg.ts !== 'undefined') {
-                    now = new Date(msg.time);
+                    now = new Date(msg.ts);
                 }
                 if (!hlp.isValidDate(now)) {
                     now = new Date();
@@ -180,7 +175,7 @@ module.exports = function (RED) {
                         text
                     });
                 }
-                send(ports); // this.send(ports); // Warning change msg object!!
+                send(ports); // this.send(ports);
                 done();
                 return null;
             } catch (err) {
