@@ -289,23 +289,37 @@ function getSpecialDayOfMonth(year, month, dayName) {
 }
 
 /**
- * get the week number for a a date
+ * For a given date, get the ISO week number
+ *
+ * Based on information at:
+ *
+ *    http://www.merlyn.demon.co.uk/weekcalc.htm#WNR
+ *
+ * Algorithm is to find nearest thursday, it's year
+ * is the year of the week number. Then get weeks
+ * between that date and the first day of that year.
+ *
+ * Note that dates in one year can be weeks of previous
+ * or next year, overlap is up to 3 days.
+ *
+ * e.g. 2014/12/29 is Monday in week  1 of 2015
+ *      2012/1/1   is Sunday in week 52 of 2011
+ *
  * @param {Date} date date to get week number
  * @returns {Number} week number
  */
 function getWeekNumber(date) {
-    const dt = new Date(date);
-    const target = new Date(dt.valueOf());
-    const dayNumber = (dt.getUTCDay() + 6) % 7;
-
-    target.setUTCDate(target.getUTCDate() - dayNumber + 3);
-    const firstThursday = target.valueOf();
-    target.setUTCMonth(0, 1);
-
-    if (target.getUTCDay() !== 4) {
-        target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
-    }
-    return Math.ceil((firstThursday - target) /  (7 * 24 * 3600 * 1000)) + 1;
+    // Copy date so don't modify original
+    date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay()||7));
+    // Get first day of year
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    // Calculate full weeks to nearest Thursday
+    const weekNo = Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7);
+    // Return array of year and week number
+    return [date.getUTCFullYear(), weekNo];
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -833,7 +847,7 @@ const _dateFormat = (function () {
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
             TT: H < 12 ? 'AM' : 'PM',
-            ww: getWeekNumber(date),
+            ww: getWeekNumber(date)[1],
             Z: utc ? 'UTC' : /.*\s(.+)/.exec(date.toLocaleTimeString([], { timeZoneName: 'short' }))[1],
             z: utc ? '' : (String(date).match(/\b(?:GMT|UTC)(?:[-+]\d{4})?\b/g) || ['']).pop(),
             zz: utc ? '' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
@@ -1082,13 +1096,14 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
                 + (offset === 0 ? 'Z' : (offset < 0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
         }
         case 19: // workweek
-            return getWeekNumber(date);
+            return getWeekNumber(date)[1];
         case 20: // workweek even
-            return !Boolean(getWeekNumber(date) % 2); // eslint-disable-line no-extra-boolean-cast
+            return !(getWeekNumber(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
     }
 
     const now = new Date();
     const delay = (date.getTime() - now.getTime());
+    const week = getWeekNumber(date);
     return {
         date,
         ts: date.getTime(),
@@ -1097,7 +1112,12 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
         delay,
         delaySec: Math.round(delay / 1000),
         lc: now.getTime(),
-        week: getWeekNumber(date)
+        week: {
+            iso : week,
+            week : week[1],
+            year : week[0],
+            even : !(week[1] % 2)
+        }
     };
 }
 // ===================================================================

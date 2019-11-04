@@ -1,5 +1,18 @@
 # node-red-contrib-sun-position
 
+#### 0.5.1-beta-0: BugFix and Maintenance Release
+
+- general
+  - fix for week number calculation when in daylight saving #65
+  - if time output as object the week is now an extra object with properties
+    - iso *array* `[year, week]`
+    - week *number* week number
+    - year *number* full year
+    - even *boolean* is true if week is even
+- blind control
+  - change logic of rule execution: From rules within Until rules will now considered.
+    - change should have no affect if rule setup is equal to the examples, that time restricted rules separated in first only until and afterwards only from rules
+
 #### 0.5.0: mayor release for blind control
 
 - configuration
