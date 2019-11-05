@@ -10,6 +10,8 @@
     - year *number* full year
     - even *boolean* is true if week is even
 - blind control
+  - fix for #66 if the blind not uses values between 0 and 1
+  - enhanced output of the rules
   - change logic of rule execution: From rules within Until rules will now considered.
     - change should have no affect if rule setup is equal to the examples, that time restricted rules separated in first only until and afterwards only from rules
 

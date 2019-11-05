@@ -908,7 +908,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    // console.log('[IN getBackendData] ',data);  // eslint-disable-line
+    console.log('[IN getBackendData] ',data);  // eslint-disable-line
     let res = '';
     if (!data || data.type === 'none' || data.type === '' || data.type === 'jsonata' || data.type === 'json' || data.type === 'bin') {
         res = data.type;
@@ -919,7 +919,7 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     } else if (data.type === 'msgPayload') {
         res = 'msg.payload';
     } else if (data.type === 'PlT') {
-        res = 'msg.payload';
+        res = 'msg.payload if msg.topic contains "' + data.value + '"';
     } else if (data.type === 'msgTs') {
         res = 'msg.ts';
     } else if (data.type === 'msgLC') {

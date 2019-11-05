@@ -173,28 +173,86 @@
         }
 
         if (t === 'pdsCalcData') {
-            return '{sun position}';
+            return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"`;
         }
 
         if (t === 'pdsCalcPercent') {
-            return '{sun in sky percent}';
+            return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"`;
+            // return '{sun in sky percent}';
         }
 
         if (t === 'pdmCalcData') {
-            return '{moon position}';
+            return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"`;
+            // return '{moon position}';
         }
 
         if (t === 'pdmPhase') {
-            return '{moon phase}';
+            return `"${node._('node-red-contrib-sun-position/position-config:common.types.moonPhase')}"`;
+            // return '{moon phase}';
         }
 
         if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-            return clipValueLength(res, l);
+            switch (v) {
+                case 'astronomicalDawn':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn');
+                case 'amateurDawn':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn');
+                case 'nauticalDawn':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn');
+                case 'blueHourDawnStart':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart');
+                case 'civilDawn':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn');
+                case 'blueHourDawnEnd':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd');
+                case 'goldenHourDawnStart':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart');
+                case 'sunrise':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise');
+                case 'sunriseEnd':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd');
+                case 'goldenHourDawnEnd':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd');
+                case 'solarNoon':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon');
+                case 'goldenHourDuskStart':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart');
+                case 'sunsetStart':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart');
+                case 'sunset':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset');
+                case 'goldenHourDuskEnd':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd');
+                case 'blueHourDuskStart':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart');
+                case 'civilDusk':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk');
+                case 'blueHourDuskEnd':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd');
+                case 'nauticalDusk':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk');
+                case 'amateurDusk':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk');
+                case 'astronomicalDusk':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk');
+                case 'nadir':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir');
+                default:
+                    return v;
+            }
+            // const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+            // return clipValueLength(res, l);
         }
 
         if (t === 'pdmTime') {
-            return 'moon' + v;
+            switch (v) {
+                case 'rise':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise');
+                case 'set':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set');
+                default:
+                    return 'moon' + v;
+            }
         }
 
         if (t === 'msgPayload') { return 'msg.payload'; }
@@ -211,9 +269,21 @@
     }
 
     /**
+     * get a time in millisecond as string of the format hh:mm, hh:mm:ss or hh:mm:ss.mss
+     * @param {number} s - milisecond
+     * @returns {string} time as string
+     */
+    function msToTime(s) {
+        // Pad to 2 or 3 digits, default is 2
+        const pad = (n, z = 2) => ('00' + n).slice(-z);
+        const sec = (s%6e4)/1000|0;
+        const msec = s%1000;
+        return pad(s/3.6e6|0) + ':' + pad((s%3.6e6)/6e4 | 0) + ((msec >0) ? (':' + pad(sec) +'.' + pad(msec, 3) ) : ((sec>0) ? ':' + pad(sec) : ''));
+    }
+    /**
      * get a description of the rule rules
      * @param {object} data - a rule description
-     * @returns {steing} description of the rule
+     * @returns {string} description of the rule
      */
     function getRuleDescription(node, selFields, data) {
         let result = '';
@@ -222,8 +292,7 @@
                 result += '<div>';
                 result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
 
-
-                result += getValueLabel(node, data.validOperandAType,data.validOperandAValue);
+                result += '<var>' + getValueLabel(node, data.validOperandAType,data.validOperandAValue) + '</var>';
                 // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
                 result += ' ' + data.validOperatorText;
                 let operatorCount = 1;
@@ -241,9 +310,9 @@
                     result += ' ' + getValueLabel(node, data.validOperandBType, data.validOperandBValue);
                 }
                 if (data.valid2LogOperator > 0 && data.valid2OperandAType !== 'none') {
-                    result += ' <b>' + data.valid2LogOperatorText + '</b> ';
+                    result += '<br/><strong>' + data.valid2LogOperatorText + '</strong> ';
 
-                    result += getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue);
+                    result += '<var>' + getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue) + '</var>';
                     result += ' ' + data.valid2OperatorText;
                     let operatorCount = 1;
                     const fields = selFields.comparator;
@@ -266,25 +335,60 @@
                 result += '<div>';
                 result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
                 result += data.timeOpText;
-                result += ' ' + getValueLabel(node, data.timeType, data.timeValue);
+                result += ' <var>' + getValueLabel(node, data.timeType, data.timeValue) + '</var>';
                 if (data.offsetType && data.offsetType !== 'none') {
-                    result += ' offset ' + getValueLabel(node, data.offsetType, data.offsetValue);
-                    result += ' * ' + data.multiplier/1000 + 's';
+                    if (data.offsetType === 'num') {
+                        const osmillis = data.offsetValue * data.multiplier;
+                        if (osmillis>0) {
+                            result += ' + ' + msToTime(osmillis);
+                        } else {
+                            result += ' - ' +msToTime(osmillis * -1);
+                        }
+                    } else {
+                        result += ' offset <var>' + getValueLabel(node, data.offsetType, data.offsetValue) + '</var>';
+                        // result += ' * ' + data.multiplier/1000 + 's';
+                    }
                 }
 
                 if (data.timeMinType && data.timeMinType !== 'none') {
-                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMin') + '</span> ' + getValueLabel(node, data.timeMinType, data.timeMinValue);
+                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                    result += node._('blind-control.label.ruleTimeMin');
+                    result += '</span> <var>';
+                    result += getValueLabel(node, data.timeMinType, data.timeMinValue);
+                    result += '</var>';
                     if (data.offsetMinType && data.offsetMinType !== 'none') {
-                        result += ' offset ' + getValueLabel(node, data.offsetMinType, data.offsetMinValue);
-                        result += ' * ' + data.multiplierMin/1000 + 's';
+                        if (data.offsetMinType === 'num') {
+                            const osmillis = data.offsetMinValue * data.multiplierMin;
+                            if (osmillis>0) {
+                                result += ' + ' + msToTime(osmillis);
+                            } else {
+                                result += ' - ' + msToTime(osmillis * -1);
+                            }
+                        } else {
+                            result += ' offset ' + getValueLabel(node, data.offsetMinType, data.offsetMinValue);
+                            // result += ' * ' + data.multiplierMin/1000 + 's';
+                        }
                     }
                     result += '</div>';
                 }
                 if (data.timeMaxType && data.timeMaxType !== 'none') {
-                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>' + node._('blind-control.label.ruleTimeMax') + '</span> ' + getValueLabel(node, data.timeMaxType, data.timeMaxValue);
+                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
+                    result += node._('blind-control.label.ruleTimeMax');
+                    result += '</span> <var>';
+                    result += getValueLabel(node, data.timeMaxType, data.timeMaxValue);
+                    result += '</var>';
                     if (data.offsetMaxType && data.offsetMaxType !== 'none') {
-                        result += ' offset ' + getValueLabel(node, data.offsetMaxType, data.offsetMaxValue);
-                        result += ' * ' + data.multiplierMax/1000 + 's';
+                        if (data.offsetMaxType === 'num') {
+                            const osmillis = data.offsetMaxValue * data.multiplierMax;
+                            if (osmillis>0) {
+                                result += ' + ' + msToTime(osmillis);
+                            } else {
+                                result += ' - ' +msToTime(osmillis * -1);
+                            }
+                        } else {
+                            result += ' offset ' + getValueLabel(node, data.offsetMaxType, data.offsetMaxValue);
+                            // result += ' * ' + data.multiplierMax/1000 + 's';
+                        }
                     }
                     result += '</div>';
                 }
@@ -302,6 +406,7 @@
                     }
                 } else {
                     result += data.levelOpText + ' ' + getValueLabel(node, data.levelType, data.levelValue);
+                    // <meter value="2" min="0" max="10">2 out of 10</meter>
                 }
             } else {
                 result += '-';
@@ -931,7 +1036,7 @@
                         data.levelOp = (Number(data.levelOp) || 0);
                         data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
                         data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
-                        data.timeData = (parseFloat($(this).find('.node-input-rule-time').attr('timedata')) || 0);
+                        data.timeData = (parseFloat($(this).find('.node-input-rule-timeReg').attr('timedata')) || 0);
                         data.timeOp = (data.timeLimited) ? (Number(data.timeOp) || 0) : -1;
                     });
                     /**
@@ -1372,25 +1477,25 @@
                 $dialogCond2BOperand.typedInput('width', '70%');
                 // #endregion dialogCond2
                 // #region dialogTimeReg
-                const $dialogTimeRegOperator = $dialog.find('#dlg-ip-blindctl-rule-timeA-operator');
+                const $dialogTimeRegOperator = $dialog.find('#dlg-ip-blindctl-rule-timeReg-operator');
                 $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
                 $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
 
-                const $dialogTimeRegInput = $dialog.find('#dlg-ip-blindctl-rule-timeA');
+                const $dialogTimeRegInput = $dialog.find('#dlg-ip-blindctl-rule-timeReg');
                 $dialogTimeRegInput.typedInput({
                     default: types.Undefined.value,
                     types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                 });
                 $dialogTimeRegInput.typedInput('width', '40%');
 
-                const $dialogTimeRegOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeA');
+                const $dialogTimeRegOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeReg');
                 $dialogTimeRegOffset.typedInput({
                     default: types.Undefined.value,
                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
                 }).change(() => { $dialogTimeRegInput.change(); });
                 $dialogTimeRegOffset.typedInput('width', '40%');
 
-                const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeA');
+                const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeReg');
                 appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
                 // #endregion dialogTimeReg
                 // #region dialogTimeMin
@@ -1446,10 +1551,11 @@
                     if (dialogDataOnLoading) { return; }
                     const opType = $dialogTimeRegInput.typedInput('type');
                     if (opType === types.Undefined.value) {
-                        $('#dialog-row-time').attr('title', 'N/A');
+                        $('#dialog-row-timeReg').attr('title', 'N/A');
                         $dialogTimeRegInput.attr('timedata', '0');
                         $dialogTimeRegOperator.hide();
-                        $('#dialog-row-offset-timeA').hide();
+                        $('#dialog-row-offset-timeReg').hide();
+                        $('#dialog-row-timeReg').attr('title', opType);
 
                         $('#dialog-row-timeMin').hide();
                         $('#dialog-row-timeMax').hide();
@@ -1466,18 +1572,19 @@
                         return;
                     } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                         $dialogTimeRegOperator.show();
-                        $('#dialog-row-offset-timeA').show();
+                        $('#dialog-row-offset-timeReg').show();
                     } else {
                         $dialogTimeRegOperator.show();
-                        $('#dialog-row-offset-timeA').hide();
+                        $('#dialog-row-offset-timeReg').hide();
                     }
                     getBackendData(d => {
+                        // console.log('getBackendData of $dialogTimeRegInput ',d);
                         if (d.value && d.value !== 'none') {
                             const dv = new Date(d.value);
-                            $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                            $('#dialog-row-timeReg').attr('title', bdDateToTime(dv));
                             $dialogTimeRegInput.attr('timedata', dv.getTime());
                         } else {
-                            $('#dialog-row-time').attr('title', d.value);
+                            $('#dialog-row-timeReg').attr('title', d.value);
                             $dialogTimeRegInput.attr('timedata', '0');
                         }
                     }, {
@@ -1492,6 +1599,7 @@
                     $dialogTimeMinInput.change();
                     $dialogTimeMaxInput.change();
                 });
+
                 $dialogTimeMinInput.change(() => {
                     if (dialogDataOnLoading) { return; }
                     const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1500,6 +1608,9 @@
                         const opType = $dialogTimeMinInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             $('#dialog-row-offset-timeMin').hide();
+                            $('#dialog-row-timeMin').attr('title', opType);
+                            $dialogTimeMinInput.attr('timedata', '0');
+                            return;
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeMin').show();
                         } else {
@@ -1508,10 +1619,10 @@
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
-                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $('#dialog-row-timeMin').attr('title', bdDateToTime(dv));
                                 $dialogTimeMinInput.attr('timedata', dv.getTime());
                             } else {
-                                $('#dialog-row-time').attr('title', d.value);
+                                $('#dialog-row-timeMin').attr('title', d.value);
                                 $dialogTimeMinInput.attr('timedata', '0');
                             }
                         }, {
@@ -1525,6 +1636,7 @@
                         });
                     }
                 });
+
                 $dialogTimeMaxInput.change(() => {
                     if (dialogDataOnLoading) { return; }
                     const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1533,6 +1645,9 @@
                         const opType = $dialogTimeMaxInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             $('#dialog-row-offset-timeMax').hide();
+                            $('#dialog-row-timeMax').attr('title', opType);
+                            $dialogTimeMaxInput.attr('timedata', '0');
+                            return;
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeMax').show();
                         } else {
@@ -1541,10 +1656,10 @@
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
-                                $('#dialog-row-time').attr('title', bdDateToTime(dv));
+                                $('#dialog-row-timeMax').attr('title', bdDateToTime(dv));
                                 $dialogTimeMaxInput.attr('timedata', dv.getTime());
                             } else {
-                                $('#dialog-row-time').attr('title', d.value);
+                                $('#dialog-row-timeMax').attr('title', d.value);
                                 $dialogTimeMaxInput.attr('timedata', '0');
                             }
                         }, {
@@ -2072,16 +2187,16 @@
             <label for="dlg-ip-blindctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
             <input id="dlg-ip-blindctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-timeA">
-            <label for="dlg-ip-blindctl-rule-timeA"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
-            <select id="dlg-ip-blindctl-rule-timeA-operator" class="ipadd dlg-ip-blindctl-rule-timeA-operator" >
+        <div class="dialog-row pt-2" id="dialog-row-timeReg">
+            <label for="dlg-ip-blindctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
+            <select id="dlg-ip-blindctl-rule-timeReg-operator" class="ipadd dlg-ip-blindctl-rule-timeReg-operator" >
             </select>
-            <input type="text" id="dlg-ip-blindctl-rule-timeA" class="ipMain dlg-ip-blindctl-rule-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+            <input type="text" id="dlg-ip-blindctl-rule-timeReg" class="ipMain dlg-ip-blindctl-rule-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.time">
         </div>
-        <div class="dialog-row block-indent2" id="dialog-row-offset-timeA">
-            <label for="dlg-ip-blindctl-rule-offset-timeA"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeA"class="ipMain dlg-ip-blindctl-rule-offset-timeA" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
-            <select  id="dlg-ip-blindctl-rule-multiplier-timeA" class="ipadd dlg-ip-blindctl-rule-multiplier-timeA" >
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeReg">
+            <label for="dlg-ip-blindctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-offset-timeReg"class="ipMain dlg-ip-blindctl-rule-offset-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
+            <select  id="dlg-ip-blindctl-rule-multiplier-timeReg" class="ipadd dlg-ip-blindctl-rule-multiplier-timeReg" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">

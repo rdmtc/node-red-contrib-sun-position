@@ -1052,7 +1052,9 @@ module.exports = function (RED) {
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
-                res.status(500).send(JSON.stringify({}));
+                res.status(500).send(JSON.stringify({
+                    error: 'can not find position config node "' +req.query.config+'" '+String(posConfig)
+                }));
                 return;
             }
             let obj = {};
