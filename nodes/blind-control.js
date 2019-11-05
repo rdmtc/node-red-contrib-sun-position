@@ -265,7 +265,7 @@ module.exports = function (RED) {
                     } else if (val > 99) {
                         return node.blindData.levelTop;
                     }
-                    return (val / 100);
+                    return posPrcToAbs_(node, val / 100);
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
