@@ -116,6 +116,12 @@
             if (!v) {
                 return '?%';
             }
+            if (v.includes('open')) {
+                return node._('blind-control.typeOptions.100');
+            }
+            if (v.includes('closed')) {
+                return node._('blind-control.typeOptions.0');
+            }
             return String(v);
         }
 
@@ -399,7 +405,10 @@
                         result += node._('blind-control.label.ruleLevelND');
                     }
                 } else {
-                    result += data.levelOpText + ' ' + getValueLabel(node, data.levelType, data.levelValue);
+                    result += data.levelOpText;
+                    result += ' <var>';
+                    result += getValueLabel(node, data.levelType, data.levelValue);
+                    result += '</var>';
                     // <meter value="2" min="0" max="10">2 out of 10</meter>
                 }
             } else {
