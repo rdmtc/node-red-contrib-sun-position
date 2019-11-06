@@ -280,12 +280,33 @@
         const msec = s%1000;
         return pad(s/3.6e6|0) + ':' + pad((s%3.6e6)/6e4 | 0) + ((msec >0) ? (':' + pad(sec) +'.' + pad(msec, 3) ) : ((sec>0) ? ':' + pad(sec) : ''));
     }
+
+    /**
+     * get the time offset text
+     */
+    function _getOffsetText(node, t,v,m) {
+        let result = '';
+        if (t && t !== 'none') {
+            if (t === 'num') {
+                const osmillis = v * m;
+                if (osmillis>0) {
+                    result += ' + ' + msToTime(osmillis);
+                } else {
+                    result += ' - ' +msToTime(osmillis * -1);
+                }
+            } else {
+                result += ' offset <var>' + getValueLabel(node, t, v) + '</var>';
+                // result += ' * ' + data.multiplier/1000 + 's';
+            }
+        }
+        return result;
+    }
     /**
      * get a description of the rule rules
      * @param {object} data - a rule description
      * @returns {string} description of the rule
      */
-    function getRuleDescription(node, selFields, data) {
+    function getRuleDescription(node, selFields, data, enh) {
         let result = '';
         try {
             if (data.validOperandAType && data.validOperandAType !== 'none') {
@@ -336,18 +357,9 @@
                 result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
                 result += data.timeOpText;
                 result += ' <var>' + getValueLabel(node, data.timeType, data.timeValue) + '</var>';
-                if (data.offsetType && data.offsetType !== 'none') {
-                    if (data.offsetType === 'num') {
-                        const osmillis = data.offsetValue * data.multiplier;
-                        if (osmillis>0) {
-                            result += ' + ' + msToTime(osmillis);
-                        } else {
-                            result += ' - ' +msToTime(osmillis * -1);
-                        }
-                    } else {
-                        result += ' offset <var>' + getValueLabel(node, data.offsetType, data.offsetValue) + '</var>';
-                        // result += ' * ' + data.multiplier/1000 + 's';
-                    }
+                result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
+                if (enh && enh.timeReg) {
+                    result += ' <i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
                 }
 
                 if (data.timeMinType && data.timeMinType !== 'none') {
@@ -356,18 +368,9 @@
                     result += '</span> <var>';
                     result += getValueLabel(node, data.timeMinType, data.timeMinValue);
                     result += '</var>';
-                    if (data.offsetMinType && data.offsetMinType !== 'none') {
-                        if (data.offsetMinType === 'num') {
-                            const osmillis = data.offsetMinValue * data.multiplierMin;
-                            if (osmillis>0) {
-                                result += ' + ' + msToTime(osmillis);
-                            } else {
-                                result += ' - ' + msToTime(osmillis * -1);
-                            }
-                        } else {
-                            result += ' offset ' + getValueLabel(node, data.offsetMinType, data.offsetMinValue);
-                            // result += ' * ' + data.multiplierMin/1000 + 's';
-                        }
+                    result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
+                    if (enh && enh.timeMin) {
+                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
                     }
                     result += '</div>';
                 }
@@ -377,18 +380,9 @@
                     result += '</span> <var>';
                     result += getValueLabel(node, data.timeMaxType, data.timeMaxValue);
                     result += '</var>';
-                    if (data.offsetMaxType && data.offsetMaxType !== 'none') {
-                        if (data.offsetMaxType === 'num') {
-                            const osmillis = data.offsetMaxValue * data.multiplierMax;
-                            if (osmillis>0) {
-                                result += ' + ' + msToTime(osmillis);
-                            } else {
-                                result += ' - ' +msToTime(osmillis * -1);
-                            }
-                        } else {
-                            result += ' offset ' + getValueLabel(node, data.offsetMaxType, data.offsetMaxValue);
-                            // result += ' * ' + data.multiplierMax/1000 + 's';
-                        }
+                    result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
+                    if (enh && enh.timeMax) {
+                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
                     }
                     result += '</div>';
                 }
@@ -924,7 +918,7 @@
                 }
 
                 $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
-                    addItem(containerRow, containerIndex, data) {
+                    addItem($containerRow, containerIndex, data) {
                         if (data === {}) {
                             data.description = 'please edit rule';
                             data.name = 'empty';
@@ -963,9 +957,9 @@
                         }
 
                         data.levelOpText = data.levelOpText || node._('blind-control.label.ruleLevelAbs');
-                        containerRow.data('ruleData', JSON.stringify(data));
-                        containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
-                        const $row0 = $('<div/>').appendTo(containerRow);
+                        $containerRow.data('ruleData', JSON.stringify(data));
+                        $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
+                        const $row0 = $('<div/>').appendTo($containerRow);
                         const $div = $('<div/>', {
                             class: 'blind-rule-mainblock'
                         }).appendTo($row0);
@@ -989,7 +983,7 @@
                         }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
                         // $btn.button();
                         $btn.click(() => {
-                            _dialogLoadData(containerIndex, containerRow);
+                            _dialogLoadData(containerIndex, $containerRow);
                         });
                     },
                     addButton: false,
@@ -1423,17 +1417,22 @@
                         Ok() {
                             _dialogSaveData();
                             $dialog.dialog( 'close' );
+                            $dialogDataRow = null;
+                            dialogDataIndex = -1;
                         },
                         Cancel() {
                             $dialog.dialog( 'close' );
+                            $dialogDataRow = null;
+                            dialogDataIndex = -1;
                         }
                     }
                 });
 
                 const $dialogName = $dialog.find('#dlg-ip-blindctl-rule-name');
-                let dialogData = null;
+                let $dialogDataRow = null;
                 let dialogDataOnLoading = false;
                 let dialogDataIndex = -1;
+                const dialogAddData = {};
                 /**
                  * Build the dialog
                  */
@@ -1551,8 +1550,13 @@
                     if (dialogDataOnLoading) { return; }
                     const opType = $dialogTimeRegInput.typedInput('type');
                     if (opType === types.Undefined.value) {
-                        $('#dialog-row-timeReg').attr('title', 'N/A');
-                        $dialogTimeRegInput.attr('timedata', '0');
+                        dialogAddData.timeReg = {
+                            ts : 0,
+                            data : null,
+                            text : 'N/A'
+                        };
+                        $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
+                        $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
                         $dialogTimeRegOperator.hide();
                         $('#dialog-row-offset-timeReg').hide();
                         $('#dialog-row-timeReg').attr('title', opType);
@@ -1569,6 +1573,7 @@
                         if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                             $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
                         }
+                        _dialogGenHelpText();
                         return;
                     } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                         $dialogTimeRegOperator.show();
@@ -1581,12 +1586,21 @@
                         // console.log('getBackendData of $dialogTimeRegInput ',d);
                         if (d.value && d.value !== 'none') {
                             const dv = new Date(d.value);
-                            $('#dialog-row-timeReg').attr('title', bdDateToTime(dv));
-                            $dialogTimeRegInput.attr('timedata', dv.getTime());
+                            dialogAddData.timeReg = {
+                                ts : dv.getTime(),
+                                data : d,
+                                text : bdDateToTime(dv)
+                            };
                         } else {
-                            $('#dialog-row-timeReg').attr('title', d.value);
-                            $dialogTimeRegInput.attr('timedata', '0');
+                            dialogAddData.timeReg = {
+                                ts : 0,
+                                data : null,
+                                text : d.value
+                            };
                         }
+                        $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
+                        $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
+                        _dialogGenHelpText();
                     }, {
                         kind: 'getTimeData',
                         config : $nodeConfig.val(),
@@ -1608,8 +1622,14 @@
                         const opType = $dialogTimeMinInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             $('#dialog-row-offset-timeMin').hide();
-                            $('#dialog-row-timeMin').attr('title', opType);
-                            $dialogTimeMinInput.attr('timedata', '0');
+                            dialogAddData.timeMin = {
+                                ts : 0,
+                                data : null,
+                                text : 'N/A'
+                            };
+                            $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
+                            $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
+                            _dialogGenHelpText();
                             return;
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeMin').show();
@@ -1619,12 +1639,21 @@
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
-                                $('#dialog-row-timeMin').attr('title', bdDateToTime(dv));
-                                $dialogTimeMinInput.attr('timedata', dv.getTime());
+                                dialogAddData.timeMin = {
+                                    ts : dv.getTime(),
+                                    data : d,
+                                    text : bdDateToTime(dv)
+                                };
                             } else {
-                                $('#dialog-row-timeMin').attr('title', d.value);
-                                $dialogTimeMinInput.attr('timedata', '0');
+                                dialogAddData.timeMin = {
+                                    ts : 0,
+                                    data : null,
+                                    text : d.value
+                                };
                             }
+                            $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
+                            $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
+                            _dialogGenHelpText();
                         }, {
                             kind: 'getTimeData',
                             config: $nodeConfig.val(),
@@ -1645,8 +1674,14 @@
                         const opType = $dialogTimeMaxInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             $('#dialog-row-offset-timeMax').hide();
-                            $('#dialog-row-timeMax').attr('title', opType);
-                            $dialogTimeMaxInput.attr('timedata', '0');
+                            dialogAddData.timeMax = {
+                                ts : 0,
+                                data : null,
+                                text : 'N/A'
+                            };
+                            $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
+                            $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
+                            _dialogGenHelpText();
                             return;
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeMax').show();
@@ -1656,12 +1691,21 @@
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
-                                $('#dialog-row-timeMax').attr('title', bdDateToTime(dv));
-                                $dialogTimeMaxInput.attr('timedata', dv.getTime());
+                                dialogAddData.timeMax = {
+                                    ts : dv.getTime(),
+                                    data : d,
+                                    text : bdDateToTime(dv)
+                                };
                             } else {
-                                $('#dialog-row-timeMax').attr('title', d.value);
-                                $dialogTimeMaxInput.attr('timedata', '0');
+                                dialogAddData.timeMax = {
+                                    ts : 0,
+                                    data : null,
+                                    text : d.value
+                                };
                             }
+                            $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
+                            $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
+                            _dialogGenHelpText();
                         }, {
                             kind: 'getTimeData',
                             config: $nodeConfig.val(),
@@ -1713,10 +1757,12 @@
                     }
                     $dialogCondBOperand.change();
                     $dialogCond2AOperand.change();
+                    _dialogGenHelpText();
                 });
                 $dialogCondAOperator.change(() => { $dialogCondAOperand.change(); });
 
                 $dialogCond2AOperand.change(() => {
+                    if (dialogDataOnLoading) { return; }
                     const op2 = parseInt($dialogCond2LogOperator.val());
                     if (isNaN(op2) || op2 === 0) {
                         $dialogCond2AOperator.val(selFields.comparator[0].id);
@@ -1759,6 +1805,7 @@
                         }
                     }
                     $dialogCond2BOperand.change();
+                    _dialogGenHelpText();
                 });
                 $dialogCond2LogOperator.change(() => { $dialogCond2AOperand.change(); });
                 $dialogCond2AOperator.change(() => { $dialogCond2AOperand.change(); });
@@ -1779,14 +1826,29 @@
                     }
                     // $field.typedInput('type', type);
                 }
+
+                /**
+                 * generates the help text of the dialog
+                 */
+                function _dialogGenHelpText() {
+                    $('#dlg-txt-blindctl-rule-descr').html('');
+                    if (dialogAddData.timeout) {
+                        clearTimeout(dialogAddData.timeout);
+                        dialogAddData.timeout = null;
+                    }
+                    dialogAddData.timeout = setTimeout(() => {
+                        dialogAddData.timeout = null;
+                        $('#dlg-txt-blindctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
+                    },1000);
+                }
                 /**
                  * load the data from the rule
                  */
-                function _dialogLoadData(containerIndex, containerRow) {
+                function _dialogLoadData(containerIndex, $containerRow) {
                     try {
-                        dialogData = containerRow;
+                        $dialogDataRow = $containerRow;
                         dialogDataIndex = containerIndex;
-                        const data = JSON.parse(dialogData.data('ruleData'));
+                        const data = JSON.parse($dialogDataRow.data('ruleData'));
                         $dialogName.val(data.name);
                         dialogDataOnLoading = true;
 
@@ -1816,6 +1878,7 @@
                         setTI($dialogLevel, data.levelValue, data.levelType);
                         $dialogLevel.typedInput('value',data.levelValue);
                         $dialogLevel.typedInput('type',data.levelType);
+                        _dialogGenHelpText();
 
                         dialogDataOnLoading = false;
                         $dialogCondAOperand.change();
@@ -1829,10 +1892,10 @@
                 }
 
                 /**
-                 * save the data of the rule back
+                 * Get the data object for a rule
                  */
-                function _dialogSaveData() {
-                    const data = {
+                function _dialogGetData() {
+                    return {
                         index: dialogDataIndex,
                         name:$dialogName.val(),
 
@@ -1877,8 +1940,14 @@
                         valid2OperandBValue: $dialogCond2BOperand.typedInput('value'),
                         valid2OperandBType: $dialogCond2BOperand.typedInput('type')
                     };
+                }
+                /**
+                 * save the data of the rule back
+                 */
+                function _dialogSaveData() {
+                    const data = _dialogGetData();
                     data.description = getRuleDescription(node, selFields, data);
-                    dialogData.data('ruleData', JSON.stringify(data));
+                    $dialogDataRow.data('ruleData', JSON.stringify(data));
                     $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
                     $('#rule-description-'+dialogDataIndex).html(data.description);
                     resizeContainer();
@@ -2227,6 +2296,10 @@
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>
+        <div class="dialog-row pt-2 block-noindent" id="dialog-row-descr">
+            <label for="dlg-txt-blindctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="blind-control.label.ruleDescription" ></span></label>
+            <div id="dlg-txt-blindctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
+        </div>
     </div>
 </script>
 <style>
@@ -2308,7 +2381,11 @@
         width : calc(100% - 130px);
     }
     .indent-time-text {
-        text-indent:10px;
+        /* text-indent:10px; */
+        padding-left: 20px;
+    }
+    .indent-enh-text {
+        padding-left: 10px;
     }
     .node-input-multiplier {
         width: 125px;

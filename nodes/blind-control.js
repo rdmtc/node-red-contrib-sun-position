@@ -736,7 +736,7 @@ module.exports = function (RED) {
                     hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
                 } else if (!rule.timeDataMin.value) {
                     throw new Error('Error can not calc Alt time!');
-                } else if (num2 < num) {
+                } else if (num2 > num) {
                     const tmp = rule.timeData;
                     rule.timeData = rule.timeDataMin;
                     rule.timeDataMin = tmp;
@@ -759,7 +759,7 @@ module.exports = function (RED) {
                     hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
                 } else if (!rule.timeDataMax.value) {
                     throw new Error('Error can not calc Alt time!');
-                } else if (num2 > num) {
+                } else if (num2 < num) {
                     const tmp = rule.timeData;
                     rule.timeData = rule.timeDataMax;
                     rule.timeDataMax = tmp;
