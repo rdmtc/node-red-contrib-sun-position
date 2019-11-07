@@ -452,6 +452,10 @@
             return 'moon' + v + suffix;
         }
 
+        if (t === 'pdsTimeNow') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.suntime') + suffix;
+        }
+
         if (t === 'msgPayload') { return 'msg.payload'; }
         if (t === 'msgTs') { return 'msg.ts'; }
         if (t === 'msgLc') { return 'msg.lc'; }
@@ -899,6 +903,7 @@
                 jsonata: 'result of jsonata expression',
                 dayOfMonth: 'timestamp',
                 pdsTime: 'sun time',
+                pdsTimeNow: 'sun time object',
                 pdmTime: 'moon time',
                 pdsCalcPercent: 'percent of sun in the sky',
                 pdsCalcData: 'object of sun position',
@@ -1107,6 +1112,7 @@
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'flow',
@@ -1419,6 +1425,7 @@
                         types.TimeEntered,
                         types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'flow',
@@ -1540,7 +1547,9 @@
                         'date',
                         types.DateSpecific,
                         types.TimeEntered,
+                        types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'flow',
@@ -1657,7 +1666,9 @@
                         'date',
                         types.DateSpecific,
                         types.TimeEntered,
+                        types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'flow',

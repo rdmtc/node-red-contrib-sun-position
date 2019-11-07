@@ -252,6 +252,10 @@
             return 'moon' + v + suffix;
         }
 
+        if (t === 'pdsTimeNow') {
+            return node._('node-red-contrib-sun-position/position-config:common.label.suntime') + suffix;
+        }
+
         if (t === 'msgPayload') { return 'msg.payload'; }
         if (t === 'msgTs') { return 'msg.ts'; }
         if (t === 'msgLc') { return 'msg.lc'; }
@@ -483,6 +487,7 @@
                         'str',
                         types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'env'
@@ -571,6 +576,7 @@
                         'str',
                         types.DateEntered,
                         types.TimeSun,
+                        types.TimeSunNow,
                         types.TimeMoon,
                         types.DayOfMonth,
                         'env'

@@ -423,6 +423,44 @@ module.exports = function (RED) {
                     return hlp.getFormattedDateOut(result.value, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
+            } else if (data.type === 'pdsTimeNow') {
+                const dayid = this._getDayId(now); // this._getUTCDayId(now);
+                const today = this._sunTimesCheck(); // refresh if needed, get dayId
+                // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+                if (dayid === today.dayId) {
+                    this.debug('getSunTime sunTimesToday');
+                    result = this.sunTimesToday; // needed for a object copy
+                } else if (dayid === (today.dayId + 1)) {
+                    this.debug('getSunTime sunTimesTomorow');
+                    result = this.sunTimesTomorow; // needed for a object copy
+                } else {
+                    this.debug('getSunTime calc extra time');
+                    result = sunCalc.getSunTimes(now, this.latitude, this.longitude, false); // needed for a object copy
+                }
+                const sortable = [];
+                for (const key in result) {
+                    sortable.push(result[key]);
+                }
+                sortable.sort((a, b) => {
+                    return a.ts - b.ts;
+                });
+                const nowTs = now.getTime();
+                let i = 0;
+                let last = Object.assign({index: i}, sortable[0]);
+                if (last.ts > nowTs) {
+                    return [Object.assign({index: -1}, result['nadir']), last];
+                }
+                for (let index = 1; index < sortable.length; index++) {
+                    const element = sortable[index];
+                    if (last.ts < element.ts) {
+                        i++;
+                        if (element.ts > nowTs) {
+                            return [last,  Object.assign({index: i},element)];
+                        }
+                        last = Object.assign({index: i},element);
+                    }
+                }
+                return [last,Object.assign({index: -1}, sortable[0])];
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);

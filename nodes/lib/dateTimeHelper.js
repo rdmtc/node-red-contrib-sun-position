@@ -306,9 +306,9 @@ function getSpecialDayOfMonth(year, month, dayName) {
  *      2012/1/1   is Sunday in week 52 of 2011
  *
  * @param {Date} date date to get week number
- * @returns {Number} week number
+ * @returns {Array} ISO week number, [UTCFullYear, weekNumber]
  */
-function getWeekNumber(date) {
+function getWeekOfYear(date) {
     // Copy date so don't modify original
     date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     // Set to nearest Thursday: current date + 4 - current day number
@@ -320,6 +320,19 @@ function getWeekNumber(date) {
     const weekNo = Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7);
     // Return array of year and week number
     return [date.getUTCFullYear(), weekNo];
+}
+
+/**
+ * For a given date, get the day number
+ * @param {Date} date date to get day number
+ * @returns {Array} day number, [UTCFullYear, dayNumber]
+
+ */
+function getDayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+    const oneDay = 1000 * 60 * 60 * 24;
+    return [date.getUTCFullYear(),  Math.floor(diff / oneDay)];
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -765,7 +778,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
  * @return {string}   date as depending on the given Format
  */
 const _dateFormat = (function () {
-    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|ww|"[^"]*"|'[^']*'/g;
+    const token = /x{1,2}|d{1,4}|E{1,2}|M{1,4}|NNN|yy(?:yy)?|([HhKkmsTt])\1?|l{1,3}|[LSZ]|z{1,2}|o{1,4}|ww|w|dy|ddy|"[^"]*"|'[^']*'/g;
 
     // const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
     // const timezoneClip = /[^-+\dA-Z]/g;
@@ -847,7 +860,10 @@ const _dateFormat = (function () {
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
             TT: H < 12 ? 'AM' : 'PM',
-            ww: getWeekNumber(date)[1],
+            w: getWeekOfYear(date)[1],
+            ww: pad2(getWeekOfYear(date)[1]),
+            dy: getDayOfYear(date)[1],
+            ddy: pad(getDayOfYear(date)[1],3),
             Z: utc ? 'UTC' : /.*\s(.+)/.exec(date.toLocaleTimeString([], { timeZoneName: 'short' }))[1],
             z: utc ? '' : (String(date).match(/\b(?:GMT|UTC)(?:[-+]\d{4})?\b/g) || ['']).pop(),
             zz: utc ? '' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
@@ -1096,14 +1112,19 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
                 + (offset === 0 ? 'Z' : (offset < 0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
         }
         case 19: // workweek
-            return getWeekNumber(date)[1];
+            return getWeekOfYear(date)[1];
         case 20: // workweek even
-            return !(getWeekNumber(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
+            return !(getWeekOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
+        case 21: // workweek even
+            return getDayOfYear(date)[1]; // eslint-disable-line no-extra-boolean-cast
+        case 22: // workweek even
+            return !(getDayOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
     }
 
     const now = new Date();
     const delay = (date.getTime() - now.getTime());
-    const week = getWeekNumber(date);
+    const weekOfYear = getWeekOfYear(date);
+    const dayOfYear = getDayOfYear(date);
     return {
         date,
         ts: date.getTime(),
@@ -1112,11 +1133,18 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disa
         delay,
         delaySec: Math.round(delay / 1000),
         lc: now.getTime(),
-        week: {
-            iso : week,
-            week : week[1],
-            year : week[0],
-            even : !(week[1] % 2)
+        ofYear: {
+            year : dayOfYear[0],
+            day: {
+                iso : dayOfYear,
+                week : dayOfYear[1],
+                even : !(dayOfYear[1] % 2)
+            },
+            week: {
+                iso : weekOfYear,
+                week : weekOfYear[1],
+                even : !(weekOfYear[1] % 2)
+            }
         }
     };
 }
