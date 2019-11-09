@@ -6,6 +6,7 @@
             "json": "json",
             "jsonata": "jsonata Ausdr.",
             "timestamp": "Zeitpunkt",
+            "suntimeObj": "{Sonnenzeit}",
             "blank": "\"\"",
             "nothing": "nichts",
             "checkall" : "Alle Regeln überprüfen",
@@ -21,9 +22,11 @@
             "dayofmonth": "Monatstag",
             "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
+            "timesunnow": "nächste Uhrzeit Sonnenstand",
             "suninsky":"Sonne am Himmel (Prozent)",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "suncalc": "Sonnenposition",
+            "suntime":"Sonnenzeit",
             "mooncalc": "Mondposition",
             "moonPhase": "Mondphase",
             "moonPhaseCheck": "Mondphase",
@@ -113,7 +116,8 @@
             "Text",
             "Zeit (Zahl) seit since emit",
             "Wochentag",
-            "Woche",
+            "Tag des Jahres",
+            "Woche des Jahres",
             "freier Text"
         ],
         "outputFormats": [
@@ -134,6 +138,8 @@
             "Tag relativ, Bsp. Heute, 22.12.",
             "Kalenderwoche (KW)",
             "Kalenderwoche gerade",
+            "Tag des Jahres (Zahl)",
+            "ist der tag gerade",
             "als Objekt",
             "Anderes"
         ],

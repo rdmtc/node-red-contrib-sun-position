@@ -55,7 +55,8 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 'string', label: 'Text (string)'},
             {id: 'time', label: 'time (number) since emit'},
             {id: 'dayOfWeek', label: 'day of week'},
-            {id: 'Week', label: 'info about week'},
+            {id: 'dayOfYear', label: 'day of year'},
+            {id: 'WeekOfYear', label: 'week of year'},
             {id: 'other', label: 'Other'}
         ], outputFormats: [
             {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
@@ -73,8 +74,10 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 9, group: 'time', name: 'hour', label: 'hours'},
             {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
             {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
-            {id: 19, group: 'Week', name: 'week number', label: 'Number of week e.g. 22'},
-            {id: 20, group: 'Week', name: 'is week even', label: 'Boolean if week is even'},
+            {id: 19, group: 'WeekOfYear', name: 'week number', label: 'Number of week e.g. 22'},
+            {id: 20, group: 'WeekOfYear', name: 'is week even', label: 'Boolean if week is even'},
+            {id: 21, group: 'dayOfYear', name: 'day number', label: 'Number of day e.g. 365'},
+            {id: 22, group: 'dayOfYear', name: 'is day even', label: 'Boolean if day is even'},
             {id: -1, group: 'other', name: 'object', label: 'as object'},
             {id: 99, group: 'other', name: 'free definition', label: 'Other'}
         ], parseFormatsGroups: [
@@ -314,6 +317,12 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir')
             }]
         },
+        TimeSunNow: {
+            value: 'pdsTimeNow',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timesunnow'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTime.png',
+            hasValue: false
+        },
         TimeMoon: {
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
@@ -463,7 +472,8 @@ function getAutocompleteFormats() {
             {label: 'TT   AM/PM (2 digits - Uppercase)', value: 'TT'},
             {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'}
         ],
-        dateOutFormat: [{label: 'yyyy Year (4 digits)', value: 'yyyy'},
+        dateOutFormat: [
+            {label: 'yyyy Year (4 digits)', value: 'yyyy'},
             {label: 'yy   Year (2 digits)', value: 'yy'},
             {label: 'M    Month (1 digit)', value: 'M'},
             {label: 'MM   Month (2 digits)', value: 'MM'},
@@ -494,7 +504,10 @@ function getAutocompleteFormats() {
             {label: 'tt   AM/PM (2 digits - Lowercase)', value: 'tt'},
             {label: 'T    AM/PM (1 digit - Uppercase)', value: 'T'},
             {label: 'TT   AM/PM (2 digits - Uppercase)', value: 'TT'},
-            {label: 'ww   workweek (number)', value: 'ww'},
+            {label: 'w    week of year (0-53)', value: 'w'},
+            {label: 'ww   week of year (2 digits 00-53)', value: 'ww'},
+            {label: 'dy   day of year (0-365)', value: 'dy'},
+            {label: 'ddy  day of year (3 digits 000-365)', value: 'ddy'},
             {label: 'Z    time zone (abbr.)', value: 'Z'},
             {label: 'o    time zone offset (abbr.)', value: 'o'},
             {label: 'S    date\'s ordinal suffix (st, nd, rd, or th)', value: 'S'},
@@ -908,7 +921,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    // console.log('[IN getBackendData] ',data);  // eslint-disable-line
+    console.log('[IN getBackendData] ',data);  // eslint-disable-line
     let res = '';
     if (!data || data.type === 'none' || data.type === '' || data.type === 'jsonata' || data.type === 'json' || data.type === 'bin') {
         res = data.type;
@@ -919,7 +932,7 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     } else if (data.type === 'msgPayload') {
         res = 'msg.payload';
     } else if (data.type === 'PlT') {
-        res = 'msg.payload';
+        res = 'msg.payload if msg.topic contains "' + data.value + '"';
     } else if (data.type === 'msgTs') {
         res = 'msg.ts';
     } else if (data.type === 'msgLC') {

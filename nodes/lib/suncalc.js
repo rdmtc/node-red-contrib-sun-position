@@ -402,7 +402,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 name: 'solarNoon',
                 // elevation: 90,
                 julian: Jnoon,
-                valid: !isNaN(Jnoon)
+                valid: !isNaN(Jnoon),
+                index: sunTimes.length
             },
             nadir: {
                 value: nadirVal,
@@ -411,10 +412,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 name: 'nadir',
                 // elevation: 270,
                 julian: Jnoon + 0.5,
-                valid: !isNaN(Jnoon)
+                valid: !isNaN(Jnoon),
+                index: (sunTimes.length * 2) + 1
             }
         };
-
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
             const time = sunTimes[i];
             const sa = time[0];
@@ -443,7 +444,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 name: time[2],
                 elevation: sa,
                 julian: Jset,
-                valid
+                valid,
+                index : len + i + 1
             };
             result[time[1]] = {
                 value: v2,
@@ -452,7 +454,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 name: time[1],
                 elevation: sa, // (180 + (sa * -1)),
                 julian: Jrise,
-                valid
+                valid,
+                index: len - i - 1
             };
         }
 
@@ -460,10 +463,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             // for backward compatibility
             for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
                 const time = sunTimesAlternate[i];
-                result[time[0]] = result[time[1]];
+                result[time[0]] = Object.assign({}, result[time[1]]);
+                result[time[0]].index = -2;
             }
         }
-
         return result;
     };
 

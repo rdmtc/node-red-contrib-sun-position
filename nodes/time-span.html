@@ -153,774 +153,843 @@
 </style>
 
 <script type="text/javascript">
-    /**
-     * clip a value to a defined length
-     * @param {string} v - the value
-     * @param {number} [l] - the desired length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function clipValueLength(v, l) {
-        l = l || 18;
-        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-    }
-    /**
-     * get the label for a typed input vlaue
-     * @param {*} node - the node object for getting i18N Data (node._())
-     * @param {string} t - the type of the value
-     * @param {string} v - the value
-     * @param {number} [offset] - a optional offset to the value
-     * @param {number} [l] - the desired maximum length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-        l = l || 20;
-        let suffix = '';
-        if (offset && offset > 0) {
-            suffix = '↷';
-        } else if (offset && offset < 0) {
-            suffix = '↶';
+    (function() {
+        /**
+         * clip a value to a defined length
+         * @param {string} v - the value
+         * @param {number} [l] - the desired length (default = 18)
+         * @returns {string} the value clipped to the given length
+         */
+        function clipValueLength(v, l) {
+            l = l || 18;
+            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
         }
 
-        if (t === 'jsonata') {
-            if (v.length < l) { return v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+        /**
+         * clip a test to a maximum length
+         * @param {string} v text to clip
+         * @param {number} l length to clip the text
+         */
+        function clipValueLengthRight(v, l) {
+            l = l || 15;
+            v = String(v);
+            if (v.length > l) {
+                return '...' + v.slice(-(l - 3));
+            }
+            return v;
         }
 
-        if (t === 'json') {
-            if (v.length < l) { return  v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-        }
-
-        if (t === 'bin') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-        }
-
-        if (t === 'date') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-        }
-
-        if (t === 'dateSpecific') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-        }
-
-        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
-            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-            return '"' + clipValueLength(v, l) + '"' + suffix;
-        }
-
-        if (t === 'num') {
-            if (v === '') { return '0' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'bool') {
-            if (v === '') { return 'false' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'msg' || t === 'env') {
-            return t + '.' + clipValueLength(v, l) + suffix;
-        }
-
-        if (t === 'flow' || t === 'global') {
-            const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l) + suffix;
-        }
-
-        if (t === 'pdsCalcData') {
-            return '{sun position}' + suffix;
-        }
-
-        if (t === 'pdsCalcPercent') {
-            return '{sun in sky percent}' + suffix;
-        }
-
-        if (t === 'pdmCalcData') {
-            return '{moon position}' + suffix;
-        }
-
-        if (t === 'pdmPhase') {
-            return '{moon phase}' + suffix;
-        }
-
-        if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-            return clipValueLength(res, l) + suffix;
-        }
-
-        if (t === 'pdmTime') {
-            return 'moon' + v + suffix;
-        }
-
-        if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgTs') { return 'msg.ts'; }
-        if (t === 'msgLc') { return 'msg.lc'; }
-        if (t === 'msgValue') { return 'msg.value'; }
-        if (t === 'timespan') { return 'timespan'; }
-        if (t === 'operand1') { return 'operand1 data'; }
-        if (t === 'operand2') { return 'operand2 data'; }
-
-        if (v === '') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-        }
-
-        return clipValueLength(v, l) + suffix;
-    }
-
-    RED.nodes.registerType('time-span', {
-        category: 'time and astro',
-        color: '#EDFDBF',
-        icon: 'time-span-black.png',
-        inputs: 1,
-        outputs: 1,
-        defaults: {
-            outputs: {
-                value: 1
-            },
-            name: {
-                value: '',
-                required: false
-            },
-            positionConfig: {
-                value: '',
-                type: 'position-config',
-                required: true
-            },
-            // #region operand1
-            operand1: {
-                value: 'payload',
-                validate: RED.validators.typedInput('operand1Type')
-            },
-            operand1Type: {
-                value: 'msgPayload'
-            },
-            operand1Format: {
-                value: 0,
-                required: true,
-                validate(v) {
-                    return (v !== '') || typeof v === 'undefined';
+        /**
+         * get the label for a typed input vlaue
+         * @param {*} node - the node object for getting i18N Data (node._())
+         * @param {string} t - the type of the value
+         * @param {string} v - the value
+         * @param {number} [offset] - a optional offset to the value
+         * @param {number} [l] - the desired maximum length (default = 18)
+         * @returns {string} the value clipped to the given length
+         */
+        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
+            l = l || 30;
+            let suffix = '';
+            if (offset && offset > 0) {
+                suffix = '↷';
+            } else if (offset && offset < 0) {
+                suffix = '↶';
+            }
+            switch (t) {
+                case 'jsonata':
+                    v = String(v);
+                    if (v.length < l) { return v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+                case 'json':
+                    v = String(v);
+                    if (v.length < l) { return  v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+                case 'bin':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+                case 'date':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+                case 'dateSpecific':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+                case 'string':
+                case 'str':
+                case 'dayOfMonth':
+                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+                    return '"' + clipValueLength(v, l) + '"' + suffix;
+                case 'num':
+                    if (v === '') { return '0' + suffix; }
+                    return String(v) + suffix;
+                case 'bool':
+                    if (v === '') { return 'false' + suffix; }
+                    return String(v) + suffix;
+                case 'msg':
+                case 'env':
+                    return t + '.' + clipValueLength(v, l) + suffix;
+                case 'flow':
+                case 'global': {
+                    const result = RED.utils.parseContextKey(v);
+                    // special for Homematic Devices
+                    if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
+                        result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                    }
+                    return t + '.' + clipValueLengthRight(result.key, l) + suffix;
                 }
-            },
-            operand1Offset: {
-                value: 0,
-                required: true,
-                validate(v) {
-                    return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
+                case 'pdsCalcData':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
+                case 'pdsCalcPercent':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
+                case 'pdmCalcData':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"${suffix}`;
+                case 'pdmPhase':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.moonPhase')}"${suffix}`;
+                case 'pdsTime': {
+                    switch (v) {
+                        case 'astronomicalDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
+                        case 'amateurDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
+                        case 'nauticalDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
+                        case 'blueHourDawnStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
+                        case 'civilDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
+                        case 'blueHourDawnEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
+                        case 'goldenHourDawnStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
+                        case 'sunrise':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
+                        case 'sunriseEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
+                        case 'goldenHourDawnEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
+                        case 'solarNoon':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
+                        case 'goldenHourDuskStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
+                        case 'sunsetStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
+                        case 'sunset':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
+                        case 'goldenHourDuskEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
+                        case 'blueHourDuskStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
+                        case 'civilDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
+                        case 'blueHourDuskEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
+                        case 'nauticalDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
+                        case 'amateurDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
+                        case 'astronomicalDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
+                        case 'nadir':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
+                        default: {
+                            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+                            return clipValueLength(res, l) + suffix;
+                        }
+                    }
                 }
-            },
-            operand1OffsetType: {
-                value: 'none'
-            },
-            operand1OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
-                }
-            },
-            // #endregion operand1
-            // #region operand2
-            operand2: {
-                value: '',
-                validate: RED.validators.typedInput('operand2Type')
-            },
-            operand2Type: {
-                value: 'msg'
-            },
-            operand2Format: {
-                value: 0,
-                required: true,
-                validate(v) {
-                    return (v !== '') || typeof v === 'undefined';
-                }
-            },
-            operand2Offset: {
-                value: 0,
-                required: true,
-                validate(v) {
-                    return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
-                }
-            },
-            operand2OffsetType: {
-                value: 'none'
-            },
-            operand2OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
-                }
-            },
-            // #endregion operand2
-            // #region rules
-            rules: {
-                value: [{
-                    operator: 1,
-                    operatorText: '==',
-                    operandType: 'num',
-                    operandValue: '',
-                    multiplier: 60000
-                }]
-            },
-            checkall: {
-                value: 'true',
-                required: true
-            },
-            // #endregion rules
-            // #region result1
-            result1: {
-                value: 'payload',
-                validate: RED.validators.typedInput('result1Type')
-            },
-            result1Type: {
-                value: 'msgPayload'
-            },
-            result1Value: {
-                value: '',
-                validate(v) {
-                    return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
-                }
-            },
-            result1ValueType: {
-                value: 'timespan'
-            },
-            result1TSFormat: {
-                value: 1,
-                required: false,
-                validate(v) {
-                    return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
-                }
-            },
-            result1Format: {
-                value: 0,
-                required: false,
-                validate(v) {
-                    return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
-                }
-            },
-            result1Offset: {
-                value: 0,
-                required: true,
-                validate(v) {
-                    return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
-                }
-            },
-            result1OffsetType: {
-                value: 'none'
-            },
-            result1OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v) {
-                    return RED.validators.number()(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
+                case 'pdmTime':
+                    switch (v) {
+                        case 'rise':
+                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
+                        case 'set':
+                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
+                        default:
+                            return 'moon' + v + suffix;
+                    }
+                case 'pdsTimeNow':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.timesunnow') + suffix;
+                case 'PlT':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: clipValueLength(v, l), suffix} );
+                case 'msgPayload':
+                    return 'msg.payload';
+                case 'msgTs':
+                    return 'msg.ts';
+                case 'msgLc':
+                    return 'msg.lc';
+                case 'msgValue':
+                    return 'msg.value';
+                case 'input':
+                    return 'input data';
+                case 'timespan':
+                    return 'timespan';
+                case 'operand1':
+                    return 'operand1 data';
+                case 'operand2':
+                    return 'operand2 data';
+                default: {
+                    if (v === '') {
+                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+                    }
+                    return clipValueLength(v, l) + suffix;
                 }
             }
-            // #endregion result1
-        },
-        outputLabels(index) {
-            if (this.rules.length) {
-                const rule = this.rules[index];
-                if (rule) {
-                    return rule.operatorText + ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
-                }
-                if (this.checkall === 'true') {
-                    return 'always';
-                }
-                return 'otherwise';
-                // return ["msg if comparision is true", "msg if comparision is false"];
-            }
+        }
 
-            return 'input msg after evaluation';
-        },
-        label() {
-            if (this.name) {
-                return this.name;
-            }
-            if (!this.rules || this.rules.length <= 1) {
-                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
-                return op1 + ' - ' + op2;
-            } else if (this.rules && this.rules.length === 1) {
-                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
-                const cmp = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
-                return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
-            } else if (this.rules && this.rules.length > 1) {
-                const op1 = getValueLabel(this, this.operand1Type, this.operand1);
-                const op2 = getValueLabel(this, this.operand2Type, this.operand2);
-                return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
-            }
-            return this._('time-span.label.time-span');
-        },
-        labelStyle() {
-            return this.name ? 'node_label_italic' : '';
-        },
-        paletteLabel: 'time span',
-        align: 'left',
-        oneditprepare() {
-            const node = this;
-            const $nodeConfig = $('#node-input-positionConfig');
-            const setup = function(node) {
-                /* global getSelectFields getTypes appendOptions setupTInput initCombobox getBackendData bdDateToTime */
-                const types = getTypes(node);
-                const selFields = getSelectFields();
+        RED.nodes.registerType('time-span', {
+            category: 'time and astro',
+            color: '#EDFDBF',
+            icon: 'time-span-black.png',
+            inputs: 1,
+            outputs: 1,
+            defaults: {
+                outputs: {
+                    value: 1
+                },
+                name: {
+                    value: '',
+                    required: false
+                },
+                positionConfig: {
+                    value: '',
+                    type: 'position-config',
+                    required: true
+                },
                 // #region operand1
-                setupTInput(node, {
-                    typeProp: 'operand1Type',
-                    valueProp: 'operand1',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.MsgPayload.value,
-                    types: [
-                        'msg',
-                        types.MsgPayload,
-                        types.MsgTs,
-                        types.MsgLc,
-                        'flow',
-                        'global',
-                        'date',
-                        types.DateSpecific,
-                        'num',
-                        'str',
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'env'
-                    ],
-                    onChange(_type, _value) {
-                        const $operand1 = $('#node-input-operand1');
-                        const opType = $operand1.typedInput('type');
-                        if (opType === types.DateSpecific.value ||
-                            opType === types.TimeEntered.value ||
-                            opType === types.DateEntered.value ||
-                            opType === types.TimeSun.value ||
-                            opType === types.TimeMoon.value ||
-                            opType === types.DayOfMonth.value) {
-                            $('.time-row-operand1Format').hide();
-                            $('.time-row-operand1Offset').show();
-                        } else if (opType === 'msg' ||
-                                    opType === types.MsgPayload.value ||
-                                    opType === types.MsgTs.value ||
-                                    opType === 'flow' ||
-                                    opType === 'global' ||
-                                    opType === 'str' ||
-                                    opType === 'num' ||
-                                    opType === 'env') {
-                            $('.time-row-operand1Format').show();
-                            $('.time-row-operand1Offset').show();
-                        } else {
-                            $('.time-row-operand1Format').hide();
-                            $('.time-row-operand1Offset').hide();
-                        }
-
-                        getBackendData(d => {
-                            const $div = $('#node-input-operand1-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       opType,
-                            value:      $operand1.typedInput('value'),
-                            format:     $('#node-input-operand1Format').val(),
-                            offsetType: $('#node-input-operand1Offset').typedInput('type'),
-                            offset:     $('#node-input-operand1Offset').typedInput('value'),
-                            multiplier: $('#node-input-operand1OffsetMultiplier').val()
-                        });
+                operand1: {
+                    value: 'payload',
+                    validate: RED.validators.typedInput('operand1Type')
+                },
+                operand1Type: {
+                    value: 'msgPayload'
+                },
+                operand1Format: {
+                    value: 0,
+                    required: true,
+                    validate(v) {
+                        return (v !== '') || typeof v === 'undefined';
                     }
-                });
-
-                initCombobox(node, $('#node-input-operand1Formatsel'), $('#node-input-operand1Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
-
-                const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
-                appendOptions(node, operand1MultiplierField, 'multiplier');
-                operand1MultiplierField.val(node.operand1OffsetMultiplier);
-                setupTInput(node, {
-                    typeProp: 'operand1OffsetType',
-                    valueProp: 'operand1Offset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: types.Undefined.value,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-operand1Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-operand1OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-operand1OffsetMultiplier').prop('disabled', false);
-                        }
-                        $('#node-input-operand1').change();
+                },
+                operand1Offset: {
+                    value: 0,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.typedInput('operand1OffsetType')(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
                     }
-                }).change();
+                },
+                operand1OffsetType: {
+                    value: 'none'
+                },
+                operand1OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.number()(v) || $('#node-input-operand1OffsetType').val() === 'none' || this.operand1OffsetType === 'none';
+                    }
+                },
                 // #endregion operand1
                 // #region operand2
-                setupTInput(node, {
-                    typeProp: 'operand2Type',
-                    valueProp: 'operand2',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.MsgPayload.value,
-                    types: [
-                        'msg',
-                        types.MsgPayload,
-                        types.MsgTs,
-                        types.MsgLc,
-                        'flow',
-                        'global',
-                        'date',
-                        types.DateSpecific,
-                        'num',
-                        'str',
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'env'
-                    ],
-                    onChange(_type, _value) {
-                        const $operand2 = $('#node-input-operand2');
-                        const opType = $operand2.typedInput('type');
-                        if (opType === types.DateSpecific.value ||
-                            opType === types.TimeEntered.value ||
-                            opType === types.DateEntered.value ||
-                            opType === types.TimeSun.value ||
-                            opType === types.TimeMoon.value ||
-                            opType === types.DayOfMonth.value) {
-                            $('.time-row-operand2Format').hide();
-                            $('.time-row-operand2Offset').show();
-                        } else if (opType === 'msg' ||
-                                    opType === types.MsgPayload.value ||
-                                    opType === types.MsgTs.value ||
-                                    opType === 'flow' ||
-                                    opType === 'global' ||
-                                    opType === 'str' ||
-                                    opType === 'num' ||
-                                    opType === 'env') {
-                            $('.time-row-operand2Format').show();
-                            $('.time-row-operand2Offset').show();
-                        } else {
-                            $('.time-row-operand2Format').hide();
-                            $('.time-row-operand2Offset').hide();
-                        }
-
-                        getBackendData(d => {
-                            const $div = $('#node-input-operand2-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       opType,
-                            value:      $operand2.typedInput('value'),
-                            format:     $('#node-input-operand2Format').val(),
-                            offsetType: $('#node-input-operand2Offset').typedInput('type'),
-                            offset:     $('#node-input-operand2Offset').typedInput('value'),
-                            multiplier: $('#node-input-operand2OffsetMultiplier').val()
-                        });
+                operand2: {
+                    value: '',
+                    validate: RED.validators.typedInput('operand2Type')
+                },
+                operand2Type: {
+                    value: 'msg'
+                },
+                operand2Format: {
+                    value: 0,
+                    required: true,
+                    validate(v) {
+                        return (v !== '') || typeof v === 'undefined';
                     }
-                });
-
-                initCombobox(node, $('#node-input-operand2Formatsel'), $('#node-input-operand2Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
-
-                const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
-                appendOptions(node, operand2MultiplierField, 'multiplier');
-                operand2MultiplierField.val(node.operand2OffsetMultiplier);
-                setupTInput(node, {
-                    typeProp: 'operand2OffsetType',
-                    valueProp: 'operand2Offset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: types.Undefined.value,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-operand2Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-operand2OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-operand2OffsetMultiplier').prop('disabled', false);
-                        }
-                        $('#node-input-operand2').change();
+                },
+                operand2Offset: {
+                    value: 0,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.typedInput('operand2OffsetType')(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
                     }
-                }).change();
+                },
+                operand2OffsetType: {
+                    value: 'none'
+                },
+                operand2OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.number()(v) || $('#node-input-operand2OffsetType').val() === 'none' || this.operand2OffsetType === 'none';
+                    }
+                },
                 // #endregion operand2
+                // #region rules
+                rules: {
+                    value: [{
+                        operator: 1,
+                        operatorText: '==',
+                        operandType: 'num',
+                        operandValue: '',
+                        multiplier: 60000
+                    }]
+                },
+                checkall: {
+                    value: 'true',
+                    required: true
+                },
+                // #endregion rules
+                // #region result1
+                result1: {
+                    value: 'payload',
+                    validate: RED.validators.typedInput('result1Type')
+                },
+                result1Type: {
+                    value: 'msgPayload'
+                },
+                result1Value: {
+                    value: '',
+                    validate(v) {
+                        return (RED.validators.typedInput('result1ValueType')(v) || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
+                    }
+                },
+                result1ValueType: {
+                    value: 'timespan'
+                },
+                result1TSFormat: {
+                    value: 1,
+                    required: false,
+                    validate(v) {
+                        return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
+                    }
+                },
+                result1Format: {
+                    value: 0,
+                    required: false,
+                    validate(v) {
+                        return ((v !== '') || $('#node-input-result1Type').val() === 'none' || this.result1Type === 'undefined');
+                    }
+                },
+                result1Offset: {
+                    value: 0,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.typedInput('result1OffsetType')(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
+                    }
+                },
+                result1OffsetType: {
+                    value: 'none'
+                },
+                result1OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.number()(v) || $('#node-input-result1OffsetType').val() === 'none' || this.result1OffsetType === 'none';
+                    }
+                }
+                // #endregion result1
+            },
+            outputLabels(index) {
+                if (this.rules.length) {
+                    const rule = this.rules[index];
+                    if (rule) {
+                        return rule.operatorText + ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
+                    }
+                    if (this.checkall === 'true') {
+                        return 'always';
+                    }
+                    return 'otherwise';
+                    // return ["msg if comparision is true", "msg if comparision is false"];
+                }
+
+                return 'input msg after evaluation';
+            },
+            label() {
+                if (this.name) {
+                    return this.name;
+                }
+                if (!this.rules || this.rules.length <= 1) {
+                    const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = getValueLabel(this, this.operand2Type, this.operand2);
+                    return op1 + ' - ' + op2;
+                } else if (this.rules && this.rules.length === 1) {
+                    const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = getValueLabel(this, this.operand2Type, this.operand2);
+                    const cmp = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
+                    return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
+                } else if (this.rules && this.rules.length > 1) {
+                    const op1 = getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = getValueLabel(this, this.operand2Type, this.operand2);
+                    return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
+                }
+                return this._('time-span.label.time-span');
+            },
+            labelStyle() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            paletteLabel: 'time span',
+            align: 'left',
+            oneditprepare() {
+                const node = this;
+                const $nodeConfig = $('#node-input-positionConfig');
+                const setup = function(node) {
+                    /* global getSelectFields getTypes appendOptions setupTInput initCombobox getBackendData bdDateToTime */
+                    const types = getTypes(node);
+                    const selFields = getSelectFields();
+                    // #region operand1
+                    setupTInput(node, {
+                        typeProp: 'operand1Type',
+                        valueProp: 'operand1',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.MsgPayload.value,
+                        types: [
+                            'msg',
+                            types.MsgPayload,
+                            types.MsgTs,
+                            types.MsgLc,
+                            'flow',
+                            'global',
+                            'date',
+                            types.DateSpecific,
+                            'num',
+                            'str',
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'env'
+                        ],
+                        onChange(_type, _value) {
+                            const $operand1 = $('#node-input-operand1');
+                            const opType = $operand1.typedInput('type');
+                            if (opType === types.DateSpecific.value ||
+                                opType === types.TimeEntered.value ||
+                                opType === types.DateEntered.value ||
+                                opType === types.TimeSun.value ||
+                                opType === types.TimeMoon.value ||
+                                opType === types.DayOfMonth.value) {
+                                $('.time-row-operand1Format').hide();
+                                $('.time-row-operand1Offset').show();
+                            } else if (opType === 'msg' ||
+                                        opType === types.MsgPayload.value ||
+                                        opType === types.MsgTs.value ||
+                                        opType === 'flow' ||
+                                        opType === 'global' ||
+                                        opType === 'str' ||
+                                        opType === 'num' ||
+                                        opType === 'env') {
+                                $('.time-row-operand1Format').show();
+                                $('.time-row-operand1Offset').show();
+                            } else {
+                                $('.time-row-operand1Format').hide();
+                                $('.time-row-operand1Offset').hide();
+                            }
+
+                            getBackendData(d => {
+                                const $div = $('#node-input-operand1-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       opType,
+                                value:      $operand1.typedInput('value'),
+                                format:     $('#node-input-operand1Format').val(),
+                                offsetType: $('#node-input-operand1Offset').typedInput('type'),
+                                offset:     $('#node-input-operand1Offset').typedInput('value'),
+                                multiplier: $('#node-input-operand1OffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    initCombobox(node, $('#node-input-operand1Formatsel'), $('#node-input-operand1Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+
+                    const operand1MultiplierField = $('#node-input-operand1OffsetMultiplier');
+                    appendOptions(node, operand1MultiplierField, 'multiplier');
+                    operand1MultiplierField.val(node.operand1OffsetMultiplier);
+                    setupTInput(node, {
+                        typeProp: 'operand1OffsetType',
+                        valueProp: 'operand1Offset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: types.Undefined.value,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-operand1Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-operand1OffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-operand1OffsetMultiplier').prop('disabled', false);
+                            }
+                            $('#node-input-operand1').change();
+                        }
+                    }).change();
+                    // #endregion operand1
+                    // #region operand2
+                    setupTInput(node, {
+                        typeProp: 'operand2Type',
+                        valueProp: 'operand2',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.MsgPayload.value,
+                        types: [
+                            'msg',
+                            types.MsgPayload,
+                            types.MsgTs,
+                            types.MsgLc,
+                            'flow',
+                            'global',
+                            'date',
+                            types.DateSpecific,
+                            'num',
+                            'str',
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'env'
+                        ],
+                        onChange(_type, _value) {
+                            const $operand2 = $('#node-input-operand2');
+                            const opType = $operand2.typedInput('type');
+                            if (opType === types.DateSpecific.value ||
+                                opType === types.TimeEntered.value ||
+                                opType === types.DateEntered.value ||
+                                opType === types.TimeSun.value ||
+                                opType === types.TimeMoon.value ||
+                                opType === types.DayOfMonth.value) {
+                                $('.time-row-operand2Format').hide();
+                                $('.time-row-operand2Offset').show();
+                            } else if (opType === 'msg' ||
+                                        opType === types.MsgPayload.value ||
+                                        opType === types.MsgTs.value ||
+                                        opType === 'flow' ||
+                                        opType === 'global' ||
+                                        opType === 'str' ||
+                                        opType === 'num' ||
+                                        opType === 'env') {
+                                $('.time-row-operand2Format').show();
+                                $('.time-row-operand2Offset').show();
+                            } else {
+                                $('.time-row-operand2Format').hide();
+                                $('.time-row-operand2Offset').hide();
+                            }
+
+                            getBackendData(d => {
+                                const $div = $('#node-input-operand2-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       opType,
+                                value:      $operand2.typedInput('value'),
+                                format:     $('#node-input-operand2Format').val(),
+                                offsetType: $('#node-input-operand2Offset').typedInput('type'),
+                                offset:     $('#node-input-operand2Offset').typedInput('value'),
+                                multiplier: $('#node-input-operand2OffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    initCombobox(node, $('#node-input-operand2Formatsel'), $('#node-input-operand2Format'), 'dateParseFormat', 'parseFormats', node.operand1Format, 20);
+
+                    const operand2MultiplierField = $('#node-input-operand2OffsetMultiplier');
+                    appendOptions(node, operand2MultiplierField, 'multiplier');
+                    operand2MultiplierField.val(node.operand2OffsetMultiplier);
+                    setupTInput(node, {
+                        typeProp: 'operand2OffsetType',
+                        valueProp: 'operand2Offset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: types.Undefined.value,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-operand2Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-operand2OffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-operand2OffsetMultiplier').prop('disabled', false);
+                            }
+                            $('#node-input-operand2').change();
+                        }
+                    }).change();
+                    // #endregion operand2
+                    // #region rule-container
+                    /**
+                     * resizes a rule container
+                     */
+                    function resizeContainer() {
+                        const editorRow = $('.node-input-rule-container-row ol');
+                        const height =  editorRow.outerHeight(true);
+                        const rows = $('#node-input-rule-container').editableList('items');
+                        if (rows.size() > 0) {
+                            $('#node-input-rule-container').editableList('height', height + 40);
+                        } else {
+                            $('#node-input-rule-container').editableList('height', 20);
+                        }
+                    }
+
+                    /**
+                     * resizes a rule
+                     * @param {jQuery} rule - the jQuery selector of the rule
+                     */
+                    function resizeRule(rule) {
+                        const newWidth = rule.width() - 10;
+                        const operatorField = rule.find('.node-input-rule-operator');
+                        const operandField = rule.find('.node-input-rule-operand');
+                        const multiplierField = rule.find('.node-input-rule-multiplier');
+                        const lblWidth = 25;
+                        // row1
+                        if (Number(operatorField.val()) === 99) {
+                            operatorField.width(newWidth - lblWidth - 20);
+                        } else {
+                            const operatorWidth = 60;
+                            const multiplierWidth = 125;
+                            operatorField.width(operatorWidth);
+                            multiplierField.width(multiplierWidth);
+                            operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth - lblWidth - 45));
+                        }
+                    }
+
+                    $('#node-input-rule-container').css('min-height', '20px').css('min-width', '200px').editableList({
+                        addItem(containerRow, containerIndex, data) {
+                            containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                            const $row = $('<div/>').appendTo(containerRow);
+                            // row1
+                            // operator
+                            const operatorField = $('<select/>', {
+                                class: 'node-input-rule-operator',
+                                id: 'node-input-rule-operator' + containerIndex
+                            }).appendTo($row);
+                            appendOptions(node, operatorField, 'operators');
+                            operatorField.val(data.operator || selFields.operators[0].id);
+
+                            const $operandDiv = $('<span />').appendTo($row); // , { style: 'display: inline-block;' }
+
+                            $('<input/>', {
+                                class: 'node-input-rule-operand',
+                                id: 'node-input-rule-operand' + containerIndex,
+                                type: 'text',
+                                value: (data.operandValue || '')
+                            }).appendTo($operandDiv).typedInput({
+                                default: (data.operandType || 'num'),
+                                types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
+                            });
+                            const multiplierField = $('<select/>', {
+                                class: 'node-input-rule-multiplier',
+                                id: 'node-input-rule-multiplier' + containerIndex
+                            }).appendTo($operandDiv);
+                            appendOptions(node, multiplierField, 'multiplier', data => (data.id > 0) );
+                            multiplierField.val(data.multiplier || 60000);
+
+                            const finalspan = $('<span/>', {
+                                style: 'float: right; margin-top: 6px;'
+                            }).appendTo($row);
+                            finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
+                            operatorField.change(() => {
+                                if (Number(operatorField.val()) === 99) {
+                                    $operandDiv.hide();
+                                } else {
+                                    $operandDiv.show();
+                                }
+                                resizeRule(containerRow);
+                            });
+                            operatorField.change();
+                            // resizeRule(containerRow);
+                            resizeContainer();
+                        },
+                        sortItems(rules) {
+                            rules = $('#node-input-rule-container').editableList('items');
+                            rules.each(function (i) {
+                                $(this).find('.node-input-rule-index').html(i + 1);
+                            });
+                        },
+                        resizeItem: resizeRule,
+                        sortable: true,
+                        removable: true,
+                        removeItem: resizeContainer
+                    });
+                    if (node.rules) {
+                        for (let i = 0; i < node.rules.length; i++) {
+                            const rule = node.rules[i];
+                            $('#node-input-rule-container').editableList('addItem', rule);
+                        }
+                    }
+                    // #endregion rule-container
+                    // #region result1
+                    setupTInput(node, {
+                        typeProp: 'result1Type',
+                        valueProp: 'result1',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
+                        onChange(_type, _value) {
+                            if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
+                                $('.time-result1Value').show();
+                                const plVType = $('#node-input-result1Value').typedInput('type');
+                                if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === types.DateSpecific.value || plVType === types.DateEntered.value) {
+                                    $('.time-row-result1Offset').show();
+                                    $('.time-row-result1TSFormat').hide();
+                                    $('.time-row-result1Format').show();
+                                } else if (plVType === 'timespan') {
+                                    $('.time-row-result1Offset').hide();
+                                    $('.time-row-result1Format').hide();
+                                    $('.time-row-result1TSFormat').show();
+                                } else if (plVType === 'operand1' || plVType === 'operand2') {
+                                    $('.time-row-result1Offset').hide();
+                                    $('.time-row-result1TSFormat').hide();
+                                    $('.time-row-result1Format').show();
+                                } else {
+                                    $('.time-row-result1Offset').hide();
+                                    $('.time-row-result1TSFormat').hide();
+                                    $('.time-row-result1Format').hide();
+                                }
+                            } else {
+                                $('.time-result1Value').hide();
+                                $('.time-row-result1Offset').hide();
+                                $('.time-row-result1TSFormat').hide();
+                                $('.time-row-result1Format').hide();
+                            }
+                            $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
+                            $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
+
+                            const val = $('#node-input-result1Value').typedInput('value');
+                            if (val === 'operand1') {
+                                const $div = $('#node-input-result1Value-div');
+                                $div.attr('title', $('#node-input-operand1').attr('title') + ' - ' + $div.attr('titleOrg'));
+                            } else if (val === 'operand2') {
+                                const $div = $('#node-input-result1Value-div');
+                                $div.attr('title', $('#node-input-operand2').attr('title') + ' - ' + $div.attr('titleOrg'));
+                            } else if (val === 'optimespanerand2') {
+                                const $div = $('#node-input-result1Value-div');
+                                $div.attr('title', 'timespan - ' + $div.attr('titleOrg'));
+                            } else {
+                                getBackendData(d => {
+                                    const $div = $('#node-input-result1Value-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                }, {
+                                    kind:       'getOutDataData',
+                                    config:     $nodeConfig.val(),
+                                    type:       $('#node-input-result1Value').typedInput('type'),
+                                    value:      $('#node-input-result1Value').typedInput('value'),
+                                    format:     $('#node-input-result1Format').val(),
+                                    offsetType: $('#node-input-result1Offset').typedInput('type'),
+                                    offset:     $('#node-input-result1Offset').typedInput('value'),
+                                    multiplier: $('#node-input-result1OffsetMultiplier').val()
+                                });
+                            }
+                        }
+                    });
+
+                    setupTInput(node, {
+                        typeProp: 'result1ValueType',
+                        valueProp: 'result1Value',
+                        width: 'calc(100% - 120px)',
+                        defaultType: 'timespan',
+                        types: [
+                            {value: 'timespan', label: 'timespan between Inputs', hasValue: false},
+                            {value: 'operand1', label: 'Input 1 value', hasValue: false},
+                            {value: 'operand2', label: 'Input 2 value', hasValue: false},
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) { $('#node-input-result1').change(); }
+                    });
+                    /********************************************************/
+                    initCombobox(node, $('#node-input-result1TSFormatSel'), $('#node-input-result1TSFormat'), 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
+                    /********************************************************/
+                    initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
+                    /********************************************************/
+                    const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
+                    appendOptions(node, resultMultiplierField, 'multiplier');
+                    resultMultiplierField.val(node.result1OffsetMultiplier);
+                    setupTInput(node, {
+                        typeProp: 'result1OffsetType',
+                        valueProp: 'result1Offset',
+                        width: 'calc(100% - 265px)',
+                        defaultType: types.Undefined.value,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-result1Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-result1OffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-result1OffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    $('#node-input-result1Value').change();
+                    // autocomplete($('#node-input-result1TSFormat'), 'dateOutTSFormat');
+                    // autocomplete($('#node-input-result1Format'), 'dateOutFormat');
+                    // #endregion result1
+                    // #region spinner
+                    $('.wg-offset-spinner').spinner({max: 1439,min: -1439});
+                    // #endregion spinner
+                }; // setup
+
+                $.getScript('sun-position/js/htmlglobal.js')
+                    .done((_data, _textStatus, _jqxhr) => {
+                        setup(node);
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                        console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                        console.log(exception); // eslint-disable-line
+                        console.log(exception.stack); // eslint-disable-line
+                    });
+            },
+            oneditsave() {
+                const node = this;
+                if (Number($('#node-input-operand1Formatsel').val()) !== 99) {
+                    $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
+                    node.operand1Format = $('#node-input-operand1Formatsel').val();
+                }
+                if (Number($('#node-input-operand2Formatsel').val()) !== 99) {
+                    $('#node-input-operand2Format').val($('#node-input-operand2Formatsel').val());
+                    node.operand2Format = $('#node-input-operand2Formatsel').val();
+                }
                 // #region rule-container
-                /**
-                 * resizes a rule container
-                 */
-                function resizeContainer() {
+                node.rules = [];
+                const rules = $('#node-input-rule-container').editableList('items');
+                rules.each(function (_i) {
+                    const rule = $(this);
+                    const data = {
+                        operator: rule.find('.node-input-rule-operator').val(),
+                        operatorText: rule.find('.node-input-rule-operator option:selected').text(),
+                        operandType: rule.find('.node-input-rule-operand').typedInput('type'),
+                        operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
+                        multiplier: rule.find('.node-input-rule-multiplier').val()
+                    };
+                    node.rules.push(data);
+                });
+                const outputs = (node.rules) ? (node.rules.length + 1) : 1;
+                $('#node-input-outputs').val(outputs);
+                // #endregion result-container
+            },
+            oneditresize(_size) {
+                try {
                     const editorRow = $('.node-input-rule-container-row ol');
-                    const height =  editorRow.outerHeight(true);
+                    const height = editorRow.outerHeight(true);
                     const rows = $('#node-input-rule-container').editableList('items');
                     if (rows.size() > 0) {
                         $('#node-input-rule-container').editableList('height', height + 40);
                     } else {
                         $('#node-input-rule-container').editableList('height', 20);
                     }
+                } catch (err) {
+                    console.debug(err); // eslint-disable-line no-console
                 }
-
-                /**
-                 * resizes a rule
-                 * @param {jQuery} rule - the jQuery selector of the rule
-                 */
-                function resizeRule(rule) {
-                    const newWidth = rule.width() - 10;
-                    const operatorField = rule.find('.node-input-rule-operator');
-                    const operandField = rule.find('.node-input-rule-operand');
-                    const multiplierField = rule.find('.node-input-rule-multiplier');
-                    const lblWidth = 25;
-                    // row1
-                    if (Number(operatorField.val()) === 99) {
-                        operatorField.width(newWidth - lblWidth - 20);
-                    } else {
-                        const operatorWidth = 60;
-                        const multiplierWidth = 125;
-                        operatorField.width(operatorWidth);
-                        multiplierField.width(multiplierWidth);
-                        operandField.typedInput('width', (newWidth - operatorWidth - multiplierWidth - lblWidth - 45));
-                    }
-                }
-
-                $('#node-input-rule-container').css('min-height', '20px').css('min-width', '200px').editableList({
-                    addItem(containerRow, containerIndex, data) {
-                        containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                        const $row = $('<div/>').appendTo(containerRow);
-                        // row1
-                        // operator
-                        const operatorField = $('<select/>', {
-                            class: 'node-input-rule-operator',
-                            id: 'node-input-rule-operator' + containerIndex
-                        }).appendTo($row);
-                        appendOptions(node, operatorField, 'operators');
-                        operatorField.val(data.operator || selFields.operators[0].id);
-
-                        const $operandDiv = $('<span />').appendTo($row); // , { style: 'display: inline-block;' }
-
-                        $('<input/>', {
-                            class: 'node-input-rule-operand',
-                            id: 'node-input-rule-operand' + containerIndex,
-                            type: 'text',
-                            value: (data.operandValue || '')
-                        }).appendTo($operandDiv).typedInput({
-                            default: (data.operandType || 'num'),
-                            types: ['msg', 'flow', 'global', 'num', 'env', 'jsonata']
-                        });
-                        const multiplierField = $('<select/>', {
-                            class: 'node-input-rule-multiplier',
-                            id: 'node-input-rule-multiplier' + containerIndex
-                        }).appendTo($operandDiv);
-                        appendOptions(node, multiplierField, 'multiplier', data => (data.id > 0) );
-                        multiplierField.val(data.multiplier || 60000);
-
-                        const finalspan = $('<span/>', {
-                            style: 'float: right; margin-top: 6px;'
-                        }).appendTo($row);
-                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
-                        operatorField.change(() => {
-                            if (Number(operatorField.val()) === 99) {
-                                $operandDiv.hide();
-                            } else {
-                                $operandDiv.show();
-                            }
-                            resizeRule(containerRow);
-                        });
-                        operatorField.change();
-                        // resizeRule(containerRow);
-                        resizeContainer();
-                    },
-                    sortItems(rules) {
-                        rules = $('#node-input-rule-container').editableList('items');
-                        rules.each(function (i) {
-                            $(this).find('.node-input-rule-index').html(i + 1);
-                        });
-                    },
-                    resizeItem: resizeRule,
-                    sortable: true,
-                    removable: true,
-                    removeItem: resizeContainer
-                });
-                if (node.rules) {
-                    for (let i = 0; i < node.rules.length; i++) {
-                        const rule = node.rules[i];
-                        $('#node-input-rule-container').editableList('addItem', rule);
-                    }
-                }
-                // #endregion rule-container
-                // #region result1
-                setupTInput(node, {
-                    typeProp: 'result1Type',
-                    valueProp: 'result1',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                    onChange(_type, _value) {
-                        if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
-                            $('.time-result1Value').show();
-                            const plVType = $('#node-input-result1Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === types.DateSpecific.value || plVType === types.DateEntered.value) {
-                                $('.time-row-result1Offset').show();
-                                $('.time-row-result1TSFormat').hide();
-                                $('.time-row-result1Format').show();
-                            } else if (plVType === 'timespan') {
-                                $('.time-row-result1Offset').hide();
-                                $('.time-row-result1Format').hide();
-                                $('.time-row-result1TSFormat').show();
-                            } else if (plVType === 'operand1' || plVType === 'operand2') {
-                                $('.time-row-result1Offset').hide();
-                                $('.time-row-result1TSFormat').hide();
-                                $('.time-row-result1Format').show();
-                            } else {
-                                $('.time-row-result1Offset').hide();
-                                $('.time-row-result1TSFormat').hide();
-                                $('.time-row-result1Format').hide();
-                            }
-                        } else {
-                            $('.time-result1Value').hide();
-                            $('.time-row-result1Offset').hide();
-                            $('.time-row-result1TSFormat').hide();
-                            $('.time-row-result1Format').hide();
-                        }
-                        $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
-                        $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
-
-                        const val = $('#node-input-result1Value').typedInput('value');
-                        if (val === 'operand1') {
-                            const $div = $('#node-input-result1Value-div');
-                            $div.attr('title', $('#node-input-operand1').attr('title') + ' - ' + $div.attr('titleOrg'));
-                        } else if (val === 'operand2') {
-                            const $div = $('#node-input-result1Value-div');
-                            $div.attr('title', $('#node-input-operand2').attr('title') + ' - ' + $div.attr('titleOrg'));
-                        } else if (val === 'optimespanerand2') {
-                            const $div = $('#node-input-result1Value-div');
-                            $div.attr('title', 'timespan - ' + $div.attr('titleOrg'));
-                        } else {
-                            getBackendData(d => {
-                                const $div = $('#node-input-result1Value-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                            }, {
-                                kind:       'getOutDataData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-result1Value').typedInput('type'),
-                                value:      $('#node-input-result1Value').typedInput('value'),
-                                format:     $('#node-input-result1Format').val(),
-                                offsetType: $('#node-input-result1Offset').typedInput('type'),
-                                offset:     $('#node-input-result1Offset').typedInput('value'),
-                                multiplier: $('#node-input-result1OffsetMultiplier').val()
-                            });
-                        }
-                    }
-                });
-
-                setupTInput(node, {
-                    typeProp: 'result1ValueType',
-                    valueProp: 'result1Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'timespan',
-                    types: [
-                        {value: 'timespan', label: 'timespan between Inputs', hasValue: false},
-                        {value: 'operand1', label: 'Input 1 value', hasValue: false},
-                        {value: 'operand2', label: 'Input 2 value', hasValue: false},
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeMoon,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.SunInSky,
-                        types.MoonCalc,
-                        types.MoonPhase
-                    ],
-                    onChange(_type, _value) { $('#node-input-result1').change(); }
-                });
-                /********************************************************/
-                initCombobox(node, $('#node-input-result1TSFormatSel'), $('#node-input-result1TSFormat'), 'dateOutTSFormat', 'outputTSFormats', node.result1TSFormat, 30);
-                /********************************************************/
-                initCombobox(node, $('#node-input-result1FormatSel'), $('#node-input-result1Format'), 'dateOutFormat', 'outputFormats', node.result1Format, 30);
-                /********************************************************/
-                const resultMultiplierField = $('#node-input-result1OffsetMultiplier');
-                appendOptions(node, resultMultiplierField, 'multiplier');
-                resultMultiplierField.val(node.result1OffsetMultiplier);
-                setupTInput(node, {
-                    typeProp: 'result1OffsetType',
-                    valueProp: 'result1Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: types.Undefined.value,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-result1Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-result1OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-result1OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                $('#node-input-result1Value').change();
-                // autocomplete($('#node-input-result1TSFormat'), 'dateOutTSFormat');
-                // autocomplete($('#node-input-result1Format'), 'dateOutFormat');
-                // #endregion result1
-                // #region spinner
-                $('.wg-offset-spinner').spinner({max: 1439,min: -1439});
-                // #endregion spinner
-            }; // setup
-
-            $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
-                    setup(node);
-                })
-                .fail((jqxhr, settings, exception) => {
-                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
-                    console.log(exception); // eslint-disable-line
-                    console.log(exception.stack); // eslint-disable-line
-                });
-        },
-        oneditsave() {
-            const node = this;
-            if (Number($('#node-input-operand1Formatsel').val()) !== 99) {
-                $('#node-input-operand1Format').val($('#node-input-operand1Formatsel').val());
-                node.operand1Format = $('#node-input-operand1Formatsel').val();
             }
-            if (Number($('#node-input-operand2Formatsel').val()) !== 99) {
-                $('#node-input-operand2Format').val($('#node-input-operand2Formatsel').val());
-                node.operand2Format = $('#node-input-operand2Formatsel').val();
-            }
-            // #region rule-container
-            node.rules = [];
-            const rules = $('#node-input-rule-container').editableList('items');
-            rules.each(function (_i) {
-                const rule = $(this);
-                const data = {
-                    operator: rule.find('.node-input-rule-operator').val(),
-                    operatorText: rule.find('.node-input-rule-operator option:selected').text(),
-                    operandType: rule.find('.node-input-rule-operand').typedInput('type'),
-                    operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
-                    multiplier: rule.find('.node-input-rule-multiplier').val()
-                };
-                node.rules.push(data);
-            });
-            const outputs = (node.rules) ? (node.rules.length + 1) : 1;
-            $('#node-input-outputs').val(outputs);
-            // #endregion result-container
-        },
-        oneditresize(_size) {
-            try {
-                const editorRow = $('.node-input-rule-container-row ol');
-                const height = editorRow.outerHeight(true);
-                const rows = $('#node-input-rule-container').editableList('items');
-                if (rows.size() > 0) {
-                    $('#node-input-rule-container').editableList('height', height + 40);
-                } else {
-                    $('#node-input-rule-container').editableList('height', 20);
-                }
-            } catch (err) {
-                console.debug(err); // eslint-disable-line no-console
-            }
-        }
-    });</script>
+        });
+    })();</script>

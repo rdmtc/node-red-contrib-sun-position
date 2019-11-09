@@ -176,7 +176,7 @@ module.exports = function (RED) {
          */
 
         /**
-         * gets sun time
+         * gets sun time by Name
          * @param {Date} now current time
          * @param {string} value name of the sun time
          * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
@@ -185,19 +185,19 @@ module.exports = function (RED) {
          * @param {string} [days] days for which should be calculated the sun time
          * @return {timeresult|erroresult} result object of sunTime
          */
-        getSunTime(now, value, offset, multiplier, next, days) {
+        getSunTimeByName(now, value, offset, multiplier, next, days) {
             let result;
             const dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                this.debug('getSunTime sunTimesToday');
+                this.debug('getSunTimes sunTimesToday');
                 result = Object.assign({}, this.sunTimesToday[value]); // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
-                this.debug('getSunTime sunTimesTomorow');
+                this.debug('getSunTimes sunTimesTomorow');
                 result = Object.assign({},this.sunTimesTomorow[value]); // needed for a object copy
             } else {
-                this.debug('getSunTime calc extra time');
+                this.debug('getSunTimes calc extra time');
                 result = Object.assign({},sunCalc.getSunTimes(now, this.latitude, this.longitude, false)[value]); // needed for a object copy
             }
 
@@ -225,13 +225,56 @@ module.exports = function (RED) {
                     result = Object.assign(result, sunCalc.getSunTimes(date, this.latitude, this.longitude, false)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 } else if (dayx < 0) {
-                    // this.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                    // this.debug('getSunTimeByName - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                     result.error = 'No valid day of week found!';
                 }
             }
 
-            // this.debug('getSunTime result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            // this.debug('getSunTimeByName result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
+        }
+
+        /**
+         * gets previous and next sun time
+         * @param {Date} now current time
+         * @return {array} result object of sunTime
+         */
+        getSunTimePrevNext(now) {
+            const dayid = this._getDayId(now); // this._getUTCDayId(now);
+            const today = this._sunTimesCheck(); // refresh if needed, get dayId
+            let result;
+            // this.debug(`getSunTimePrevNext value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            if (dayid === today.dayId) {
+                result = this.sunTimesToday; // needed for a object copy
+            } else if (dayid === (today.dayId + 1)) {
+                result = this.sunTimesTomorow; // needed for a object copy
+            } else {
+                result = sunCalc.getSunTimes(now, this.latitude, this.longitude, false); // needed for a object copy
+            }
+            const sortable = [];
+            for (const key in result) {
+                if (result[key].index >=0) {
+                    sortable.push(result[key]);
+                }
+            }
+            sortable.sort((a, b) => {
+                return a.ts - b.ts;
+            });
+            const nowTs = now.getTime();
+            let last = sortable[0];
+            if (last.ts > nowTs) {
+                return [result['nadir'], last];
+            }
+            for (let index = 1; index < sortable.length; index++) {
+                const element = sortable[index];
+                if (last.ts < element.ts) {
+                    if (element.ts > nowTs) {
+                        return [last, element];
+                    }
+                    last = element;
+                }
+            }
+            return [last, sortable[0]];
         }
         /*******************************************************************************************************/
         /**
@@ -249,12 +292,12 @@ module.exports = function (RED) {
         * @param {string} [days] days for which should be calculated the moon time
         * @return {moontime|erroresult} result object of moon time
         */
-        getMoonTime(now, value, offset, multiplier, next, days) {
+        getMoonTimeByName(now, value, offset, multiplier, next, days) {
             const result = {};
             const datebase = new Date(now);
             const dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._moonTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getMoonTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${today}`);
+            // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${today}`);
 
             if (dayid === today.dayId) {
                 result.value = this.moonTimesToday[value]; // needed for a object copy
@@ -293,12 +336,12 @@ module.exports = function (RED) {
                     result.value = new Date(sunCalc.getMoonTimes(date, this.latitude, this.longitude, false)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 } else if (dayx < 0) {
-                    // this.debug('getSunTime - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                    // this.debug('getMoonTimeByName - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                     result.error = 'No valid day of week found!';
                 }
             }
 
-            // this.debug('getMoonTime result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            // this.debug('getMoonTimeByName result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
         /*******************************************************************************************************/
@@ -414,15 +457,17 @@ module.exports = function (RED) {
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getSunTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                 } else if (data.type === 'pdmTime') { // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getMoonTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                 }
                 if (result && result.value && !result.error) {
                     return hlp.getFormattedDateOut(result.value, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
                 return null;
+            } else if (data.type === 'pdsTimeNow') {
+                return Object.assign({}, this.getSunTimePrevNext(now));
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
@@ -520,7 +565,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdsTime') {
                     // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getSunTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -528,11 +573,13 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdmTime') {
                     // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
-                    result = this.getMoonTime(now, data.value, offsetX, data.multiplier, data.next, data.days);
+                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
                     result.fix = true;
+                } else if (data.type === 'pdsTimeNow') {
+                    return this.getSunTimePrevNext(now)[1];
                 } else if (data.type === 'str') {
                     result.fix = true;
                     if (data.format) {
@@ -762,17 +809,17 @@ module.exports = function (RED) {
 
             const dayid = this._getDayId(date); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTime value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTimes value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                this.debug('getSunTime sunTimesToday');
+                this.debug('getSunTimes sunTimesToday');
                 result.times =this.sunTimesToday; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonToday;
             } else if (dayid === (today.dayId + 1)) {
-                this.debug('getSunTime sunTimesTomorow');
+                this.debug('getSunTimes sunTimesTomorow');
                 result.times = this.sunTimesTomorow; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonTomorow;
             } else {
-                this.debug('getSunTime calc extra time');
+                this.debug('getSunTimes calc extra time');
                 result.times = sunCalc.getSunTimes(date, this.latitude, this.longitude, false); // needed for a object copy
                 if (sunInSky && result.times.solarNoon.valid) {
                     result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value, this.latitude, this.longitude);
@@ -1052,7 +1099,9 @@ module.exports = function (RED) {
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
-                res.status(500).send(JSON.stringify({}));
+                res.status(500).send(JSON.stringify({
+                    error: 'can not find position config node "' +req.query.config+'" '+String(posConfig)
+                }));
                 return;
             }
             let obj = {};

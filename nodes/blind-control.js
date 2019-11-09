@@ -265,7 +265,7 @@ module.exports = function (RED) {
                     } else if (val > 99) {
                         return node.blindData.levelTop;
                     }
-                    return (val / 100);
+                    return posPrcToAbs_(node, val / 100);
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
@@ -736,7 +736,7 @@ module.exports = function (RED) {
                     hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
                 } else if (!rule.timeDataMin.value) {
                     throw new Error('Error can not calc Alt time!');
-                } else if (num2 < num) {
+                } else if (num2 > num) {
                     const tmp = rule.timeData;
                     rule.timeData = rule.timeDataMin;
                     rule.timeDataMin = tmp;
@@ -759,7 +759,7 @@ module.exports = function (RED) {
                     hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
                 } else if (!rule.timeDataMax.value) {
                     throw new Error('Error can not calc Alt time!');
-                } else if (num2 > num) {
+                } else if (num2 < num) {
                     const tmp = rule.timeData;
                     rule.timeData = rule.timeDataMax;
                     rule.timeDataMax = tmp;
@@ -781,29 +781,24 @@ module.exports = function (RED) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (rule.timeOp === cRuleFrom) { continue; }
-            const res = fktCheck(rule, r => (r >= nowNr));
-            /* let res = null;
+            // const res = fktCheck(rule, r => (r >= nowNr));
+            let res = null;
             if (rule.timeOp === cRuleFrom) {
                 res = fktCheck(rule, r => (r <= nowNr));
             } else {
                 res = fktCheck(rule, r => (r >= nowNr));
-            } */
+            }
             if (res) {
                 node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                /* if (Boolean(ruleSel) && res.timeOp === cRuleUntil) {
-                    node.debug('break');
-                    // es gibt bereits eine treffende Regel
-                    // nachfolgende BIS Regel wird nicht mehr ausgeführt
-                    // nachfolgende VON Regeln werden ausgeführt (wenn sie zeitlich passen)
-                    break;
-                } */
                 if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
                 } else if (res.levelOp === cRuleMaxOversteer) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
-                    break;
+                    if (rule.timeOp !== cRuleFrom) {
+                        break;
+                    }
                 }
             }
         }
