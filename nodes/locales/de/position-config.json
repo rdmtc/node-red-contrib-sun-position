@@ -22,7 +22,7 @@
             "dayofmonth": "Monatstag",
             "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
-            "timesunnow": "Uhrzeit Sonnenstand aktuell",
+            "timesunnow": "nächste Uhrzeit Sonnenstand",
             "suninsky":"Sonne am Himmel (Prozent)",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "suncalc": "Sonnenposition",

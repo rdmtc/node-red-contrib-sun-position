@@ -164,790 +164,781 @@
 </style>
 
 <script type="text/javascript">
-    /**
-     * clip a value to a defined length
-     * @param {string} v - the value
-     * @param {number} [l] - the desired length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function clipValueLength(v, l) {
-        l = l || 18;
-        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-    }
-    /**
-     * get the label for a typed input vlaue
-     * @param {*} node - the node object for getting i18N Data (node._())
-     * @param {string} t - the type of the value
-     * @param {string} v - the value
-     * @param {number} [offset] - a optional offset to the value
-     * @param {number} [l] - the desired maximum length (default = 20)
-     * @returns {string} the value clipped to the given length
-     */
-    function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-        l = l || 20;
-        let suffix = '';
-        if (offset && offset > 0) {
-            suffix = '↷';
-        } else if (offset && offset < 0) {
-            suffix = '↶';
+    (function() {
+        /**
+         * clip a value to a defined length
+         * @param {string} v - the value
+         * @param {number} [l] - the desired length (default = 18)
+         * @returns {string} the value clipped to the given length
+         */
+        function clipValueLength(v, l) {
+            l = l || 18;
+            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
         }
-
-        if (t === 'jsonata') {
-            if (v.length < l) { return v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-        }
-
-        if (t === 'json') {
-            if (v.length < l) { return  v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-        }
-
-        if (t === 'bin') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-        }
-
-        if (t === 'date') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-        }
-
-        if (t === 'dateSpecific') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-        }
-
-        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
-            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-            return '"' + clipValueLength(v, l) + '"' + suffix;
-        }
-
-        if (t === 'num') {
-            if (v === '') { return '0' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'bool') {
-            if (v === '') { return 'false' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'msg' || t === 'env') {
-            return t + '.' + clipValueLength(v, l) + suffix;
-        }
-
-        if (t === 'flow' || t === 'global') {
-            const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l) + suffix;
-        }
-
-        if (t === 'pdsCalcData') {
-            return '{sun position}' + suffix;
-        }
-
-        if (t === 'pdsCalcPercent') {
-            return '{sun in sky percent}' + suffix;
-        }
-
-        if (t === 'pdmCalcData') {
-            return '{moon position}' + suffix;
-        }
-
-        if (t === 'pdmPhase') {
-            return '{moon phase}' + suffix;
-        }
-
-        if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-            return clipValueLength(res, l) + suffix;
-        }
-
-        if (t === 'pdmTime') {
-            return 'moon' + v + suffix;
-        }
-
-        if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgTs') { return 'msg.ts'; }
-        if (t === 'msgLc') { return 'msg.lc'; }
-        if (t === 'msgValue') { return 'msg.value'; }
-
-        if (v === '') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-        }
-
-        return clipValueLength(v, l) + suffix;
-    }
-
-    RED.nodes.registerType('within-time-switch', {
-        category: 'time and astro',
-        color: '#f37a33',
-        icon: 'switch-white.png',
-        inputs: 1,
-        outputs: 2,
-        defaults: {
-            name: {
-                value: '',
-                required: false
-            },
-            positionConfig: {
-                value: '',
-                type: 'position-config',
-                required: true
-            },
-            startTime: {
-                value: '',
-                required: true,
-                validate: RED.validators.typedInput('startTimeType')
-            },
-            startTimeType: {
-                value: 'entered'
-            },
-            startOffset: {
-                value: 0,
-                validate(v) {
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetType')(v)
-                    );
+        /**
+         * get the label for a typed input vlaue
+         * @param {*} node - the node object for getting i18N Data (node._())
+         * @param {string} t - the type of the value
+         * @param {string} v - the value
+         * @param {number} [offset] - a optional offset to the value
+         * @param {number} [l] - the desired maximum length (default = 20)
+         * @returns {string} the value clipped to the given length
+         */
+        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
+            l = l || 30;
+            let suffix = '';
+            if (offset && offset > 0) {
+                suffix = '↷';
+            } else if (offset && offset < 0) {
+                suffix = '↶';
+            }
+            switch (t) {
+                case 'jsonata':
+                    if (v.length < l) { return v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+                case 'json':
+                    if (v.length < l) { return  v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+                case 'bin':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+                case 'date':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+                case 'dateSpecific':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+                case 'string':
+                case 'str':
+                case 'dayOfMonth':
+                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+                    return '"' + clipValueLength(v, l) + '"' + suffix;
+                case 'num':
+                    if (v === '') { return '0' + suffix; }
+                    return String(v) + suffix;
+                case 'bool':
+                    if (v === '') { return 'false' + suffix; }
+                    return String(v) + suffix;
+                case 'msg':
+                case 'env':
+                    return t + '.' + clipValueLength(v, l) + suffix;
+                case 'flow':
+                case 'global': {
+                    const result = RED.utils.parseContextKey(v);
+                    return t + '.' + clipValueLength(result.key, l) + suffix;
                 }
-            },
-            startOffsetType: {
-                value: 'none'
-            },
-            startOffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate: RED.validators.number()
-            },
-            endTime: {
-                value: '',
-                required: true,
-                validate: RED.validators.typedInput('endTimeType')
-            },
-            endTimeType: {
-                value: 'entered'
-            },
-            endOffset: {
-                value: 0,
-                validate(v) {
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.endOffsetType === 'undefined') ||
-                        RED.validators.typedInput('endOffsetType')(v)
-                    );
+                case 'pdsCalcData':
+                    return '{sun position}' + suffix;
+                case 'pdsCalcPercent':
+                    return '{sun in sky percent}' + suffix;
+                case 'pdmCalcData':
+                    return '{moon position}' + suffix;
+                case 'pdmPhase':
+                    return '{moon phase}' + suffix;
+                case 'pdsTime': {
+                    const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+                    return clipValueLength(res, l) + suffix;
                 }
-            },
-            endOffsetType: {
-                value: 'none'
-            },
-            endOffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate: RED.validators.number()
-            },
-            propertyStart: {
-                value: '',
-                required: false,
-                validate: RED.validators.typedInput('propertyStartType')
-            },
-            propertyStartType: {
-                value: 'none'
-            },
-            propertyStartCompare: {
-                value: 'true'
-            },
-            propertyStartThreshold: {
-                value: '',
-                validate(v) {
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('propertyStartThresholdType')(v) ||
-                        ($('#node-input-startTimeAltType').length ?
-                            $('#node-input-startTimeAlt').typedInput('type') === 'none' :
-                            this.startTimeAlt === 'none') ||
-                        typeof this.propertyStartType === 'undefined' ||
-                        ($('#node-input-propertyStartType').length ?
-                            $('#node-input-propertyStart').typedInput('type') === 'none' :
-                            this.propertyStartType === 'none')
-                    );
+                case 'pdmTime':
+                    return 'moon' + v + suffix;
+                case 'pdsTimeNow':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.suntimeObj') + suffix;
+                case 'msgPayload':
+                    return 'msg.payload';
+                case 'msgTs':
+                    return 'msg.ts';
+                case 'msgLc':
+                    return 'msg.lc';
+                case 'msgValue':
+                    return 'msg.value';
+                case 'input':
+                    return 'input data';
+                case 'timespan':
+                    return 'timespan';
+                case 'operand1':
+                    return 'operand1 data';
+                case 'operand2':
+                    return 'operand2 data';
+                default: {
+                    if (v === '') {
+                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+                    }
+                    return clipValueLength(v, l) + suffix;
                 }
-            },
-            propertyStartThresholdType: {
-                value: 'num'
-            },
-            startTimeAlt: {
-                value: '',
-                required: false,
-                validate(v) {
-                    return RED.validators.typedInput('startTimeAltType')(v) || ($(
-                        '#node-input-propertyStart').typedInput(
-                        'type') === 'none');
-                }
-            },
-            startTimeAltType: {
-                value: 'none'
-            },
-            startOffsetAlt: {
-                value: 0,
-                validate(v) {
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetAltType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetAltType')(v) ||
+            }
+        }
+
+        RED.nodes.registerType('within-time-switch', {
+            category: 'time and astro',
+            color: '#f37a33',
+            icon: 'switch-white.png',
+            inputs: 1,
+            outputs: 2,
+            defaults: {
+                name: {
+                    value: '',
+                    required: false
+                },
+                positionConfig: {
+                    value: '',
+                    type: 'position-config',
+                    required: true
+                },
+                startTime: {
+                    value: '',
+                    required: true,
+                    validate: RED.validators.typedInput('startTimeType')
+                },
+                startTimeType: {
+                    value: 'entered'
+                },
+                startOffset: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.startOffsetType === 'undefined') ||
+                            RED.validators.typedInput('startOffsetType')(v)
+                        );
+                    }
+                },
+                startOffsetType: {
+                    value: 'none'
+                },
+                startOffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate: RED.validators.number()
+                },
+                endTime: {
+                    value: '',
+                    required: true,
+                    validate: RED.validators.typedInput('endTimeType')
+                },
+                endTimeType: {
+                    value: 'entered'
+                },
+                endOffset: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.endOffsetType === 'undefined') ||
+                            RED.validators.typedInput('endOffsetType')(v)
+                        );
+                    }
+                },
+                endOffsetType: {
+                    value: 'none'
+                },
+                endOffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate: RED.validators.number()
+                },
+                propertyStart: {
+                    value: '',
+                    required: false,
+                    validate: RED.validators.typedInput('propertyStartType')
+                },
+                propertyStartType: {
+                    value: 'none'
+                },
+                propertyStartCompare: {
+                    value: 'true'
+                },
+                propertyStartThreshold: {
+                    value: '',
+                    validate(v) {
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('propertyStartThresholdType')(v) ||
+                            ($('#node-input-startTimeAltType').length ?
+                                $('#node-input-startTimeAlt').typedInput('type') === 'none' :
+                                this.startTimeAlt === 'none') ||
+                            typeof this.propertyStartType === 'undefined' ||
+                            ($('#node-input-propertyStartType').length ?
+                                $('#node-input-propertyStart').typedInput('type') === 'none' :
+                                this.propertyStartType === 'none')
+                        );
+                    }
+                },
+                propertyStartThresholdType: {
+                    value: 'num'
+                },
+                startTimeAlt: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return RED.validators.typedInput('startTimeAltType')(v) || ($(
+                            '#node-input-propertyStart').typedInput(
+                            'type') === 'none');
+                    }
+                },
+                startTimeAltType: {
+                    value: 'none'
+                },
+                startOffsetAlt: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.startOffsetAltType === 'undefined') ||
+                            RED.validators.typedInput('startOffsetAltType')(v) ||
+                            ($('#node-input-propertyStart').typedInput('type') === 'none') ||
+                            ($('#node-input-startTimeAlt').typedInput('type') === 'none')
+                        );
+                    }
+                },
+                startOffsetAltType: {
+                    value: 'none'
+                },
+                startOffsetAltMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.number()(v) ||
                         ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                        ($('#node-input-startTimeAlt').typedInput('type') === 'none')
-                    );
-                }
-            },
-            startOffsetAltType: {
-                value: 'none'
-            },
-            startOffsetAltMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v) {
-                    return RED.validators.number()(v) ||
-                    ($('#node-input-propertyStart').typedInput('type') === 'none') ||
-                    ($('#node-input-startTimeAlt').typedInput('type') === 'none');
-                }
-            },
-            propertyEnd: {
-                value: '',
-                required: false,
-                validate: RED.validators.typedInput('propertyEndType')
-            },
-            propertyEndType: {
-                value: 'none'
-            },
-            propertyEndCompare: {
-                value: 'true'
-            },
-            propertyEndThreshold: {
-                value: '',
-                validate(v) {
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('propertyEndThresholdType')(v) ||
-                        ($('#node-input-startTimeAltType').length ?
-                            $('#node-input-startTimeAlt').typedInput('type') === 'none' :
-                            this.startTimeAlt === 'none') ||
-                        typeof this.propertyEndType === 'undefined' ||
-                        ($('#node-input-propertyEndType').length ?
-                            $('#node-input-propertyEnd').typedInput('type') === 'none' :
-                            this.propertyEndType === 'none')
-                    );
-                }
-            },
-            propertyEndThresholdType: {
-                value: 'num'
-            },
-            endTimeAlt: {
-                value: '',
-                required: false,
-                validate(v) {
-                    return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
-                        'type') === 'none');
-                }
-            },
-            endTimeAltType: {
-                value: 'none'
-            },
-            endOffsetAlt: {
-                value: 0,
-                validate(v) {
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.startOffsetAltType === 'undefined') ||
-                        RED.validators.typedInput('startOffsetAltType')(v) ||
+                        ($('#node-input-startTimeAlt').typedInput('type') === 'none');
+                    }
+                },
+                propertyEnd: {
+                    value: '',
+                    required: false,
+                    validate: RED.validators.typedInput('propertyEndType')
+                },
+                propertyEndType: {
+                    value: 'none'
+                },
+                propertyEndCompare: {
+                    value: 'true'
+                },
+                propertyEndThreshold: {
+                    value: '',
+                    validate(v) {
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('propertyEndThresholdType')(v) ||
+                            ($('#node-input-startTimeAltType').length ?
+                                $('#node-input-startTimeAlt').typedInput('type') === 'none' :
+                                this.startTimeAlt === 'none') ||
+                            typeof this.propertyEndType === 'undefined' ||
+                            ($('#node-input-propertyEndType').length ?
+                                $('#node-input-propertyEnd').typedInput('type') === 'none' :
+                                this.propertyEndType === 'none')
+                        );
+                    }
+                },
+                propertyEndThresholdType: {
+                    value: 'num'
+                },
+                endTimeAlt: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return RED.validators.typedInput('endTimeAltType')(v) || ($('#node-input-propertyEnd').typedInput(
+                            'type') === 'none');
+                    }
+                },
+                endTimeAltType: {
+                    value: 'none'
+                },
+                endOffsetAlt: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.startOffsetAltType === 'undefined') ||
+                            RED.validators.typedInput('startOffsetAltType')(v) ||
+                            ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
+                            ($('#node-input-endTimeAlt').typedInput('type') === 'none')
+                        );
+                    }
+                },
+                endOffsetAltType: {
+                    value: 'none'
+                },
+                endOffsetAltMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return RED.validators.number()(v) ||
                         ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                        ($('#node-input-endTimeAlt').typedInput('type') === 'none')
-                    );
+                        ($('#node-input-endTimeAlt').typedInput('type') === 'none');
+                    }
+                },
+                tsCompare: {
+                    value: '0'
+                },
+                lastMsgOnStartOut: {
+                    value: false,
+                    required: false
+                },
+                lastMsgOnEndOut: {
+                    value: false,
+                    required: false
                 }
             },
-            endOffsetAltType: {
-                value: 'none'
-            },
-            endOffsetAltMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v) {
-                    return RED.validators.number()(v) ||
-                    ($('#node-input-propertyEnd').typedInput('type') === 'none') ||
-                    ($('#node-input-endTimeAlt').typedInput('type') === 'none');
-                }
-            },
-            tsCompare: {
-                value: '0'
-            },
-            lastMsgOnStartOut: {
-                value: false,
-                required: false
-            },
-            lastMsgOnEndOut: {
-                value: false,
-                required: false
-            }
-        },
-        outputLabels: ['within time', 'out of time'],
-        label() {
-            const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
-                if (property !== 'none' && property !== '' && value2) {
-                    return getValueLabel(this, type1, value1, offset1, 12) + '/' + getValueLabel(this, type2, value2, offset2, 12);
-                }
-
-                return getValueLabel(this, type1, value1, undefined, 12);
-            };
-
-            if (this.name) {
-                return this.name;
-            }
-
-            if (this.startTime && this.endTime) {
-                return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
-                    this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-            ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
-            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
-            ((this.lastMsgOnEndOut) ? '⨧' : '');
-            }
-
-            return 'within-time';
-        },
-        labelStyle() {
-            return this.name ? 'node_label_italic' : '';
-        },
-        paletteLabel: 'within-time',
-        align: 'left',
-        oneditprepare() {
-            setTimeout(() => {
-                $('.is-to-show-initially').show();
-                $('.is-to-hide-initially').hide();
-            }, 300);
-
-            $('.enhanced-row-toggle').on('click', () => {
-                $('.enhanced-row').toggle(); // .hide();
-            });
-
-            const node = this;
-            const $nodeConfig = $('#node-input-positionConfig');
-            const setup = function(node) {
-                /* global getTypes getSelectFields appendOptions setupTInput initializeValue getBackendData bdDateToTime */
-
-                const types = getTypes(node);
-                const selFields = getSelectFields();
-                // #region initialize
-                /**
-                * update multiplier settings from a previous version
-                * @param {number} mp - the multiplier value
-                * @param {string} name - the name of the element
-                * @returns {number} the updated multiplier value
-                */
-                function multiplierUpdate(mp, name) {
-                    const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
-                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
-                        mp = 60000;
-                    } else {
-                        mp = parseFloat(mp);
-                        if (mp === 1) {
-                            mp = 1000;
-                        } else if (mp === 60) {
-                            mp = 60000;
-                        } else if (mp === 3600) {
-                            mp = 3600000;
-                        }
+            outputLabels: ['within time', 'out of time'],
+            label() {
+                const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
+                    if (property !== 'none' && property !== '' && value2) {
+                        return getValueLabel(this, type1, value1, offset1, 12) + '/' + getValueLabel(this, type2, value2, offset2, 12);
                     }
-                    field.val(mp);
-                    return mp;
-                }
-                // #endregion initialize
-                // #region timeStart
-                const $startTime = setupTInput(node, {
-                    typeProp: 'startTimeType',
-                    valueProp: 'startTime',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.startTimeType || types.TimeEntered.value,
-                    defaultValue: node.startTime || '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus(_type, _value) {
-                        const plVType = $('#node-input-startTime').typedInput('type');
-                        const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
-                        if (plVType ===  'msg' ||
-                            plVType === 'flow' ||
-                            plVType === 'global' ||
-                            plVTypeAlt === 'msg' ||
-                            plVTypeAlt === 'flow' ||
-                            plVTypeAlt === 'global') {
-                            $('.msg-start-out-row').hide();
-                        } else {
-                            $('.msg-start-out-row').show();
-                        }
-                    },
-                    onChange(_type, _value) {
-                        getBackendData(d => {
-                            const $div = $('#node-input-startTime-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       $('#node-input-startTime').typedInput('type'),
-                            value:      $('#node-input-startTime').typedInput('value'),
-                            offsetType: $('#node-input-startOffset').typedInput('type'),
-                            offset:     $('#node-input-startOffset').typedInput('value'),
-                            multiplier: $('#node-input-startOffsetMultiplier').val()
-                        });
-                    }
-                });
 
-                node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'startOffsetType',
-                    valueProp: 'startOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-startOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-startOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-startOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion timeStart
-                // #region timeEnd
-                const $endTime = setupTInput(node, {
-                    typeProp: 'endTimeType',
-                    valueProp: 'endTime',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.endTimeType || types.TimeEntered.value,
-                    defaultValue: node.endTime || '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
-                    onFocus(_type, _value) {
-                        const plVType = $('#node-input-endTime').typedInput('type');
-                        const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
-                        if (plVType ===  'msg' ||
-                            plVType === 'flow' ||
-                            plVType === 'global' ||
-                            plVTypeAlt === 'msg' ||
-                            plVTypeAlt === 'flow' ||
-                            plVTypeAlt === 'global') {
-                            $('.msg-end-out-row').hide();
-                        } else {
-                            $('.msg-end-out-row').show();
-                        }
-                    },
-                    onChange(_type, _value) {
-                        getBackendData(d => {
-                            const $div = $('#node-input-endTime-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       $('#node-input-endTime').typedInput('type'),
-                            value:      $('#node-input-endTime').typedInput('value'),
-                            offsetType: $('#node-input-endOffset').typedInput('type'),
-                            offset:     $('#node-input-endOffset').typedInput('value'),
-                            multiplier: $('#node-input-endOffsetMultiplier').val()
-                        });
-                    }
-                });
-
-                node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'endOffsetType',
-                    valueProp: 'endOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-endOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-endOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-endOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion timeEnd
-                // #region propertyStart
-                const $propertyStart = setupTInput(node, {
-                    typeProp: 'propertyStartType',
-                    valueProp: 'propertyStart',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.propertyStartType  || types.Undefined.value,
-                    defaultValue: node.propertyStartValue || '' ,
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
-                    onChange(_type, _value) {
-                        const propCompare = $('#node-input-propertyStartCompare');
-                        const propType = $('#node-input-propertyStart').typedInput('type');
-                        if (propType === 'none') {
-                            $('.alternate-time-start').hide();
-                            $('.alternate-time-start-offset').hide();
-                            propCompare.hide();
-                            $('.row-propertyStartThreshold').hide();
-                            $('#node-input-propertyStart').typedInput('width', 'calc(100% - 110px)');
-                        } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
-                            $('.alternate-time-start').show();
-                            propCompare.show();
-                            propCompare.attr('disabled', true);
-                            propCompare.val(selFields.comparator[0].id); // only true is valid for jsonata
-                            $('.row-propertyStartThreshold').hide();
-                            $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
-                        } else {
-                            $('.alternate-time-start').show();
-                            propCompare.show();
-                            propCompare.attr('disabled', false);
-                            $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
-                            const condOp = propCompare.val();
-                            let operatorCount = 1;
-                            const fields = selFields.comparator;
-                            const fieldsLength = fields.length;
-                            for (let index = 0; index < fieldsLength; index++) {
-                                const el = fields[index];
-                                if (el.id === condOp) {
-                                    operatorCount = el.operatorCount;
-                                    break;
-                                }
-                            }
-                            if (operatorCount > 1) {
-                                $('.row-propertyStartThreshold').show(); // condOpB
-                            } else {
-                                $('.row-propertyStartThreshold').hide(); // condOpB
-                            }
-                        }
-                        $('#node-input-startTimeAlt').change();
-                        $('#node-input-propertyStartThreshold').change();
-                    }
-                });
-                const $propertyStartCompare = $('#node-input-propertyStartCompare');
-                appendOptions(node, $propertyStartCompare, 'comparator');
-                $propertyStartCompare.val(node.propertyStartCompare || 'true');
-                $propertyStartCompare.change(() => { $('#node-input-propertyStart').change(); });
-                setupTInput(node, {
-                    typeProp: 'propertyStartThresholdType',
-                    valueProp: 'propertyStartThreshold',
-                    width: 'calc(100% - 130px)',
-                    defaultType: 'num',
-                    defaultValue: '',
-                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
-                });
-                // #endregion propertyStart
-                // #region timeAltStart
-                setupTInput(node, {
-                    typeProp: 'startTimeAltType',
-                    valueProp: 'startTimeAlt',
-                    width: 'calc(100% - 110px)',
-                    defaultType: 'entered',
-                    defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus(_type, _value) {
-                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                            $('.alternate-time-start-offset').hide();
-                        } else {
-                            $('.alternate-time-start-offset').show();
-                        }
-                    },
-                    onChange(_type, _value) {
-                        getBackendData(d => {
-                            const $div = $('#node-input-startTimeAlt-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       $('#node-input-startTimeAlt').typedInput('type'),
-                            value:      $('#node-input-startTimeAlt').typedInput('value'),
-                            offsetType: $('#node-input-startTimeAltOffset').typedInput('type'),
-                            offset:     $('#node-input-startTimeAltOffset').typedInput('value'),
-                            multiplier: $('#node-input-startTimeAltOffsetMultiplier').val()
-                        });
-                    }
-                });
-
-                node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'startTimeAltOffsetType',
-                    valueProp: 'startTimeAltOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-startTimeAltOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion timeAltStart
-                // #region propertyEnd
-                const $propertyEnd = setupTInput(node, {
-                    typeProp: 'propertyEndType',
-                    valueProp: 'propertyEnd',
-                    width: 'calc(100% - 110px)',
-                    defaultType: node.propertyEndType  || types.Undefined.value,
-                    defaultValue: node.propertyEndValue || '' ,
-                    types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
-                    onChange(_type, _value) {
-                        const propCompare = $('#node-input-propertyEndCompare');
-                        const propType = $('#node-input-propertyEnd').typedInput('type');
-
-                        if (propType === 'none') {
-                            $('.alternate-time-end').hide();
-                            $('.alternate-time-end-offset').hide();
-                            propCompare.hide();
-                            $('.row-propertyEndThreshold').hide();
-                            $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 110px)');
-                        } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
-                            $('.alternate-time-end').show();
-                            propCompare.show();
-                            propCompare.attr('disabled', true);
-                            propCompare.val(selFields.comparator[0].id); // only true is valid for jsonata
-                            $('.row-propertyEndThreshold').hide();
-                            $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
-                        } else {
-                            $('.alternate-time-end').show();
-                            propCompare.show();
-                            propCompare.attr('disabled', false);
-                            $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
-                            const condOp = propCompare.val();
-                            let operatorCount = 1;
-                            const fields = selFields.comparator;
-                            const fieldsLength = fields.length;
-                            for (let index = 0; index < fieldsLength; index++) {
-                                const el = fields[index];
-                                if (el.id === condOp) {
-                                    operatorCount = el.operatorCount;
-                                    break;
-                                }
-                            }
-                            if (operatorCount > 1) {
-                                $('.row-propertyEndThreshold').show(); // condOpB
-                            } else {
-                                $('.row-propertyEndThreshold').hide(); // condOpB
-                            }
-                        }
-                        $('#node-input-endTimeAlt').change();
-                        $('#node-input-propertyEndThreshold').change();
-                    }
-                });
-                const $propertyEndCompare = $('#node-input-propertyEndCompare');
-                appendOptions(node, $propertyEndCompare, 'comparator');
-                $propertyEndCompare.val(node.propertyEndCompare || 'true');
-                $propertyEndCompare.change(() => { $('#node-input-propertyEnd').change(); });
-                setupTInput(node, {
-                    typeProp: 'propertyEndThresholdType',
-                    valueProp: 'propertyEndThreshold',
-                    width: 'calc(100% - 130px)',
-                    defaultType: 'num',
-                    defaultValue: '',
-                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
-                });
-                // #endregion propertyEnd
-                // #region timeAltEnd
-                setupTInput(node, {
-                    typeProp: 'endTimeAltType',
-                    valueProp: 'endTimeAlt',
-                    width: 'calc(100% - 110px)',
-                    defaultType: 'entered',
-                    defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onFocus(_type, _value) {
-                        if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                            ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                            $('.alternate-time-start-offset').hide();
-                        } else {
-                            $('.alternate-time-start-offset').show();
-                        }
-                    },
-                    onChange(_type, _value) {
-                        getBackendData(d => {
-                            const $div = $('#node-input-endTimeAlt-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                        }, {
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       $('#node-input-endTimeAlt').typedInput('type'),
-                            value:      $('#node-input-endTimeAlt').typedInput('value'),
-                            offsetType: $('#node-input-endTimeAltOffset').typedInput('type'),
-                            offset:     $('#node-input-endTimeAltOffset').typedInput('value'),
-                            multiplier: $('#node-input-endTimeAltOffsetMultiplier').val()
-                        });
-                    }
-                });
-
-                node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'endTimeAltOffsetType',
-                    valueProp: 'endTimeAltOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-endTimeAltOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion timeAltEnd
-                // #region Enhanced settings
-                initializeValue(node, 'tsCompare', 0);
-                const chkVal = (name, val) => {
-                    return (node[name] === null) ||
-                            (typeof node[name] === 'undefined') ||
-                            ($('#node-input-' + name).val() === val) ||
-                            ($('#node-input-' + name).is(':checked') === val) ||
-                            (parseFloat($('#node-input-' + name).val()) === val);
+                    return getValueLabel(this, type1, value1, undefined, 12);
                 };
 
-                if (chkVal('lastMsgOnStartOut', false) &&
-                    chkVal('lastMsgOnEndOut', false) &&
-                    chkVal('tsCompare', 0)) {
-                    $('.enhanced-row').hide();
-                } else {
-                    $('.enhanced-row').show();
+                if (this.name) {
+                    return this.name;
                 }
-                // #endregion Enhanced settings
-                $startTime.change();
-                $endTime.change();
-                $propertyStart.change();
-                $propertyEnd.change();
-            }; // setup
 
-            $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
-                    try {
-                        setup(node);
-                    } catch (err) {
-                        console.log("failed to setup editor"); // eslint-disable-line
-                        console.log(err); // eslint-disable-line
-                        console.log(err.stack); // eslint-disable-line
-                    }
-                })
-                .fail((_jqxhr, settings, exception) => {
-                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
-                    console.log(exception); // eslint-disable-line
-                    console.log(exception.stack); // eslint-disable-line
+                if (this.startTime && this.endTime) {
+                    return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
+                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
+                ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
+                getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
+                    this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
+                ((this.lastMsgOnEndOut) ? '⨧' : '');
+                }
+
+                return 'within-time';
+            },
+            labelStyle() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            paletteLabel: 'within-time',
+            align: 'left',
+            oneditprepare() {
+                setTimeout(() => {
+                    $('.is-to-show-initially').show();
+                    $('.is-to-hide-initially').hide();
+                }, 300);
+
+                $('.enhanced-row-toggle').on('click', () => {
+                    $('.enhanced-row').toggle(); // .hide();
                 });
-        },
-        oneditsave() {
-            this.propertyStartType = $('#node-input-propertyStart').typedInput('type');
-            this.propertyEndType = $('#node-input-propertyEnd').typedInput('type');
-            this.startTimeType = $('#node-input-startTime').typedInput('type');
-            this.endTimeType = $('#node-input-endTime').typedInput('type');
-            this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
-            this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
-        }
-    });</script>
+
+                const node = this;
+                const $nodeConfig = $('#node-input-positionConfig');
+                const setup = function(node) {
+                    /* global getTypes getSelectFields appendOptions setupTInput initializeValue getBackendData bdDateToTime */
+
+                    const types = getTypes(node);
+                    const selFields = getSelectFields();
+                    // #region initialize
+                    /**
+                    * update multiplier settings from a previous version
+                    * @param {number} mp - the multiplier value
+                    * @param {string} name - the name of the element
+                    * @returns {number} the updated multiplier value
+                    */
+                    function multiplierUpdate(mp, name) {
+                        const field = $('#node-input-' + name);
+                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                        if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                            mp = 60000;
+                        } else {
+                            mp = parseFloat(mp);
+                            if (mp === 1) {
+                                mp = 1000;
+                            } else if (mp === 60) {
+                                mp = 60000;
+                            } else if (mp === 3600) {
+                                mp = 3600000;
+                            }
+                        }
+                        field.val(mp);
+                        return mp;
+                    }
+                    // #endregion initialize
+                    // #region timeStart
+                    const $startTime = setupTInput(node, {
+                        typeProp: 'startTimeType',
+                        valueProp: 'startTime',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.startTimeType || types.TimeEntered.value,
+                        defaultValue: node.startTime || '',
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                        onFocus(_type, _value) {
+                            const plVType = $('#node-input-startTime').typedInput('type');
+                            const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
+                            if (plVType ===  'msg' ||
+                                plVType === 'flow' ||
+                                plVType === 'global' ||
+                                plVTypeAlt === 'msg' ||
+                                plVTypeAlt === 'flow' ||
+                                plVTypeAlt === 'global') {
+                                $('.msg-start-out-row').hide();
+                            } else {
+                                $('.msg-start-out-row').show();
+                            }
+                        },
+                        onChange(_type, _value) {
+                            getBackendData(d => {
+                                const $div = $('#node-input-startTime-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-startTime').typedInput('type'),
+                                value:      $('#node-input-startTime').typedInput('value'),
+                                offsetType: $('#node-input-startOffset').typedInput('type'),
+                                offset:     $('#node-input-startOffset').typedInput('value'),
+                                multiplier: $('#node-input-startOffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'startOffsetType',
+                        valueProp: 'startOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-startOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-startOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-startOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion timeStart
+                    // #region timeEnd
+                    const $endTime = setupTInput(node, {
+                        typeProp: 'endTimeType',
+                        valueProp: 'endTime',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.endTimeType || types.TimeEntered.value,
+                        defaultValue: node.endTime || '',
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                        onFocus(_type, _value) {
+                            const plVType = $('#node-input-endTime').typedInput('type');
+                            const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
+                            if (plVType ===  'msg' ||
+                                plVType === 'flow' ||
+                                plVType === 'global' ||
+                                plVTypeAlt === 'msg' ||
+                                plVTypeAlt === 'flow' ||
+                                plVTypeAlt === 'global') {
+                                $('.msg-end-out-row').hide();
+                            } else {
+                                $('.msg-end-out-row').show();
+                            }
+                        },
+                        onChange(_type, _value) {
+                            getBackendData(d => {
+                                const $div = $('#node-input-endTime-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-endTime').typedInput('type'),
+                                value:      $('#node-input-endTime').typedInput('value'),
+                                offsetType: $('#node-input-endOffset').typedInput('type'),
+                                offset:     $('#node-input-endOffset').typedInput('value'),
+                                multiplier: $('#node-input-endOffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'endOffsetType',
+                        valueProp: 'endOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-endOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-endOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-endOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion timeEnd
+                    // #region propertyStart
+                    const $propertyStart = setupTInput(node, {
+                        typeProp: 'propertyStartType',
+                        valueProp: 'propertyStart',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.propertyStartType  || types.Undefined.value,
+                        defaultValue: node.propertyStartValue || '' ,
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                        onChange(_type, _value) {
+                            const propCompare = $('#node-input-propertyStartCompare');
+                            const propType = $('#node-input-propertyStart').typedInput('type');
+                            if (propType === 'none') {
+                                $('.alternate-time-start').hide();
+                                $('.alternate-time-start-offset').hide();
+                                propCompare.hide();
+                                $('.row-propertyStartThreshold').hide();
+                                $('#node-input-propertyStart').typedInput('width', 'calc(100% - 110px)');
+                            } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                                $('.alternate-time-start').show();
+                                propCompare.show();
+                                propCompare.attr('disabled', true);
+                                propCompare.val(selFields.comparator[0].id); // only true is valid for jsonata
+                                $('.row-propertyStartThreshold').hide();
+                                $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
+                            } else {
+                                $('.alternate-time-start').show();
+                                propCompare.show();
+                                propCompare.attr('disabled', false);
+                                $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
+                                const condOp = propCompare.val();
+                                let operatorCount = 1;
+                                const fields = selFields.comparator;
+                                const fieldsLength = fields.length;
+                                for (let index = 0; index < fieldsLength; index++) {
+                                    const el = fields[index];
+                                    if (el.id === condOp) {
+                                        operatorCount = el.operatorCount;
+                                        break;
+                                    }
+                                }
+                                if (operatorCount > 1) {
+                                    $('.row-propertyStartThreshold').show(); // condOpB
+                                } else {
+                                    $('.row-propertyStartThreshold').hide(); // condOpB
+                                }
+                            }
+                            $('#node-input-startTimeAlt').change();
+                            $('#node-input-propertyStartThreshold').change();
+                        }
+                    });
+                    const $propertyStartCompare = $('#node-input-propertyStartCompare');
+                    appendOptions(node, $propertyStartCompare, 'comparator');
+                    $propertyStartCompare.val(node.propertyStartCompare || 'true');
+                    $propertyStartCompare.change(() => { $('#node-input-propertyStart').change(); });
+                    setupTInput(node, {
+                        typeProp: 'propertyStartThresholdType',
+                        valueProp: 'propertyStartThreshold',
+                        width: 'calc(100% - 130px)',
+                        defaultType: 'num',
+                        defaultValue: '',
+                        types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                    });
+                    // #endregion propertyStart
+                    // #region timeAltStart
+                    setupTInput(node, {
+                        typeProp: 'startTimeAltType',
+                        valueProp: 'startTimeAlt',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'entered',
+                        defaultValue: '',
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        onFocus(_type, _value) {
+                            if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                                ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                                $('.alternate-time-start-offset').hide();
+                            } else {
+                                $('.alternate-time-start-offset').show();
+                            }
+                        },
+                        onChange(_type, _value) {
+                            getBackendData(d => {
+                                const $div = $('#node-input-startTimeAlt-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-startTimeAlt').typedInput('type'),
+                                value:      $('#node-input-startTimeAlt').typedInput('value'),
+                                offsetType: $('#node-input-startTimeAltOffset').typedInput('type'),
+                                offset:     $('#node-input-startTimeAltOffset').typedInput('value'),
+                                multiplier: $('#node-input-startTimeAltOffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'startTimeAltOffsetType',
+                        valueProp: 'startTimeAltOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-startTimeAltOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion timeAltStart
+                    // #region propertyEnd
+                    const $propertyEnd = setupTInput(node, {
+                        typeProp: 'propertyEndType',
+                        valueProp: 'propertyEnd',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.propertyEndType  || types.Undefined.value,
+                        defaultValue: node.propertyEndValue || '' ,
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                        onChange(_type, _value) {
+                            const propCompare = $('#node-input-propertyEndCompare');
+                            const propType = $('#node-input-propertyEnd').typedInput('type');
+
+                            if (propType === 'none') {
+                                $('.alternate-time-end').hide();
+                                $('.alternate-time-end-offset').hide();
+                                propCompare.hide();
+                                $('.row-propertyEndThreshold').hide();
+                                $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 110px)');
+                            } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                                $('.alternate-time-end').show();
+                                propCompare.show();
+                                propCompare.attr('disabled', true);
+                                propCompare.val(selFields.comparator[0].id); // only true is valid for jsonata
+                                $('.row-propertyEndThreshold').hide();
+                                $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
+                            } else {
+                                $('.alternate-time-end').show();
+                                propCompare.show();
+                                propCompare.attr('disabled', false);
+                                $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
+                                const condOp = propCompare.val();
+                                let operatorCount = 1;
+                                const fields = selFields.comparator;
+                                const fieldsLength = fields.length;
+                                for (let index = 0; index < fieldsLength; index++) {
+                                    const el = fields[index];
+                                    if (el.id === condOp) {
+                                        operatorCount = el.operatorCount;
+                                        break;
+                                    }
+                                }
+                                if (operatorCount > 1) {
+                                    $('.row-propertyEndThreshold').show(); // condOpB
+                                } else {
+                                    $('.row-propertyEndThreshold').hide(); // condOpB
+                                }
+                            }
+                            $('#node-input-endTimeAlt').change();
+                            $('#node-input-propertyEndThreshold').change();
+                        }
+                    });
+                    const $propertyEndCompare = $('#node-input-propertyEndCompare');
+                    appendOptions(node, $propertyEndCompare, 'comparator');
+                    $propertyEndCompare.val(node.propertyEndCompare || 'true');
+                    $propertyEndCompare.change(() => { $('#node-input-propertyEnd').change(); });
+                    setupTInput(node, {
+                        typeProp: 'propertyEndThresholdType',
+                        valueProp: 'propertyEndThreshold',
+                        width: 'calc(100% - 130px)',
+                        defaultType: 'num',
+                        defaultValue: '',
+                        types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                    });
+                    // #endregion propertyEnd
+                    // #region timeAltEnd
+                    setupTInput(node, {
+                        typeProp: 'endTimeAltType',
+                        valueProp: 'endTimeAlt',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'entered',
+                        defaultValue: '',
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        onFocus(_type, _value) {
+                            if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
+                                ($('#node-input-propertyStart').typedInput('type') === 'none')) {
+                                $('.alternate-time-start-offset').hide();
+                            } else {
+                                $('.alternate-time-start-offset').show();
+                            }
+                        },
+                        onChange(_type, _value) {
+                            getBackendData(d => {
+                                const $div = $('#node-input-endTimeAlt-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type:       $('#node-input-endTimeAlt').typedInput('type'),
+                                value:      $('#node-input-endTimeAlt').typedInput('value'),
+                                offsetType: $('#node-input-endTimeAltOffset').typedInput('type'),
+                                offset:     $('#node-input-endTimeAltOffset').typedInput('value'),
+                                multiplier: $('#node-input-endTimeAltOffsetMultiplier').val()
+                            });
+                        }
+                    });
+
+                    node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'endTimeAltOffsetType',
+                        valueProp: 'endTimeAltOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-endTimeAltOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion timeAltEnd
+                    // #region Enhanced settings
+                    initializeValue(node, 'tsCompare', 0);
+                    const chkVal = (name, val) => {
+                        return (node[name] === null) ||
+                                (typeof node[name] === 'undefined') ||
+                                ($('#node-input-' + name).val() === val) ||
+                                ($('#node-input-' + name).is(':checked') === val) ||
+                                (parseFloat($('#node-input-' + name).val()) === val);
+                    };
+
+                    if (chkVal('lastMsgOnStartOut', false) &&
+                        chkVal('lastMsgOnEndOut', false) &&
+                        chkVal('tsCompare', 0)) {
+                        $('.enhanced-row').hide();
+                    } else {
+                        $('.enhanced-row').show();
+                    }
+                    // #endregion Enhanced settings
+                    $startTime.change();
+                    $endTime.change();
+                    $propertyStart.change();
+                    $propertyEnd.change();
+                }; // setup
+
+                $.getScript('sun-position/js/htmlglobal.js')
+                    .done((_data, _textStatus, _jqxhr) => {
+                        try {
+                            setup(node);
+                        } catch (err) {
+                            console.log("failed to setup editor"); // eslint-disable-line
+                            console.log(err); // eslint-disable-line
+                            console.log(err.stack); // eslint-disable-line
+                        }
+                    })
+                    .fail((_jqxhr, settings, exception) => {
+                        console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                        console.log(exception); // eslint-disable-line
+                        console.log(exception.stack); // eslint-disable-line
+                    });
+            },
+            oneditsave() {
+                this.propertyStartType = $('#node-input-propertyStart').typedInput('type');
+                this.propertyEndType = $('#node-input-propertyEnd').typedInput('type');
+                this.startTimeType = $('#node-input-startTime').typedInput('type');
+                this.endTimeType = $('#node-input-endTime').typedInput('type');
+                this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
+                this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
+            }
+        });
+    })();</script>

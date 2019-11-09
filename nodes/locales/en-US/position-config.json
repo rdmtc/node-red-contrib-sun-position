@@ -6,7 +6,7 @@
             "json": "json",
             "jsonata": "json expr.",
             "timestamp":"timestamp",
-            "suntimeObj": "{suntime}",
+            "suntimeObj": "{next suntime}",
             "blank": "\"\"",
             "nothing": "nothing",
             "checkall": "stopping after first match (if)",
@@ -22,7 +22,7 @@
             "dayofmonth":"day of month",
             "dayofweek":"day of week",
             "timesun":"sun time",
-            "timesunnow": "last suntime",
+            "timesunnow": "next sun time",
             "timemoon":"moon time",
             "suncalc":"sun calculation",
             "suninsky":"sun in the sky (percent)",
@@ -33,7 +33,8 @@
             "moonPhaseCheck": "moon phase",
             "levelfix":"Level",
             "levelfree": "Level entered",
-            "levelND": "N/D - use default, sun control or reset"
+            "levelND": "N/D - use default, sun control or reset",
+            "PlTRes":"msg.payload if topic contains \"__value__\""
         },
         "typeOptions": {
             "moonRise": "moon rise",

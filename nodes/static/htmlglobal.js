@@ -319,7 +319,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         TimeSunNow: {
             value: 'pdsTimeNow',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.timesunnow','sun time'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timesunnow'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTime.png',
             hasValue: false
         },

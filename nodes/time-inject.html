@@ -353,1481 +353,1560 @@
 </style>
 
 <script type="text/javascript">
-    /**
-     * clip a value to a defined length
-     * @param {string} v - the value
-     * @param {number} [l] - the desired length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function clipValueLength(v, l) {
-        l = l || 18;
-        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-    }
-    /**
-     * get the label for a typed input vlaue
-     * @param {*} node - the node object for getting i18N Data (node._())
-     * @param {string} t - the type of the value
-     * @param {string} v - the value
-     * @param {number} [offset] - a optional offset to the value
-     * @param {number} [l] - the desired maximum length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-        l = l || 20;
-        let suffix = '';
-        if (offset && offset > 0) {
-            suffix = '↷';
-        } else if (offset && offset < 0) {
-            suffix = '↶';
+    (function() {
+        /**
+         * clip a value to a defined length
+         * @param {string} v - the value
+         * @param {number} [l] - the desired length (default = 18)
+         * @returns {string} the value clipped to the given length
+         */
+        function clipValueLength(v, l) {
+            l = l || 18;
+            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
         }
-
-        if (t === 'jsonata') {
-            if (v.length < l) { return v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-        }
-
-        if (t === 'json') {
-            if (v.length < l) { return  v + suffix; }
-            return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-        }
-
-        if (t === 'bin') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-        }
-
-        if (t === 'date') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-        }
-
-        if (t === 'dateSpecific') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-        }
-
-        if (t === 'string' || t === 'str' || t === 'dayOfMonth') {
-            if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-            return '"' + clipValueLength(v, l) + '"' + suffix;
-        }
-
-        if (t === 'num') {
-            if (v === '') { return '0' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'bool') {
-            if (v === '') { return 'false' + suffix; }
-            return String(v) + suffix;
-        }
-
-        if (t === 'msg' || t === 'env') {
-            return t + '.' + clipValueLength(v, l) + suffix;
-        }
-
-        if (t === 'flow' || t === 'global') {
-            const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l) + suffix;
-        }
-
-        if (t === 'pdsCalcData') {
-            return '{sun position}' + suffix;
-        }
-
-        if (t === 'pdsCalcPercent') {
-            return '{sun in sky percent}' + suffix;
-        }
-
-        if (t === 'pdmCalcData') {
-            return '{moon position}' + suffix;
-        }
-
-        if (t === 'pdmPhase') {
-            return '{moon phase}' + suffix;
-        }
-
-        if (t === 'pdsTime') {
-            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-            return clipValueLength(res, l) + suffix;
-        }
-
-        if (t === 'pdmTime') {
-            return 'moon' + v + suffix;
-        }
-
-        if (t === 'pdsTimeNow') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.suntime') + suffix;
-        }
-
-        if (t === 'msgPayload') { return 'msg.payload'; }
-        if (t === 'msgTs') { return 'msg.ts'; }
-        if (t === 'msgLc') { return 'msg.lc'; }
-        if (t === 'msgValue') { return 'msg.value'; }
-
-        if (v === '') {
-            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-        }
-
-        return clipValueLength(v, l) + suffix;
-    }
-    /**
-     * get the value for the day checkbox array
-     * @param {jQuery} value - the checkbox array
-     * @returns {string} the value of the checkboxes
-     */
-    function getDaysStr(value) {
-        const days = value.map((_, el) => { return $(el).val(); }).get();
-        if (days.length === 0) { return ''; }
-        if (days.length === 7) { return '*'; }
-        return days.join(',');
-    }
-
-    RED.nodes.registerType('time-inject', {
-        category: 'time and astro',
-        color: '#a6bbcf',
-        icon: 'injectSun-white.png',
-        inputs: 0,
-        outputs: 1,
-        defaults: {
-            name: {
-                value: ''
-            },
-            nameInt: {
-                value: ''
-            },
-            positionConfig: {
-                value: '',
-                type: 'position-config',
-                required: true
-            },
-            payload: {
-                value: '',
-                validate: RED.validators.typedInput('payloadType')
-            },
-            payloadType: {
-                value: 'date'
-            },
-            payloadTimeFormat: {
-                value: 0
-            },
-            payloadOffset: {
-                value: 0,
-                validate(v) {
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.payloadOffsetType === 'undefined') ||
-                        RED.validators.typedInput('payloadOffsetType')(v)
-                    );
-                }
-            },
-            payloadOffsetType: {
-                value: 'none'
-            },
-            payloadOffsetMultiplier: {
-                value: 60000
-            },
-            topic: {
-                value: ''
-            },
-            time: {
-                value: '',
-                required: false,
-                validate: RED.validators.typedInput('timeType')
-            },
-            timeType: {
-                value: 'none'
-            },
-            timeDays: {
-                value: '*',
-                required: true
-            },
-            offset: {
-                value: 0,
-                validate(v){
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.offsetType === 'undefined') ||
-                        RED.validators.typedInput('offsetType')(v) ||
-                        ($('#node-input-time').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none')
-                    );
-                }
-            },
-            offsetType: {
-                value: 'none'
-            },
-            offsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v){
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.number()(v) ||
-                        $('#node-input-offsetType').typedInput('type') === 'none' ||
-                        this.offsetType === 'none' ||
-                        ($('#node-input-time').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none')
-                    );
-                }
-            },
-            property: {
-                value: '',
-                required: false,
-                validate(v){
-                    return (
-                        typeof v === 'undefined' ||
-                        typeof this.propertyType === 'undefined' ||
-                        RED.validators.typedInput('propertyType')(v) ||
-                        ($('#node-input-time').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none')
-                    );
-                }
-            },
-            propertyType: {
-                value: 'none'
-            },
-            propertyCompare: {
-                value: 'true'
-            },
-            propertyThreshold: {
-                value: '',
-                validate(v){
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('propertyThresholdType')(v) ||
-                        ($('#node-input-timeType').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none') ||
-                        typeof this.propertyType === 'undefined' ||
-                        ($('#node-input-propertyType').length ?
-                            $('#node-input-property').typedInput('type') === 'none' :
-                            this.propertyType === 'none')
-                    );
-                }
-            },
-            propertyThresholdType: {
-                value: 'num'
-            },
-            timeAlt: {
-                value: '',
-                required: false,
-                validate(v){
-                    return (
-                        RED.validators.typedInput('timeAltType')(v) ||
-                        ($('#node-input-timeType').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none') ||
-                        typeof this.propertyType === 'undefined' ||
-                        ($('#node-input-propertyType').length ?
-                            $('#node-input-property').typedInput('type') === 'none' :
-                            this.propertyType === 'none')
-                    );
-                }
-            },
-            timeAltType: {
-                value: 'entered'
-            },
-            timeAltOffset: {
-                value: 0,
-                validate(v){
-                    return (
-                        typeof v === 'undefined' ||
-                        (typeof this.timeAltOffsetType === 'undefined') ||
-                        RED.validators.typedInput('timeAltOffsetType')(v) ||
-                        ($('#node-input-time').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none') ||
-                        typeof this.propertyType === 'undefined' ||
-                        ($('#node-input-propertyType').length ?
-                            $('#node-input-property').typedInput('type') === 'none' :
-                            this.propertyType === 'none')
-                    );
-                }
-            },
-            timeAltOffsetType: {
-                value: 'none'
-            },
-            timeAltOffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v){
-                    return (
-                        typeof v === 'undefined' ||
-                        RED.validators.number()(v) ||
-                        $('#node-input-timeAltOffsetType').typedInput('type') === 'none' ||
-                        this.timeAltOffsetType === 'none' ||
-                        ($('#node-input-time').length ?
-                            $('#node-input-time').typedInput('type') === 'none' :
-                            this.timeType === 'none') ||
-                        typeof this.propertyType === 'undefined' ||
-                        ($('#node-input-propertyType').length ?
-                            $('#node-input-property').typedInput('type') === 'none' :
-                            this.propertyType === 'none')
-                    );
-                }
-            },
-            once: {
-                value: false
-            },
-            onceDelay: {
-                value: 0.1,
-                validate(v){
-                    return (
-                        RED.validators.number()(v) ||
-                        v === '' ||
-                        v === null ||
-                        typeof v === 'undefined'
-                    );
-                }
-            },
-            addPayload1: {
-                value: '',
-                validate(v){
-                    return (
-                        typeof this.addPayload1Type === 'undefined' ||
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('addPayload1Type')(v)
-                    );
-                }
-            },
-            addPayload1Type: {
-                value: 'none'
-            },
-            addPayload1Value: {
-                value: '',
-                validate(v){
-                    return (
-                        RED.validators.typedInput('addPayload1ValueType')(v) ||
-                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        typeof this.addPayload1Type === 'undefined'
-                    );
-                }
-            },
-            addPayload1ValueType: {
-                value: 'date'
-            },
-            addPayload1Format: {
-                value: 0
-            },
-            addPayload1Offset: {
-                value: 0,
-                validate(v){
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.addPayload1OffsetType === 'undefined') ||
-                        RED.validators.typedInput('addPayload1OffsetType')(v) ||
-                        $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload1OffsetType === 'none' ||
-                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        typeof this.addPayload1Type === 'undefined'
-                    );
-                }
-            },
-            addPayload1OffsetType: {
-                value: 'none'
-            },
-            addPayload1OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v){
-                    return (
-                        RED.validators.number()(v) ||
-                        $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload1OffsetType === 'none' ||
-                        $('#node-input-addPayload1').typedInput('type') === 'none' ||
-                        typeof this.addPayload1Type === 'undefined'
-                    );
-                }
-            },
-            addPayload1Next: {
-                value: true
-            },
-            addPayload1Days: {
-                value: '*',
-                required: true
-            },
-            addPayload2: {
-                value: '',
-                validate(v){
-                    return (
-                        typeof this.addPayload2Type === 'undefined' ||
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('addPayload2Type')(v)
-                    );
-                }
-            },
-            addPayload2Type: {
-                value: 'none'
-            },
-            addPayload2Value: {
-                value: '',
-                validate(v){
-                    return (
-                        RED.validators.typedInput('addPayload2ValueType')(v) ||
-                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        typeof this.addPayload2Type === 'undefined'
-                    );
-                }
-            },
-            addPayload2ValueType: {
-                value: 'date'
-            },
-            addPayload2Format: {
-                value: 0
-            },
-            addPayload2Offset: {
-                value: 0,
-                validate(v){
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.addPayload2OffsetType === 'undefined') ||
-                        RED.validators.typedInput('addPayload2OffsetType')(v) ||
-                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        typeof this.addPayload2Type === 'undefined'
-                    );
-                }
-            },
-            addPayload2OffsetType: {
-                value: 'none'
-            },
-            addPayload2OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v){
-                    return (
-                        RED.validators.number()(v) ||
-                        $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload2OffsetType === 'none' ||
-                        $('#node-input-addPayload2').typedInput('type') === 'none' ||
-                        typeof this.addPayload2Type === 'undefined'
-                    );
-                }
-            },
-            addPayload2Next: {
-                value: true
-            },
-            addPayload2Days: {
-                value: '*',
-                required: true
-            },
-            addPayload3: {
-                value: '',
-                validate(v){
-                    return (
-                        typeof this.addPayload3Type === 'undefined' ||
-                        typeof v === 'undefined' ||
-                        RED.validators.typedInput('addPayload3Type')(v)
-                    );
-                }
-            },
-            addPayload3Type: {
-                value: 'none'
-            },
-            addPayload3Value: {
-                value: '',
-                validate(v){
-                    return (
-                        RED.validators.typedInput('addPayload3ValueType')(v) ||
-                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        typeof this.addPayload3Type === 'undefined'
-                    );
-                }
-            },
-            addPayload3ValueType: {
-                value: 'date'
-            },
-            addPayload3Format: {
-                value: 0
-            },
-            addPayload3Offset: {
-                value: 0,
-                validate(v){
-                    return (
-                        (typeof v === 'undefined') ||
-                        (typeof this.addPayload3OffsetType === 'undefined') ||
-                        RED.validators.typedInput('addPayload3OffsetType')(v) ||
-                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        typeof this.addPayload3Type === 'undefined'
-                    );
-                }
-            },
-            addPayload3OffsetType: {
-                value: 'none'
-            },
-            addPayload3OffsetMultiplier: {
-                value: 60000,
-                required: true,
-                validate(v){
-                    return (
-                        RED.validators.number()(v) ||
-                        $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
-                        this.addPayload3OffsetType === 'none' ||
-                        $('#node-input-addPayload3').typedInput('type') === 'none' ||
-                        typeof this.addPayload3Type === 'undefined'
-                    );
-                }
-            },
-            addPayload3Next: {
-                value: true
-            },
-            addPayload3Days: {
-                value: '*',
-                required: true
-            },
-            recalcTime: {
-                value: 2,
-                validate(v){
-                    return (
-                        RED.validators.number()(v) ||
-                        v === '' ||
-                        v === null ||
-                        typeof v === 'undefined'
-                    );
-                }
+        /**
+         * clip a test to a maximum length
+         * @param {string} v text to clip
+         * @param {number} l length to clip the text
+         */
+        function clipValueLengthRight(v, l) {
+            l = l || 15;
+            v = String(v);
+            if (v.length > l) {
+                return '...' + v.slice(-(l - 3));
             }
-        },
-        outputLabels(_index) {
-            const labels = {
-                str: 'string',
-                num: 'number',
-                bool: 'boolean',
-                json: 'object',
-                flow: 'flow context',
-                global: 'global context',
-                bin: 'binary data',
-                date: 'timestamp',
-                dateSpecific: 'special timestamp',
-                entered: 'timestamp',
-                dateEntered: 'timestamp',
-                env: 'Environment variable',
-                jsonata: 'result of jsonata expression',
-                dayOfMonth: 'timestamp',
-                pdsTime: 'sun time',
-                pdsTimeNow: 'sun time object',
-                pdmTime: 'moon time',
-                pdsCalcPercent: 'percent of sun in the sky',
-                pdsCalcData: 'object of sun position',
-                pdmCalcData: 'object of moon position',
-                pdmPhase: 'object of moon phase',
-                pdmPhaseCheck: 'boolean indicates if moon in specific phase'
-            };
-            let lab = labels[this.payloadType] || this.payloadType;
-            if (lab === 'object') {
-                try {
-                    lab = typeof JSON.parse(this.payload);
-                    if (lab === 'object') {
-                        if (Array.isArray(JSON.parse(this.payload))) {
-                            lab = 'Array';
+            return v;
+        }
+
+        /**
+         * get the label for a typed input vlaue
+         * @param {*} node - the node object for getting i18N Data (node._())
+         * @param {string} t - the type of the value
+         * @param {string} v - the value
+         * @param {number} [offset] - a optional offset to the value
+         * @param {number} [l] - the desired maximum length (default = 18)
+         * @returns {string} the value clipped to the given length
+         */
+        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
+            l = l || 30;
+            let suffix = '';
+            if (offset && offset > 0) {
+                suffix = '↷';
+            } else if (offset && offset < 0) {
+                suffix = '↶';
+            }
+            switch (t) {
+                case 'jsonata':
+                    v = String(v);
+                    if (v.length < l) { return v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+                case 'json':
+                    v = String(v);
+                    if (v.length < l) { return  v + suffix; }
+                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+                case 'bin':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+                case 'date':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+                case 'dateSpecific':
+                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+                case 'string':
+                case 'str':
+                case 'dayOfMonth':
+                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+                    return '"' + clipValueLength(v, l) + '"' + suffix;
+                case 'num':
+                    if (v === '') { return '0' + suffix; }
+                    return String(v) + suffix;
+                case 'bool':
+                    if (v === '') { return 'false' + suffix; }
+                    return String(v) + suffix;
+                case 'msg':
+                case 'env':
+                    return t + '.' + clipValueLength(v, l) + suffix;
+                case 'flow':
+                case 'global': {
+                    const result = RED.utils.parseContextKey(v);
+                    // special for Homematic Devices
+                    if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
+                        result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                    }
+                    return t + '.' + clipValueLengthRight(result.key, l) + suffix;
+                }
+                case 'pdsCalcData':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.suncalc') + suffix;
+                case 'pdsCalcPercent':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.suninsky') + suffix;
+                case 'pdmCalcData':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.mooncalc') + suffix;
+                case 'pdmPhase':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.moonPhase') + suffix;
+                case 'pdsTime': {
+                    switch (v) {
+                        case 'astronomicalDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
+                        case 'amateurDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
+                        case 'nauticalDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
+                        case 'blueHourDawnStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
+                        case 'civilDawn':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
+                        case 'blueHourDawnEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
+                        case 'goldenHourDawnStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
+                        case 'sunrise':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
+                        case 'sunriseEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
+                        case 'goldenHourDawnEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
+                        case 'solarNoon':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
+                        case 'goldenHourDuskStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
+                        case 'sunsetStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
+                        case 'sunset':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
+                        case 'goldenHourDuskEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
+                        case 'blueHourDuskStart':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
+                        case 'civilDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
+                        case 'blueHourDuskEnd':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
+                        case 'nauticalDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
+                        case 'amateurDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
+                        case 'astronomicalDusk':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
+                        case 'nadir':
+                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
+                        default: {
+                            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+                            return clipValueLength(res, l) + suffix;
                         }
                     }
-                } catch (e) {
-                    lab = 'Invalid JSON Object';
                 }
-            }
-
-            return lab;
-        },
-        label() {
-            if (this.name) {
-                return this.name;
-            }
-
-            let result = '';
-            if (this.once) {
-                result += '¹';
-            }
-
-            const getTimeId = () => {
-                let suffix = '';
-                const days = this.timeDays;
-                if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
-                    if (days === '1,2,3,4,5') {
-                        suffix += ' [Mo-Fr]'; // '👷'
-                    } else if (days === '1,2,3,4') {
-                        suffix += ' [Mo-Th]';
-                    } else if (days === '5,6,0') {
-                        suffix += ' [Fr-Su]';
-                    } else if (days === '6,0') {
-                        suffix += ' [Sa+Su]';
-                    } else {
-                        const dayArr = [];
-                        if (days.indexOf('1') >= 0) {
-                            dayArr.push('Mo');
-                        }
-
-                        if (days.indexOf('2') >= 0) {
-                            dayArr.push('Tu');
-                        }
-
-                        if (days.indexOf('3') >= 0) {
-                            dayArr.push('We');
-                        }
-
-                        if (days.indexOf('4') >= 0) {
-                            dayArr.push('Th');
-                        }
-
-                        if (days.indexOf('5') >= 0) {
-                            dayArr.push('Fr');
-                        }
-
-                        if (days.indexOf('6') >= 0) {
-                            dayArr.push('Sa');
-                        }
-
-                        if (days.indexOf('0') >= 0) {
-                            dayArr.push('Su');
-                        }
-
-                        suffix += ' [' + dayArr.join(',') + ']';
+                case 'pdmTime':
+                    switch (v) {
+                        case 'rise':
+                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
+                        case 'set':
+                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
+                        default:
+                            return 'moon' + v + suffix;
                     }
-                    // ...
+                case 'pdsTimeNow':
+                    return node._('node-red-contrib-sun-position/position-config:common.types.timesunnow') + suffix;
+                case 'PlT':
+                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: clipValueLength(v, l), suffix} );
+                case 'msgPayload':
+                    return 'msg.payload';
+                case 'msgTs':
+                    return 'msg.ts';
+                case 'msgLc':
+                    return 'msg.lc';
+                case 'msgValue':
+                    return 'msg.value';
+                case 'input':
+                    return 'input data';
+                case 'timespan':
+                    return 'timespan';
+                case 'operand1':
+                    return 'operand1 data';
+                case 'operand2':
+                    return 'operand2 data';
+                default: {
+                    if (v === '') {
+                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+                    }
+                    return clipValueLength(v, l) + suffix;
+                }
+            }
+        }
+
+        /**
+         * get the value for the day checkbox array
+         * @param {jQuery} value - the checkbox array
+         * @returns {string} the value of the checkboxes
+         */
+        function getDaysStr(value) {
+            const days = value.map((_, el) => { return $(el).val(); }).get();
+            if (days.length === 0) { return ''; }
+            if (days.length === 7) { return '*'; }
+            return days.join(',');
+        }
+
+        RED.nodes.registerType('time-inject', {
+            category: 'time and astro',
+            color: '#a6bbcf',
+            icon: 'injectSun-white.png',
+            inputs: 0,
+            outputs: 1,
+            defaults: {
+                name: {
+                    value: ''
+                },
+                nameInt: {
+                    value: ''
+                },
+                positionConfig: {
+                    value: '',
+                    type: 'position-config',
+                    required: true
+                },
+                payload: {
+                    value: '',
+                    validate: RED.validators.typedInput('payloadType')
+                },
+                payloadType: {
+                    value: 'date'
+                },
+                payloadTimeFormat: {
+                    value: 0
+                },
+                payloadOffset: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.payloadOffsetType === 'undefined') ||
+                            RED.validators.typedInput('payloadOffsetType')(v)
+                        );
+                    }
+                },
+                payloadOffsetType: {
+                    value: 'none'
+                },
+                payloadOffsetMultiplier: {
+                    value: 60000
+                },
+                topic: {
+                    value: ''
+                },
+                time: {
+                    value: '',
+                    required: false,
+                    validate: RED.validators.typedInput('timeType')
+                },
+                timeType: {
+                    value: 'none'
+                },
+                timeDays: {
+                    value: '*',
+                    required: true
+                },
+                offset: {
+                    value: 0,
+                    validate(v){
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.offsetType === 'undefined') ||
+                            RED.validators.typedInput('offsetType')(v) ||
+                            ($('#node-input-time').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none')
+                        );
+                    }
+                },
+                offsetType: {
+                    value: 'none'
+                },
+                offsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v){
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.number()(v) ||
+                            $('#node-input-offsetType').typedInput('type') === 'none' ||
+                            this.offsetType === 'none' ||
+                            ($('#node-input-time').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none')
+                        );
+                    }
+                },
+                property: {
+                    value: '',
+                    required: false,
+                    validate(v){
+                        return (
+                            typeof v === 'undefined' ||
+                            typeof this.propertyType === 'undefined' ||
+                            RED.validators.typedInput('propertyType')(v) ||
+                            ($('#node-input-time').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none')
+                        );
+                    }
+                },
+                propertyType: {
+                    value: 'none'
+                },
+                propertyCompare: {
+                    value: 'true'
+                },
+                propertyThreshold: {
+                    value: '',
+                    validate(v){
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('propertyThresholdType')(v) ||
+                            ($('#node-input-timeType').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none') ||
+                            typeof this.propertyType === 'undefined' ||
+                            ($('#node-input-propertyType').length ?
+                                $('#node-input-property').typedInput('type') === 'none' :
+                                this.propertyType === 'none')
+                        );
+                    }
+                },
+                propertyThresholdType: {
+                    value: 'num'
+                },
+                timeAlt: {
+                    value: '',
+                    required: false,
+                    validate(v){
+                        return (
+                            RED.validators.typedInput('timeAltType')(v) ||
+                            ($('#node-input-timeType').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none') ||
+                            typeof this.propertyType === 'undefined' ||
+                            ($('#node-input-propertyType').length ?
+                                $('#node-input-property').typedInput('type') === 'none' :
+                                this.propertyType === 'none')
+                        );
+                    }
+                },
+                timeAltType: {
+                    value: 'entered'
+                },
+                timeAltOffset: {
+                    value: 0,
+                    validate(v){
+                        return (
+                            typeof v === 'undefined' ||
+                            (typeof this.timeAltOffsetType === 'undefined') ||
+                            RED.validators.typedInput('timeAltOffsetType')(v) ||
+                            ($('#node-input-time').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none') ||
+                            typeof this.propertyType === 'undefined' ||
+                            ($('#node-input-propertyType').length ?
+                                $('#node-input-property').typedInput('type') === 'none' :
+                                this.propertyType === 'none')
+                        );
+                    }
+                },
+                timeAltOffsetType: {
+                    value: 'none'
+                },
+                timeAltOffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v){
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.number()(v) ||
+                            $('#node-input-timeAltOffsetType').typedInput('type') === 'none' ||
+                            this.timeAltOffsetType === 'none' ||
+                            ($('#node-input-time').length ?
+                                $('#node-input-time').typedInput('type') === 'none' :
+                                this.timeType === 'none') ||
+                            typeof this.propertyType === 'undefined' ||
+                            ($('#node-input-propertyType').length ?
+                                $('#node-input-property').typedInput('type') === 'none' :
+                                this.propertyType === 'none')
+                        );
+                    }
+                },
+                once: {
+                    value: false
+                },
+                onceDelay: {
+                    value: 0.1,
+                    validate(v){
+                        return (
+                            RED.validators.number()(v) ||
+                            v === '' ||
+                            v === null ||
+                            typeof v === 'undefined'
+                        );
+                    }
+                },
+                addPayload1: {
+                    value: '',
+                    validate(v){
+                        return (
+                            typeof this.addPayload1Type === 'undefined' ||
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('addPayload1Type')(v)
+                        );
+                    }
+                },
+                addPayload1Type: {
+                    value: 'none'
+                },
+                addPayload1Value: {
+                    value: '',
+                    validate(v){
+                        return (
+                            RED.validators.typedInput('addPayload1ValueType')(v) ||
+                            $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                            typeof this.addPayload1Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload1ValueType: {
+                    value: 'date'
+                },
+                addPayload1Format: {
+                    value: 0
+                },
+                addPayload1Offset: {
+                    value: 0,
+                    validate(v){
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.addPayload1OffsetType === 'undefined') ||
+                            RED.validators.typedInput('addPayload1OffsetType')(v) ||
+                            $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
+                            this.addPayload1OffsetType === 'none' ||
+                            $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                            typeof this.addPayload1Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload1OffsetType: {
+                    value: 'none'
+                },
+                addPayload1OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v){
+                        return (
+                            RED.validators.number()(v) ||
+                            $('#node-input-addPayload1OffsetType').typedInput('type') === 'none' ||
+                            this.addPayload1OffsetType === 'none' ||
+                            $('#node-input-addPayload1').typedInput('type') === 'none' ||
+                            typeof this.addPayload1Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload1Next: {
+                    value: true
+                },
+                addPayload1Days: {
+                    value: '*',
+                    required: true
+                },
+                addPayload2: {
+                    value: '',
+                    validate(v){
+                        return (
+                            typeof this.addPayload2Type === 'undefined' ||
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('addPayload2Type')(v)
+                        );
+                    }
+                },
+                addPayload2Type: {
+                    value: 'none'
+                },
+                addPayload2Value: {
+                    value: '',
+                    validate(v){
+                        return (
+                            RED.validators.typedInput('addPayload2ValueType')(v) ||
+                            $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                            typeof this.addPayload2Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload2ValueType: {
+                    value: 'date'
+                },
+                addPayload2Format: {
+                    value: 0
+                },
+                addPayload2Offset: {
+                    value: 0,
+                    validate(v){
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.addPayload2OffsetType === 'undefined') ||
+                            RED.validators.typedInput('addPayload2OffsetType')(v) ||
+                            $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                            typeof this.addPayload2Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload2OffsetType: {
+                    value: 'none'
+                },
+                addPayload2OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v){
+                        return (
+                            RED.validators.number()(v) ||
+                            $('#node-input-addPayload2OffsetType').typedInput('type') === 'none' ||
+                            this.addPayload2OffsetType === 'none' ||
+                            $('#node-input-addPayload2').typedInput('type') === 'none' ||
+                            typeof this.addPayload2Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload2Next: {
+                    value: true
+                },
+                addPayload2Days: {
+                    value: '*',
+                    required: true
+                },
+                addPayload3: {
+                    value: '',
+                    validate(v){
+                        return (
+                            typeof this.addPayload3Type === 'undefined' ||
+                            typeof v === 'undefined' ||
+                            RED.validators.typedInput('addPayload3Type')(v)
+                        );
+                    }
+                },
+                addPayload3Type: {
+                    value: 'none'
+                },
+                addPayload3Value: {
+                    value: '',
+                    validate(v){
+                        return (
+                            RED.validators.typedInput('addPayload3ValueType')(v) ||
+                            $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                            typeof this.addPayload3Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload3ValueType: {
+                    value: 'date'
+                },
+                addPayload3Format: {
+                    value: 0
+                },
+                addPayload3Offset: {
+                    value: 0,
+                    validate(v){
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.addPayload3OffsetType === 'undefined') ||
+                            RED.validators.typedInput('addPayload3OffsetType')(v) ||
+                            $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                            typeof this.addPayload3Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload3OffsetType: {
+                    value: 'none'
+                },
+                addPayload3OffsetMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v){
+                        return (
+                            RED.validators.number()(v) ||
+                            $('#node-input-addPayload3OffsetType').typedInput('type') === 'none' ||
+                            this.addPayload3OffsetType === 'none' ||
+                            $('#node-input-addPayload3').typedInput('type') === 'none' ||
+                            typeof this.addPayload3Type === 'undefined'
+                        );
+                    }
+                },
+                addPayload3Next: {
+                    value: true
+                },
+                addPayload3Days: {
+                    value: '*',
+                    required: true
+                },
+                recalcTime: {
+                    value: 2,
+                    validate(v){
+                        return (
+                            RED.validators.number()(v) ||
+                            v === '' ||
+                            v === null ||
+                            typeof v === 'undefined'
+                        );
+                    }
+                }
+            },
+            outputLabels(_index) {
+                const labels = {
+                    str: 'string',
+                    num: 'number',
+                    bool: 'boolean',
+                    json: 'object',
+                    flow: 'flow context',
+                    global: 'global context',
+                    bin: 'binary data',
+                    date: 'timestamp',
+                    dateSpecific: 'special timestamp',
+                    entered: 'timestamp',
+                    dateEntered: 'timestamp',
+                    env: 'Environment variable',
+                    jsonata: 'result of jsonata expression',
+                    dayOfMonth: 'timestamp',
+                    pdsTime: 'sun time',
+                    pdsTimeNow: 'sun time object',
+                    pdmTime: 'moon time',
+                    pdsCalcPercent: 'percent of sun in the sky',
+                    pdsCalcData: 'object of sun position',
+                    pdmCalcData: 'object of moon position',
+                    pdmPhase: 'object of moon phase',
+                    pdmPhaseCheck: 'boolean indicates if moon in specific phase'
+                };
+                let lab = labels[this.payloadType] || this.payloadType;
+                if (lab === 'object') {
+                    try {
+                        lab = typeof JSON.parse(this.payload);
+                        if (lab === 'object') {
+                            if (Array.isArray(JSON.parse(this.payload))) {
+                                lab = 'Array';
+                            }
+                        }
+                    } catch (e) {
+                        lab = 'Invalid JSON Object';
+                    }
                 }
 
-                const part1 = getValueLabel(this, this.timeType, this.time, this.offset);
-                if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
-                    return (part1 + '/' + getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
+                return lab;
+            },
+            label() {
+                if (this.name) {
+                    return this.name;
                 }
 
-                return part1 + suffix;
-            };
+                let result = '';
+                if (this.once) {
+                    result += '¹';
+                }
 
-            if (this.timeType === 'none' || this.timeType === '') {
-                result += (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 12, this.payloadTimeFormat));
-            } else {
-                const timeTxt = getTimeId();
-                if (timeTxt.length > 26) {
-                    result += timeTxt + ' =...';
+                const getTimeId = () => {
+                    let suffix = '';
+                    const days = this.timeDays;
+                    if (days && days !== '*' && days !== '1,2,3,4,5,6,0') {
+                        if (days === '1,2,3,4,5') {
+                            suffix += ' [Mo-Fr]'; // '👷'
+                        } else if (days === '1,2,3,4') {
+                            suffix += ' [Mo-Th]';
+                        } else if (days === '5,6,0') {
+                            suffix += ' [Fr-Su]';
+                        } else if (days === '6,0') {
+                            suffix += ' [Sa+Su]';
+                        } else {
+                            const dayArr = [];
+                            if (days.indexOf('1') >= 0) {
+                                dayArr.push('Mo');
+                            }
+
+                            if (days.indexOf('2') >= 0) {
+                                dayArr.push('Tu');
+                            }
+
+                            if (days.indexOf('3') >= 0) {
+                                dayArr.push('We');
+                            }
+
+                            if (days.indexOf('4') >= 0) {
+                                dayArr.push('Th');
+                            }
+
+                            if (days.indexOf('5') >= 0) {
+                                dayArr.push('Fr');
+                            }
+
+                            if (days.indexOf('6') >= 0) {
+                                dayArr.push('Sa');
+                            }
+
+                            if (days.indexOf('0') >= 0) {
+                                dayArr.push('Su');
+                            }
+
+                            suffix += ' [' + dayArr.join(',') + ']';
+                        }
+                        // ...
+                    }
+
+                    const part1 = getValueLabel(this, this.timeType, this.time, this.offset);
+                    if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
+                        return (part1 + '/' + getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
+                    }
+                    return part1 + suffix;
+                };
+
+                if (this.timeType === 'none' || this.timeType === '') {
+                    result += (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                 } else {
-                    result += timeTxt + ' = ' + (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 14));
-                }
-            }
-
-            if (this.topic && this.topic.length + result.length <= 32) {
-                return this.topic + ':' + result;
-            }
-
-            return result;
-        },
-        labelStyle() {
-            return this.name ? 'node_label_italic' : '';
-        },
-        paletteLabel: 'time inject',
-        align: 'left',
-        oneditprepare() {
-            setTimeout(() => {
-                $('.is-to-show-initially').show();
-                $('.is-to-hide-initially').hide();
-            }, 300);
-            const node = this;
-            const $nodeConfig = $('#node-input-positionConfig');
-            const setup = function(node) {
-                /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData bdDateToTime */
-                const types = getTypes(node);
-                const selFields = getSelectFields();
-                // #region initialize
-                /**
-                * update multiplier settings from a previous version
-                * @param {number} mp - the multiplier value
-                * @param {string} name - the name of the element
-                * @returns {number} the updated multiplier value
-                */
-                function multiplierUpdate(mp, name) {
-                    const field = $('#node-input-' + name);
-                    appendOptions(node, field, 'multiplier', data => (data.id > 0));
-                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
-                        mp = 60000;
+                    const timeTxt = getTimeId();
+                    if (timeTxt.length > 26) {
+                        result += timeTxt + ' =...';
                     } else {
-                        mp = parseFloat(mp);
-                        if (mp === 1) {
-                            mp = 1000;
-                        } else if (mp === 60) {
+                        result += timeTxt + ' = ' + (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
+                    }
+                }
+                if (this.topic && this.topic.length + result.length <= 32) {
+                    return this.topic + ':' + result;
+                }
+
+                return result;
+            },
+            labelStyle() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            paletteLabel: 'time inject',
+            align: 'left',
+            oneditprepare() {
+                setTimeout(() => {
+                    $('.is-to-show-initially').show();
+                    $('.is-to-hide-initially').hide();
+                }, 300);
+                const node = this;
+                const $nodeConfig = $('#node-input-positionConfig');
+                const setup = function(node) {
+                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData bdDateToTime */
+                    const types = getTypes(node);
+                    const selFields = getSelectFields();
+                    // #region initialize
+                    /**
+                    * update multiplier settings from a previous version
+                    * @param {number} mp - the multiplier value
+                    * @param {string} name - the name of the element
+                    * @returns {number} the updated multiplier value
+                    */
+                    function multiplierUpdate(mp, name) {
+                        const field = $('#node-input-' + name);
+                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                        if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
-                        } else if (mp === 3600) {
-                            mp = 3600000;
+                        } else {
+                            mp = parseFloat(mp);
+                            if (mp === 1) {
+                                mp = 1000;
+                            } else if (mp === 60) {
+                                mp = 60000;
+                            } else if (mp === 3600) {
+                                mp = 3600000;
+                            }
                         }
+                        field.val(mp);
+                        return mp;
                     }
-                    field.val(mp);
-                    return mp;
-                }
 
-                initializeValue(node, 'timeDays', '*');
-                initializeValue(node, 'timeAltDays', '*');
-                initializeValue(node, 'addPayload1Days', '*');
-                initializeValue(node, 'addPayload2Days', '*');
-                initializeValue(node, 'addPayload3Days', '*');
+                    initializeValue(node, 'timeDays', '*');
+                    initializeValue(node, 'timeAltDays', '*');
+                    initializeValue(node, 'addPayload1Days', '*');
+                    initializeValue(node, 'addPayload2Days', '*');
+                    initializeValue(node, 'addPayload3Days', '*');
 
-                if (typeof node.addPayload1Next === 'undefined' || node.addPayload1Next === null || $('#node-input-addPayload1Next').prop('checked')) {
-                    $('#node-input-addPayload1Next').prop('checked', true);
-                } else {
-                    $('#node-input-addPayload1Next').prop('checked', false);
-                }
-                if (typeof node.addPayload2Next === 'undefined' || node.addPayload2Next === null || $('#node-input-addPayload2Next').prop('checked')) {
-                    $('#node-input-addPayload2Next').prop('checked', true);
-                } else {
-                    $('#node-input-addPayload2Next').prop('checked', false);
-                }
-                if (typeof node.addPayload3Next === 'undefined' || node.addPayload3Next === null || $('#node-input-addPayload3Next').prop('checked')) {
-                    $('#node-input-addPayload3Next').prop('checked', true);
-                } else {
-                    $('#node-input-addPayload3Next').prop('checked', false);
-                }
-                // #endregion initialize
-                // #region spinner
-                $('#node-input-once').change(() => {
-                    $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
-                });
-
-                $('.wt-offset-time').spinner({
-                    max: 1439,
-                    min: -1439
-                });
-                $('#node-input-onceDelay').spinner({
-                    step: 0.1,
-                    numberFormat: 'n'
-                });
-                $('#node-input-recalcTime').spinner({
-                    step: 0.1,
-                    numberFormat: 'n'
-                });
-                // #endregion spinner
-                // #region payload
-                if (node.payloadType === null) {
-                    if (node.payload === '') {
-                        node.payloadType = 'date';
+                    if (typeof node.addPayload1Next === 'undefined' || node.addPayload1Next === null || $('#node-input-addPayload1Next').prop('checked')) {
+                        $('#node-input-addPayload1Next').prop('checked', true);
                     } else {
+                        $('#node-input-addPayload1Next').prop('checked', false);
+                    }
+                    if (typeof node.addPayload2Next === 'undefined' || node.addPayload2Next === null || $('#node-input-addPayload2Next').prop('checked')) {
+                        $('#node-input-addPayload2Next').prop('checked', true);
+                    } else {
+                        $('#node-input-addPayload2Next').prop('checked', false);
+                    }
+                    if (typeof node.addPayload3Next === 'undefined' || node.addPayload3Next === null || $('#node-input-addPayload3Next').prop('checked')) {
+                        $('#node-input-addPayload3Next').prop('checked', true);
+                    } else {
+                        $('#node-input-addPayload3Next').prop('checked', false);
+                    }
+                    // #endregion initialize
+                    // #region spinner
+                    $('#node-input-once').change(() => {
+                        $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+                    });
+
+                    $('.wt-offset-time').spinner({
+                        max: 1439,
+                        min: -1439
+                    });
+                    $('#node-input-onceDelay').spinner({
+                        step: 0.1,
+                        numberFormat: 'n'
+                    });
+                    $('#node-input-recalcTime').spinner({
+                        step: 0.1,
+                        numberFormat: 'n'
+                    });
+                    // #endregion spinner
+                    // #region payload
+                    if (node.payloadType === null) {
+                        if (node.payload === '') {
+                            node.payloadType = 'date';
+                        } else {
+                            node.payloadType = 'str';
+                        }
+                    } else if (node.payloadType === 'string' || node.payloadType === types.Undefined.value) {
                         node.payloadType = 'str';
                     }
-                } else if (node.payloadType === 'string' || node.payloadType === types.Undefined.value) {
-                    node.payloadType = 'str';
-                }
-                const $payload = setupTInput(node, {
-                    typeProp: 'payloadType',
-                    valueProp: 'payload',
-                    width: 'calc(100% - 110px)',
-                    defaultType: 'date',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeSunNow,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.SunInSky,
-                        types.MoonCalc,
-                        types.MoonPhase
-                    ],
-                    onChange(_type, _value) {
-                        const plVType = $('#node-input-payload').typedInput('type');
-                        if (plVType ===  types.TimeEntered.value ||
-                            plVType === types.TimeSun.value ||
-                            plVType === types.TimeMoon.value ||
-                            plVType === types.DateSpecific.value) {
-                            $('.time-inject-row-payloadTimeFormat').show();
-                            $('.time-inject-row-payloadOffset').show();
-                        } else {
-                            $('.time-inject-row-payloadTimeFormat').hide();
-                            $('.time-inject-row-payloadOffset').hide();
-                        }
-                        getBackendData(d => {
-                            const $div = $('#node-input-payload-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                        }, {
-                            kind:       'getOutDataData',
-                            config:     $nodeConfig.val(),
-                            type:       plVType,
-                            value:      $('#node-input-payload').typedInput('value'),
-                            format:     $('#node-input-payloadTimeFormat').val(),
-                            offsetType: $('#node-input-payloadOffset').typedInput('type'),
-                            offset:     $('#node-input-payloadOffset').typedInput('value'),
-                            multiplier: $('#node-input-payloadOffsetMultiplier').val()
-                        });
-                    }
-                });
-                initCombobox(node, $('#node-input-payloadTimeFormatsel'), $('#node-input-payloadTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
-
-                node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'payloadOffsetType',
-                    valueProp: 'payloadOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.payloadOffset === 0 || node.payloadOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-payloadOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-payloadOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-payloadOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion payload
-                // #region time
-                const $time = setupTInput(node, {
-                    typeProp: 'timeType',
-                    valueProp: 'time',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-time').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('.time-inject-row-offset').hide();
-                            $('.time-inject-row-timeDays').hide();
-                            $('.time-inject-row-alt').hide();
-
-                            const $div = $('#node-input-time-div');
-                            const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', titleOrg);
-                        } else {
-                            $('.time-inject-row-offset').show();
-                            $('.time-inject-row-timeDays').show();
-                            $('.time-inject-row-alt').show();
-
+                    const $payload = setupTInput(node, {
+                        typeProp: 'payloadType',
+                        valueProp: 'payload',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'date',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) {
+                            const plVType = $('#node-input-payload').typedInput('type');
+                            if (plVType ===  types.TimeEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value ||
+                                plVType === types.DateSpecific.value) {
+                                $('.time-inject-row-payloadTimeFormat').show();
+                                $('.time-inject-row-payloadOffset').show();
+                            } else {
+                                $('.time-inject-row-payloadTimeFormat').hide();
+                                $('.time-inject-row-payloadOffset').hide();
+                            }
                             getBackendData(d => {
-                                const $div = $('#node-input-time-div');
+                                const $div = $('#node-input-payload-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
-                                kind:       'getTimeData',
+                                kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
-                                type,
-                                value:      $('#node-input-time').typedInput('value'),
-                                offsetType: $('#node-input-offset').typedInput('type'),
-                                offset:     $('#node-input-offset').typedInput('value'),
-                                multiplier: $('#node-input-offsetMultiplier').val(),
-                                next: 1,
-                                days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'))
+                                type:       plVType,
+                                value:      $('#node-input-payload').typedInput('value'),
+                                format:     $('#node-input-payloadTimeFormat').val(),
+                                offsetType: $('#node-input-payloadOffset').typedInput('type'),
+                                offset:     $('#node-input-payloadOffset').typedInput('value'),
+                                multiplier: $('#node-input-payloadOffsetMultiplier').val()
                             });
                         }
-                        $('#node-input-property').change();
-                    }
-                });
-                initDaysCheckbox('#time-inject-timeDays', node.timeDays);
+                    });
+                    initCombobox(node, $('#node-input-payloadTimeFormatsel'), $('#node-input-payloadTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
-                node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'offsetType',
-                    valueProp: 'offset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-offsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-offsetMultiplier').prop('disabled', false);
+                    node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'payloadOffsetType',
+                        valueProp: 'payloadOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.payloadOffset === 0 || node.payloadOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-payloadOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-payloadOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-payloadOffsetMultiplier').prop('disabled', false);
+                            }
                         }
-                    }
-                }).change();
-                // #endregion time
-                // #region property
-                setupTInput(node, {
-                    typeProp: 'propertyType',
-                    valueProp: 'property',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
-                    onChange(_type, _value) {
-                        const timeType = $('#node-input-time').typedInput('type');
-                        const propType = $('#node-input-property').typedInput('type');
-                        if ( timeType === types.Undefined.value || propType === types.Undefined.value ) {
-                            $('.time-inject-row-timeAlt').hide();
-                            $('.time-inject-row-timeAltOffset').hide();
-                            $('.time-inject-row-timeAltDays').hide();
-                            $('#node-input-propertyCompare').hide();
-                            $('.row-propertyThreshold').hide();
-                            $('#node-input-property').typedInput('width', 'calc(100% - 110px)');
-                        } else if(propType === 'jsonata' || propType === types.PhaseMoon.value) {
-                            $('.time-inject-row-timeAlt').show();
-                            $('.time-inject-row-timeAltOffset').show();
-                            $('.time-inject-row-timeAltDays').show();
-                            $('#node-input-propertyCompare').show();
-                            $('#node-input-propertyCompare').attr('disabled', true);
-                            $('#node-input-propertyCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                            $('.row-propertyThreshold').hide();
-                            $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
-                        } else {
-                            $('.time-inject-row-timeAlt').show();
-                            $('.time-inject-row-timeAltOffset').show();
-                            $('.time-inject-row-timeAltDays').show();
-                            $('#node-input-propertyCompare').show();
-                            $('#node-input-propertyCompare').attr('disabled', false);
-                            $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
-                            const condOp = $('#node-input-propertyCompare').val();
-                            let operatorCount = 1;
-                            const fields = selFields.comparator;
-                            const fieldsLength = fields.length;
-                            for(let index = 0; index<fieldsLength; index++) {
-                                const el = fields[index];
-                                if (el.id === condOp) {
-                                    operatorCount = el.operatorCount;
-                                    break;
+                    }).change();
+                    // #endregion payload
+                    // #region time
+                    const $time = setupTInput(node, {
+                        typeProp: 'timeType',
+                        valueProp: 'time',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env'
+                        ],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-time').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('.time-inject-row-offset').hide();
+                                $('.time-inject-row-timeDays').hide();
+                                $('.time-inject-row-alt').hide();
+
+                                const $div = $('#node-input-time-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', titleOrg);
+                            } else {
+                                $('.time-inject-row-offset').show();
+                                $('.time-inject-row-timeDays').show();
+                                $('.time-inject-row-alt').show();
+
+                                getBackendData(d => {
+                                    const $div = $('#node-input-time-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                                }, {
+                                    kind:       'getTimeData',
+                                    config:     $nodeConfig.val(),
+                                    type,
+                                    value:      $('#node-input-time').typedInput('value'),
+                                    offsetType: $('#node-input-offset').typedInput('type'),
+                                    offset:     $('#node-input-offset').typedInput('value'),
+                                    multiplier: $('#node-input-offsetMultiplier').val(),
+                                    next: 1,
+                                    days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'))
+                                });
+                            }
+                            $('#node-input-property').change();
+                        }
+                    });
+                    initDaysCheckbox('#time-inject-timeDays', node.timeDays);
+
+                    node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'offsetType',
+                        valueProp: 'offset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-offsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-offsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion time
+                    // #region property
+                    setupTInput(node, {
+                        typeProp: 'propertyType',
+                        valueProp: 'property',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
+                        types: [types.Undefined, 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                        onChange(_type, _value) {
+                            const timeType = $('#node-input-time').typedInput('type');
+                            const propType = $('#node-input-property').typedInput('type');
+                            if ( timeType === types.Undefined.value || propType === types.Undefined.value ) {
+                                $('.time-inject-row-timeAlt').hide();
+                                $('.time-inject-row-timeAltOffset').hide();
+                                $('.time-inject-row-timeAltDays').hide();
+                                $('#node-input-propertyCompare').hide();
+                                $('.row-propertyThreshold').hide();
+                                $('#node-input-property').typedInput('width', 'calc(100% - 110px)');
+                            } else if(propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                                $('.time-inject-row-timeAlt').show();
+                                $('.time-inject-row-timeAltOffset').show();
+                                $('.time-inject-row-timeAltDays').show();
+                                $('#node-input-propertyCompare').show();
+                                $('#node-input-propertyCompare').attr('disabled', true);
+                                $('#node-input-propertyCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
+                                $('.row-propertyThreshold').hide();
+                                $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
+                            } else {
+                                $('.time-inject-row-timeAlt').show();
+                                $('.time-inject-row-timeAltOffset').show();
+                                $('.time-inject-row-timeAltDays').show();
+                                $('#node-input-propertyCompare').show();
+                                $('#node-input-propertyCompare').attr('disabled', false);
+                                $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
+                                const condOp = $('#node-input-propertyCompare').val();
+                                let operatorCount = 1;
+                                const fields = selFields.comparator;
+                                const fieldsLength = fields.length;
+                                for(let index = 0; index<fieldsLength; index++) {
+                                    const el = fields[index];
+                                    if (el.id === condOp) {
+                                        operatorCount = el.operatorCount;
+                                        break;
+                                    }
+                                }
+
+                                if (operatorCount > 1) {
+                                    $('.row-propertyThreshold').show(); // condOpB
+                                } else {
+                                    $('.row-propertyThreshold').hide(); // condOpB
                                 }
                             }
 
-                            if (operatorCount > 1) {
-                                $('.row-propertyThreshold').show(); // condOpB
+                            if ( timeType === 'flow' || timeType === 'global' || propType !== types.Undefined.value ) {
+                                $('.time-inject-recalc').show();
                             } else {
-                                $('.row-propertyThreshold').hide(); // condOpB
+                                $('.time-inject-recalc').hide();
+                                $('#time-inject-recalcTime').val('');
+                            }
+                            $('#node-input-propertyThreshold').change();
+                        }
+                    });
+                    const propertyCompareField = $('#node-input-propertyCompare');
+                    appendOptions(node, propertyCompareField, 'comparator');
+                    propertyCompareField.val(node.propertyCompare || 'true');
+                    propertyCompareField.change(() => { $('#node-input-property').change(); });
+                    setupTInput(node, {
+                        typeProp: 'propertyThresholdType',
+                        valueProp: 'propertyThreshold',
+                        width: 'calc(100% - 130px)',
+                        defaultType: 'num',
+                        defaultValue: '',
+                        types: ['msg', 'flow', 'global', 'str', 'num', 'env']
+                    });
+                    // #endregion property
+                    // #region timeAlt
+                    const $timeAlt = setupTInput(node, {
+                        typeProp: 'timeAltType',
+                        valueProp: 'timeAlt',
+                        width: 'calc(100% - 120px)',
+                        defaultType: 'entered',
+                        defaultValue: '',
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env'
+                        ],
+                        onChange (_type, _value) {
+                            if (!$('.time-inject-row-timeAlt').is(':hidden')) {
+                                getBackendData(d => {
+                                    const $div = $('#node-input-timeAlt-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                                }, {
+                                    kind:       'getTimeData',
+                                    config:     $nodeConfig.val(),
+                                    type:       $('#node-input-timeAlt').typedInput('type'),
+                                    value:      $('#node-input-timeAlt').typedInput('value'),
+                                    offsetType: $('#node-input-timeAltOffset').typedInput('type'),
+                                    offset:     $('#node-input-timeAltOffset').typedInput('value'),
+                                    multiplier: $('#node-input-timeAltOffsetMultiplier').val(),
+                                    next: 1,
+                                    days:       getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'))
+                                });
                             }
                         }
+                    });
 
-                        if ( timeType === 'flow' || timeType === 'global' || propType !== types.Undefined.value ) {
-                            $('.time-inject-recalc').show();
-                        } else {
-                            $('.time-inject-recalc').hide();
-                            $('#time-inject-recalcTime').val('');
-                        }
-                        $('#node-input-propertyThreshold').change();
-                    }
-                });
-                const propertyCompareField = $('#node-input-propertyCompare');
-                appendOptions(node, propertyCompareField, 'comparator');
-                propertyCompareField.val(node.propertyCompare || 'true');
-                propertyCompareField.change(() => { $('#node-input-property').change(); });
-                setupTInput(node, {
-                    typeProp: 'propertyThresholdType',
-                    valueProp: 'propertyThreshold',
-                    width: 'calc(100% - 130px)',
-                    defaultType: 'num',
-                    defaultValue: '',
-                    types: ['msg', 'flow', 'global', 'str', 'num', 'env']
-                });
-                // #endregion property
-                // #region timeAlt
-                const $timeAlt = setupTInput(node, {
-                    typeProp: 'timeAltType',
-                    valueProp: 'timeAlt',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'entered',
-                    defaultValue: '',
-                    types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
-                    onChange (_type, _value) {
-                        if (!$('.time-inject-row-timeAlt').is(':hidden')) {
-                            getBackendData(d => {
-                                const $div = $('#node-input-timeAlt-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                            }, {
-                                kind:       'getTimeData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-timeAlt').typedInput('type'),
-                                value:      $('#node-input-timeAlt').typedInput('value'),
-                                offsetType: $('#node-input-timeAltOffset').typedInput('type'),
-                                offset:     $('#node-input-timeAltOffset').typedInput('value'),
-                                multiplier: $('#node-input-timeAltOffsetMultiplier').val(),
-                                next: 1,
-                                days:       getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'))
-                            });
-                        }
-                    }
-                });
+                    initDaysCheckbox('#time-inject-timeAltDays', node.timeAltDays);
 
-                initDaysCheckbox('#time-inject-timeAltDays', node.timeAltDays);
-
-                node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'timeAltOffsetType',
-                    valueProp: 'timeAltOffset',
-                    width: 'calc(100% - 255px)',
-                    defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-timeAltOffset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-timeAltOffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-timeAltOffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion timeAlt
-                // #region addPayload1
-                if (node.addPayload1Type === types.MsgPayload.value) {
-                    node.addPayload1Type = 'msg';
-                    node.addPayload1 = 'payload';
-                }
-                const $addPayload1 = setupTInput(node, {
-                    typeProp: 'addPayload1Type',
-                    valueProp: 'addPayload1',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange(_type, _value) {
-                        const plType = $('#node-input-addPayload1').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload1Value').show();
-                            $('.time-addPayload2').show();
-                            const plVType = $('#node-input-addPayload1Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1Next').show();
-                                $('.time-inject-row-addPayload1days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload1Format').show();
-                                $('.time-inject-row-addPayload1Offset').show();
-                                $('.time-inject-row-addPayload1Next').hide();
-                                $('.time-inject-row-addPayload1days').hide();
+                    node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'timeAltOffsetType',
+                        valueProp: 'timeAltOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-timeAltOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-timeAltOffsetMultiplier').prop('disabled', true);
                             } else {
+                                $('#node-input-timeAltOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion timeAlt
+                    // #region addPayload1
+                    if (node.addPayload1Type === types.MsgPayload.value) {
+                        node.addPayload1Type = 'msg';
+                        node.addPayload1 = 'payload';
+                    }
+                    const $addPayload1 = setupTInput(node, {
+                        typeProp: 'addPayload1Type',
+                        valueProp: 'addPayload1',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
+                        types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
+                        onChange(_type, _value) {
+                            const plType = $('#node-input-addPayload1').typedInput('type');
+                            if (plType !== types.Undefined.value) {
+                                $('.time-addPayload1Value').show();
+                                $('.time-addPayload2').show();
+                                const plVType = $('#node-input-addPayload1Value').typedInput('type');
+                                if (plVType === types.TimeEntered.value ||
+                                    plVType === types.TimeSun.value ||
+                                    plVType === types.TimeMoon.value) {
+                                    $('.time-inject-row-addPayload1Format').show();
+                                    $('.time-inject-row-addPayload1Offset').show();
+                                    $('.time-inject-row-addPayload1Next').show();
+                                    $('.time-inject-row-addPayload1days').show();
+                                } else if (plVType === types.DateSpecific.value ||
+                                        plVType === types.DateEntered.value ||
+                                        plVType === types.DayOfMonth.value) {
+                                    $('.time-inject-row-addPayload1Format').show();
+                                    $('.time-inject-row-addPayload1Offset').show();
+                                    $('.time-inject-row-addPayload1Next').hide();
+                                    $('.time-inject-row-addPayload1days').hide();
+                                } else {
+                                    $('.time-inject-row-addPayload1Format').hide();
+                                    $('.time-inject-row-addPayload1Offset').hide();
+                                    $('.time-inject-row-addPayload1Next').hide();
+                                    $('.time-inject-row-addPayload1days').hide();
+                                }
+                            } else {
+                                $('.time-addPayload1Value').hide();
                                 $('.time-inject-row-addPayload1Format').hide();
                                 $('.time-inject-row-addPayload1Offset').hide();
                                 $('.time-inject-row-addPayload1Next').hide();
                                 $('.time-inject-row-addPayload1days').hide();
+                                $('.time-addPayload2').hide();
                             }
-                        } else {
-                            $('.time-addPayload1Value').hide();
-                            $('.time-inject-row-addPayload1Format').hide();
-                            $('.time-inject-row-addPayload1Offset').hide();
-                            $('.time-inject-row-addPayload1Next').hide();
-                            $('.time-inject-row-addPayload1days').hide();
-                            $('.time-addPayload2').hide();
+                            $('#node-input-addPayload2').change();
                         }
-                        $('#node-input-addPayload2').change();
-                    }
-                });
+                    });
 
-                setupTInput(node, {
-                    typeProp: 'addPayload1ValueType',
-                    valueProp: 'addPayload1Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeSunNow,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.SunInSky,
-                        types.MoonCalc,
-                        types.MoonPhase
-                    ],
-                    onChange(_type, _value) {
-                        $('#node-input-addPayload1').change();
-                        if (!$('.time-addPayload1Value').is(':hidden')) {
-                            getBackendData(d => {
-                                const $div = $('#node-input-addPayload1-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                            }, {
-                                kind:       'getOutDataData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-addPayload1Value').typedInput('type'),
-                                value:      $('#node-input-addPayload1Value').typedInput('value'),
-                                format:     $('#node-input-addPayload1Format').val(),
-                                offsetType: $('#node-input-addPayload1Offset').typedInput('type'),
-                                offset:     $('#node-input-addPayload1Offset').typedInput('value'),
-                                multiplier: $('#node-input-addPayload1OffsetMultiplier').val()
-                            });
+                    setupTInput(node, {
+                        typeProp: 'addPayload1ValueType',
+                        valueProp: 'addPayload1Value',
+                        width: 'calc(100% - 120px)',
+                        defaultType: 'date',
+                        defaultValue: '',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) {
+                            $('#node-input-addPayload1').change();
+                            if (!$('.time-addPayload1Value').is(':hidden')) {
+                                getBackendData(d => {
+                                    const $div = $('#node-input-addPayload1-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                }, {
+                                    kind:       'getOutDataData',
+                                    config:     $nodeConfig.val(),
+                                    type:       $('#node-input-addPayload1Value').typedInput('type'),
+                                    value:      $('#node-input-addPayload1Value').typedInput('value'),
+                                    format:     $('#node-input-addPayload1Format').val(),
+                                    offsetType: $('#node-input-addPayload1Offset').typedInput('type'),
+                                    offset:     $('#node-input-addPayload1Offset').typedInput('value'),
+                                    multiplier: $('#node-input-addPayload1OffsetMultiplier').val()
+                                });
+                            }
                         }
-                    }
-                });
+                    });
 
-                initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
+                    initDaysCheckbox('#time-inject-addPayload1Days', node.addPayload1Days);
 
-                initCombobox(node, $('#node-input-addPayload1Formatsel'), $('#node-input-addPayload1Format'), 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
+                    initCombobox(node, $('#node-input-addPayload1Formatsel'), $('#node-input-addPayload1Format'), 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
-                node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
+                    node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
 
-                setupTInput(node, {
-                    typeProp: 'addPayload1OffsetType',
-                    valueProp: 'addPayload1Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload1Offset === 0 || node.addPayload1Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-addPayload1Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload1OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion addPayload1
-                // #region addPayload2
-                if (node.addPayload2Type === types.MsgPayload.value) {
-                    node.addPayload2Type = 'msg';
-                    node.addPayload2 = 'payload';
-                }
-                setupTInput(node, {
-                    typeProp: 'addPayload2Type',
-                    valueProp: 'addPayload2',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange(_type, _value) {
-                        const plType = $('#node-input-addPayload2').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload2Value').show();
-                            $('.time-addPayload3').show();
-                            const plVType = $('#node-input-addPayload2Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload2Format').show();
-                                $('.time-inject-row-addPayload2Offset').show();
-                                $('.time-inject-row-addPayload2Next').show();
-                                $('.time-inject-row-addPayload2days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload2Format').show();
-                                $('.time-inject-row-addPayload2Offset').show();
-                                $('.time-inject-row-addPayload2Next').hide();
-                                $('.time-inject-row-addPayload2days').hide();
+                    setupTInput(node, {
+                        typeProp: 'addPayload1OffsetType',
+                        valueProp: 'addPayload1Offset',
+                        width: 'calc(100% - 265px)',
+                        defaultType: (node.addPayload1Offset === 0 || node.addPayload1Offset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-addPayload1Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-addPayload1OffsetMultiplier').prop('disabled', true);
                             } else {
+                                $('#node-input-addPayload1OffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion addPayload1
+                    // #region addPayload2
+                    if (node.addPayload2Type === types.MsgPayload.value) {
+                        node.addPayload2Type = 'msg';
+                        node.addPayload2 = 'payload';
+                    }
+                    setupTInput(node, {
+                        typeProp: 'addPayload2Type',
+                        valueProp: 'addPayload2',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
+                        types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
+                        onChange(_type, _value) {
+                            const plType = $('#node-input-addPayload2').typedInput('type');
+                            if (plType !== types.Undefined.value) {
+                                $('.time-addPayload2Value').show();
+                                $('.time-addPayload3').show();
+                                const plVType = $('#node-input-addPayload2Value').typedInput('type');
+                                if (plVType === types.TimeEntered.value ||
+                                    plVType === types.TimeSun.value ||
+                                    plVType === types.TimeMoon.value) {
+                                    $('.time-inject-row-addPayload2Format').show();
+                                    $('.time-inject-row-addPayload2Offset').show();
+                                    $('.time-inject-row-addPayload2Next').show();
+                                    $('.time-inject-row-addPayload2days').show();
+                                } else if (plVType === types.DateSpecific.value ||
+                                        plVType === types.DateEntered.value ||
+                                        plVType === types.DayOfMonth.value) {
+                                    $('.time-inject-row-addPayload2Format').show();
+                                    $('.time-inject-row-addPayload2Offset').show();
+                                    $('.time-inject-row-addPayload2Next').hide();
+                                    $('.time-inject-row-addPayload2days').hide();
+                                } else {
+                                    $('.time-inject-row-addPayload2Format').hide();
+                                    $('.time-inject-row-addPayload2Offset').hide();
+                                    $('.time-inject-row-addPayload2Next').hide();
+                                    $('.time-inject-row-addPayload2days').hide();
+                                }
+                            } else {
+                                $('.time-addPayload2Value').hide();
                                 $('.time-inject-row-addPayload2Format').hide();
                                 $('.time-inject-row-addPayload2Offset').hide();
                                 $('.time-inject-row-addPayload2Next').hide();
                                 $('.time-inject-row-addPayload2days').hide();
+                                $('.time-addPayload3').hide();
                             }
-                        } else {
-                            $('.time-addPayload2Value').hide();
-                            $('.time-inject-row-addPayload2Format').hide();
-                            $('.time-inject-row-addPayload2Offset').hide();
-                            $('.time-inject-row-addPayload2Next').hide();
-                            $('.time-inject-row-addPayload2days').hide();
-                            $('.time-addPayload3').hide();
+
+                            $('#node-input-addPayload3').change();
                         }
+                    });
 
-                        $('#node-input-addPayload3').change();
-                    }
-                });
-
-                setupTInput(node, {
-                    typeProp: 'addPayload2ValueType',
-                    valueProp: 'addPayload2Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeSunNow,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.SunInSky,
-                        types.MoonCalc,
-                        types.MoonPhase
-                    ],
-                    onChange(_type, _value) {
-                        $('#node-input-addPayload2').change();
-                        if (!$('.time-addPayload2Value').is(':hidden')) {
-                            getBackendData(d => {
-                                const $div = $('#node-input-addPayload1-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                            }, {
-                                kind:       'getOutDataData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-addPayload2Value').typedInput('type'),
-                                value:      $('#node-input-addPayload2Value').typedInput('value'),
-                                format:     $('#node-input-addPayload2Format').val(),
-                                offsetType: $('#node-input-addPayload2Offset').typedInput('type'),
-                                offset:     $('#node-input-addPayload2Offset').typedInput('value'),
-                                multiplier: $('#node-input-addPayload2OffsetMultiplier').val()
-                            });
+                    setupTInput(node, {
+                        typeProp: 'addPayload2ValueType',
+                        valueProp: 'addPayload2Value',
+                        width: 'calc(100% - 120px)',
+                        defaultType: 'date',
+                        defaultValue: '',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) {
+                            $('#node-input-addPayload2').change();
+                            if (!$('.time-addPayload2Value').is(':hidden')) {
+                                getBackendData(d => {
+                                    const $div = $('#node-input-addPayload1-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                }, {
+                                    kind:       'getOutDataData',
+                                    config:     $nodeConfig.val(),
+                                    type:       $('#node-input-addPayload2Value').typedInput('type'),
+                                    value:      $('#node-input-addPayload2Value').typedInput('value'),
+                                    format:     $('#node-input-addPayload2Format').val(),
+                                    offsetType: $('#node-input-addPayload2Offset').typedInput('type'),
+                                    offset:     $('#node-input-addPayload2Offset').typedInput('value'),
+                                    multiplier: $('#node-input-addPayload2OffsetMultiplier').val()
+                                });
+                            }
                         }
-                    }
-                });
+                    });
 
-                initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
+                    initDaysCheckbox('#time-inject-addPayload2Days', node.addPayload2Days);
 
-                initCombobox(node, $('#node-input-addPayload2Formatsel'), $('#node-input-addPayload2Format'), 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
+                    initCombobox(node, $('#node-input-addPayload2Formatsel'), $('#node-input-addPayload2Format'), 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
-                node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'addPayload2OffsetType',
-                    valueProp: 'addPayload2Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload2Offset === 0 || node.addPayload2Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-addPayload2Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload2OffsetMultiplier').prop('disabled', false);
-                        }
-                    }
-                }).change();
-                // #endregion addPayload2
-                // #region addPayload3
-                if (node.addPayload3Type === types.MsgPayload.value) {
-                    node.addPayload3Type = 'msg';
-                    node.addPayload3 = 'payload';
-                }
-                setupTInput(node, {
-                    typeProp: 'addPayload3Type',
-                    valueProp: 'addPayload3',
-                    width: 'calc(100% - 110px)',
-                    defaultType: types.Undefined.value,
-                    defaultValue: '',
-                    types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
-                    onChange(_type, _value) {
-                        const plType = $('#node-input-addPayload3').typedInput('type');
-                        if (plType !== types.Undefined.value) {
-                            $('.time-addPayload3Value').show();
-                            const plVType = $('#node-input-addPayload3Value').typedInput('type');
-                            if (plVType === types.TimeEntered.value ||
-                                plVType === types.TimeSun.value ||
-                                plVType === types.TimeMoon.value) {
-                                $('.time-inject-row-addPayload3Format').show();
-                                $('.time-inject-row-addPayload3Offset').show();
-                                $('.time-inject-row-addPayload3Next').show();
-                                $('.time-inject-row-addPayload3days').show();
-                            } else if (plVType === types.DateSpecific.value ||
-                                       plVType === types.DateEntered.value ||
-                                       plVType === types.DayOfMonth.value) {
-                                $('.time-inject-row-addPayload3Format').show();
-                                $('.time-inject-row-addPayload3Offset').show();
-                                $('.time-inject-row-addPayload3Next').hide();
-                                $('.time-inject-row-addPayload3days').hide();
+                    node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'addPayload2OffsetType',
+                        valueProp: 'addPayload2Offset',
+                        width: 'calc(100% - 265px)',
+                        defaultType: (node.addPayload2Offset === 0 || node.addPayload2Offset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-addPayload2Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-addPayload2OffsetMultiplier').prop('disabled', true);
                             } else {
+                                $('#node-input-addPayload2OffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion addPayload2
+                    // #region addPayload3
+                    if (node.addPayload3Type === types.MsgPayload.value) {
+                        node.addPayload3Type = 'msg';
+                        node.addPayload3 = 'payload';
+                    }
+                    setupTInput(node, {
+                        typeProp: 'addPayload3Type',
+                        valueProp: 'addPayload3',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
+                        types: [types.Undefined, 'msg', types.MsgTs, types.MsgLc, types.MsgValue, 'flow', 'global'],
+                        onChange(_type, _value) {
+                            const plType = $('#node-input-addPayload3').typedInput('type');
+                            if (plType !== types.Undefined.value) {
+                                $('.time-addPayload3Value').show();
+                                const plVType = $('#node-input-addPayload3Value').typedInput('type');
+                                if (plVType === types.TimeEntered.value ||
+                                    plVType === types.TimeSun.value ||
+                                    plVType === types.TimeMoon.value) {
+                                    $('.time-inject-row-addPayload3Format').show();
+                                    $('.time-inject-row-addPayload3Offset').show();
+                                    $('.time-inject-row-addPayload3Next').show();
+                                    $('.time-inject-row-addPayload3days').show();
+                                } else if (plVType === types.DateSpecific.value ||
+                                        plVType === types.DateEntered.value ||
+                                        plVType === types.DayOfMonth.value) {
+                                    $('.time-inject-row-addPayload3Format').show();
+                                    $('.time-inject-row-addPayload3Offset').show();
+                                    $('.time-inject-row-addPayload3Next').hide();
+                                    $('.time-inject-row-addPayload3days').hide();
+                                } else {
+                                    $('.time-inject-row-addPayload3Format').hide();
+                                    $('.time-inject-row-addPayload3Offset').hide();
+                                    $('.time-inject-row-addPayload3Next').hide();
+                                    $('.time-inject-row-addPayload3days').hide();
+                                }
+                            } else {
+                                $('.time-addPayload3Value').hide();
                                 $('.time-inject-row-addPayload3Format').hide();
                                 $('.time-inject-row-addPayload3Offset').hide();
                                 $('.time-inject-row-addPayload3Next').hide();
                                 $('.time-inject-row-addPayload3days').hide();
                             }
-                        } else {
-                            $('.time-addPayload3Value').hide();
-                            $('.time-inject-row-addPayload3Format').hide();
-                            $('.time-inject-row-addPayload3Offset').hide();
-                            $('.time-inject-row-addPayload3Next').hide();
-                            $('.time-inject-row-addPayload3days').hide();
                         }
-                    }
-                });
+                    });
 
-                setupTInput(node, {
-                    typeProp: 'addPayload3ValueType',
-                    valueProp: 'addPayload3Value',
-                    width: 'calc(100% - 120px)',
-                    defaultType: 'date',
-                    defaultValue: '',
-                    types: [
-                        'date',
-                        types.DateSpecific,
-                        types.TimeEntered,
-                        types.DateEntered,
-                        types.TimeSun,
-                        types.TimeSunNow,
-                        types.TimeMoon,
-                        types.DayOfMonth,
-                        'flow',
-                        'global',
-                        'str',
-                        'num',
-                        'bool',
-                        'json',
-                        'bin',
-                        'env',
-                        'jsonata',
-                        types.SunCalc,
-                        types.SunInSky,
-                        types.MoonCalc,
-                        types.MoonPhase
-                    ],
-                    onChange(_type, _value) {
-                        $('#node-input-addPayload3').change();
-                        if (!$('.time-addPayload3Value').is(':hidden')) {
-                            getBackendData(d => {
-                                const $div = $('#node-input-addPayload1-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                            }, {
-                                kind:       'getOutDataData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-addPayload3Value').typedInput('type'),
-                                value:      $('#node-input-addPayload3Value').typedInput('value'),
-                                format:     $('#node-input-addPayload3Format').val(),
-                                offsetType: $('#node-input-addPayload3Offset').typedInput('type'),
-                                offset:     $('#node-input-addPayload3Offset').typedInput('value'),
-                                multiplier: $('#node-input-addPayload3OffsetMultiplier').val()
-                            });
+                    setupTInput(node, {
+                        typeProp: 'addPayload3ValueType',
+                        valueProp: 'addPayload3Value',
+                        width: 'calc(100% - 120px)',
+                        defaultType: 'date',
+                        defaultValue: '',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) {
+                            $('#node-input-addPayload3').change();
+                            if (!$('.time-addPayload3Value').is(':hidden')) {
+                                getBackendData(d => {
+                                    const $div = $('#node-input-addPayload1-div');
+                                    const titleOrg = $div.attr('titleOrg');
+                                    $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                }, {
+                                    kind:       'getOutDataData',
+                                    config:     $nodeConfig.val(),
+                                    type:       $('#node-input-addPayload3Value').typedInput('type'),
+                                    value:      $('#node-input-addPayload3Value').typedInput('value'),
+                                    format:     $('#node-input-addPayload3Format').val(),
+                                    offsetType: $('#node-input-addPayload3Offset').typedInput('type'),
+                                    offset:     $('#node-input-addPayload3Offset').typedInput('value'),
+                                    multiplier: $('#node-input-addPayload3OffsetMultiplier').val()
+                                });
+                            }
                         }
-                    }
-                });
+                    });
 
-                initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
+                    initDaysCheckbox('#time-inject-addPayload3Days', node.addPayload3Days);
 
-                initCombobox(node, $('#node-input-addPayload3Formatsel'), $('#node-input-addPayload3Format'), 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
+                    initCombobox(node, $('#node-input-addPayload3Formatsel'), $('#node-input-addPayload3Format'), 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
-                node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
-                setupTInput(node, {
-                    typeProp: 'addPayload3OffsetType',
-                    valueProp: 'addPayload3Offset',
-                    width: 'calc(100% - 265px)',
-                    defaultType: (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : 'num',
-                    defaultValue: 0,
-                    types: [types.Undefined, 'num', 'flow', 'global', 'env'],
-                    onChange(_type, _value) {
-                        const type = $('#node-input-addPayload3Offset').typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', true);
-                        } else {
-                            $('#node-input-addPayload3OffsetMultiplier').prop('disabled', false);
+                    node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'addPayload3OffsetType',
+                        valueProp: 'addPayload3Offset',
+                        width: 'calc(100% - 265px)',
+                        defaultType: (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-addPayload3Offset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-addPayload3OffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-addPayload3OffsetMultiplier').prop('disabled', false);
+                            }
                         }
-                    }
-                }).change();
-                // #endregion addPayload3
-                // #region onceDelay
-                $('#node-input-once').change(() => {
-                    $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
-                });
-                // #endregion onceDelay
-                $payload.change();
-                $time.change(); // also property change
-                $timeAlt.change();
-                $addPayload1.change(); // addPayload2 + addPayload3
-            }; // setup
+                    }).change();
+                    // #endregion addPayload3
+                    // #region onceDelay
+                    $('#node-input-once').change(() => {
+                        $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
+                    });
+                    // #endregion onceDelay
+                    $payload.change();
+                    $time.change(); // also property change
+                    $timeAlt.change();
+                    $addPayload1.change(); // addPayload2 + addPayload3
+                }; // setup
 
-            $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
-                    try {
-                        setup(node);
-                    } catch (err) {
-                        console.log("failed to setup editor"); // eslint-disable-line
-                        console.log(err); // eslint-disable-line
-                        console.log(err.stack); // eslint-disable-line
-                    }
-                })
-                .fail((jqxhr, settings, exception) => {
-                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
-                    console.log(exception); // eslint-disable-line
-                    console.log(exception.stack); // eslint-disable-line
-                });
-        },
-        oneditsave() {
-            const plt = $('#node-input-payload').typedInput('type');
-            if (plt === 'dateSpecific') {
-                if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
-                    this.nameInt = clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
-                } else {
-                    let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
-                    txt = $.trim(txt.split(',')[0]);
-                    this.nameInt = clipValueLength(txt, 20);
-                }
-            } else {
-                this.nameInt = getValueLabel(this, plt,
-                    $('#node-input-payload').typedInput('value'),
-                    $('#node-input-payloadOffset').typedInput('value'),
-                    20);
-            }
-            this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
-            this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
-            this.addPayload1Days = getDaysStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'));
-            if (Number($('#node-input-addPayload1Formatsel').val()) !== 99) {
-                $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
-                this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
-            }
-            this.addPayload2Days = getDaysStr($('#time-inject-addPayload2Days input[type=checkbox]:checked'));
-            if (Number($('#node-input-addPayload2Formatsel').val()) !== 99) {
-                $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
-                this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
-            }
-            this.addPayload3Days = getDaysStr($('#time-inject-addPayload3Days input[type=checkbox]:checked'));
-            if (Number($('#node-input-addPayload3Formatsel').val()) !== 99) {
-                $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
-                this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
-            }
-        },
-        button: {
-            enabled: function() { // eslint-disable-line object-shorthand
-                return !this.changed;
+                $.getScript('sun-position/js/htmlglobal.js')
+                    .done((_data, _textStatus, _jqxhr) => {
+                        try {
+                            setup(node);
+                        } catch (err) {
+                            console.log("failed to setup editor"); // eslint-disable-line
+                            console.log(err); // eslint-disable-line
+                            console.log(err.stack); // eslint-disable-line
+                        }
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                        console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                        console.log(exception); // eslint-disable-line
+                        console.log(exception.stack); // eslint-disable-line
+                    });
             },
-            onclick: function() { // eslint-disable-line object-shorthand
-                if (this.changed) {
-                    return RED.notify(RED._('node-red:notification.warning', { message: RED._('node-red:notification.warnings.undeployedChanges') }), 'warning');
-                }
-
-                let payload = this.payload;
-                if ((this.payloadType === 'flow') ||
-                    (this.payloadType === 'global')) {
-                    const key = RED.utils.parseContextKey(payload);
-                    payload = this.payloadType + '.' + key.key;
-                }
-
-                if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
-                let label = this._def.label.call(this);
-                label = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                const node = this;
-                $.ajax({
-                    url: 'time-inject/' + this.id,
-                    type: 'POST',
-                    success(_resp) {
-                        RED.notify(node._('node-red:inject.success',{label}),{type:'success',id:'inject'});
-                    },
-                    error(jqXHR, textStatus, _errorThrown) {
-                        if (jqXHR.status === 404) {
-                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
-                        } else if (jqXHR.status === 500) {
-                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:inject.errors.failed')}),'error');
-                        } else if (jqXHR.status === 0) {
-                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.no-response')}),'error');
-                        } else {
-                            RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.unexpected',{status:jqXHR.status,message:textStatus})}),'error');
-                        }
+            oneditsave() {
+                const plt = $('#node-input-payload').typedInput('type');
+                if (plt === 'dateSpecific') {
+                    if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
+                        this.nameInt = clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
+                    } else {
+                        let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
+                        txt = $.trim(txt.split(',')[0]);
+                        this.nameInt = clipValueLength(txt, 20);
                     }
-                });
-                return undefined;
+                } else {
+                    this.nameInt = getValueLabel(this, plt,
+                        $('#node-input-payload').typedInput('value'),
+                        $('#node-input-payloadOffset').typedInput('value'));
+                }
+                this.timeDays = getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'));
+                this.timeAltDays = getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'));
+                this.addPayload1Days = getDaysStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'));
+                if (Number($('#node-input-addPayload1Formatsel').val()) !== 99) {
+                    $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
+                    this.addPayload1Format = $('#node-input-addPayload1Formatsel').val();
+                }
+                this.addPayload2Days = getDaysStr($('#time-inject-addPayload2Days input[type=checkbox]:checked'));
+                if (Number($('#node-input-addPayload2Formatsel').val()) !== 99) {
+                    $('#node-input-addPayload2Format').val($('#node-input-addPayload2Formatsel').val());
+                    this.addPayload2Format = $('#node-input-addPayload2Formatsel').val();
+                }
+                this.addPayload3Days = getDaysStr($('#time-inject-addPayload3Days input[type=checkbox]:checked'));
+                if (Number($('#node-input-addPayload3Formatsel').val()) !== 99) {
+                    $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
+                    this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
+                }
+            },
+            button: {
+                enabled: function() { // eslint-disable-line object-shorthand
+                    return !this.changed;
+                },
+                onclick: function() { // eslint-disable-line object-shorthand
+                    if (this.changed) {
+                        return RED.notify(RED._('node-red:notification.warning', { message: RED._('node-red:notification.warnings.undeployedChanges') }), 'warning');
+                    }
+
+                    let payload = this.payload;
+                    if ((this.payloadType === 'flow') ||
+                        (this.payloadType === 'global')) {
+                        const key = RED.utils.parseContextKey(payload);
+                        payload = this.payloadType + '.' + key.key;
+                    }
+
+                    if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
+                    let label = this._def.label.call(this);
+                    label = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                    const node = this;
+                    $.ajax({
+                        url: 'time-inject/' + this.id,
+                        type: 'POST',
+                        success(_resp) {
+                            RED.notify(node._('node-red:inject.success',{label}),{type:'success',id:'inject'});
+                        },
+                        error(jqXHR, textStatus, _errorThrown) {
+                            if (jqXHR.status === 404) {
+                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
+                            } else if (jqXHR.status === 500) {
+                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:inject.errors.failed')}),'error');
+                            } else if (jqXHR.status === 0) {
+                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.no-response')}),'error');
+                            } else {
+                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.unexpected',{status:jqXHR.status,message:textStatus})}),'error');
+                            }
+                        }
+                    });
+                    return undefined;
+                }
             }
-        }
-    });</script>
+        });
+    })();</script>
