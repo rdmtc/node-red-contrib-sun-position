@@ -597,6 +597,7 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       opType,
@@ -604,7 +605,8 @@
                                 format:     $('#node-input-inputFormat').val(),
                                 offsetType: $('#node-input-inputOffset').typedInput('type'),
                                 offset:     $('#node-input-inputOffset').typedInput('value'),
-                                multiplier: $('#node-input-inputOffsetMultiplier').val()
+                                multiplier: $('#node-input-inputOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -816,6 +818,7 @@
                                 getBackendData(d => {
                                     $operandDiv.attr('title', bdDateToTime(d));
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getTimeData',
                                     config:     $nodeConfig.val(),
                                     type:       opType,
@@ -823,7 +826,8 @@
                                     format:     $formatIp.val(),
                                     offsetType: $offset.typedInput('type'),
                                     offset:     $offset.typedInput('value'),
-                                    multiplier: $multiplier.val()
+                                    multiplier: $multiplier.val(),
+                                    noOffsetError: true
                                 });
                                 resizeRule(containerRow);
                             });
@@ -898,6 +902,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getOutDataData',
                                     config:     $nodeConfig.val(),
                                     type:       $('#node-input-result1Value').typedInput('type'),
@@ -905,7 +910,8 @@
                                     format:     $('#node-input-result1Format').val(),
                                     offsetType: $('#node-input-result1Offset').typedInput('type'),
                                     offset:     $('#node-input-result1Offset').typedInput('value'),
-                                    multiplier: $('#node-input-result1OffsetMultiplier').val()
+                                    multiplier: $('#node-input-result1OffsetMultiplier').val(),
+                                    noOffsetError: true
                                 });
                             }
                         }

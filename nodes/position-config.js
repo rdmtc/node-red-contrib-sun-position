@@ -388,8 +388,8 @@ module.exports = function (RED) {
          * @param {*} [opCallback] - callback function for getting getPropValue
          * @returns {number} float property
          */
-        getFloatProp(_srcNode, msg, type, value, def, opCallback) {
-            // _srcNode.debug('getFloatProp type='+type+' value='+value);
+        getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
+            _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -404,10 +404,12 @@ module.exports = function (RED) {
                 data = this.getPropValue(_srcNode, msg, { type, value, callback:opCallback });
             }
             if (data === null || typeof data === 'undefined') {
+                if (noError) { return NaN; }
                 throw new Error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', {type, value}) }));
             }
             data = parseFloat(data);
             if (isNaN(data)) {
+                if (noError) { return NaN; }
                 throw new Error('the value of ' + type + '.' + value + ' is not a valid Number!');
             }
             return data;
@@ -440,7 +442,7 @@ module.exports = function (RED) {
             let result = null;
             if (data.type === null || data.type === 'none' || data.type === '' || (typeof data.type === 'undefined')) {
                 if (data.value === '' || (typeof data.value === 'undefined')) {
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = hlp.addOffset(now, offsetX, data.multiplier);
                     return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
@@ -451,15 +453,15 @@ module.exports = function (RED) {
                 }
                 return Date.now();
             } else if (data.type === 'dateSpecific') {
-                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                 result = hlp.addOffset(now, offsetX, data.multiplier);
                 return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                 } else if (data.type === 'pdmTime') { // moon
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                 }
                 if (result && result.value && !result.error) {
@@ -470,14 +472,14 @@ module.exports = function (RED) {
                 return Object.assign({}, this.getSunTimePrevNext(now));
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
-                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                 result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
                 return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
             } else if (data.type === 'dayOfMonth') {
                 result = new Date();
                 result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), data.value);
                 if (result !== null && typeof result !== 'undefined') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
                     return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
                 }
@@ -515,7 +517,7 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
@@ -535,7 +537,7 @@ module.exports = function (RED) {
                     }
                     result.fix = true;
                 } else if (data.type === 'dateSpecific') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result.value = hlp.normalizeDate(now, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value);
@@ -543,7 +545,7 @@ module.exports = function (RED) {
                     result.fix = true;
                 } else if (data.type === 'dayOfMonth') {
                     result.value = hlp.getSpecialDayOfMonth(now.getFullYear(), now.getMonth(), data.value);
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value);
@@ -551,20 +553,20 @@ module.exports = function (RED) {
                 } else if (data.type === 'entered') {
                     result.value = hlp.getTimeOfText(String(data.value), now, (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null) {
-                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     }
                     result.fix = true;
                 } else if (data.type === 'dateEntered') {
                     result.value =  hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null) {
-                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     }
                     result.fix = true;
                 } else if (data.type === 'pdsTime') {
                     // sun
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
@@ -572,7 +574,7 @@ module.exports = function (RED) {
                     result.fix = true;
                 } else if (data.type === 'pdmTime') {
                     // moon
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
@@ -587,7 +589,7 @@ module.exports = function (RED) {
                     } else {
                         result.value = hlp.getDateOfText(data.value, (this.tzOffset === 0), this.tzOffset);
                     }
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
@@ -602,7 +604,7 @@ module.exports = function (RED) {
                         } else {
                             result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
                         }
-                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0);
+                        const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                         if (this.tzOffset) {
                             result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
@@ -1095,7 +1097,7 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
-        // console.log('RED.httpAdmin.get - result for getTimeData', req.query.config);
+        // console.log('RED.httpAdmin.get', req.query.config);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
@@ -1104,11 +1106,18 @@ module.exports = function (RED) {
                 }));
                 return;
             }
+            let scrNode;
+            if (req.query.nodeId) {
+                scrNode = RED.nodes.getNode(req.query.nodeId);
+            }
+            if (!scrNode) {
+                scrNode = posConfig;
+            }
             let obj = {};
             switch (req.query.kind) {
                 case 'getTimeData': {
                     try {
-                        obj = posConfig.getTimeProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getTimeProp(scrNode, undefined, req.query); // req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err.message;
@@ -1119,7 +1128,7 @@ module.exports = function (RED) {
                 }
                 case 'getOutDataData': {
                     try {
-                        obj = posConfig.getOutDataProp(posConfig, undefined, req.query); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getOutDataProp(scrNode, undefined, req.query); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err.message;
