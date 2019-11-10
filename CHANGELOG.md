@@ -1,6 +1,11 @@
 # node-red-contrib-sun-position
 
-#### 0.5.1-beta-0: BugFix and Maintenance Release
+#### 0.5.2: BugFix
+
+- general
+  - fix for error on getting tooltip #69
+
+#### 0.5.1: BugFix and Maintenance Release
 
 - general
   - fix for week number calculation when in daylight saving #65

@@ -1208,6 +1208,7 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getOutDataData',
                                 config:     $nodeConfig.val(),
                                 type:       plVType,
@@ -1215,7 +1216,8 @@
                                 format:     $('#node-input-payloadTimeFormat').val(),
                                 offsetType: $('#node-input-payloadOffset').typedInput('type'),
                                 offset:     $('#node-input-payloadOffset').typedInput('value'),
-                                multiplier: $('#node-input-payloadOffsetMultiplier').val()
+                                multiplier: $('#node-input-payloadOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -1276,6 +1278,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getTimeData',
                                     config:     $nodeConfig.val(),
                                     type,
@@ -1284,7 +1287,8 @@
                                     offset:     $('#node-input-offset').typedInput('value'),
                                     multiplier: $('#node-input-offsetMultiplier').val(),
                                     next: 1,
-                                    days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked'))
+                                    days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked')),
+                                    noOffsetError: true
                                 });
                             }
                             $('#node-input-property').change();
@@ -1408,6 +1412,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getTimeData',
                                     config:     $nodeConfig.val(),
                                     type:       $('#node-input-timeAlt').typedInput('type'),
@@ -1416,7 +1421,8 @@
                                     offset:     $('#node-input-timeAltOffset').typedInput('value'),
                                     multiplier: $('#node-input-timeAltOffsetMultiplier').val(),
                                     next: 1,
-                                    days:       getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked'))
+                                    days:       getDaysStr($('#time-inject-timeAltDays input[type=checkbox]:checked')),
+                                    noOffsetError: true
                                 });
                             }
                         }
@@ -1529,6 +1535,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getOutDataData',
                                     config:     $nodeConfig.val(),
                                     type:       $('#node-input-addPayload1Value').typedInput('type'),
@@ -1536,7 +1543,8 @@
                                     format:     $('#node-input-addPayload1Format').val(),
                                     offsetType: $('#node-input-addPayload1Offset').typedInput('type'),
                                     offset:     $('#node-input-addPayload1Offset').typedInput('value'),
-                                    multiplier: $('#node-input-addPayload1OffsetMultiplier').val()
+                                    multiplier: $('#node-input-addPayload1OffsetMultiplier').val(),
+                                    noOffsetError: true
                                 });
                             }
                         }
@@ -1653,6 +1661,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getOutDataData',
                                     config:     $nodeConfig.val(),
                                     type:       $('#node-input-addPayload2Value').typedInput('type'),
@@ -1660,7 +1669,8 @@
                                     format:     $('#node-input-addPayload2Format').val(),
                                     offsetType: $('#node-input-addPayload2Offset').typedInput('type'),
                                     offset:     $('#node-input-addPayload2Offset').typedInput('value'),
-                                    multiplier: $('#node-input-addPayload2OffsetMultiplier').val()
+                                    multiplier: $('#node-input-addPayload2OffsetMultiplier').val(),
+                                    noOffsetError: true
                                 });
                             }
                         }
@@ -1772,6 +1782,7 @@
                                     const titleOrg = $div.attr('titleOrg');
                                     $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
                                 }, {
+                                    nodeId:     node.id,
                                     kind:       'getOutDataData',
                                     config:     $nodeConfig.val(),
                                     type:       $('#node-input-addPayload3Value').typedInput('type'),
@@ -1779,7 +1790,8 @@
                                     format:     $('#node-input-addPayload3Format').val(),
                                     offsetType: $('#node-input-addPayload3Offset').typedInput('type'),
                                     offset:     $('#node-input-addPayload3Offset').typedInput('value'),
-                                    multiplier: $('#node-input-addPayload3OffsetMultiplier').val()
+                                    multiplier: $('#node-input-addPayload3OffsetMultiplier').val(),
+                                    noOffsetError: true
                                 });
                             }
                         }

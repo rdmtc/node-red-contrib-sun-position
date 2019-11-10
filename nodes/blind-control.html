@@ -1599,13 +1599,15 @@
                             $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
                             _dialogGenHelpText();
                         }, {
-                            kind: 'getTimeData',
-                            config : $nodeConfig.val(),
-                            type: opType,
-                            value: $dialogTimeRegInput.typedInput('value'),
+                            nodeId:     node.id,
+                            kind:       'getTimeData',
+                            config:     $nodeConfig.val(),
+                            type:       opType,
+                            value:      $dialogTimeRegInput.typedInput('value'),
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
-                            offset: $dialogTimeRegOffset.typedInput('value'),
-                            multiplier: parseInt($dialogTimeRegMultiplier.val())
+                            offset:     $dialogTimeRegOffset.typedInput('value'),
+                            multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            noOffsetError: true
                         });
                         $dialogTimeMinInput.change();
                         $dialogTimeMaxInput.change();
@@ -1652,13 +1654,15 @@
                                 $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
                                 _dialogGenHelpText();
                             }, {
+                                nodeId: node.id,
                                 kind: 'getTimeData',
                                 config: $nodeConfig.val(),
                                 type: opType,
                                 value: $dialogTimeMinInput.typedInput('value'),
                                 offsetType: $dialogTimeMinOffset.typedInput('type'),
                                 offset: $dialogTimeMinOffset.typedInput('value'),
-                                multiplier: parseInt($dialogTimeMinMultiplier.val())
+                                multiplier: parseInt($dialogTimeMinMultiplier.val()),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -1704,13 +1708,15 @@
                                 $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
                                 _dialogGenHelpText();
                             }, {
+                                nodeId: node.id,
                                 kind: 'getTimeData',
                                 config: $nodeConfig.val(),
                                 type: opType,
                                 value: $dialogTimeMaxInput.typedInput('value'),
                                 offsetType: $dialogTimeMaxOffset.typedInput('type'),
                                 offset: $dialogTimeMaxOffset.typedInput('value'),
-                                multiplier: parseInt($dialogTimeMaxMultiplier.val())
+                                multiplier: parseInt($dialogTimeMaxMultiplier.val()),
+                                noOffsetError: true
                             });
                         }
                     });

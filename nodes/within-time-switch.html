@@ -523,6 +523,7 @@
 
                     const types = getTypes(node);
                     const selFields = getSelectFields();
+                    let onInit = true;
                     // #region initialize
                     /**
                     * update multiplier settings from a previous version
@@ -572,18 +573,21 @@
                             }
                         },
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             getBackendData(d => {
                                 const $div = $('#node-input-startTime-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-startTime').typedInput('type'),
                                 value:      $('#node-input-startTime').typedInput('value'),
                                 offsetType: $('#node-input-startOffset').typedInput('type'),
                                 offset:     $('#node-input-startOffset').typedInput('value'),
-                                multiplier: $('#node-input-startOffsetMultiplier').val()
+                                multiplier: $('#node-input-startOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -597,6 +601,7 @@
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             const type = $('#node-input-startOffset').typedInput('type');
                             if (type === types.Undefined.value) {
                                 $('#node-input-startOffsetMultiplier').prop('disabled', true);
@@ -629,18 +634,21 @@
                             }
                         },
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             getBackendData(d => {
                                 const $div = $('#node-input-endTime-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-endTime').typedInput('type'),
                                 value:      $('#node-input-endTime').typedInput('value'),
                                 offsetType: $('#node-input-endOffset').typedInput('type'),
                                 offset:     $('#node-input-endOffset').typedInput('value'),
-                                multiplier: $('#node-input-endOffsetMultiplier').val()
+                                multiplier: $('#node-input-endOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -654,6 +662,7 @@
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             const type = $('#node-input-endOffset').typedInput('type');
                             if (type === types.Undefined.value) {
                                 $('#node-input-endOffsetMultiplier').prop('disabled', true);
@@ -672,6 +681,7 @@
                         defaultValue: node.propertyStartValue || '' ,
                         types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                         onChange(_type, _value) {
+                            if (onInit) { return; }
                             const propCompare = $('#node-input-propertyStartCompare');
                             const propType = $('#node-input-propertyStart').typedInput('type');
                             if (propType === 'none') {
@@ -743,18 +753,21 @@
                             }
                         },
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             getBackendData(d => {
                                 const $div = $('#node-input-startTimeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-startTimeAlt').typedInput('type'),
                                 value:      $('#node-input-startTimeAlt').typedInput('value'),
                                 offsetType: $('#node-input-startTimeAltOffset').typedInput('type'),
                                 offset:     $('#node-input-startTimeAltOffset').typedInput('value'),
-                                multiplier: $('#node-input-startTimeAltOffsetMultiplier').val()
+                                multiplier: $('#node-input-startTimeAltOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -768,6 +781,7 @@
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'flow', 'global', 'env'],
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             const type = $('#node-input-startTimeAltOffset').typedInput('type');
                             if (type === types.Undefined.value) {
                                 $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
@@ -786,6 +800,7 @@
                         defaultValue: node.propertyEndValue || '' ,
                         types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             const propCompare = $('#node-input-propertyEndCompare');
                             const propType = $('#node-input-propertyEnd').typedInput('type');
 
@@ -858,18 +873,21 @@
                             }
                         },
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             getBackendData(d => {
                                 const $div = $('#node-input-endTimeAlt-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
+                                nodeId:     node.id,
                                 kind:       'getTimeData',
                                 config:     $nodeConfig.val(),
                                 type:       $('#node-input-endTimeAlt').typedInput('type'),
                                 value:      $('#node-input-endTimeAlt').typedInput('value'),
                                 offsetType: $('#node-input-endTimeAltOffset').typedInput('type'),
                                 offset:     $('#node-input-endTimeAltOffset').typedInput('value'),
-                                multiplier: $('#node-input-endTimeAltOffsetMultiplier').val()
+                                multiplier: $('#node-input-endTimeAltOffsetMultiplier').val(),
+                                noOffsetError: true
                             });
                         }
                     });
@@ -883,6 +901,7 @@
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'flow', 'global', 'env'],
                         onChange(_type, _value) {
+                            if ( onInit) { return; }
                             const type = $('#node-input-endTimeAltOffset').typedInput('type');
                             if (type === types.Undefined.value) {
                                 $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
@@ -910,6 +929,7 @@
                         $('.enhanced-row').show();
                     }
                     // #endregion Enhanced settings
+                    onInit = false;
                     $startTime.change();
                     $endTime.change();
                     $propertyStart.change();
