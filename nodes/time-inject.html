@@ -1268,30 +1268,35 @@
                                 const $div = $('#node-input-time-div');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', titleOrg);
+                                $('#node-input-property').change();
+                                return;
+                            } else if (type === types.TimeSunNow.value){
+                                $('.time-inject-row-offset').show();
+                                $('.time-inject-row-timeDays').hide();
+                                $('.time-inject-row-alt').show();
                             } else {
                                 $('.time-inject-row-offset').show();
                                 $('.time-inject-row-timeDays').show();
                                 $('.time-inject-row-alt').show();
-
-                                getBackendData(d => {
-                                    const $div = $('#node-input-time-div');
-                                    const titleOrg = $div.attr('titleOrg');
-                                    $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                                }, {
-                                    nodeId:     node.id,
-                                    kind:       'getTimeData',
-                                    config:     $nodeConfig.val(),
-                                    type,
-                                    value:      $('#node-input-time').typedInput('value'),
-                                    offsetType: $('#node-input-offset').typedInput('type'),
-                                    offset:     $('#node-input-offset').typedInput('value'),
-                                    multiplier: $('#node-input-offsetMultiplier').val(),
-                                    next: 1,
-                                    days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked')),
-                                    noOffsetError: true
-                                });
                             }
                             $('#node-input-property').change();
+                            getBackendData(d => {
+                                const $div = $('#node-input-time-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                nodeId:     node.id,
+                                kind:       'getTimeData',
+                                config:     $nodeConfig.val(),
+                                type,
+                                value:      $('#node-input-time').typedInput('value'),
+                                offsetType: $('#node-input-offset').typedInput('type'),
+                                offset:     $('#node-input-offset').typedInput('value'),
+                                multiplier: $('#node-input-offsetMultiplier').val(),
+                                next: 1,
+                                days:       getDaysStr($('#time-inject-timeDays input[type=checkbox]:checked')),
+                                noOffsetError: true
+                            });
                         }
                     });
                     initDaysCheckbox('#time-inject-timeDays', node.timeDays);

@@ -260,21 +260,72 @@ module.exports = function (RED) {
             sortable.sort((a, b) => {
                 return a.ts - b.ts;
             });
-            const nowTs = now.getTime();
+            const nowTs = now.getTime() + 300; // offset to get really next
             let last = sortable[0];
-            if (last.ts > nowTs) {
-                return [result['nadir'], last];
+            if (last.ts >= nowTs) {
+                return {
+                    next : {
+                        value : new Date(result['nadir'].value),
+                        name : result['nadir'].name,
+                        index : result['nadir'].index,
+                        pos : result['nadir'].pos,
+                        valid : result['nadir'].valid,
+                        elevation : result['nadir'].elevation
+                    },
+                    last : {
+                        value : new Date(last.value),
+                        name : last.name,
+                        index : last.index,
+                        pos : last.pos,
+                        valid : last.valid,
+                        elevation : last.elevation
+                    }
+                };
             }
             for (let index = 1; index < sortable.length; index++) {
                 const element = sortable[index];
                 if (last.ts < element.ts) {
                     if (element.ts > nowTs) {
-                        return [last, element];
+                        return {
+                            next : {
+                                value : new Date(element.value),
+                                name : element.name,
+                                index : element.index,
+                                pos : element.pos,
+                                valid : element.valid,
+                                elevation : element.elevation
+                            },
+                            last : {
+                                value : new Date(last.value),
+                                name : last.name,
+                                index : last.index,
+                                pos : last.pos,
+                                valid : last.valid,
+                                elevation : last.elevation
+                            }
+                        };
                     }
                     last = element;
                 }
             }
-            return [last, sortable[0]];
+            return {
+                next : {
+                    value : new Date(sortable[0].value),
+                    name : sortable[0].name,
+                    index : sortable[0].index,
+                    pos : sortable[0].pos,
+                    valid : sortable[0].valid,
+                    elevation : sortable[0].elevation
+                },
+                last : {
+                    value : new Date(last.value),
+                    name : last.name,
+                    index : last.index,
+                    pos : last.pos,
+                    valid : last.valid,
+                    elevation : last.elevation
+                }
+            };
         }
         /*******************************************************************************************************/
         /**
@@ -469,7 +520,17 @@ module.exports = function (RED) {
                 }
                 return null;
             } else if (data.type === 'pdsTimeNow') {
-                return Object.assign({}, this.getSunTimePrevNext(now));
+                result = Object.assign({}, this.getSunTimePrevNext(now));
+                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
+                result.next.value = hlp.normalizeDate(result.next.value, offsetX, data.multiplier, data.next, data.days);
+                if (data.format > 0) {
+                    return hlp.getFormattedDateOut(result.next, data.format, (this.tzOffset === 0), this.tzOffset);
+                }
+                if (this.tzOffset) {
+                    result.prev.value = hlp.convertDateTimeZone(result.prev.value, this.tzOffset).getTime();
+                    result.next.value = hlp.convertDateTimeZone(result.next.value, this.tzOffset).getTime();
+                }
+                return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
@@ -581,7 +642,10 @@ module.exports = function (RED) {
                     }
                     result.fix = true;
                 } else if (data.type === 'pdsTimeNow') {
-                    return this.getSunTimePrevNext(now)[1];
+                    result = this.getSunTimePrevNext(now).next;
+                    result.fix = true;
+                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
+                    result.value = hlp.addOffset(result.value, offsetX, data.multiplier, data.next); // , data.days);
                 } else if (data.type === 'str') {
                     result.fix = true;
                     if (data.format) {
