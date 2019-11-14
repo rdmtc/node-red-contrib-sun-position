@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 0.5.3: BugFix
+
+- general
+  - fix for #68
+
 #### 0.5.2: BugFix
 
 - general
