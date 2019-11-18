@@ -264,23 +264,17 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /** sun times configuration (angle, morning name, evening name) */
     const sunTimes = SunCalc.times = [
-        [6, 'goldenHourDawnEnd', 'goldenHourDuskStart', 10, 12], // GOLDEN_HOUR_2
-        [-0.3, 'sunriseEnd', 'sunsetStart', 9, 13], // SUNRISE_END
-        [-0.833, 'sunrise', 'sunset', 8, 14], // SUNRISE
-        [-1, 'goldenHourDawnStart', 'goldenHourDuskEnd', 7, 15], // GOLDEN_HOUR_1
-        [-4, 'blueHourDawnEnd', 'blueHourDuskStart', 6, 16], // BLUE_HOUR
-        [-6, 'civilDawn', 'civilDusk', 5, 17], // DAWN
-        [-8, 'blueHourDawnStart', 'blueHourDuskEnd', 4, 18], // BLUE_HOUR
-        [-12, 'nauticalDawn', 'nauticalDusk', 3, 19], // NAUTIC_DAWN
-        [-15, 'amateurDawn', 'amateurDusk', 2, 20],
-        [-18, 'astronomicalDawn', 'astronomicalDusk', 1, 21] // ASTRO_DAWN
+        [6, 'goldenHourDawnEnd', 'goldenHourDuskStart'], // GOLDEN_HOUR_2
+        [-0.3, 'sunriseEnd', 'sunsetStart'], // SUNRISE_END
+        [-0.833, 'sunrise', 'sunset'], // SUNRISE
+        [-1, 'goldenHourDawnStart', 'goldenHourDuskEnd'], // GOLDEN_HOUR_1
+        [-4, 'blueHourDawnEnd', 'blueHourDuskStart'], // BLUE_HOUR
+        [-6, 'civilDawn', 'civilDusk'], // DAWN
+        [-8, 'blueHourDawnStart', 'blueHourDuskEnd'], // BLUE_HOUR
+        [-12, 'nauticalDawn', 'nauticalDusk'], // NAUTIC_DAWN
+        [-15, 'amateurDawn', 'amateurDusk'],
+        [-18, 'astronomicalDawn', 'astronomicalDusk'] // ASTRO_DAWN
     ];
-
-    /** default time definitions */
-    const sunTimesDefault = SunCalc.timesDefault = {
-        solarNoon: 11,
-        nadir: 0
-    };
 
     /** alternate time names for backward compatibility */
     const sunTimesAlternate = SunCalc.timesAlternate = [
@@ -398,22 +392,20 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             solarNoon: {
                 value: noonVal,
                 ts: noonVal.getTime(),
-                pos: sunTimesDefault.solarNoon,
                 name: 'solarNoon',
                 // elevation: 90,
                 julian: Jnoon,
                 valid: !isNaN(Jnoon),
-                index: sunTimes.length
+                pos: sunTimes.length
             },
             nadir: {
                 value: nadirVal,
                 ts: nadirVal.getTime(),
-                pos: sunTimesDefault.nadir,
                 name: 'nadir',
                 // elevation: 270,
                 julian: Jnoon + 0.5,
                 valid: !isNaN(Jnoon),
-                index: (sunTimes.length * 2) + 1
+                pos: (sunTimes.length * 2) + 1
             }
         };
         for (let i = 0, len = sunTimes.length; i < len; i += 1) {
@@ -440,22 +432,20 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time[2]] = {
                 value: v1,
                 ts: v1.getTime(),
-                pos: time[4],
                 name: time[2],
                 elevation: sa,
                 julian: Jset,
                 valid,
-                index : len + i + 1
+                pos: len + i + 1
             };
             result[time[1]] = {
                 value: v2,
                 ts: v2.getTime(),
-                pos: time[3],
                 name: time[1],
                 elevation: sa, // (180 + (sa * -1)),
                 julian: Jrise,
                 valid,
-                index: len - i - 1
+                pos: len - i - 1
             };
         }
 
@@ -464,7 +454,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             for (let i = 0, len = sunTimesAlternate.length; i < len; i += 1) {
                 const time = sunTimesAlternate[i];
                 result[time[0]] = Object.assign({}, result[time[1]]);
-                result[time[0]].index = -2;
+                result[time[0]].deprecated = true;
+                result[time[0]].posOrg = result[time[0]].pos;
+                result[time[0]].pos = -2;
             }
         }
         return result;

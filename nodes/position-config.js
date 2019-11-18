@@ -240,10 +240,10 @@ module.exports = function (RED) {
          * @return {array} result object of sunTime
          */
         getSunTimePrevNext(now) {
-            const dayid = this._getDayId(now); // this._getUTCDayId(now);
+            let dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             let result;
-            // this.debug(`getSunTimePrevNext value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            this.debug(`getSunTimePrevNext now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
                 result = this.sunTimesToday; // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
@@ -253,7 +253,7 @@ module.exports = function (RED) {
             }
             const sortable = [];
             for (const key in result) {
-                if (result[key].index >=0) {
+                if (result[key].pos >= 0) {
                     sortable.push(result[key]);
                 }
             }
@@ -261,66 +261,79 @@ module.exports = function (RED) {
                 return a.ts - b.ts;
             });
             const nowTs = now.getTime() + 300; // offset to get really next
+            this.debug(`getSunTimePrevNext nowTs=${nowTs} sortable=${util.inspect(sortable, { colors: true, compact: 10, breakLength: Infinity })}`);
+
             let last = sortable[0];
             if (last.ts >= nowTs) {
                 return {
                     next : {
-                        value : new Date(result['nadir'].value),
-                        name : result['nadir'].name,
-                        index : result['nadir'].index,
-                        pos : result['nadir'].pos,
-                        valid : result['nadir'].valid,
-                        elevation : result['nadir'].elevation
-                    },
-                    last : {
                         value : new Date(last.value),
                         name : last.name,
-                        index : last.index,
                         pos : last.pos,
                         valid : last.valid,
                         elevation : last.elevation
+                    },
+                    last : {
+                        value : new Date(result['nadir'].value),
+                        name : result['nadir'].name,
+                        pos : result['nadir'].pos,
+                        valid : result['nadir'].valid,
+                        elevation : result['nadir'].elevation
                     }
                 };
             }
-            for (let index = 1; index < sortable.length; index++) {
-                const element = sortable[index];
-                if (last.ts < element.ts) {
-                    if (element.ts > nowTs) {
-                        return {
-                            next : {
-                                value : new Date(element.value),
-                                name : element.name,
-                                index : element.index,
-                                pos : element.pos,
-                                valid : element.valid,
-                                elevation : element.elevation
-                            },
-                            last : {
-                                value : new Date(last.value),
-                                name : last.name,
-                                index : last.index,
-                                pos : last.pos,
-                                valid : last.valid,
-                                elevation : last.elevation
-                            }
-                        };
-                    }
-                    last = element;
+            for (let i = 1; i < sortable.length; i++) {
+                const element = sortable[i];
+                if (nowTs < element.ts) {
+                    return {
+                        next : {
+                            value : new Date(element.value),
+                            name : element.name,
+                            pos : element.pos,
+                            valid : element.valid,
+                            elevation : element.elevation
+                        },
+                        last : {
+                            value : new Date(last.value),
+                            name : last.name,
+                            pos : last.pos,
+                            valid : last.valid,
+                            elevation : last.elevation
+                        }
+                    };
+                }
+                last = element;
+            }
+            dayid += 1;
+            if (dayid === today.dayId) {
+                result = this.sunTimesToday; // needed for a object copy
+            } else if (dayid === (today.dayId + 1)) {
+                result = this.sunTimesTomorow; // needed for a object copy
+            } else {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                result = sunCalc.getSunTimes(tomorrow, this.latitude, this.longitude, false); // needed for a object copy
+            }
+            const sortable2 = [];
+            for (const key in result) {
+                if (result[key].pos >=0) {
+                    sortable2.push(result[key]);
                 }
             }
+            sortable2.sort((a, b) => {
+                return a.ts - b.ts;
+            });
             return {
                 next : {
-                    value : new Date(sortable[0].value),
-                    name : sortable[0].name,
-                    index : sortable[0].index,
-                    pos : sortable[0].pos,
-                    valid : sortable[0].valid,
-                    elevation : sortable[0].elevation
+                    value : new Date(sortable2[0].value),
+                    name : sortable2[0].name,
+                    pos : sortable2[0].pos,
+                    valid : sortable2[0].valid,
+                    elevation : sortable2[0].elevation
                 },
                 last : {
                     value : new Date(last.value),
                     name : last.name,
-                    index : last.index,
                     pos : last.pos,
                     valid : last.valid,
                     elevation : last.elevation
@@ -440,7 +453,7 @@ module.exports = function (RED) {
          * @returns {number} float property
          */
         getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            _srcNode.debug('getFloatProp type='+type+' value='+value);
+            // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -487,7 +500,7 @@ module.exports = function (RED) {
          * @returns {*} output Data
          */
         getOutDataProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getOutDataProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
             let now = new Date(data.now);
             if (!hlp.isValidDate(data.now)) { now = new Date(); }
             let result = null;
@@ -521,14 +534,15 @@ module.exports = function (RED) {
                 return null;
             } else if (data.type === 'pdsTimeNow') {
                 result = Object.assign({}, this.getSunTimePrevNext(now));
+                _srcNode.debug(`getOutDataProp 1 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
+                result.last.value = hlp.normalizeDate(result.last.value, offsetX, data.multiplier, data.next, data.days);
                 result.next.value = hlp.normalizeDate(result.next.value, offsetX, data.multiplier, data.next, data.days);
-                if (data.format > 0) {
-                    return hlp.getFormattedDateOut(result.next, data.format, (this.tzOffset === 0), this.tzOffset);
-                }
+                _srcNode.debug(`getOutDataProp 2 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 if (this.tzOffset) {
-                    result.prev.value = hlp.convertDateTimeZone(result.prev.value, this.tzOffset).getTime();
+                    result.last.value = hlp.convertDateTimeZone(result.last.value, this.tzOffset).getTime();
                     result.next.value = hlp.convertDateTimeZone(result.next.value, this.tzOffset).getTime();
+                    _srcNode.debug(`getOutDataProp 3 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 }
                 return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
@@ -546,7 +560,7 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            // _srcNode.debug(`getOutDataProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
             return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
         /*******************************************************************************************************/
@@ -578,7 +592,7 @@ module.exports = function (RED) {
          * @returns {timePropResultType} value of the type input
          */
         getTimeProp(_srcNode, msg, data) {
-            _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,

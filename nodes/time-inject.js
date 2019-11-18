@@ -335,7 +335,6 @@ module.exports = function (RED) {
                     multiplier: config.payloadOffsetMultiplier,
                     next: true
                 });
-
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
                 } else if (value.error) {
