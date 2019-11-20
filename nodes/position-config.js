@@ -243,7 +243,7 @@ module.exports = function (RED) {
             let dayid = this._getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             let result;
-            this.debug(`getSunTimePrevNext now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTimePrevNext now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
                 result = this.sunTimesToday; // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
@@ -261,7 +261,7 @@ module.exports = function (RED) {
                 return a.ts - b.ts;
             });
             const nowTs = now.getTime() + 300; // offset to get really next
-            this.debug(`getSunTimePrevNext nowTs=${nowTs} sortable=${util.inspect(sortable, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTimePrevNext nowTs=${nowTs} sortable=${util.inspect(sortable, { colors: true, compact: 10, breakLength: Infinity })}`);
 
             let last = sortable[0];
             if (last.ts >= nowTs) {
