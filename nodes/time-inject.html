@@ -1199,6 +1199,9 @@
                                 plVType === types.DateSpecific.value) {
                                 $('.time-inject-row-payloadTimeFormat').show();
                                 $('.time-inject-row-payloadOffset').show();
+                            } else if (plVType ===  types.TimeSunNow.value) {
+                                $('.time-inject-row-payloadTimeFormat').hide();
+                                $('.time-inject-row-payloadOffset').show();
                             } else {
                                 $('.time-inject-row-payloadTimeFormat').hide();
                                 $('.time-inject-row-payloadOffset').hide();
@@ -1412,6 +1415,14 @@
                         ],
                         onChange (_type, _value) {
                             if (!$('.time-inject-row-timeAlt').is(':hidden')) {
+                                const type = $('#node-input-timeAlt').typedInput('type');
+                                if (type === types.TimeSunNow.value){
+                                    $('.time-inject-row-timeAltOffset').show();
+                                    $('.time-inject-row-timeAltDays').hide();
+                                } else {
+                                    $('.time-inject-row-timeAltOffset').show();
+                                    $('.time-inject-row-timeAltDays').show();
+                                }
                                 getBackendData(d => {
                                     const $div = $('#node-input-timeAlt-div');
                                     const titleOrg = $div.attr('titleOrg');
@@ -1478,8 +1489,14 @@
                                     $('.time-inject-row-addPayload1Offset').show();
                                     $('.time-inject-row-addPayload1Next').show();
                                     $('.time-inject-row-addPayload1days').show();
+                                } else if (plVType === types.TimeSunNow.value) {
+                                    $('.time-inject-row-addPayload1Format').hide();
+                                    $('.time-inject-row-addPayload1Offset').show();
+                                    $('.time-inject-row-addPayload1Next').hide();
+                                    $('.time-inject-row-addPayload1days').hide();
                                 } else if (plVType === types.DateSpecific.value ||
                                         plVType === types.DateEntered.value ||
+                                        plVType === types.DayOfMonth.value ||
                                         plVType === types.DayOfMonth.value) {
                                     $('.time-inject-row-addPayload1Format').show();
                                     $('.time-inject-row-addPayload1Offset').show();
@@ -1603,6 +1620,11 @@
                                     $('.time-inject-row-addPayload2Offset').show();
                                     $('.time-inject-row-addPayload2Next').show();
                                     $('.time-inject-row-addPayload2days').show();
+                                } else if (plVType === types.TimeSunNow.value) {
+                                    $('.time-inject-row-addPayload2Format').hide();
+                                    $('.time-inject-row-addPayload2Offset').show();
+                                    $('.time-inject-row-addPayload2Next').hide();
+                                    $('.time-inject-row-addPayload2days').hide();
                                 } else if (plVType === types.DateSpecific.value ||
                                         plVType === types.DateEntered.value ||
                                         plVType === types.DayOfMonth.value) {
@@ -1727,6 +1749,11 @@
                                     $('.time-inject-row-addPayload3Offset').show();
                                     $('.time-inject-row-addPayload3Next').show();
                                     $('.time-inject-row-addPayload3days').show();
+                                } else if (plVType === types.TimeSunNow.value) {
+                                    $('.time-inject-row-addPayload3Format').hide();
+                                    $('.time-inject-row-addPayload3Offset').show();
+                                    $('.time-inject-row-addPayload3Next').hide();
+                                    $('.time-inject-row-addPayload3days').hide();
                                 } else if (plVType === types.DateSpecific.value ||
                                         plVType === types.DateEntered.value ||
                                         plVType === types.DayOfMonth.value) {
