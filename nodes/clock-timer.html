@@ -3,59 +3,6 @@
 <script type="text/javascript">
     (function() {
         /**
-         * get a value
-         * @param {*} node - the node representation
-         * @param {string} name - name of the value
-         * @returns {*} the value of th element
-         */
-        function getVal(node,name) {
-            const v = $('#node-input-' + name).val();
-            if (v === undefined) {
-                return node[name];
-            }
-            return v;
-        }
-        /**
-         * count decimals
-         * @param {number} value - a floating point number
-         * @returns {number} number of decimals
-         */
-        function countDecimals(value) {
-            return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
-        }
-
-        /**
-         * get the min and maximum blind positions
-         * @param {*} node - the node representation
-         * @returns {object} object with property __min__ and __max__
-         */
-        function getMinMaxBlindPos(node) {
-            let max = getVal(node, 'blindOpenPos');
-            let min = getVal(node, 'blindClosedPos');
-            if (max < min) {
-                [min, max] = [max, min];
-            }
-            return { min, max };
-        }
-
-        /**
-         * validates a blind position
-         * @param {*} node - the node representation
-         * @param {number} v - the blind position to validate
-         * @returns {boolean} __true__ if the blind position is valid
-         */
-        function validateBlindPos(node, v) {
-            const n = parseFloat(v);
-            const inc = getVal(node, 'blindIncrement');
-            const mm = getMinMaxBlindPos(node);
-
-            return RED.validators.number(v) &&
-                    (v !== '') &&
-                    (n <= mm.max) &&
-                    (n >= mm.min) &&
-                    Number.isInteger(Number((n / inc).toFixed(countDecimals(inc) + 2)));
-        }
-        /**
          * save rules
          * @param {number} rules - output of the editableList
          * @returns {number} number of decimals
@@ -115,18 +62,6 @@
             const suffix = '';
 
             switch (t) {
-                case 'levelFixed': {
-                    if (!v) {
-                        return '?%';
-                    }
-                    if (v.includes('open')) {
-                        return node._('blind-control.typeOptions.100');
-                    }
-                    if (v.includes('closed')) {
-                        return node._('blind-control.typeOptions.0');
-                    }
-                    return String(v);
-                }
                 case 'jsonata':
                     v = String(v);
                     if (v.length < l) { return v + suffix; }
@@ -358,7 +293,7 @@
 
                     if (data.timeMinType && data.timeMinType !== 'none') {
                         result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                        result += node._('blind-control.label.ruleTimeMin');
+                        result += node._('clock-timer.label.ruleTimeMin');
                         result += '</span> <var>';
                         result += getValueLabel(node, data.timeMinType, data.timeMinValue);
                         result += '</var>';
@@ -370,7 +305,7 @@
                     }
                     if (data.timeMaxType && data.timeMaxType !== 'none') {
                         result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                        result += node._('blind-control.label.ruleTimeMax');
+                        result += node._('clock-timer.label.ruleTimeMax');
                         result += '</span> <var>';
                         result += getValueLabel(node, data.timeMaxType, data.timeMaxValue);
                         result += '</var>';
@@ -386,11 +321,11 @@
                 if (typeof data.levelType !== 'undefined') {
                     if (data.levelType === 'levelND') {
                         if (data.levelOp === 1) {
-                            result += node._('blind-control.label.ruleLevelResetMin');
+                            result += node._('clock-timer.label.ruleLevelResetMin');
                         } else if (data.levelOp === 2) {
-                            result += node._('blind-control.label.ruleLevelResetMax');
+                            result += node._('clock-timer.label.ruleLevelResetMax');
                         } else {
-                            result += node._('blind-control.label.ruleLevelND');
+                            result += node._('clock-timer.label.ruleLevelND');
                         }
                     } else {
                         result += data.levelOpText;
@@ -412,10 +347,10 @@
             return result;
         }
 
-        RED.nodes.registerType('blind-control', {
+        RED.nodes.registerType('clock-timer', {
             category: 'time+astro',
             color: '#FFCC66',
-            icon: 'blind-white.png',
+            icon: 'clock-timer-white.png',
             inputs: 1,
             outputs: 1,
             defaults: {
@@ -434,50 +369,6 @@
                 },
                 outputs: { value: '1' },
                 autoTrigger: { value: false },
-                // #region blind settings
-                blindIncrement: {
-                    value: 0.01,
-                    required: true,
-                    validate(v) {
-                        const n = parseFloat(v);
-                        const mm = getMinMaxBlindPos(this);
-
-                        return (RED.validators.number(v) &&
-                                (n <= mm.max) &&
-                                (n >= mm.min) );
-                    }
-                },
-                blindOpenPos: {
-                    value: 1.00,
-                    required: true,
-                    validate(v) {
-                        const n = parseFloat(v);
-                        return RED.validators.number(v) &&
-                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                            (n !== getVal(this, 'blindClosedPos'));
-                    }
-                },
-                blindClosedPos: {
-                    value: 0.00,
-                    required: true,
-                    validate(v) {
-                        const n = parseFloat(v);
-                        return RED.validators.number(v) &&
-                                (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                                (n !== getVal(this, 'blindOpenPos'));
-                    }
-                },
-                blindPosReverse: {
-                    value: false
-                },
-                blindPosDefault: {
-                    value: 'open (max)',
-                    validate: RED.validators.typedInput('blindPosDefaultType')
-                },
-                blindPosDefaultType: {
-                    value: 'levelFixed'
-                },
-                // #endregion blind settings
                 // #region overwrite settings
                 overwriteExpire: {
                     value: '',
@@ -492,247 +383,46 @@
                 rules: {
                     value: {}
                 },
-                // #endregion time settings
-                // #region sun settings
-                sunControlMode: {
-                    value: '0',
-                    required: true,
-                    validate(v) {
-                        const n = Number(v);
-                        return (RED.validators.number(v) && (n >= 0) && (n <= 2));
-                    }
-                },
-                sunFloorLength: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 1) ||
-                                (v === '') ||
-                                (v !== '' && RED.validators.number(v));
-                    }
-                },
-                sunMinAltitude: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        const n = parseFloat(v);
-                        return (Number(getVal(this, 'sunControlMode')) <= 1) ||
-                                (v === '') ||
-                                (RED.validators.number(v) && (n >= 0) && (n <= 90));
-                    }
-                },
-                sunMinDelta: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        const n = parseFloat(v);
-                        const mm = getMinMaxBlindPos(this);
-                        return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
-                                (v === '') ||
-                                (n <= mm.max) &&
-                                (n >= mm.min) &&
-                                (n >= getVal(this, 'blindIncrement')) );
-                    }
-                },
-                blindPosMin: {
-                    value: 'closed (min)',
-                    validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            RED.validators.typedInput('blindPosMinType')(v));
-                    }
-                },
-                blindPosMinType: {
-                    value: 'levelFixed'
-                },
-                blindPosMax: {
+                payloadDefault: {
                     value: 'open (max)',
+                    validate: RED.validators.typedInput('payloadDefaultType')
+                },
+                payloadDefaultType: {
+                    value: 'date'
+                },
+                payloadDefaultTimeFormat: {
+                    value: 0
+                },
+                payloadDefaultOffset: {
+                    value: 0,
                     validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
-                        RED.validators.typedInput('blindPosMaxType')(v));
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.payloadOffsetType === 'undefined') ||
+                            RED.validators.typedInput('payloadOffsetType')(v)
+                        );
                     }
                 },
-                blindPosMaxType: {
-                    value: 'levelFixed'
-                },
-                smoothTime: {
-                    value: '',
-                    validate(v) {
-                        const n = parseFloat(v);
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) || (v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
-                    }
-                },
-                // #endregion sun settings
-                // #region window settings
-                windowTop: {
-                    value: '',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (v !== '' && RED.validators.number(v));
-                    }
-                },
-                windowBottom: {
-                    value: '',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (v !== '' && RED.validators.number(v));
-                    }
-                },
-                windowAzimuthStart: {
-                    value: '',
-                    validate(v) {
-                        const n = Number(v);
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                                (n < getVal(this, 'windowAzimuthEnd')) );
-                    }
-                },
-                windowAzimuthEnd: {
-                    value: '',
-                    validate(v) {
-                        const n = Number(v);
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                                (n > getVal(this, 'windowAzimuthStart')) );
-                    }
-                },
-                // #endregion window settings
-                // #region oversteering settings
-                oversteerValue: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                RED.validators.typedInput('oversteerValueType')(v);
-                    }
-                },
-                oversteerValueType: {
+                payloadDefaultOffsetType: {
                     value: 'none'
                 },
-                oversteerCompare: {
-                    value: 'gte'
-                },
-                oversteerThreshold: {
-                    value: '',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (getVal(this, 'oversteerValueType') === 'none') ||
-                                RED.validators.typedInput('oversteerThresholdType')(v);
-                    }
-                },
-                oversteerThresholdType: {
-                    value: 'num'
-                },
-                oversteerBlindPos: {
-                    value: 'open (max)',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (getVal(this, 'oversteerValueType') === 'none') ||
-                                RED.validators.typedInput('oversteerBlindPosType')(v); // validateBlindPos(this, v);
-                    }
-                },
-                oversteerBlindPosType: {
-                    value: 'levelFixed'
-                },
-                oversteer2Value: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer2ValueType')(v);
-                    }
-                },
-                oversteer2ValueType: {
-                    value: 'none'
-                },
-                oversteer2Compare: {
-                    value: 'gte'
-                },
-                oversteer2Threshold: {
-                    value: '',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            (getVal(this, 'oversteer2ValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer2ThresholdType')(v);
-                    }
-                },
-                oversteer2ThresholdType: {
-                    value: 'num'
-                },
-                oversteer2BlindPos: {
-                    value: 'open (max)',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            (getVal(this, 'oversteer2ValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer2BlindPosType')(v);
-                    }
-                },
-                oversteer2BlindPosType: {
-                    value: 'levelFixed'
-                },
-                oversteer3Value: {
-                    value: '',
-                    required: false,
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            (getVal(this, 'oversteer2ValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer3ValueType')(v);
-                    }
-                },
-                oversteer3ValueType: {
-                    value: 'none'
-                },
-                oversteer3Compare: {
-                    value: 'gte'
-                },
-                oversteer3Threshold: {
-                    value: '',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            (getVal(this, 'oversteer2ValueType') === 'none') ||
-                            (getVal(this, 'oversteer3ValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer3ThresholdType')(v);
-                    }
-                },
-                oversteer3ThresholdType: {
-                    value: 'num'
-                },
-                oversteer3BlindPos: {
-                    value: 'open (max)',
-                    validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            (getVal(this, 'oversteerValueType') === 'none') ||
-                            (getVal(this, 'oversteer2ValueType') === 'none') ||
-                            (getVal(this, 'oversteer3ValueType') === 'none') ||
-                            RED.validators.typedInput('oversteer3BlindPosType')(v);
-                    }
-                },
-                oversteer3BlindPosType: {
-                    value: 'levelFixed'
+                payloadDefaultOffsetMultiplier: {
+                    value: 60000
                 }
-                // #endregion oversteering settings
+                // #endregion time settings
             },
             outputLabels() {
-                return [this._('blind-control.label.output1'), this._('blind-control.label.output2')];
+                return [this._('clock-timer.label.output1'), this._('clock-timer.label.output2')];
             },
             label() {
                 let suffix = '';
                 if (this.rules && (this.rules.length >0)) {
                     suffix += '⏲';
                 }
-                if (Number(this.sunControlMode) === 2) {
-                    suffix += '☀';
-                } else if (Number(this.sunControlMode) === 1) {
-                    suffix += '☃';
-                }
                 if (this.name) {
                     return this.name+' '+suffix;
                 }
-                const result = this._('blind-control.label.blind-control');
+                const result = this._('clock-timer.label.clock-timer');
                 if (this.topic && (this.topic.length + result.length <= 32)) {
                     return this.topic + ':' + result+' '+suffix;
                 }
@@ -741,7 +431,7 @@
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
             },
-            paletteLabel() { return this._('blind-control.label.blind-control-palette'); },
+            paletteLabel() { return this._('clock-timer.label.clock-timer-palette'); },
             oneditprepare() {
                 setTimeout(() => {
                     $('.is-to-show-initially').show();
@@ -750,69 +440,38 @@
                 $('.rdg-ui-btn').button();
 
                 this.outputs = this.outputs || 1;
-                this.sunControlMode = this.sunControlMode || 0;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
-
-                // #region Dialog
-                /**
-                const $dialogCtx = $('#dialog-select-context').dialog({
-                    autoOpen: false,
-                    height: 400,
-                    width: 600,
-                    modal: true
-                });
-                /* */
-                // #endregion Dialog
-
                 const setup = function(node) {
-                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime */
+                    console.log('clock-timer setup IN');
+                    /* global getTypes getSelectFields appendOptions autocomplete setupTInput initCombobox appendOptions getBackendData bdDateToTime */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
-
-                    types.LevelEntered = {
-                        value: 'num',
-                        label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),
-                        icon: 'red/images/typedInput/09.png',
-                        validate(v) { return validateBlindPos(this, v); }
-                    };
-                    types.LevelFix = {
-                        value: 'levelFixed',
-                        label: node._('node-red-contrib-sun-position/position-config:common.types.levelfix'),
-                        icon: 'icons/node-red-contrib-sun-position/inputTypeLevel.png',
-                        options: [{
-                            value: 'open (max)',
-                            label: node._('blind-control.typeOptions.100')
-                        }, {
-                            value: '75%',
-                            label: node._('blind-control.typeOptions.75')
-                        }, {
-                            value: '66%',
-                            label: node._('blind-control.typeOptions.66')
-                        }, {
-                            value: '50%',
-                            label: node._('blind-control.typeOptions.50')
-                        }, {
-                            value: '33%',
-                            label: node._('blind-control.typeOptions.33')
-                        }, {
-                            value: '25%',
-                            label: node._('blind-control.typeOptions.25')
-                        }, {
-                            value: '10%',
-                            label: node._('blind-control.typeOptions.10')
-                        }, {
-                            value: 'closed (min)',
-                            label: node._('blind-control.typeOptions.0')
-                        }]
-                    };
-                    types.LevelND= {
-                        value: 'levelND',
-                        label: node._('node-red-contrib-sun-position/position-config:common.types.levelND'),
-                        icon: 'icons/node-red-contrib-sun-position/inputTypeNone2.png',
-                        hasValue: false
-                    };
+                    /**
+                    * update multiplier settings from a previous version
+                    * @param {number} mp - the multiplier value
+                    * @param {string} name - the name of the element
+                    * @returns {number} the updated multiplier value
+                    */
+                    function multiplierUpdate(mp, name) {
+                        const field = $('#node-input-' + name);
+                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                        if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                            mp = 60000;
+                        } else {
+                            mp = parseFloat(mp);
+                            if (mp === 1) {
+                                mp = 1000;
+                            } else if (mp === 60) {
+                                mp = 60000;
+                            } else if (mp === 3600) {
+                                mp = 3600000;
+                            }
+                        }
+                        field.val(mp);
+                        return mp;
+                    }
                     /**
                      * save rules
                      * @param {*} node - the node representation
@@ -862,40 +521,105 @@
                         });
                         $('#time-control-' + name).change();
                     }
-                    /**
-                     * get the default level
-                     * @param {string} type - the type value
-                     * @param {string} value - value
-                     * @param {string} def - the default value
-                     * @returns {string} the default value for the level
-                    */
-                    function getDefLevel(type, value, def) {
-                        // console.log(`getDefLevel "${type}", "${value}", "${def}"`);
-                        if (value) {
-                            return value;
-                        }
-                        if (!type || type === types.LevelFix.value) {
-                            return def;
-                        }
-                        return def;
-                    }
                     // #endregion initialize
-                    // #region blind
+                    // #region payloadDefault
+                    console.log('clock-timer payloadDefault');
+                    if (node.payloadDefaultType === null) {
+                        if (node.payloadDefault === '') {
+                            node.payloadDefaultType = 'date';
+                        } else {
+                            node.payloadDefaultType = 'str';
+                        }
+                    } else if (node.payloadDefaultType === 'string' || node.payloadDefaultType === types.Undefined.value) {
+                        node.payloadDefaultType = 'str';
+                    }
+                    const $payloadDefault = setupTInput(node, {
+                        typeProp: 'payloadDefaultType',
+                        valueProp: 'payloadDefault',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'date',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ],
+                        onChange(_type, _value) {
+                            const plVType = $('#node-input-payloadDefault').typedInput('type');
+                            if (plVType ===  types.TimeEntered.value ||
+                                plVType === types.TimeSun.value ||
+                                plVType === types.TimeMoon.value ||
+                                plVType === types.DateSpecific.value) {
+                                $('.time-inject-row-payloadDefaultTimeFormat').show();
+                                $('.time-inject-row-payloadDefaultOffset').show();
+                            } else if (plVType ===  types.TimeSunNow.value) {
+                                $('.time-inject-row-payloadDefaultTimeFormat').hide();
+                                $('.time-inject-row-payloadDefaultOffset').show();
+                            } else {
+                                $('.time-inject-row-payloadDefaultTimeFormat').hide();
+                                $('.time-inject-row-payloadDefaultOffset').hide();
+                            }
+                            getBackendData(d => {
+                                const $div = $('#node-input-payloadDefault-div');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                            }, {
+                                nodeId:     node.id,
+                                kind:       'getOutDataData',
+                                config:     $nodeConfig.val(),
+                                type:       plVType,
+                                value:      $('#node-input-payloadDefault').typedInput('value'),
+                                format:     $('#node-input-payloadDefaultTimeFormat').val(),
+                                offsetType: $('#node-input-payloadDefaultOffset').typedInput('type'),
+                                offset:     $('#node-input-payloadDefaultOffset').typedInput('value'),
+                                multiplier: $('#node-input-payloadDefaultOffsetMultiplier').val(),
+                                noOffsetError: true
+                            });
+                        }
+                    });
+                    initCombobox(node, $('#node-input-payloadDefaultTimeFormatsel'), $('#node-input-payloadDefaultTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadDefaultTimeFormat || 0, 30);
+
+                    node.payloadDefaultOffsetMultiplier = multiplierUpdate(node.payloadDefaultOffsetMultiplier, 'payloadDefaultOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'payloadDefaultOffsetType',
+                        valueProp: 'payloadDefaultOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.payloadDefaultOffset === 0 || node.payloadDefaultOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-payloadDefaultOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-payloadDefaultOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-payloadDefaultOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+                    // #endregion payloadDefault
+                    // #region rules
+                    console.log('clock-timer rules');
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
                         return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }, 3600000);
-                    setupTInput(node, {
-                        typeProp: 'blindPosDefaultType',
-                        valueProp: 'blindPosDefault',
-                        width: 'calc(100% - 110px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.blindPosDefaultType, node.blindPosDefault, 'open (max)'), // types.LevelFix.options[0],
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-
-                    // #endregion blind
-                    // #region rules
 
                     /**
                      * resizes a rule container
@@ -945,39 +669,36 @@
                             data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
                             data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
 
-                            data.levelType = (data.levelType || types.LevelFix.value);
-                            data.levelValue = (data.levelValue || 'closed (min)');
-                            data.levelOp = (parseInt(data.levelOp) || 0);
-                            if ((data.levelOp === 3) || (data.levelOp === 4)) {
-                                data.levelType = types.LevelND.value;
-                                data.levelValue = '';
-                                data.levelOp = data.levelOp - 2;
-                            }
 
-                            data.levelOpText = data.levelOpText || node._('blind-control.label.ruleLevelAbs');
+                            data.payloadType = (data.payloadType || 'date');
+                            data.payloadValue = (data.payloadValue || '');
+                            data.payloadOffsetType = (data.payloadOffsetType || types.Undefined.value);
+                            data.payloadOffsetMultiplier = (parseInt(data.multiplier) || 60000);
+                            data.payloadFormat = (parseInt(data.payloadFormat) || 99);
+
                             $containerRow.data('ruleData', JSON.stringify(data));
                             $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
                             const $row0 = $('<div/>').appendTo($containerRow);
                             const $div = $('<div/>', {
-                                class: 'blind-rule-mainblock'
+                                class: 'clock-timer-rule-mainblock'
                             }).appendTo($row0);
                             $('<span />', {
                                 id: 'rule-name-'+containerIndex,
-                                class: 'blind-rule-name-span'
+                                class: 'clock-timer-rule-name-span'
                             }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
                             if (!data.description) {
                                 data.description = getRuleDescription(node, selFields, data);
                             }
                             $('<div />', {
                                 id: 'rule-description-'+containerIndex,
-                                class: 'blind-rule-description-span'
+                                class: 'clock-timer-rule-description-span'
                             }).append(data.description).appendTo( $div );
                             const finalspan1 = $('<span/>',{
-                                class:'blind-rule-finalspan'
+                                class:'clock-timer-rule-finalspan'
                             }).appendTo($row0);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
                             const $btn = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn'
+                                class: 'red-ui-button red-ui-button-small clock-timer-rule-editBtn'
                             }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
                             // $btn.button();
                             $btn.click(() => {
@@ -1025,7 +746,6 @@
                         prerules.each(function(i) {
                             const data = $(this).data('data');
                             data.index = i;
-                            data.levelOp = (Number(data.levelOp) || 0);
                             data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
                             data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
                             data.timeData = (parseFloat($(this).find('.node-input-rule-timeReg').attr('timedata')) || 0);
@@ -1046,13 +766,6 @@
                             if (top !== 0) {
                                 return top; // from before until; not timeLimited before timeLimited (1-3)
                             }
-                            // both same from/until type
-                            /*
-                            if ((a.levelOp > 2) && (b.levelOp <= 2)) { // time is different
-                                return 1; // a after b
-                            } else if ((b.levelOp > 2) && (a.levelOp <= 2)) {
-                                return -1; // a before b
-                            } */
 
                             const time = a.timeData - b.timeData;
                             if ((a.timeData !== 0) && (b.timeData !== 0) && (time !== 0)) { // time is different
@@ -1069,321 +782,7 @@
                     });
                     // #endregion Button
                     // #endregion rules
-                    // #region sun
-                    $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
-                        const val= Number($('#node-input-sunControlMode').val());
-                        if (val === 2) {
-                            $('.form-row-sunControlActive').show();
-                            $('.form-row-sunControlRestriction').show();
-                            $('.form-row-sunControlMaximization').hide();
-                        } else if (val === 1) {
-                            $('.form-row-sunControlActive').show();
-                            $('.form-row-sunControlRestriction').hide();
-                            $('.form-row-sunControlMaximization').show();
-                        } else {
-                            $('.form-row-sunControlActive').hide();
-                            $('.form-row-sunControlRestriction').hide();
-                            $('.form-row-sunControlMaximization').hide();
-                            $('.row-oversteerThreshold').hide();
-                            $('.row-oversteerBlindPos').hide();
-                            $('.row-oversteer2Value').hide();
-                            $('.row-oversteer2Threshold').hide();
-                            $('.row-oversteer2BlindPos').hide();
-                            $('.row-oversteer3Value').hide();
-                            $('.row-oversteer3Threshold').hide();
-                            $('.row-oversteer3BlindPos').hide();
-                        }
-                        $('#node-input-oversteerValue').change();
-                    });
-                    // blindPosMin "undefined", "", blindPosMax "levelFixed", ""
-                    // console.log(`blindPosMin "${node.blindPosMinType}", "${node.blindPosMin}", blindPosMax "${node.blindPosMaxType}", "${node.blindPosMax}"`);
-                    setupTInput(node, {
-                        typeProp: 'blindPosMinType',
-                        valueProp: 'blindPosMin',
-                        width: 'calc(100% - 120px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-                    setupTInput(node, {
-                        typeProp: 'blindPosMaxType',
-                        valueProp: 'blindPosMax',
-                        width: 'calc(100% - 120px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-
-                    setMultiplier(node, 'smoothTime', v => {
-                        const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
-                    }, 60000);
-                    // #endregion sun
-                    // #region oversteering
-                    // #region oversteer - 1
-                    setupTInput(node, {
-                        typeProp: 'oversteerValueType',
-                        valueProp: 'oversteerValue',
-                        width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
-                        defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
-                        onChange(_type, _value) {
-                            const sunControlMode = Number($('#node-input-sunControlMode').val());
-                            const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
-                            if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
-                                $('.row-oversteerBlindPos').hide();
-                                $('#node-input-oversteerCompare').hide();
-                                $('.row-oversteerThreshold').hide();
-                                $('#node-input-oversteerValue').typedInput('width','calc(100% - 110px)');
-                            } else if (oversteerValueType === 'jsonata' ||
-                                       oversteerValueType === types.PhaseMoon.value ||
-                                       oversteerValueType === types.MsgPayloadByTopic.value) {
-                                $('.row-oversteerBlindPos').show();
-                                $('#node-input-oversteerCompare').show();
-                                $('#node-input-oversteerCompare').attr('disabled', true);
-                                $('#node-input-oversteerCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $('.row-oversteerThreshold').hide();
-                                $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
-                            } else {
-                                $('.row-oversteerBlindPos').show();
-                                $('#node-input-oversteerCompare').show();
-                                $('#node-input-oversteerCompare').attr('disabled', false);
-                                $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
-                                const condOp = $('#node-input-oversteerCompare').val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-                                if (operatorCount > 1) {
-                                    $('.row-oversteerThreshold').show(); // condOpB
-                                } else {
-                                    $('.row-oversteerThreshold').hide(); // condOpB
-                                }
-                            }
-                            $('#node-input-oversteerThreshold').change();
-                            $('#node-input-oversteerBlindPos').change();
-                            $('#node-input-oversteer2Value').change();
-                        }
-                    });
-
-                    const $oversteerCompare = $('#node-input-oversteerCompare');
-                    appendOptions(node, $oversteerCompare, 'comparator');
-                    $oversteerCompare.val(node.oversteerCompare || 'gte');
-                    $oversteerCompare.change(() => { $('#node-input-oversteerValue').change(); });
-                    setupTInput(node, {
-                        typeProp: 'oversteerThresholdType',
-                        valueProp: 'oversteerThreshold',
-                        width: 'calc(100% - 120px)',
-                        defaultType: 'num',
-                        defaultValue: '',
-                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                    });
-                    setupTInput(node, {
-                        typeProp: 'oversteerBlindPosType',
-                        valueProp: 'oversteerBlindPos',
-                        width: 'calc(100% - 120px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.oversteerBlindPosType, node.oversteerBlindPos, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-                    // #endregion oversteer - 1
-                    // #region oversteer - 2
-                    setupTInput(node, {
-                        typeProp: 'oversteer2ValueType',
-                        valueProp: 'oversteer2Value',
-                        width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
-                        defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
-                        onChange(_type, _value) {
-                            const sunControlMode = Number($('#node-input-sunControlMode').val());
-                            const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
-                            const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
-
-                            if ((oversteer1ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
-                                // $('#node-input-oversteer2Value').typedInput('value','');
-                                $('#node-input-oversteer2Value').typedInput('type', types.Undefined.value);
-                                $('.row-oversteer2Value').hide();
-                                $('.row-oversteer2Threshold').hide();
-                                $('#node-input-oversteer2Compare').hide();
-                                $('.row-oversteer2BlindPos').hide();
-                            } else if (oversteer2ValueType === types.Undefined.value) {
-                                $('.row-oversteer2Value').show();
-                                $('.row-oversteer2BlindPos').hide();
-                                $('#node-input-oversteer2Compare').hide();
-                                $('.row-oversteer2Threshold').hide();
-                                $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 110px)');
-                            } else if (oversteer2ValueType === 'jsonata' ||
-                                       oversteer2ValueType === types.PhaseMoon.value ||
-                                       oversteer2ValueType === types.MsgPayloadByTopic.value) {
-                                $('.row-oversteer2Value').show();
-                                $('.row-oversteer2BlindPos').show();
-                                $('#node-input-oversteer2Compare').show();
-                                $('#node-input-oversteer2Compare').attr('disabled', true);
-                                $('#node-input-oversteer2Compare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $('.row-oversteer2Threshold').hide();
-                                $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 220px)');
-                            } else {
-                                $('.row-oversteer2Value').show();
-                                $('.row-oversteer2BlindPos').show();
-                                $('#node-input-oversteer2Compare').show();
-                                $('#node-input-oversteer2Compare').attr('disabled', false);
-                                $('#node-input-oversteer2Value').typedInput('width', 'calc(100% - 220px)');
-                                const condOp = $('#node-input-oversteer2Compare').val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-                                if (operatorCount > 1) {
-                                    $('.row-oversteer2Threshold').show(); // condOpB
-                                } else {
-                                    $('.row-oversteer2Threshold').hide(); // condOpB
-                                }
-                            }
-                            $('#node-input-oversteer2Threshold').change();
-                            $('#node-input-oversteer2BlindPos').change();
-                            $('#node-input-oversteer3Value').change();
-                        }
-                    });
-
-                    const $oversteer2Compare = $('#node-input-oversteer2Compare');
-                    appendOptions(node, $oversteer2Compare, 'comparator');
-                    $oversteer2Compare.val(node.oversteer2Compare || 'gte');
-                    $oversteer2Compare.change(() => { $('#node-input-oversteer2Value').change(); });
-                    setupTInput(node, {
-                        typeProp: 'oversteer2ThresholdType',
-                        valueProp: 'oversteer2Threshold',
-                        width: 'calc(100% - 120px)',
-                        defaultType: 'num',
-                        defaultValue: '',
-                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                    });
-                    setupTInput(node, {
-                        typeProp: 'oversteer2BlindPosType',
-                        valueProp: 'oversteer2BlindPos',
-                        width: 'calc(100% - 120px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.oversteer2BlindPosType, node.oversteer2BlindPos, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-                    // #endregion oversteer - 2
-                    // #region oversteer - 3
-                    setupTInput(node, {
-                        typeProp: 'oversteer3ValueType',
-                        valueProp: 'oversteer3Value',
-                        width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
-                        defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
-                        onChange(_type, _value) {
-                            const sunControlMode = Number($('#node-input-sunControlMode').val());
-                            const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
-                            const oversteer3ValueType = $('#node-input-oversteer3Value').typedInput('type');
-
-                            if ((oversteer2ValueType === types.Undefined.value) || (sunControlMode <= 0)) {
-                                // $('#node-input-oversteer3Value').typedInput('value','');
-                                $('#node-input-oversteer3Value').typedInput('type', types.Undefined.value);
-                                $('.row-oversteer3Value').hide();
-                                $('.row-oversteer3Threshold').hide();
-                                $('#node-input-oversteer3Compare').hide();
-                                $('.row-oversteer3BlindPos').hide();
-                            } else if (oversteer3ValueType === types.Undefined.value) {
-                                $('.row-oversteer3Value').show();
-                                $('.row-oversteer3BlindPos').hide();
-                                $('#node-input-oversteer3Compare').hide();
-                                $('.row-oversteer3Threshold').hide();
-                                $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 110px)');
-                            } else if (oversteer3ValueType === 'jsonata' ||
-                                       oversteer3ValueType === types.PhaseMoon.value ||
-                                       oversteer3ValueType === types.MsgPayloadByTopic.value) {
-                                $('.row-oversteer3Value').show();
-                                $('.row-oversteer3BlindPos').show();
-                                $('#node-input-oversteer3Compare').show();
-                                $('#node-input-oversteer3Compare').attr('disabled', true);
-                                $('#node-input-oversteer3Compare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $('.row-oversteer3Threshold').hide();
-                                $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
-                            } else {
-                                $('.row-oversteer3Value').show();
-                                $('.row-oversteer3BlindPos').show();
-                                $('#node-input-oversteer3Compare').show();
-                                $('#node-input-oversteer3Compare').attr('disabled', false);
-                                $('#node-input-oversteer3Value').typedInput('width', 'calc(100% - 220px)');
-                                const condOp = $('#node-input-oversteer3Compare').val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-                                if (operatorCount > 1) {
-                                    $('.row-oversteer3Threshold').show(); // condOpB
-                                } else {
-                                    $('.row-oversteer3Threshold').hide(); // condOpB
-                                }
-                            }
-                            $('#node-input-oversteer3Threshold').change();
-                            $('#node-input-oversteer3BlindPos').change();
-                        }
-                    });
-
-                    const $oversteer3Compare = $('#node-input-oversteer3Compare');
-                    appendOptions(node, $oversteer3Compare, 'comparator');
-                    $oversteer3Compare.val(node.oversteer3Compare || 'gte');
-                    $oversteer3Compare.change(() => { $('#node-input-oversteer3Value').change(); });
-                    setupTInput(node, {
-                        typeProp: 'oversteer3ThresholdType',
-                        valueProp: 'oversteer3Threshold',
-                        width: 'calc(100% - 120px)',
-                        defaultType: 'num',
-                        defaultValue: '',
-                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                    });
-                    setupTInput(node, {
-                        typeProp: 'oversteer3BlindPosType',
-                        valueProp: 'oversteer3BlindPos',
-                        width: 'calc(100% - 120px)',
-                        defaultType: types.LevelFix.value,
-                        defaultValue: getDefLevel(node.oversteer3BlindPosType, node.oversteer3BlindPos, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
-                    });
-                    // #endregion oversteer - 3
-                    // #endregion oversteering
                     // #region Enhanced settings
-                    $('.spinner-noLimit').spinner();
-                    $('.spinner-angle').spinner({
-                        max: 360,
-                        min: -360,
-                        step: 1
-                    });
-                    $('.spinner-altitude').spinner({
-                        max: 90,
-                        min: 0,
-                        step: 1
-                    });
-                    $('.spinner-level').spinner({
-                        max: 100,
-                        min: 0,
-                        step: 0.01,
-                        numberFormat: 'n'
-                    });
                     $('.spinner-time').spinner({
                         max: 1439,
                         min: 0,
@@ -1391,6 +790,7 @@
                     });
                     // #endregion Enhanced settings
                     // fill rules
+                    console.log('clock-timer fill rules');
                     if (node.rules) {
                         for (let i = 0; i < node.rules.length; i++) {
                             const rule = node.rules[i];
@@ -1398,14 +798,14 @@
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
                         setTimeout(() => {
-                            $('#node-input-sunControlMode').change();
+                            $payloadDefault.change();
                             resizeContainer();
                         }, 1500);
                     }
 
                     // #region dialog
                     const $dialog = $('#dialog-edit-rule').dialog({
-                        title: node._('blind-control.label.dialogtitle'),
+                        title: node._('clock-timer.label.dialogtitle'),
                         autoOpen: false,
                         resizable: true,
                         height: Math.min(900, $(window).height() * 0.8),
@@ -1432,7 +832,7 @@
                         }
                     });
 
-                    const $dialogName = $dialog.find('#dlg-ip-blindctl-rule-name');
+                    const $dialogName = $dialog.find('#dlg-ip-clktimctl-rule-name');
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
@@ -1441,16 +841,16 @@
                      * Build the dialog
                      */
                     // #region dialogCond1
-                    const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
+                    const $dialogCondAOperand = $dialog.find('#dlg-ip-clktimctl-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
                         types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
-                    const $dialogCondAOperator = $dialog.find('#dlg-ip-blindctl-rule-condAOperator');
+                    const $dialogCondAOperator = $dialog.find('#dlg-ip-clktimctl-rule-condAOperator');
                     appendOptions(node, $dialogCondAOperator, 'comparator');
-                    const $dialogCondBOperand = $dialog.find('#dlg-ip-blindctl-rule-condBOperand');
+                    const $dialogCondBOperand = $dialog.find('#dlg-ip-clktimctl-rule-condBOperand');
                     $dialogCondBOperand.typedInput({
                         default: 'num',
                         types: ['num', 'str', 'bool', 'flow', 'global', 'env']
@@ -1458,21 +858,21 @@
                     $dialogCondBOperand.typedInput('width', '70%');
                     // #endregion dialogCond1
                     // #region dialogCond2
-                    const $dialogCond2LogOperator = $dialog.find('#dlg-ip-blindctl-rule-cond2LogOperator');
-                    $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleCondNone')));
-                    $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleCondOr')));
-                    $dialogCond2LogOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleCondAnd')));
+                    const $dialogCond2LogOperator = $dialog.find('#dlg-ip-clktimctl-rule-cond2LogOperator');
+                    $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleCondNone')));
+                    $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleCondOr')));
+                    $dialogCond2LogOperator.append($('<option></option>').val(2).text(node._('clock-timer.label.ruleCondAnd')));
 
-                    const $dialogCond2AOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperand');
+                    const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktimctl-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
                         types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
-                    const $dialogCond2AOperator = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperator');
+                    const $dialogCond2AOperator = $dialog.find('#dlg-ip-clktimctl-rule-cond2AOperator');
                     appendOptions(node, $dialogCond2AOperator, 'comparator');
-                    const $dialogCond2BOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2BOperand');
+                    const $dialogCond2BOperand = $dialog.find('#dlg-ip-clktimctl-rule-cond2BOperand');
                     $dialogCond2BOperand.typedInput({
                         default: 'num',
                         types: ['num', 'str', 'bool', 'flow', 'global', 'env']
@@ -1480,18 +880,21 @@
                     $dialogCond2BOperand.typedInput('width', '70%');
                     // #endregion dialogCond2
                     // #region dialogTimeReg
-                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-blindctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
+                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-clktimctl-rule-timeReg-operator');
+                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleTimeUntil')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleTimeFrom')));
 
-                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-blindctl-rule-timeReg');
+                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-clktimctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
-                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeReg');
+                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeReg');
+                    appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -1505,19 +908,19 @@
                         $dialogTimeRegInput.change();
                     });
                     $dialogTimeRegOffset.typedInput('width', '40%');
-
-                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeReg');
-                    appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeReg
                     // #region dialogTimeMin
-                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-blindctl-rule-timeMin');
+                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-clktimctl-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
-                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMin');
+                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeMin');
+                    appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -1531,19 +934,19 @@
                         $dialogTimeMinInput.change();
                     });
                     $dialogTimeMinOffset.typedInput('width', '40%');
-
-                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMin');
-                    appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeMin
                     // #region dialogTimeMax
-                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-blindctl-rule-timeMax');
+                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-clktimctl-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 
-                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMax');
+                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeMax');
+                    appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -1557,22 +960,54 @@
                         $dialogTimeMaxInput.change();
                     });
                     $dialogTimeMaxOffset.typedInput('width', '40%');
-
-                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMax');
-                    appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeMax
-                    // #region dialogLevel
-                    const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
-                    $dialogLevel.typedInput({
-                        default: types.LevelFix.value,
-                        types: [types.LevelFix, types.LevelEntered, types.LevelND,'msg', 'flow', 'global', 'env']
+                    // #region dialogPayload
+                    const $dialogPayload = $dialog.find('#dlg-ip-clktimctl-rule-payload');
+                    $dialogPayload.typedInput({
+                        default: 'date',
+                        types: [
+                            'date',
+                            types.DateSpecific,
+                            types.TimeEntered,
+                            types.DateEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            types.DayOfMonth,
+                            'flow',
+                            'global',
+                            'str',
+                            'num',
+                            'bool',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase
+                        ]
                     });
-                    $dialogLevel.typedInput('width', '40%');
-                    const $dialogLevelOperator = $dialog.find('#dlg-ip-blindctl-rule-level-operator');
-                    $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
-                    $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
-                    $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
-                    // #endregion dialogLevel
+                    $dialogPayload.typedInput('width', '40%');
+
+                    const $dialogPayloadOffset = $dialog.find('#dlg-ip-clktimctl-rule-payloadOffset');
+                    $dialogPayloadOffset.typedInput({
+                        default: types.Undefined.value,
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
+                    }).change(() => { $dialogPayload.change(); });
+                    $dialogPayloadOffset.typedInput('width', '40%');
+
+                    const $dialogPayloadMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-payloadOffsetMultiplier');
+                    appendOptions(node, $dialogPayloadMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-clktimctl-rule-payloadTimeFormat');
+                    const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-clktimctl-rule-payloadTimeFormatsel');
+                    const $dialogTopic = $dialog.find('#dlg-ip-clktimctl-rule-topic');
+                    // console.log('[IN initCombobox] node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+                    appendOptions(node, $dialogPayloadTimeFormatsel, 'outputFormats');
+                    autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
+                    // #endregion dialogPayload
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -1643,7 +1078,6 @@
                         $dialogTimeMinInput.change();
                         $dialogTimeMaxInput.change();
                     });
-
                     $dialogTimeMinInput.change(() => {
                         if (dialogDataOnLoading) { return; }
                         const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1697,7 +1131,6 @@
                             });
                         }
                     });
-
                     $dialogTimeMaxInput.change(() => {
                         if (dialogDataOnLoading) { return; }
                         const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1847,6 +1280,56 @@
                     });
                     $dialogCond2LogOperator.change(() => { $dialogCond2AOperand.change(); });
                     $dialogCond2AOperator.change(() => { $dialogCond2AOperand.change(); });
+
+                    $dialogPayload.change(() => {
+                        const plVType = $dialogPayload.typedInput('type');
+                        if (plVType ===  types.TimeEntered.value ||
+                            plVType === types.TimeSun.value ||
+                            plVType === types.TimeMoon.value ||
+                            plVType === types.DateSpecific.value) {
+                            $('#dialog-row-payloadTimeFormat').show();
+                            $('#dialog-row-payloadOffset').show();
+                        } else if (plVType ===  types.TimeSunNow.value) {
+                            $('#dialog-row-payloadTimeFormat').hide();
+                            $('#dialog-row-payloadOffset').show();
+                        } else {
+                            $('#dialog-row-payloadTimeFormat').hide();
+                            $('#dialog-row-payloadOffset').hide();
+                        }
+                        getBackendData(d => {
+                            const $div = $('#dialog-row-payload');
+                            const titleOrg = $div.attr('titleOrg');
+                            $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                        }, {
+                            nodeId:     node.id,
+                            kind:       'getOutDataData',
+                            config:     $nodeConfig.val(),
+                            type:       plVType,
+                            value:      $('#dlg-ip-clktimctl-rule-payload').typedInput('value'),
+                            format:     $('#dlg-ip-clktimctl-rule-payloadTimeFormat').val(),
+                            offsetType: $('#dlg-ip-clktimctl-rule-payloadOffset').typedInput('type'),
+                            offset:     $('#dlg-ip-clktimctl-rule-payloadOffset').typedInput('value'),
+                            multiplier: $('#dlg-ip-clktimctl-rule-payloadOffsetMultiplier').val(),
+                            noOffsetError: true
+                        });
+                    });
+
+                    $dialogPayloadTimeFormatsel.on('change focus focusout', (_type, _value) => {
+                        if (Number($dialogPayloadTimeFormatsel.val()) === 99) {
+                            $dialogPayloadTimeFormatsel.css({ width: '100px' });
+                            const width = (205 + 30);
+                            $dialogPayloadTimeFormat.css({ width: 'calc(100% - ' + width + 'px)' });
+                            $dialogPayloadTimeFormat.show();
+                            if (!isNaN($dialogPayloadTimeFormat.val())) {
+                                $dialogPayloadTimeFormat.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.default'));
+                            }
+                        } else {
+                            $dialogPayloadTimeFormat.hide();
+                            const width = (100 + 30);
+                            $dialogPayloadTimeFormatsel.css({ width: 'calc(100% - ' + width + 'px)' });
+                            $dialogPayloadTimeFormat.val($dialogPayloadTimeFormatsel.val());
+                        }
+                    });
                     // #endregion dialogChange
                     // #region dialogload & save
                     /**
@@ -1869,14 +1352,14 @@
                      * generates the help text of the dialog
                      */
                     function _dialogGenHelpText() {
-                        $('#dlg-txt-blindctl-rule-descr').html('');
+                        $('#dlg-txt-clktimctl-rule-descr').html('');
                         if (dialogAddData.timeout) {
                             clearTimeout(dialogAddData.timeout);
                             dialogAddData.timeout = null;
                         }
                         dialogAddData.timeout = setTimeout(() => {
                             dialogAddData.timeout = null;
-                            $('#dlg-txt-blindctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
+                            $('#dlg-txt-clktimctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
                         },1000);
                     }
                     /**
@@ -1912,10 +1395,18 @@
                             setTI($dialogTimeMaxInput, data.timeMaxValue, data.timeMaxType);
                             setTI($dialogTimeMaxOffset, data.offsetMaxValue, data.offsetMaxType);
 
-                            $dialogLevelOperator.val(data.levelOp || 0);
-                            setTI($dialogLevel, data.levelValue, data.levelType);
-                            $dialogLevel.typedInput('value',data.levelValue);
-                            $dialogLevel.typedInput('type',data.levelType);
+                            $dialogPayloadMultiplier.val(data.payloadOffsetMultiplier || 60000);
+                            setTI($dialogPayload, data.payloadValue, data.payloadType);
+                            setTI($dialogPayloadOffset, data.payloadOffsetValue, data.payloadOffsetType);
+                            const valueNum = Number(data.payloadFormat);
+                            if (isNaN(valueNum)) {
+                                $dialogPayloadTimeFormatsel.val(99);
+                                $dialogPayloadTimeFormat.val(data.payloadFormat);
+                            } else {
+                                $dialogPayloadTimeFormatsel.val(valueNum);
+                            }
+                            $dialogTopic.val(data.topic);
+
                             _dialogGenHelpText();
 
                             dialogDataOnLoading = false;
@@ -1957,10 +1448,13 @@
                             offsetMaxType: $dialogTimeMaxOffset.typedInput('type'),
                             multiplierMax:  parseInt($dialogTimeMaxMultiplier.val()),
 
-                            levelValue: $dialogLevel.typedInput('value'),
-                            levelType: $dialogLevel.typedInput('type'),
-                            levelOp: parseInt($dialogLevelOperator.val()),
-                            levelOpText: $dialogLevelOperator.find('option:selected').text(),
+                            payloadValue: $dialogPayload.typedInput('value'),
+                            payloadType: $dialogPayload.typedInput('type'),
+                            payloadOffsetValue: $dialogPayloadOffset.typedInput('value'),
+                            payloadOffsetType: $dialogPayloadOffset.typedInput('type'),
+                            payloadOffsetMultiplier: parseInt($dialogPayloadMultiplier.val()),
+                            payloadFormat: $dialogPayloadTimeFormat.val(),
+                            topic: $dialogTopic.val(),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2024,12 +1518,6 @@
                     $('#node-input-overwriteExpire').val(val);
                 }
 
-                const smoothTime = parseFloat($('#time-control-smoothTime').val());
-                if (isNaN(smoothTime) || smoothTime === '' || smoothTime === 0) {
-                    $('#node-input-smoothTime').val('');
-                } else {
-                    $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
-                }
                 $('#dialog-edit-rule').dialog('destroy').remove();
             },
             oneditcancel() {
@@ -2041,56 +1529,54 @@
         });
     })();</script>
 
-<script type="text/html" data-template-name="blind-control">
+<script type="text/html" data-template-name="clock-timer">
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" class="row-full-width" id="node-input-positionConfig">
     </div>
     <hr>
-    <!-- blind ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-window-maximize"></i> <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span></span></span>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
-        <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindIncrement" data-i18n="[placeholder]blind-control.placeholder.blindIncrement"/>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindOpenPos">
-        <label for="node-input-blindOpenPos"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPos"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPos" data-i18n="[placeholder]blind-control.placeholder.blindOpenPos"/>
-    </div>
-    <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindClosedPos">
-        <label for="node-input-blindClosedPos"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPos"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPos" data-i18n="[placeholder]blind-control.placeholder.blindClosedPos"/>
-    </div>
-    <hr>
     <!-- time ######################################################################## -->
     <div class="is-to-show-initially">
-        <span><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span></span>
+        <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span></span>
         <div class="form-row node-input-rule-container-row row-full-width">
             <ol id="node-input-rule-container"></ol>
-            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
-            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
-            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="clock-timer.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="clock-timer.label.btnSort"></span></button>
         </div>
     </div>
-
     <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
+        <span data-i18n="[html]clock-timer.text.payloadDefault" class="row-full-width"></span>
     </div>
-    <div class="form-row block-noindent is-to-show-initially" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
-        <label for="node-input-blindPosDefault"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelDefault"></span></label>
-        <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
-        <input type="hidden" id="node-input-blindPosDefaultType">
+    <div class="form-row block-noindent is-to-show-initially" id="node-input-payloadDefault-div" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
+        <label for="node-input-payloadDefault"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
+        <input type="text" id="node-input-payloadDefault" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
+        <input type="hidden" id="node-input-payloadDefaultType">
+    </div>
+    <div class="form-row block-indent1 is-initial-hidden" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
+        <label for="node-input-payloadDefaultOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
+        <input id="node-input-payloadDefaultOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset">
+        <input type="hidden" id="node-input-payloadDefaultOffsetType">
+        <select id="node-input-payloadDefaultOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent1 is-initial-hidden" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
+        <label for="node-input-payloadDefaultTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
+        <select id="node-input-payloadDefaultTimeFormatsel">
+        </select>
+        <input type="text" id="node-input-payloadDefaultTimeFormat">
+    </div>
+    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
     </div>
     <hr>
-    <!-- overwrite blind ######################################################################## -->
+    <!-- overwrite ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
+        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span></span>
     </div>
-    <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
-        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
-        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value=""/>
+    <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]clock-timer.placeholder.overwriteExpire">
+        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.overwriteExpire"></span></label>
+        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]clock-timer.placeholder.overwriteExpire" value=""/>
         <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
             <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
@@ -2099,170 +1585,27 @@
         <input type="hidden" id="node-input-overwriteExpire">
     </div>
     <hr>
-    <!-- sun ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-            <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
-            <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
-        <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
-        <select id="node-input-sunControlMode" class="row-full-width">
-            <option value="0" data-i18n="[html]blind-control.label.sunControlOff"></option>
-            <option value="1" data-i18n="[html]blind-control.label.sunControlMaximize"></option>
-            <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
-        </select>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-noindent">
-        <span data-i18n="[html]blind-control.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlMaximization block-noindent">
-        <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <hr class="form-row-sunControlActive" >
-    <!-- window ######################################################################## -->
-    <div class="form-row form-row-sunControlActive block-noindent">
-        <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
-        <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
-        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
-        <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
-        <input type="text" class="spinner-angle row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-noindent">
-        <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
-        <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowTop" data-i18n="[placeholder]blind-control.placeholder.windowTop"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowBottom">
-        <label for="node-input-windowBottom"><i class="fa fa-arrow-down"></i> <span data-i18n="blind-control.label.windowBottom"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-windowBottom" data-i18n="[placeholder]blind-control.placeholder.windowBottom"/>
-    </div>
-     <!-- sun ######################################################################## -->
-     <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-        <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
-        <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
-        <input type="text" class="spinner-noLimit row-full-width" id="node-input-sunFloorLength" data-i18n="[placeholder]blind-control.placeholder.sunFloorLength"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-        <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinAltitude">
-        <label for="node-input-sunMinAltitude"><i class="fa fa-arrows-v"></i> <span data-i18n="blind-control.label.sunMinAltitude"></span></label>
-        <input type="text" class="spinner-altitude row-full-width" id="node-input-sunMinAltitude" data-i18n="[placeholder]blind-control.placeholder.sunMinAltitude"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
-        <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
-        <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
-    </div>
-    <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
-        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-        </select>
-        <input type="hidden" id="node-input-smoothTime">
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
-        <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
-        <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
-        <input type="hidden" id="node-input-blindPosMinType">
-    </div>
-    <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMax">
-        <label for="node-input-blindPosMax"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMax"></span></label>
-        <input type="text" id="node-input-blindPosMax" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMax"/>
-        <input type="hidden" id="node-input-blindPosMaxType">
-    </div>
-    <hr class="form-row-sunControlActive" >
-    <!-- oversteering ######################################################################## -->
-    <div class="form-row form-row-sunControlActive block-noindent">
-        <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
-    </div>
-    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteerValue"> <i class="fa fa-thermometer-three-quarters fa-fw"></i> </i> <span data-i18n="blind-control.label.oversteerValue"></span></label>
-        <input type="text" id="node-input-oversteerValue" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteerValueType">
-        <select id="node-input-oversteerCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteerThreshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteerThreshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteerThreshold"></span></label>
-        <input type="text" id="node-input-oversteerThreshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteerThresholdType">
-    </div>
-    <div class="form-row row-oversteerBlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteerBlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteerBlindPos"></span></label>
-        <input type="text" id="node-input-oversteerBlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteerBlindPosType">
-    </div>
-    <div class="form-row row-oversteer2Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer2Value"> <i class="fa fa-cloud fa-fw"></i> <span data-i18n="blind-control.label.oversteer2Value"></span></label>
-        <input type="text" id="node-input-oversteer2Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer2ValueType">
-        <select id="node-input-oversteer2Compare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteer2Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteer2Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer2Threshold"></span></label>
-        <input type="text" id="node-input-oversteer2Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteer2ThresholdType">
-    </div>
-    <div class="form-row row-oversteer2BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer2BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer2BlindPos"></span></label>
-        <input type="text" id="node-input-oversteer2BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer2BlindPosType">
-    </div>
-    <div class="form-row row-oversteer3Value is-initial-hidden block-noindent" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer3Value"> <i class="fa fa-tint fa-fw"></i> <span data-i18n="blind-control.label.oversteer3Value"></span></label>
-        <input type="text" id="node-input-oversteer3Value" class="" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer3ValueType">
-        <select id="node-input-oversteer3Compare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row row-oversteer3Threshold is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.oversteerThreshold">
-        <label for="node-input-oversteer3Threshold"><i class="fa fa-compress"></i> <span data-i18n="blind-control.label.oversteer3Threshold"></span></label>
-        <input type="text" id="node-input-oversteer3Threshold" data-i18n="[placeholder]blind-control.placeholder.oversteerThreshold"/>
-        <input type="hidden" id="node-input-oversteer3ThresholdType">
-    </div>
-    <div class="form-row row-oversteer3BlindPos is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.oversteerValue">
-        <label for="node-input-oversteer3BlindPos"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.oversteer3BlindPos"></span></label>
-        <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
-        <input type="hidden" id="node-input-oversteer3BlindPosType">
-    </div>
-    <hr>
     <!-- Enhanced ######################################################################## -->
-    <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
-        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="blind-control.label.outputs"></span></label>
+    <div class="form-row block-noindent" data-i18n="[title]clock-timer.placeholder.outputs">
+        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="clock-timer.label.outputs"></span></label>
         <select id="node-input-outputs" class="row-full-width">
-            <option value="1" data-i18n="blind-control.label.singleOutput"></option>
-            <option value="2" data-i18n="blind-control.label.splitOutput"></option>
+            <option value="1" data-i18n="clock-timer.label.singleOutput"></option>
+            <option value="2" data-i18n="clock-timer.label.splitOutput"></option>
         </select>
     </div>
-    <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.autoTrigger">
-        <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.autoTrigger"></span></label>
+    <div class="form-row block-noindent" data-i18n="[title]clock-timer.placeholder.autoTrigger">
+        <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
         <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
-        <span data-i18n="blind-control.label.autoTrigger2"></span>
+        <span data-i18n="clock-timer.label.autoTrigger2"></span>
     </div>
     <hr>
     <!-- End ######################################################################## -->
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
-    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
     </div>
     <div class="form-tips is-to-show-initially">
-        <span data-i18n="[html]blind-control.tips.sunPosControl" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]clock-timer.tips.sunPosControl" style="word-wrap:break-word;"></span>
     </div>
 
     <!-- DIALOG ######################################################################## -->
@@ -2272,77 +1615,92 @@
 
     <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
         <div class="dialog-row">
-            <label for="dlg-ip-blindctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-name" class="ipalone" data-i18n="[placeholder]blind-control.placeholder.name">
+            <label for="dlg-ip-clktimctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="clock-timer.label.name"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-name" class="ipalone" data-i18n="[placeholder]clock-timer.placeholder.name">
         </div>
         <div class="dialog-row pt-2" id="dialog-row-condA">
-            <label for="dlg-ip-blindctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
-            <select id="dlg-ip-blindctl-rule-condAOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            <label for="dlg-ip-clktimctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <select id="dlg-ip-clktimctl-rule-condAOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-condB">
-            <label for="dlg-ip-blindctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-blindctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+            <label for="dlg-ip-clktimctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-clktimctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-cond2LogOperator">
-            <label for="dlg-ip-blindctl-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleAndOr"></span></label>
-            <select id="dlg-ip-blindctl-rule-cond2LogOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            <label for="dlg-ip-clktimctl-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleAndOr"></span></label>
+            <select id="dlg-ip-clktimctl-rule-cond2LogOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-cond2A">
-            <label for="dlg-ip-blindctl-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
-            <select id="dlg-ip-blindctl-rule-cond2AOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
+            <label for="dlg-ip-clktimctl-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <select id="dlg-ip-clktimctl-rule-cond2AOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-cond2B">
-            <label for="dlg-ip-blindctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-blindctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
+            <label for="dlg-ip-clktimctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-clktimctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
         </div>
         <div class="dialog-row pt-2" id="dialog-row-timeReg">
-            <label for="dlg-ip-blindctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
-            <select id="dlg-ip-blindctl-rule-timeReg-operator" class="ipadd dlg-ip-blindctl-rule-timeReg-operator" >
+            <label for="dlg-ip-clktimctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.time"></span></label>
+            <select id="dlg-ip-clktimctl-rule-timeReg-operator" class="ipadd dlg-ip-clktimctl-rule-timeReg-operator" >
             </select>
-            <input type="text" id="dlg-ip-blindctl-rule-timeReg" class="ipMain dlg-ip-blindctl-rule-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+            <input type="text" id="dlg-ip-clktimctl-rule-timeReg" class="ipMain dlg-ip-clktimctl-rule-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeReg">
-            <label for="dlg-ip-blindctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeReg"class="ipMain dlg-ip-blindctl-rule-offset-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
-            <select  id="dlg-ip-blindctl-rule-multiplier-timeReg" class="ipadd dlg-ip-blindctl-rule-multiplier-timeReg" >
+            <label for="dlg-ip-clktimctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeReg"class="ipMain dlg-ip-clktimctl-rule-offset-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktimctl-rule-multiplier-timeReg" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeReg" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-blindctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMin"></span></label>
-            <!-- select id="dlg-ip-blindctl-rule-timeMax-operator" class="ipadd dlg-ip-blindctl-rule-timeMax-operator" >
+            <label for="dlg-ip-clktimctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
+            <!-- select id="dlg-ip-clktimctl-rule-timeMax-operator" class="ipadd dlg-ip-clktimctl-rule-timeMax-operator" >
             </select -->
-            <input type="text" id="dlg-ip-blindctl-rule-timeMin" class="ipMain dlg-ip-blindctl-rule-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+            <input type="text" id="dlg-ip-clktimctl-rule-timeMin" class="ipMain dlg-ip-clktimctl-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
-            <label for="dlg-ip-blindctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMin"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMin"class="ipMain dlg-ip-blindctl-rule-offset-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
-            <select  id="dlg-ip-blindctl-rule-multiplier-timeMin" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMin" >
+            <label for="dlg-ip-clktimctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeMin"class="ipMain dlg-ip-clktimctl-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktimctl-rule-multiplier-timeMin" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeMin" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-blindctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMax"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-timeMax" class="ipMain dlg-ip-blindctl-rule-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.time">
+            <label for="dlg-ip-clktimctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-timeMax" class="ipMain dlg-ip-clktimctl-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
-            <label for="dlg-ip-blindctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMax"></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-offset-timeMax"class="ipMain dlg-ip-blindctl-rule-offset-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset">
-            <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
+            <label for="dlg-ip-clktimctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeMax"class="ipMain dlg-ip-clktimctl-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktimctl-rule-multiplier-timeMax" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-level">
-            <label for="dlg-ip-blindctl-rule-level"><i class="fa fa-window-maximize"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
-            <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
-            <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
+        <div class="dialog-row pt-2 block-noindent" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
+            <label for="dlg-ip-clktimctl-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
+            <input type="hidden" id="dlg-ip-clktimctl-rule-payloadType">
+        </div>
+        <div class="dialog-row pt-2 block-indent1" id="dialog-row-payloadOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
+            <label for="dlg-ip-clktimctl-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
+            <input id="dlg-ip-clktimctl-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"></input>
+            <input type="hidden" id="dlg-ip-clktimctl-rule-payloadOffsetType">
+            <select id="dlg-ip-clktimctl-rule-payloadOffsetMultiplier" class="node-input-multiplier"></select>
+        </div>
+        <div class="dialog-row pt-2 block-indent1" id="dialog-row-payloadTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
+            <label for="dlg-ip-clktimctl-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
+            <select id="dlg-ip-clktimctl-rule-payloadTimeFormatsel" class="ipMain">
             </select>
+            <input type="text" id="dlg-ip-clktimctl-rule-payloadTimeFormat" class="ipadd" />
+        </div>
+        <div class="dialog-row pt-2 block-noindent" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic">
+            <label for="dlg-ip-clktimctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-clktimctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>
         <div class="dialog-row pt-2 block-noindent" id="dialog-row-descr">
-            <label for="dlg-txt-blindctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="blind-control.label.ruleDescription" ></span></label>
-            <div id="dlg-txt-blindctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
+            <label for="dlg-txt-clktimctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
+            <div id="dlg-txt-clktimctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
     </div>
 </script>
@@ -2364,9 +1722,6 @@
     .pr-3 { padding-right:1.25rem !important; }
     .is-to-show-initially { display:none }
     .is-initial-hidden { display:none }
-    .form-row-sunControlActive { display:none }
-    .form-row-sunControlRestriction { display:none }
-    .form-row-sunControlMaximization { display:none }
     .form-tips { width: 90% }
     .block-indent1 {
         float: left;
@@ -2500,26 +1855,26 @@
         width: 45%;
         margin-bottom: 0px !important;
     }npm
-    .blind-rule-mainblock {
+    .clock-timer-rule-mainblock {
         margin-right: 28px;
     }
-    .blind-rule-name-span {
+    .clock-timer-rule-name-span {
         /* font-weight: bolder; */
         width: 30%; /* width: 120px; */
         float: left;
     }
-    .blind-rule-description-span {
+    .clock-timer-rule-description-span {
         font-size: 10px;
         margin-left: 30%; /* margin-left: 122px; */
         margin-right: 5px;
     }
-    .blind-rule-finalspan {
+    .clock-timer-rule-finalspan {
         top: 50%;
         position: absolute;
         right: 66px;
         margin-top: -9px;
     }
-    .blind-rule-editBtn {
+    .clock-timer-rule-editBtn {
         top: 50%;
         position: absolute;
         right: 28px;

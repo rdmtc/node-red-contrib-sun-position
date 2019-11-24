@@ -1,5 +1,5 @@
 /********************************************
- * blind-control:
+ * clock-timer:
  *********************************************/
 const path = require('path');
 
@@ -213,14 +213,14 @@ module.exports = function (RED) {
             const name = `${type}.${value}`;
             if (typeof tempData[name] !== 'undefined') {
                 if (type !== 'PlT') {
-                    node.log(RED._('blind-control.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
+                    node.log(RED._('clock-timer.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
                 }
                 return tempData[name];
             }
             if (node.nowarn[name]) {
                 return null; // only one error per run
             }
-            node.warn(RED._('blind-control.errors.warning', { message: RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
+            node.warn(RED._('clock-timer.errors.warning', { message: RED._('clock-timer.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
             node.nowarn[name] = true;
             return null;
         }
@@ -248,7 +248,7 @@ module.exports = function (RED) {
                     return evalTempData(node, _obj.type, _obj.value, result, tempData);
                 }));
         } catch (err) {
-            node.error(RED._('blind-control.errors.getOversteerData', err));
+            node.error(RED._('clock-timer.errors.getOversteerData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
         // node.debug('node.oversteerData=' + util.inspect(node.oversteerData, { colors: true, compact: 10, breakLength: Infinity }));
@@ -295,7 +295,7 @@ module.exports = function (RED) {
             }
             return res;
         } catch (err) {
-            node.error(RED._('blind-control.errors.getBlindPosData', err));
+            node.error(RED._('clock-timer.errors.getBlindPosData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
         }
         return def;
@@ -400,12 +400,12 @@ module.exports = function (RED) {
                 dateISO: node.blindData.overwrite.expireDateISO,
                 dateUTC: node.blindData.overwrite.expireDateUTC
             };
-            node.reason.state = RED._('blind-control.states.overwriteExpire', obj);
-            node.reason.description = RED._('blind-control.reasons.overwriteExpire', obj);
+            node.reason.state = RED._('clock-timer.states.overwriteExpire', obj);
+            node.reason.description = RED._('clock-timer.reasons.overwriteExpire', obj);
         } else {
             node.reason.code = 2;
-            node.reason.state = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
-            node.reason.description = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
+            node.reason.state = RED._('clock-timer.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
+            node.reason.description = RED._('clock-timer.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
         }
         node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
     }
@@ -464,7 +464,7 @@ module.exports = function (RED) {
             } else if (!isNaN(newPos)) {
                 const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
                 if (!validPosition_(node, newPos, allowRound)) {
-                    node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
+                    node.error(RED._('clock-timer.errors.invalid-blind-level', { pos: newPos }));
                     return false;
                 }
                 if (allowRound) {
@@ -522,20 +522,20 @@ module.exports = function (RED) {
                 node.level.current = node.blindData.levelMin;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.reason.code = 13;
-                node.reason.state = RED._('blind-control.states.sunNotInWinMin');
-                node.reason.description = RED._('blind-control.reasons.sunNotInWin');
+                node.reason.state = RED._('clock-timer.states.sunNotInWinMin');
+                node.reason.description = RED._('clock-timer.reasons.sunNotInWin');
             } else {
                 node.reason.code = 8;
-                node.reason.state = RED._('blind-control.states.sunNotInWin');
-                node.reason.description = RED._('blind-control.reasons.sunNotInWin');
+                node.reason.state = RED._('clock-timer.states.sunNotInWin');
+                node.reason.description = RED._('clock-timer.reasons.sunNotInWin');
             }
             return sunPosition;
         }
 
         if ((node.sunData.mode === summerMode) && node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
             node.reason.code = 7;
-            node.reason.state = RED._('blind-control.states.sunMinAltitude');
-            node.reason.description = RED._('blind-control.reasons.sunMinAltitude');
+            node.reason.state = RED._('clock-timer.states.sunMinAltitude');
+            node.reason.description = RED._('clock-timer.reasons.sunMinAltitude');
             return sunPosition;
         }
 
@@ -545,8 +545,8 @@ module.exports = function (RED) {
                 node.level.current = res.blindPos;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.reason.code = 10;
-                node.reason.state = RED._('blind-control.states.oversteer');
-                node.reason.description = RED._('blind-control.reasons.oversteer');
+                node.reason.state = RED._('clock-timer.states.oversteer');
+                node.reason.description = RED._('clock-timer.reasons.oversteer');
                 sunPosition.oversteer = res;
                 sunPosition.oversteerAll = node.oversteerData;
                 return sunPosition;
@@ -558,8 +558,8 @@ module.exports = function (RED) {
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current);
             node.reason.code = 12;
-            node.reason.state = RED._('blind-control.states.sunInWinMax');
-            node.reason.description = RED._('blind-control.reasons.sunInWinMax');
+            node.reason.state = RED._('clock-timer.states.sunInWinMax');
+            node.reason.description = RED._('clock-timer.reasons.sunInWinMax');
             return sunPosition;
         }
 
@@ -582,20 +582,20 @@ module.exports = function (RED) {
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
             node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
-            node.reason.state = RED._('blind-control.states.smooth', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('blind-control.reasons.smooth', { pos: getRealLevel_(node).toString()});
+            node.reason.state = RED._('clock-timer.states.smooth', { pos: getRealLevel_(node).toString()});
+            node.reason.description = RED._('clock-timer.reasons.smooth', { pos: getRealLevel_(node).toString()});
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
         } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.blindData.levelBottom) && (node.level.current < node.blindData.levelTop)) {
             node.reason.code = 14;
-            node.reason.state = RED._('blind-control.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
+            node.reason.state = RED._('clock-timer.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
+            node.reason.description = RED._('clock-timer.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
         } else {
             node.reason.code = 9;
-            node.reason.state = RED._('blind-control.states.sunCtrl');
-            node.reason.description = RED._('blind-control.reasons.sunCtrl');
+            node.reason.state = RED._('clock-timer.states.sunCtrl');
+            node.reason.description = RED._('clock-timer.reasons.sunCtrl');
             node.sunData.changeAgain = now.getTime() + node.smoothTime;
             // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} now=` + now.getTime());
         }
@@ -603,16 +603,16 @@ module.exports = function (RED) {
             // min
             node.debug(`${node.level.current} is below ${node.blindData.levelMin} (min)`);
             node.reason.code = 5;
-            node.reason.state = RED._('blind-control.states.sunCtrlMin', {org: node.reason.state});
-            node.reason.description = RED._('blind-control.reasons.sunCtrlMin', {org: node.reason.description, level:node.level.current});
+            node.reason.state = RED._('clock-timer.states.sunCtrlMin', {org: node.reason.state});
+            node.reason.description = RED._('clock-timer.reasons.sunCtrlMin', {org: node.reason.description, level:node.level.current});
             node.level.current = node.blindData.levelMin;
             node.level.currentInverse = getInversePos_(node, node.level.current); // node.blindData.levelMax;
         } else if (node.level.current > node.blindData.levelMax) {
             // max
             node.debug(`${node.level.current} is above ${node.blindData.levelMax} (max)`);
             node.reason.code = 6;
-            node.reason.state = RED._('blind-control.states.sunCtrlMax', {org: node.reason.state});
-            node.reason.description = RED._('blind-control.reasons.sunCtrlMax', {org: node.reason.description, level:node.level.current});
+            node.reason.state = RED._('clock-timer.states.sunCtrlMax', {org: node.reason.state});
+            node.reason.description = RED._('clock-timer.reasons.sunCtrlMax', {org: node.reason.description, level:node.level.current});
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current); // node.blindData.levelMin;
         }
@@ -711,7 +711,7 @@ module.exports = function (RED) {
             now
         });
         if (rule.timeData.error) {
-            hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
+            hlp.handleError(node, RED._('clock-timer.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
             return -1;
         } else if (!rule.timeData.value) {
             throw new Error('Error can not calc time!');
@@ -731,7 +731,7 @@ module.exports = function (RED) {
             const numMin = rule.timeDataMin.value.getTime();
             rule.timeDataMin.source = 'Min';
             if (rule.timeDataMin.error) {
-                hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
+                hlp.handleError(node, RED._('clock-timer.errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
             } else if (!rule.timeDataMin.value) {
                 throw new Error('Error can not calc Alt time!');
             } else {
@@ -756,7 +756,7 @@ module.exports = function (RED) {
             const numMax = rule.timeDataMax.value.getTime();
             rule.timeDataMax.source = 'Max';
             if (rule.timeDataMax.error) {
-                hlp.handleError(node, RED._('blind-control.errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
+                hlp.handleError(node, RED._('clock-timer.errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
             } else if (!rule.timeDataMax.value) {
                 throw new Error('Error can not calc Alt time!');
             } else {
@@ -793,7 +793,7 @@ module.exports = function (RED) {
                         return null;
                     }
                 } catch (err) {
-                    node.warn(RED._('blind-control.errors.getPropertyData', err));
+                    node.warn(RED._('clock-timer.errors.getPropertyData', err));
                     node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                     return null;
                 }
@@ -955,8 +955,8 @@ module.exports = function (RED) {
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
-            node.reason.state= RED._('blind-control.states.'+name, data);
-            node.reason.description = RED._('blind-control.reasons.'+name, data);
+            node.reason.state= RED._('clock-timer.states.'+name, data);
+            node.reason.description = RED._('clock-timer.reasons.'+name, data);
             node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
@@ -965,18 +965,18 @@ module.exports = function (RED) {
         node.level.current = node.blindData.levelDefault;
         node.level.currentInverse = getInversePos_(node, node.blindData.levelDefault);
         node.reason.code = 1;
-        node.reason.state = RED._('blind-control.states.default');
-        node.reason.description = RED._('blind-control.reasons.default');
+        node.reason.state = RED._('clock-timer.states.default');
+        node.reason.description = RED._('clock-timer.reasons.default');
         node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
     /******************************************************************************************/
     /**
-     * standard Node-Red Node handler for the sunBlindControlNode
+     * standard Node-Red Node handler for the clockTimerNode
      * @param {*} config the Node-Red Configuration property of the Node
      */
-    function sunBlindControlNode(config) {
+    function clockTimerNode(config) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
@@ -986,7 +986,7 @@ module.exports = function (RED) {
         const node = this;
 
         if (node.smoothTime >= 0x7FFFFFFF) {
-            node.error(RED._('blind-control.errors.smoothTimeToolong', this));
+            node.error(RED._('clock-timer.errors.smoothTimeToolong', this));
             delete node.smoothTime;
         }
         node.nowarn = {};
@@ -1129,7 +1129,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.debug(`--- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
+                node.debug(`--- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
@@ -1183,15 +1183,15 @@ module.exports = function (RED) {
                     if (blindCtrl.rule.hasMinimum && (node.level.current < blindCtrl.rule.levelMinimum)) {
                         node.debug(`${node.level.current} is below rule minimum ${blindCtrl.rule.levelMinimum}`);
                         node.reason.code = 15;
-                        node.reason.state = RED._('blind-control.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name });
-                        node.reason.description = RED._('blind-control.reasons.ruleMin', { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
+                        node.reason.state = RED._('clock-timer.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name });
+                        node.reason.description = RED._('clock-timer.reasons.ruleMin', { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
                         node.level.current = blindCtrl.rule.levelMinimum;
                         node.level.currentInverse = getInversePos_(node, node.level.current);
                     } else if (blindCtrl.rule.hasMaximum && (node.level.current > blindCtrl.rule.levelMaximum)) {
                         node.debug(`${node.level.current} is above rule maximum ${blindCtrl.rule.levelMaximum}`);
                         node.reason.code = 26;
-                        node.reason.state = RED._('blind-control.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
-                        node.reason.description = RED._('blind-control.reasons.ruleMax', { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
+                        node.reason.state = RED._('clock-timer.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
+                        node.reason.description = RED._('clock-timer.reasons.ruleMax', { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
                         node.level.current = blindCtrl.rule.levelMaximum;
                         node.level.currentInverse = getInversePos_(node, node.level.current);
                     }
@@ -1285,14 +1285,14 @@ module.exports = function (RED) {
                 done();
                 return null;
             } catch (err) {
-                // node.error(RED._('blind-control.errors.error', err));
+                // node.error(RED._('clock-timer.errors.error', err));
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
                     text: 'internal error'
                 });
-                done(RED._('blind-control.errors.error', err), msg);
+                done(RED._('clock-timer.errors.error', err), msg);
             }
             return null;
         });
@@ -1474,5 +1474,5 @@ module.exports = function (RED) {
         initialize();
     }
 
-    RED.nodes.registerType('blind-control', sunBlindControlNode);
+    RED.nodes.registerType('clock-timer', clockTimerNode);
 };

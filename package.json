@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "0.5.4",
+  "version": "1.0.0-alpha-1",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -81,13 +81,14 @@
     "version": ">=0.19.0",
     "nodes": {
       "position-config": "nodes/position-config.js",
-      "sun-position": "nodes/sun-position.js",
-      "moon-position": "nodes/moon-position.js",
-      "within-time-switch": "nodes/within-time-switch.js",
       "time-inject": "nodes/time-inject.js",
+      "within-time-switch": "nodes/within-time-switch.js",
+      "clock-timer": "nodes/clock-timer.js",
       "time-comp": "nodes/time-comp.js",
       "time-span": "nodes/time-span.js",
-      "blind-control": "nodes/blind-control.js"
+      "blind-control": "nodes/blind-control.js",
+      "sun-position": "nodes/sun-position.js",
+      "moon-position": "nodes/moon-position.js"
     }
   },
   "devDependencies": {

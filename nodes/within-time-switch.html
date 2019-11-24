@@ -266,7 +266,7 @@
         }
 
         RED.nodes.registerType('within-time-switch', {
-            category: 'time and astro',
+            category: 'common',
             color: '#f37a33',
             icon: 'switch-white.png',
             inputs: 1,
@@ -679,7 +679,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.propertyStartType  || types.Undefined.value,
                         defaultValue: node.propertyStartValue || '' ,
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.MsgPayloadByTopic, types.PhaseMoon, types.SunInSky],
                         onChange(_type, _value) {
                             if (onInit) { return; }
                             const propCompare = $('#node-input-propertyStartCompare');
@@ -690,7 +690,9 @@
                                 propCompare.hide();
                                 $('.row-propertyStartThreshold').hide();
                                 $('#node-input-propertyStart').typedInput('width', 'calc(100% - 110px)');
-                            } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                            } else if (propType === 'jsonata' ||
+                                       propType === types.PhaseMoon.value ||
+                                       propType === types.MsgPayloadByTopic.value) {
                                 $('.alternate-time-start').show();
                                 propCompare.show();
                                 propCompare.attr('disabled', true);
@@ -798,7 +800,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.propertyEndType  || types.Undefined.value,
                         defaultValue: node.propertyEndValue || '' ,
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon],
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.MsgPayloadByTopic, types.PhaseMoon, types.SunInSky],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const propCompare = $('#node-input-propertyEndCompare');
@@ -810,7 +812,9 @@
                                 propCompare.hide();
                                 $('.row-propertyEndThreshold').hide();
                                 $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 110px)');
-                            } else if (propType === 'jsonata' || propType === types.PhaseMoon.value) {
+                            } else if (propType === 'jsonata' ||
+                                       propType === types.PhaseMoon.value ||
+                                       propType === types.MsgPayloadByTopic.value) {
                                 $('.alternate-time-end').show();
                                 propCompare.show();
                                 propCompare.attr('disabled', true);

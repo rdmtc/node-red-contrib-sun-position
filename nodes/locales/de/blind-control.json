@@ -61,7 +61,9 @@
 			"btnAdd": "hinzufügen",
 			"btnSort": "sortieren",
 			"btnClear": "leeren",
-			"dialogtitle":"Regel bearbeiten"
+			"dialogtitle":"Regel bearbeiten",
+			"autoTrigger":"automatisch triggern",
+			"autoTrigger2":"Neuberechnung nach dynamischer Zeit"
 		},
 		"placeholder": {
 			"windowTop": "Oberkante Fenster",
@@ -75,7 +77,7 @@
 			"blindLevelMin": "maximale Rollladenposition Sonnenstands abhängig",
 			"blindLevelMax": "minimale Rollladenposition Sonnenstands abhängig",
 			"sunControlMode": "wähle wie die Sonnensteuerung  arbeiten soll",
-			"OverwriteExpire": "(opt) Dauer nasch der eine manuelle Einstellung verfällt",
+			"overwriteExpire": "(opt) Dauer nasch der eine manuelle Einstellung verfällt",
 			"sunFloorLength": "das Ausmaß, in dem direktes Sonnenlicht durch das Fenster in den Raum gelangen darf, definiert als Länge am Boden",
 			"sunMinAltitude": "(opt) minimaler Höhenwinkel der Sonne",
 			"sunMinDelta": "(opt) mindest Änderung der Behanghöhe",
@@ -92,7 +94,9 @@
 			"condoperand":"operand",
 			"time":"Zeit",
 			"offset":"Zeit offset",
-			"level": "Behanghöhe"
+			"level": "Behanghöhe",
+			"autoTrigger":"automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne"
+
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
