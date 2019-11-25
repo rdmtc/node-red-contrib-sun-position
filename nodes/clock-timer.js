@@ -220,7 +220,7 @@ module.exports = function (RED) {
             if (node.nowarn[name]) {
                 return undefined; // only one error per run
             }
-            node.warn(RED._('clock-timer.errors.warning', { message: RED._('clock-timer.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
+            node.warn(RED._('clock-timer.errors.warning', { message: RED._('clock-timer.errors.notEvaluableProperty', { type, value, usedValue: 'undefined' }) }));
             node.nowarn[name] = true;
             return undefined;
         }

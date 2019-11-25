@@ -347,6 +347,30 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.png',
             hasValue: false
         },
+        SunAzimuth: {
+            value: 'pdsCalcAzimuth',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            hasValue: false
+        },
+        SunElevation: {
+            value: 'pdsCalcElevation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation','Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
+            hasValue: false
+        },
+        SunAzimuthRad: {
+            value: 'pdsCalcAzimuthRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            hasValue: false
+        },
+        SunElevationRad: {
+            value: 'pdsCalcElevationRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad','Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
+            hasValue: false
+        },
         MoonCalc: {
             value: 'pdmCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),

@@ -534,15 +534,12 @@ module.exports = function (RED) {
                 return null;
             } else if (data.type === 'pdsTimeNow') {
                 result = Object.assign({}, this.getSunTimePrevNext(now));
-                _srcNode.debug(`getOutDataProp 1 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                 result.last.value = hlp.normalizeDate(result.last.value, offsetX, data.multiplier, data.next, data.days);
                 result.next.value = hlp.normalizeDate(result.next.value, offsetX, data.multiplier, data.next, data.days);
-                _srcNode.debug(`getOutDataProp 2 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 if (this.tzOffset) {
                     result.last.value = hlp.convertDateTimeZone(result.last.value, this.tzOffset).getTime();
                     result.next.value = hlp.convertDateTimeZone(result.next.value, this.tzOffset).getTime();
-                    _srcNode.debug(`getOutDataProp 3 result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 }
                 return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
@@ -754,6 +751,14 @@ module.exports = function (RED) {
                 result = this.getSunCalc(msg.ts, true);
             } else if (data.type === 'pdsCalcPercent') {
                 result = this.getSunInSky(msg.ts);
+            } else if (data.type === 'pdsCalcAzimuth') {
+                result = this.getSunCalc(msg.ts, false, false).azimuthDegrees;
+            } else if (data.type === 'pdsCalcElevation') {
+                result = this.getSunCalc(msg.ts, false, false).altitudeDegrees;
+            } else if (data.type === 'pdsCalcAzimuthRad') {
+                result = this.getSunCalc(msg.ts, false, false).azimuthRadians;
+            } else if (data.type === 'pdsCalcElevationRad') {
+                result = this.getSunCalc(msg.ts, false, false).altitudeRadians;
             } else if (data.type === 'pdmCalcData') {
                 result = this.getMoonCalc(msg.ts, true);
             } else if (data.type === 'pdmPhase') {

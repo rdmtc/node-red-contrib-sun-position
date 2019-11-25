@@ -437,6 +437,14 @@
                     return node._('node-red-contrib-sun-position/position-config:common.types.suncalc') + suffix;
                 case 'pdsCalcPercent':
                     return node._('node-red-contrib-sun-position/position-config:common.types.suninsky') + suffix;
+                case 'pdsCalcAzimuth':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
+                case 'pdsCalcAzimuthRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
+                case 'pdsCalcElevation':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
+                case 'pdsCalcElevationRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
                 case 'pdmCalcData':
                     return node._('node-red-contrib-sun-position/position-config:common.types.mooncalc') + suffix;
                 case 'pdmPhase':
@@ -970,6 +978,10 @@
                     pdsTimeNow: 'sun time object',
                     pdmTime: 'moon time',
                     pdsCalcPercent: 'percent of sun in the sky',
+                    pdsCalcAzimuth: 'Azimuth of sun',
+                    pdsCalcAzimuthRad: 'Azimuth of sun (Rad)',
+                    pdsCalcElevation: 'Elevation of sun',
+                    pdsCalcElevationRad: 'Elevation of sun (Rad)',
                     pdsCalcData: 'object of sun position',
                     pdmCalcData: 'object of moon position',
                     pdmPhase: 'object of moon phase',
@@ -1189,7 +1201,11 @@
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
-                            types.MoonPhase
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payload').typedInput('type');
@@ -1329,7 +1345,17 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.SunInSky],
+                        types: [types.Undefined,
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad],
                         onChange(_type, _value) {
                             const timeType = $('#node-input-time').typedInput('type');
                             const propType = $('#node-input-property').typedInput('type');

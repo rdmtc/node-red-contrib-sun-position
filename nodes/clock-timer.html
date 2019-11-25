@@ -103,6 +103,14 @@
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
                 case 'pdsCalcPercent':
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
+                case 'pdsCalcAzimuth':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
+                case 'pdsCalcAzimuthRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
+                case 'pdsCalcElevation':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
+                case 'pdsCalcElevationRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
                 case 'pdmCalcData':
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"`;
                 case 'pdmPhase':
@@ -559,7 +567,11 @@
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
-                            types.MoonPhase
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payloadDefault').typedInput('type');
@@ -844,7 +856,7 @@
                     const $dialogCondAOperand = $dialog.find('#dlg-ip-clktimctl-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
-                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
+                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -866,7 +878,7 @@
                     const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktimctl-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
-                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
+                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -986,7 +998,11 @@
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
-                            types.MoonPhase
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad
                         ]
                     });
                     $dialogPayload.typedInput('width', '40%');

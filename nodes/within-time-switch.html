@@ -228,6 +228,14 @@
                     return '{sun position}' + suffix;
                 case 'pdsCalcPercent':
                     return '{sun in sky percent}' + suffix;
+                case 'pdsCalcAzimuth':
+                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}}${suffix}`;
+                case 'pdsCalcAzimuthRad':
+                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}}${suffix}`;
+                case 'pdsCalcElevation':
+                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}}${suffix}`;
+                case 'pdsCalcElevationRad':
+                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}}${suffix}`;
                 case 'pdmCalcData':
                     return '{moon position}' + suffix;
                 case 'pdmPhase':
@@ -679,7 +687,19 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.propertyStartType  || types.Undefined.value,
                         defaultValue: node.propertyStartValue || '' ,
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.MsgPayloadByTopic, types.PhaseMoon, types.SunInSky],
+                        types: [types.Undefined,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.MsgPayloadByTopic,
+                            types.PhaseMoon,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad],
                         onChange(_type, _value) {
                             if (onInit) { return; }
                             const propCompare = $('#node-input-propertyStartCompare');
@@ -800,7 +820,19 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.propertyEndType  || types.Undefined.value,
                         defaultValue: node.propertyEndValue || '' ,
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.MsgPayloadByTopic, types.PhaseMoon, types.SunInSky],
+                        types: [types.Undefined,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.MsgPayloadByTopic,
+                            types.PhaseMoon,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const propCompare = $('#node-input-propertyEndCompare');

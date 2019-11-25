@@ -220,7 +220,7 @@ module.exports = function (RED) {
             if (node.nowarn[name]) {
                 return undefined; // only one error per run
             }
-            node.warn(RED._('blind-control.errors.warning', { message: RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
+            node.warn(RED._('blind-control.errors.warning', { message: RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'undefined' }) }));
             node.nowarn[name] = true;
             return undefined;
         }
@@ -648,7 +648,6 @@ module.exports = function (RED) {
                         return evalTempData(node, _obj.type, _obj.value, result, tempData);
                     }
                 );
-                console.log(rule.conditonData[0].result, typeof rule.conditonData[0].result);
                 rule.conditon = {
                     result : rule.conditonData[0].result,
                     text : rule.conditonData[0].text,
@@ -827,7 +826,7 @@ module.exports = function (RED) {
                 res = fktCheck(rule, r => (r >= nowNr));
             }
             if (res) {
-                node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
                 } else if (res.levelOp === cRuleMaxOversteer) {
@@ -850,7 +849,7 @@ module.exports = function (RED) {
                 if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
-                    node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     if (res.levelOp === cRuleMinOversteer) {
                         ruleSelMin = res;
                     } else if (res.levelOp === cRuleMaxOversteer) {
@@ -865,7 +864,7 @@ module.exports = function (RED) {
 
         livingRuleData.hasMinimum = false;
         if (ruleSelMin) {
-            node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
+            // node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, -1);
             if (lev > -1) {
                 livingRuleData.levelMinimum = lev;
@@ -882,7 +881,7 @@ module.exports = function (RED) {
         }
         livingRuleData.hasMaximum = false;
         if (ruleSelMax) {
-            node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
+            // node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, -1);
             if (livingRuleData.levelMaximum > -1) {
                 livingRuleData.levelMaximum = lev;
@@ -919,7 +918,7 @@ module.exports = function (RED) {
                 }
             }
             // ruleSel.text = '';
-            node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
+            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
             node.reason.code = 4;
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
@@ -958,7 +957,7 @@ module.exports = function (RED) {
             }
             node.reason.state= RED._('blind-control.states.'+name, data);
             node.reason.description = RED._('blind-control.reasons.'+name, data);
-            node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -968,7 +967,7 @@ module.exports = function (RED) {
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
-        node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/

@@ -168,6 +168,14 @@
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
                 case 'pdsCalcPercent':
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
+                case 'pdsCalcAzimuth':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
+                case 'pdsCalcAzimuthRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
+                case 'pdsCalcElevation':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
+                case 'pdsCalcElevationRad':
+                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
                 case 'pdmCalcData':
                     return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"`;
                 case 'pdmPhase':
@@ -1127,7 +1135,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1201,7 +1209,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1287,7 +1295,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky],
+                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
@@ -1444,7 +1452,7 @@
                     const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
-                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
+                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -1466,7 +1474,7 @@
                     const $dialogCond2AOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
-                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky]
+                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
