@@ -25,8 +25,11 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             if (node.positionConfig === null ||
+                typeof node.positionConfig === 'undefined' ||
                 config.operator === null ||
-                config.inputType === null) {
+                typeof config.operator === 'undefined' ||
+                config.inputType === null ||
+                typeof config.inputType === 'undefined') {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -66,7 +69,7 @@ module.exports = function (RED) {
                         });
                     }
 
-                    if (resultObj === null) {
+                    if (resultObj === null || typeof resultObj === 'undefined') {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {
                         node.error('error on getting result: ' + resultObj.error);

@@ -603,7 +603,7 @@ module.exports = function (RED) {
             try {
                 if (data.days === '') {
                     result.error = 'No valid Days given!';
-                } else if (data.type === '' || data.type === 'none' || data.type === null) {
+                } else if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
                     result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
                 } else if (data.type === 'date') {
                     result.value = now;
@@ -627,14 +627,14 @@ module.exports = function (RED) {
                     }
                 } else if (data.type === 'entered') {
                     result.value = hlp.getTimeOfText(String(data.value), now, (this.tzOffset === 0), this.tzOffset);
-                    if (result.value !== null) {
+                    if (result.value !== null && typeof result.value !== 'undefined') {
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     }
                     result.fix = true;
                 } else if (data.type === 'dateEntered') {
                     result.value =  hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
-                    if (result.value !== null) {
+                    if (result.value !== null && typeof result.value !== 'undefined') {
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data.next, data.days);
                     }
@@ -724,10 +724,10 @@ module.exports = function (RED) {
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
         getPropValue(_srcNode, msg, data) {
-            // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID})`);
-            let result = null;
+            _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            let result = undefined;
             if (data.type === '' || data.type === 'none' || typeof data.type === 'undefined' || data.type === null) {
-                result = null;
+                result = undefined;
             } else if (data.type === 'num') {
                 result = Number(data.value);
             } else if (data.type === 'str') {
@@ -748,7 +748,7 @@ module.exports = function (RED) {
                 if (msg.topic && msg.value && msg.topic.includes(msg.value)) {
                     result = msg.payload;
                 } else {
-                    result = null;
+                    result = undefined;
                 }
             } else if (data.type === 'pdsCalcData') {
                 result = this.getSunCalc(msg.ts, true);
@@ -771,17 +771,18 @@ module.exports = function (RED) {
                 }
             }
             if (typeof data.callback === 'function') {
+                _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
                 _srcNode.error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
-                return null;
+                return undefined;
             }
-            // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
+            _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
         comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) { // eslint-disable-line complexity
-            // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
+            _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             } else if (opTypeA === 'jsonata' || opTypeA === 'pdmPhaseCheck') {

@@ -218,11 +218,11 @@ module.exports = function (RED) {
                 return tempData[name];
             }
             if (node.nowarn[name]) {
-                return null; // only one error per run
+                return undefined; // only one error per run
             }
             node.warn(RED._('blind-control.errors.warning', { message: RED._('blind-control.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
             node.nowarn[name] = true;
-            return null;
+            return undefined;
         }
         tempData[`${type}.${value}`] = data;
         return data;
@@ -648,6 +648,7 @@ module.exports = function (RED) {
                         return evalTempData(node, _obj.type, _obj.value, result, tempData);
                     }
                 );
+                console.log(rule.conditonData[0].result, typeof rule.conditonData[0].result);
                 rule.conditon = {
                     result : rule.conditonData[0].result,
                     text : rule.conditonData[0].text,
@@ -826,7 +827,7 @@ module.exports = function (RED) {
                 res = fktCheck(rule, r => (r >= nowNr));
             }
             if (res) {
-                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 if (res.levelOp === cRuleMinOversteer) {
                     ruleSelMin = res;
                 } else if (res.levelOp === cRuleMaxOversteer) {
@@ -849,7 +850,7 @@ module.exports = function (RED) {
                 if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
-                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     if (res.levelOp === cRuleMinOversteer) {
                         ruleSelMin = res;
                     } else if (res.levelOp === cRuleMaxOversteer) {

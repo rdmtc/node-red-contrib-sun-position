@@ -252,7 +252,7 @@ function _getLastDayOfMonth(year, month, dayOfWeek) {
  * @param {number} year year to check
  * @param {number} month month to check
  * @param {number} dayName  Name of the special day
- * @returns {Date} last day of given month or null
+ * @returns {Date|null} last day of given month or null
  */
 function getSpecialDayOfMonth(year, month, dayName) {
     switch (dayName) {
@@ -526,7 +526,7 @@ function isValidDate(d) {
  * @param {Date} d Date object where the offset should be added
  * @param {number} offset the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
  * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
- * @return {Date}  Date with added offset
+ * @return {Date|undefined|null}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
     if (d === null || typeof d === 'undefined') { return d; }
@@ -612,7 +612,7 @@ function normalizeDate(d, offset, multiplier, next, days) {
  * @param {string} t text representation of a time
  * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
  * @param {boolean} [utc] define if the time should be in utc
- * @return {Date} the parsed date object or **null** if can not parsed
+ * @return {Date|null} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date, utc, timeZoneOffset) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
@@ -703,7 +703,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
     const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P)?)?.*$/;
     if (re.test(String(dt))) {
         const result = getTimeOfText(String(dt), utc, timeZoneOffset);
-        if (result !== null) {
+        if (result !== null && typeof result !== 'undefined') {
             return result;
         }
     }
@@ -725,11 +725,11 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
 
     if (typeof dt === 'string') {
         let res = _parseDateTime(dt, preferMonthFirst, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         if (utc || timeZoneOffset === 0) {
             if (!dt.includes('UTC') && !dt.includes('utc') && !dt.includes('+') && !dt.includes('-')) {
                 dt += ' UTC';
@@ -1314,7 +1314,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
                 y = 4;
             }
             year = _getInt(val, i_val, x, y);
-            if (year === null) {
+            if (year === null && typeof year !== 'undefined') {
                 return { value: null, error: 'invalid year of format "' + token + '"'};
             }
 
@@ -1356,56 +1356,56 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
             }
         } else if (token === 'MM' || token === 'M') {
             month = _getInt(val, i_val, token.length, 2);
-            if (month === null || (month < 1) || (month > 12)) {
+            if (month === null || typeof month === 'undefined' || (month < 1) || (month > 12)) {
                 return { value: null, error: 'invalid month "' + month + '" of format "' + token + '"' };
             }
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
-            if (date === null || (date < 1) || (date > 31)) {
+            if (date === null || typeof date === 'undefined' || (date < 1) || (date > 31)) {
                 return { value: null, error: 'invalid date "' + date + '"' };
             }
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 1) || (hour > 12)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 12)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 0) || (hour > 23)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 23)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 0) || (hour > 11)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 11)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 1) || (hour > 24)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 24)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
             hour--;
         } else if (token === 'mm' || token === 'm') {
             min = _getInt(val, i_val, token.length, 2);
-            if (min === null || (min < 0) || (min > 59)) {
+            if (min === null || typeof min === 'undefined' || (min < 0) || (min > 59)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += min.length;
         } else if (token === 'ss' || token === 's') {
             sec = _getInt(val, i_val, token.length, 2);
-            if (sec === null || (sec < 0) || (sec > 59)) {
+            if (sec === null || typeof sec === 'undefined' || (sec < 0) || (sec > 59)) {
                 return { value: null, error: 'invalid sec "' + sec + '" of format "' + token + '"' };
             }
             i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
             misec = _getInt(val, i_val, token.length, 3);
-            if (misec === null || (misec < 0) || (misec > 999)) {
+            if (misec === null || typeof misec === 'undefined' || (misec < 0) || (misec > 999)) {
                 return { value: null, error: 'invalid millisecond "' + misec + '" of format "' + token + '"' };
             }
             i_val += misec.length;
@@ -1493,7 +1493,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
 function _parseArray(val, listToCheck, utc, timeZoneOffset) {
     for (let i = 0, n = listToCheck.length; i < n; i++) {
         const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset);
-        if (res.value !== null) {
+        if (res.value !== null && typeof res.value !== 'undefined') {
             return res.value;
         }
     }
@@ -1524,9 +1524,9 @@ function _isTimestamp(str) {
 function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset);
-    if (res !== null) { return res; }
+    if (res !== null && typeof res !== 'undefined') { return res; }
     res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset);
-    if (res !== null) { return res; }
+    if (res !== null && typeof res !== 'undefined') { return res; }
     return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset);
 }
 
@@ -1601,11 +1601,11 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
         const tryparse = (val, preferMonthFirst) => {
             // console.debug('try parse ' + util.inspect(val, { colors: true, compact: 10, breakLength: Infinity }) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
             let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = Date.parse(val);
             if (!isNaN(res)) {
                 return new Date(res);

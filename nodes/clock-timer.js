@@ -218,11 +218,11 @@ module.exports = function (RED) {
                 return tempData[name];
             }
             if (node.nowarn[name]) {
-                return null; // only one error per run
+                return undefined; // only one error per run
             }
             node.warn(RED._('clock-timer.errors.warning', { message: RED._('clock-timer.errors.notEvaluableProperty', { type, value, usedValue: 'null' }) }));
             node.nowarn[name] = true;
-            return null;
+            return undefined;
         }
         tempData[`${type}.${value}`] = data;
         return data;

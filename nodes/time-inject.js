@@ -191,7 +191,7 @@ module.exports = function (RED) {
                 }
             }
 
-            if ((node.nextTime !== null) && (errorStatus === '')) {
+            if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
                     return { state:'error', done: false, statusMsg: 'internal error!', errorMsg: 'Invalid time format'};
@@ -465,7 +465,7 @@ module.exports = function (RED) {
 
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
         const node = RED.nodes.getNode(req.params.id);
-        if (node !== null) {
+        if (node !== null && typeof node !== 'undefined') {
             try {
                 node.receive();
                 res.sendStatus(200);
