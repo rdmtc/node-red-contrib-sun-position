@@ -356,7 +356,7 @@
         }
 
         RED.nodes.registerType('clock-timer', {
-            category: 'time+astro',
+            category: 'time astro',
             color: '#FFCC66',
             icon: 'clock-timer-white.png',
             inputs: 1,
@@ -377,6 +377,7 @@
                 },
                 outputs: { value: '1' },
                 autoTrigger: { value: false },
+                storeName:  { value: '' },
                 // #region overwrite settings
                 overwriteExpire: {
                     value: '',
@@ -680,7 +681,6 @@
                             data.timeMaxOp = (parseInt(data.timeMaxOp) || 0);
                             data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
                             data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
-
 
                             data.payloadType = (data.payloadType || 'date');
                             data.payloadValue = (data.payloadValue || '');

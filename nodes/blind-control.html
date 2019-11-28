@@ -421,7 +421,7 @@
         }
 
         RED.nodes.registerType('blind-control', {
-            category: 'time+astro',
+            category: 'time astro',
             color: '#FFCC66',
             icon: 'blind-white.png',
             inputs: 1,
@@ -442,6 +442,7 @@
                 },
                 outputs: { value: '1' },
                 autoTrigger: { value: false },
+                storeName:  { value: '' },
                 // #region blind settings
                 blindIncrement: {
                     value: 0.01,
