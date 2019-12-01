@@ -742,7 +742,7 @@ module.exports = function (RED) {
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
             } else if (data.type === 'PlT') {
-                if (msg.topic && msg.value && msg.topic.includes(msg.value)) {
+                if (msg.topic && data.value && msg.topic.includes(data.value)) {
                     result = msg.payload;
                 } else {
                     result = undefined;

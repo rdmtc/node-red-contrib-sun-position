@@ -326,26 +326,25 @@
                     result += '</div>';
                 }
                 result += '<div>';
-                if (typeof data.levelType !== 'undefined') {
-                    if (data.levelType === 'levelND') {
-                        if (data.levelOp === 1) {
-                            result += node._('clock-timer.label.ruleLevelResetMin');
-                        } else if (data.levelOp === 2) {
-                            result += node._('clock-timer.label.ruleLevelResetMax');
-                        } else {
-                            result += node._('clock-timer.label.ruleLevelND');
-                        }
-                    } else {
-                        result += data.levelOpText;
-                        result += ' <var>';
-                        result += getValueLabel(node, data.levelType, data.levelValue);
+                if (data.payloadType && data.payloadType !== 'none') {
+                    result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                    result += node._('clock-timer.label.rulePayload');
+                    result += '</span> <var>';
+                    result += getValueLabel(node, data.payloadType, data.payloadValue);
+                    result += '</var>';
+                    result += _getOffsetText(node, data.payloadOffsetType, data.payloadOffsetValue, data.payloadOffsetMultiplier);
+                    result += '</div>';
+                    if (data.topic) {
+                        result += '<div class="indent-topic-text"> <span>';
+                        result += node._('clock-timer.label.ruleTopic');
+                        result += '</span> <var>';
+                        result += data.topic;
                         result += '</var>';
-                        // <meter value="2" min="0" max="10">2 out of 10</meter>
+                        result += '</div>';
                     }
                 } else {
                     result += '-';
                 }
-
                 result += '</div>';
             } catch (err) {
                 console.log(err.message); // eslint-disable-line no-console
@@ -393,11 +392,11 @@
                     value: {}
                 },
                 payloadDefault: {
-                    value: 'open (max)',
+                    value: '',
                     validate: RED.validators.typedInput('payloadDefaultType')
                 },
                 payloadDefaultType: {
-                    value: 'date'
+                    value: 'none'
                 },
                 payloadDefaultTimeFormat: {
                     value: 0
@@ -534,37 +533,34 @@
                     // #region payloadDefault
                     console.log('clock-timer payloadDefault');
                     if (node.payloadDefaultType === null) {
-                        if (node.payloadDefault === '') {
-                            node.payloadDefaultType = 'date';
-                        } else {
-                            node.payloadDefaultType = 'str';
-                        }
-                    } else if (node.payloadDefaultType === 'string' || node.payloadDefaultType === types.Undefined.value) {
+                        node.payloadDefaultType = types.Undefined.value;
+                    } else if (node.payloadDefaultType === 'string') {
                         node.payloadDefaultType = 'str';
                     }
                     const $payloadDefault = setupTInput(node, {
                         typeProp: 'payloadDefaultType',
                         valueProp: 'payloadDefault',
                         width: 'calc(100% - 110px)',
-                        defaultType: 'date',
+                        defaultType: types.Undefined.value,
                         types: [
+                            types.Undefined,
+                            'str',
+                            'num',
+                            'bool',
                             'date',
                             types.DateSpecific,
+                            'flow',
+                            'global',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
-                            'flow',
-                            'global',
-                            'str',
-                            'num',
-                            'bool',
-                            'json',
-                            'bin',
-                            'env',
-                            'jsonata',
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
@@ -652,7 +648,8 @@
                         }
                     }
 
-                    $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
+                    let resizeContainerTO = null;
+                    $('#node-input-rule-container').css('min-height', '80px').css('min-width', '300px').editableList({
                         addItem($containerRow, containerIndex, data) {
                             if (data === {}) {
                                 data.description = 'please edit rule';
@@ -682,7 +679,7 @@
                             data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
                             data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
 
-                            data.payloadType = (data.payloadType || 'date');
+                            data.payloadType = (data.payloadType || 'none');
                             data.payloadValue = (data.payloadValue || '');
                             data.payloadOffsetType = (data.payloadOffsetType || types.Undefined.value);
                             data.payloadOffsetMultiplier = (parseInt(data.multiplier) || 60000);
@@ -716,6 +713,14 @@
                             $btn.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
                             });
+
+                            if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
+                            resizeContainerTO = setTimeout(() => {
+                                resizeContainerTO = null;
+                                $payloadDefault.change();
+                                resizeContainer();
+                            }, 1000);
+
                         },
                         addButton: false,
                         sortable: true,
@@ -809,10 +814,6 @@
                             // rule.index = i;
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
-                        setTimeout(() => {
-                            $payloadDefault.change();
-                            resizeContainer();
-                        }, 1500);
                     }
 
                     // #region dialog
@@ -976,25 +977,26 @@
                     // #region dialogPayload
                     const $dialogPayload = $dialog.find('#dlg-ip-clktimctl-rule-payload');
                     $dialogPayload.typedInput({
-                        default: 'date',
+                        default: types.Undefined.value,
                         types: [
+                            types.Undefined,
+                            'str',
+                            'num',
+                            'bool',
                             'date',
                             types.DateSpecific,
+                            'flow',
+                            'global',
+                            'json',
+                            'bin',
+                            'env',
+                            'jsonata',
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
-                            'flow',
-                            'global',
-                            'str',
-                            'num',
-                            'bool',
-                            'json',
-                            'bin',
-                            'env',
-                            'jsonata',
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
@@ -1299,7 +1301,12 @@
 
                     $dialogPayload.change(() => {
                         const plVType = $dialogPayload.typedInput('type');
-                        if (plVType ===  types.TimeEntered.value ||
+                        if (plVType === types.Undefined.value) {
+                            $('#dialog-row-topic').hide();
+                            $('#dialog-row-payloadTimeFormat').hide();
+                            $('#dialog-row-payloadOffset').hide();
+                            return;
+                        } else if (plVType ===  types.TimeEntered.value ||
                             plVType === types.TimeSun.value ||
                             plVType === types.TimeMoon.value ||
                             plVType === types.DateSpecific.value) {
@@ -1702,7 +1709,7 @@
             <label for="dlg-ip-clktimctl-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
             <input id="dlg-ip-clktimctl-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"></input>
             <input type="hidden" id="dlg-ip-clktimctl-rule-payloadOffsetType">
-            <select id="dlg-ip-clktimctl-rule-payloadOffsetMultiplier" class="node-input-multiplier"></select>
+            <select id="dlg-ip-clktimctl-rule-payloadOffsetMultiplier" class="node-input-multiplier ipadd"></select>
         </div>
         <div class="dialog-row pt-2 block-indent1" id="dialog-row-payloadTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
             <label for="dlg-ip-clktimctl-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>

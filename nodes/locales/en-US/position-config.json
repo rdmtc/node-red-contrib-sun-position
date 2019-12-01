@@ -38,7 +38,7 @@
             "levelfix":"Level",
             "levelfree": "Level entered",
             "levelND": "N/D - use default, sun control or reset",
-            "PlTRes":"msg.payload if topic contains \"__value__\""
+            "PlTRes":"msg.payload if topic contains"
         },
         "typeOptions": {
             "moonRise": "moon rise",
@@ -86,7 +86,8 @@
             "fullMoon": "Full Moon 🌝",
             "waningGibbousMoon": "Waning Gibbous 🌖",
             "lastQuarterMoon": "Last Quarter 🌗",
-            "waningCrescentMoon": "Waning Crescent 🌘"
+            "waningCrescentMoon": "Waning Crescent 🌘",
+            "PlTRes":"msg.payload if topic contains \"__topic__\""
         },
         "multiselectLbl": {
             "operatorTypes": "include into compare"

@@ -54,9 +54,9 @@ module.exports = function (RED) {
      * @returns {*}  data which was cached
      */
     function evalTempData(node, type, value, data, tempData) {
-        // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        const name = `${type}.${value}`;
         if (data === null || typeof data === 'undefined') {
-            const name = `${type}.${value}`;
             if (typeof tempData[name] !== 'undefined') {
                 if (type !== 'PlT') {
                     node.log(RED._('clock-timer.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
@@ -70,8 +70,22 @@ module.exports = function (RED) {
             node.nowarn[name] = true;
             return undefined;
         }
-        tempData[`${type}.${value}`] = data;
+        tempData[name] = data;
         return data;
+    }
+
+    /**
+     * clip a test to a maximum length
+     * @param {string} v text to clip
+     * @param {number} l length to clip the text
+     */
+    function clipValueLength(v, l) {
+        l = l || 15;
+        v = String(v);
+        if (v.length > l) {
+            return v.slice(0, (l - 3)) + '...';
+        }
+        return v;
     }
 
     /******************************************************************************************/
@@ -190,8 +204,8 @@ module.exports = function (RED) {
      * @param {*} msg message object
      * @returns true if override is active, otherwise false
      */
-    function checkBlindPosOverwrite(node, msg, now, previousData) {
-        node.debug(`checkBlindPosOverwrite act=${node.timeClockData.overwrite.active} `);
+    function checkTCPosOverwrite(node, msg, now, previousData) {
+        node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
@@ -218,9 +232,12 @@ module.exports = function (RED) {
 
         let overrideData = undefined;
         let overrideTopic = undefined;
-        if (!onlyTrigger && msg.topic && msg.payload) {
-            if (msg.topic.includes('manual') ||
-                msg.topic.includes('overwrite')) {
+        if (!onlyTrigger && msg.payload) {
+            if (msg.payload.value && (msg.payload.expires || msg.payload.prio || msg.payload.priority)) {
+                overrideData = msg.payload.value;
+                overrideTopic = msg.topic;
+            } else if (msg.topic && (msg.topic.includes('manual') ||
+                msg.topic.includes('overwrite'))) {
                 overrideData = msg.payload;
                 overrideTopic = msg.topic;
             }
@@ -634,6 +651,10 @@ module.exports = function (RED) {
         node.rules = {
             data: config.rules || []
         };
+        node.payload = {
+            current:undefined,
+            topic:node.timeClockData.topic
+        };
 
         /**
          * set the state of the node
@@ -654,7 +675,7 @@ module.exports = function (RED) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
 
-            node.reason.stateComplete = node.reason.state;
+            node.reason.stateComplete = (!timeCtrl.payload) ? node.reason.state : clipValueLength(timeCtrl.payload.toString(),15) + ' - ' + node.reason.state;
             node.status({
                 fill,
                 shape,
@@ -672,7 +693,7 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
+                node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
@@ -686,7 +707,8 @@ module.exports = function (RED) {
                 node.nowarn = {};
                 const timeCtrl = {
                     reason : node.reason,
-                    timeClock: node.timeClockData
+                    timeClock: node.timeClockData,
+                    payload: node.payload.current
                 };
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
@@ -707,7 +729,7 @@ module.exports = function (RED) {
 
                 // node.debug(`start pos=${node.payload.current} manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
-                if (!checkBlindPosOverwrite(node, msg, now, previousData)) {
+                if (!checkTCPosOverwrite(node, msg, now, previousData)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, now, tempData);
                     ruleId = timeCtrl.rule.id;
@@ -729,6 +751,7 @@ module.exports = function (RED) {
                 }
 
                 if (node.payload.current &&
+                    node.payload.current !== 'none' &&
                     ((node.payload.current !== previousData.payload) ||
                     (node.reason.code !== previousData.reasonCode) ||
                     (ruleId !== previousData.usedRule) ||
@@ -738,7 +761,6 @@ module.exports = function (RED) {
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: timeCtrl }]); // node.send([msg, { topic, payload: timeCtrl }]);
                     } else {
-                        msg.topic = topic;
                         msg.timeCtrl = timeCtrl;
                         send(msg, null); // node.send(msg, null);
                     }

@@ -924,6 +924,7 @@
                         }
                     }
 
+                    let resizeContainerTO = null;
                     $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                         addItem($containerRow, containerIndex, data) {
                             if (data === {}) {
@@ -992,6 +993,13 @@
                             $btn.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
                             });
+
+                            if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
+                            resizeContainerTO = setTimeout(() => {
+                                resizeContainerTO = null;
+                                $('#node-input-sunControlMode').change();
+                                resizeContainer();
+                            }, 1000);
                         },
                         addButton: false,
                         sortable: true,
@@ -1406,10 +1414,6 @@
                             // rule.index = i;
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
-                        setTimeout(() => {
-                            $('#node-input-sunControlMode').change();
-                            resizeContainer();
-                        }, 1500);
                     }
 
                     // #region dialog

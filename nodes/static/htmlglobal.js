@@ -181,7 +181,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         MsgPayloadByTopic: {
             value: 'PlT',
-            label: 'msg.payload if topic contains',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.PlTRes'),
             hasValue: true
         },
         TimeEntered: {
