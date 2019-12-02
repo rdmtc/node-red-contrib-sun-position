@@ -451,7 +451,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 const setup = function(node) {
-                    console.log('clock-timer setup IN');
+                    // console.log('clock-timer setup IN');
                     /* global getTypes getSelectFields appendOptions autocomplete setupTInput initCombobox appendOptions getBackendData bdDateToTime */
                     // #region initialize
                     const types = getTypes(node);
@@ -531,7 +531,7 @@
                     }
                     // #endregion initialize
                     // #region payloadDefault
-                    console.log('clock-timer payloadDefault');
+                    // console.log('clock-timer payloadDefault');
                     if (node.payloadDefaultType === null) {
                         node.payloadDefaultType = types.Undefined.value;
                     } else if (node.payloadDefaultType === 'string') {
@@ -624,7 +624,7 @@
                     }).change();
                     // #endregion payloadDefault
                     // #region rules
-                    console.log('clock-timer rules');
+                    // console.log('clock-timer rules');
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
                         return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
@@ -807,7 +807,7 @@
                     });
                     // #endregion Enhanced settings
                     // fill rules
-                    console.log('clock-timer fill rules');
+                    // console.log('clock-timer fill rules');
                     if (node.rules) {
                         for (let i = 0; i < node.rules.length; i++) {
                             const rule = node.rules[i];
@@ -1310,12 +1310,15 @@
                             plVType === types.TimeSun.value ||
                             plVType === types.TimeMoon.value ||
                             plVType === types.DateSpecific.value) {
+                            $('#dialog-row-topic').show();
                             $('#dialog-row-payloadTimeFormat').show();
                             $('#dialog-row-payloadOffset').show();
                         } else if (plVType ===  types.TimeSunNow.value) {
+                            $('#dialog-row-topic').show();
                             $('#dialog-row-payloadTimeFormat').hide();
                             $('#dialog-row-payloadOffset').show();
                         } else {
+                            $('#dialog-row-topic').show();
                             $('#dialog-row-payloadTimeFormat').hide();
                             $('#dialog-row-payloadOffset').hide();
                         }

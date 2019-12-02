@@ -204,7 +204,7 @@ module.exports = function (RED) {
      * @param {*} msg message object
      * @returns true if override is active, otherwise false
      */
-    function checkTCPosOverwrite(node, msg, now, previousData) {
+    function checkTCPosOverwrite(node, msg, now) {
         node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
@@ -261,12 +261,6 @@ module.exports = function (RED) {
             node.debug(`needOverwrite prio=${prio} expire=${expire}`);
             if (overrideData) {
                 node.debug(`overwrite overrideData=${overrideData}`);
-                const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
-                if (noSameValue && (previousData.payload === overrideData)) {
-                    setOverwriteReason(node);
-                    node.debug(`overwrite exit true noSameValue=${noSameValue}, overrideData=${overrideData}`);
-                    return true;
-                }
                 node.payload.current = overrideData;
                 node.payload.topic = overrideTopic;
             }
@@ -545,7 +539,6 @@ module.exports = function (RED) {
             }
             // ruleSel.text = '';
             node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
-            node.reason.code = 4;
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             node.reason.code = 4;
@@ -659,13 +652,10 @@ module.exports = function (RED) {
         /**
          * set the state of the node
          */
-        function setState(timeCtrl, previousData) {
-            let code = node.reason.code;
+        function setState(timeCtrl) {
+            const code = node.reason.code;
             const shape = 'ring';
             let fill = 'yellow';
-            if (code === 10 && previousData) { // smooth;
-                code = previousData.reasonCode;
-            }
 
             if (code <= 3) {
                 fill = 'blue'; // override
@@ -712,8 +702,6 @@ module.exports = function (RED) {
                 };
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
-                previousData.payload = node.payload.current;
-                previousData.topic = node.payload.topic;
                 previousData.reasonCode = node.reason.code;
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
@@ -725,11 +713,11 @@ module.exports = function (RED) {
                 }
 
                 // check if the message contains any oversteering data
-                let ruleId = -1; // NaN;
+                let ruleId = -1;
 
                 // node.debug(`start pos=${node.payload.current} manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
-                if (!checkTCPosOverwrite(node, msg, now, previousData)) {
+                if (!checkTCPosOverwrite(node, msg, now)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, now, tempData);
                     ruleId = timeCtrl.rule.id;
@@ -745,17 +733,16 @@ module.exports = function (RED) {
                         code: node.reason.code,
                         state: node.reason.state,
                         rule: ruleId,
-                        topic: msg.topic
+                        newtopic: node.payload.topic,
+                        orgtopic: msg.topic
                     };
-                    topic = hlp.topicReplace(config.topic, topicAttrs);
+                    topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
                 if (node.payload.current &&
                     node.payload.current !== 'none' &&
-                    ((node.payload.current !== previousData.payload) ||
-                    (node.reason.code !== previousData.reasonCode) ||
-                    (ruleId !== previousData.usedRule) ||
-                    (node.payload.topic !== previousData.topic))) {
+                    ((node.reason.code !== previousData.reasonCode) ||
+                    (ruleId !== previousData.usedRule))) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
                     if (node.outputs > 1) {
