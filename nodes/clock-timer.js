@@ -376,6 +376,7 @@ module.exports = function (RED) {
             offset : rule.offsetValue,
             multiplier : rule.multiplier,
             next : false,
+            days : rule.timeDays,
             now
         });
         if (rule.timeData.error) {
@@ -394,6 +395,7 @@ module.exports = function (RED) {
                 offset: rule.offsetMinValue,
                 multiplier: rule.multiplierMin,
                 next: false,
+                days: rule.timeDays,
                 now
             });
             const numMin = rule.timeDataMin.value.getTime();
@@ -419,6 +421,7 @@ module.exports = function (RED) {
                 offset: rule.offsetMaxValue,
                 multiplier: rule.multiplierMax,
                 next: false,
+                days: rule.timeDays,
                 now
             });
             const numMax = rule.timeDataMax.value.getTime();
@@ -584,6 +587,7 @@ module.exports = function (RED) {
             }
             node.reason.state= RED._('clock-timer.states.'+name, data);
             node.reason.description = RED._('clock-timer.reasons.'+name, data);
+            node.debug(`checkRules data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
@@ -668,7 +672,10 @@ module.exports = function (RED) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
 
-            node.reason.stateComplete = (!timeCtrl.payload) ? node.reason.state : clipValueLength(timeCtrl.payload.toString(),15) + ' - ' + node.reason.state;
+            node.reason.stateComplete = node.reason.state ;
+            if (timeCtrl.payload && typeof timeCtrl.payload !== 'object') {
+                node.reason.stateComplete = clipValueLength(timeCtrl.payload.toString(),10) + ' - ' + node.reason.stateComplete;
+            }
             node.status({
                 fill,
                 shape,
