@@ -207,8 +207,8 @@ module.exports = function (RED) {
     function checkTCPosOverwrite(node, msg, now) {
         node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
         let priook = false;
-        const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
+        const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege']);
+        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], null, p => {
             if (prioMustEqual) {
                 priook = (node.timeClockData.overwrite.priority === p);
             } else {
@@ -243,7 +243,7 @@ module.exports = function (RED) {
             }
         }
 
-        const expire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
+        const expire = hlp.getMsgNumberValue(msg, 'expire');
         if (!overrideData && node.timeClockData.overwrite.active) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}`);
             if (Number.isFinite(expire)) {
@@ -468,6 +468,9 @@ module.exports = function (RED) {
             }
             if (!rule.timeLimited) {
                 return rule;
+            }
+            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(now.getDay())) {
+                return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);

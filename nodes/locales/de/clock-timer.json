@@ -1,0 +1,102 @@
+{
+	"clock-timer": {
+		"label": {
+			"clock-timer": "Zeitschaltuhr",
+			"clock-timer-palette": "Zeitschaltuhr",
+			"output1": "payload basierend auf Regel",
+			"output2": "status Objekt",
+			"payloadDefault": "payload",
+			"payloadDefaultOffset": "Offset",
+			"payloadDefaultFormat": "Format",
+			"overwriteExpire": "verfällt",
+			"ruleCondition": "nur wenn",
+			"ruleConditionThreshold": "Schwelle",
+			"ruleAndOr": "und/oder",
+			"ruleCondNone": "N/A",
+			"ruleCondAnd": "und",
+			"ruleCondOr": "oder",
+			"ruleTimeFrom": "↧ von",
+			"ruleTimeUntil": "↥ bis",
+			"ruleTimeNone": "N/A",
+			"ruleTimeMax": "spätestens (max)",
+			"ruleTimeMin": "frühestens (min)",
+			"ruleTimeDays": "nur an folgenden Tagen",
+			"ruleDescription": "Beschreibung",
+			"rulePayload": "Payload:",
+			"rulePayloadND": "Kein Payload",
+			"ruleTopic": "Topic:",
+			"time": "Zeit",
+			"name": "name",
+			"showEnhSettings": "Erweiterte Einstellungen",
+			"outputs": "Ausgänge",
+			"offset": "Zeit offset",
+			"offset-timeMin": "früheste (min) offset",
+			"offset-timeMax": "späteste (max) offset",
+			"singleOutput": "einzeln (1)",
+			"splitOutput": "doppelt (2)",
+			"btnAdd": "hinzufügen",
+			"btnSort": "sortieren",
+			"btnClear": "leeren",
+			"dialogtitle":"Regel bearbeiten",
+			"autoTrigger":"automatisch triggern",
+			"autoTrigger2":"Neuberechnung nach dynamischer Zeit"
+		},
+		"placeholder": {
+			"payloadDefault": "payload if no other used",
+			"payloadDefaultOffset": "",
+			"payloadDefaultFormat": "",
+			"overwriteExpire": "(opt) Dauer nasch der eine manuelle Einstellung verfällt",
+			"name": "Name",
+			"expiryperiod": "120",
+			"outputs": "Anzahl der Ausgänge",
+			"btnAdd": "neue leere Regel hinzufügen",
+			"btnSort": "alle Regeln sortieren, Achtung dies kann das Verhalten ändern!",
+			"btnClear": "alle Regeln entfernen",
+			"condoperand":"operand",
+			"time":"Zeit",
+			"offset":"Zeit offset",
+			"level": "Behanghöhe",
+			"ruleTimeDays": "wähle tage an denen diese Regel gültig sein soll",
+			"autoTrigger":"automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne"
+		},
+		"text": {
+			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
+			"payloadDefault":"Wenn keine Regel zutrifft, wird der folgende payload gesendet.",
+			"overwrite": "manuelles Überschreiben der Rollladenposition"
+		},
+		"tips": {
+			"timerControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/clock_timer.md\">Dokumentation und Beispiele</a>"
+		},
+		"reasons": {
+			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",
+			"overwriteExpire": "manuell überschrieben (Priorität __prio__), verfällt __dateISO__",
+			"default": "Position ist auf Standard gesetzt, weil keine Regel zutrifft",
+			"ruleTime": "Position durch Zeitregel - rule __timeOp__ __timeLocal__ [rule __number__]",
+			"ruleCond": "Position durch bedingte Regel __text__ [rule __number__]",
+			"ruleTimeCond": "Position durch Zeit Regel __timeOp__ __timeLocal__ und Bedingung __text__ [rule __number__]",
+			"rule": "Position durch feste Regel __number__",
+			"ruleMin": "__org__ (__level__ ist unter minimum) [__number__] __name__",
+			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__"
+		},
+		"states": {
+			"overwriteNoExpire": "überschrieben [Prio=__prio__]",
+			"overwriteExpire": "überschrieben [Prio=__prio__], bis __timeLocal__",
+			"default": "Standard",
+			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
+			"ruleCond": "__textShort__ [rule __number__]",
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [rule __number__]",
+			"rule": "durch feste Regel __number__",
+			"ruleMin": "__org__ [min rule __number__]",
+			"ruleMax": "__org__ [max rule __number__]"
+		},
+		"errors": {
+			"error": "Fehler: __message__",
+			"warning": "Warnung: __message__",
+			"internal": "Fehler: __message__",
+			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
+			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
+			"usingTempValue": "Wert von __type__.__value__ kann nicht ermitteln werden und es wird der gespeicherte Wert \"__usedValue__\" verwendet!",
+			"notEvaluableProperty": "kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
+		}
+	}
+}

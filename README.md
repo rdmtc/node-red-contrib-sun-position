@@ -14,54 +14,55 @@ This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variat
 Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
 In addition, there is now a blind controller, which can set blind position time and sun controlled. ( see [blind-control](blind_control.md) )
 
-[![nodes](images/appearance1.png?raw=true)](README.md)
-[![nodes](images/appearance2.png?raw=true)](blind_control.md)
+![nodes](https://user-images.githubusercontent.com/12692680/70033601-19d46a00-15b0-11ea-9e36-a7843e20ff85.png)
+
 
 ## Table of contents
 
-- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  - [Table of contents](#table-of-contents)
-  - [Preconditions](#preconditions)
-  - [Installation](#installation)
-  - [General](#general)
-    - [Saving resources](#saving-resources)
-    - [second based accuracy](#second-based-accuracy)
-  - [Implemented Nodes](#implemented-nodes)
-    - [sun-position](#sun-position)
-      - [sun-position - Node settings](#sun-position---node-settings)
-      - [Node Input](#node-input)
-      - [sun-position - Node Output](#sun-position---node-output)
-    - [moon-position](#moon-position)
-      - [moon-position - Node settings](#moon-position---node-settings)
-      - [moon-position - Node Output](#moon-position---node-output)
-    - [time-inject](#time-inject)
-      - [time-inject - Node settings](#time-inject---node-settings)
-      - [time-inject - Node Input](#time-inject---node-input)
-      - [time-inject - Node Output](#time-inject---node-output)
-    - [within-time](#within-time)
-      - [within-time - Node settings](#within-time---node-settings)
-    - [time-comp](#time-comp)
-      - [time-comp - Node settings](#time-comp---node-settings)
-    - [time-span](#time-span)
-      - [time-span - Node settings](#time-span---node-settings)
-    - [blind-control](#blind-control)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
-  - [CHANGELOG](#changelog)
-  - [TODO](#todo)
-  - [Support, Bugs and Feedback](#support-bugs-and-feedback)
-  - [LICENSE](#license)
-  - [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Preconditions](#preconditions)
+  * [Installation](#installation)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [clock-timer](#clock-timer)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [CHANGELOG](#changelog)
+  * [TODO](#todo)
+  * [Support, Bugs and Feedback](#support-bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Preconditions
 
@@ -381,9 +382,19 @@ Without defining any comparison, the node allows by only defining inputs and res
 
 ### blind-control
 
+![blind-control](https://user-images.githubusercontent.com/12692680/70033605-1c36c400-15b0-11ea-94db-fbf30eb6d7b7.png)
+
 Used to control a blind with many possibilities. This can be time-dependent and it can calculate the blind position based on the current position of the sun to limit the sun light To limit the sunlight on the floor of a window.
 
 [blind-control](blind_control.md)
+
+### clock-timer
+
+![clock-timer](https://user-images.githubusercontent.com/12692680/70033610-1e991e00-15b0-11ea-8035-8a74164f7d64.png)
+
+Used to control a flow time based with many possibilities. This can be used to switch something which is time-dependent (e.g. Christmas lights).
+
+[clock-timer](clock_timer.md)
 
 ### Times definitions
 

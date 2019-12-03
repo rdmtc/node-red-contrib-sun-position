@@ -49,6 +49,18 @@
         }
 
         /**
+         * get the value for the day checkbox array
+         * @param {jQuery} value - the checkbox array
+         * @returns {string} the value of the checkboxes
+         */
+        function getDaysStr(value) {
+            const days = value.map((_, el) => { return $(el).val(); }).get();
+            if (days.length === 0) { return ''; }
+            if (days.length === 7) { return '*'; }
+            return days.join(',');
+        }
+
+        /**
          * get the label for a typed input vlaue
          * @param {*} node - the node object for getting i18N Data (node._())
          * @param {string} t - the type of the value
@@ -244,8 +256,12 @@
          * @returns {string} description of the rule
          */
         function getRuleDescription(node, selFields, data, enh) {
+            console.log('getRuleDescription', data);
             let result = '';
             try {
+                if (!data.valid || !data.isValid) {
+                    result += '<div>Rule is invalid and needs to be changed!!</div>';
+                }
                 if (data.validOperandAType && data.validOperandAType !== 'none') {
                     result += '<div>';
                     result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
@@ -323,6 +339,16 @@
                         }
                         result += '</div>';
                     }
+                    if (data.timeDays && data.timeDays!=='*') {
+                        result += '<div class="indent-time-daya"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                        result += node._('clock-timer.label.ruleTimeDays');
+                        result += '</span> <var>';
+                        const days = data.timeDays.split(',');
+                        days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v+7)));
+                        result += days.join(',');// data.timeDays.replace('0','7');
+                        result += '</var></div>';
+                    }
+
                     result += '</div>';
                 }
                 result += '<div>';
@@ -343,7 +369,7 @@
                         result += '</div>';
                     }
                 } else {
-                    result += '-';
+                    result += node._('clock-timer.label.rulePayloadND');
                 }
                 result += '</div>';
             } catch (err) {
@@ -452,7 +478,7 @@
                 const node = this;
                 const setup = function(node) {
                     // console.log('clock-timer setup IN');
-                    /* global getTypes getSelectFields appendOptions autocomplete setupTInput initCombobox appendOptions getBackendData bdDateToTime */
+                    /* global getTypes getSelectFields appendOptions autocomplete setupTInput initCombobox initDaysCheckbox appendOptions getBackendData bdDateToTime */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -544,11 +570,14 @@
                         defaultType: types.Undefined.value,
                         types: [
                             types.Undefined,
+                            types.MsgPayload,
+                            types.MsgValue,
                             'str',
                             'num',
                             'bool',
                             'date',
                             types.DateSpecific,
+                            'msg',
                             'flow',
                             'global',
                             'json',
@@ -655,6 +684,8 @@
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
                             }
+                            data.valid = {};
+                            data.isValid = false;
                             data.index = containerIndex;
                             data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
                             data.validOperandBType = (data.validOperandBType || 'num');
@@ -798,14 +829,6 @@
                         });
                     });
                     // #endregion Button
-                    // #endregion rules
-                    // #region Enhanced settings
-                    $('.spinner-time').spinner({
-                        max: 1439,
-                        min: 0,
-                        step: 1
-                    });
-                    // #endregion Enhanced settings
                     // fill rules
                     // console.log('clock-timer fill rules');
                     if (node.rules) {
@@ -815,7 +838,14 @@
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
                     }
-
+                    // #endregion rules
+                    // #region Enhanced settings
+                    $('.spinner-time').spinner({
+                        max: 1439,
+                        min: 0,
+                        step: 1
+                    });
+                    // #endregion Enhanced settings
                     // #region dialog
                     const $dialog = $('#dialog-edit-rule').dialog({
                         title: node._('clock-timer.label.dialogtitle'),
@@ -845,7 +875,7 @@
                         }
                     });
 
-                    const $dialogName = $dialog.find('#dlg-ip-clktimctl-rule-name');
+                    const $dialogName = $dialog.find('#dlg-ip-clktime-rule-name');
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
@@ -854,16 +884,16 @@
                      * Build the dialog
                      */
                     // #region dialogCond1
-                    const $dialogCondAOperand = $dialog.find('#dlg-ip-clktimctl-rule-condAOperand');
+                    const $dialogCondAOperand = $dialog.find('#dlg-ip-clktime-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
                         types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
-                    const $dialogCondAOperator = $dialog.find('#dlg-ip-clktimctl-rule-condAOperator');
+                    const $dialogCondAOperator = $dialog.find('#dlg-ip-clktime-rule-condAOperator');
                     appendOptions(node, $dialogCondAOperator, 'comparator');
-                    const $dialogCondBOperand = $dialog.find('#dlg-ip-clktimctl-rule-condBOperand');
+                    const $dialogCondBOperand = $dialog.find('#dlg-ip-clktime-rule-condBOperand');
                     $dialogCondBOperand.typedInput({
                         default: 'num',
                         types: ['num', 'str', 'bool', 'flow', 'global', 'env']
@@ -871,21 +901,21 @@
                     $dialogCondBOperand.typedInput('width', '70%');
                     // #endregion dialogCond1
                     // #region dialogCond2
-                    const $dialogCond2LogOperator = $dialog.find('#dlg-ip-clktimctl-rule-cond2LogOperator');
+                    const $dialogCond2LogOperator = $dialog.find('#dlg-ip-clktime-rule-cond2LogOperator');
                     $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleCondNone')));
                     $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleCondOr')));
                     $dialogCond2LogOperator.append($('<option></option>').val(2).text(node._('clock-timer.label.ruleCondAnd')));
 
-                    const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktimctl-rule-cond2AOperand');
+                    const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktime-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
                         types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
-                    const $dialogCond2AOperator = $dialog.find('#dlg-ip-clktimctl-rule-cond2AOperator');
+                    const $dialogCond2AOperator = $dialog.find('#dlg-ip-clktime-rule-cond2AOperator');
                     appendOptions(node, $dialogCond2AOperator, 'comparator');
-                    const $dialogCond2BOperand = $dialog.find('#dlg-ip-clktimctl-rule-cond2BOperand');
+                    const $dialogCond2BOperand = $dialog.find('#dlg-ip-clktime-rule-cond2BOperand');
                     $dialogCond2BOperand.typedInput({
                         default: 'num',
                         types: ['num', 'str', 'bool', 'flow', 'global', 'env']
@@ -893,21 +923,21 @@
                     $dialogCond2BOperand.typedInput('width', '70%');
                     // #endregion dialogCond2
                     // #region dialogTimeReg
-                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-clktimctl-rule-timeReg-operator');
+                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-clktime-rule-timeReg-operator');
                     $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleTimeUntil')));
                     $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleTimeFrom')));
 
-                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-clktimctl-rule-timeReg');
+                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-clktime-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
-                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeReg');
+                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeReg');
                     appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeReg');
+                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -923,17 +953,17 @@
                     $dialogTimeRegOffset.typedInput('width', '40%');
                     // #endregion dialogTimeReg
                     // #region dialogTimeMin
-                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-clktimctl-rule-timeMin');
+                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-clktime-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
-                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeMin');
+                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeMin');
                     appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeMin');
+                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -949,17 +979,17 @@
                     $dialogTimeMinOffset.typedInput('width', '40%');
                     // #endregion dialogTimeMin
                     // #region dialogTimeMax
-                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-clktimctl-rule-timeMax');
+                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-clktime-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 
-                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-multiplier-timeMax');
+                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeMax');
                     appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-clktimctl-rule-offset-timeMax');
+                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
@@ -975,16 +1005,19 @@
                     $dialogTimeMaxOffset.typedInput('width', '40%');
                     // #endregion dialogTimeMax
                     // #region dialogPayload
-                    const $dialogPayload = $dialog.find('#dlg-ip-clktimctl-rule-payload');
+                    const $dialogPayload = $dialog.find('#dlg-ip-clktime-rule-payload');
                     $dialogPayload.typedInput({
                         default: types.Undefined.value,
                         types: [
                             types.Undefined,
+                            types.MsgPayload,
+                            types.MsgValue,
                             'str',
                             'num',
                             'bool',
                             'date',
                             types.DateSpecific,
+                            'msg',
                             'flow',
                             'global',
                             'json',
@@ -1009,19 +1042,19 @@
                     });
                     $dialogPayload.typedInput('width', '40%');
 
-                    const $dialogPayloadOffset = $dialog.find('#dlg-ip-clktimctl-rule-payloadOffset');
+                    const $dialogPayloadOffset = $dialog.find('#dlg-ip-clktime-rule-payloadOffset');
                     $dialogPayloadOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata']
                     }).change(() => { $dialogPayload.change(); });
                     $dialogPayloadOffset.typedInput('width', '40%');
 
-                    const $dialogPayloadMultiplier = $dialog.find('#dlg-ip-clktimctl-rule-payloadOffsetMultiplier');
+                    const $dialogPayloadMultiplier = $dialog.find('#dlg-ip-clktime-rule-payloadOffsetMultiplier');
                     appendOptions(node, $dialogPayloadMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-clktimctl-rule-payloadTimeFormat');
-                    const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-clktimctl-rule-payloadTimeFormatsel');
-                    const $dialogTopic = $dialog.find('#dlg-ip-clktimctl-rule-topic');
+                    const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormat');
+                    const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormatsel');
+                    const $dialogTopic = $dialog.find('#dlg-ip-clktime-rule-topic');
                     // console.log('[IN initCombobox] node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
                     appendOptions(node, $dialogPayloadTimeFormatsel, 'outputFormats');
                     autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
@@ -1046,6 +1079,7 @@
                             $('#dialog-row-timeMax').hide();
                             $('#dialog-row-offset-timeMin').hide();
                             $('#dialog-row-offset-timeMax').hide();
+                            $('#dialog-row-timeDays').hide();
                             // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
@@ -1059,9 +1093,11 @@
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').show();
+                            $('#dialog-row-timeDays').show();
                         } else {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').hide();
+                            $('#dialog-row-timeDays').show();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -1091,6 +1127,8 @@
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             offset:     $dialogTimeRegOffset.typedInput('value'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            next:       1,
+                            days:       getDaysStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked')),
                             noOffsetError: true
                         });
                         $dialogTimeMinInput.change();
@@ -1145,6 +1183,8 @@
                                 offsetType: $dialogTimeMinOffset.typedInput('type'),
                                 offset: $dialogTimeMinOffset.typedInput('value'),
                                 multiplier: parseInt($dialogTimeMinMultiplier.val()),
+                                next: 1,
+                                days: getDaysStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked')),
                                 noOffsetError: true
                             });
                         }
@@ -1198,6 +1238,8 @@
                                 offsetType: $dialogTimeMaxOffset.typedInput('type'),
                                 offset: $dialogTimeMaxOffset.typedInput('value'),
                                 multiplier: parseInt($dialogTimeMaxMultiplier.val()),
+                                next: 1,
+                                days: getDaysStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked')),
                                 noOffsetError: true
                             });
                         }
@@ -1331,11 +1373,11 @@
                             kind:       'getOutDataData',
                             config:     $nodeConfig.val(),
                             type:       plVType,
-                            value:      $('#dlg-ip-clktimctl-rule-payload').typedInput('value'),
-                            format:     $('#dlg-ip-clktimctl-rule-payloadTimeFormat').val(),
-                            offsetType: $('#dlg-ip-clktimctl-rule-payloadOffset').typedInput('type'),
-                            offset:     $('#dlg-ip-clktimctl-rule-payloadOffset').typedInput('value'),
-                            multiplier: $('#dlg-ip-clktimctl-rule-payloadOffsetMultiplier').val(),
+                            value:      $('#dlg-ip-clktime-rule-payload').typedInput('value'),
+                            format:     $('#dlg-ip-clktime-rule-payloadTimeFormat').val(),
+                            offsetType: $('#dlg-ip-clktime-rule-payloadOffset').typedInput('type'),
+                            offset:     $('#dlg-ip-clktime-rule-payloadOffset').typedInput('value'),
+                            multiplier: $('#dlg-ip-clktime-rule-payloadOffsetMultiplier').val(),
                             noOffsetError: true
                         });
                     });
@@ -1413,6 +1455,8 @@
                             setTI($dialogTimeRegInput, data.timeValue, data.timeType);
                             setTI($dialogTimeRegOffset, data.offsetValue, data.offsetType);
 
+                            initDaysCheckbox('#dlg-ip-clktime-rule-timeDays', data.timeDays);
+
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
                             setTI($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
@@ -1450,9 +1494,11 @@
                      * Get the data object for a rule
                      */
                     function _dialogGetData() {
-                        return {
+                        const result = {
                             index: dialogDataIndex,
                             name:$dialogName.val(),
+                            isValid:true,
+                            valid:{},
 
                             timeValue: $dialogTimeRegInput.typedInput('value'),
                             timeType: $dialogTimeRegInput.typedInput('type'),
@@ -1460,7 +1506,8 @@
                             timeOpText: $dialogTimeRegOperator.find('option:selected').text(),
                             offsetValue: $dialogTimeRegOffset.typedInput('value'),
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
-                            multiplier:   parseInt($dialogTimeRegMultiplier.val()),
+                            multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            timeDays: getDaysStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked')),
 
                             timeMinValue: $dialogTimeMinInput.typedInput('value'),
                             timeMinType: $dialogTimeMinInput.typedInput('type'),
@@ -1498,6 +1545,44 @@
                             valid2OperandBValue: $dialogCond2BOperand.typedInput('value'),
                             valid2OperandBType: $dialogCond2BOperand.typedInput('type')
                         };
+                        result.valid.validTimeReg = $dialogTimeRegInput.typedInput('validate');
+                        if (result.valid.validTimeReg && result.timeType !== 'none') {
+                            result.valid.validTimeReg = $dialogTimeRegOffset.typedInput('validate') &&
+                                result.multiplier &&
+                                $dialogTimeMinInput.typedInput('validate') &&
+                                $dialogTimeMaxInput.typedInput('validate');
+                            if (result.valid.validTimeReg && result.timeMinType !== 'none') {
+                                result.valid.validTimeReg = $dialogTimeMinOffset.typedInput('validate') &&
+                                    result.multiplierMin;
+                            }
+                            if (result.valid.validTimeReg && result.timeMaxType !== 'none') {
+                                result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
+                                    result.multiplierMax;
+                            }
+                        }
+                        result.isValid = result.valid.validTimeReg;
+                        result.valid.validPayload = $dialogPayload.typedInput('validate');
+                        if (result.valid.validPayload && result.payloadType !== 'none') {
+                            result.valid.validPayload = $dialogPayloadOffset.typedInput('validate') &&
+                                result.payloadOffsetMultiplier &&
+                                result.payloadFormat;
+                        }
+                        result.isValid = result.isValid && result.valid.validPayload;
+                        result.valid.validOperand1 = $dialogCondAOperand.typedInput('validate');
+                        if (result.valid.validOperand1 && result.validOperandAType !== 'none') {
+                            result.valid.validOperand1 = $dialogCondBOperand.typedInput('validate') &&
+                                result.validOperator;
+                            result.valid.validOperand2 = $dialogCond2AOperand.typedInput('validate');
+                            if (result.valid.validOperand2 && result.validOperandAType !== 'none') {
+                                result.valid.validOperand2 = $dialogCond2BOperand.typedInput('validate') &&
+                                    result.valid2Operator &&
+                                    result.valid2LogOperator;
+                            }
+                            result.isValid = result.isValid && result.valid.validOperand2;
+                        }
+                        result.isValid = result.isValid && result.valid.validOperand1;
+
+                        return result;
                     }
                     /**
                      * save the data of the rule back
@@ -1631,7 +1716,7 @@
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
     </div>
     <div class="form-tips is-to-show-initially">
-        <span data-i18n="[html]clock-timer.tips.sunPosControl" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]clock-timer.tips.timerControl" style="word-wrap:break-word;"></span>
     </div>
 
     <!-- DIALOG ######################################################################## -->
@@ -1641,90 +1726,112 @@
 
     <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
         <div class="dialog-row">
-            <label for="dlg-ip-clktimctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="clock-timer.label.name"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-name" class="ipalone" data-i18n="[placeholder]clock-timer.placeholder.name">
+            <label for="dlg-ip-clktime-rule-name"><i class="fa fa-tag"></i> <span data-i18n="clock-timer.label.name"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-name" class="ipalone" data-i18n="[placeholder]clock-timer.placeholder.name">
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-condA">
-            <label for="dlg-ip-clktimctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
-            <select id="dlg-ip-clktimctl-rule-condAOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0" id="dialog-row-condA">
+            <label for="dlg-ip-clktime-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-condAOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <select id="dlg-ip-clktime-rule-condAOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-condB">
-            <label for="dlg-ip-clktimctl-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-clktimctl-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <label for="dlg-ip-clktime-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-clktime-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-cond2LogOperator">
-            <label for="dlg-ip-clktimctl-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleAndOr"></span></label>
-            <select id="dlg-ip-clktimctl-rule-cond2LogOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
+            <label for="dlg-ip-clktime-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleAndOr"></span></label>
+            <select id="dlg-ip-clktime-rule-cond2LogOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-cond2A">
-            <label for="dlg-ip-clktimctl-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
-            <select id="dlg-ip-clktimctl-rule-cond2AOperator" class="ipadd dlg-ip-clktimctl-rule-condOperator" >
+            <label for="dlg-ip-clktime-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <select id="dlg-ip-clktime-rule-cond2AOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
             </select>
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-cond2B">
-            <label for="dlg-ip-clktimctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-clktimctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+            <label for="dlg-ip-clktime-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
+            <input id="dlg-ip-clktime-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-timeReg">
-            <label for="dlg-ip-clktimctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.time"></span></label>
-            <select id="dlg-ip-clktimctl-rule-timeReg-operator" class="ipadd dlg-ip-clktimctl-rule-timeReg-operator" >
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0" id="dialog-row-timeReg">
+            <label for="dlg-ip-clktime-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.time"></span></label>
+            <select id="dlg-ip-clktime-rule-timeReg-operator" class="ipadd dlg-ip-clktime-rule-timeReg-operator" >
             </select>
-            <input type="text" id="dlg-ip-clktimctl-rule-timeReg" class="ipMain dlg-ip-clktimctl-rule-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <input type="text" id="dlg-ip-clktime-rule-timeReg" class="ipMain dlg-ip-clktime-rule-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeReg">
-            <label for="dlg-ip-clktimctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeReg"class="ipMain dlg-ip-clktimctl-rule-offset-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktimctl-rule-multiplier-timeReg" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeReg" >
+            <label for="dlg-ip-clktime-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-offset-timeReg"class="ipMain dlg-ip-clktime-rule-offset-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktime-rule-multiplier-timeReg" class="ipadd dlg-ip-clktime-rule-multiplier-timeReg" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-clktimctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
-            <!-- select id="dlg-ip-clktimctl-rule-timeMax-operator" class="ipadd dlg-ip-clktimctl-rule-timeMax-operator" >
+            <label for="dlg-ip-clktime-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
+            <!-- select id="dlg-ip-clktime-rule-timeMax-operator" class="ipadd dlg-ip-clktime-rule-timeMax-operator" >
             </select -->
-            <input type="text" id="dlg-ip-clktimctl-rule-timeMin" class="ipMain dlg-ip-clktimctl-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <input type="text" id="dlg-ip-clktime-rule-timeMin" class="ipMain dlg-ip-clktime-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
-            <label for="dlg-ip-clktimctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeMin"class="ipMain dlg-ip-clktimctl-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktimctl-rule-multiplier-timeMin" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeMin" >
+            <label for="dlg-ip-clktime-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-offset-timeMin"class="ipMain dlg-ip-clktime-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktime-rule-multiplier-timeMin" class="ipadd dlg-ip-clktime-rule-multiplier-timeMin" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-clktimctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-timeMax" class="ipMain dlg-ip-clktimctl-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <label for="dlg-ip-clktime-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-timeMax" class="ipMain dlg-ip-clktime-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
-            <label for="dlg-ip-clktimctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-offset-timeMax"class="ipMain dlg-ip-clktimctl-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktimctl-rule-multiplier-timeMax" class="ipadd dlg-ip-clktimctl-rule-multiplier-timeMax" >
+            <label for="dlg-ip-clktime-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-offset-timeMax"class="ipMain dlg-ip-clktime-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-clktime-rule-multiplier-timeMax" class="ipadd dlg-ip-clktime-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row pt-2 block-noindent" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
-            <label for="dlg-ip-clktimctl-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
-            <input type="hidden" id="dlg-ip-clktimctl-rule-payloadType">
+        <div class="dialog-row dialog-row-timeDays" id="dialog-row-timeDays" data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
+            <div id="dlg-ip-clktime-rule-timeDays" class="dlg-ip-clktime-rule-days">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+                <div style="display:inline-block;">
+                    <div>
+                        <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                        <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                        <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                        <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    </div>
+                    <div>
+                        <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                        <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                        <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
+            <label for="dlg-ip-clktime-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
+            <input type="hidden" id="dlg-ip-clktime-rule-payloadType">
         </div>
         <div class="dialog-row pt-2 block-indent1" id="dialog-row-payloadOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
-            <label for="dlg-ip-clktimctl-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
-            <input id="dlg-ip-clktimctl-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"></input>
-            <input type="hidden" id="dlg-ip-clktimctl-rule-payloadOffsetType">
-            <select id="dlg-ip-clktimctl-rule-payloadOffsetMultiplier" class="node-input-multiplier ipadd"></select>
+            <label for="dlg-ip-clktime-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
+            <input id="dlg-ip-clktime-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"></input>
+            <input type="hidden" id="dlg-ip-clktime-rule-payloadOffsetType">
+            <select id="dlg-ip-clktime-rule-payloadOffsetMultiplier" class="node-input-multiplier ipadd"></select>
         </div>
         <div class="dialog-row pt-2 block-indent1" id="dialog-row-payloadTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
-            <label for="dlg-ip-clktimctl-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
-            <select id="dlg-ip-clktimctl-rule-payloadTimeFormatsel" class="ipMain">
+            <label for="dlg-ip-clktime-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
+            <select id="dlg-ip-clktime-rule-payloadTimeFormatsel" class="ipMain">
             </select>
-            <input type="text" id="dlg-ip-clktimctl-rule-payloadTimeFormat" class="ipadd" />
+            <input type="text" id="dlg-ip-clktime-rule-payloadTimeFormat" class="ipadd" />
         </div>
         <div class="dialog-row pt-2 block-noindent" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic">
-            <label for="dlg-ip-clktimctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-            <input type="text" id="dlg-ip-clktimctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
+            <label for="dlg-ip-clktime-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-clktime-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>
-        <div class="dialog-row pt-2 block-noindent" id="dialog-row-descr">
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">
             <label for="dlg-txt-clktimctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
             <div id="dlg-txt-clktimctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
@@ -1734,6 +1841,12 @@
     hr { width: 100% }
     .mt-0 { margin-top:0 !important; }
     .mb-0 { margin-bottom:0 !important; }
+    .mt-1 { margin-top:0.5rem !important; }
+    .mb-1 { margin-bottom:0.5rem !important; }
+    .pt-0 { padding-top:0 !important; }
+    .pb-0 { padding-bottom:0 !important; }
+    .pl-0 { padding-left:0 !important; }
+    .pr-0 { padding-right:0 !important; }
     .pt-1 { padding-top:0.5rem !important; }
     .pb-1 { padding-bottom:0.5rem !important; }
     .pl-1 { padding-left:0.5rem !important; }
@@ -1752,13 +1865,13 @@
     .block-indent1 {
         float: left;
         min-height: 1px;
-        margin-left: 2%; /* 10px; */
+        margin-left: 10px;
         width: 98%
     }
     .block-indent1-noadd {
         float: left;
         min-height: 1px;
-        margin-left: 2%; /* 10px; */
+        margin-left: 10px;
         width: 98%
     }
     .input-error {
@@ -1769,7 +1882,7 @@
     .block-indent2 {
         float: left;
         min-height: 1px;
-        margin-left: 4%; /* 20px; */
+        margin-left: 20px;
         width: 96%
     }
     .block-indent2-noadd {
@@ -1837,17 +1950,17 @@
     }
     .dialog-row label {
         display: inline-block;
-        /* width: 9rem; */
-        width: 25%;
+        width: 9rem;
+        /* width: 25%; */
         margin-bottom: 0px !important;
     }
     .dialog-row.block-indent1 label {
-        /* width: 11rem; */
-        width: 23%;
+        width: 11rem;
+        /*width: 23%; */
     }
     .dialog-row.block-indent2 label {
-        /* width: 13rem; */
-        width: 22%;
+        width: 13rem;
+        /* width: 22%;*/
     }
 
     .dialog-row .ipalone {
@@ -1880,13 +1993,30 @@
     .dialog-row.block-indent2 .ipMain {
         width: 45%;
         margin-bottom: 0px !important;
-    }npm
+    }
+    .dlg-ip-clktime-rule-days {
+        margin-top: 5px;
+        margin-left: 30%;
+    }
+    .dlg-ip-clktime-rule-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 110px !important;
+    }
+    .dlg-ip-clktime-rule-days input {
+        width: auto;
+        vertical-align: baseline;
+    }
     .clock-timer-rule-mainblock {
         margin-right: 28px;
     }
     .clock-timer-rule-name-span {
         /* font-weight: bolder; */
-        width: 30%; /* width: 120px; */
+        width: 26%; /* width: 120px; */
         float: left;
     }
     .clock-timer-rule-description-span {
