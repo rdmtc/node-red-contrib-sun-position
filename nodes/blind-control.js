@@ -209,8 +209,8 @@ module.exports = function (RED) {
      */
     function evalTempData(node, type, value, data, tempData) {
         // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        const name = `${type}.${value}`;
         if (data === null || typeof data === 'undefined') {
-            const name = `${type}.${value}`;
             if (typeof tempData[name] !== 'undefined') {
                 if (type !== 'PlT') {
                     node.log(RED._('blind-control.errors.usingTempValue', { type, value, usedValue: tempData[name] }));
@@ -224,7 +224,7 @@ module.exports = function (RED) {
             node.nowarn[name] = true;
             return undefined;
         }
-        tempData[`${type}.${value}`] = data;
+        tempData[name] = data;
         return data;
     }
 
@@ -360,7 +360,7 @@ module.exports = function (RED) {
         node.timeOutObj = setTimeout(() => {
             node.debug('timeout - overwrite expired');
             blindPosOverwriteReset(node);
-            node.emit('input', { payload: -1, topic: 'internal-trigger-overwriteExpired', force: false });
+            node.emit('input', { payload: -1, topic: 'internal-triggerOnly-overwriteExpired', force: false });
         }, expire);
     }
 
@@ -718,6 +718,7 @@ module.exports = function (RED) {
         }
         rule.timeData.source = 'Default';
         rule.timeData.ts = rule.timeData.value.getTime();
+        rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
         if (rule.timeMinType !== 'none') {
             rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, {
                 type: rule.timeMinType,
@@ -740,6 +741,7 @@ module.exports = function (RED) {
                     rule.timeData = rule.timeDataMin;
                     rule.timeDataMin = tmp;
                     rule.timeData.ts = numMin;
+                    rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
                 }
             }
         }
@@ -765,6 +767,7 @@ module.exports = function (RED) {
                     rule.timeData = rule.timeDataMax;
                     rule.timeDataMax = tmp;
                     rule.timeData.ts = numMax;
+                    rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
                 }
             }
         }
@@ -782,6 +785,8 @@ module.exports = function (RED) {
         node.debug('checkRules ----------------------------------------------------------------------------');
         const livingRuleData = {};
         const nowNr = now.getTime();
+        const dayNr = now.getDay();
+        const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
         node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
@@ -801,9 +806,12 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
+            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(dayNr)) {
+                return null;
+            }
             const num = getRuleTimeData(node, msg, rule, now);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-            if (num >=0  && cmp(num)) {
+            if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
                 return rule;
             }
             return null;
@@ -919,7 +927,6 @@ module.exports = function (RED) {
             }
             // ruleSel.text = '';
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
-            node.reason.code = 4;
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             node.reason.code = 4;
@@ -1162,7 +1169,7 @@ module.exports = function (RED) {
                 }
 
                 // check if the message contains any oversteering data
-                let ruleId = -1; // NaN;
+                let ruleId = -1;
 
                 const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
                 if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {

@@ -9,6 +9,9 @@
 - general
   - added on several settings the possibility to use payload if the topic of an incoming message contains special value.
   - fixed smaller problems
+- blind-control
+  - added possibility to limit rules for several days
+  - added validation of rules (shows a hint if a rule in invalid)
 
 - The big jump in the version number is not due to the amount change, but rather otherwise.
   - The Version starting with 1... will show that this node is tested and working with Node-Red above 1...

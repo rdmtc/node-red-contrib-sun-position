@@ -102,6 +102,18 @@
         }
 
         /**
+         * get the value for the day checkbox array
+         * @param {jQuery} value - the checkbox array
+         * @returns {string} the value of the checkboxes
+         */
+        function getDaysStr(value) {
+            const days = value.map((_, el) => { return $(el).val(); }).get();
+            if (days.length === 0) { return ''; }
+            if (days.length === 7) { return '*'; }
+            return days.join(',');
+        }
+
+        /**
          * get the label for a typed input vlaue
          * @param {*} node - the node object for getting i18N Data (node._())
          * @param {string} t - the type of the value
@@ -311,6 +323,9 @@
         function getRuleDescription(node, selFields, data, enh) {
             let result = '';
             try {
+                if (!data.valid || !data.isValid) {
+                    result += '<div>Rule is invalid and needs to be changed!!</div>';
+                }
                 if (data.validOperandAType && data.validOperandAType !== 'none') {
                     result += '<div>';
                     result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
@@ -388,6 +403,16 @@
                         }
                         result += '</div>';
                     }
+                    if (data.timeDays && data.timeDays!=='*') {
+                        result += '<div class="indent-time-daya"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                        result += node._('blind-control.label.ruleTimeDays');
+                        result += '</span> <var>';
+                        const days = data.timeDays.split(',');
+                        days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v+7)));
+                        result += days.join(',');// data.timeDays.replace('0','7');
+                        result += '</var></div>';
+                    }
+
                     result += '</div>';
                 }
                 result += '<div>';
@@ -410,7 +435,6 @@
                 } else {
                     result += '-';
                 }
-
                 result += '</div>';
             } catch (err) {
                 console.log(err.message); // eslint-disable-line no-console
@@ -775,7 +799,7 @@
                 // #endregion Dialog
 
                 const setup = function(node) {
-                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime */
+                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initDaysCheckbox */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -931,6 +955,8 @@
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
                             }
+                            data.valid = {};
+                            data.isValid = false;
                             data.index = containerIndex;
                             data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
                             data.validOperandBType = (data.validOperandBType || 'num');
@@ -1085,6 +1111,14 @@
                         });
                     });
                     // #endregion Button
+                    // fill rules
+                    if (node.rules) {
+                        for (let i = 0; i < node.rules.length; i++) {
+                            const rule = node.rules[i];
+                            // rule.index = i;
+                            $('#node-input-rule-container').editableList('addItem', rule);
+                        }
+                    }
                     // #endregion rules
                     // #region sun
                     $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
@@ -1407,15 +1441,6 @@
                         step: 1
                     });
                     // #endregion Enhanced settings
-                    // fill rules
-                    if (node.rules) {
-                        for (let i = 0; i < node.rules.length; i++) {
-                            const rule = node.rules[i];
-                            // rule.index = i;
-                            $('#node-input-rule-container').editableList('addItem', rule);
-                        }
-                    }
-
                     // #region dialog
                     const $dialog = $('#dialog-edit-rule').dialog({
                         title: node._('blind-control.label.dialogtitle'),
@@ -1504,6 +1529,9 @@
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
+                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeReg');
+                    appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
+
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
@@ -1518,9 +1546,6 @@
                         $dialogTimeRegInput.change();
                     });
                     $dialogTimeRegOffset.typedInput('width', '40%');
-
-                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeReg');
-                    appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeReg
                     // #region dialogTimeMin
                     const $dialogTimeMinInput = $dialog.find('#dlg-ip-blindctl-rule-timeMin');
@@ -1529,6 +1554,9 @@
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
+
+                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMin');
+                    appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
 
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
@@ -1544,9 +1572,6 @@
                         $dialogTimeMinInput.change();
                     });
                     $dialogTimeMinOffset.typedInput('width', '40%');
-
-                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMin');
-                    appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeMin
                     // #region dialogTimeMax
                     const $dialogTimeMaxInput = $dialog.find('#dlg-ip-blindctl-rule-timeMax');
@@ -1555,6 +1580,9 @@
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
+
+                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMax');
+                    appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
 
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-blindctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
@@ -1570,9 +1598,6 @@
                         $dialogTimeMaxInput.change();
                     });
                     $dialogTimeMaxOffset.typedInput('width', '40%');
-
-                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-blindctl-rule-multiplier-timeMax');
-                    appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
                     // #endregion dialogTimeMax
                     // #region dialogLevel
                     const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
@@ -1606,6 +1631,7 @@
                             $('#dialog-row-timeMax').hide();
                             $('#dialog-row-offset-timeMin').hide();
                             $('#dialog-row-offset-timeMax').hide();
+                            $('#dialog-row-timeDays').hide();
                             // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
@@ -1619,9 +1645,11 @@
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').show();
+                            $('#dialog-row-timeDays').show();
                         } else {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').hide();
+                            $('#dialog-row-timeDays').show();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -1651,6 +1679,7 @@
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             offset:     $dialogTimeRegOffset.typedInput('value'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            days:       getDaysStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked')),
                             noOffsetError: true
                         });
                         $dialogTimeMinInput.change();
@@ -1706,6 +1735,7 @@
                                 offsetType: $dialogTimeMinOffset.typedInput('type'),
                                 offset: $dialogTimeMinOffset.typedInput('value'),
                                 multiplier: parseInt($dialogTimeMinMultiplier.val()),
+                                days: getDaysStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked')),
                                 noOffsetError: true
                             });
                         }
@@ -1760,6 +1790,7 @@
                                 offsetType: $dialogTimeMaxOffset.typedInput('type'),
                                 offset: $dialogTimeMaxOffset.typedInput('value'),
                                 multiplier: parseInt($dialogTimeMaxMultiplier.val()),
+                                days: getDaysStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked')),
                                 noOffsetError: true
                             });
                         }
@@ -1917,6 +1948,8 @@
                             setTI($dialogTimeRegInput, data.timeValue, data.timeType);
                             setTI($dialogTimeRegOffset, data.offsetValue, data.offsetType);
 
+                            initDaysCheckbox('#dlg-ip-blindctl-rule-timeDays', data.timeDays);
+
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
                             setTI($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
@@ -1946,9 +1979,11 @@
                      * Get the data object for a rule
                      */
                     function _dialogGetData() {
-                        return {
+                        const result = {
                             index: dialogDataIndex,
                             name:$dialogName.val(),
+                            isValid:true,
+                            valid:{},
 
                             timeValue: $dialogTimeRegInput.typedInput('value'),
                             timeType: $dialogTimeRegInput.typedInput('type'),
@@ -1956,7 +1991,8 @@
                             timeOpText: $dialogTimeRegOperator.find('option:selected').text(),
                             offsetValue: $dialogTimeRegOffset.typedInput('value'),
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
-                            multiplier:   parseInt($dialogTimeRegMultiplier.val()),
+                            multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            timeDays: getDaysStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked')),
 
                             timeMinValue: $dialogTimeMinInput.typedInput('value'),
                             timeMinType: $dialogTimeMinInput.typedInput('type'),
@@ -1991,6 +2027,37 @@
                             valid2OperandBValue: $dialogCond2BOperand.typedInput('value'),
                             valid2OperandBType: $dialogCond2BOperand.typedInput('type')
                         };
+                        result.valid.validTimeReg = $dialogTimeRegInput.typedInput('validate');
+                        if (result.valid.validTimeReg && result.timeType !== 'none') {
+                            result.valid.validTimeReg = $dialogTimeRegOffset.typedInput('validate') &&
+                                result.multiplier &&
+                                $dialogTimeMinInput.typedInput('validate') &&
+                                $dialogTimeMaxInput.typedInput('validate');
+                            if (result.valid.validTimeReg && result.timeMinType !== 'none') {
+                                result.valid.validTimeReg = $dialogTimeMinOffset.typedInput('validate') &&
+                                    result.multiplierMin;
+                            }
+                            if (result.valid.validTimeReg && result.timeMaxType !== 'none') {
+                                result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
+                                    result.multiplierMax;
+                            }
+                        }
+                        result.isValid = result.valid.validTimeReg;
+                        result.valid.validLevel = $dialogLevel.typedInput('validate');
+                        result.isValid = result.isValid && result.valid.validLevel;
+                        result.valid.validOperand1A = $dialogCondAOperand.typedInput('validate');
+                        if (result.validOperandAType !== 'none') {
+                            result.valid.validOperand1B = $dialogCondBOperand.typedInput('validate');
+                            result.isValid = result.isValid && result.valid.validOperand1B;
+                            if (result.valid2LogOperator) {
+                                result.valid.validOperand2A = $dialogCond2AOperand.typedInput('validate');
+                                result.valid.validOperand2B = $dialogCond2BOperand.typedInput('validate');
+                                result.isValid = result.isValid && result.valid.validOperand2A && result.valid.validOperand2B;
+                            }
+                        }
+                        result.isValid = result.isValid && result.valid.validOperand1A;
+                        console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
+                        return result;
                     }
                     /**
                      * save the data of the rule back
@@ -2288,7 +2355,8 @@
             <label for="dlg-ip-blindctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="blind-control.label.name"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-name" class="ipalone" data-i18n="[placeholder]blind-control.placeholder.name">
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-condA">
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0" id="dialog-row-condA">
             <label for="dlg-ip-blindctl-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="blind-control.label.ruleCondition"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-condAOperand" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.condoperand">
             <select id="dlg-ip-blindctl-rule-condAOperator" class="ipadd dlg-ip-blindctl-rule-condOperator" >
@@ -2313,7 +2381,8 @@
             <label for="dlg-ip-blindctl-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="blind-control.label.ruleConditionThreshold"></span></label>
             <input id="dlg-ip-blindctl-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]blind-control.placeholder.condoperand">
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-timeReg">
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0" id="dialog-row-timeReg">
             <label for="dlg-ip-blindctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
             <select id="dlg-ip-blindctl-rule-timeReg-operator" class="ipadd dlg-ip-blindctl-rule-timeReg-operator" >
             </select>
@@ -2347,13 +2416,33 @@
             <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row pt-2" id="dialog-row-level">
+        <div class="dialog-row dialog-row-timeDays" id="dialog-row-timeDays" data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
+            <div id="dlg-ip-blindctl-rule-timeDays" class="dlg-ip-blindctl-rule-days">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+                <div style="display:inline-block;">
+                    <div>
+                        <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                        <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                        <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                        <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    </div>
+                    <div>
+                        <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                        <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                        <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-level">
             <label for="dlg-ip-blindctl-rule-level"><i class="fa fa-window-maximize"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>
-        <div class="dialog-row pt-2 block-noindent" id="dialog-row-descr">
+        <hr class="mt-1 mb-1 pt-0 pb-0">
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">
             <label for="dlg-txt-blindctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="blind-control.label.ruleDescription" ></span></label>
             <div id="dlg-txt-blindctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
@@ -2363,6 +2452,12 @@
     hr { width: 100% }
     .mt-0 { margin-top:0 !important; }
     .mb-0 { margin-bottom:0 !important; }
+    .mt-1 { margin-top:0.5rem !important; }
+    .mb-1 { margin-bottom:0.5rem !important; }
+    .pt-0 { padding-top:0 !important; }
+    .pb-0 { padding-bottom:0 !important; }
+    .pl-0 { padding-left:0 !important; }
+    .pr-0 { padding-right:0 !important; }
     .pt-1 { padding-top:0.5rem !important; }
     .pb-1 { padding-bottom:0.5rem !important; }
     .pl-1 { padding-left:0.5rem !important; }
@@ -2512,7 +2607,24 @@
     .dialog-row.block-indent2 .ipMain {
         width: 45%;
         margin-bottom: 0px !important;
-    }npm
+    }
+    .dlg-ip-blindctl-rule-days {
+        margin-top: 5px;
+        margin-left: 30%;
+    }
+    .dlg-ip-blindctl-rule-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 110px !important;
+    }
+    .dlg-ip-blindctl-rule-days input {
+        width: auto;
+        vertical-align: baseline;
+    }
     .blind-rule-mainblock {
         margin-right: 28px;
     }

@@ -256,7 +256,6 @@
          * @returns {string} description of the rule
          */
         function getRuleDescription(node, selFields, data, enh) {
-            console.log('getRuleDescription', data);
             let result = '';
             try {
                 if (!data.valid || !data.isValid) {
@@ -477,8 +476,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 const setup = function(node) {
-                    // console.log('clock-timer setup IN');
-                    /* global getTypes getSelectFields appendOptions autocomplete setupTInput initCombobox initDaysCheckbox appendOptions getBackendData bdDateToTime */
+                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initDaysCheckbox autocomplete */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -751,7 +749,6 @@
                                 $payloadDefault.change();
                                 resizeContainer();
                             }, 1000);
-
                         },
                         addButton: false,
                         sortable: true,
@@ -830,7 +827,6 @@
                     });
                     // #endregion Button
                     // fill rules
-                    // console.log('clock-timer fill rules');
                     if (node.rules) {
                         for (let i = 0; i < node.rules.length; i++) {
                             const rule = node.rules[i];
@@ -1133,6 +1129,7 @@
                         $dialogTimeMinInput.change();
                         $dialogTimeMaxInput.change();
                     });
+
                     $dialogTimeMinInput.change(() => {
                         if (dialogDataOnLoading) { return; }
                         const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1187,6 +1184,7 @@
                             });
                         }
                     });
+
                     $dialogTimeMaxInput.change(() => {
                         if (dialogDataOnLoading) { return; }
                         const opAType = $dialogTimeRegInput.typedInput('type');
@@ -1344,6 +1342,7 @@
                             $('#dialog-row-topic').hide();
                             $('#dialog-row-payloadTimeFormat').hide();
                             $('#dialog-row-payloadOffset').hide();
+                            _dialogGenHelpText();
                             return;
                         } else if (plVType ===  types.TimeEntered.value ||
                             plVType === types.TimeSun.value ||
@@ -1377,6 +1376,7 @@
                             multiplier: $('#dlg-ip-clktime-rule-payloadOffsetMultiplier').val(),
                             noOffsetError: true
                         });
+                        _dialogGenHelpText();
                     });
 
                     $dialogPayloadTimeFormatsel.on('change focus focusout', (_type, _value) => {
@@ -1394,6 +1394,7 @@
                             $dialogPayloadTimeFormatsel.css({ width: 'calc(100% - ' + width + 'px)' });
                             $dialogPayloadTimeFormat.val($dialogPayloadTimeFormatsel.val());
                         }
+                        _dialogGenHelpText();
                     });
                     // #endregion dialogChange
                     // #region dialogload & save
@@ -1561,23 +1562,21 @@
                         result.valid.validPayload = $dialogPayload.typedInput('validate');
                         if (result.valid.validPayload && result.payloadType !== 'none') {
                             result.valid.validPayload = $dialogPayloadOffset.typedInput('validate') &&
-                                result.payloadOffsetMultiplier &&
-                                result.payloadFormat;
+                                        !isNaN(result.payloadOffsetMultiplier);
                         }
                         result.isValid = result.isValid && result.valid.validPayload;
-                        result.valid.validOperand1 = $dialogCondAOperand.typedInput('validate');
-                        if (result.valid.validOperand1 && result.validOperandAType !== 'none') {
-                            result.valid.validOperand1 = $dialogCondBOperand.typedInput('validate') &&
-                                result.validOperator;
-                            result.valid.validOperand2 = $dialogCond2AOperand.typedInput('validate');
-                            if (result.valid.validOperand2 && result.validOperandAType !== 'none') {
-                                result.valid.validOperand2 = $dialogCond2BOperand.typedInput('validate') &&
-                                    result.valid2Operator &&
-                                    result.valid2LogOperator;
+                        result.valid.validOperand1A = $dialogCondAOperand.typedInput('validate');
+                        if (result.validOperandAType !== 'none') {
+                            result.valid.validOperand1B = $dialogCondBOperand.typedInput('validate');
+                            result.isValid = result.isValid && result.valid.validOperand1B;
+                            if (result.valid2LogOperator) {
+                                result.valid.validOperand2A = $dialogCond2AOperand.typedInput('validate');
+                                result.valid.validOperand2B = $dialogCond2BOperand.typedInput('validate');
+                                result.isValid = result.isValid && result.valid.validOperand2A && result.valid.validOperand2B;
                             }
-                            result.isValid = result.isValid && result.valid.validOperand2;
                         }
-                        result.isValid = result.isValid && result.valid.validOperand1;
+                        result.isValid = result.isValid && result.valid.validOperand1A;
+                        console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
 
                         return result;
                     }

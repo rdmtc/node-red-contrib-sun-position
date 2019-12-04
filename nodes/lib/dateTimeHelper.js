@@ -29,6 +29,10 @@ module.exports = {
     normalizeDate,
     getTimeOfText,
     getDateOfText,
+    getDayOfYear,
+    getWeekOfYear,
+    getUTCDayId,
+    getDayId,
     getTimeNumberUTC,
     getNodeId,
     initializeParser,
@@ -191,10 +195,11 @@ function chkValueFilled(val, defaultVal) {
 /**
  * clip a test to a maximum length
  * @param {string} v text to clip
- * @param {number} l length to clip the text
+ * @param {number} [l] length to clip the text
  */
 function clipStrLength(v, l) {
     l = l || 15;
+    v = String(v);
     if (v.length > l) {
         return v.slice(0, (l - 3)) + '...';
     }
@@ -333,6 +338,22 @@ function getDayOfYear(date) {
     const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
     const oneDay = 1000 * 60 * 60 * 24;
     return [date.getUTCFullYear(),  Math.floor(diff / oneDay)];
+}
+
+/**
+ * gets a day id from a date
+ * @param {Date} d date to get day id from
+ */
+function getUTCDayId(d) {
+    return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
+}
+
+/**
+ * gets a day id from a date
+ * @param {Date} d date to get day id from
+ */
+function getDayId(d) {
+    return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */

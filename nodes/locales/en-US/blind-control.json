@@ -27,6 +27,7 @@
 			"ruleTimeNone": "N/A",
 			"ruleTimeMax": "no later than (max)",
 			"ruleTimeMin": "at the earliest (min)",
+			"ruleTimeDays":"only on day",
 			"ruleDescription": "Description",
 			"ruleBlindLevel": "blind position",
 			"ruleLevelAbs": "↕ absolute",
@@ -98,6 +99,7 @@
 			"time":"time",
 			"offset":"time offset",
 			"level": "level",
+			"ruleTimeDays": "select days wherefore it should be valid",
 			"autoTrigger":"automatic triggers new calculation of the blind position in a dynamic changing time interval"
 		},
 		"text": {

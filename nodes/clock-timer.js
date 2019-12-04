@@ -74,20 +74,6 @@ module.exports = function (RED) {
         return data;
     }
 
-    /**
-     * clip a test to a maximum length
-     * @param {string} v text to clip
-     * @param {number} l length to clip the text
-     */
-    function clipValueLength(v, l) {
-        l = l || 15;
-        v = String(v);
-        if (v.length > l) {
-            return v.slice(0, (l - 3)) + '...';
-        }
-        return v;
-    }
-
     /******************************************************************************************/
     /**
      * reset any existing override
@@ -376,7 +362,6 @@ module.exports = function (RED) {
             offset : rule.offsetValue,
             multiplier : rule.multiplier,
             next : false,
-            days : rule.timeDays,
             now
         });
         if (rule.timeData.error) {
@@ -387,6 +372,7 @@ module.exports = function (RED) {
         }
         rule.timeData.source = 'Default';
         rule.timeData.ts = rule.timeData.value.getTime();
+        rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
         if (rule.timeMinType !== 'none') {
             rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, {
                 type: rule.timeMinType,
@@ -395,7 +381,6 @@ module.exports = function (RED) {
                 offset: rule.offsetMinValue,
                 multiplier: rule.multiplierMin,
                 next: false,
-                days: rule.timeDays,
                 now
             });
             const numMin = rule.timeDataMin.value.getTime();
@@ -410,6 +395,7 @@ module.exports = function (RED) {
                     rule.timeData = rule.timeDataMin;
                     rule.timeDataMin = tmp;
                     rule.timeData.ts = numMin;
+                    rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
                 }
             }
         }
@@ -421,7 +407,6 @@ module.exports = function (RED) {
                 offset: rule.offsetMaxValue,
                 multiplier: rule.multiplierMax,
                 next: false,
-                days: rule.timeDays,
                 now
             });
             const numMax = rule.timeDataMax.value.getTime();
@@ -436,6 +421,7 @@ module.exports = function (RED) {
                     rule.timeData = rule.timeDataMax;
                     rule.timeDataMax = tmp;
                     rule.timeData.ts = numMax;
+                    rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
                 }
             }
         }
@@ -453,6 +439,8 @@ module.exports = function (RED) {
         node.debug('checkRules ----------------------------------------------------------------------------');
         const livingRuleData = {};
         const nowNr = now.getTime();
+        const dayNr = now.getDay();
+        const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
         node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
@@ -472,12 +460,12 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(now.getDay())) {
+            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(dayNr)) {
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-            if (num >=0  && cmp(num)) {
+            if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
                 return rule;
             }
             return null;
@@ -674,7 +662,7 @@ module.exports = function (RED) {
 
             node.reason.stateComplete = node.reason.state ;
             if (timeCtrl.payload && typeof timeCtrl.payload !== 'object') {
-                node.reason.stateComplete = clipValueLength(timeCtrl.payload.toString(),10) + ' - ' + node.reason.stateComplete;
+                node.reason.stateComplete = hlp.clipStrLength(timeCtrl.payload.toString(),10) + ' - ' + node.reason.stateComplete;
             }
             node.status({
                 fill,

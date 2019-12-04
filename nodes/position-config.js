@@ -125,7 +125,7 @@ module.exports = function (RED) {
                 };
 
                 const today = new Date();
-                const dayId = this._getDayId(today); // this._getUTCDayId(today);
+                const dayId = hlp.getDayId(today); // this._getUTCDayId(today);
                 const tomorrow = today.addDays(1);
                 this._sunTimesRefresh(today, tomorrow, dayId);
                 this._moonTimesRefresh(today, tomorrow, dayId);
@@ -187,7 +187,7 @@ module.exports = function (RED) {
          */
         getSunTimeByName(now, value, offset, multiplier, next, days) {
             let result;
-            const dayid = this._getDayId(now); // this._getUTCDayId(now);
+            const dayid = hlp.getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
@@ -240,7 +240,7 @@ module.exports = function (RED) {
          * @return {array} result object of sunTime
          */
         getSunTimePrevNext(now) {
-            let dayid = this._getDayId(now); // this._getUTCDayId(now);
+            let dayid = hlp.getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             let result;
             // this.debug(`getSunTimePrevNext now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -359,7 +359,7 @@ module.exports = function (RED) {
         getMoonTimeByName(now, value, offset, multiplier, next, days) {
             const result = {};
             const datebase = new Date(now);
-            const dayid = this._getDayId(now); // this._getUTCDayId(now);
+            const dayid = hlp.getDayId(now); // this._getUTCDayId(now);
             const today = this._moonTimesCheck(); // refresh if needed, get dayId
             // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${today}`);
 
@@ -548,8 +548,7 @@ module.exports = function (RED) {
                 result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
                 return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
             } else if (data.type === 'dayOfMonth') {
-                result = new Date();
-                result = hlp.getSpecialDayOfMonth(result.getFullYear(),result.getMonth(), data.value);
+                result = hlp.getSpecialDayOfMonth(now.getFullYear(),now.getMonth(), data.value);
                 if (result !== null && typeof result !== 'undefined') {
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result = hlp.normalizeDate(result, offsetX, data.multiplier, data.next, data.days);
@@ -893,7 +892,7 @@ module.exports = function (RED) {
                 return result;
             }
 
-            const dayid = this._getDayId(date); // this._getUTCDayId(now);
+            const dayid = hlp.getDayId(date); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             // this.debug(`getSunTimes value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
@@ -1048,8 +1047,8 @@ module.exports = function (RED) {
                 }
             }
 
-            const dayidReq = this._getDayId(date); // this._getUTCDayId(now);
-            const dayIdNow = this._getDayId(now); // this._getUTCDayId(dateb);
+            const dayidReq = hlp.getDayId(date); // this._getUTCDayId(now);
+            const dayIdNow = hlp.getDayId(now); // this._getUTCDayId(dateb);
 
             if (dayidReq === dayIdNow) {
                 if (dayIdNow !== this.moonIlluDayId) {
@@ -1096,7 +1095,7 @@ module.exports = function (RED) {
         _sunTimesCheck(force) {
             // this.debug('_sunTimesCheck');
             const today = new Date();
-            const dayId = this._getDayId(today); // _getUTCDayId(today);
+            const dayId = hlp.getDayId(today); // _getUTCDayId(today);
             // this.debug(`_sunTimesCheck ${this.sunDayId} - ${dayId}`);
             if (force || this.sunDayId !== dayId) {
                 this.debug(`_sunTimesCheck - need refresh - force=${force}, base-dayId=${this.sunDayId} current-dayId=${dayId} today=${today}`);
@@ -1142,7 +1141,7 @@ module.exports = function (RED) {
         _moonTimesCheck(force) {
             // this.debug('moonTimesCheck');
             const today = new Date();
-            const dayId = this._getDayId(today); // this._getUTCDayId(dateb);
+            const dayId = hlp.getDayId(today); // this._getUTCDayId(dateb);
             if (force || this.moonDayId !== dayId) {
                 this.debug(`_moonTimesCheck - need refresh - force=${ force }, base-dayId=${ this.moonDayId } current-dayId=${ dayId }`);
                 const tomorrow = (new Date()).addDays(1);
@@ -1153,14 +1152,6 @@ module.exports = function (RED) {
                 today,
                 dayId
             };
-        }
-
-        _getUTCDayId(d) {
-            return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
-        }
-
-        _getDayId(d) {
-            return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
         }
     }
 
