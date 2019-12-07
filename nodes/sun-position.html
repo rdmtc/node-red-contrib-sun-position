@@ -119,7 +119,7 @@
 
                 const rule = this.rules[index - 1];
                 if (rule) {
-                    return RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(rule.valueHighType, rule.valueHigh);
+                    return RED.nodes.getType('position-config').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('position-config').getValueLabel(rule.valueHighType, rule.valueHigh);
                 }
                 return undefined;
             },

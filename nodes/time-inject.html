@@ -511,21 +511,21 @@
                         // ...
                     }
 
-                    const part1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.timeType, this.time, this.offset);
+                    const part1 = RED.nodes.getType('position-config').getValueLabel(this, this.timeType, this.time, this.offset);
                     if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
-                        return (part1 + '/' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
+                        return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
                     }
                     return part1 + suffix;
                 };
 
                 if (this.timeType === 'none' || this.timeType === '') {
-                    result += (this.nameInt || RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
+                    result += (this.nameInt || RED.nodes.getType('position-config').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                 } else {
                     const timeTxt = getTimeId();
                     if (timeTxt.length > 26) {
                         result += timeTxt + ' =...';
                     } else {
-                        result += timeTxt + ' = ' + (this.nameInt || RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
+                        result += timeTxt + ' = ' + (this.nameInt || RED.nodes.getType('position-config').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                     }
                 }
                 if (this.topic && this.topic.length + result.length <= 32) {
@@ -1372,14 +1372,14 @@
                 const plt = $('#node-input-payload').typedInput('type');
                 if (plt === 'dateSpecific') {
                     if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
-                        this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
+                        this.nameInt = RED.nodes.getType('position-config').clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
                     } else {
                         let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
                         txt = $.trim(txt.split(',')[0]);
-                        this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').clipValueLength(txt, 20);
+                        this.nameInt = RED.nodes.getType('position-config').clipValueLength(txt, 20);
                     }
                 } else {
-                    this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, plt,
+                    this.nameInt = RED.nodes.getType('position-config').getValueLabel(this, plt,
                         $('#node-input-payload').typedInput('value'),
                         $('#node-input-payloadOffset').typedInput('value'));
                 }

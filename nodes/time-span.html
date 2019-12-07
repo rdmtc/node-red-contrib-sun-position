@@ -156,7 +156,7 @@
                 if (this.rules.length) {
                     const rule = this.rules[index];
                     if (rule) {
-                        return rule.operatorText + ' ' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, rule.operandType, rule.operandValue);
+                        return rule.operatorText + ' ' + RED.nodes.getType('position-config').getValueLabel(this, rule.operandType, rule.operandValue);
                     }
                     if (this.checkall === 'true') {
                         return 'always';
@@ -172,17 +172,17 @@
                     return this.name;
                 }
                 if (!this.rules || this.rules.length <= 1) {
-                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand1Type, this.operand1);
-                    const op2 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand2Type, this.operand2);
+                    const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = RED.nodes.getType('position-config').getValueLabel(this, this.operand2Type, this.operand2);
                     return op1 + ' - ' + op2;
                 } else if (this.rules && this.rules.length === 1) {
-                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand1Type, this.operand1);
-                    const op2 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand2Type, this.operand2);
-                    const cmp = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
+                    const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = RED.nodes.getType('position-config').getValueLabel(this, this.operand2Type, this.operand2);
+                    const cmp = RED.nodes.getType('position-config').getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
                     return op1 + ' - ' + op2 + ' ' + this.rules[0].operatorText + ' ' + cmp;
                 } else if (this.rules && this.rules.length > 1) {
-                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand1Type, this.operand1);
-                    const op2 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.operand2Type, this.operand2);
+                    const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.operand1Type, this.operand1);
+                    const op2 = RED.nodes.getType('position-config').getValueLabel(this, this.operand2Type, this.operand2);
                     return op1 + ' - ' + op2 + ' ' + this._('time-span.label.compare');
                 }
                 return this._('time-span.label.time-span');
