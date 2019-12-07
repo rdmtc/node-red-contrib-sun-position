@@ -1,278 +1,7 @@
 <!DOCTYPE HTML>
-<script type="text/html" data-template-name="within-time-switch">
-    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" id="node-input-positionConfig">
-    </div>
-    <hr>
-    <div class="form-row block-noindent is-to-show-initially" id="node-input-startTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.startTime">
-        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
-        <input type="text" id="node-input-startTime" />
-        <input type="hidden" id="node-input-startTimeType">
-    </div>
-    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.startOffset">
-        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
-        <input id="node-input-startOffset" data-i18n="[placeholder]within-time-switch.placeholder.startOffset"></input>
-        <input type="hidden" id="node-input-startOffsetType">
-        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-
-    <div class="form-row block-noindent is-to-show-initially" id="node-input-endTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTime">
-        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" data-i18n="[placeholder]within-time-switch.label.endTime"/>
-        <input type="hidden" id="node-input-endTimeType">
-    </div>
-    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.endOffset">
-        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
-        <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"></input>
-        <input type="hidden" id="node-input-endOffsetType">
-        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <hr>
-    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]within-time-switch.tips.addTimes"></div>
-    <div class="form-row alternate-property-start is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.propertyStart">
-        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
-        <input type="text" id="node-input-propertyStart" data-i18n="[placeholder]within-time-switch.placeholder.propertyStart"/>
-        <input type="hidden" id="node-input-propertyStartType">
-        <select id="node-input-propertyStartCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row block-indent2 row-propertyStartThreshold is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.propertyStartThreshold">
-        <label for="node-input-propertyStartThreshold"><i class="fa fa-compress"></i> <span data-i18n="within-time-switch.label.propertyStartThreshold"></span></label>
-        <input type="text" id="node-input-propertyStartThreshold" data-i18n="[placeholder]within-time-switch.placeholder.propertyStartThreshold">
-        <input type="hidden" id="node-input-propertyStartThresholdType">
-    </div>
-    <div class="form-row block-indent1 alternate-time-start is-initial-hidden" id="node-input-startTimeAlt-div" data-i18n="[titleOrg]within-time-switch.placeholder.startTimeAlt">
-        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
-        <input type="text" id="node-input-startTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAlt"/>
-        <input type="hidden" id="node-input-startTimeAltType">
-    </div>
-    <div class="form-row block-indent1 alternate-time-start-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.startTimeAltOffset">
-        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
-        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"></input>
-        <input type="hidden" id="node-input-startTimeAltOffsetType">
-        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row alternate-property-end is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.propertyEnd">
-        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
-        <input type="text" id="node-input-propertyEnd" data-i18n="[placeholder]within-time-switch.placeholder.propertyEnd"/>
-        <input type="hidden" id="node-input-propertyEndType">
-        <select id="node-input-propertyEndCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row block-indent2 row-propertyEndThreshold is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.propertyEndThreshold">
-        <label for="node-input-propertyEndThreshold"><i class="fa fa-compress"></i> <span data-i18n="within-time-switch.label.propertyEndThreshold"></span></label>
-        <input type="text" id="node-input-propertyEndThreshold" data-i18n="[placeholder]within-time-switch.placeholder.propertyEndThreshold">
-        <input type="hidden" id="node-input-propertyEndThresholdType">
-    </div>
-    <div class="form-row block-indent1 alternate-time-end is-initial-hidden" id="node-input-endTimeAlt-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTimeAlt">
-        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
-        <input type="text" id="node-input-endTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAlt"/>
-        <input type="hidden" id="node-input-endTimeAltType">
-    </div>
-    <div class="form-row block-indent1 alternate-time-end-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.endTimeAltOffset">
-        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
-        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"></input>
-        <input type="hidden" id="node-input-endTimeAltOffsetType">
-        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <hr>
-    <div class="form-row is-to-show-initially">
-        <a href="#" class="enhanced-row-toggle"><span data-i18n="within-time-switch.label.showEnhSettings"></span></a>
-    </div>
-    <div class="form-row enhanced-row" style="display:none">
-        <div class="form-row compare-row" data-i18n="[title]within-time-switch.placeholder.compareTime">
-            <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
-            <select id="node-input-tsCompare" style="width:70%;" >
-                <option value="0" data-i18n="within-time-switch.label.now"></option>
-                <option value="1" data-i18n="within-time-switch.label.msgts"></option>
-                <option value="2" data-i18n="within-time-switch.label.msglc"></option>
-                <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
-                <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
-            </select>
-        </div>
-        <div class="form-row msg-start-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnStartOut">
-            <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
-            <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-            <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
-        </div>
-        <div class="form-row msg-end-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnEndOut">
-            <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
-            <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-            <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
-        </div>
-    </div>
-    <hr>
-    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-    </div>
-</script>
-<style>
-    hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .form-tips {
-        width: 90%
-    }
-    .block-indent1 {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: calc(100% - 15px);
-    }
-    .block-indent2 {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: calc(100% - 25px);
-    }
-    .block-noindent .row-full-width {
-        width : calc(100% - 115px);
-    }
-    .block-indent1 .row-full-width {
-        width : calc(100% - 125px);
-    }
-    .block-indent2 .row-full-width {
-        width : calc(100% - 135px);
-    }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 250px);
-    }
-    .block-indent1 .ui-spinner {
-        width : calc(100% - 260px);
-    }
-    .block-indent2 .ui-spinner {
-        width : calc(100% - 270px);
-    }
-    .node-input-multiplier {
-        width: 125px;
-        max-width: 125px;
-        margin-left: 5px;
-    }
-    .node-input-addOn {
-        width: 100px;
-        max-width: 100px;
-        margin-left: 5px;
-    }
-</style>
 
 <script type="text/javascript">
     (function() {
-        /**
-         * clip a value to a defined length
-         * @param {string} v - the value
-         * @param {number} [l] - the desired length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function clipValueLength(v, l) {
-            l = l || 18;
-            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-        }
-        /**
-         * get the label for a typed input vlaue
-         * @param {*} node - the node object for getting i18N Data (node._())
-         * @param {string} t - the type of the value
-         * @param {string} v - the value
-         * @param {number} [offset] - a optional offset to the value
-         * @param {number} [l] - the desired maximum length (default = 20)
-         * @returns {string} the value clipped to the given length
-         */
-        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-            l = l || 30;
-            let suffix = '';
-            if (offset && offset > 0) {
-                suffix = '↷';
-            } else if (offset && offset < 0) {
-                suffix = '↶';
-            }
-            switch (t) {
-                case 'jsonata':
-                    if (v.length < l) { return v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-                case 'json':
-                    if (v.length < l) { return  v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-                case 'bin':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-                case 'date':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-                case 'dateSpecific':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-                case 'string':
-                case 'str':
-                case 'dayOfMonth':
-                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-                    return '"' + clipValueLength(v, l) + '"' + suffix;
-                case 'num':
-                    if (v === '') { return '0' + suffix; }
-                    return String(v) + suffix;
-                case 'bool':
-                    if (v === '') { return 'false' + suffix; }
-                    return String(v) + suffix;
-                case 'msg':
-                case 'env':
-                    return t + '.' + clipValueLength(v, l) + suffix;
-                case 'flow':
-                case 'global': {
-                    const result = RED.utils.parseContextKey(v);
-                    return t + '.' + clipValueLength(result.key, l) + suffix;
-                }
-                case 'pdsCalcData':
-                    return '{sun position}' + suffix;
-                case 'pdsCalcPercent':
-                    return '{sun in sky percent}' + suffix;
-                case 'pdsCalcAzimuth':
-                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}}${suffix}`;
-                case 'pdsCalcAzimuthRad':
-                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}}${suffix}`;
-                case 'pdsCalcElevation':
-                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}}${suffix}`;
-                case 'pdsCalcElevationRad':
-                    return `{${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}}${suffix}`;
-                case 'pdmCalcData':
-                    return '{moon position}' + suffix;
-                case 'pdmPhase':
-                    return '{moon phase}' + suffix;
-                case 'pdsTime': {
-                    const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-                    return clipValueLength(res, l) + suffix;
-                }
-                case 'pdmTime':
-                    return 'moon' + v + suffix;
-                case 'pdsTimeNow':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.suntimeObj') + suffix;
-                case 'msgPayload':
-                    return 'msg.payload';
-                case 'msgTs':
-                    return 'msg.ts';
-                case 'msgLc':
-                    return 'msg.lc';
-                case 'msgValue':
-                    return 'msg.value';
-                case 'input':
-                    return 'input data';
-                case 'timespan':
-                    return 'timespan';
-                case 'operand1':
-                    return 'operand1 data';
-                case 'operand2':
-                    return 'operand2 data';
-                default: {
-                    if (v === '') {
-                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-                    }
-                    return clipValueLength(v, l) + suffix;
-                }
-            }
-        }
-
         RED.nodes.registerType('within-time-switch', {
             category: 'time and astro',
             color: '#f37a33',
@@ -488,10 +217,10 @@
             label() {
                 const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
                     if (property !== 'none' && property !== '' && value2) {
-                        return getValueLabel(this, type1, value1, offset1, 12) + '/' + getValueLabel(this, type2, value2, offset2, 12);
+                        return RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, type1, value1, offset1, 12) + '/' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, type2, value2, offset2, 12);
                     }
 
-                    return getValueLabel(this, type1, value1, undefined, 12);
+                    return RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, type1, value1, undefined, 12);
                 };
 
                 if (this.name) {
@@ -998,3 +727,167 @@
             }
         });
     })();</script>
+
+<script type="text/html" data-template-name="within-time-switch">
+    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <div class="form-row block-noindent is-to-show-initially" id="node-input-startTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.startTime">
+        <label for="node-input-startTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTime"></span></label>
+        <input type="text" id="node-input-startTime" />
+        <input type="hidden" id="node-input-startTimeType">
+    </div>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.startOffset">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]within-time-switch.placeholder.startOffset"></input>
+        <input type="hidden" id="node-input-startOffsetType">
+        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+
+    <div class="form-row block-noindent is-to-show-initially" id="node-input-endTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTime">
+        <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
+        <input type="text" id="node-input-endTime" data-i18n="[placeholder]within-time-switch.label.endTime"/>
+        <input type="hidden" id="node-input-endTimeType">
+    </div>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.endOffset">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"></input>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]within-time-switch.tips.addTimes"></div>
+    <div class="form-row alternate-property-start is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.propertyStart">
+        <label for="node-input-propertyStart"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyStart"></span></label>
+        <input type="text" id="node-input-propertyStart" data-i18n="[placeholder]within-time-switch.placeholder.propertyStart"/>
+        <input type="hidden" id="node-input-propertyStartType">
+        <select id="node-input-propertyStartCompare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row block-indent2 row-propertyStartThreshold is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.propertyStartThreshold">
+        <label for="node-input-propertyStartThreshold"><i class="fa fa-compress"></i> <span data-i18n="within-time-switch.label.propertyStartThreshold"></span></label>
+        <input type="text" id="node-input-propertyStartThreshold" data-i18n="[placeholder]within-time-switch.placeholder.propertyStartThreshold">
+        <input type="hidden" id="node-input-propertyStartThresholdType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-start is-initial-hidden" id="node-input-startTimeAlt-div" data-i18n="[titleOrg]within-time-switch.placeholder.startTimeAlt">
+        <label for="node-input-startTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.startTimeAlt"></span></label>
+        <input type="text" id="node-input-startTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAlt"/>
+        <input type="hidden" id="node-input-startTimeAltType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-start-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.startTimeAltOffset">
+        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
+        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"></input>
+        <input type="hidden" id="node-input-startTimeAltOffsetType">
+        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row alternate-property-end is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.propertyEnd">
+        <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
+        <input type="text" id="node-input-propertyEnd" data-i18n="[placeholder]within-time-switch.placeholder.propertyEnd"/>
+        <input type="hidden" id="node-input-propertyEndType">
+        <select id="node-input-propertyEndCompare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row block-indent2 row-propertyEndThreshold is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.propertyEndThreshold">
+        <label for="node-input-propertyEndThreshold"><i class="fa fa-compress"></i> <span data-i18n="within-time-switch.label.propertyEndThreshold"></span></label>
+        <input type="text" id="node-input-propertyEndThreshold" data-i18n="[placeholder]within-time-switch.placeholder.propertyEndThreshold">
+        <input type="hidden" id="node-input-propertyEndThresholdType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-end is-initial-hidden" id="node-input-endTimeAlt-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTimeAlt">
+        <label for="node-input-endTimeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTimeAlt"></span></label>
+        <input type="text" id="node-input-endTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAlt"/>
+        <input type="hidden" id="node-input-endTimeAltType">
+    </div>
+    <div class="form-row block-indent1 alternate-time-end-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.endTimeAltOffset">
+        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
+        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"></input>
+        <input type="hidden" id="node-input-endTimeAltOffsetType">
+        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <div class="form-row is-to-show-initially">
+        <a href="#" class="enhanced-row-toggle"><span data-i18n="within-time-switch.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row" style="display:none">
+        <div class="form-row compare-row" data-i18n="[title]within-time-switch.placeholder.compareTime">
+            <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.compareTime"></span></label>
+            <select id="node-input-tsCompare" style="width:70%;" >
+                <option value="0" data-i18n="within-time-switch.label.now"></option>
+                <option value="1" data-i18n="within-time-switch.label.msgts"></option>
+                <option value="2" data-i18n="within-time-switch.label.msglc"></option>
+                <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
+                <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
+            </select>
+        </div>
+        <div class="form-row msg-start-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnStartOut">
+            <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
+        </div>
+        <div class="form-row msg-end-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnEndOut">
+            <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
+            <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
+            <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
+        </div>
+    </div>
+    <hr>
+    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
+    }
+    .form-tips {
+        width: 90%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: calc(100% - 15px);
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: calc(100% - 25px);
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 115px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 125px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 135px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 250px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 260px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 270px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        max-width: 125px;
+        margin-left: 5px;
+    }
+    .node-input-addOn {
+        width: 100px;
+        max-width: 100px;
+        margin-left: 5px;
+    }
+</style>

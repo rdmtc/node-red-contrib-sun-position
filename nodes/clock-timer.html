@@ -2,383 +2,6 @@
 
 <script type="text/javascript">
     (function() {
-        /**
-         * save rules
-         * @param {number} rules - output of the editableList
-         * @returns {number} number of decimals
-         */
-        function saveRules(rules) {
-            const result = [];
-            if (rules) {
-                rules.each(function (_i) {
-                    const rule = $(this);
-                    const data = JSON.parse(rule.data('ruleData'));
-                    data.index= _i;
-                    result.push(data);
-                });
-            }
-            return result;
-        }
-
-        /**
-         * clip a test to a maximum length
-         * @param {string} v text to clip
-         * @param {number} l length to clip the text
-         */
-        function clipValueLength(v, l) {
-            l = l || 15;
-            v = String(v);
-            if (v.length > l) {
-                return v.slice(0, (l - 3)) + '...';
-            }
-            return v;
-        }
-
-        /**
-         * clip a test to a maximum length
-         * @param {string} v text to clip
-         * @param {number} l length to clip the text
-         */
-        function clipValueLengthRight(v, l) {
-            l = l || 15;
-            v = String(v);
-            if (v.length > l) {
-                return '...' + v.slice(-(l - 3));
-            }
-            return v;
-        }
-
-        /**
-         * get the value for the day checkbox array
-         * @param {jQuery} value - the checkbox array
-         * @returns {string} the value of the checkboxes
-         */
-        function getDaysStr(value) {
-            const days = value.map((_, el) => { return $(el).val(); }).get();
-            if (days.length === 0) { return ''; }
-            if (days.length === 7) { return '*'; }
-            return days.join(',');
-        }
-
-        /**
-         * get the label for a typed input vlaue
-         * @param {*} node - the node object for getting i18N Data (node._())
-         * @param {string} t - the type of the value
-         * @param {string} v - the value
-         * @param {number} [offset] - a optional offset to the value
-         * @param {number} [l] - the desired maximum length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function getValueLabel(node, t, v, l) { // eslint-disable-line complexity
-            l = l || 30;
-            const suffix = '';
-
-            switch (t) {
-                case 'jsonata':
-                    v = String(v);
-                    if (v.length < l) { return v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-                case 'json':
-                    v = String(v);
-                    if (v.length < l) { return  v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-                case 'bin':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-                case 'date':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-                case 'dateSpecific':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-                case 'string':
-                case 'str':
-                case 'dayOfMonth':
-                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-                    return '"' + clipValueLength(v, l) + '"' + suffix;
-                case 'num':
-                    if (v === '') { return '0' + suffix; }
-                    return String(v) + suffix;
-                case 'bool':
-                    if (v === '') { return 'false' + suffix; }
-                    return String(v) + suffix;
-                case 'msg':
-                case 'env':
-                    return t + '.' + clipValueLength(v, l) + suffix;
-                case 'flow':
-                case 'global': {
-                    const result = RED.utils.parseContextKey(v);
-                    // special for Homematic Devices
-                    if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
-                        result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
-                    }
-                    return t + '.' + clipValueLengthRight(result.key, l) + suffix;
-                }
-                case 'pdsCalcData':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
-                case 'pdsCalcPercent':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
-                case 'pdsCalcAzimuth':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
-                case 'pdsCalcAzimuthRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
-                case 'pdsCalcElevation':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
-                case 'pdsCalcElevationRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
-                case 'pdmCalcData':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"`;
-                case 'pdmPhase':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.moonPhase')}"`;
-                case 'pdsTime': {
-                    switch (v) {
-                        case 'astronomicalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
-                        case 'amateurDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
-                        case 'nauticalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
-                        case 'blueHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
-                        case 'civilDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
-                        case 'blueHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
-                        case 'goldenHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
-                        case 'sunrise':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
-                        case 'sunriseEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
-                        case 'goldenHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
-                        case 'solarNoon':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
-                        case 'goldenHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
-                        case 'sunsetStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
-                        case 'sunset':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
-                        case 'goldenHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
-                        case 'blueHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
-                        case 'civilDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
-                        case 'blueHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
-                        case 'nauticalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
-                        case 'amateurDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
-                        case 'astronomicalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
-                        case 'nadir':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
-                        default: {
-                            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-                            return clipValueLength(res, l) + suffix;
-                        }
-                    }
-                }
-                case 'pdmTime':
-                    switch (v) {
-                        case 'rise':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
-                        case 'set':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
-                        default:
-                            return 'moon' + v + suffix;
-                    }
-                case 'pdsTimeNow':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.suntimeObj') + suffix;
-                case 'PlT':
-                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: clipValueLength(v, l), suffix} );
-                case 'msgPayload':
-                    return 'msg.payload';
-                case 'msgTs':
-                    return 'msg.ts';
-                case 'msgLc':
-                    return 'msg.lc';
-                case 'msgValue':
-                    return 'msg.value';
-                case 'input':
-                    return 'input data';
-                case 'timespan':
-                    return 'timespan';
-                case 'operand1':
-                    return 'operand1 data';
-                case 'operand2':
-                    return 'operand2 data';
-                default: {
-                    if (v === '') {
-                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-                    }
-                    return clipValueLength(v, l) + suffix;
-                }
-            }
-        }
-
-        /**
-         * get a time in millisecond as string of the format hh:mm, hh:mm:ss or hh:mm:ss.mss
-         * @param {number} s - milisecond
-         * @returns {string} time as string
-         */
-        function msToTime(s) {
-            // Pad to 2 or 3 digits, default is 2
-            const pad = (n, z = 2) => ('00' + n).slice(-z);
-            const sec = (s%6e4)/1000|0;
-            const msec = s%1000;
-            return pad(s/3.6e6|0) + ':' + pad((s%3.6e6)/6e4 | 0) + ((msec >0) ? (':' + pad(sec) +'.' + pad(msec, 3) ) : ((sec>0) ? ':' + pad(sec) : ''));
-        }
-
-        /**
-         * get the time offset text
-         */
-        function _getOffsetText(node, t,v,m) {
-            let result = '';
-            if (t && t !== 'none') {
-                if (t === 'num') {
-                    const osmillis = v * m;
-                    if (osmillis>0) {
-                        result += ' + ' + msToTime(osmillis);
-                    } else {
-                        result += ' - ' +msToTime(osmillis * -1);
-                    }
-                } else {
-                    result += ' offset <var>' + getValueLabel(node, t, v) + '</var>';
-                    // result += ' * ' + data.multiplier/1000 + 's';
-                }
-            }
-            return result;
-        }
-        /**
-         * get a description of the rule rules
-         * @param {object} data - a rule description
-         * @returns {string} description of the rule
-         */
-        function getRuleDescription(node, selFields, data, enh) {
-            let result = '';
-            try {
-                if (!data.valid || !data.isValid) {
-                    result += '<div>Rule is invalid and needs to be changed!!</div>';
-                }
-                if (data.validOperandAType && data.validOperandAType !== 'none') {
-                    result += '<div>';
-                    result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
-
-                    result += '<var>' + getValueLabel(node, data.validOperandAType,data.validOperandAValue) + '</var>';
-                    // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
-                    result += ' ' + data.validOperatorText;
-                    let operatorCount = 1;
-                    const fields = selFields.comparator;
-                    const fieldsLength = fields.length;
-                    for (let index = 0; index < fieldsLength; index++) {
-                        const el = fields[index];
-                        if (el.id === data.validOperator) {
-                            operatorCount = el.operatorCount;
-                            break;
-                        }
-                    }
-
-                    if (operatorCount > 1) {
-                        result += ' ' + getValueLabel(node, data.validOperandBType, data.validOperandBValue);
-                    }
-                    if (data.valid2LogOperator > 0 && data.valid2OperandAType !== 'none') {
-                        result += '<br/><strong>' + data.valid2LogOperatorText + '</strong> ';
-
-                        result += '<var>' + getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue) + '</var>';
-                        result += ' ' + data.valid2OperatorText;
-                        let operatorCount = 1;
-                        const fields = selFields.comparator;
-                        const fieldsLength = fields.length;
-                        for (let index = 0; index < fieldsLength; index++) {
-                            const el = fields[index];
-                            if (el.id === data.valid2Operator) {
-                                operatorCount = el.operatorCount;
-                                break;
-                            }
-                        }
-
-                        if (operatorCount > 1) {
-                            result += ' ' + getValueLabel(node, data.valid2OperandBType, data.valid2OperandBValue);
-                        }
-                    }
-                    result += '</div>';
-                }
-                if (data.timeType && data.timeType !== 'none') {
-                    result += '<div>';
-                    result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
-                    result += data.timeOpText;
-                    result += ' <var>' + getValueLabel(node, data.timeType, data.timeValue) + '</var>';
-                    result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
-                    if (enh && enh.timeReg) {
-                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
-                    }
-
-                    if (data.timeMinType && data.timeMinType !== 'none') {
-                        result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                        result += node._('clock-timer.label.ruleTimeMin');
-                        result += '</span> <var>';
-                        result += getValueLabel(node, data.timeMinType, data.timeMinValue);
-                        result += '</var>';
-                        result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
-                        if (enh && enh.timeMin) {
-                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
-                        }
-                        result += '</div>';
-                    }
-                    if (data.timeMaxType && data.timeMaxType !== 'none') {
-                        result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                        result += node._('clock-timer.label.ruleTimeMax');
-                        result += '</span> <var>';
-                        result += getValueLabel(node, data.timeMaxType, data.timeMaxValue);
-                        result += '</var>';
-                        result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
-                        if (enh && enh.timeMax) {
-                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
-                        }
-                        result += '</div>';
-                    }
-                    if (data.timeDays && data.timeDays!=='*') {
-                        result += '<div class="indent-time-daya"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                        result += node._('clock-timer.label.ruleTimeDays');
-                        result += '</span> <var>';
-                        const days = data.timeDays.split(',');
-                        days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v+7)));
-                        result += days.join(',');// data.timeDays.replace('0','7');
-                        result += '</var></div>';
-                    }
-
-                    result += '</div>';
-                }
-                result += '<div>';
-                if (data.payloadType && data.payloadType !== 'none') {
-                    result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                    result += node._('clock-timer.label.rulePayload');
-                    result += '</span> <var>';
-                    result += getValueLabel(node, data.payloadType, data.payloadValue);
-                    result += '</var>';
-                    result += _getOffsetText(node, data.payloadOffsetType, data.payloadOffsetValue, data.payloadOffsetMultiplier);
-                    result += '</div>';
-                    if (data.topic) {
-                        result += '<div class="indent-topic-text"> <span>';
-                        result += node._('clock-timer.label.ruleTopic');
-                        result += '</span> <var>';
-                        result += data.topic;
-                        result += '</var>';
-                        result += '</div>';
-                    }
-                } else {
-                    result += node._('clock-timer.label.rulePayloadND');
-                }
-                result += '</div>';
-            } catch (err) {
-                console.log(err.message); // eslint-disable-line no-console
-                console.log(err.stack); // eslint-disable-line no-console
-                result = 'Error: "' + err.message + '"';
-            }
-            return result;
-        }
-
         RED.nodes.registerType('clock-timer', {
             category: 'time and astro',
             color: '#FFCC66',
@@ -476,7 +99,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 const setup = function(node) {
-                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initDaysCheckbox autocomplete */
+                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initDaysCheckbox autocomplete getDaysStr */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -652,10 +275,167 @@
                     // #endregion payloadDefault
                     // #region rules
                     // console.log('clock-timer rules');
-                    setMultiplier(node,'overwriteExpire', v => {
-                        const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
-                    }, 3600000);
+                    /**
+                     * get a time in millisecond as string of the format hh:mm, hh:mm:ss or hh:mm:ss.mss
+                     * @param {number} s - milisecond
+                     * @returns {string} time as string
+                     */
+                    function msToTime(s) {
+                        // Pad to 2 or 3 digits, default is 2
+                        const pad = (n, z = 2) => ('00' + n).slice(-z);
+                        const sec = (s%6e4)/1000|0;
+                        const msec = s%1000;
+                        return pad(s/3.6e6|0) + ':' + pad((s%3.6e6)/6e4 | 0) + ((msec >0) ? (':' + pad(sec) +'.' + pad(msec, 3) ) : ((sec>0) ? ':' + pad(sec) : ''));
+                    }
+
+                    /**
+                     * get the time offset text
+                     */
+                    function _getOffsetText(node, t,v,m) {
+                        let result = '';
+                        if (t && t !== 'none') {
+                            if (t === 'num') {
+                                const osmillis = v * m;
+                                if (osmillis>0) {
+                                    result += ' + ' + msToTime(osmillis);
+                                } else {
+                                    result += ' - ' +msToTime(osmillis * -1);
+                                }
+                            } else {
+                                result += ' offset <var>' + RED.nodes.getType('position-config').getValueLabel(node, t, v) + '</var>';
+                                // result += ' * ' + data.multiplier/1000 + 's';
+                            }
+                        }
+                        return result;
+                    }
+                    /**
+                     * get a description of the rule rules
+                     * @param {object} data - a rule description
+                     * @returns {string} description of the rule
+                     */
+                    function getRuleDescription(node, selFields, data, enh) {
+                        let result = '';
+                        try {
+                            if (!data.valid || !data.isValid) {
+                                result += '<div>Rule is invalid and needs to be changed!!</div>';
+                            }
+                            if (data.validOperandAType && data.validOperandAType !== 'none') {
+                                result += '<div>';
+                                result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
+
+                                result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, data.validOperandAType,data.validOperandAValue) + '</var>';
+                                // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
+                                result += ' ' + data.validOperatorText;
+                                let operatorCount = 1;
+                                const fields = selFields.comparator;
+                                const fieldsLength = fields.length;
+                                for (let index = 0; index < fieldsLength; index++) {
+                                    const el = fields[index];
+                                    if (el.id === data.validOperator) {
+                                        operatorCount = el.operatorCount;
+                                        break;
+                                    }
+                                }
+
+                                if (operatorCount > 1) {
+                                    result += ' ' + RED.nodes.getType('position-config').getValueLabel(node, data.validOperandBType, data.validOperandBValue);
+                                }
+                                if (data.valid2LogOperator > 0 && data.valid2OperandAType !== 'none') {
+                                    result += '<br/><strong>' + data.valid2LogOperatorText + '</strong> ';
+
+                                    result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue) + '</var>';
+                                    result += ' ' + data.valid2OperatorText;
+                                    let operatorCount = 1;
+                                    const fields = selFields.comparator;
+                                    const fieldsLength = fields.length;
+                                    for (let index = 0; index < fieldsLength; index++) {
+                                        const el = fields[index];
+                                        if (el.id === data.valid2Operator) {
+                                            operatorCount = el.operatorCount;
+                                            break;
+                                        }
+                                    }
+
+                                    if (operatorCount > 1) {
+                                        result += ' ' + RED.nodes.getType('position-config').getValueLabel(node, data.valid2OperandBType, data.valid2OperandBValue);
+                                    }
+                                }
+                                result += '</div>';
+                            }
+                            if (data.timeType && data.timeType !== 'none') {
+                                result += '<div>';
+                                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                                result += data.timeOpText;
+                                result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.timeType, data.timeValue) + '</var>';
+                                result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
+                                if (enh && enh.timeReg) {
+                                    result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
+                                }
+
+                                if (data.timeMinType && data.timeMinType !== 'none') {
+                                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                                    result += node._('clock-timer.label.ruleTimeMin');
+                                    result += '</span> <var>';
+                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMinType, data.timeMinValue);
+                                    result += '</var>';
+                                    result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
+                                    if (enh && enh.timeMin) {
+                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                    }
+                                    result += '</div>';
+                                }
+                                if (data.timeMaxType && data.timeMaxType !== 'none') {
+                                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
+                                    result += node._('clock-timer.label.ruleTimeMax');
+                                    result += '</span> <var>';
+                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMaxType, data.timeMaxValue);
+                                    result += '</var>';
+                                    result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
+                                    if (enh && enh.timeMax) {
+                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                    }
+                                    result += '</div>';
+                                }
+                                if (data.timeDays && data.timeDays!=='*') {
+                                    result += '<div class="indent-time-daya"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                    result += node._('clock-timer.label.ruleTimeDays');
+                                    result += '</span> <var>';
+                                    const days = data.timeDays.split(',');
+                                    days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v+7)));
+                                    result += days.join(',');// data.timeDays.replace('0','7');
+                                    result += '</var></div>';
+                                }
+
+                                result += '</div>';
+                            }
+                            result += '<div>';
+                            if (data.payloadType && data.payloadType !== 'none') {
+                                result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                                result += node._('clock-timer.label.rulePayload');
+                                result += '</span> <var>';
+                                result += RED.nodes.getType('position-config').getValueLabel(node, data.payloadType, data.payloadValue);
+                                result += '</var>';
+                                result += _getOffsetText(node, data.payloadOffsetType, data.payloadOffsetValue, data.payloadOffsetMultiplier);
+                                result += '</div>';
+                                if (data.topic) {
+                                    result += '<div class="indent-topic-text"> <span>';
+                                    result += node._('clock-timer.label.ruleTopic');
+                                    result += '</span> <var>';
+                                    result += data.topic;
+                                    result += '</var>';
+                                    result += '</div>';
+                                }
+                            } else {
+                                result += node._('clock-timer.label.rulePayloadND');
+                            }
+                            result += '</div>';
+                        } catch (err) {
+                            console.log(err.message); // eslint-disable-line no-console
+                            console.log(err.stack); // eslint-disable-line no-console
+                            result = 'Error: "' + err.message + '"';
+                        }
+                        return result;
+                    }
 
                     /**
                      * resizes a rule container
@@ -836,6 +616,11 @@
                     }
                     // #endregion rules
                     // #region Enhanced settings
+                    setMultiplier(node,'overwriteExpire', v => {
+                        const n = parseFloat(v);
+                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                    }, 3600000);
+
                     $('.spinner-time').spinner({
                         max: 1439,
                         min: 0,
@@ -1576,7 +1361,9 @@
                             }
                         }
                         result.isValid = result.isValid && result.valid.validOperand1A;
-                        console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
+                        if (!result.isValid) {
+                            console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
+                        }
 
                         return result;
                     }
@@ -1612,7 +1399,17 @@
             },
             oneditsave() {
                 const node = this;
-                node.rules = saveRules($('#node-input-rule-container').editableList('items'));
+                const $rules = $('#node-input-rule-container').editableList('items');
+                node.rules = [];
+                if ($rules) {
+                    $rules.each(function (_i) {
+                        const rule = $(this);
+                        const data = JSON.parse(rule.data('ruleData'));
+                        data.index= _i;
+                        node.rules.push(data);
+                    });
+                }
+
 
                 const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
                 if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {

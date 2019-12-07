@@ -1,556 +1,7 @@
 <!DOCTYPE HTML>
-<script type="text/html" data-template-name="time-inject">
-    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" id="node-input-positionConfig">
-    </div>
-    <hr>
-    <div class="form-row block-noindent time-payload" id="node-input-payload-div" data-i18n="[titleOrg]time-inject.placeholder.payload">
-        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="node-red:common.label.payload"></span></label>
-        <input type="text" id="node-input-payload" data-i18n="[placeholder]time-inject.placeholder.payload">
-        <input type="hidden" id="node-input-payloadType">
-    </div>
-    <div class="form-row block-indent1 time-inject-row-payloadOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.payloadOffset">
-        <label for="node-input-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.payloadOffset"></span></label>
-        <input id="node-input-payloadOffset" data-i18n="[placeholder]time-inject.placeholder.payloadOffset"></input>
-        <input type="hidden" id="node-input-payloadOffsetType">
-        <select id="node-input-payloadOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-indent1 time-inject-row-payloadTimeFormat is-initial-hidden" data-i18n="[title]time-inject.placeholder.payloadFormat">
-        <label for="node-input-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.payloadFormat"></span></label>
-        <select id="node-input-payloadTimeFormatsel">
-        </select>
-        <input type="text" id="node-input-payloadTimeFormat">
-    </div>
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
-    </div>
-    <hr>
-    <div class="form-row block-noindent" id="node-input-time-div"  data-i18n="[titleOrg]time-inject.placeholder.time">
-        <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
-        <input type="text" id="node-input-time" />
-        <input type="hidden" id="node-input-timeType">
-    </div>
-    <div class="form-row block-indent1 time-inject-row-offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
-        <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
-        <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"></input>
-        <input type="hidden" id="node-input-offsetType">
-        <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row time-inject-row-timeDays is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
-        <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row form-tips" data-i18n="[html]time-inject.tips.config"></div>
-    <hr class="block-noindent time-inject-row-alt is-initial-hidden">
-    <div class="form-row time-inject-row-alt is-initial-hidden" data-i18n="[title]time-inject.placeholder.property">
-        <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
-        <input type="text" id="node-input-property" data-i18n="[placeholder]time-inject.placeholder.property"/>
-        <input type="hidden" id="node-input-propertyType">
-        <select id="node-input-propertyCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row block-indent2 row-propertyThreshold is-initial-hidden" data-i18n="[title]time-inject.placeholder.propertyThreshold">
-        <label for="node-input-propertyThreshold"><i class="fa fa-compress"></i> <span data-i18n="time-inject.label.propertyThreshold"></span></label>
-        <input type="text" id="node-input-propertyThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyThreshold">
-        <input type="hidden" id="node-input-propertyThresholdType">
-    </div>
-    <div class="form-row block-indent1 time-inject-row-timeAlt is-initial-hidden" id="node-input-timeAlt-div" data-i18n="[titleOrg]time-inject.placeholder.timeAlt">
-        <label for="node-input-timeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeAlt"></span></label>
-        <input type="text" id="node-input-timeAlt" data-i18n="[placeholder]time-inject.placeholder.timeAlt"/>
-        <input type="hidden" id="node-input-timeAltType">
-    </div>
-    <div class="form-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeAltOffset">
-        <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
-        <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"></input>
-        <input type="hidden" id="node-input-timeAltOffsetType">
-        <select id="node-input-timeAltOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row time-inject-row-timeAltDays is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
-        <div id="time-inject-timeAltDays" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row form-tips time-inject-row-alt is-initial-hidden">
-        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
-    </div>
-    <hr>
-    <div class="form-row" id="node-once" data-i18n="[title]time-inject.placeholder.once">
-        <label for="node-input-once"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.once"></span></label>
-        <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="time-inject.label.onstart"></span>&nbsp;
-        <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
-        <span data-i18n="time-inject.label.onceDelay"></span>
-    </div>
-    <hr class="time-inject-recalc is-initial-hidden">
-    <div class="form-row time-inject-recalc is-initial-hidden" data-i18n="[title]time-inject.placeholder.recalcTime">
-        <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.recalcTime"></span></label>
-        <input type="text" id="node-input-recalcTime" placeholder="2" style="width:65px; height:28px;">&nbsp;
-        <span data-i18n="time-inject.label.hours"></span>
-    </div>
-    <div class="form-tips time-inject-recalc is-initial-hidden" data-i18n="[html]time-inject.tips.recalc"></div>
-    <hr class="time-inject-addPayload">
-    <div class="form-row block-noindent time-addPayload1" data-i18n="[title]time-inject.placeholder.addPayload">
-        <label for="node-input-addPayload1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload1"></span></label>
-        <input type="text" id="node-input-addPayload1" data-i18n="[placeholder]time-inject.placeholder.addPayload">
-        <input type="hidden" id="node-input-addPayload1Type">
-    </div>
-    <div class="form-row block-indent1 time-addPayload1Value is-initial-hidden" id="node-input-addPayload1-div" data-i18n="[titleOrg]time-inject.placeholder.addPayloadValue">
-        <label for="node-input-addPayload1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload1Value"></span></label>
-        <input type="text" id="node-input-addPayload1Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
-        <input type="hidden" id="node-input-addPayload1ValueType">
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload1Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
-        <label for="node-input-addPayload1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload1Format"></span></label>
-        <select id="node-input-addPayload1Formatsel"></select>
-        <input type="text" id="node-input-addPayload1Format">
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload1Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
-        <label for="node-input-addPayload1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload1Offset"></span></label>
-        <input id="node-input-addPayload1Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
-        <input type="hidden" id="node-input-addPayload1OffsetType">
-        <select id="node-input-addPayload1OffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload1Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
-        <label for="node-input-addPayload1Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload1Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload1Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
-        <span data-i18n="time-inject.label.addPayload1Next2"></span>
-    </div>
-    <div class="form-row time-inject-row-addPayload1days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
-        <div id="time-inject-addPayload1Days" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr class="time-addPayload2 is-initial-hidden">
-    <div class="form-row block-noindent time-addPayload2 is-initial-hidden" id="node-input-addPayload2-div" data-i18n="[titleOrg]time-inject.placeholder.addPayload">
-        <label for="node-input-addPayload2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload2"></span></label>
-        <input type="text" id="node-input-addPayload2" data-i18n="[placeholder]time-inject.placeholder.addPayload">
-        <input type="hidden" id="node-input-addPayload2Type">
-    </div>
-    <div class="form-row block-indent1 time-addPayload2Value is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadValue">
-        <label for="node-input-addPayload2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload2Value"></span></label>
-        <input type="text" id="node-input-addPayload2Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
-        <input type="hidden" id="node-input-addPayload2ValueType">
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload2Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
-        <label for="node-input-addPayload2Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
-        <select id="node-input-addPayload2Formatsel">
-    </select>
-    <input type="text" id="node-input-addPayload2Format">
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload2Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
-        <label for="node-input-addPayload2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload2Offset"></span></label>
-        <input id="node-input-addPayload2Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
-        <input type="hidden" id="node-input-addPayload2OffsetType">
-        <select id="node-input-addPayload2OffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload2Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
-        <label for="node-input-addPayload2Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload2Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload2Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
-        <span data-i18n="time-inject.label.addPayload2Next2"></span>
-    </div>
-    <div class="form-row time-inject-row-addPayload2days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
-        <div id="time-inject-addPayload2Days" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr class="time-addPayload3 is-initial-hidden">
-    <div class="form-row block-noindent time-addPayload3 is-initial-hidden" id="node-input-addPayload3-div" data-i18n="[titleOrg]time-inject.placeholder.addPayload">
-        <label for="node-input-addPayload3"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload3"></span></label>
-        <input type="text" id="node-input-addPayload3" data-i18n="[placeholder]time-inject.placeholder.addPayload">
-        <input type="hidden" id="node-input-addPayload3Type">
-    </div>
-    <div class="form-row block-indent1 time-addPayload3Value is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadValue">
-        <label for="node-input-addPayload3Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload3Value"></span></label>
-        <input type="text" id="node-input-addPayload3Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
-        <input type="hidden" id="node-input-addPayload3ValueType">
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload3Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
-        <label for="node-input-addPayload3Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload3Format"></span></label>
-        <select id="node-input-addPayload3Formatsel"></select>
-        <input type="text" id="node-input-addPayload3Format" >
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload3Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
-        <label for="node-input-addPayload3Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload3Offset"></span></label>
-        <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
-        <input type="hidden" id="node-input-addPayload3OffsetType">
-        <select id="node-input-addPayload3OffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-indent2 time-inject-row-addPayload3Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
-        <label for="node-input-addPayload3Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload3Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload3Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
-        <span data-i18n="time-inject.label.addPayload3Next2"></span>
-    </div>
-    <div class="form-row time-inject-row-addPayload3days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
-        <div id="time-inject-addPayload3Days" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row form-tips time-inject-addPayload" data-i18n="[html]time-inject.tips.addPayload"></div>
-    <hr>
-    <div class="form-row" data-i18n="[title]node-red:common.label.name">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-    </div>
-</script>
-<style>
-    hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .form-tips {
-        width: 90%
-    }
-    .block-indent1 {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: 100%
-    }
-    .block-indent2 {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: 100%
-    }
-    .block-noindent .row-full-width {
-        width : calc(100% - 110px);
-    }
-    .block-indent1 .row-full-width {
-        width : calc(100% - 120px);
-    }
-    .block-indent2 .row-full-width {
-        width : calc(100% - 130px);
-    }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 245px);
-    }
-    .block-indent1 .ui-spinner {
-        width : calc(100% - 255px);
-    }
-    .block-indent2 .ui-spinner {
-        width : calc(100% - 265px);
-    }
-    .node-input-multiplier {
-        width: 125px;
-        max-width: 125px;
-        margin-left: 5px;
-    }
-    .time-inject-row-timeDays,
-    .time-inject-row-timeAltDays,
-    .time-inject-row-addPayload1days,
-    .time-inject-row-addPayload2days,
-    .time-inject-row-addPayload3days {
-        padding-left: 110px;
-    }
-    .time-inject-row-timeDays select,
-    .time-inject-row-timeAltDays select,
-    .time-inject-row-addPayload1days select,
-    .time-inject-row-addPayload2days select,
-    .time-inject-row-addPayload2days select {
-        margin: 3px 0;
-    }
-    .time-inject-days label {
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        vertical-align: baseline;
-        width: 100px;
-    }
-    .time-inject-days input {
-        width: auto;
-        vertical-align: baseline;
-    }
-    .node-input-addOn {
-        width: 100px;
-        max-width: 100px;
-        margin-left: 5px;
-    }
-</style>
 
 <script type="text/javascript">
     (function() {
-        /**
-         * clip a value to a defined length
-         * @param {string} v - the value
-         * @param {number} [l] - the desired length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function clipValueLength(v, l) {
-            l = l || 18;
-            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-        }
-        /**
-         * clip a test to a maximum length
-         * @param {string} v text to clip
-         * @param {number} l length to clip the text
-         */
-        function clipValueLengthRight(v, l) {
-            l = l || 15;
-            v = String(v);
-            if (v.length > l) {
-                return '...' + v.slice(-(l - 3));
-            }
-            return v;
-        }
-
-        /**
-         * get the label for a typed input vlaue
-         * @param {*} node - the node object for getting i18N Data (node._())
-         * @param {string} t - the type of the value
-         * @param {string} v - the value
-         * @param {number} [offset] - a optional offset to the value
-         * @param {number} [l] - the desired maximum length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-            l = l || 30;
-            let suffix = '';
-            if (offset && offset > 0) {
-                suffix = '↷';
-            } else if (offset && offset < 0) {
-                suffix = '↶';
-            }
-            switch (t) {
-                case 'jsonata':
-                    v = String(v);
-                    if (v.length < l) { return v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-                case 'json':
-                    v = String(v);
-                    if (v.length < l) { return  v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-                case 'bin':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-                case 'date':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-                case 'dateSpecific':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-                case 'string':
-                case 'str':
-                case 'dayOfMonth':
-                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-                    return '"' + clipValueLength(v, l) + '"' + suffix;
-                case 'num':
-                    if (v === '') { return '0' + suffix; }
-                    return String(v) + suffix;
-                case 'bool':
-                    if (v === '') { return 'false' + suffix; }
-                    return String(v) + suffix;
-                case 'msg':
-                case 'env':
-                    return t + '.' + clipValueLength(v, l) + suffix;
-                case 'flow':
-                case 'global': {
-                    const result = RED.utils.parseContextKey(v);
-                    // special for Homematic Devices
-                    if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
-                        result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
-                    }
-                    return t + '.' + clipValueLengthRight(result.key, l) + suffix;
-                }
-                case 'pdsCalcData':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.suncalc') + suffix;
-                case 'pdsCalcPercent':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.suninsky') + suffix;
-                case 'pdsCalcAzimuth':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
-                case 'pdsCalcAzimuthRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
-                case 'pdsCalcElevation':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
-                case 'pdsCalcElevationRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
-                case 'pdmCalcData':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.mooncalc') + suffix;
-                case 'pdmPhase':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.moonPhase') + suffix;
-                case 'pdsTime': {
-                    switch (v) {
-                        case 'astronomicalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
-                        case 'amateurDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
-                        case 'nauticalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
-                        case 'blueHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
-                        case 'civilDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
-                        case 'blueHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
-                        case 'goldenHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
-                        case 'sunrise':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
-                        case 'sunriseEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
-                        case 'goldenHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
-                        case 'solarNoon':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
-                        case 'goldenHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
-                        case 'sunsetStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
-                        case 'sunset':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
-                        case 'goldenHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
-                        case 'blueHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
-                        case 'civilDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
-                        case 'blueHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
-                        case 'nauticalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
-                        case 'amateurDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
-                        case 'astronomicalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
-                        case 'nadir':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
-                        default: {
-                            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-                            return clipValueLength(res, l) + suffix;
-                        }
-                    }
-                }
-                case 'pdmTime':
-                    switch (v) {
-                        case 'rise':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
-                        case 'set':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
-                        default:
-                            return 'moon' + v + suffix;
-                    }
-                case 'pdsTimeNow':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.timesunnow') + suffix;
-                case 'PlT':
-                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: clipValueLength(v, l), suffix} );
-                case 'msgPayload':
-                    return 'msg.payload';
-                case 'msgTs':
-                    return 'msg.ts';
-                case 'msgLc':
-                    return 'msg.lc';
-                case 'msgValue':
-                    return 'msg.value';
-                case 'input':
-                    return 'input data';
-                case 'timespan':
-                    return 'timespan';
-                case 'operand1':
-                    return 'operand1 data';
-                case 'operand2':
-                    return 'operand2 data';
-                default: {
-                    if (v === '') {
-                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-                    }
-                    return clipValueLength(v, l) + suffix;
-                }
-            }
-        }
-
-        /**
-         * get the value for the day checkbox array
-         * @param {jQuery} value - the checkbox array
-         * @returns {string} the value of the checkboxes
-         */
-        function getDaysStr(value) {
-            const days = value.map((_, el) => { return $(el).val(); }).get();
-            if (days.length === 0) { return ''; }
-            if (days.length === 7) { return '*'; }
-            return days.join(',');
-        }
-
         RED.nodes.registerType('time-inject', {
             category: 'time and astro',
             color: '#a6bbcf',
@@ -1060,21 +511,21 @@
                         // ...
                     }
 
-                    const part1 = getValueLabel(this, this.timeType, this.time, this.offset);
+                    const part1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.timeType, this.time, this.offset);
                     if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
-                        return (part1 + '/' + getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
+                        return (part1 + '/' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
                     }
                     return part1 + suffix;
                 };
 
                 if (this.timeType === 'none' || this.timeType === '') {
-                    result += (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
+                    result += (this.nameInt || RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                 } else {
                     const timeTxt = getTimeId();
                     if (timeTxt.length > 26) {
                         result += timeTxt + ' =...';
                     } else {
-                        result += timeTxt + ' = ' + (this.nameInt || getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
+                        result += timeTxt + ' = ' + (this.nameInt || RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                     }
                 }
                 if (this.topic && this.topic.length + result.length <= 32) {
@@ -1096,7 +547,7 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData bdDateToTime */
+                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initDaysCheckbox getBackendData bdDateToTime getDaysStr */
                     const types = getTypes(node);
                     const selFields = getSelectFields();
                     // #region initialize
@@ -1921,14 +1372,14 @@
                 const plt = $('#node-input-payload').typedInput('type');
                 if (plt === 'dateSpecific') {
                     if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
-                        this.nameInt = clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
+                        this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
                     } else {
                         let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
                         txt = $.trim(txt.split(',')[0]);
-                        this.nameInt = clipValueLength(txt, 20);
+                        this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').clipValueLength(txt, 20);
                     }
                 } else {
-                    this.nameInt = getValueLabel(this, plt,
+                    this.nameInt = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, plt,
                         $('#node-input-payload').typedInput('value'),
                         $('#node-input-payloadOffset').typedInput('value'));
                 }
@@ -1993,3 +1444,356 @@
             }
         });
     })();</script>
+
+<script type="text/html" data-template-name="time-inject">
+    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <div class="form-row block-noindent time-payload" id="node-input-payload-div" data-i18n="[titleOrg]time-inject.placeholder.payload">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="node-red:common.label.payload"></span></label>
+        <input type="text" id="node-input-payload" data-i18n="[placeholder]time-inject.placeholder.payload">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
+    <div class="form-row block-indent1 time-inject-row-payloadOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.payloadOffset">
+        <label for="node-input-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.payloadOffset"></span></label>
+        <input id="node-input-payloadOffset" data-i18n="[placeholder]time-inject.placeholder.payloadOffset"></input>
+        <input type="hidden" id="node-input-payloadOffsetType">
+        <select id="node-input-payloadOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent1 time-inject-row-payloadTimeFormat is-initial-hidden" data-i18n="[title]time-inject.placeholder.payloadFormat">
+        <label for="node-input-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.payloadFormat"></span></label>
+        <select id="node-input-payloadTimeFormatsel">
+        </select>
+        <input type="text" id="node-input-payloadTimeFormat">
+    </div>
+    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
+    </div>
+    <hr>
+    <div class="form-row block-noindent" id="node-input-time-div"  data-i18n="[titleOrg]time-inject.placeholder.time">
+        <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
+        <input type="text" id="node-input-time" />
+        <input type="hidden" id="node-input-timeType">
+    </div>
+    <div class="form-row block-indent1 time-inject-row-offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
+        <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
+        <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"></input>
+        <input type="hidden" id="node-input-offsetType">
+        <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row time-inject-row-timeDays is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
+        <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row form-tips" data-i18n="[html]time-inject.tips.config"></div>
+    <hr class="block-noindent time-inject-row-alt is-initial-hidden">
+    <div class="form-row time-inject-row-alt is-initial-hidden" data-i18n="[title]time-inject.placeholder.property">
+        <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
+        <input type="text" id="node-input-property" data-i18n="[placeholder]time-inject.placeholder.property"/>
+        <input type="hidden" id="node-input-propertyType">
+        <select id="node-input-propertyCompare" class="node-input-addOn">
+        </select>
+    </div>
+    <div class="form-row block-indent2 row-propertyThreshold is-initial-hidden" data-i18n="[title]time-inject.placeholder.propertyThreshold">
+        <label for="node-input-propertyThreshold"><i class="fa fa-compress"></i> <span data-i18n="time-inject.label.propertyThreshold"></span></label>
+        <input type="text" id="node-input-propertyThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyThreshold">
+        <input type="hidden" id="node-input-propertyThresholdType">
+    </div>
+    <div class="form-row block-indent1 time-inject-row-timeAlt is-initial-hidden" id="node-input-timeAlt-div" data-i18n="[titleOrg]time-inject.placeholder.timeAlt">
+        <label for="node-input-timeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeAlt"></span></label>
+        <input type="text" id="node-input-timeAlt" data-i18n="[placeholder]time-inject.placeholder.timeAlt"/>
+        <input type="hidden" id="node-input-timeAltType">
+    </div>
+    <div class="form-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeAltOffset">
+        <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
+        <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"></input>
+        <input type="hidden" id="node-input-timeAltOffsetType">
+        <select id="node-input-timeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row time-inject-row-timeAltDays is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
+        <div id="time-inject-timeAltDays" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row form-tips time-inject-row-alt is-initial-hidden">
+        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
+    </div>
+    <hr>
+    <div class="form-row" id="node-once" data-i18n="[title]time-inject.placeholder.once">
+        <label for="node-input-once"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.once"></span></label>
+        <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="time-inject.label.onstart"></span>&nbsp;
+        <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
+        <span data-i18n="time-inject.label.onceDelay"></span>
+    </div>
+    <hr class="time-inject-recalc is-initial-hidden">
+    <div class="form-row time-inject-recalc is-initial-hidden" data-i18n="[title]time-inject.placeholder.recalcTime">
+        <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.recalcTime"></span></label>
+        <input type="text" id="node-input-recalcTime" placeholder="2" style="width:65px; height:28px;">&nbsp;
+        <span data-i18n="time-inject.label.hours"></span>
+    </div>
+    <div class="form-tips time-inject-recalc is-initial-hidden" data-i18n="[html]time-inject.tips.recalc"></div>
+    <hr class="time-inject-addPayload">
+    <div class="form-row block-noindent time-addPayload1" data-i18n="[title]time-inject.placeholder.addPayload">
+        <label for="node-input-addPayload1"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload1"></span></label>
+        <input type="text" id="node-input-addPayload1" data-i18n="[placeholder]time-inject.placeholder.addPayload">
+        <input type="hidden" id="node-input-addPayload1Type">
+    </div>
+    <div class="form-row block-indent1 time-addPayload1Value is-initial-hidden" id="node-input-addPayload1-div" data-i18n="[titleOrg]time-inject.placeholder.addPayloadValue">
+        <label for="node-input-addPayload1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload1Value"></span></label>
+        <input type="text" id="node-input-addPayload1Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
+        <input type="hidden" id="node-input-addPayload1ValueType">
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload1Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
+        <label for="node-input-addPayload1Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload1Format"></span></label>
+        <select id="node-input-addPayload1Formatsel"></select>
+        <input type="text" id="node-input-addPayload1Format">
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload1Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
+        <label for="node-input-addPayload1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload1Offset"></span></label>
+        <input id="node-input-addPayload1Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input type="hidden" id="node-input-addPayload1OffsetType">
+        <select id="node-input-addPayload1OffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload1Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload1Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload1Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload1Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload1Next2"></span>
+    </div>
+    <div class="form-row time-inject-row-addPayload1days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
+        <div id="time-inject-addPayload1Days" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="time-addPayload2 is-initial-hidden">
+    <div class="form-row block-noindent time-addPayload2 is-initial-hidden" id="node-input-addPayload2-div" data-i18n="[titleOrg]time-inject.placeholder.addPayload">
+        <label for="node-input-addPayload2"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload2"></span></label>
+        <input type="text" id="node-input-addPayload2" data-i18n="[placeholder]time-inject.placeholder.addPayload">
+        <input type="hidden" id="node-input-addPayload2Type">
+    </div>
+    <div class="form-row block-indent1 time-addPayload2Value is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadValue">
+        <label for="node-input-addPayload2Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload2Value"></span></label>
+        <input type="text" id="node-input-addPayload2Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
+        <input type="hidden" id="node-input-addPayload2ValueType">
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload2Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
+        <label for="node-input-addPayload2Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload2Format"></span></label>
+        <select id="node-input-addPayload2Formatsel">
+    </select>
+    <input type="text" id="node-input-addPayload2Format">
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload2Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
+        <label for="node-input-addPayload2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload2Offset"></span></label>
+        <input id="node-input-addPayload2Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input type="hidden" id="node-input-addPayload2OffsetType">
+        <select id="node-input-addPayload2OffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload2Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload2Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload2Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload2Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload2Next2"></span>
+    </div>
+    <div class="form-row time-inject-row-addPayload2days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
+        <div id="time-inject-addPayload2Days" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="time-addPayload3 is-initial-hidden">
+    <div class="form-row block-noindent time-addPayload3 is-initial-hidden" id="node-input-addPayload3-div" data-i18n="[titleOrg]time-inject.placeholder.addPayload">
+        <label for="node-input-addPayload3"><i class="fa fa-plus-square-o"></i> <span data-i18n="time-inject.label.addPayload3"></span></label>
+        <input type="text" id="node-input-addPayload3" data-i18n="[placeholder]time-inject.placeholder.addPayload">
+        <input type="hidden" id="node-input-addPayload3Type">
+    </div>
+    <div class="form-row block-indent1 time-addPayload3Value is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadValue">
+        <label for="node-input-addPayload3Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-inject.label.addPayload3Value"></span></label>
+        <input type="text" id="node-input-addPayload3Value" data-i18n="[placeholder]time-inject.placeholder.addPayloadValue">
+        <input type="hidden" id="node-input-addPayload3ValueType">
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload3Format is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadFormat">
+        <label for="node-input-addPayload3Formatsel"><i class="fa fa-calendar"></i> <span data-i18n="time-inject.label.addPayload3Format"></span></label>
+        <select id="node-input-addPayload3Formatsel"></select>
+        <input type="text" id="node-input-addPayload3Format" >
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload3Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
+        <label for="node-input-addPayload3Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload3Offset"></span></label>
+        <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input type="hidden" id="node-input-addPayload3OffsetType">
+        <select id="node-input-addPayload3OffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-indent2 time-inject-row-addPayload3Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
+        <label for="node-input-addPayload3Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload3Next"></span></label>
+        <input type="checkbox" id="node-input-addPayload3Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <span data-i18n="time-inject.label.addPayload3Next2"></span>
+    </div>
+    <div class="form-row time-inject-row-addPayload3days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
+        <div id="time-inject-addPayload3Days" class="time-inject-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row form-tips time-inject-addPayload" data-i18n="[html]time-inject.tips.addPayload"></div>
+    <hr>
+    <div class="form-row" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
+    }
+    .form-tips {
+        width: 90%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        max-width: 125px;
+        margin-left: 5px;
+    }
+    .time-inject-row-timeDays,
+    .time-inject-row-timeAltDays,
+    .time-inject-row-addPayload1days,
+    .time-inject-row-addPayload2days,
+    .time-inject-row-addPayload3days {
+        padding-left: 110px;
+    }
+    .time-inject-row-timeDays select,
+    .time-inject-row-timeAltDays select,
+    .time-inject-row-addPayload1days select,
+    .time-inject-row-addPayload2days select,
+    .time-inject-row-addPayload2days select {
+        margin: 3px 0;
+    }
+    .time-inject-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 100px;
+    }
+    .time-inject-days input {
+        width: auto;
+        vertical-align: baseline;
+    }
+    .node-input-addOn {
+        width: 100px;
+        max-width: 100px;
+        margin-left: 5px;
+    }
+</style>

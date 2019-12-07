@@ -1,386 +1,7 @@
 <!DOCTYPE HTML>
-<script type="text/html" data-template-name="time-comp">
-  <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-    <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-    <input type="text" id="node-input-positionConfig">
-    <input type="hidden" id="node-input-outputs"/>
-  </div>
-  <hr>
-  <div id="node-input-input-div" class="form-row block-noindent time-input" data-i18n="[titleOrg]time-comp.placeholder.input">
-      <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
-      <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
-      <input type="hidden" id="node-input-inputType">
-  </div>
-  <div class="form-row block-indent1 time-row-inputFormat is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
-      <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
-      <select id="node-input-inputFormatsel">
-      <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
-  </div>
-  <div class="form-row block-indent1 time-row-inputOffset is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
-      <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
-      <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.inputOffset">
-      <input type="hidden" id="node-input-inputOffsetType">
-      <select id="node-input-inputOffsetMultiplier" class="node-input-multiplier">
-      </select>
-  </div>
-  <hr>
-  <div>
-    <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="time-comp.label.operatorContainer"></span></label>
-    <div class="form-row node-input-rule-container-row">
-      <ol id="node-input-rule-container"></ol>
-    </div>
-  </div>
-  <div class="form-row">
-      <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-          <option value="false" data-i18n="node-red-contrib-sun-position/position-config:common.label.stopfirst"></option>
-          <option value="true" data-i18n="node-red-contrib-sun-position/position-config:common.label.checkall"></option>
-      </select>
-  </div>
-  <hr>
-  <div class="form-row block-noindent time-result1" data-i18n="[title]time-comp.placeholder.result">
-      <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-comp.label.result1"></span></label>
-      <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
-      <input type="hidden" id="node-input-result1Type">
-  </div>
-  <div id="node-input-result1Value-div" class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[titleOrg]time-comp.placeholder.resultValue">
-      <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
-      <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
-      <input type="hidden" id="node-input-result1ValueType">
-  </div>
-  <div class="form-row block-indent2 time-row-result1Format is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
-      <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
-      <select id="node-input-result1FormatSel">
-      </select>
-      <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
-  </div>
-  <div class="form-row block-indent2 time-row-result1Offset is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
-      <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
-      <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.resultOffset">
-      <input type="hidden" id="node-input-result1OffsetType">
-      <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
-      </select>
-  </div>
-  <hr>
-  <div class="form-row" data-i18n="[title]node-red:common.label.name">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-      <input type="text" id="node-input-name" data-i18n="[placeholder]time-comp.placeholder.name">
-  </div>
-</script>
-<style>
-        hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .block-indent1 {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: 100%
-    }
-    .block-indent2 {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: 100%
-    }
-    .block-noindent .row-full-width {
-        width : calc(100% - 110px);
-    }
-    .block-indent1 .row-full-width {
-        width : calc(100% - 120px);
-    }
-    .block-indent2 .row-full-width {
-        width : calc(100% - 130px);
-    }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 245px);
-    }
-    .block-indent1 .ui-spinner {
-        width : calc(100% - 255px);
-    }
-    .block-indent2 .ui-spinner {
-        width : calc(100% - 265px);
-    }
-    .node-input-rule-operator {
-        width: 60px;
-        margin-left: 5px;
-        text-align: center;
-    }
-    .node-input-rule-operand {
-        margin-left: 5px;
-    }
-    .node-input-rule-operandFormatIp {
-        margin-left: 5px;
-        text-align: left;
-    }
-    .node-input-rule-operandFormatSel {
-        margin-left: 5px;
-        text-align: left;
-    };
-    .node-input-rule-offset {
-        margin-left: 5px;
-    }
-    .node-input-rule-multiplier {
-        margin-left: 5px;
-    }
-    .node-input-multiplier {
-        width: 125px;
-        max-width: 125px;
-        margin-left: 5px;
-    }
-    .node-input-rule-property {
-        margin-left: 5px;
-        width:70px
-    }
-    .multiselect {
-        width: 60px;
-        display: inline-block;
-    }
-    .selectBox {
-        position: relative;
-    }
-    .selectBox select {
-        width: 100%;
-        font-weight: bold;
-    }
-    .overSelect {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-    }
-    .option-checkboxes {
-        display: none;
-        border: 1px #dadada solid;
-        background: #ffffff;
-        min-width: 150px;
-        /* width: 200px; */
-        position: absolute;
-        z-index: 90000;
-    }
-    .option-checkboxes label {
-        display: block !important;
-        width: auto !important;
-        text-align: left;
-        margin-right:15px;
-        margin-left:5px;
-    }
-    .option-checkboxes .header {
-        background:#cccccc;
-        margin-left:5px;
-        margin-right:5px;
-    }
-    .option-checkboxes input {
-        display: block !important;
-        width: auto !important;
-        margin-right:5px;
-        margin-left:5px;
-        float:left;
-        /* clear: both; */
-    }
-    .option-checkboxes label:hover {
-        background-color: #1e90ff;
-    }
-    .node-input-addOn {
-        width: 100px;
-        max-width: 100px;
-        margin-left: 5px;
-    }
-</style>
 
 <script type="text/javascript">
     (function() {
-        /**
-         * clip a value to a defined length
-         * @param {string} v - the value
-         * @param {number} [l] - the desired length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function clipValueLength(v, l) {
-            l = l || 18;
-            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-        }
-        /**
-         * clip a test to a maximum length
-         * @param {string} v text to clip
-         * @param {number} l length to clip the text
-         */
-        function clipValueLengthRight(v, l) {
-            l = l || 15;
-            v = String(v);
-            if (v.length > l) {
-                return '...' + v.slice(-(l - 3));
-            }
-            return v;
-        }
-
-        /**
-         * get the label for a typed input vlaue
-         * @param {*} node - the node object for getting i18N Data (node._())
-         * @param {string} t - the type of the value
-         * @param {string} v - the value
-         * @param {number} [offset] - a optional offset to the value
-         * @param {number} [l] - the desired maximum length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function getValueLabel(node, t, v, offset, l) { // eslint-disable-line complexity
-            l = l || 30;
-            let suffix = '';
-            if (offset && offset > 0) {
-                suffix = '↷';
-            } else if (offset && offset < 0) {
-                suffix = '↶';
-            }
-            switch (t) {
-                case 'jsonata':
-                    v = String(v);
-                    if (v.length < l) { return v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
-                case 'json':
-                    v = String(v);
-                    if (v.length < l) { return  v + suffix; }
-                    return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
-                case 'bin':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
-                case 'date':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
-                case 'dateSpecific':
-                    return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
-                case 'string':
-                case 'str':
-                case 'dayOfMonth':
-                    if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
-                    return '"' + clipValueLength(v, l) + '"' + suffix;
-                case 'num':
-                    if (v === '') { return '0' + suffix; }
-                    return String(v) + suffix;
-                case 'bool':
-                    if (v === '') { return 'false' + suffix; }
-                    return String(v) + suffix;
-                case 'msg':
-                case 'env':
-                    return t + '.' + clipValueLength(v, l) + suffix;
-                case 'flow':
-                case 'global': {
-                    const result = RED.utils.parseContextKey(v);
-                    // special for Homematic Devices
-                    if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
-                        result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
-                    }
-                    return t + '.' + clipValueLengthRight(result.key, l) + suffix;
-                }
-                case 'pdsCalcData':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
-                case 'pdsCalcPercent':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
-                case 'pdsCalcAzimuth':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
-                case 'pdsCalcAzimuthRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
-                case 'pdsCalcElevation':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
-                case 'pdsCalcElevationRad':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
-                case 'pdmCalcData':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"${suffix}`;
-                case 'pdmPhase':
-                    return `"${node._('node-red-contrib-sun-position/position-config:common.types.moonPhase')}"${suffix}`;
-                case 'pdsTime': {
-                    switch (v) {
-                        case 'astronomicalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
-                        case 'amateurDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
-                        case 'nauticalDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
-                        case 'blueHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
-                        case 'civilDawn':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
-                        case 'blueHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
-                        case 'goldenHourDawnStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
-                        case 'sunrise':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
-                        case 'sunriseEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
-                        case 'goldenHourDawnEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
-                        case 'solarNoon':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
-                        case 'goldenHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
-                        case 'sunsetStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
-                        case 'sunset':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
-                        case 'goldenHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
-                        case 'blueHourDuskStart':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
-                        case 'civilDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
-                        case 'blueHourDuskEnd':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
-                        case 'nauticalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
-                        case 'amateurDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
-                        case 'astronomicalDusk':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
-                        case 'nadir':
-                            return clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
-                        default: {
-                            const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
-                            return clipValueLength(res, l) + suffix;
-                        }
-                    }
-                }
-                case 'pdmTime':
-                    switch (v) {
-                        case 'rise':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
-                        case 'set':
-                            return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
-                        default:
-                            return 'moon' + v + suffix;
-                    }
-                case 'pdsTimeNow':
-                    return node._('node-red-contrib-sun-position/position-config:common.types.timesunnow') + suffix;
-                case 'PlT':
-                    return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: clipValueLength(v, l), suffix} );
-                case 'msgPayload':
-                    return 'msg.payload';
-                case 'msgTs':
-                    return 'msg.ts';
-                case 'msgLc':
-                    return 'msg.lc';
-                case 'msgValue':
-                    return 'msg.value';
-                case 'input':
-                    return 'input data';
-                case 'timespan':
-                    return 'timespan';
-                case 'operand1':
-                    return 'operand1 data';
-                case 'operand2':
-                    return 'operand2 data';
-                default: {
-                    if (v === '') {
-                        return node._('node-red-contrib-sun-position/position-config:common.label.blank');
-                    }
-                    return clipValueLength(v, l) + suffix;
-                }
-            }
-        }
-
         RED.nodes.registerType('time-comp', {
             category: 'time and astro',
             color: '#FDF0C2',
@@ -494,9 +115,9 @@
                 if (this.rules.length) {
                     const rule = this.rules[index];
                     if (rule) {
-                        label = rule.operatorText +  ' ' + getValueLabel(this, rule.operandType, rule.operandValue);
+                        label = rule.operatorText +  ' ' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, rule.operandType, rule.operandValue);
                         if (rule.propertyType !== 'none') {
-                            label += ' only if ' + getValueLabel(this, rule.propertyType, rule.propertyValue) + ' is true';
+                            label += ' only if ' + RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, rule.propertyType, rule.propertyValue) + ' is true';
                         }
                         return label;
                     }
@@ -514,18 +135,18 @@
                     return this.name;
                 }
                 if (!this.rules || this.rules.length <= 1) {
-                    const op1 = getValueLabel(this, this.inputType, this.input);
+                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.inputType, this.input);
                     return op1;
                 }
 
                 if (this.rules && this.rules.length === 1) {
-                    const op1 = getValueLabel(this, this.inputType, this.input);
-                    const op2 = getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
+                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.inputType, this.input);
+                    const op2 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
                     return op1 + this.rules[0].operatorText + op2;
                 }
 
                 if (this.rules && this.rules.length === 1) {
-                    const op1 = getValueLabel(this, this.inputType, this.input);
+                    const op1 = RED.nodes.getType('sun-position-GlobalFunc').getValueLabel(this, this.inputType, this.input);
                     return op1 + ' ' + this._('time-comp.label.compare');
                 }
                 return this._('time-comp.label.time-comp');
@@ -1067,3 +688,198 @@
             }
         });
     })();</script>
+
+<script type="text/html" data-template-name="time-comp">
+    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+      <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+      <input type="text" id="node-input-positionConfig">
+      <input type="hidden" id="node-input-outputs"/>
+    </div>
+    <hr>
+    <div id="node-input-input-div" class="form-row block-noindent time-input" data-i18n="[titleOrg]time-comp.placeholder.input">
+        <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
+        <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
+        <input type="hidden" id="node-input-inputType">
+    </div>
+    <div class="form-row block-indent1 time-row-inputFormat is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
+        <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>
+        <select id="node-input-inputFormatsel">
+        <input type="text" id="node-input-inputFormat" style="margin-left: 5px;">
+    </div>
+    <div class="form-row block-indent1 time-row-inputOffset is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputOffset">
+        <label for="node-input-inputOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.inputOffset"></span></label>
+        <input id="node-input-inputOffset" data-i18n="[placeholder]time-comp.placeholder.inputOffset">
+        <input type="hidden" id="node-input-inputOffsetType">
+        <select id="node-input-inputOffsetMultiplier" class="node-input-multiplier">
+        </select>
+    </div>
+    <hr>
+    <div>
+      <label for="node-input-rule-container-row"><i class="fa fa-list"></i> <span data-i18n="time-comp.label.operatorContainer"></span></label>
+      <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+      </div>
+    </div>
+    <div class="form-row">
+        <select id="node-input-checkall" style="width:100%; margin-right:5px;">
+            <option value="false" data-i18n="node-red-contrib-sun-position/position-config:common.label.stopfirst"></option>
+            <option value="true" data-i18n="node-red-contrib-sun-position/position-config:common.label.checkall"></option>
+        </select>
+    </div>
+    <hr>
+    <div class="form-row block-noindent time-result1" data-i18n="[title]time-comp.placeholder.result">
+        <label for="node-input-result1"><i class="fa fa-terminal"></i> <span data-i18n="time-comp.label.result1"></span></label>
+        <input type="text" id="node-input-result1" class="row-full-width" data-i18n="[placeholder]time-comp.placeholder.result">
+        <input type="hidden" id="node-input-result1Type">
+    </div>
+    <div id="node-input-result1Value-div" class="form-row block-indent1 time-result1Value is-initial-hidden" data-i18n="[titleOrg]time-comp.placeholder.resultValue">
+        <label for="node-input-result1Value"><i class="fa fa-envelope-o"></i> <span data-i18n="time-comp.label.result1Value"></span></label>
+        <input type="text" id="node-input-result1Value" data-i18n="[placeholder]time-comp.placeholder.resultValue">
+        <input type="hidden" id="node-input-result1ValueType">
+    </div>
+    <div class="form-row block-indent2 time-row-result1Format is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultFormat">
+        <label for="node-input-result1FormatSel"><i class="fa fa-sign-out"></i> <span data-i18n="time-comp.label.result1Format"></span></label>
+        <select id="node-input-result1FormatSel">
+        </select>
+        <input type="text" id="node-input-result1Format" style="margin-left: 5px;">
+    </div>
+    <div class="form-row block-indent2 time-row-result1Offset is-initial-hidden" data-i18n="[title]time-comp.placeholder.resultOffset">
+        <label for="node-input-result1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-comp.label.result1Offset"></span></label>
+        <input id="node-input-result1Offset" data-i18n="[placeholder]time-comp.placeholder.resultOffset">
+        <input type="hidden" id="node-input-result1OffsetType">
+        <select id="node-input-result1OffsetMultiplier" class="node-input-multiplier">
+        </select>
+    </div>
+    <hr>
+    <div class="form-row" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]time-comp.placeholder.name">
+    </div>
+  </script>
+  <style>
+          hr {
+          width: 100%
+      }
+      .is-to-show-initially {
+          display:none
+      }
+      .is-initial-hidden {
+          display:none
+      }
+      .block-indent1 {
+          float: left;
+          min-height: 1px;
+          margin-left: 10px;
+          width: 100%
+      }
+      .block-indent2 {
+          float: left;
+          min-height: 1px;
+          margin-left: 20px;
+          width: 100%
+      }
+      .block-noindent .row-full-width {
+          width : calc(100% - 110px);
+      }
+      .block-indent1 .row-full-width {
+          width : calc(100% - 120px);
+      }
+      .block-indent2 .row-full-width {
+          width : calc(100% - 130px);
+      }
+      .block-noindent .ui-spinner {
+          width : calc(100% - 245px);
+      }
+      .block-indent1 .ui-spinner {
+          width : calc(100% - 255px);
+      }
+      .block-indent2 .ui-spinner {
+          width : calc(100% - 265px);
+      }
+      .node-input-rule-operator {
+          width: 60px;
+          margin-left: 5px;
+          text-align: center;
+      }
+      .node-input-rule-operand {
+          margin-left: 5px;
+      }
+      .node-input-rule-operandFormatIp {
+          margin-left: 5px;
+          text-align: left;
+      }
+      .node-input-rule-operandFormatSel {
+          margin-left: 5px;
+          text-align: left;
+      };
+      .node-input-rule-offset {
+          margin-left: 5px;
+      }
+      .node-input-rule-multiplier {
+          margin-left: 5px;
+      }
+      .node-input-multiplier {
+          width: 125px;
+          max-width: 125px;
+          margin-left: 5px;
+      }
+      .node-input-rule-property {
+          margin-left: 5px;
+          width:70px
+      }
+      .multiselect {
+          width: 60px;
+          display: inline-block;
+      }
+      .selectBox {
+          position: relative;
+      }
+      .selectBox select {
+          width: 100%;
+          font-weight: bold;
+      }
+      .overSelect {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+      }
+      .option-checkboxes {
+          display: none;
+          border: 1px #dadada solid;
+          background: #ffffff;
+          min-width: 150px;
+          /* width: 200px; */
+          position: absolute;
+          z-index: 90000;
+      }
+      .option-checkboxes label {
+          display: block !important;
+          width: auto !important;
+          text-align: left;
+          margin-right:15px;
+          margin-left:5px;
+      }
+      .option-checkboxes .header {
+          background:#cccccc;
+          margin-left:5px;
+          margin-right:5px;
+      }
+      .option-checkboxes input {
+          display: block !important;
+          width: auto !important;
+          margin-right:5px;
+          margin-left:5px;
+          float:left;
+          /* clear: both; */
+      }
+      .option-checkboxes label:hover {
+          background-color: #1e90ff;
+      }
+      .node-input-addOn {
+          width: 100px;
+          max-width: 100px;
+          margin-left: 5px;
+      }
+  </style>

@@ -1,4 +1,4 @@
-# Blind Controller
+# clock-timer Controller
 
 ## clock-timer
 
@@ -9,30 +9,30 @@ Used to control a flow time based with many possibilities. This can be used to s
 
 ### Table of contents
 
-* [Blind Controller](#blind-controller)
-  * [clock-timer](#clock-timer)
-    * [Table of contents](#table-of-contents)
-    * [The node](#the-node)
-    * [Node settings](#node-settings)
-      * [general settings](#general-settings)
-      * [rule settings](#rule-settings)
-      * [overwrite settings](#overwrite-settings)
-    * [Node Input](#node-input)
-    * [Node Output](#node-output)
-    * [Node Status](#node-status)
-  * [rules](#rules)
-    * [rules execution in detail](#rules-execution-in-detail)
-    * [rules example](#rules-example)
-  * [Samples](#samples)
-    * [Example 1](#example-1)
-    * [Example 2](#example-2)
-    * [Example 3 - testing rules and overrides](#example-3---testing-rules-and-overrides)
-    * [Example 4 - usage of message properties](#example-4---usage-of-message-properties)
-  * [Additional FAQ](#additional-faq)
-    * [Why is there no multi blind controller? (FAQ)](#why-is-there-no-multi-blind-controller-faq)
-    * [How to define a Temperature Overwrite? (FAQ)](#how-to-define-a-temperature-overwrite-faq)
-    * [How do I achieve that when opening a window the blind opens? (FAQ)](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens-faq)
-  * [Other](#other)
+- [clock-timer Controller](#clock-timer-controller)
+  - [clock-timer](#clock-timer)
+    - [Table of contents](#table-of-contents)
+    - [The node](#the-node)
+    - [Node settings](#node-settings)
+      - [general settings](#general-settings)
+      - [rule settings](#rule-settings)
+      - [overwrite settings](#overwrite-settings)
+    - [Node Input](#node-input)
+    - [Node Output](#node-output)
+    - [Node Status](#node-status)
+  - [rules](#rules)
+    - [rules execution in detail](#rules-execution-in-detail)
+    - [rules example](#rules-example)
+  - [Samples](#samples)
+    - [Example 1](#example-1)
+    - [Example 2](#example-2)
+    - [Example 3 - testing rules and overrides](#example-3---testing-rules-and-overrides)
+    - [Example 4 - usage of message properties](#example-4---usage-of-message-properties)
+  - [Additional FAQ](#additional-faq)
+    - [Why is there no multi blind controller? (FAQ)](#why-is-there-no-multi-blind-controller-faq)
+    - [How to define a Temperature Overwrite? (FAQ)](#how-to-define-a-temperature-overwrite-faq)
+    - [How do I achieve that when opening a window the blind opens? (FAQ)](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens-faq)
+  - [Other](#other)
 
 ### The node
 

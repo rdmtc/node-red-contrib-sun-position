@@ -945,7 +945,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    console.log('[IN getBackendData] ',data);  // eslint-disable-line
+    // console.log('[IN getBackendData] ',data);  // eslint-disable-line
     let res = '';
     if (!data || data.type === 'none' || data.type === '' || data.type === 'jsonata' || data.type === 'json' || data.type === 'bin') {
         res = data.type;
@@ -1007,4 +1007,17 @@ function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
         return d + ((add) ? ' ' + add : '');
     }
     return ((add) ? add : '');
+}
+
+
+/**
+ * get the value for the day checkbox array
+ * @param {jQuery} value - the checkbox array
+ * @returns {string} the value of the checkboxes
+ */
+function getDaysStr(value) { // eslint-disable-line no-unused-vars
+    const days = value.map((_, el) => { return $(el).val(); }).get();
+    if (days.length === 0) { return ''; }
+    if (days.length === 7) { return '*'; }
+    return days.join(',');
 }

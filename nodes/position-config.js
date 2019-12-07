@@ -10,6 +10,7 @@ const util = require('util');
 
 const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 
+// (function() {
 /*******************************************************************************************************/
 const moonPhases = [{
     pos: 0,
@@ -88,9 +89,9 @@ module.exports = function (RED) {
     /** generic configuration Node */
     class positionConfigurationNode {
         /**
-         * creates a new instance of the settings node and initializes them
-         * @param {*} config - configuration of the node
-         */
+             * creates a new instance of the settings node and initializes them
+             * @param {*} config - configuration of the node
+             */
         constructor(config) {
             RED.nodes.createNode(this, config);
             try {
@@ -142,49 +143,49 @@ module.exports = function (RED) {
         }
 
         /**
-         * register a node as child
-         * @param {*} node node to register as child node
-         */
+             * register a node as child
+             * @param {*} node node to register as child node
+             */
         register(node) {
             this.users[node.id] = node;
         }
 
         /**
-         * remove a previous registered node as child
-         * @param {*} node node to remove
-         * @param {function} done function which should be executed after deregister
-         * @returns {*} result of the function
-         */
+             * remove a previous registered node as child
+             * @param {*} node node to remove
+             * @param {function} done function which should be executed after deregister
+             * @returns {*} result of the function
+             */
         deregister(node, done) {
             delete node.users[node.id];
             return done();
         }
         /*******************************************************************************************************/
         /**
-         * @typedef {Object} timeresult
-         * @property {Date} value - a Date object of the neesed date/time
-         * @property {number} ts - The time as unix timestamp
-         * @property {number} pos - The position of the sun on the time
-         * @property {number} angle - Angle of the sun on the time
-         * @property {number} julian - The time as julian calendar
-         * @property {boolean} valid - indicates if the time is valid or not
-         */
+             * @typedef {Object} timeresult
+             * @property {Date} value - a Date object of the neesed date/time
+             * @property {number} ts - The time as unix timestamp
+             * @property {number} pos - The position of the sun on the time
+             * @property {number} angle - Angle of the sun on the time
+             * @property {number} julian - The time as julian calendar
+             * @property {boolean} valid - indicates if the time is valid or not
+             */
 
         /**
-         * @typedef {Object} erroresult
-         * @property {string} error - string of an error message if an error occurs
-         */
+             * @typedef {Object} erroresult
+             * @property {string} error - string of an error message if an error occurs
+             */
 
         /**
-         * gets sun time by Name
-         * @param {Date} now current time
-         * @param {string} value name of the sun time
-         * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
-         * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
-         * @param {number} [next] if greater than 0 the number of days in the future
-         * @param {string} [days] days for which should be calculated the sun time
-         * @return {timeresult|erroresult} result object of sunTime
-         */
+             * gets sun time by Name
+             * @param {Date} now current time
+             * @param {string} value name of the sun time
+             * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
+             * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
+             * @param {number} [next] if greater than 0 the number of days in the future
+             * @param {string} [days] days for which should be calculated the sun time
+             * @return {timeresult|erroresult} result object of sunTime
+             */
         getSunTimeByName(now, value, offset, multiplier, next, days) {
             let result;
             const dayid = hlp.getDayId(now); // this._getUTCDayId(now);
@@ -235,10 +236,10 @@ module.exports = function (RED) {
         }
 
         /**
-         * gets previous and next sun time
-         * @param {Date} now current time
-         * @return {array} result object of sunTime
-         */
+             * gets previous and next sun time
+             * @param {Date} now current time
+             * @return {array} result object of sunTime
+             */
         getSunTimePrevNext(now) {
             let dayid = hlp.getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
@@ -342,20 +343,20 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-         * @typedef {Object} moontime
-         * @property {Date|NaN} value - a Date object of the neesed date/time
-         */
+             * @typedef {Object} moontime
+             * @property {Date|NaN} value - a Date object of the neesed date/time
+             */
 
         /**
-        * gets moon time
-        * @param {Date} now current time
-        * @param {string} value name of the moon time
-        * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
-        * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
-        * @param {number} [next] if greater than 0 the number of days in the future
-        * @param {string} [days] days for which should be calculated the moon time
-        * @return {moontime|erroresult} result object of moon time
-        */
+            * gets moon time
+            * @param {Date} now current time
+            * @param {string} value name of the moon time
+            * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
+            * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
+            * @param {number} [next] if greater than 0 the number of days in the future
+            * @param {string} [days] days for which should be calculated the moon time
+            * @return {moontime|erroresult} result object of moon time
+            */
         getMoonTimeByName(now, value, offset, multiplier, next, days) {
             const result = {};
             const datebase = new Date(now);
@@ -410,19 +411,19 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-         * Formate a Date Object to a Date and Time String
-         * @param {Date} dt Date to format to Date and Time string
-         * @returns {string} formated Date object
-         */
+             * Formate a Date Object to a Date and Time String
+             * @param {Date} dt Date to format to Date and Time string
+             * @returns {string} formated Date object
+             */
         toDateTimeString(dt) {
             return (this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
         }
 
         /**
-         * Formate a Date Object to a Time String
-         * @param {Date} dt Date to format to trime string
-         * @returns {string} formated Date object
-         */
+             * Formate a Date Object to a Time String
+             * @param {Date} dt Date to format to trime string
+             * @returns {string} formated Date object
+             */
         toTimeString(dt) {
             if (!this.tzOffset && this.stateTimeFormat === '3') {
                 return dt.toLocaleTimeString();
@@ -431,10 +432,10 @@ module.exports = function (RED) {
         }
 
         /**
-         * Formate a Date Object to a Date String
-         * @param {Date} dt Date to format to Date string
-         * @returns {string} formated Date object
-         */
+             * Formate a Date Object to a Date String
+             * @param {Date} dt Date to format to Date string
+             * @returns {string} formated Date object
+             */
         toDateString(dt) {
             if (!this.tzOffset && this.stateDateFormat === '12') {
                 return dt.toLocaleDateString();
@@ -443,15 +444,15 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-         * get a float value from a type input in Node-Red
-         * @param {*} _srcNode - source node information
-         * @param {*} msg - message object
-         * @param {string} type - type name of the type input
-         * @param {*} value - value of the type input
-         * @param {*} [def] - default value if can not get float value
-         * @param {*} [opCallback] - callback function for getting getPropValue
-         * @returns {number} float property
-         */
+             * get a float value from a type input in Node-Red
+             * @param {*} _srcNode - source node information
+             * @param {*} msg - message object
+             * @param {string} type - type name of the type input
+             * @param {*} value - value of the type input
+             * @param {*} [def] - default value if can not get float value
+             * @param {*} [opCallback] - callback function for getting getPropValue
+             * @returns {number} float property
+             */
         getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
             // _srcNode.debug('getFloatProp type='+type+' value='+value);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
@@ -480,25 +481,25 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-        * @typedef {Object} outPropType
-        * @property {string} type - type name of the type input
-        * @property {string} value - value of the type input
-        * @property {string|number} format - format of the input
-        * @property {string} [offset] - value of the offset type input
-        * @property {string} [offsetType] - type name of the offset type input
-        * @property {number} [multiplier] - multiplier to the time
-        * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valid days
-        * @property {Date} [now] - base date, current time as default
-        */
+            * @typedef {Object} outPropType
+            * @property {string} type - type name of the type input
+            * @property {string} value - value of the type input
+            * @property {string|number} format - format of the input
+            * @property {string} [offset] - value of the offset type input
+            * @property {string} [offsetType] - type name of the offset type input
+            * @property {number} [multiplier] - multiplier to the time
+            * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
+            * @property {string} [days] - valid days
+            * @property {Date} [now] - base date, current time as default
+            */
 
         /**
-         * get the time Data prepared for output
-         * @param {*} _srcNode - source node for logging
-         * @param {*} [msg] - the message object
-         * @param {outPropType} data - a Data object
-         * @returns {*} output Data
-         */
+             * get the time Data prepared for output
+             * @param {*} _srcNode - source node for logging
+             * @param {*} [msg] - the message object
+             * @param {outPropType} data - a Data object
+             * @returns {*} output Data
+             */
         getOutDataProp(_srcNode, msg, data) {
             // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
             let now = new Date(data.now);
@@ -561,32 +562,32 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-        * @typedef {Object} timePropType
-        * @property {string} type - type name of the type input
-        * @property {string} value - value of the type input
-        * @property {string|number} [format] - format of the input
-        * @property {string} [offset] - value of the offset type input
-        * @property {string} [offsetType] - type name of the offset type input
-        * @property {number} [multiplier] - multiplier to the time
-        * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
-        * @property {string} [days] - valid days
-        * @property {Date} [now] - base date, current time as default
-        */
+            * @typedef {Object} timePropType
+            * @property {string} type - type name of the type input
+            * @property {string} value - value of the type input
+            * @property {string|number} [format] - format of the input
+            * @property {string} [offset] - value of the offset type input
+            * @property {string} [offsetType] - type name of the offset type input
+            * @property {number} [multiplier] - multiplier to the time
+            * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
+            * @property {string} [days] - valid days
+            * @property {Date} [now] - base date, current time as default
+            */
 
         /**
-        * @typedef {Object} timePropResultType
-        * @property {Date} value - the Date value
-        * @property {string} error - error message if an error has occured
-        * @property {boolean} fix - indicator if the given time value is a fix date
-        */
+            * @typedef {Object} timePropResultType
+            * @property {Date} value - the Date value
+            * @property {string} error - error message if an error has occured
+            * @property {boolean} fix - indicator if the given time value is a fix date
+            */
 
         /**
-         * get the time Data from a typed input
-         * @param {*} _srcNode - source node for logging
-         * @param {*} [msg] - the message object
-         * @param {timePropType} data - a Data object
-         * @returns {timePropResultType} value of the type input
-         */
+             * get the time Data from a typed input
+             * @param {*} _srcNode - source node for logging
+             * @param {*} [msg] - the message object
+             * @param {timePropType} data - a Data object
+             * @returns {timePropResultType} value of the type input
+             */
         getTimeProp(_srcNode, msg, data) {
             // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
@@ -706,19 +707,19 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-        * @typedef {Object} propValueType
-        * @property {string} type - type name of the type input
-        * @property {string} value - value of the type input
-        * @property {function} [callback] - function which should be called after value was recived
-        */
+            * @typedef {Object} propValueType
+            * @property {string} type - type name of the type input
+            * @property {string} value - value of the type input
+            * @property {function} [callback] - function which should be called after value was recived
+            */
 
         /**
-        * get a property value from a type input in Node-Red
-        * @param {*} _srcNode - source node information
-        * @param {*} msg - message object
-        * @param {propValueType} data - data object with more information
-        * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
-        */
+            * get a property value from a type input in Node-Red
+            * @param {*} _srcNode - source node information
+            * @param {*} msg - message object
+            * @param {propValueType} data - data object with more information
+            * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
+            */
         getPropValue(_srcNode, msg, data) {
             _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             let result = undefined;
@@ -1218,3 +1219,4 @@ module.exports = function (RED) {
         }
     });
 };
+// })();
