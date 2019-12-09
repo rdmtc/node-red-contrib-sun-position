@@ -13,8 +13,7 @@ const cRuleFrom = 1;
 const cRuleNone = 0;
 const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
-const cautoTriggerTimeFull = 60 * 60000; // <- 1h
-// const cautoTriggerTimeSmall = 10 * 60000; // 10 min
+const cautoTriggerTime = 20 * 60000;
 
 /******************************************************************************************/
 /**
@@ -218,13 +217,13 @@ module.exports = function (RED) {
 
         let overrideData = undefined;
         let overrideTopic = undefined;
-        if (!onlyTrigger && msg.payload) {
-            if (msg.payload.value && (msg.payload.expires || msg.payload.prio || msg.payload.priority)) {
-                overrideData = msg.payload.value;
-                overrideTopic = msg.topic;
-            } else if (msg.topic && (msg.topic.includes('manual') ||
+        if (!onlyTrigger && typeof msg.payload !== 'undefined') {
+            if (msg.topic && (msg.topic.includes('manual') ||
                 msg.topic.includes('overwrite'))) {
                 overrideData = msg.payload;
+                overrideTopic = msg.topic;
+            } else if (typeof msg.payload === 'object' && (msg.payload.value && (msg.payload.expires || msg.payload.prio || msg.payload.priority))) {
+                overrideData = msg.payload.value;
                 overrideTopic = msg.topic;
             }
         }
@@ -661,8 +660,10 @@ module.exports = function (RED) {
             }
 
             node.reason.stateComplete = node.reason.state ;
-            if (timeCtrl.payload && typeof timeCtrl.payload !== 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(timeCtrl.payload.toString(),10) + ' - ' + node.reason.stateComplete;
+            if (timeCtrl.payloadOut === null || typeof timeCtrl.payloadOut !== 'object') {
+                node.reason.stateComplete = hlp.clipStrLength(''+timeCtrl.payloadOut,20) + ' - ' + node.reason.stateComplete;
+            } else if (typeof timeCtrl.payloadOut === 'object') {
+                node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(timeCtrl.payloadOut),20) + ' - ' + node.reason.stateComplete;
             }
             node.status({
                 fill,
@@ -696,7 +697,7 @@ module.exports = function (RED) {
                 const timeCtrl = {
                     reason : node.reason,
                     timeClock: node.timeClockData,
-                    payload: node.payload.current
+                    payloadOut: node.payload.current
                 };
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
@@ -706,7 +707,7 @@ module.exports = function (RED) {
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
                 if (node.autoTrigger) {
-                    node.autoTriggerTime = cautoTriggerTimeFull;
+                    node.autoTriggerTime = cautoTriggerTime;
                     node.autoTriggerType = 0;
                 }
 
@@ -737,8 +738,9 @@ module.exports = function (RED) {
                     topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
-                if (node.payload.current &&
+                if (typeof node.payload.current !== 'undefined' &&
                     node.payload.current !== 'none' &&
+                    node.payload.current !== null &&
                     ((node.reason.code !== previousData.reasonCode) ||
                     (ruleId !== previousData.usedRule))) {
                     msg.payload = node.payload.current;
