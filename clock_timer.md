@@ -6,7 +6,6 @@ Used to control a flow time based with many possibilities. This can be used to s
 
 ![clock-timer](https://user-images.githubusercontent.com/12692680/70033610-1e991e00-15b0-11ea-8035-8a74164f7d64.png)
 
-
 ### Table of contents
 
 - [clock-timer Controller](#clock-timer-controller)
@@ -38,39 +37,36 @@ Used to control a flow time based with many possibilities. This can be used to s
 
 The node was created out of the desire to be able to use the [blind-control node](blind_control.md) also for dimmers. So this node is a simplified [blind-control node](blind_control.md) without sun based control. In contrast, this node offers the possibility to have any payload.
 
-
 ### Node settings
 
 #### general settings
 
 ![clock-timer-settings-1](https://user-images.githubusercontent.com/12692680/57134454-8c753100-6da6-11e9-95e9-bdff86f1e3d4.png)
 
-* **Position Configuration** connects to the central configuration node, which contains the current position, but also handles a lot of internal shared functions. Thus, this configuration is always needed, even if the sense does not always open up.
-* **name** the name of the node
+- **Position Configuration** connects to the central configuration node, which contains the current position, but also handles a lot of internal shared functions. Thus, this configuration is always needed, even if the sense does not always open up.
+- **name** the name of the node
+
+#### rule settings
+
+![clock-timer-settings-2](https://user-images.githubusercontent.com/12692680/70568882-138a5300-1b99-11ea-97b4-011f7e7d8819.png)
+
+- **default payload** The value which will be used if no other value given by rule, or override.
+
+![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/68091970-9deae300-fe86-11e9-9a33-c69607fb8a38.png)
+
+- If a rule has a condition, the rule only applies if the condition matches.
+  - For some conditions a comparisons needs to be defined.
+  - If the values of comparison comes from a message object and the value can not be determined, the value is taken at which the value could be determined last. If there is no previous value a error will be thrown otherwise only a log output. To thus the message property not needs to be available in all incoming messages.
+- If a rule has a time limitation
+  - `until` the first rule is taken, where the given time is greater than the current time.
+  - `from` the last rule is taken, where the given time is less than the current time.
+- If a rule will applied the defined payload to the rule will be send.
+
+- For some time definitions an Offset could be added (or be reduced with a negative value)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#### rule settings
-
-![blind-control-settings-3](https://user-images.githubusercontent.com/12692680/57134461-8d0dc780-6da6-11e9-8235-a5bd141fef99.png)
-
-* **default position** The value which will be used if no other value given by condition, time or sun applies.
-
-![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/68091970-9deae300-fe86-11e9-9a33-c69607fb8a38.png)
-
-
-* If a rule with a absolute blind position applies, the blind position defined by the rule will be used.
-  * sun control will then not be active
-* If a rule has a condition, the rule only applies if the condition matches.
-  * For some conditions a comparisons needs to be defined.
-  * If the values of comparison comes from a message object and the value can not be determined, the value is taken at which the value could be determined last. If there is no previous value a error will be thrown otherwise only a log output. To thus the message property not needs to be available in all incoming messages.
-* If a rule has a time limitation
-  * `until` the first rule is taken, where the given time is greater than the current time.
-  * `from` the last rule is taken, where the given time is less than the current time.
-
-* For some time definitions an Offset could be added (or be reduced with a negative value)
-* If for the blind position a value from a message object and the value can not be determined the defined default blind position will be used.
 
 #### overwrite settings
 

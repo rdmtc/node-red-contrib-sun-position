@@ -53,7 +53,6 @@ module.exports = function (RED) {
         }
         // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
         if (data.outType !== 'none') {
-            // const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, next, days);
             const res = node.positionConfig.getOutDataProp(node, msg, data);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + data.type + '.' + data.value);
@@ -325,7 +324,6 @@ module.exports = function (RED) {
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                // const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier, true);
                 const value = node.positionConfig.getOutDataProp(node, msg, {
                     type: config.payloadType,
                     value: config.payload,

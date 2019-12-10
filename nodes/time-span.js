@@ -338,7 +338,6 @@ module.exports = function (RED) {
                     } else if (config.result1ValueType === 'operand2') {
                         resultObj = hlp.getFormattedDateOut(operand2.value, config.result1Format);
                     } else {
-                        // resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
                         resultObj = node.positionConfig.getOutDataProp(node, msg, {
                             type: config.result1ValueType,
                             value: config.result1Value,
@@ -350,8 +349,6 @@ module.exports = function (RED) {
                         });
                     }
                     // node.debug('resultObj=' + util.inspect(resultObj, { colors: true, compact: 10, breakLength: Infinity }));
-                    // to
-
                     if (resultObj === null || typeof resultObj === 'undefined') {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {

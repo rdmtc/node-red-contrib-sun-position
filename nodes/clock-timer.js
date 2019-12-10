@@ -646,7 +646,7 @@ module.exports = function (RED) {
         /**
          * set the state of the node
          */
-        function setState(timeCtrl) {
+        function setState(pLoad) {
             const code = node.reason.code;
             const shape = 'ring';
             let fill = 'yellow';
@@ -660,10 +660,10 @@ module.exports = function (RED) {
             }
 
             node.reason.stateComplete = node.reason.state ;
-            if (timeCtrl.payloadOut === null || typeof timeCtrl.payloadOut !== 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(''+timeCtrl.payloadOut,20) + ' - ' + node.reason.stateComplete;
-            } else if (typeof timeCtrl.payloadOut === 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(timeCtrl.payloadOut),20) + ' - ' + node.reason.stateComplete;
+            if (pLoad === null || typeof pLoad !== 'object') {
+                node.reason.stateComplete = hlp.clipStrLength(''+pLoad,20) + ' - ' + node.reason.stateComplete;
+            } else if (typeof pLoad === 'object') {
+                node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(pLoad),20) + ' - ' + node.reason.stateComplete;
             }
             node.status({
                 fill,
@@ -694,11 +694,6 @@ module.exports = function (RED) {
                     return null;
                 }
                 node.nowarn = {};
-                const timeCtrl = {
-                    reason : node.reason,
-                    timeClock: node.timeClockData,
-                    payloadOut: node.payload.current
-                };
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
                 previousData.reasonCode = node.reason.code;
@@ -712,8 +707,8 @@ module.exports = function (RED) {
                 }
 
                 // check if the message contains any oversteering data
-                let ruleId = -1;
-
+                let ruleId = -2;
+                const timeCtrl = {};
                 // node.debug(`start pos=${node.payload.current} manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
                 if (!checkTCPosOverwrite(node, msg, now)) {
@@ -723,7 +718,9 @@ module.exports = function (RED) {
                 }
 
                 node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
-                setState(timeCtrl);
+                timeCtrl.reason = node.reason;
+                timeCtrl.timeClock = node.timeClockData;
+                setState(node.payload.current);
 
                 let topic = node.payload.topic;
                 if (topic) {
@@ -745,8 +742,9 @@ module.exports = function (RED) {
                     (ruleId !== previousData.usedRule))) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
+                    msg.timeCtrl = timeCtrl;
                     if (node.outputs > 1) {
-                        send([msg, { topic, payload: timeCtrl }]); // node.send([msg, { topic, payload: timeCtrl }]);
+                        send([msg, { topic, payload: timeCtrl, payloadOut: node.payload.current }]); // node.send([msg, { topic, payload: timeCtrl }]);
                     } else {
                         msg.timeCtrl = timeCtrl;
                         send(msg, null); // node.send(msg, null);
