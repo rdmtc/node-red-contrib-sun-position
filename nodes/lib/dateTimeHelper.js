@@ -18,12 +18,15 @@ module.exports = {
     chkValueFilled,
     checkLimits,
     getMsgBoolValue,
+    getMsgBoolValue2,
     getMsgNumberValue,
+    getMsgNumberValue2,
     getSpecialDayOfMonth,
     getStdTimezoneOffset,
     isDSTObserved,
     addOffset,
     calcDayOffset,
+    calcMonthOffset,
     convertDateTimeZone,
     isValidDate,
     normalizeDate,
@@ -453,6 +456,36 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
  * @param {*} msg message
  * @param {*} name property name
  */
+function getMsgNumberValue2(msg, ids, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== '')) {
+                const res = Number(msg[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
+                    }
+                    return res;
+                }
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return NaN;
+    }
+    return notFound;
+}
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
 function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     if (ids && msg) {
         if (!Array.isArray(ids)) {
@@ -495,6 +528,33 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     return notFound;
 }
 
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgBoolValue2(msg, ids, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    return isFound(isTrue(msg[id]), msg[id], msg.topic);
+                }
+                return isTrue(msg[id]);
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return false;
+    }
+    return notFound;
+}
 /*******************************************************************************************************/
 /**
  * get the standard timezone offset without DST
@@ -577,22 +637,38 @@ function addOffset(d, offset, multiplier) {
  */
 function calcDayOffset(days, daystart) {
     let dayx = 0;
-    let daypos = daystart;
-    // while (days.indexOf( ) === -1) {
-    while (!days.includes(daypos)) {
-        dayx += 1;
+    while (!days.includes(daystart + dayx)) {
+        dayx++;
         if ((daystart + dayx) > 6) {
             daystart = (dayx * -1);
         }
-
-        daypos = daystart + dayx;
-
         if (dayx > 7) {
             dayx = -1;
             break;
         }
     }
     return dayx;
+}
+
+/**
+ * calculates the number of month to get a positive date object
+ * @param {Array.<number>} months array of allowed months
+ * @param {number} monthstart start month (0=January)
+ * @return {number} number of months for the next valid day as offset to the monthstart
+ */
+function calcMonthOffset(months, monthstart) {
+    let monthx = 0;
+    while (!months.includes(monthstart + monthx)) {
+        monthx++;
+        if ((monthstart + monthx) > 11) {
+            monthstart = (monthx * -1);
+        }
+        if (monthx > 12) {
+            monthx = -1;
+            break;
+        }
+    }
+    return monthx;
 }
 
 /*******************************************************************************************************/
@@ -605,7 +681,7 @@ function calcDayOffset(days, daystart) {
  * @param {Array.<number>} days array of allowed days
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
-function normalizeDate(d, offset, multiplier, next, days) {
+function normalizeDate(d, offset, multiplier, next, days, months) {
     // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
     if (next) {
@@ -622,6 +698,12 @@ function normalizeDate(d, offset, multiplier, next, days) {
         const dayx = calcDayOffset(days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
+        }
+    }
+    if (months && (months !== '*') && (months !== '')) {
+        const monthx = calcMonthOffset(months, d.getMonth());
+        if (monthx > 0) {
+            d.setMonth(d.getMonth() + monthx);
         }
     }
     return d;

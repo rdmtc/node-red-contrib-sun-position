@@ -21,6 +21,7 @@
 			"ruleTimeMax": "no later than (max)",
 			"ruleTimeMin": "at the earliest (min)",
 			"ruleTimeDays":"only on day",
+			"ruleTimeMonths": "only on month",
 			"ruleDescription": "Description",
 			"rulePayload": "Payload:",
 			"rulePayloadND": "No Payload",
@@ -39,7 +40,8 @@
 			"btnClear": "clear",
 			"dialogtitle":"Edit Rule",
 			"autoTrigger":"auto trigger",
-			"autoTrigger2":"recalculate every x minutes"
+			"autoTrigger2":"recalculate every x minutes",
+			"validFor":"only valid for "
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",
@@ -57,6 +59,7 @@
 			"offset":"time offset",
 			"level": "level",
 			"ruleTimeDays": "select days wherefore it should be valid",
+			"ruleTimeMonths": "select months wherefore it should be valid",
 			"autoTrigger":"automatic triggers new calculation of the rule in a dynamic changing time interval"
 		},
 		"text": {

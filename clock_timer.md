@@ -52,7 +52,7 @@ The node was created out of the desire to be able to use the [blind-control node
 
 - **default payload** The value which will be used if no other value given by rule, or override.
 
-![blind-control-settings-4](https://user-images.githubusercontent.com/12692680/68091970-9deae300-fe86-11e9-9a33-c69607fb8a38.png)
+![clock-timer-settings-3](https://user-images.githubusercontent.com/12692680/70744707-84a94200-1d22-11ea-8fc4-f781e6202901.png)
 
 - If a rule has a condition, the rule only applies if the condition matches.
   - For some conditions a comparisons needs to be defined.
@@ -64,81 +64,81 @@ The node was created out of the desire to be able to use the [blind-control node
 
 - For some time definitions an Offset could be added (or be reduced with a negative value)
 
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 #### overwrite settings
 
-![blind-control-settings-5](https://user-images.githubusercontent.com/12692680/57134465-8d0dc780-6da6-11e9-97a6-8f3b61ed2de9.png)
+![clock-timer-settings-4](https://user-images.githubusercontent.com/12692680/70744825-d5209f80-1d22-11ea-90c1-1d7e13b13d91.png)
 
-* **expire** the duration in minutes a manual setting will remain is place. If not defined, there will be no default expiring of overrides.
+- **expire** the duration in minutes a manual setting will remain is place. If not defined, there will be no default expiring of overrides.
 
-![blind-control-settings-6](https://user-images.githubusercontent.com/12692680/57134466-8da65e00-6da6-11e9-84d2-425ca0be5e3d.png)
+![clock-timer-settings-5](https://user-images.githubusercontent.com/12692680/70744896-fe413000-1d22-11ea-8085-0d37847d74dc.png)
 
 ### Node Input
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
-* **reset** an incoming message with `msg.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  * **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is __equal or higher__ then the priority of the existing override. The message priority can be defined by
-    * a property `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value
-    * a higher number is a higher priority. So prio 1 is the lowest priority
-    * If in the message a property  `msg.exactPriority` or `msg.exactPrivilege` is set to true then the existing override will only reset if the absolute value of the priority of the message is __equal__ then the priority of the existing override.
-* **position** an incoming message with a topic including `manual` or `overwrite` will override any of rule based or default payload.
-  * If an override is already active a new message changes the payload if the **priority** of the existing override allows this.
-* **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
-  * A message property  `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value
-  * A `boolean` value `true` is considered as numeric `1`
-  * a higher number is a higher priority. So prio 1 is the lowest priority
-* **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
-  * A message property `msg.expire`
-  * The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
-  * If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
+- **reset** an incoming message with `msg.reset` or `msg.resetOverwrite` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
+  - **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is __equal or higher__ then the priority of the existing override. The message priority can be defined by
+    - a property `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value
+    - A higher number is a higher priority. So prio 1 is the lowest priority.
+    - If in the message a property  `msg.exactPriority` or `msg.exactPrivilege` is set to true then the existing override will only reset if the absolute value of the priority of the message is __equal__ then the priority of the existing override.
+- **override** an incoming message with a topic including `manual` or `overwrite` will override any of rule based or default payload.
+  - If an override is already active a new message changes the payload if the **priority** of the existing override allows this.
+- **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
+  - A message property  `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value.
+  - A `boolean` value `true` is considered as numeric `1`.
+  - A higher number is a higher priority. So prio 1 is the lowest priority.
+- **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
+  - A message property `msg.expire`
+  - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
+  - If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
 
 Useful to know:
 
-* If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
-* An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
-  * if additional **exactPrio** is defined, then the message priority must be __equal__ to the existing priority.
-* A message where the topic contains `triggerOnly` or  or with an property `msg.trigger` which is true can not act as override.
+- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
+- An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
+  - if additional **exactPriority** is defined, then the message priority must be __equal__ to the existing priority.
+- A message where the topic contains `triggerOnly` or with an property `msg.trigger` which is true can not act as override.
 
 ### Node Output
 
-In then enhanced option are configurable if the node has one single (default) or two outputs.
+In the enhanced option are configurable if the node has one single (default) or two outputs.
 
-An output can be triggered by an incoming message or by an expiring timeout from an override. If the trigger is a incoming message, the incoming message will be forwarded to the first output if the blind position has changed.
+An output can be triggered by an incoming message or by an expiring timeout from an override. If the trigger is a incoming message, the incoming message will be forwarded to the first output if the rule has changed.
 
 The incoming message is changed as following:
 
-* `msg.topic` if a topic is defined this topic will be used, otherwise no change of the topic from the incoming message
-* `msg.payload` the payload will be set to the new blind level (numeric value)
+- `msg.topic` if a topic is defined this topic will be used, otherwise no change of the topic from the incoming message
+- `msg.payload` the payload will be set to the new blind level (numeric value)
 
-If the output is set to single, an object property `msg.blindCtrl` will be attached to the message and forwarded to the first output.
+If the output is set to single, an object property `msg.timeCtrl` will be attached to the message and forwarded to the first output.
 If the node is configured with two outputs this object is set as the `msg.payload` property of the message that is send to the second output. The difference is also, that the second output will give this object every time a recalculation will is triggered, where the first output only send a message on blind position change.
 
-* `blindCtrl` a object will be added add as `msg.blindCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
-  * `blindCtrl.reason` object for the reason of the current blind position
-    * `blindCtrl.reason.code` a number representing the reason for the blind position. The possible codes are
-      * **-1** - the rules was not evaluated, maybe override is active
-      * **1**  - defined default blind position, because no other rule/condition/behavior
-      * **2**  - manual override
-      * **3**  - manual override - expiring
-      * **4**  - based blind position based by rule
-      * **5**  - calculated blind position by sun control is below defined minimum blind position (minimum blind position used)
-      * **6**  - calculated blind position by sun control is above defined maximum blind position (maximum blind position used)
-      * **7**  - Sun below altitude threshold
-      * **8**  - Sun is not in window, default blind position is used
-      * **9**  - blind position calculated by sun position
-      * **10** - defined oversteer condition applies
-      * **11** - blind position calculated by sun position was not used caused by smooth settings
-      * **12** - sun is in window (maximize mode), max blind position used
-      * **13** - sun is not in window (maximize mode), min blind position used
-      * **14** - change is below defined minimum delta
-      * **15** - blind position is below defined minimum blind position by rule
-      * **16** - blind position is above defined maximum blind position by rule
-    * `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
-    * `blindCtrl.reason.description` a text, describe the reason for the blind position
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+- `timeCtrl` a object will be added add as `msg.timeCtrl` property on single output mode or send as `msg.payload` on split output mode with the following properties:
+  - `timeCtrl.reason` object for the reason of the current blind position
+    - `timeCtrl.reason.code` a number representing the reason for the blind position. The possible codes are
+      - **-1** - the rules was not evaluated, maybe override is active
+      - **1**  - defined default blind position, because no other rule/condition/behavior
+      - **2**  - manual override
+      - **3**  - manual override - expiring
+      - **4**  - based blind position based by rule
+      - **5**  - calculated blind position by sun control is below defined minimum blind position (minimum blind position used)
+      - **6**  - calculated blind position by sun control is above defined maximum blind position (maximum blind position used)
+      - **7**  - Sun below altitude threshold
+      - **8**  - Sun is not in window, default blind position is used
+      - **9**  - blind position calculated by sun position
+      - **10** - defined oversteer condition applies
+      - **11** - blind position calculated by sun position was not used caused by smooth settings
+      - **12** - sun is in window (maximize mode), max blind position used
+      - **13** - sun is not in window (maximize mode), min blind position used
+      - **14** - change is below defined minimum delta
+      - **15** - blind position is below defined minimum blind position by rule
+      - **16** - blind position is above defined maximum blind position by rule
+    * `timeCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
+    * `timeCtrl.reason.description` a text, describe the reason for the blind position
   * `blindCtrl.level` - the new blind level (numeric value) - equal to `msg.payload` of the first output message.
   * `blindCtrl.levelInverse` - if `blindCtrl.blind.overwrite.active` is true, the value of `blindCtrl.levelInverse` will be equal to the value of `blindCtrl.level`, otherwise it will be the inverse to `blindCtrl.level`. This means if `blindCtrl.level` indicates how much the blind is open, then `blindCtrl.levelInverse` indicates how much the blind is closed. So if `blindCtrl.level` is equal to **min position**, `blindCtrl.levelInverse` will be **max position**.
   * `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here

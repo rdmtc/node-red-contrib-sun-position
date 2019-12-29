@@ -722,7 +722,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
  * @param {string} element name of the element as jQuery element name
  * @param {string} val value of the element
  */
-function initDaysCheckbox(element, val) { // eslint-disable-line no-unused-vars
+function initCheckboxesBlock(element, val) { // eslint-disable-line no-unused-vars
     if (val === '*' || typeof val === 'undefined' || val === null) {
         $(element + ' input[type=checkbox]').prop('checked', true);
     } else if (val === '' || val === 'none') {
@@ -935,6 +935,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
 * @property {number} [multiplier] - multiplier to value
 * @property {boolean} [next] - identifier if the next should be output
 * @property {string} [days] - allowed days identifier
+* @property {string} [months] - allowed months identifier
 * @property {string} [format] - output format
 */
 
@@ -963,6 +964,10 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
         res = 'msg.lc';
     } else if (data.type === 'msgValue') {
         res = 'msg.value';
+    } else if (data.timeDays === '') {
+        res = 'No valid days given! Please check settings!';
+    } else if (data.timeMonths === '') {
+        res = 'No valid month given! Please check settings!';
     } else {
         const url = 'sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
@@ -1013,11 +1018,12 @@ function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
 /**
  * get the value for the day checkbox array
  * @param {jQuery} value - the checkbox array
+ * * @param {number} max - the maximum count of elements
  * @returns {string} the value of the checkboxes
  */
-function getDaysStr(value) { // eslint-disable-line no-unused-vars
+function getCheckboxesStr(value, max) { // eslint-disable-line no-unused-vars
     const days = value.map((_, el) => { return $(el).val(); }).get();
     if (days.length === 0) { return ''; }
-    if (days.length === 7) { return '*'; }
+    if (days.length === max) { return '*'; }
     return days.join(',');
 }

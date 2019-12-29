@@ -786,6 +786,7 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = now.getTime();
         const dayNr = now.getDay();
+        const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
         node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
@@ -807,6 +808,9 @@ module.exports = function (RED) {
                 return rule;
             }
             if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(dayNr)) {
+                return null;
+            }
+            if (rule.timeMonths && rule.timeMonths !== '*' && !rule.timeMonths.includes(monthNr)) {
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
@@ -1315,7 +1319,7 @@ module.exports = function (RED) {
         /**
          * initializes the node
          */
-        function initialize() {
+        function initialize() { // eslint-disable-line complexity
             node.debug('initialize');
             if (!node.context().get('cacheData', node.storeName)) {
                 node.context().set('cacheData', { }, node.storeName);
@@ -1399,6 +1403,18 @@ module.exports = function (RED) {
                 rule.timeMaxValue = (rule.timeMaxValue || '');
                 rule.offsetMaxType = rule.offsetMaxType || 'none';
                 rule.multiplierMax = rule.multiplierMax || 60000;
+
+                if (!rule.timeDays || rule.timeDays === '*') {
+                    rule.timeDays = null;
+                } else {
+                    rule.timeDays = rule.timeDays.split(',');
+                }
+
+                if (!rule.timeMonths || rule.timeMonths === '*') {
+                    rule.timeMonths = null;
+                } else {
+                    rule.timeMonths = rule.timeMonths.split(',');
+                }
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;

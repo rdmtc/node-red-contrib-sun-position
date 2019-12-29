@@ -89,6 +89,22 @@ module.exports = function (RED) {
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
         this.timeAltDays = config.timeAltDays;
+        this.timeMonths = config.timeMonths;
+        this.timeAltMonths = config.timeAltMonths;
+
+        if (this.timeDays === '') {
+            throw new Error('No valid days given! Please check settings!');
+        }
+        if (this.timeAltDays === '') {
+            throw new Error('No valid alternate days given! Please check settings!');
+        }
+        if (this.timeMonths === '') {
+            throw new Error('No valid month given! Please check settings!');
+        }
+        if (this.timeAltMonths === '') {
+            throw new Error('No valid alternate month given! Please check settings!');
+        }
+
         this.offset = config.offset || config.timeOffset || 0;
         this.offsetType = config.offsetType;
         if (!this.offsetType) { this.offsetType = ((this.offset === 0) ? 'none' : 'num'); }
@@ -135,7 +151,6 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                // node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, true, node.timeDays);
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeType,
                     value : node.time,
@@ -143,7 +158,8 @@ module.exports = function (RED) {
                     offset : node.offset,
                     multiplier : node.offsetMultiplier,
                     next : true,
-                    days : node.timeDays
+                    days : node.timeDays,
+                    months : node.timeMonths
                 });
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
@@ -163,8 +179,6 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
-                // node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, true, node.timeAltDays);
                 node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeAltType,
                     value : node.timeAlt,
@@ -172,7 +186,8 @@ module.exports = function (RED) {
                     offset : node.timeAltOffset,
                     multiplier : node.timeAltOffsetMultiplier,
                     next : true,
-                    days : node.timeAltDays
+                    days : node.timeAltDays,
+                    months : node.timeAltMonths
                 });
 
                 if (node.nextTimeAltData.error) {

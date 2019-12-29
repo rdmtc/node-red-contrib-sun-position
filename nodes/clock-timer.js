@@ -192,8 +192,8 @@ module.exports = function (RED) {
     function checkTCPosOverwrite(node, msg, now) {
         node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
         let priook = false;
-        const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege']);
-        const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], null, p => {
+        const prioMustEqual = hlp.getMsgBoolValue2(msg, ['exactPriority', 'exactPrivilege']);
+        const prio = hlp.getMsgNumberValue2(msg, ['prio', 'priority', 'privilege'], null, p => {
             if (prioMustEqual) {
                 priook = (node.timeClockData.overwrite.priority === p);
             } else {
@@ -439,6 +439,7 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = now.getTime();
         const dayNr = now.getDay();
+        const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
         node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
@@ -459,7 +460,10 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(dayNr)) {
+            if (rule.timeDays && !rule.timeDays.includes(dayNr)) {
+                return null;
+            }
+            if (rule.timeMonths && !rule.timeMonths.includes(monthNr)) {
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
@@ -871,6 +875,18 @@ module.exports = function (RED) {
                 rule.timeMaxValue = (rule.timeMaxValue || '');
                 rule.offsetMaxType = rule.offsetMaxType || 'none';
                 rule.multiplierMax = rule.multiplierMax || 60000;
+
+                if (!rule.timeDays || rule.timeDays === '*') {
+                    rule.timeDays = null;
+                } else {
+                    rule.timeDays = rule.timeDays.split(',');
+                }
+
+                if (!rule.timeMonths || rule.timeMonths === '*') {
+                    rule.timeMonths = null;
+                } else {
+                    rule.timeMonths = rule.timeMonths.split(',');
+                }
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;
