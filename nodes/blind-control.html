@@ -572,7 +572,7 @@
                      * @param {object} data - a rule description
                      * @returns {string} description of the rule
                      */
-                    function getRuleDescription(node, selFields, data, enh) {
+                    function getRuleDescription(node, selFields, data, enh) { // eslint-disable-line complexity
                         let result = '';
                         try {
                             if (!data.valid || !data.isValid) {
@@ -655,18 +655,26 @@
                                     }
                                     result += '</div>';
                                 }
-                                if (data.timeDays && data.timeDays!=='*') {
-                                    result += '<div class="indent-time-daya"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                if ((data.timeDays && data.timeDays !== '*') || data.timeBanEvenDays || data.timeBanOddDays) {
+                                    result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
                                     result += node._('blind-control.label.ruleTimeDays');
                                     result += '</span> <var>';
-                                    const days = data.timeDays.split(',');
-                                    days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v+7)));
-                                    result += days.join(',');
+                                    if (data.timeDays && data.timeDays !== '*') {
+                                        const days = data.timeDays.split(',');
+                                        days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v + 7)));
+                                        result += days.join(',');
+                                    }
+                                    if (data.timeBanEvenDays) {
+                                        result += node._('blind-control.label.banEvenDays');
+                                    }
+                                    if (data.timeBanOddDays) {
+                                        result += node._('blind-control.label.banOddDays');
+                                    }
                                     result += '</var></div>';
                                 }
                                 if (data.timeMonths && data.timeMonths!=='*') {
                                     result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeMonths');
+                                    result += node._('blind-control.label.ruleTimeMonths');
                                     result += '</span> <var>';
                                     const months = data.timeMonths.split(',');
                                     months.map(v=>  node._('node-red-contrib-sun-position/position-config:common.months.'+(v+12)));
@@ -1398,6 +1406,7 @@
                             $('#dialog-row-offset-timeMin').hide();
                             $('#dialog-row-offset-timeMax').hide();
                             $('#dialog-row-timeDays').hide();
+                            $('#dialog-row-timeLimits').hide();
                             $('#dialog-row-timeMonths').hide();
                             // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
@@ -1413,11 +1422,13 @@
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').show();
                             $('#dialog-row-timeDays').show();
+                            $('#dialog-row-timeLimits').show();
                             $('#dialog-row-timeMonths').show();
                         } else {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').hide();
                             $('#dialog-row-timeDays').show();
+                            $('#dialog-row-timeLimits').show();
                             $('#dialog-row-timeMonths').show();
                         }
                         getBackendData(d => {
@@ -1448,8 +1459,10 @@
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             offset:     $dialogTimeRegOffset.typedInput('value'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
-                            days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                            months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
+                            days:           getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7),
+                            months:         getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
+                            banOddDays:     $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked'),
+                            banEvenDays:    $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked'),
                             noOffsetError: true
                         });
                         $dialogTimeMinInput.change();
@@ -1505,8 +1518,10 @@
                                 offsetType:     $dialogTimeMinOffset.typedInput('type'),
                                 offset:         $dialogTimeMinOffset.typedInput('value'),
                                 multiplier:     parseInt($dialogTimeMinMultiplier.val()),
-                                days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                                months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
+                                days:           getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7),
+                                months:         getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
+                                banOddDays:     $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked'),
+                                banEvenDays:    $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1561,8 +1576,10 @@
                                 offsetType:     $dialogTimeMaxOffset.typedInput('type'),
                                 offset:         $dialogTimeMaxOffset.typedInput('value'),
                                 multiplier:     parseInt($dialogTimeMaxMultiplier.val()),
-                                days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                                months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
+                                days:           getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7),
+                                months:         getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
+                                banOddDays:     $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked'),
+                                banEvenDays:    $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1722,6 +1739,8 @@
 
                             initCheckboxesBlock('#dlg-ip-blindctl-rule-timeDays', data.timeDays);
                             initCheckboxesBlock('#dlg-ip-blindctl-rule-timeMonths', data.timeMonths);
+                            $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked', data.timeBanEvenDays);
+                            $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked', data.timeBanOddDays);
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
@@ -1766,7 +1785,9 @@
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
                             timeDays: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'),7),
-                            timeMonths: getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
+                            timeMonths: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
+                            timeBanEvenDays: $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked'),
+                            timeBanOddDays: $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked'),
 
                             timeMinValue: $dialogTimeMinInput.typedInput('value'),
                             timeMinType: $dialogTimeMinInput.typedInput('type'),
@@ -2201,9 +2222,9 @@
             <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row dialog-row-timeDays" id="dialog-row-timeDays" data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
+        <div class="dialog-row dialog-row-timeDays" id="dialog-row-timeDays" data-i18n="[title]blind-control.placeholder.ruleTimeDays">
             <div id="dlg-ip-blindctl-rule-timeDays" class="dlg-ip-blindctl-rule-days">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validFor"></div>
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForDays"></div>
                 <div style="display:inline-block;">
                     <div>
                         <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
@@ -2219,9 +2240,21 @@
                 </div>
             </div>
         </div>
-        <div class="dialog-row dialog-row-timeMonths" id="dialog-row-timeMonths" data-i18n="[title]clock-timer.placeholder.ruleTimeMonths">
-            <div id="dlg-ip-clktime-rule-timeMonths" class="dlg-ip-blindctl-rule-months" style="margin-top:5px">
+        <div class="dialog-row dialog-row-timeLimits is-initial-hidden" data-i18n="[title]blind-control.placeholder.limits">
+            <div class="dlg-ip-blindctl-rule-limits" style="margin-top:5px">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validFor"></div>
                 <div style="display:inline-block;border-top: 1px solid #000;">
+                    <div>
+                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeBanEvenDays"/> <span data-i18n="blind-control.label.banEvenDays"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeBanOddDays"/> <span data-i18n="blind-control.label.banOddDays"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dialog-row dialog-row-timeMonths" id="dialog-row-timeMonths" data-i18n="[title]blind-control.placeholder.ruleTimeMonths">
+            <div id="dlg-ip-blindctl-rule-timeMonths" class="dlg-ip-blindctl-rule-months">
+                <div style="display:inline-block;border-top: 1px solid #000;">
+                    <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForMonths"></div>
                     <div>
                         <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
                         <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.1"></span></label>
@@ -2419,27 +2452,14 @@
         width: 45%;
         margin-bottom: 0px !important;
     }
-    .dlg-ip-blindctl-rule-days {
+    .dlg-ip-blindctl-rule-days,
+    .dlg-ip-blindctl-rule-limits,
+    .dlg-ip-blindctl-rule-months {
         margin-top: 5px;
         margin-left: 30%;
     }
-    .dlg-ip-blindctl-rule-days label {
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        vertical-align: baseline;
-        width: 110px !important;
-    }
-    .dlg-ip-blindctl-rule-days input {
-        width: auto;
-        vertical-align: baseline;
-    }
-    .dlg-ip-blindctl-rule-months {
-        margin-top: 15px;
-        margin-left: 30%;
-    }
+    .dlg-ip-blindctl-rule-days label,
+    .dlg-ip-blindctl-rule-limits label,
     .dlg-ip-blindctl-rule-months label {
         -webkit-user-select: none;
         -khtml-user-select: none;
@@ -2449,6 +2469,8 @@
         vertical-align: baseline;
         width: 110px !important;
     }
+    .dlg-ip-blindctl-rule-days input,
+    .dlg-ip-blindctl-rule-limits input,
     .dlg-ip-blindctl-rule-months input {
         width: auto;
         vertical-align: baseline;

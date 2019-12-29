@@ -673,18 +673,26 @@ function calcMonthOffset(months, monthstart) {
 
 /*******************************************************************************************************/
 /**
+ * @typedef {Object} limitationsObj
+ * @property {number} [next] if greater than 0 the number of days in the future
+ * @property {string} [days] days for which should be calculated the sun time
+ * @property {string} [months] months for which should be calculated the sun time
+ * @property {boolean} [banOddDays] - if true odd days will be banned
+ * @property {boolean} [banEvenDays] - if true even days will be banned
+ */
+
+/**
  * normalize date by adding offset, get only the next valid date, etc...
  * @param {Date} d input Date to normalize
  * @param {number} offset offset to add tot he Date object
  * @param {number} multiplier multiplier for the offset
- * @param {number} next If date is less then today this number of days will be added to the date
- * @param {Array.<number>} days array of allowed days
+ * @param {limitationsObj} [limit] additional limitations for the calculation
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
-function normalizeDate(d, offset, multiplier, next, days, months) {
-    // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
+function normalizeDate(d, offset, multiplier, limit) {
+    // console.debug('normalizeDate d=' + d + ' offset=' + offset); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
-    if (next) {
+    if (limit.next) {
         const now = new Date();
         d.setMilliseconds(0);
         now.setMilliseconds(600); // security
@@ -694,16 +702,30 @@ function normalizeDate(d, offset, multiplier, next, days, months) {
         }
     }
 
-    if (days && (days !== '*') && (days !== '')) {
-        const dayx = calcDayOffset(days, d.getDay());
+    if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
+        const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
         }
     }
-    if (months && (months !== '*') && (months !== '')) {
-        const monthx = calcMonthOffset(months, d.getMonth());
+    if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
+        const monthx = calcMonthOffset(limit.months, d.getMonth());
         if (monthx > 0) {
             d.setMonth(d.getMonth() + monthx);
+        }
+    }
+    if (limit.banOddDays || limit.banEvenDays) {
+        const time = d.getDate();
+        if ((time % 2 !== 0)) {
+            // odd
+            if (limit.banOddDays) {
+                d = d.setDate(d.getDate() + 1);
+            }
+        } else {
+            // even
+            if (limit.banEvenDays) {
+                d = d.setDate(d.getDate() + 1);
+            }
         }
     }
     return d;

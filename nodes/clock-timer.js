@@ -439,6 +439,7 @@ module.exports = function (RED) {
         const livingRuleData = {};
         const nowNr = now.getTime();
         const dayNr = now.getDay();
+        const dateNr = now.getDate();
         const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
@@ -464,6 +465,14 @@ module.exports = function (RED) {
                 return null;
             }
             if (rule.timeMonths && !rule.timeMonths.includes(monthNr)) {
+                return null;
+            }
+            if (rule.timeBanOddDays && (dateNr % 2 !== 0)) {
+                // odd
+                return null;
+            }
+            if (rule.timebanEvenDays && (dateNr % 2 === 0)) {
+                // even
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
@@ -881,7 +890,6 @@ module.exports = function (RED) {
                 } else {
                     rule.timeDays = rule.timeDays.split(',');
                 }
-
                 if (!rule.timeMonths || rule.timeMonths === '*') {
                     rule.timeMonths = null;
                 } else {

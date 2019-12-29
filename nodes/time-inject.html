@@ -57,8 +57,12 @@
                 timeType: {
                     value: 'none'
                 },
-                timeDays: {
-                    value: '*',
+                timeBanOddDays: {
+                    value: false,
+                    required: true
+                },
+                timeBanEvenDays: {
+                    value: false,
                     required: true
                 },
                 timeMonths: {
@@ -153,6 +157,14 @@
                 },
                 timeAltDays: {
                     value: '*',
+                    required: true
+                },
+                timeAltBanOddDays: {
+                    value: false,
+                    required: true
+                },
+                timeAltBanEvenDays: {
+                    value: false,
                     required: true
                 },
                 timeAltMonths: {
@@ -776,6 +788,7 @@
                             if (type === types.Undefined.value) {
                                 $('.time-inject-row-offset').hide();
                                 $('.time-inject-row-timeDays').hide();
+                                $('.time-inject-row-timeLimits').hide();
                                 $('.time-inject-row-timeMonths').hide();
                                 $('.time-inject-row-alt').hide();
 
@@ -787,11 +800,13 @@
                             } else if (type === types.TimeSunNow.value){
                                 $('.time-inject-row-offset').show();
                                 $('.time-inject-row-timeDays').hide();
+                                $('.time-inject-row-timeLimits').hide();
                                 $('.time-inject-row-timeMonths').hide();
                                 $('.time-inject-row-alt').show();
                             } else {
                                 $('.time-inject-row-offset').show();
                                 $('.time-inject-row-timeDays').show();
+                                $('.time-inject-row-timeLimits').show();
                                 $('.time-inject-row-timeMonths').show();
                                 $('.time-inject-row-alt').show();
                             }
@@ -812,6 +827,8 @@
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
+                                banOddDays:     $('#node-input-timeBanOddDays').attr('checked'),
+                                banEvenDays:    $('#node-input-timeBanEvenDays').attr('checked'),
                                 noOffsetError: true
                             });
                         }
@@ -862,6 +879,7 @@
                                 $('.time-inject-row-timeAlt').hide();
                                 $('.time-inject-row-timeAltOffset').hide();
                                 $('.time-inject-row-timeAltDays').hide();
+                                $('.time-inject-row-timeAltLimits').hide();
                                 $('.time-inject-row-timeAltMonths').hide();
                                 $('#node-input-propertyCompare').hide();
                                 $('.row-propertyThreshold').hide();
@@ -871,6 +889,7 @@
                                 $('.time-inject-row-timeAlt').show();
                                 $('.time-inject-row-timeAltOffset').show();
                                 $('.time-inject-row-timeAltDays').show();
+                                $('.time-inject-row-timeAltLimits').show();
                                 $('.time-inject-row-timeAltMonths').show();
                                 $('#node-input-propertyCompare').show();
                                 $('#node-input-propertyCompare').attr('disabled', true);
@@ -881,6 +900,7 @@
                                 $('.time-inject-row-timeAlt').show();
                                 $('.time-inject-row-timeAltOffset').show();
                                 $('.time-inject-row-timeAltDays').show();
+                                $('.time-inject-row-timeAltLimits').show();
                                 $('.time-inject-row-timeAltMonths').show();
                                 $('#node-input-propertyCompare').show();
                                 $('#node-input-propertyCompare').attr('disabled', false);
@@ -948,10 +968,12 @@
                                 if (type === types.TimeSunNow.value){
                                     $('.time-inject-row-timeAltOffset').show();
                                     $('.time-inject-row-timeAltDays').hide();
+                                    $('.time-inject-row-timeAltLimits').hide();
                                     $('.time-inject-row-timeAltMonths').hide();
                                 } else {
                                     $('.time-inject-row-timeAltOffset').show();
                                     $('.time-inject-row-timeAltDays').show();
+                                    $('.time-inject-row-timeAltLimits').show();
                                     $('.time-inject-row-timeAltMonths').show();
                                 }
                                 getBackendData(d => {
@@ -970,6 +992,8 @@
                                     next:           1,
                                     days:           getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7),
                                     months:         getCheckboxesStr($('#time-inject-timeAltMonths input[type=checkbox]:checked'), 12),
+                                    banOddDays:     $('#node-input-timeAltBanOddDays').attr('checked'),
+                                    banEvenDays:    $('#node-input-timeAltBanEvenDays').attr('checked'),
                                     noOffsetError:  true
                                 });
                             }
@@ -1515,7 +1539,7 @@
     </div>
     <div class="form-row block-indent1 time-inject-row-payloadOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.payloadOffset">
         <label for="node-input-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.payloadOffset"></span></label>
-        <input id="node-input-payloadOffset" data-i18n="[placeholder]time-inject.placeholder.payloadOffset"></input>
+        <input id="node-input-payloadOffset" data-i18n="[placeholder]time-inject.placeholder.payloadOffset"/>
         <input type="hidden" id="node-input-payloadOffsetType">
         <select id="node-input-payloadOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
@@ -1537,13 +1561,13 @@
     </div>
     <div class="form-row block-indent1 time-inject-row-offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
         <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
-        <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"></input>
+        <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
         <input type="hidden" id="node-input-offsetType">
         <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row time-inject-row-timeDays is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
         <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validForDays"></div>
             <div style="display:inline-block;">
                 <div>
                     <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
@@ -1561,9 +1585,20 @@
             </div>
         </div>
     </div>
+    <div class="form-row time-inject-row-timeLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.limits">
+        <div class="time-inject-limits" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validFor"></div>
+            <div style="display:inline-block;border-top: 1px solid #000;">
+                <div>
+                    <label><input type='checkbox' checked id="node-input-timeBanEvenDays"/> <span data-i18n="time-inject.label.banEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeBanOddDays"/> <span data-i18n="time-inject.label.banOddDays"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="form-row time-inject-row-timeMonths is-initial-hidden" data-i18n="[title]time-inject.placeholder.months">
         <div id="time-inject-timeMonths" class="time-inject-months" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validForMonths"></div>
             <div style="display:inline-block;border-top: 1px solid #000;">
                 <div>
                     <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
@@ -1609,7 +1644,7 @@
     </div>
     <div class="form-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeAltOffset">
         <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
-        <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"></input>
+        <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"/>
         <input type="hidden" id="node-input-timeAltOffsetType">
         <select id="node-input-timeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
@@ -1629,6 +1664,17 @@
                 </div>
                 <div>
                     <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row time-inject-row-timeAltLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.limits">
+        <div class="time-inject-limits" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validFor"></div>
+            <div style="display:inline-block;border-top: 1px solid #000;">
+                <div>
+                    <label><input type='checkbox' checked id="node-input-timeAltBanEvenDays"/> <span data-i18n="time-inject.label.banEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeAltBanOddDays"/> <span data-i18n="time-inject.label.banOddDays"></span></label>
                 </div>
             </div>
         </div>
@@ -1696,13 +1742,13 @@
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload1Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
         <label for="node-input-addPayload1Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload1Offset"></span></label>
-        <input id="node-input-addPayload1Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input id="node-input-addPayload1Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"/>
         <input type="hidden" id="node-input-addPayload1OffsetType">
         <select id="node-input-addPayload1OffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload1Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
         <label for="node-input-addPayload1Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload1Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload1Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <input type="checkbox" id="node-input-addPayload1Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"/>
         <span data-i18n="time-inject.label.addPayload1Next2"></span>
     </div>
     <div class="form-row time-inject-row-addPayload1days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
@@ -1744,13 +1790,13 @@
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload2Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
         <label for="node-input-addPayload2Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload2Offset"></span></label>
-        <input id="node-input-addPayload2Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input id="node-input-addPayload2Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"/>
         <input type="hidden" id="node-input-addPayload2OffsetType">
         <select id="node-input-addPayload2OffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload2Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
         <label for="node-input-addPayload2Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload2Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload2Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <input type="checkbox" id="node-input-addPayload2Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"/>
         <span data-i18n="time-inject.label.addPayload2Next2"></span>
     </div>
     <div class="form-row time-inject-row-addPayload2days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">
@@ -1791,13 +1837,13 @@
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload3Offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadOffset">
         <label for="node-input-addPayload3Offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.addPayload3Offset"></span></label>
-        <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"></input>
+        <input id="node-input-addPayload3Offset" data-i18n="[placeholder]time-inject.placeholder.addPayloadOffset"/>
         <input type="hidden" id="node-input-addPayload3OffsetType">
         <select id="node-input-addPayload3OffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row block-indent2 time-inject-row-addPayload3Next is-initial-hidden" data-i18n="[title]time-inject.placeholder.addPayloadNext">
         <label for="node-input-addPayload3Next"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.addPayload3Next"></span></label>
-        <input type="checkbox" id="node-input-addPayload3Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"></input>
+        <input type="checkbox" id="node-input-addPayload3Next" style="display:inline-block; width:15px; vertical-align:baseline;" data-i18n="[placeholder]time-inject.placeholder.addPayloadNext"/>
         <span data-i18n="time-inject.label.addPayload3Next2"></span>
     </div>
     <div class="form-row time-inject-row-addPayload3days is-initial-hidden" data-i18n="[title]time-inject.placeholder.days">

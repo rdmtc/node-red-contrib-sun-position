@@ -88,7 +88,11 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
+        this.timeBanOddDays = config.timeBanOddDays;
+        this.timeBanEvenDays = config.timeBanEvenDays;
         this.timeAltDays = config.timeAltDays;
+        this.timeAltBanOddDays = config.timeAltBanOddDays;
+        this.timeAltBanEvenDays = config.timeAltBanEvenDays;
         this.timeMonths = config.timeMonths;
         this.timeAltMonths = config.timeAltMonths;
 
@@ -159,7 +163,9 @@ module.exports = function (RED) {
                     multiplier : node.offsetMultiplier,
                     next : true,
                     days : node.timeDays,
-                    months : node.timeMonths
+                    months : node.timeMonths,
+                    banOddDays: node.timeBanOddDays,
+                    banEvenDays: node.timeBanEvenDays
                 });
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
@@ -187,7 +193,9 @@ module.exports = function (RED) {
                     multiplier : node.timeAltOffsetMultiplier,
                     next : true,
                     days : node.timeAltDays,
-                    months : node.timeAltMonths
+                    months : node.timeAltMonths,
+                    banOddDays: node.timeAltBanOddDays,
+                    banEvenDays: node.timeAltBanEvenDays
                 });
 
                 if (node.nextTimeAltData.error) {

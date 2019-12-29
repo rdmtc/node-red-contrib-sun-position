@@ -29,10 +29,15 @@
             "addPayload3Format": "time format",
             "recalcTime": "Reclac.",
             "hours": "hours",
-            "on": "on",
+            "on":"on",
             "once": "additional",
             "onstart": "Inject on start ",
-            "onceDelay": "seconds"
+            "onceDelay": "seconds",
+			"validForDays":"valid days",
+            "validForMonths":"valid months",
+			"validFor":"valid",
+			"banEvenDays":"ban even days",
+			"banOddDays":"ban odd days"
         },
         "placeholder": {
             "position": "Position",

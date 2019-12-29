@@ -69,7 +69,11 @@
 			"dialogtitle":"Edit Rule",
 			"autoTrigger":"auto trigger",
 			"autoTrigger2":"recalculate every x minutes",
-			"validFor":"only valid for "
+			"validForDays":"valid days",
+			"validForMonths":"valid months",
+			"validFor":"valid",
+			"banEvenDays":"ban even days",
+			"banOddDays":"ban odd days"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",
