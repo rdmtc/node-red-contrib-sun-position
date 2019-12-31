@@ -70,6 +70,24 @@
                     required: true,
                     validate: RED.validators.number()
                 },
+                timeDays: {
+                    value: '*',
+                    required: true
+                },
+                timeBanOddDays: {
+                    value: false,
+                    required: true,
+                    validate(v) { return !(this.timeBanEvenDays && v); }
+                },
+                timeBanEvenDays: {
+                    value: false,
+                    required: true,
+                    validate(v) { return !(this.timeBanOddDays && v); }
+                },
+                timeMonths: {
+                    value: '*',
+                    required: true
+                },
                 propertyStart: {
                     value: '',
                     required: false,
@@ -256,7 +274,7 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global getTypes getSelectFields appendOptions setupTInput initializeValue getBackendData bdDateToTime */
+                    /* global getTypes getSelectFields appendOptions setupTInput initializeValue initCheckboxesBlock getCheckboxesStr getBackendData bdDateToTime */
 
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -288,6 +306,11 @@
                     }
                     // #endregion initialize
                     // #region timeStart
+                    initializeValue(node, 'timeDays', '*');
+                    initializeValue(node, 'timeMonths', '*');
+                    initCheckboxesBlock('#within-time-switch-timeDays', node.timeDays);
+                    initCheckboxesBlock('#within-time-switch-timeMonths', node.timeMonths);
+
                     const $startTime = setupTInput(node, {
                         typeProp: 'startTimeType',
                         valueProp: 'startTime',
@@ -316,15 +339,15 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
-                                nodeId:     node.id,
-                                kind:       'getTimeData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-startTime').typedInput('type'),
-                                value:      $('#node-input-startTime').typedInput('value'),
-                                offsetType: $('#node-input-startOffset').typedInput('type'),
-                                offset:     $('#node-input-startOffset').typedInput('value'),
-                                multiplier: $('#node-input-startOffsetMultiplier').val(),
-                                noOffsetError: true
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           $('#node-input-startTime').typedInput('type'),
+                                value:          $('#node-input-startTime').typedInput('value'),
+                                offsetType:     $('#node-input-startOffset').typedInput('type'),
+                                offset:         $('#node-input-startOffset').typedInput('value'),
+                                multiplier:     $('#node-input-startOffsetMultiplier').val(),
+                                noOffsetError:  true
                             });
                         }
                     });
@@ -377,15 +400,15 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
-                                nodeId:     node.id,
-                                kind:       'getTimeData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-endTime').typedInput('type'),
-                                value:      $('#node-input-endTime').typedInput('value'),
-                                offsetType: $('#node-input-endOffset').typedInput('type'),
-                                offset:     $('#node-input-endOffset').typedInput('value'),
-                                multiplier: $('#node-input-endOffsetMultiplier').val(),
-                                noOffsetError: true
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           $('#node-input-endTime').typedInput('type'),
+                                value:          $('#node-input-endTime').typedInput('value'),
+                                offsetType:     $('#node-input-endOffset').typedInput('type'),
+                                offset:         $('#node-input-endOffset').typedInput('value'),
+                                multiplier:     $('#node-input-endOffsetMultiplier').val(),
+                                noOffsetError:  true
                             });
                         }
                     });
@@ -510,15 +533,15 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
-                                nodeId:     node.id,
-                                kind:       'getTimeData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-startTimeAlt').typedInput('type'),
-                                value:      $('#node-input-startTimeAlt').typedInput('value'),
-                                offsetType: $('#node-input-startTimeAltOffset').typedInput('type'),
-                                offset:     $('#node-input-startTimeAltOffset').typedInput('value'),
-                                multiplier: $('#node-input-startTimeAltOffsetMultiplier').val(),
-                                noOffsetError: true
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           $('#node-input-startTimeAlt').typedInput('type'),
+                                value:          $('#node-input-startTimeAlt').typedInput('value'),
+                                offsetType:     $('#node-input-startTimeAltOffset').typedInput('type'),
+                                offset:         $('#node-input-startTimeAltOffset').typedInput('value'),
+                                multiplier:     $('#node-input-startTimeAltOffsetMultiplier').val(),
+                                noOffsetError:  true
                             });
                         }
                     });
@@ -644,15 +667,15 @@
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
-                                nodeId:     node.id,
-                                kind:       'getTimeData',
-                                config:     $nodeConfig.val(),
-                                type:       $('#node-input-endTimeAlt').typedInput('type'),
-                                value:      $('#node-input-endTimeAlt').typedInput('value'),
-                                offsetType: $('#node-input-endTimeAltOffset').typedInput('type'),
-                                offset:     $('#node-input-endTimeAltOffset').typedInput('value'),
-                                multiplier: $('#node-input-endTimeAltOffsetMultiplier').val(),
-                                noOffsetError: true
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           $('#node-input-endTimeAlt').typedInput('type'),
+                                value:          $('#node-input-endTimeAlt').typedInput('value'),
+                                offsetType:     $('#node-input-endTimeAltOffset').typedInput('type'),
+                                offset:         $('#node-input-endTimeAltOffset').typedInput('value'),
+                                multiplier:     $('#node-input-endTimeAltOffsetMultiplier').val(),
+                                noOffsetError:  true
                             });
                         }
                     });
@@ -724,6 +747,8 @@
                 this.endTimeType = $('#node-input-endTime').typedInput('type');
                 this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
                 this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
+                this.timeDays = getCheckboxesStr($('#within-time-switch-timeDays input[type=checkbox]:checked'), 7);
+                this.timeMonths = getCheckboxesStr($('#within-time-switch-timeMonths input[type=checkbox]:checked'), 12);
             }
         });
     })();</script>
@@ -756,6 +781,60 @@
         <input id="node-input-endOffset" data-i18n="[placeholder]within-time-switch.placeholder.endOffset"/>
         <input type="hidden" id="node-input-endOffsetType">
         <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row node-input-row-timeLimits is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.days">
+        <div id="within-time-switch-timeDays" class="within-time-switch-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForDays"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                </div>
+            </div>
+        </div>
+        <div class="within-time-switch-limits" style="margin-top:5px;border-top: 1px solid #000;">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.banDays"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked id="node-input-timeBanEvenDays"/> <span data-i18n="within-time-switch.label.banEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeBanOddDays"/> <span data-i18n="within-time-switch.label.banOddDays"></span></label>
+                </div>
+            </div>
+        </div>
+        <div id="within-time-switch-timeMonths" class="within-time-switch-months" style="margin-top:5px;border-top: 1px solid #000;">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForMonths"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.1"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.2"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.3"></span></label>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.4"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.5"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.6"></span></label>
+                    <label><input type='checkbox' checked value='7'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.7"></span></label>
+                    <label><input type='checkbox' checked value='8'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.8"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='9'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.9"></span></label>
+                    <label><input type='checkbox' checked value='10'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.10"></span></label>
+                    <label><input type='checkbox' checked value='11'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.11"></span></label>
+                </div>
+            </div>
+        </div>
     </div>
     <hr>
     <div class="form-row form-tips is-to-show-initially" data-i18n="[html]within-time-switch.tips.addTimes"></div>
@@ -889,5 +968,14 @@
         width: 100px;
         max-width: 100px;
         margin-left: 5px;
+    }
+    .node-input-row-timeLimits {
+        padding-left: 110px;
+    }
+    .node-input-row-timeLimits select {
+        margin: 3px 0;
+    }
+    .node-input-row-timeLimits input {
+        width: auto !important;
     }
 </style>

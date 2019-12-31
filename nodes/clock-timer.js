@@ -461,17 +461,17 @@ module.exports = function (RED) {
             if (!rule.timeLimited) {
                 return rule;
             }
-            if (rule.timeDays && !rule.timeDays.includes(dayNr)) {
+            if (rule.timeDays && rule.timeDays !== '*' && !rule.timeDays.includes(dayNr)) {
                 return null;
             }
-            if (rule.timeMonths && !rule.timeMonths.includes(monthNr)) {
+            if (rule.timeMonths && rule.timeMonths !== '*' && !rule.timeMonths.includes(monthNr)) {
                 return null;
             }
             if (rule.timeBanOddDays && (dateNr % 2 !== 0)) {
                 // odd
                 return null;
             }
-            if (rule.timebanEvenDays && (dateNr % 2 === 0)) {
+            if (rule.timeBanEvenDays && (dateNr % 2 === 0)) {
                 // even
                 return null;
             }

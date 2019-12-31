@@ -818,7 +818,7 @@ module.exports = function (RED) {
                 // odd
                 return null;
             }
-            if (rule.timebanEvenDays && (dateNr % 2 === 0)) {
+            if (rule.timeBanEvenDays && (dateNr % 2 === 0)) {
                 // even
                 return null;
             }

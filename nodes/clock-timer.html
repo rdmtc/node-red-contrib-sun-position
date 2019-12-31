@@ -401,15 +401,44 @@
                                     result += node._('clock-timer.label.ruleTimeDays');
                                     result += '</span> <var>';
                                     if (data.timeDays && data.timeDays !== '*') {
-                                        const days = data.timeDays.split(',');
-                                        days.map(v=>  node._('node-red-contrib-sun-position/position-config:common.days.'+(v + 7)));
-                                        result += days.join(',');
+                                        const daysarr = data.timeDays.split(',');
+                                        if (daysarr.length === 1) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                        } else if (data.timeDays === '5,6,0') {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
+                                            result += '-';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                        } else if (daysarr.length === 2) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                            result += ',';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                        } else {
+                                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                            let isok = true;
+                                            let elF = parseInt(daysarr[0]);
+                                            daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                                            for (let index = 1; index < daysarr.length; index++) {
+                                                const element = parseInt(daysarr[index]);
+                                                isok = isok && (element === elF+1);
+                                                elF = element;
+                                                daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
+                                            }
+                                            if (isok) {
+                                                result += daysarr[0];
+                                                result += '-';
+                                                result += daysarr[daysarr.length-1];
+                                            } else {
+                                                result += daysarr.join(',');
+                                            }
+                                        }
                                     }
                                     if (data.timeBanEvenDays) {
-                                        result += node._('clock-timer.label.banEvenDays');
+                                        result += ' ';
+                                        result += node._('clock-timer.label.onlyOddDays');
                                     }
                                     if (data.timeBanOddDays) {
-                                        result += node._('clock-timer.label.banOddDays');
+                                        result += ' ';
+                                        result += node._('clock-timer.label.onlyEvenDays');
                                     }
                                     result += '</var></div>';
                                 }
@@ -418,9 +447,32 @@
                                     result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
                                     result += node._('clock-timer.label.ruleTimeMonths');
                                     result += '</span> <var>';
-                                    const months = data.timeMonths.split(',');
-                                    months.map(v=>  node._('node-red-contrib-sun-position/position-config:common.months.'+(v + 12)));
-                                    result += months.join(',');
+                                    const montharr = data.timeMonths.split(',');
+                                    if (montharr.length === 2) {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                                        result += ',';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
+                                    } else if (montharr.length === 1) {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                                    } else {
+                                        montharr.sort((a, b) => parseInt(a) - parseInt(b));
+                                        let isok = true;
+                                        let elF = parseInt(montharr[0]);
+                                        montharr[0] = node._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
+                                        for (let index = 1; index < montharr.length; index++) {
+                                            const element = parseInt(montharr[index]);
+                                            isok = isok && (element === elF+1);
+                                            elF = element;
+                                            montharr[index] = node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(element) + 12));
+                                        }
+                                        if (isok) {
+                                            result += montharr[0];
+                                            result += '-';
+                                            result += montharr[montharr.length-1];
+                                        } else {
+                                            result += montharr.join(',');
+                                        }
+                                    }
                                     result += '</var></div>';
                                 }
                                 result += '</div>';
@@ -487,6 +539,10 @@
                             data.valid2LogOperator = (parseInt(data.valid2LogOperator) || 0);
                             data.valid2OperandAType = (data.valid2OperandAType || 'msg');
                             data.valid2OperandBType = (data.valid2OperandBType || 'num');
+                            data.timeDays = (data.timeDays || '*');
+                            data.timeMonths = (data.timeMonths || '*');
+                            data.timeBanOddDays = (data.timeBanOddDays || false);
+                            data.timeBanEvenDays = (data.timeBanEvenDays || false);
                             data.timeOp = (parseInt(data.timeOp) || 0);
                             data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
                             data.timeValue = (data.timeValue || '');
@@ -877,9 +933,7 @@
                             $('#dialog-row-timeMax').hide();
                             $('#dialog-row-offset-timeMin').hide();
                             $('#dialog-row-offset-timeMax').hide();
-                            $('#dialog-row-timeDays').hide();
-                            $('#dialog-row-timeLimits').hide();
-                            $('#dialog-row-timeMonths').hide();
+                            $('.dialog-row-timeLimits').hide();
                             // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
@@ -893,15 +947,11 @@
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').show();
-                            $('#dialog-row-timeDays').show();
-                            $('#dialog-row-timeLimits').show();
-                            $('#dialog-row-timeMonths').show();
+                            $('.dialog-row-timeLimits').show();
                         } else {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').hide();
-                            $('#dialog-row-timeDays').show();
-                            $('#dialog-row-timeLimits').show();
-                            $('#dialog-row-timeMonths').show();
+                            $('.dialog-row-timeLimits').show();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -931,10 +981,6 @@
                             offsetType:     $dialogTimeRegOffset.typedInput('type'),
                             offset:         $dialogTimeRegOffset.typedInput('value'),
                             multiplier:     parseInt($dialogTimeRegMultiplier.val()),
-                            days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                            months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
-                            banOddDays:     $('#dlg-ip-clktime-rule-timeBanOddDays').attr('checked'),
-                            banEvenDays:    $('#dlg-ip-clktime-rule-timeBanEvenDays').attr('checked'),
                             noOffsetError:  true
                         });
                         $dialogTimeMinInput.change();
@@ -990,10 +1036,6 @@
                                 offsetType:     $dialogTimeMinOffset.typedInput('type'),
                                 offset:         $dialogTimeMinOffset.typedInput('value'),
                                 multiplier:     parseInt($dialogTimeMinMultiplier.val()),
-                                days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                                months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
-                                banOddDays:     $('#dlg-ip-clktime-rule-timeBanOddDays').attr('checked'),
-                                banEvenDays:    $('#dlg-ip-clktime-rule-timeBanEvenDays').attr('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1048,10 +1090,6 @@
                                 offsetType:     $dialogTimeMaxOffset.typedInput('type'),
                                 offset:         $dialogTimeMaxOffset.typedInput('value'),
                                 multiplier:     parseInt($dialogTimeMaxMultiplier.val()),
-                                days:           getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                                months:         getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
-                                banOddDays:     $('#dlg-ip-clktime-rule-timeBanOddDays').attr('checked'),
-                                banEvenDays:    $('#dlg-ip-clktime-rule-timeBanEvenDays').attr('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1380,6 +1418,12 @@
                                 result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
                                     result.multiplierMax;
                             }
+                            if (result.timeBanEvenDays && result.timeBanOddDays) {
+                                result.valid.validTimeReg = false;
+                            }
+                            if (!result.timeDays || !result.timeMonths) {
+                                result.valid.validTimeReg = false;
+                            }
                         }
                         result.isValid = result.valid.validTimeReg;
                         result.valid.validPayload = $dialogPayload.typedInput('validate');
@@ -1621,7 +1665,7 @@
             <select  id="dlg-ip-clktime-rule-multiplier-timeMax" class="ipadd dlg-ip-clktime-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row dialog-row-timeDays" id="dialog-row-timeDays" data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
+        <div class="dialog-row dialog-row-timeLimits" id="dialog-row-timeDays" data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
             <div id="dlg-ip-clktime-rule-timeDays" class="dlg-ip-clktime-rule-days">
                 <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.validForDays"></div>
                 <div style="display:inline-block;">
@@ -1638,22 +1682,18 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="dialog-row dialog-row-timeLimits is-initial-hidden" data-i18n="[title]clock-timer.placeholder.limits">
-            <div class="dlg-ip-clktime-rule-limits" style="margin-top:5px">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.validFor"></div>
-                <div style="display:inline-block;border-top: 1px solid #000;">
+            <div class="dlg-ip-clktime-rule-limits" style="margin-top:5px;border-top: 1px solid #000;">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.banDays"></div>
+                <div style="display:inline-block;">
                     <div>
                         <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeBanEvenDays"/> <span data-i18n="clock-timer.label.banEvenDays"></span></label>
                         <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeBanOddDays"/> <span data-i18n="clock-timer.label.banOddDays"></span></label>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="dialog-row dialog-row-timeMonths" id="dialog-row-timeMonths" data-i18n="[title]clock-timer.placeholder.ruleTimeMonths">
-            <div id="dlg-ip-clktime-rule-timeMonths" class="dlg-ip-clktime-rule-months">
+            <div id="dlg-ip-clktime-rule-timeMonths" class="dlg-ip-clktime-rule-months" style="margin-top:5px;border-top: 1px solid #000;">
                 <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForMonths"></div>
-                <div style="display:inline-block;border-top: 1px solid #000;">
+                <div style="display:inline-block;">
                     <div>
                         <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
                         <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.1"></span></label>

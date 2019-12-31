@@ -43,9 +43,11 @@
 			"autoTrigger2":"recalculate every x minutes",
 			"validForDays":"valid days",
 			"validForMonths":"valid months",
-			"validFor":"valid",
-			"banEvenDays":"ban even days",
-			"banOddDays":"ban odd days"
+			"banDays":"ban days",
+			"banEvenDays":"even",
+			"banOddDays":"odd",
+			"onlyEvenDays":"only even days",
+			"onlyOddDays":"only odd days"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",

@@ -90,10 +90,10 @@ module.exports = function (RED) {
         this.timeDays = config.timeDays;
         this.timeBanOddDays = config.timeBanOddDays;
         this.timeBanEvenDays = config.timeBanEvenDays;
+        this.timeMonths = config.timeMonths;
         this.timeAltDays = config.timeAltDays;
         this.timeAltBanOddDays = config.timeAltBanOddDays;
         this.timeAltBanEvenDays = config.timeAltBanEvenDays;
-        this.timeMonths = config.timeMonths;
         this.timeAltMonths = config.timeAltMonths;
 
         if (this.timeDays === '') {
@@ -107,6 +107,9 @@ module.exports = function (RED) {
         }
         if (this.timeAltMonths === '') {
             throw new Error('No valid alternate month given! Please check settings!');
+        }
+        if (this.timeAltBanEvenDays && this.timeAltBanOddDays) {
+            throw new Error('No valid days aviable (odd and enven days banned! Please check settings!');
         }
 
         this.offset = config.offset || config.timeOffset || 0;

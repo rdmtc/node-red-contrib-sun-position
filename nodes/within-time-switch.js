@@ -65,6 +65,14 @@ module.exports = function (RED) {
             });
             return false;
         }
+        if (data.warn) {
+            node.status({
+                fill: 'yellow',
+                shape: 'dot',
+                text: data.warn
+            });
+            return false;
+        }
         if (data.start && data.start.error) {
             if (_onInit === true) {
                 node.status({
@@ -89,7 +97,7 @@ module.exports = function (RED) {
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : data.end.error}), undefined, data.end.error);
         } else if (data.start && data.start.value && data.end && data.end.value) {
             node.status({
-                fill: 'yellow',
+                fill: 'blue',
                 shape: 'dot',
                 text: '⏵' + node.positionConfig.toTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.toTimeString(data.end.value) + data.endSuffix
             });
@@ -104,7 +112,7 @@ module.exports = function (RED) {
      * @param {*} config - the configuration
      * @returns {object} containing start and end Dates
      */
-    function calcWithinTimes(node, msg, config) {
+    function calcWithinTimes(node, msg, config, now) {
         // node.debug('calcWithinTimes');
         const result = {
             start: {},
@@ -112,8 +120,30 @@ module.exports = function (RED) {
             startSuffix: '',
             endSuffix: '',
             altStartTime: (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
-            altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg'))
+            altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg')),
+            valid:false
         };
+
+        if (config.timeDays && config.timeDays !== '*' && !config.timeDays.includes(now.getDay())) {
+            node.debug('invalid Day config. today=' + now.getDay() + ' timeDays=' + util.inspect(config.timeDays, Object.getOwnPropertyNames(config.timeDays)));
+            result.warn = RED._('within-time-switch.errors.invalid-day');
+            return result;
+        }
+        if (config.timeMonths && config.timeMonths !== '*' && !config.timeMonths.includes(now.getMonth())) {
+            node.debug('invalid Day config. today=' + now.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
+            result.warn = RED._('within-time-switch.errors.invalid-month');
+            return result;
+        }
+        const dateNr = now.getDate();
+        if (config.timeBanOddDays && (dateNr % 2 !== 0)) {
+            result.warn = RED._('within-time-switch.errors.banned-odd-day');
+            return result;
+        }
+        if (config.timeBanEvenDays && (dateNr % 2 === 0)) {
+            result.warn = RED._('within-time-switch.errors.banned-even-day');
+            return result;
+        }
+        result.valid = true;
 
         if (result.altStartTime) {
             // node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
@@ -259,9 +289,21 @@ module.exports = function (RED) {
         this.propertyEndOperator = config.propertyEndCompare || 'true';
         this.propertyEndThresholdValue = config.propertyEndThreshold;
         this.propertyEndThresholdType = config.propertyEndThresholdType;
+
+        if (config.timeDays === '') {
+            throw new Error('No valid days given! Please check settings!');
+        }
+        if (config.timeMonths === '') {
+            throw new Error('No valid month given! Please check settings!');
+        }
+        if (config.timeAltBanEvenDays && config.timeAltBanOddDays) {
+            throw new Error('No valid days aviable (odd and enven days banned! Please check settings!');
+        }
+
         this.timeOutObj = null;
         this.lastMsgObj = null;
         const node = this;
+
 
         this.on('input', function (msg, send, done) { // eslint-disable-line complexity
             // If this is pre-1.0, 'done' will be undefined
@@ -277,34 +319,36 @@ module.exports = function (RED) {
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('config ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
-                const result = calcWithinTimes(this, msg, config);
                 const now = getDate(config.tsCompare, msg, node);
+                const result = calcWithinTimes(this, msg, config, now);
 
-                if (!result.start.value || !result.end.value) {
-                    throw new Error('Error can not calc time!');
-                }
-
-                const startNr = hlp.getTimeNumberUTC(result.start.value);
-                const endNr = hlp.getTimeNumberUTC(result.end.value);
-                const cmpNow = hlp.getTimeNumberUTC(now);
-                setstate(this, result);
-                if (startNr < endNr) {
-                    if (cmpNow >= startNr && cmpNow < endNr) {
-                        this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                if (result.start.value && result.end.value) {
+                    const startNr = hlp.getTimeNumberUTC(result.start.value);
+                    const endNr = hlp.getTimeNumberUTC(result.end.value);
+                    const cmpNow = hlp.getTimeNumberUTC(now);
+                    setstate(this, result);
+                    if (startNr < endNr) {
+                        if (cmpNow >= startNr && cmpNow < endNr) {
+                            this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                            send([msg, null]); // this.send([msg, null]);
+                            checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
+                            done();
+                            return null;
+                        }
+                    } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
+                        this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                         send([msg, null]); // this.send([msg, null]);
                         checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         done();
                         return null;
                     }
-                } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
-                    this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
-                    send([msg, null]); // this.send([msg, null]);
-                    checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
-                    done();
-                    return null;
+                } else if (!result.valid) {
+                    throw new Error('Error can not calc time!');
+                } else {
+                    setstate(node, result);
                 }
 
-                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix);
                 send([null, msg]); // this.send([null, msg]);
                 checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
                 done();
@@ -325,13 +369,13 @@ module.exports = function (RED) {
                 return null;
             }
             node.status({});
-            const result = calcWithinTimes(this, null, config);
+            const result = calcWithinTimes(this, null, config, new Date());
             // if an error occurred, will retry in 6 minutes. This will prevent errors on initialization.
             if (setstate(this, result, true)) {
                 node.debug('node is in initialization, retrigger time calculation in 6 min');
                 setTimeout(() => {
                     try {
-                        const result = calcWithinTimes(this, null, config);
+                        const result = calcWithinTimes(this, null, config, new Date());
                         setstate(this, result);
                     } catch (err) {
                         node.error(err.message);
