@@ -600,7 +600,7 @@ module.exports = function (RED) {
                 }
                 return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
-                result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
+                result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
                 const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                 result = hlp.normalizeDate(result, offsetX, data.multiplier, data);
                 return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
@@ -685,7 +685,7 @@ module.exports = function (RED) {
                     }
                     result.fix = true;
                 } else if (data.type === 'dateEntered') {
-                    result.value =  hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
+                    result.value =  hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
                     if (result.value !== null && typeof result.value !== 'undefined') {
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data);
@@ -717,7 +717,7 @@ module.exports = function (RED) {
                     if (data.format) {
                         result.value = hlp.parseDateFromFormat(data.value, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                     } else {
-                        result.value = hlp.getDateOfText(data.value, (this.tzOffset === 0), this.tzOffset);
+                        result.value = hlp.getDateOfText(data.value, true, (this.tzOffset === 0), this.tzOffset);
                     }
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data);
@@ -732,7 +732,7 @@ module.exports = function (RED) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
-                            result.value = hlp.getDateOfText(res, (this.tzOffset === 0), this.tzOffset);
+                            result.value = hlp.getDateOfText(res, true, (this.tzOffset === 0), this.tzOffset);
                         }
                         const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                         result.value = hlp.normalizeDate(result.value, offsetX, data.multiplier, data);
@@ -822,7 +822,7 @@ module.exports = function (RED) {
                 const pahse = this.getMoonPhase(msg.ts);
                 result = (pahse === data.value);
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
-                result = hlp.getDateOfText(String(data.value), (this.tzOffset === 0), this.tzOffset);
+                result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
