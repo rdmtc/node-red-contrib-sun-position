@@ -35,9 +35,9 @@
             "onceDelay": "seconds",
 			"validForDays":"valid days",
             "validForMonths":"valid months",
-			"banDays":"ban days",
-			"banEvenDays":"even",
-            "banOddDays":"odd",
+			"specialDays":"special days",
+			"onlyEvenDays":"only even",
+            "onlyOddDays":"only odd",
             "fewDays": "few days",
             "fewMonths": "few months"
         },

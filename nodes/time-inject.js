@@ -88,12 +88,12 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
-        this.timeBanOddDays = config.timeBanOddDays;
-        this.timeBanEvenDays = config.timeBanEvenDays;
+        this.timeOnlyOddDays = config.timeOnlyOddDays;
+        this.timeOnlyEvenDays = config.timeOnlyEvenDays;
         this.timeMonths = config.timeMonths;
         this.timeAltDays = config.timeAltDays;
-        this.timeAltBanOddDays = config.timeAltBanOddDays;
-        this.timeAltBanEvenDays = config.timeAltBanEvenDays;
+        this.timeAltOnlyOddDays = config.timeAltOnlyOddDays;
+        this.timeAltOnlyEvenDays = config.timeAltOnlyEvenDays;
         this.timeAltMonths = config.timeAltMonths;
 
         if (this.timeDays === '') {
@@ -108,8 +108,13 @@ module.exports = function (RED) {
         if (this.timeAltMonths === '') {
             throw new Error('No valid alternate month given! Please check settings!');
         }
-        if (this.timeAltBanEvenDays && this.timeAltBanOddDays) {
-            throw new Error('No valid days aviable (odd and enven days banned! Please check settings!');
+        if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
+            this.timeOnlyEvenDays = false;
+            this.timeOnlyOddDays = false;
+        }
+        if (this.timeAltOnlyEvenDays && this.timeAltOnlyOddDays) {
+            this.timeAltOnlyEvenDays = false;
+            this.timeAltOnlyOddDays = false;
         }
 
         this.offset = config.offset || config.timeOffset || 0;
@@ -167,8 +172,8 @@ module.exports = function (RED) {
                     next : true,
                     days : node.timeDays,
                     months : node.timeMonths,
-                    banOddDays: node.timeBanOddDays,
-                    banEvenDays: node.timeBanEvenDays
+                    onlyOddDays: node.timeOnlyOddDays,
+                    onlyEvenDays: node.timeOnlyEvenDays
                 });
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
@@ -197,8 +202,8 @@ module.exports = function (RED) {
                     next : true,
                     days : node.timeAltDays,
                     months : node.timeAltMonths,
-                    banOddDays: node.timeAltBanOddDays,
-                    banEvenDays: node.timeAltBanEvenDays
+                    onlyOddDays: node.timeAltOnlyOddDays,
+                    onlyEvenDays: node.timeAltOnlyEvenDays
                 });
 
                 if (node.nextTimeAltData.error) {
@@ -219,7 +224,7 @@ module.exports = function (RED) {
             if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
-                    return { state:'error', done: false, statusMsg: 'internal error!', errorMsg: 'Invalid time format'};
+                    return { state:'error', done: false, statusMsg: 'Invalid time format!', errorMsg: 'Invalid time format'};
                 }
 
                 let millisec = tsGetScheduleTime(node.nextTime, 10);

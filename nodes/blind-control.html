@@ -70,6 +70,14 @@
                 },
                 outputs: { value: '1' },
                 autoTrigger: { value: false },
+                autoTriggerTime: {
+                    value: 3600000,
+                    validate(v) {
+                        const n = parseFloat(v);
+                        return (typeof v === 'undefined') ||
+                               (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                    }
+                },
                 storeName:  { value: '' },
                 // #region blind settings
                 blindIncrement: {
@@ -121,7 +129,9 @@
                     required: false,
                     validate(v) {
                         const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                        return (typeof v === 'undefined') ||
+                               (v === '') ||
+                               (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
                 // #endregion overwrite settings
@@ -455,28 +465,31 @@
                      * @param {*} node - the node representation
                      * @param {string} name - the node representation
                      * @param {*} element - the node representation
-                     * @param {number} rules - output of the editableList
-                     * @returns {number} number of decimals
+                     * @param {function} validate - ovalidation function of the input
+                     * @param {number} defMultiplier - default multiplier (in ms)
+                     * @param {number} minMultiplier - minimum multiplier (in ms)
                     */
-                    function setMultiplier(node, name, element, validate, defMultiplier) {
+                    function setMultiplier(node, name, element, validate, defMultiplier, minMultiplier) {
                         const c = Number(node[name]);
                         if (node[name] !== '' && !isNaN(c)) {
-                            let r = 1000;
-                            if (c % 3600000 === 0) {
-                                r = 3600000;
+                            let r = minMultiplier || 1000;
+                            if (c % 86400000 === 0) {
+                                r = 86400000; // Days
+                            } else if (c % 3600000 === 0) {
+                                r = 3600000; // Hours
                             } else if (c % 60000 === 0) {
-                                r = 60000;
+                                r = 60000; // Minutes
                             }
-                            $('#time-control-' + name).val(c/r);
-                            $('#time-control-' + name + '-multiplier').val(r);
+                            $('#blind-control-' + name).val(c/r);
+                            $('#blind-control-' + name + '-multiplier').val(r);
                         } else {
-                            $('#time-control-' + name).val('');
-                            $('#time-control-' + name + '-multiplier').val(defMultiplier || 1000);
+                            $('#blind-control-' + name).val('');
+                            $('#blind-control-' + name + '-multiplier').val(defMultiplier || 1000);
                         }
-                        $('#time-control-' + name).on('change focus focusout', () => {
-                            const el = $('#time-control-' + name);
+                        $('#blind-control-' + name).on('change focus focusout', () => {
+                            const el = $('#blind-control-' + name);
                             let val = el.val();
-                            const mp = $('#time-control-' + name + '-multiplier').val();
+                            const mp = $('#blind-control-' + name + '-multiplier').val();
                             if (isNaN(val) || val === '' || val === 0) {
                                 val = '';
                                 $('node-input-' + name).val('');
@@ -494,10 +507,10 @@
                             }
                         });
 
-                        $('#time-control-' + name + '-multiplier').change( () => {
-                            $('#time-control-' + name).change();
+                        $('#blind-control-' + name + '-multiplier').change( () => {
+                            $('#blind-control-' + name).change();
                         });
-                        $('#time-control-' + name).change();
+                        $('#blind-control-' + name).change();
                     }
                     /**
                      * get the default level
@@ -521,7 +534,11 @@
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
                         return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
-                    }, 3600000);
+                    }, 3600000, 1000);
+                    setMultiplier(node,'autoTriggerTime', v => {
+                        const n = parseFloat(v);
+                        return (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                    }, 3600000, 60000);
                     setupTInput(node, {
                         typeProp: 'blindPosDefaultType',
                         valueProp: 'blindPosDefault',
@@ -572,7 +589,7 @@
                      * @param {object} data - a rule description
                      * @returns {string} description of the rule
                      */
-                    function getRuleDescription(node, selFields, data, enh) { // eslint-disable-line complexity
+                    function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
                             if (!data.valid || !data.isValid) {
@@ -655,22 +672,21 @@
                                     }
                                     result += '</div>';
                                 }
-                                if ((data.timeDays && data.timeDays !== '*') || data.timeBanEvenDays || data.timeBanOddDays) {
+                                if ((data.timeDays && data.timeDays !== '*') || data.timeOnlyEvenDays || data.timeOnlyOddDays) {
                                     result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeDays');
+                                    result += node._('blind-control.label.ruleTimeDays');
                                     result += '</span> <var>';
+                                    const resultArr = [];
                                     if (data.timeDays && data.timeDays !== '*') {
                                         const daysarr = data.timeDays.split(',');
                                         if (daysarr.length === 1) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
                                         } else if (data.timeDays === '5,6,0') {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
-                                            result += '-';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
+                                                node._('node-red-contrib-sun-position/position-config:common.days.7'));
                                         } else if (daysarr.length === 2) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
-                                            result += ',';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
+                                                node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
                                         } else {
                                             daysarr.sort((a, b) => parseInt(a) - parseInt(b));
                                             let isok = true;
@@ -683,28 +699,25 @@
                                                 daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
                                             }
                                             if (isok) {
-                                                result += daysarr[0];
-                                                result += '-';
-                                                result += daysarr[daysarr.length-1];
+                                                resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
                                             } else {
-                                                result += daysarr.join(',');
+                                                resultArr.push(daysarr.join(','));
                                             }
                                         }
                                     }
-                                    if (data.timeBanEvenDays) {
-                                        result += ' ';
-                                        result += node._('clock-timer.label.onlyOddDays');
+                                    if (data.timeOnlyEvenDays) {
+                                        resultArr.push(node._('blind-control.label.onlyOddDays'));
                                     }
-                                    if (data.timeBanOddDays) {
-                                        result += ' ';
-                                        result += node._('clock-timer.label.onlyEvenDays');
+                                    if (data.timeOnlyOddDays) {
+                                        resultArr.push(node._('blind-control.label.onlyEvenDays'));
                                     }
+                                    result += resultArr.join(' <b>and</b> ');
                                     result += '</var></div>';
                                 }
 
                                 if (data.timeMonths && data.timeMonths !== '*') {
                                     result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeMonths');
+                                    result += node._('blind-control.label.ruleTimeMonths');
                                     result += '</span> <var>';
                                     const montharr = data.timeMonths.split(',');
                                     if (montharr.length === 2) {
@@ -760,7 +773,7 @@
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
-                            result = 'Error: "' + err.message + '"';
+                            result = err.message;
                         }
                         return result;
                     }
@@ -799,8 +812,8 @@
                             data.valid2OperandBType = (data.valid2OperandBType || 'num');
                             data.timeDays = (data.timeDays || '*');
                             data.timeMonths = (data.timeMonths || '*');
-                            data.timeBanOddDays = (data.timeBanOddDays || false);
-                            data.timeBanEvenDays = (data.timeBanEvenDays || false);
+                            data.timeOnlyOddDays = (data.timeOnlyOddDays || false);
+                            data.timeOnlyEvenDays = (data.timeOnlyEvenDays || false);
                             data.timeOp = (parseInt(data.timeOp) || 0);
                             data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
                             data.timeValue = (data.timeValue || '');
@@ -1271,6 +1284,14 @@
                         min: 0,
                         step: 1
                     });
+                    $('#node-input-autoTrigger').change( () => {
+                        if ($('#node-input-autoTrigger').is(':checked')) {
+                            $('#blind-control-autoTriggerTime-edit').show();
+                        } else {
+                            $('#blind-control-autoTriggerTime-edit').hide();
+                        }
+                    });
+                    $('#node-input-autoTrigger').change();
                     // #endregion Enhanced settings
                     // #region dialog
                     const $dialog = $('#dialog-edit-rule').dialog({
@@ -1623,6 +1644,9 @@
                             });
                         }
                     });
+                    $('.dialog-row-timeLimits :checkbox').change(() => {
+                        $dialogTimeRegInput.change();
+                    });
 
                     $dialogCondAOperand.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -1778,8 +1802,8 @@
 
                             initCheckboxesBlock('#dlg-ip-blindctl-rule-timeDays', data.timeDays);
                             initCheckboxesBlock('#dlg-ip-blindctl-rule-timeMonths', data.timeMonths);
-                            $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked', data.timeBanEvenDays);
-                            $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked', data.timeBanOddDays);
+                            $('#dlg-ip-blindctl-rule-timeOnlyEvenDays').attr('checked', data.timeOnlyEvenDays);
+                            $('#dlg-ip-blindctl-rule-timeOnlyOddDays').attr('checked', data.timeOnlyOddDays);
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
@@ -1825,8 +1849,8 @@
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
                             timeDays: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'),7),
                             timeMonths: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
-                            timeBanEvenDays: $('#dlg-ip-blindctl-rule-timeBanEvenDays').attr('checked'),
-                            timeBanOddDays: $('#dlg-ip-blindctl-rule-timeBanOddDays').attr('checked'),
+                            timeOnlyEvenDays: $('#dlg-ip-blindctl-rule-timeOnlyEvenDays').is(':checked'),
+                            timeOnlyOddDays: $('#dlg-ip-blindctl-rule-timeOnlyOddDays').is(':checked'),
 
                             timeMinValue: $dialogTimeMinInput.typedInput('value'),
                             timeMinType: $dialogTimeMinInput.typedInput('type'),
@@ -1875,7 +1899,7 @@
                                 result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
                                     result.multiplierMax;
                             }
-                            if (result.timeBanEvenDays && result.timeBanOddDays) {
+                            if (result.timeOnlyEvenDays && result.timeOnlyOddDays) {
                                 result.valid.validTimeReg = false;
                             }
                             if (!result.timeDays || !result.timeMonths) {
@@ -1944,22 +1968,33 @@
                     });
                 }
 
-                const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
+                const overwriteExpire = parseFloat($('#blind-control-overwriteExpire').val());
                 if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
                     $('#node-input-overwriteExpire').val('');
                 } else {
-                    let val = overwriteExpire * parseFloat($('#time-control-overwriteExpire-multiplier').val());
+                    let val = overwriteExpire * parseFloat($('#blind-control-overwriteExpire-multiplier').val());
                     if (val < 1000) {
                         val = 1000;
                     }
                     $('#node-input-overwriteExpire').val(val);
                 }
 
-                const smoothTime = parseFloat($('#time-control-smoothTime').val());
+                const autoTriggerTime = parseFloat($('#blind-control-autoTriggerTime').val());
+                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime === 0) {
+                    $('#node-input-autoTriggerTime').val(20*60000);
+                } else {
+                    let val = autoTriggerTime * parseFloat($('#blind-control-autoTriggerTime-multiplier').val());
+                    if (val < 60000) {
+                        val = 60000;
+                    }
+                    $('#node-input-autoTriggerTime').val(val);
+                }
+
+                const smoothTime = parseFloat($('#blind-control-smoothTime').val());
                 if (isNaN(smoothTime) || smoothTime === '' || smoothTime === 0) {
                     $('#node-input-smoothTime').val('');
                 } else {
-                    $('#node-input-smoothTime').val(smoothTime * parseFloat($('#time-control-smoothTime-multiplier').val()));
+                    $('#node-input-smoothTime').val(smoothTime * parseFloat($('#blind-control-smoothTime-multiplier').val()));
                 }
                 $('#dialog-edit-rule').dialog('destroy').remove();
             },
@@ -1973,6 +2008,9 @@
     })();</script>
 
 <script type="text/html" data-template-name="blind-control">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" class="row-full-width" id="node-input-positionConfig">
@@ -2020,9 +2058,9 @@
         <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
     </div>
     <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
-        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
-        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value=""/>
-        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
+        <label for="blind-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
+        <input type="text" class="spinner-time" id="blind-control-overwriteExpire" data-i18n="[placeholder]blind-control.placeholder.overwriteExpire" value=""/>
+        <select id="blind-control-overwriteExpire-multiplier" class="node-input-multiplier">
             <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
@@ -2093,9 +2131,9 @@
         <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
     </div>
     <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
-        <label for="time-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-        <input type="text" class="spinner-time" id="time-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-        <select id="time-control-smoothTime-multiplier" class="node-input-multiplier">
+        <label for="blind-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+        <input type="text" class="spinner-time" id="blind-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+        <select id="blind-control-smoothTime-multiplier" class="node-input-multiplier">
             <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
@@ -2177,10 +2215,19 @@
             <option value="2" data-i18n="blind-control.label.splitOutput"></option>
         </select>
     </div>
-    <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.autoTrigger">
+    <div class="form-row block-noindent spinner-Small" data-i18n="[title]blind-control.placeholder.autoTrigger">
         <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.autoTrigger"></span></label>
         <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
         <span data-i18n="blind-control.label.autoTrigger2"></span>
+        <span id="blind-control-autoTriggerTime-edit" class="is-initial-hidden">
+            <input type="text" class="spinner-time" id="blind-control-autoTriggerTime" data-i18n="[placeholder]blind-control.placeholder.autoTriggerTime" value=""/>
+            <select id="blind-control-autoTriggerTime-multiplier" class="node-input-multiplier">
+                <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
+            </select>
+            <input type="hidden" id="node-input-autoTriggerTime">
+        </span>
     </div>
     <hr>
     <!-- End ######################################################################## -->
@@ -2285,11 +2332,11 @@
                 </div>
             </div>
             <div class="dlg-ip-blindctl-rule-limits" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.banDays"></div>
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.specialDays"></div>
                 <div style="display:inline-block;">
                     <div>
-                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeBanEvenDays"/> <span data-i18n="blind-control.label.banEvenDays"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeBanOddDays"/> <span data-i18n="blind-control.label.banOddDays"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeOnlyEvenDays"/> <span data-i18n="blind-control.label.onlyEven"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-blindctl-rule-timeOnlyOddDays"/> <span data-i18n="blind-control.label.onlyOdd"></span></label>
                     </div>
                 </div>
             </div>
@@ -2401,6 +2448,9 @@
     }
     .block-noindent .ui-spinner {
         width : calc(100% - 245px);
+    }
+    .spinner-Small .ui-spinner {
+        width : 100px !important;
     }
     .block-indent1 .ui-spinner {
         width : calc(100% - 255px);

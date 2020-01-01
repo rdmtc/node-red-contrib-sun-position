@@ -1,9 +1,9 @@
 {
 	"clock-timer": {
 		"label": {
-			"clock-timer":"clock-timer",
+			"clock-timer": "clock-timer",
 			"clock-timer-palette": "clock timer",
-			"output1":"payload based on rule",
+			"output1": "payload based on rule",
 			"output2": "state object",
 			"payloadDefault": "payload",
 			"payloadDefaultOffset": "Offset",
@@ -20,12 +20,12 @@
 			"ruleTimeNone": "N/A",
 			"ruleTimeMax": "no later than (max)",
 			"ruleTimeMin": "at the earliest (min)",
-			"ruleTimeDays":"only on day",
+			"ruleTimeDays": "only on day",
 			"ruleTimeMonths": "only on month",
 			"ruleDescription": "Description",
-			"rulePayload": "Payload:",
+			"rulePayload": "Payload: ",
 			"rulePayloadND": "No Payload",
-			"ruleTopic": "Topic:",
+			"ruleTopic": "Topic: ",
 			"time": "time",
 			"name": "name",
 			"showEnhSettings": "Enhanced settings",
@@ -38,16 +38,16 @@
 			"btnAdd": "add",
 			"btnSort": "sort",
 			"btnClear": "clear",
-			"dialogtitle":"Edit Rule",
-			"autoTrigger":"auto trigger",
-			"autoTrigger2":"recalculate every x minutes",
-			"validForDays":"valid days",
-			"validForMonths":"valid months",
-			"banDays":"ban days",
-			"banEvenDays":"even",
-			"banOddDays":"odd",
-			"onlyEvenDays":"only even days",
-			"onlyOddDays":"only odd days"
+			"dialogtitle": "Edit Rule",
+			"autoTrigger": "auto trigger",
+			"autoTrigger2": "dynamic, but max every",
+			"validForDays": "valid days",
+			"validForMonths": "valid months",
+			"specialDays": "special days",
+			"onlyEven": "even",
+			"onlyOdd": "odd",
+			"onlyEvenDays": "only even days",
+			"onlyOddDays": "only odd days"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",
@@ -60,17 +60,17 @@
 			"btnAdd": "add new empty rule",
 			"btnSort": "sort all rules, Attention this can change the behavior!",
 			"btnClear": "removes all rules from list",
-			"condoperand":"operand",
-			"time":"time",
-			"offset":"time offset",
+			"condoperand": "operand",
+			"time": "time",
+			"offset": "time offset",
 			"level": "level",
 			"ruleTimeDays": "select days wherefore it should be valid",
 			"ruleTimeMonths": "select months wherefore it should be valid",
-			"autoTrigger":"automatic triggers new calculation of the rule in a dynamic changing time interval"
+			"autoTrigger": "automatic triggers new calculation of the rule in a dynamic changing time interval"
 		},
 		"text": {
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
-			"payloadDefault":"if no rule matches the following payload will be used.",
+			"payloadDefault": "if no rule matches the following payload will be used.",
 			"overwrite": "manual overwrite of the rule payload"
 		},
 		"tips": {
@@ -99,7 +99,6 @@
 			"ruleMax": "__org__ [max rule __number__]"
 		},
 		"errors": {
-			"error": "Error: __message__",
 			"warning": "Warning: __message__",
 			"internal": "Error: __message__",
 			"error-time": "Error get time: __message__",

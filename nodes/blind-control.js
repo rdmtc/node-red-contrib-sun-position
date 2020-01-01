@@ -15,8 +15,8 @@ const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
 const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
 const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
-const cautoTriggerTimeFull = 60 * 60000; // <- 1h
-const cautoTriggerTimeSmall = 10 * 60000; // 10 min
+const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
+const cautoTriggerTimeSun = 5 * 60000; // 5 min
 /*************************************************************************************************************************/
 /**
  * check if a level has a valid value
@@ -177,20 +177,20 @@ function getSunPosition_(node, now) {
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
     node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
     if (node.autoTrigger ) {
-        if (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude)) {
-            node.autoTriggerType = 3;
+        if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
+            node.autoTrigger.type = 3; // Sun not on horizont
         } else if (sunPosition.azimuthDegrees <= 72) {
-            node.autoTriggerType = 4;
+            node.autoTrigger.type = 4; // Sun not visible
         } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthStart) {
-            node.autoTriggerTime = Math.min(node.autoTriggerTime, cautoTriggerTimeSmall);
-            node.autoTriggerType = 5;
+            node.autoTrigger.time = Math.min(node.autoTrigger.time, cautoTriggerTimeBeforeSun);
+            node.autoTrigger.type = 5; // sun before in window
         } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd) {
             if (node.smoothTime > 0) {
-                node.autoTriggerTime = Math.min(node.autoTriggerTime, node.smoothTime);
-                node.autoTriggerType = 6;
+                node.autoTrigger.time = Math.min(node.autoTrigger.time, node.smoothTime);
+                node.autoTrigger.type = 6; // sun in window (smooth time set)
             } else {
-                node.autoTriggerTime = Math.min(node.autoTriggerTime, (cautoTriggerTimeSmall / 2));
-                node.autoTriggerType = 7;
+                node.autoTrigger.time = Math.min(node.autoTrigger.time, (cautoTriggerTimeSun));
+                node.autoTrigger.type = 7; // sun in window
             }
         }
     }
@@ -814,12 +814,10 @@ module.exports = function (RED) {
             if (rule.timeMonths && rule.timeMonths !== '*' && !rule.timeMonths.includes(monthNr)) {
                 return null;
             }
-            if (rule.timeBanOddDays && (dateNr % 2 !== 0)) {
-                // odd
+            if (rule.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
                 return null;
             }
-            if (rule.timeBanEvenDays && (dateNr % 2 === 0)) {
-                // even
+            if (rule.timeOnlyEvenDays && (dateNr % 2 !== 0)) { // odd
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
@@ -921,8 +919,8 @@ module.exports = function (RED) {
             if (node.autoTrigger) {
                 if (ruleSel.timeLimited && ruleSel.timeData.ts > nowNr) {
                     const diff = ruleSel.timeData.ts - nowNr;
-                    node.autoTriggerTime = Math.min(node.autoTriggerTime, diff);
-                    node.autoTriggerType = 1;
+                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                    node.autoTrigger.type = 1; // current rule end
                 } else {
                     for (let i = (ruleindex+1); i < node.rules.count; ++i) {
                         const rule = node.rules.data[i];
@@ -932,8 +930,8 @@ module.exports = function (RED) {
                         const num = getRuleTimeData(node, msg, rule, now);
                         if (num > nowNr) {
                             const diff = num - nowNr;
-                            node.autoTriggerTime = Math.min(node.autoTriggerTime, diff);
-                            node.autoTriggerType = 2;
+                            node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                            node.autoTrigger.type = 2; // next rule
                         }
                     }
                 }
@@ -1001,8 +999,12 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || -1);
-        this.autoTrigger = config.autoTrigger || false;
-        this.autoTriggerObj = null;
+        if (config.autoTrigger) {
+            this.autoTrigger = {
+                deaultTime : config.autoTrigger.time || 3600000 // 1h
+            };
+            this.autoTriggerObj = null;
+        }
         const node = this;
 
         if (node.smoothTime >= 0x7FFFFFFF) {
@@ -1162,10 +1164,6 @@ module.exports = function (RED) {
                     return null;
                 }
                 node.nowarn = {};
-                const blindCtrl = {
-                    reason : node.reason,
-                    blind: node.blindData
-                };
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
                 previousData.level = node.level.current;
@@ -1177,10 +1175,14 @@ module.exports = function (RED) {
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
                 if (node.autoTrigger) {
-                    node.autoTriggerTime = cautoTriggerTimeFull;
-                    node.autoTriggerType = 0;
+                    node.autoTrigger.time = node.autoTrigger.deaultTime;
+                    node.autoTrigger.type = 0; // default time
                 }
-
+                const blindCtrl = {
+                    reason : node.reason,
+                    blind: node.blindData,
+                    autoTrigger : node.autoTrigger
+                };
                 // check if the message contains any oversteering data
                 let ruleId = -1;
 
@@ -1288,7 +1290,7 @@ module.exports = function (RED) {
                 node.context().set('previous', previousData, node.storeName);
                 node.context().set('current', blindCtrl, node.storeName);
                 if (node.autoTrigger) {
-                    node.debug('------------- autotrigger ---------------- ' + node.autoTriggerTime + ' - ' + node.autoTriggerType);
+                    node.debug('------------- autotrigger ---------------- ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
                         clearTimeout(node.autoTriggerObj);
                         node.autoTriggerObj = null;
@@ -1300,19 +1302,18 @@ module.exports = function (RED) {
                             payload: 'triggerOnly',
                             triggerOnly: true
                         });
-                    }, node.autoTriggerTime);
+                    }, node.autoTrigger.time);
                 }
                 done();
                 return null;
             } catch (err) {
-                // node.error(RED._('blind-control.errors.error', err));
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: 'internal error'
+                    text: 'internal error: ' + err.message
                 });
-                done(RED._('blind-control.errors.error', err), msg);
+                done(RED._('node-red-contrib-sun-position/position-config:errors.error', err), msg);
             }
             return null;
         });
@@ -1328,7 +1329,7 @@ module.exports = function (RED) {
         /**
          * initializes the node
          */
-        function initialize() { // eslint-disable-line complexity
+        function initialize() {
             node.debug('initialize');
             if (!node.context().get('cacheData', node.storeName)) {
                 node.context().set('cacheData', { }, node.storeName);
@@ -1427,6 +1428,11 @@ module.exports = function (RED) {
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;
+                }
+
+                if (rule.timeOnlyOddDays && rule.timeOnlyEvenDays) {
+                    rule.timeOnlyOddDays = false;
+                    rule.timeOnlyEvenDays = false;
                 }
 
                 if (rule.conditional) {

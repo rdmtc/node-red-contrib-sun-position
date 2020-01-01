@@ -33,9 +33,9 @@
             "showEnhSettings":"Enhanced settings",
             "validForDays":"valid days",
 			"validForMonths":"valid months",
-			"banDays":"ban days",
-			"banEvenDays":"even",
-			"banOddDays":"odd"
+			"specialDays":"special days",
+			"onlyEvenDays":"only even",
+			"onlyOddDays":"only odd"
         },
         "placeholder": {
             "propertyStart": "Property for alternate start time",
@@ -61,8 +61,8 @@
             "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
             "invalid-day": "Day is not selected.",
             "invalid-month": "Month is not selected.",
-            "banned-odd-day": "Not an even Day!",
-            "banned-even-day": "Not an odd Day!"
+            "only-odd-day": "Not an odd Day!",
+            "only-even-day": "Not an even Day!"
         }
     }
 }

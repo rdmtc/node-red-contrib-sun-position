@@ -13,7 +13,6 @@ const cRuleFrom = 1;
 const cRuleNone = 0;
 const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
-const cautoTriggerTime = 20 * 60000;
 
 /******************************************************************************************/
 /**
@@ -467,12 +466,10 @@ module.exports = function (RED) {
             if (rule.timeMonths && rule.timeMonths !== '*' && !rule.timeMonths.includes(monthNr)) {
                 return null;
             }
-            if (rule.timeBanOddDays && (dateNr % 2 !== 0)) {
-                // odd
+            if (rule.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
                 return null;
             }
-            if (rule.timeBanEvenDays && (dateNr % 2 === 0)) {
-                // even
+            if (rule.timeOnlyEvenDays && (dateNr % 2 !== 0)) { // odd
                 return null;
             }
             const num = getRuleTimeData(node, msg, rule, now);
@@ -526,8 +523,8 @@ module.exports = function (RED) {
             if (node.autoTrigger) {
                 if (ruleSel.timeLimited && ruleSel.timeData.ts > nowNr) {
                     const diff = ruleSel.timeData.ts - nowNr;
-                    node.autoTriggerTime = Math.min(node.autoTriggerTime, diff);
-                    node.autoTriggerType = 1;
+                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                    node.autoTrigger.type = 1;
                 } else {
                     for (let i = (ruleindex+1); i < node.rules.count; ++i) {
                         const rule = node.rules.data[i];
@@ -537,8 +534,8 @@ module.exports = function (RED) {
                         const num = getRuleTimeData(node, msg, rule, now);
                         if (num > nowNr) {
                             const diff = num - nowNr;
-                            node.autoTriggerTime = Math.min(node.autoTriggerTime, diff);
-                            node.autoTriggerType = 2;
+                            node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                            node.autoTrigger.type = 2;
                         }
                     }
                 }
@@ -619,8 +616,12 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
-        this.autoTrigger = config.autoTrigger || false;
-        this.autoTriggerObj = null;
+        if (config.autoTrigger) {
+            this.autoTrigger = {
+                deaultTime : config.autoTriggerTime || 20 * 60000
+            };
+            this.autoTriggerObj = null;
+        }
         const node = this;
 
         node.nowarn = {};
@@ -715,13 +716,15 @@ module.exports = function (RED) {
                 node.reason.code = NaN;
                 const now = getNow_(node, msg);
                 if (node.autoTrigger) {
-                    node.autoTriggerTime = cautoTriggerTime;
-                    node.autoTriggerType = 0;
+                    node.autoTrigger.time = node.autoTrigger.deaultTime;
+                    node.autoTrigger.type = 0;
                 }
 
                 // check if the message contains any oversteering data
                 let ruleId = -2;
-                const timeCtrl = {};
+                const timeCtrl = {
+                    autoTrigger : node.autoTrigger
+                };
                 // node.debug(`start pos=${node.payload.current} manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
                 if (!checkTCPosOverwrite(node, msg, now)) {
@@ -770,7 +773,7 @@ module.exports = function (RED) {
                 node.context().set('previous', previousData, node.storeName);
                 node.context().set('current', timeCtrl, node.storeName);
                 if (node.autoTrigger) {
-                    node.debug('------------- autotrigger ---------------- ' + node.autoTriggerTime + ' - ' + node.autoTriggerType);
+                    node.debug('------------- autotrigger ---------------- ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
                         clearTimeout(node.autoTriggerObj);
                         node.autoTriggerObj = null;
@@ -782,19 +785,18 @@ module.exports = function (RED) {
                             payload: 'triggerOnly',
                             triggerOnly: true
                         });
-                    }, node.autoTriggerTime);
+                    }, node.autoTrigger.time);
                 }
                 done();
                 return null;
             } catch (err) {
-                // node.error(RED._('clock-timer.errors.error', err));
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: 'internal error'
+                    text: 'internal error: ' + err.message
                 });
-                done(RED._('clock-timer.errors.error', err), msg);
+                done(RED._('node-red-contrib-sun-position/position-config:errors.error', err), msg);
             }
             return null;
         });
@@ -898,6 +900,11 @@ module.exports = function (RED) {
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;
+                }
+
+                if (rule.timeOnlyOddDays && rule.timeOnlyEvenDays) {
+                    rule.timeOnlyOddDays = false;
+                    rule.timeOnlyEvenDays = false;
                 }
 
                 if (rule.conditional) {

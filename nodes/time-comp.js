@@ -19,7 +19,7 @@ module.exports = function (RED) {
         // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         const node = this;
 
-        this.on('input', (msg, send, done) => { // eslint-disable-line complexity
+        this.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };

@@ -160,8 +160,8 @@ module.exports = function (RED) {
          * @property {number} [next] if greater than 0 the number of days in the future
          * @property {string} [days] days for which should be calculated the sun time
          * @property {string} [months] months for which should be calculated the sun time
-         * @property {boolean} [banOddDays] - if true odd days will be banned
-         * @property {boolean} [banEvenDays] - if true even days will be banned
+         * @property {boolean} [onlyOddDays] - if true only odd days will be used
+         * @property {boolean} [onlyEvenDays] - if true only even days will be used
          */
         // * @property {string} [meteoSeason] -only valid meteorological season
         // * @property {string} [astroSeason] -only valid astronomical season
@@ -241,20 +241,20 @@ module.exports = function (RED) {
                     result.error = 'No valid month found!';
                 }
             }
-            if (limit.banOddDays || limit.banEvenDays) {
-                const time = date.getDate();
-                if ((time % 2 !== 0)) {
+            if (limit.onlyEvenDays) {
+                let time = date.getDate();
+                while ((time % 2 !== 0)) {
                     // odd
-                    if (limit.banOddDays) {
-                        date = date.setDate(date.getDate() + 1);
-                        calcSpecial = true;
-                    }
-                } else {
+                    date = date.setDate(date.getDate() + 1);
+                    time = date.getDate();
+                }
+            }
+            if (limit.onlyOddDays) {
+                let time = date.getDate();
+                while((time % 2 === 0)) {
                     // even
-                    if (limit.banEvenDays) {
-                        date = date.setDate(date.getDate() + 1);
-                        calcSpecial = true;
-                    }
+                    date = date.setDate(date.getDate() + 1);
+                    time = date.getDate();
                 }
             }
             if (calcSpecial) {
@@ -445,20 +445,20 @@ module.exports = function (RED) {
                     result.error = 'No valid month found!';
                 }
             }
-            if (limit.banOddDays || limit.banEvenDays) {
-                const time = date.getDate();
-                if ((time % 2 !== 0)) {
+            if (limit.onlyEvenDays) {
+                let time = date.getDate();
+                while ((time % 2 !== 0)) {
                     // odd
-                    if (limit.banOddDays) {
-                        date = date.setDate(date.getDate() + 1);
-                        calcSpecial = true;
-                    }
-                } else {
+                    date = date.setDate(date.getDate() + 1);
+                    time = date.getDate();
+                }
+            }
+            if (limit.onlyOddDays) {
+                let time = date.getDate();
+                while((time % 2 === 0)) {
                     // even
-                    if (limit.banEvenDays) {
-                        date = date.setDate(date.getDate() + 1);
-                        calcSpecial = true;
-                    }
+                    date = date.setDate(date.getDate() + 1);
+                    time = date.getDate();
                 }
             }
             if (calcSpecial) {
@@ -531,7 +531,7 @@ module.exports = function (RED) {
             }
             if (data === null || typeof data === 'undefined') {
                 if (noError) { return NaN; }
-                throw new Error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', {type, value}) }));
+                throw new Error(RED._('errors.notEvaluableProperty', {type, value}));
             }
             data = parseFloat(data);
             if (isNaN(data)) {
@@ -746,7 +746,7 @@ module.exports = function (RED) {
                 }
             } catch (err) {
                 _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(RED._('errors.error', { message: RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:result.error}) }) );
+                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:result.error}));
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
@@ -834,14 +834,14 @@ module.exports = function (RED) {
                 _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
-                _srcNode.error(RED._('errors.error', { message: RED._('errors.notEvaluableProperty', data) }) );
+                _srcNode.error(RED._('errors.notEvaluableProperty', data));
                 return undefined;
             }
             _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) { // eslint-disable-line complexity
+        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
             _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;

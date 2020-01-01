@@ -74,15 +74,13 @@
                     value: '*',
                     required: true
                 },
-                timeBanOddDays: {
+                timeOnlyOddDays: {
                     value: false,
-                    required: true,
-                    validate(v) { return !(this.timeBanEvenDays && v); }
+                    required: true
                 },
-                timeBanEvenDays: {
+                timeOnlyEvenDays: {
                     value: false,
-                    required: true,
-                    validate(v) { return !(this.timeBanOddDays && v); }
+                    required: true
                 },
                 timeMonths: {
                     value: '*',
@@ -754,6 +752,9 @@
     })();</script>
 
 <script type="text/html" data-template-name="within-time-switch">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
@@ -802,11 +803,11 @@
             </div>
         </div>
         <div class="within-time-switch-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.banDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.specialDays"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeBanEvenDays"/> <span data-i18n="within-time-switch.label.banEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeBanOddDays"/> <span data-i18n="within-time-switch.label.banOddDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="within-time-switch.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="within-time-switch.label.onlyOddDays"></span></label>
                 </div>
             </div>
         </div>

@@ -40,7 +40,7 @@
 			"btnClear": "leeren",
 			"dialogtitle":"Regel bearbeiten",
 			"autoTrigger":"automatisch triggern",
-			"autoTrigger2":"Neuberechnung nach dynamischer Zeit"
+			"autoTrigger2":"dynamisch aber max aller"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",

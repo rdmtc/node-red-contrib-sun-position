@@ -24,6 +24,14 @@
                 },
                 outputs: { value: '1' },
                 autoTrigger: { value: false },
+                autoTriggerTime: {
+                    value: 20 * 60000,
+                    validate(v) {
+                        const n = parseFloat(v);
+                        return (typeof v === 'undefined') ||
+                               (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                    }
+                },
                 storeName:  { value: '' },
                 // #region overwrite settings
                 overwriteExpire: {
@@ -31,7 +39,9 @@
                     required: false,
                     validate(v) {
                         const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                        return (typeof v === 'undefined') ||
+                               (v === '') ||
+                               (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
                 // #endregion overwrite settings
@@ -63,7 +73,8 @@
                     value: 'none'
                 },
                 payloadDefaultOffsetMultiplier: {
-                    value: 60000
+                    value: 60000,
+                    validate : RED.validators.number
                 }
                 // #endregion time settings
             },
@@ -132,17 +143,20 @@
                      * @param {*} node - the node representation
                      * @param {string} name - the node representation
                      * @param {*} element - the node representation
-                     * @param {number} rules - output of the editableList
-                     * @returns {number} number of decimals
+                     * @param {function} validate - ovalidation function of the input
+                     * @param {number} defMultiplier - default multiplier (in ms)
+                     * @param {number} minMultiplier - minimum multiplier (in ms)
                     */
-                    function setMultiplier(node, name, element, validate, defMultiplier) {
+                    function setMultiplier(node, name, element, validate, defMultiplier, minMultiplier) {
                         const c = Number(node[name]);
                         if (node[name] !== '' && !isNaN(c)) {
-                            let r = 1000;
-                            if (c % 3600000 === 0) {
-                                r = 3600000;
+                            let r = minMultiplier || 1000;
+                            if (c % 86400000 === 0) {
+                                r = 86400000; // Days
+                            } else if (c % 3600000 === 0) {
+                                r = 3600000; // Hours
                             } else if (c % 60000 === 0) {
-                                r = 60000;
+                                r = 60000; // Minutes
                             }
                             $('#time-control-' + name).val(c/r);
                             $('#time-control-' + name + '-multiplier').val(r);
@@ -313,7 +327,7 @@
                      * @param {object} data - a rule description
                      * @returns {string} description of the rule
                      */
-                    function getRuleDescription(node, selFields, data, enh) { // eslint-disable-line complexity
+                    function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
                             if (!data.valid || !data.isValid) {
@@ -396,22 +410,22 @@
                                     }
                                     result += '</div>';
                                 }
-                                if ((data.timeDays && data.timeDays !== '*') || data.timeBanEvenDays || data.timeBanOddDays) {
+
+                                if ((data.timeDays && data.timeDays !== '*') || data.timeOnlyEvenDays || data.timeOnlyOddDays) {
                                     result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
                                     result += node._('clock-timer.label.ruleTimeDays');
                                     result += '</span> <var>';
+                                    const resultArr = [];
                                     if (data.timeDays && data.timeDays !== '*') {
                                         const daysarr = data.timeDays.split(',');
                                         if (daysarr.length === 1) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
                                         } else if (data.timeDays === '5,6,0') {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
-                                            result += '-';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
+                                                node._('node-red-contrib-sun-position/position-config:common.days.7'));
                                         } else if (daysarr.length === 2) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
-                                            result += ',';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
+                                                node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
                                         } else {
                                             daysarr.sort((a, b) => parseInt(a) - parseInt(b));
                                             let isok = true;
@@ -424,22 +438,19 @@
                                                 daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
                                             }
                                             if (isok) {
-                                                result += daysarr[0];
-                                                result += '-';
-                                                result += daysarr[daysarr.length-1];
+                                                resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
                                             } else {
-                                                result += daysarr.join(',');
+                                                resultArr.push(daysarr.join(','));
                                             }
                                         }
                                     }
-                                    if (data.timeBanEvenDays) {
-                                        result += ' ';
-                                        result += node._('clock-timer.label.onlyOddDays');
+                                    if (data.timeOnlyEvenDays) {
+                                        resultArr.push(node._('clock-timer.label.onlyOddDays'));
                                     }
-                                    if (data.timeBanOddDays) {
-                                        result += ' ';
-                                        result += node._('clock-timer.label.onlyEvenDays');
+                                    if (data.timeOnlyOddDays) {
+                                        resultArr.push(node._('clock-timer.label.onlyEvenDays'));
                                     }
+                                    result += resultArr.join(' <b>and</b> ');
                                     result += '</var></div>';
                                 }
 
@@ -501,7 +512,7 @@
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
-                            result = 'Error: "' + err.message + '"';
+                            result = 'Error "' + err.message + '"';
                         }
                         return result;
                     }
@@ -541,8 +552,8 @@
                             data.valid2OperandBType = (data.valid2OperandBType || 'num');
                             data.timeDays = (data.timeDays || '*');
                             data.timeMonths = (data.timeMonths || '*');
-                            data.timeBanOddDays = (data.timeBanOddDays || false);
-                            data.timeBanEvenDays = (data.timeBanEvenDays || false);
+                            data.timeOnlyOddDays = (data.timeOnlyOddDays || false);
+                            data.timeOnlyEvenDays = (data.timeOnlyEvenDays || false);
                             data.timeOp = (parseInt(data.timeOp) || 0);
                             data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
                             data.timeValue = (data.timeValue || '');
@@ -692,13 +703,25 @@
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
                         return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
-                    }, 3600000);
+                    }, 3600000, 1000);
+                    setMultiplier(node,'autoTriggerTime', v => {
+                        const n = parseFloat(v);
+                        return (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                    }, 3600000, 60000);
 
                     $('.spinner-time').spinner({
                         max: 1439,
                         min: 0,
                         step: 1
                     });
+                    $('#node-input-autoTrigger').change( () => {
+                        if ($('#node-input-autoTrigger').is(':checked')) {
+                            $('#time-control-autoTriggerTime-edit').show();
+                        } else {
+                            $('#time-control-autoTriggerTime-edit').hide();
+                        }
+                    });
+                    $('#node-input-autoTrigger').change();
                     // #endregion Enhanced settings
                     // #region dialog
                     const $dialog = $('#dialog-edit-rule').dialog({
@@ -1094,6 +1117,9 @@
                             });
                         }
                     });
+                    $('.dialog-row-timeLimits :checkbox').change(() => {
+                        $dialogTimeRegInput.change();
+                    });
 
                     $dialogCondAOperand.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -1310,8 +1336,8 @@
 
                             initCheckboxesBlock('#dlg-ip-clktime-rule-timeDays', data.timeDays);
                             initCheckboxesBlock('#dlg-ip-clktime-rule-timeMonths', data.timeMonths);
-                            $('#dlg-ip-clktime-rule-timeBanEvenDays').attr('checked', data.timeBanEvenDays);
-                            $('#dlg-ip-clktime-rule-timeBanOddDays').attr('checked', data.timeBanOddDays);
+                            $('#dlg-ip-clktime-rule-timeOnlyEvenDays').attr('checked', data.timeOnlyEvenDays);
+                            $('#dlg-ip-clktime-rule-timeOnlyOddDays').attr('checked', data.timeOnlyOddDays);
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
@@ -1365,8 +1391,8 @@
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
                             timeDays: getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
                             timeMonths: getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
-                            timeBanEvenDays: $('#dlg-ip-clktime-rule-timeBanEvenDays').attr('checked'),
-                            timeBanOddDays: $('#dlg-ip-clktime-rule-timeBanOddDays').attr('checked'),
+                            timeOnlyEvenDays: $('#dlg-ip-clktime-rule-timeOnlyEvenDays').is(':checked'),
+                            timeOnlyOddDays: $('#dlg-ip-clktime-rule-timeOnlyOddDays').is(':checked'),
 
                             timeMinValue: $dialogTimeMinInput.typedInput('value'),
                             timeMinType: $dialogTimeMinInput.typedInput('type'),
@@ -1418,7 +1444,7 @@
                                 result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
                                     result.multiplierMax;
                             }
-                            if (result.timeBanEvenDays && result.timeBanOddDays) {
+                            if (result.timeOnlyEvenDays && result.timeOnlyOddDays) {
                                 result.valid.validTimeReg = false;
                             }
                             if (!result.timeDays || !result.timeMonths) {
@@ -1492,7 +1518,6 @@
                     });
                 }
 
-
                 const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
                 if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
                     $('#node-input-overwriteExpire').val('');
@@ -1502,6 +1527,17 @@
                         val = 1000;
                     }
                     $('#node-input-overwriteExpire').val(val);
+                }
+
+                const autoTriggerTime = parseFloat($('#time-control-autoTriggerTime').val());
+                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime === 0) {
+                    $('#node-input-autoTriggerTime').val(20*60000);
+                } else {
+                    let val = autoTriggerTime * parseFloat($('#time-control-autoTriggerTime-multiplier').val());
+                    if (val < 60000) {
+                        val = 60000;
+                    }
+                    $('#node-input-autoTriggerTime').val(val);
                 }
 
                 $('#dialog-edit-rule').dialog('destroy').remove();
@@ -1516,6 +1552,9 @@
     })();</script>
 
 <script type="text/html" data-template-name="clock-timer">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" class="row-full-width" id="node-input-positionConfig">
@@ -1567,6 +1606,7 @@
             <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
             <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+            <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
         </select>
         <input type="hidden" id="node-input-overwriteExpire">
     </div>
@@ -1579,10 +1619,19 @@
             <option value="2" data-i18n="clock-timer.label.splitOutput"></option>
         </select>
     </div>
-    <div class="form-row block-noindent" data-i18n="[title]clock-timer.placeholder.autoTrigger">
+    <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.autoTrigger">
         <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
         <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
-        <span data-i18n="clock-timer.label.autoTrigger2"></span>
+        <span id="time-control-autoTriggerTime-edit" class="is-initial-hidden">
+            <span data-i18n="clock-timer.label.autoTrigger2"></span>
+            <input type="text" class="spinner-time" id="time-control-autoTriggerTime" data-i18n="[placeholder]clock-timer.placeholder.autoTriggerTime" value=""/>
+            <select id="time-control-autoTriggerTime-multiplier" class="node-input-multiplier">
+                <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
+            </select>
+            <input type="hidden" id="node-input-autoTriggerTime">
+        </span>
     </div>
     <hr>
     <!-- End ######################################################################## -->
@@ -1683,16 +1732,16 @@
                 </div>
             </div>
             <div class="dlg-ip-clktime-rule-limits" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.banDays"></div>
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.specialDays"></div>
                 <div style="display:inline-block;">
                     <div>
-                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeBanEvenDays"/> <span data-i18n="clock-timer.label.banEvenDays"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeBanOddDays"/> <span data-i18n="clock-timer.label.banOddDays"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeOnlyEvenDays"/> <span data-i18n="clock-timer.label.onlyEven"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeOnlyOddDays"/> <span data-i18n="clock-timer.label.onlyOdd"></span></label>
                     </div>
                 </div>
             </div>
             <div id="dlg-ip-clktime-rule-timeMonths" class="dlg-ip-clktime-rule-months" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForMonths"></div>
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.validForMonths"></div>
                 <div style="display:inline-block;">
                     <div>
                         <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
@@ -1808,6 +1857,9 @@
     }
     .block-indent2 .row-full-width {
         width : calc(100% - 130px);
+    }
+    .spinner-Small .ui-spinner {
+        width : 100px !important;
     }
     .block-noindent .ui-spinner {
         width : calc(100% - 245px);

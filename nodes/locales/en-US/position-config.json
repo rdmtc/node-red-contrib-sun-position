@@ -2,6 +2,7 @@
     "common": {
         "label": {
             "positionConfig": "configuration",
+            "infoText":"The configuration must be created and deployed for the settings page to work properly.",
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",

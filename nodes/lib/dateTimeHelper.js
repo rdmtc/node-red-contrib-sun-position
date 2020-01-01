@@ -677,8 +677,8 @@ function calcMonthOffset(months, monthstart) {
  * @property {number} [next] if greater than 0 the number of days in the future
  * @property {string} [days] days for which should be calculated the sun time
  * @property {string} [months] months for which should be calculated the sun time
- * @property {boolean} [banOddDays] - if true odd days will be banned
- * @property {boolean} [banEvenDays] - if true even days will be banned
+ * @property {boolean} [onlyOddDays] - if true only odd days will be used
+ * @property {boolean} [onlyEvenDays] - if true only even days will be used
  */
 
 /**
@@ -714,18 +714,21 @@ function normalizeDate(d, offset, multiplier, limit) {
             d.setMonth(d.getMonth() + monthx);
         }
     }
-    if (limit.banOddDays || limit.banEvenDays) {
-        const time = d.getDate();
-        if ((time % 2 !== 0)) {
+    if (limit.onlyEvenDays) {
+        let time = d.getDate();
+        while ((time % 2 !== 0)) {
             // odd
-            if (limit.banOddDays) {
-                d = d.setDate(d.getDate() + 1);
-            }
-        } else {
+            d = d.setDate(d.getDate() + 1);
+            time = d.getDate();
+        }
+    }
+
+    if (limit.onlyOddDays) {
+        let time = d.getDate();
+        while((time % 2 === 0)) {
             // even
-            if (limit.banEvenDays) {
-                d = d.setDate(d.getDate() + 1);
-            }
+            d = d.setDate(d.getDate() + 1);
+            time = d.getDate();
         }
     }
     return d;
@@ -788,7 +791,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  * @param {boolean} [utc] define if the time should be in utc
  */
-function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-disable-line complexity
+function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     // console.log('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
@@ -909,7 +912,7 @@ const _dateFormat = (function () {
     // const timezoneClip = /[^-+\dA-Z]/g;
 
     // Regexes and supporting functions are cached through closure
-    return function (date, mask, utc, timeZoneOffset) { // eslint-disable-line complexity
+    return function (date, mask, utc, timeZoneOffset) {
         const dF = _dateFormat;
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
@@ -1116,7 +1119,7 @@ _dateFormat.format = [
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disable-line complexity
+function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (timeZoneOffset === 0) {
         utc = true;
@@ -1386,7 +1389,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
-function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disable-line complexity
+function _getDateFromFormat(val, format, utc, timeZoneOffset) {
     // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 

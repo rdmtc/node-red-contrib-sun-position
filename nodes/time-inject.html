@@ -61,11 +61,11 @@
                     value: '*',
                     required: true
                 },
-                timeBanOddDays: {
+                timeOnlyOddDays: {
                     value: false,
                     required: true
                 },
-                timeBanEvenDays: {
+                timeOnlyEvenDays: {
                     value: false,
                     required: true
                 },
@@ -166,11 +166,11 @@
                     value: '*',
                     required: true
                 },
-                timeAltBanOddDays: {
+                timeAltOnlyOddDays: {
                     value: false,
                     required: true
                 },
-                timeAltBanEvenDays: {
+                timeAltOnlyEvenDays: {
                     value: false,
                     required: true
                 },
@@ -492,7 +492,7 @@
                     result += '¹';
                 }
 
-                const getTimeId = () => { // eslint-disable-line complexity
+                const getTimeId = () => {
                     let suffix = '';
                     if (this.timeDays && this.timeDays !== '*') {
                         const daysarr = this.timeDays.split(',');
@@ -529,7 +529,7 @@
                             } else if (daysarr.length < 5) {
                                 suffix += daysarr.join(',');
                             } else  {
-                                suffix += RED._('time-inject.label.fewDays');
+                                suffix += this._('time-inject.label.fewDays');
                             }
                             suffix += ']';
                         }
@@ -566,7 +566,7 @@
                             } else if (montharr.length < 5) {
                                 suffix += montharr.join(',');
                             } else  {
-                                suffix += RED._('time-inject.label.fewMonths');
+                                suffix += this._('time-inject.label.fewMonths');
                             }
 
                             suffix += ']';
@@ -829,8 +829,8 @@
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
-                                banOddDays:     $('#node-input-timeBanOddDays').attr('checked'),
-                                banEvenDays:    $('#node-input-timeBanEvenDays').attr('checked'),
+                                onlyOddDays:     $('#node-input-timeOnlyOddDays').val(),
+                                onlyEvenDays:    $('#node-input-timeOnlyEvenDays').val(),
                                 noOffsetError: true
                             });
                         }
@@ -984,8 +984,8 @@
                                     next:           1,
                                     days:           getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7),
                                     months:         getCheckboxesStr($('#time-inject-timeAltMonths input[type=checkbox]:checked'), 12),
-                                    banOddDays:     $('#node-input-timeAltBanOddDays').attr('checked'),
-                                    banEvenDays:    $('#node-input-timeAltBanEvenDays').attr('checked'),
+                                    onlyOddDays:     $('#node-input-timeAltOnlyOddDays').val(),
+                                    onlyEvenDays:    $('#node-input-timeAltOnlyEvenDays').val(),
                                     noOffsetError:  true
                                 });
                             }
@@ -1519,6 +1519,9 @@
     })();</script>
 
 <script type="text/html" data-template-name="time-inject">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
     <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
         <input type="text" id="node-input-positionConfig">
@@ -1577,11 +1580,11 @@
             </div>
         </div>
         <div class="time-inject-limits" style="margin-top:5px-; border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.banDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.specialDays"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeBanEvenDays"/> <span data-i18n="time-inject.label.banEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeBanOddDays"/> <span data-i18n="time-inject.label.banOddDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="time-inject.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="time-inject.label.onlyOddDays"></span></label>
                 </div>
             </div>
         </div>
@@ -1656,11 +1659,11 @@
             </div>
         </div>
         <div class="time-inject-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.banDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.specialDays"></div>
             <div style="display:inline-block">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeAltBanEvenDays"/> <span data-i18n="time-inject.label.banEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltBanOddDays"/> <span data-i18n="time-inject.label.banOddDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="time-inject.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeAltOnlyOddDays"/> <span data-i18n="time-inject.label.onlyOddDays"></span></label>
                 </div>
             </div>
         </div>

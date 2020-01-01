@@ -207,10 +207,6 @@
       ],
       "symbol-description": "error",
       "array-callback-return": "error",
-      "complexity": [
-        "warn",
-        35
-      ],
       "consistent-return": "error",
       "no-lone-blocks": "error",
       "linebreak-style": [

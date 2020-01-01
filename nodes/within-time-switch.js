@@ -135,12 +135,12 @@ module.exports = function (RED) {
             return result;
         }
         const dateNr = now.getDate();
-        if (config.timeBanOddDays && (dateNr % 2 !== 0)) {
-            result.warn = RED._('within-time-switch.errors.banned-odd-day');
+        if (node.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
+            result.warn = RED._('within-time-switch.errors.only-odd-day');
             return result;
         }
-        if (config.timeBanEvenDays && (dateNr % 2 === 0)) {
-            result.warn = RED._('within-time-switch.errors.banned-even-day');
+        if (node.timeOnlyEvenDays && (dateNr % 2 !== 0)) { // odd
+            result.warn = RED._('within-time-switch.errors.only-even-day');
             return result;
         }
         result.valid = true;
@@ -290,14 +290,18 @@ module.exports = function (RED) {
         this.propertyEndThresholdValue = config.propertyEndThreshold;
         this.propertyEndThresholdType = config.propertyEndThresholdType;
 
+        this.timeOnlyEvenDays = config.timeOnlyEvenDays;
+        this.timeOnlyOddDays = config.timeOnlyOddDays;
+
         if (config.timeDays === '') {
             throw new Error('No valid days given! Please check settings!');
         }
         if (config.timeMonths === '') {
             throw new Error('No valid month given! Please check settings!');
         }
-        if (config.timeAltBanEvenDays && config.timeAltBanOddDays) {
-            throw new Error('No valid days aviable (odd and enven days banned! Please check settings!');
+        if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
+            this.timeOnlyEvenDays = false;
+            this.timeOnlyOddDays = false;
         }
 
         this.timeOutObj = null;
@@ -305,7 +309,7 @@ module.exports = function (RED) {
         const node = this;
 
 
-        this.on('input', function (msg, send, done) { // eslint-disable-line complexity
+        this.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
