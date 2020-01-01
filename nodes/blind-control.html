@@ -88,8 +88,8 @@
                         const mm = getMinMaxBlindPos(this);
 
                         return (RED.validators.number(v) &&
-                                (n <= mm.max) &&
-                                (n >= mm.min) );
+                                (n < mm.max) &&
+                                (n > 0));
                     }
                 },
                 blindOpenPos: {
