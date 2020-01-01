@@ -1,22 +1,31 @@
 # node-red-contrib-sun-position
 
-
 #### 1.0.0: mayor release
 
 - new Node: clock-time
   - This is a simplified blind-control node, with only time rules and any payload.
   - it is ideal for dimmers, Christmas lights, ...
+- time-inject
+  - added month selection
+  - added even/odd day selection
+- within-time
+  - added day selection
+  - added month selection
+  - added even/odd day selection
+- blind control
+  - added possibility to limit rules for several days
+  - added validation of rules (shows a hint if a rule in invalid)
+  - added day selection to rules
+  - added month selection to rules
+  - added even/odd day selection for rules
+  - added auto Trigger capability
 - general
   - added on several settings the possibility to use payload if the topic of an incoming message contains special value.
   - fixed smaller problems
-- blind-control
-  - added possibility to limit rules for several days
-  - added validation of rules (shows a hint if a rule in invalid)
 
-- The big jump in the version number is not due to the amount change, but rather otherwise.
+- The big jump in the version number is not only due to the amount change, but rather otherwise.
   - The Version starting with 1... will show that this node is tested and working with Node-Red above 1...
   - After this release, no major changes are planned in the next time and the node is for the time being feature complete. This fits a version number 1.. better than 0..
-
 
 #### 0.5.3 + 0.5.4: BugFix
 
