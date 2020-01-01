@@ -38,14 +38,26 @@
          */
         function validateBlindPos(node, v) {
             const n = parseFloat(v);
-            const inc = getVal(node, 'blindIncrement');
+            let inc = getVal(node, 'blindIncrement');
             const mm = getMinMaxBlindPos(node);
+            if (isNaN(inc)) {
+                inc = 0;
+            }
+            const flength = (inc === inc>> 0 ? 0 : inc.toString().split('.')[1].length || 0) + 2;
+
+            console.log('validateBlindPos',n,inc,mm,
+                Number((n / inc).toFixed(flength)),
+                Number.isInteger(Number((n / inc).toFixed(flength))),
+                RED.validators.number(v),
+                (v !== ''),
+                (n <= mm.max),
+                (n >= mm.min));
 
             return RED.validators.number(v) &&
                     (v !== '') &&
                     (n <= mm.max) &&
                     (n >= mm.min) &&
-                    Number.isInteger(Number((n / inc).toFixed((inc === inc>> 0 ? 0 : inc.toString().split('.')[1].length || 0) + 2)));
+                    Number.isInteger(Number((n / inc).toFixed(flength)));
         }
 
         RED.nodes.registerType('blind-control', {
@@ -274,7 +286,7 @@
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) <= 0) ||
                                 (getVal(this, 'oversteerValueType') === 'none') ||
-                                RED.validators.typedInput('oversteerBlindPosType')(v); // validateBlindPos(this, v);
+                                RED.validators.typedInput('oversteerBlindPosType')(v);
                     }
                 },
                 oversteerBlindPosType: {
