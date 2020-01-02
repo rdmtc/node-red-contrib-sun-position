@@ -1060,7 +1060,9 @@ module.exports = function (RED) {
         };
 
         if (node.blindData.levelTop < node.blindData.levelBottom) {
-            [node.blindData.levelBottom, node.blindData.levelTop] = [node.blindData.levelTop, node.blindData.levelBottom];
+            const tmp = node.blindData.levelBottom;
+            node.blindData.levelBottom = node.blindData.levelTop;
+            node.blindData.levelTop = tmp;
             node.levelReverse = true;
         }
 

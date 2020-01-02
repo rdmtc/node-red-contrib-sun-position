@@ -22,42 +22,9 @@
          * @returns {object} object with property __min__ and __max__
          */
         function getMinMaxBlindPos(node) {
-            let max = getVal(node, 'blindOpenPos');
-            let min = getVal(node, 'blindClosedPos');
-            if (max < min) {
-                [min, max] = [max, min];
-            }
-            return { min, max };
-        }
-
-        /**
-         * validates a blind position
-         * @param {*} node - the node representation
-         * @param {number} v - the blind position to validate
-         * @returns {boolean} __true__ if the blind position is valid
-         */
-        function validateBlindPos(node, v) {
-            const n = parseFloat(v);
-            let inc = getVal(node, 'blindIncrement');
-            const mm = getMinMaxBlindPos(node);
-            if (isNaN(inc)) {
-                inc = 0;
-            }
-            const flength = (inc === inc>> 0 ? 0 : inc.toString().split('.')[1].length || 0) + 2;
-
-            console.log('validateBlindPos',n,inc,mm,
-                Number((n / inc).toFixed(flength)),
-                Number.isInteger(Number((n / inc).toFixed(flength))),
-                RED.validators.number(v),
-                (v !== ''),
-                (n <= mm.max),
-                (n >= mm.min));
-
-            return RED.validators.number(v) &&
-                    (v !== '') &&
-                    (n <= mm.max) &&
-                    (n >= mm.min) &&
-                    Number.isInteger(Number((n / inc).toFixed(flength)));
+            const max = parseFloat(getVal(node, 'blindOpenPos')) || 0;
+            const min = parseFloat(getVal(node, 'blindClosedPos')) || 0;
+            return { min:Math.min(min, max), max:Math.max(min, max) };
         }
 
         RED.nodes.registerType('blind-control', {
@@ -87,7 +54,7 @@
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                               (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
                     }
                 },
                 storeName:  { value: '' },
@@ -99,7 +66,7 @@
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
 
-                        return (RED.validators.number(v) &&
+                        return (RED.validators.number()(v) &&
                                 (n < mm.max) &&
                                 (n > 0));
                     }
@@ -109,9 +76,9 @@
                     required: true,
                     validate(v) {
                         const n = parseFloat(v);
-                        return RED.validators.number(v) &&
-                            (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                            (n !== getVal(this, 'blindClosedPos'));
+                        return RED.validators.number()(v) &&
+                                (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                                (n !== parseFloat(getVal(this, 'blindClosedPos')));
                     }
                 },
                 blindClosedPos: {
@@ -119,9 +86,9 @@
                     required: true,
                     validate(v) {
                         const n = parseFloat(v);
-                        return RED.validators.number(v) &&
-                                (Number.isInteger(n / getVal(this, 'blindIncrement'))) &&
-                                (n !== getVal(this, 'blindOpenPos'));
+                        return RED.validators.number()(v) &&
+                                (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                                (n !== parseFloat(getVal(this, 'blindOpenPos')));
                     }
                 },
                 blindPosReverse: {
@@ -143,7 +110,7 @@
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (v === '') ||
-                               (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                               (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
                 // #endregion overwrite settings
@@ -158,7 +125,7 @@
                     required: true,
                     validate(v) {
                         const n = Number(v);
-                        return (RED.validators.number(v) && (n >= 0) && (n <= 2));
+                        return (RED.validators.number()(v) && (n >= 0) && (n <= 2));
                     }
                 },
                 sunFloorLength: {
@@ -167,7 +134,7 @@
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                                 (v === '') ||
-                                (v !== '' && RED.validators.number(v));
+                                (v !== '' && RED.validators.number()(v));
                     }
                 },
                 sunMinAltitude: {
@@ -177,7 +144,7 @@
                         const n = parseFloat(v);
                         return (Number(getVal(this, 'sunControlMode')) <= 1) ||
                                 (v === '') ||
-                                (RED.validators.number(v) && (n >= 0) && (n <= 90));
+                                (RED.validators.number()(v) && (n >= 0) && (n <= 90));
                     }
                 },
                 sunMinDelta: {
@@ -190,14 +157,14 @@
                                 (v === '') ||
                                 (n <= mm.max) &&
                                 (n >= mm.min) &&
-                                (n >= getVal(this, 'blindIncrement')) );
+                                (n >= parseFloat(getVal(this, 'blindIncrement'))) );
                     }
                 },
                 blindPosMin: {
                     value: 'closed (min)',
                     validate(v) {
                         return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
-                            RED.validators.typedInput('blindPosMinType')(v));
+                                RED.validators.typedInput('blindPosMinType')(v));
                     }
                 },
                 blindPosMinType: {
@@ -207,7 +174,7 @@
                     value: 'open (max)',
                     validate(v) {
                         return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
-                        RED.validators.typedInput('blindPosMaxType')(v));
+                                RED.validators.typedInput('blindPosMaxType')(v));
                     }
                 },
                 blindPosMaxType: {
@@ -217,7 +184,9 @@
                     value: '',
                     validate(v) {
                         const n = parseFloat(v);
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) || (v === '') || (RED.validators.number(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
+                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
+                                (v === '') ||
+                                (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
                 },
                 // #endregion sun settings
@@ -226,14 +195,14 @@
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (v !== '' && RED.validators.number(v));
+                                (v !== '' && RED.validators.number()(v));
                     }
                 },
                 windowBottom: {
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (v !== '' && RED.validators.number(v));
+                                (v !== '' && RED.validators.number()(v));
                     }
                 },
                 windowAzimuthStart: {
@@ -241,8 +210,8 @@
                     validate(v) {
                         const n = Number(v);
                         return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                                (n < getVal(this, 'windowAzimuthEnd')) );
+                                (RED.validators.number()(v) && (n >= -360) && (n <= 360) &&
+                                (n < parseFloat(getVal(this, 'windowAzimuthEnd'))) );
                     }
                 },
                 windowAzimuthEnd: {
@@ -250,8 +219,8 @@
                     validate(v) {
                         const n = Number(v);
                         return (Number(getVal(this, 'sunControlMode')) <= 0) ||
-                                (RED.validators.number(v) && (n >= -360) && (n <= 360) &&
-                                (n > getVal(this, 'windowAzimuthStart')) );
+                                (RED.validators.number()(v) && (n >= -360) && (n <= 360) &&
+                                (n > parseFloat(getVal(this, 'windowAzimuthStart'))) );
                     }
                 },
                 // #endregion window settings
@@ -434,7 +403,21 @@
                         value: 'num',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),
                         icon: 'red/images/typedInput/09.png',
-                        validate(v) { return validateBlindPos(this, v); }
+                        validate(v) {
+                            if (!RED.validators.number()(v) || (v === '')) {
+                                return false;
+                            }
+                            const inc = parseFloat(getVal(this, 'blindIncrement'));
+                            if (isNaN(inc)) {
+                                return true;
+                            }
+                            const mm = getMinMaxBlindPos(this);
+                            const n = parseFloat(v);
+                            if (isNaN(n) || (n > mm.max) || (n < mm.min)) {
+                                return false;
+                            }
+                            return Number.isInteger(Number((n / inc).toFixed((inc === inc>> 0 ? 0 : inc.toString().split('.')[1].length || 0) + 2)));
+                        }
                     };
                     types.LevelFix = {
                         value: 'levelFixed',
@@ -545,11 +528,11 @@
                     // #region blind
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                        return (v === '') || (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }, 3600000, 1000);
                     setMultiplier(node,'autoTriggerTime', v => {
                         const n = parseFloat(v);
-                        return (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                        return (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
                     }, 3600000, 60000);
                     setupTInput(node, {
                         typeProp: 'blindPosDefaultType',
@@ -1023,7 +1006,7 @@
 
                     setMultiplier(node, 'smoothTime', v => {
                         const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
+                        return (v === '') || (RED.validators.number()(v) && (n >= -2147483647) && (n < 0x7FFFFFFF));
                     }, 60000);
                     // #endregion sun
                     // #region oversteering

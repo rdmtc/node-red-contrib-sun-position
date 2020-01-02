@@ -29,7 +29,7 @@
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                               (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
                     }
                 },
                 storeName:  { value: '' },
@@ -41,7 +41,7 @@
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (v === '') ||
-                               (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                               (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
                 // #endregion overwrite settings
@@ -74,7 +74,7 @@
                 },
                 payloadDefaultOffsetMultiplier: {
                     value: 60000,
-                    validate : RED.validators.number
+                    validate : RED.validators.number()
                 }
                 // #endregion time settings
             },
@@ -702,11 +702,11 @@
                     // #region Enhanced settings
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
-                        return (v === '') || (RED.validators.number(v) && (n >= 200) && (n < 0x7FFFFFFF));
+                        return (v === '') || (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }, 3600000, 1000);
                     setMultiplier(node,'autoTriggerTime', v => {
                         const n = parseFloat(v);
-                        return (RED.validators.number(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                        return (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
                     }, 3600000, 60000);
 
                     $('.spinner-time').spinner({
