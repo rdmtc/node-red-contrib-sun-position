@@ -263,7 +263,7 @@ module.exports = function (RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} `);
+        node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
             return def;
@@ -291,7 +291,7 @@ module.exports = function (RED) {
             }
             const res = node.positionConfig.getFloatProp(node, msg, type, value, def);
             if (node.levelReverse) {
-                return getInversePos_(res);
+                return getInversePos_(node, res);
             }
             return res;
         } catch (err) {
@@ -1154,6 +1154,8 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
+                node.debug(`blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
