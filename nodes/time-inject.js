@@ -145,6 +145,24 @@ module.exports = function (RED) {
         const node = this;
 
         /**
+         * Recalculate the timeout
+         */
+        function doTimeRecalc() {
+            try {
+                node.debug('needsRecalc');
+                doCreateTimeout(node);
+            } catch (err) {
+                node.error(err.message);
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                });
+            }
+        }
+
+        /**
          * creates the timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
@@ -220,7 +238,8 @@ module.exports = function (RED) {
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
-
+            let fill = 'yellow';
+            let shape = 'dot';
             if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
@@ -228,8 +247,9 @@ module.exports = function (RED) {
                 }
 
                 let millisec = tsGetScheduleTime(node.nextTime, 10);
-                const isAlt = (node.nextTimeAlt);
+                const isAlt = node.nextTimeAlt;
                 if (isAlt) {
+                    shape = 'ring';
                     const millisecAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
                     if (millisecAlt < millisec) {
                         millisec = millisecAlt;
@@ -237,64 +257,68 @@ module.exports = function (RED) {
                     }
                 }
 
-                // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
-                node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
-                    const msg = {
-                        type: 'start',
-                        timeData: {}
-                    };
-                    node.timeOutObj = null;
-                    let useAlternateTime = false;
-                    if (isAlt) {
-                        let needsRecalc = false;
-                        try {
-                            useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
-                                node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
-                            needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
-                        } catch (err) {
-                            needsRecalc = isAltFirst;
-                            hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
-                                type: node.propertyType,
-                                value: node.property
-                            }),  err);
-                        }
+                if (millisec > 34560000) {
+                    // > 4 Days
+                    if (node.intervalObj) {
+                        clearInterval(node.intervalObj);
+                        node.intervalObj = null;
+                    }
 
-                        if (needsRecalc) {
+                    node.timeOutObj = setTimeout(() => {
+                        doTimeRecalc();
+                    }, millisec - 259200000); // 3 days before
+                    fill = 'blue';
+                } else {
+                    // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
+                    node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
+                        const msg = {
+                            type: 'start',
+                            timeData: {}
+                        };
+                        node.timeOutObj = null;
+                        let useAlternateTime = false;
+                        if (isAlt) {
+                            let needsRecalc = false;
                             try {
-                                node.debug('needsRecalc');
-                                doCreateTimeout(node);
+                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
+                                    node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
+                                needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                             } catch (err) {
-                                node.error(err.message);
-                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                                node.status({
-                                    fill: 'red',
-                                    shape: 'ring',
-                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                                });
+                                needsRecalc = isAltFirst;
+                                hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
+                                    type: node.propertyType,
+                                    value: node.property
+                                }),  err);
                             }
-                            return { state:'recalc', done: true };
+
+                            if (needsRecalc) {
+                                doTimeRecalc();
+                                return { state:'recalc', done: true };
+                            }
                         }
-                    }
 
-                    if (useAlternateTime && node.nextTimeAltData) {
-                        msg.timeData = node.nextTimeAltData;
-                    } else if (node.nextTimeData) {
-                        msg.timeData = node.nextTimeData;
+                        if (useAlternateTime && node.nextTimeAltData) {
+                            msg.timeData = node.nextTimeAltData;
+                        } else if (node.nextTimeData) {
+                            msg.timeData = node.nextTimeData;
+                        }
+                        node.emit('input', msg);
+                        return { state: 'emit', done: true };
+                    }, millisec, isAlt, isAltFirst);
+                    fill = 'green';
+
+                    if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
+                        node.intervalObj = setInterval(() => {
+                            node.debug('retriggered');
+                            doCreateTimeout(node);
+                        }, node.recalcTime);
+                    } else if (isFixedTime && node.intervalObj) {
+                        clearInterval(node.intervalObj);
+                        node.intervalObj = null;
                     }
-                    node.emit('input', msg);
-                    return { state: 'emit', done: true };
-                }, millisec, isAlt, isAltFirst);
+                }
             }
 
-            if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
-                node.intervalObj = setInterval(() => {
-                    node.debug('retriggered');
-                    doCreateTimeout(node);
-                }, node.recalcTime);
-            } else if (isFixedTime && node.intervalObj) {
-                clearInterval(node.intervalObj);
-                node.intervalObj = null;
-            }
             if ((errorStatus !== '')) {
                 node.status({
                     fill: 'red',
@@ -306,21 +330,21 @@ module.exports = function (RED) {
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({
-                        fill: 'green',
-                        shape: 'ring',
+                        fill,
+                        shape,
                         text: node.positionConfig.toDateTimeString(node.nextTimeAlt) + ' / ' + node.positionConfig.toTimeString(node.nextTime)
                     });
                 } else {
                     node.status({
-                        fill: 'green',
-                        shape: 'dot',
+                        fill,
+                        shape,
                         text: node.positionConfig.toDateTimeString(node.nextTime) + ' / ' + node.positionConfig.toTimeString(node.nextTimeAlt)
                     });
                 }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
-                    fill: 'green',
-                    shape: 'dot',
+                    fill,
+                    shape,
                     text: node.positionConfig.toDateTimeString(node.nextTime)
                 });
             } else {
