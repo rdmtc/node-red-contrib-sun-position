@@ -29,7 +29,6 @@ module.exports = function (RED) {
         return millisec;
     }
 
-    // function tsSetAddProp(node, msg, type, name, valueType, value, format, offset, offsetType, multiplier, days, next) {
     /**
      *
      * @param {*} node
@@ -55,9 +54,9 @@ module.exports = function (RED) {
         if (data.outType !== 'none') {
             const res = node.positionConfig.getOutDataProp(node, msg, data);
             if (res === null || (typeof res === 'undefined')) {
-                throw new Error('could not evaluate ' + data.type + '.' + data.value);
+                this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
             } else if (res.error) {
-                this.error('error on getting additional payload 1: ' + res.error);
+                this.error('Eerror on getting additional payload: "' + res.error + '"');
             } else if (data.outType === 'msgPayload') {
                 msg.payload = res;
             } else if (data.outType === 'msgTs') {
@@ -396,42 +395,45 @@ module.exports = function (RED) {
                     msg.payload = value;
                 }
 
-                tsSetAddProp(this, msg, {
-                    outType: config.addPayload1Type,
-                    outValue: config.addPayload1,
-                    type: config.addPayload1ValueType,
-                    value: config.addPayload1Value,
-                    format: config.addPayload1Format,
-                    offsetType: config.addPayload1OffsetType,
-                    offset: config.addPayload1Offset,
-                    multiplier: config.addPayload1OffsetMultiplier,
-                    next: config.addPayload1Next,
-                    days: config.addPayload1Days
-                });
-                tsSetAddProp(this, msg, {
-                    outType: config.addPayload2Type,
-                    outValue: config.addPayload2,
-                    type: config.addPayload2ValueType,
-                    value: config.addPayload2Value,
-                    format: config.addPayload2Format,
-                    offsetType: config.addPayload2OffsetType,
-                    offset: config.addPayload2Offset,
-                    multiplier: config.addPayload2OffsetMultiplier,
-                    next: config.addPayload2Next,
-                    days: config.addPayload2Days
-                });
-                tsSetAddProp(this, msg, {
-                    outType: config.addPayload3Type,
-                    outValue: config.addPayload3,
-                    type: config.addPayload3ValueType,
-                    value: config.addPayload3Value,
-                    format: config.addPayload3Format,
-                    offsetType: config.addPayload3OffsetType,
-                    offset: config.addPayload3Offset,
-                    multiplier: config.addPayload3OffsetMultiplier,
-                    next: config.addPayload3Next,
-                    days: config.addPayload3Days
-                });
+                if (typeof config.addPayload1Type !== 'undefined' &&
+                    typeof config.addPayload1ValueType !== 'undefined') {
+                    tsSetAddProp(this, msg, {
+                        outType: config.addPayload1Type,
+                        outValue: config.addPayload1,
+                        type: config.addPayload1ValueType,
+                        value: config.addPayload1Value,
+                        format: config.addPayload1Format,
+                        offsetType: config.addPayload1OffsetType,
+                        offset: config.addPayload1Offset,
+                        multiplier: config.addPayload1OffsetMultiplier,
+                        next: config.addPayload1Next,
+                        days: config.addPayload1Days
+                    });
+                    tsSetAddProp(this, msg, {
+                        outType: config.addPayload2Type,
+                        outValue: config.addPayload2,
+                        type: config.addPayload2ValueType,
+                        value: config.addPayload2Value,
+                        format: config.addPayload2Format,
+                        offsetType: config.addPayload2OffsetType,
+                        offset: config.addPayload2Offset,
+                        multiplier: config.addPayload2OffsetMultiplier,
+                        next: config.addPayload2Next,
+                        days: config.addPayload2Days
+                    });
+                    tsSetAddProp(this, msg, {
+                        outType: config.addPayload3Type,
+                        outValue: config.addPayload3,
+                        type: config.addPayload3ValueType,
+                        value: config.addPayload3Value,
+                        format: config.addPayload3Format,
+                        offsetType: config.addPayload3OffsetType,
+                        offset: config.addPayload3Offset,
+                        multiplier: config.addPayload3OffsetMultiplier,
+                        next: config.addPayload3Next,
+                        days: config.addPayload3Days
+                    });
+                }
                 send(msg); // node.send(msg);
                 done();
                 return null;
