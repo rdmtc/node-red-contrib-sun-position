@@ -1,138 +1,9 @@
 <!DOCTYPE HTML>
-<script type="text/html" data-template-name="sun-position">
-    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" id="node-input-positionConfig">
-        <input type="hidden" id="node-input-outputs"/>
-    </div>
-    <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
-    </div>
-    <hr>
-    <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
-        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.azimuthpos"></span></label>
-        <ol id="node-input-rule-container"></ol>
-    </div>
-    <hr>
-    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.start">
-        <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
-        <input type="text" id="node-input-start" data-i18n="[title]sun-position.placeholder.start"/>
-        <input type="hidden" id="node-input-startType">
-    </div>
-    <div class="form-row block-indent1 sun-position-row-startOffset is-initial-hidden" data-i18n="[title]sun-position.placeholder.startOffset">
-        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
-        <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"></input>
-        <input type="hidden" id="node-input-startOffsetType">
-        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.end">
-        <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
-        <input type="text" id="node-input-end" data-i18n="[placeholder]sun-position.placeholder.end"/>
-        <input type="hidden" id="node-input-endType">
-    </div>
-    <div class="form-row block-indent1 sun-position-row-endOffset is-initial-hidden" data-i18n="[title]sun-position.placeholder.endOffset">
-        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
-        <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"></input>
-        <input type="hidden" id="node-input-endOffsetType">
-        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
-    <hr>
-    <div class="form-row" data-i18n="[title]node-red:common.label.name">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-    </div>
-    <div class="form-tips">
-        <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
-    </div>
-</script>
-<style>
-    hr {
-        width: 100%
-    }
-    .is-to-show-initially {
-        display:none
-    }
-    .is-initial-hidden {
-        display:none
-    }
-    .block-indent1 {
-        float: left;
-        min-height: 1px;
-        margin-left: 10px;
-        width: 100%
-    }
-    .block-indent2 {
-        float: left;
-        min-height: 1px;
-        margin-left: 20px;
-        width: 100%
-    }
-    .block-noindent .row-full-width {
-        width : calc(100% - 110px);
-    }
-    .block-indent1 .row-full-width {
-        width : calc(100% - 120px);
-    }
-    .block-indent2 .row-full-width {
-        width : calc(100% - 130px);
-    }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 245px);
-    }
-    .block-indent1 .ui-spinner {
-        width : calc(100% - 255px);
-    }
-    .block-indent2 .ui-spinner {
-        width : calc(100% - 265px);
-    }
-    .node-input-multiplier {
-        width: 125px;
-        max-width: 125px;
-        margin-left: 5px;
-    }
-</style>
 
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
     (function() {
-        /**
-         * clip a value to a defined length
-         * @param {string} v - the value
-         * @param {number} [l] - the desired length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function clipValueLength(v, l) {
-            l = l || 18;
-            return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-        }
-
-        /**
-         * get the label for a typed input vlaue
-         * @param {string} t - the type of the value
-         * @param {string} v - the value
-         * @param {number} [l] - the desired maximum length (default = 18)
-         * @returns {string} the value clipped to the given length
-         */
-        function getValueLabel(t, v, l) {
-            if (t === 'str') {
-                return '"' + clipValueLength(v, l) + '"';
-            }
-
-            if (t === 'msg') {
-                return t + '.' + clipValueLength(v, l);
-            }
-
-            if (t === 'flow' || t === 'global') {
-                const result = RED.utils.parseContextKey(v);
-                return t + '.' + clipValueLength(result.key, l);
-            }
-
-            return clipValueLength(v, l);
-        }
-
         RED.nodes.registerType('sun-position', {
             category: 'time and astro',
             color: '#F3B567',
@@ -248,7 +119,7 @@
 
                 const rule = this.rules[index - 1];
                 if (rule) {
-                    return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType, rule.valueHigh);
+                    return RED.nodes.getType('position-config').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('position-config').getValueLabel(rule.valueHighType, rule.valueHigh);
                 }
                 return undefined;
             },
@@ -541,3 +412,101 @@
             }
         });
     })();</script>
+
+<script type="text/html" data-template-name="sun-position">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
+    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+        <input type="hidden" id="node-input-outputs"/>
+    </div>
+    <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
+    </div>
+    <hr>
+    <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
+        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="sun-position.label.azimuthpos"></span></label>
+        <ol id="node-input-rule-container"></ol>
+    </div>
+    <hr>
+    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.start">
+        <label for="node-input-start"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.start"></span></label>
+        <input type="text" id="node-input-start" data-i18n="[title]sun-position.placeholder.start"/>
+        <input type="hidden" id="node-input-startType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-startOffset is-initial-hidden" data-i18n="[title]sun-position.placeholder.startOffset">
+        <label for="node-input-startOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.startOffset"></span></label>
+        <input id="node-input-startOffset" data-i18n="[placeholder]sun-position.placeholder.startOffset"/>
+        <input type="hidden" id="node-input-startOffsetType">
+        <select id="node-input-startOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row block-noindent" data-i18n="[title]sun-position.placeholder.end">
+        <label for="node-input-end"><i class="fa fa-clock-o"></i> <span data-i18n="sun-position.label.end"></span></label>
+        <input type="text" id="node-input-end" data-i18n="[placeholder]sun-position.placeholder.end"/>
+        <input type="hidden" id="node-input-endType">
+    </div>
+    <div class="form-row block-indent1 sun-position-row-endOffset is-initial-hidden" data-i18n="[title]sun-position.placeholder.endOffset">
+        <label for="node-input-endOffset"><i class="fa fa-calculator"></i> <span data-i18n="sun-position.label.endOffset"></span></label>
+        <input id="node-input-endOffset" data-i18n="[placeholder]sun-position.placeholder.endOffset"/>
+        <input type="hidden" id="node-input-endOffsetType">
+        <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row form-tips" data-i18n="[html]sun-position.tips.config"></div>
+    <hr>
+    <div class="form-row" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-tips">
+        <span data-i18n="sun-position.tips.sunPosControl"></span>&nbsp;
+    </div>
+</script>
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: 100%
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: 100%
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 110px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 120px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 130px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 255px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 265px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        max-width: 125px;
+        margin-left: 5px;
+    }
+</style>

@@ -1,4 +1,431 @@
 <!DOCTYPE HTML>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('position-config', {
+            category: 'config',
+            credentials: {
+                posLatitude: {
+                    type: 'text',
+                    value: '',
+                    required: true,
+                    validate(v){
+                        const n = Number(v);
+                        return RED.validators.number()(v) && ((n >= -90) && (n <= 90));
+                    }
+                },
+                posLongitude: {
+                    type: 'text',
+                    value: '',
+                    required: true,
+                    validate(v){
+                        const n = Number(v);
+                        return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
+                    }
+                }
+            },
+            defaults: {
+                name: {
+                    value: '',
+                    required: false
+                },
+                isValide: {
+                    value: false,
+                    required: true,
+                    validate(v){
+                        return (v === true) || (v === 'true');
+                    }
+                },
+                longitude: {
+                    value: '',
+                    required: false
+                },
+                latitude: {
+                    value: '',
+                    required: false
+                },
+                angleType: {
+                    value: 'deg',
+                    required: true,
+                    validate(v){
+                        return (v === 'rad' || v === 'deg');
+                    }
+                },
+                timeZoneOffset: {
+                    value: 99
+                },
+                timeZoneDST: {
+                    value: 0
+                },
+                stateTimeFormat: {
+                    value: 3 // 3 - date.toLocaleTimeString()
+                },
+                stateDateFormat: {
+                    value: 12 // 12 - date.toLocaleDateString()
+                }
+            },
+            label() {
+                return this.name || 'timeControl';
+            },
+            oneditprepare() {
+                setTimeout(() => {
+                    $('.is-to-show-initially').show();
+                    $('.is-to-hide-initially').hide();
+                }, 300);
+                $('#node-config-map-row').hide();
+                const node = this;
+                let tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
+                if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
+                    this.timeZoneOffset = 99;
+                    $('#node-config-input-timeZoneOffset').val(99);
+                    tsOffset = 99;
+                }
+
+                const tsDST = parseInt($('#node-config-input-timeZoneOffset').val());
+                if (isNaN(tsDST) || tsDST >= 99 || tsDST <= -99) {
+                    this.timeZoneDST = 0;
+                    $('#node-config-input-timeZoneDST').val(0);
+                }
+
+                $('#node-config-input-timeZoneOffset').on('change focus focusin focusout', () => {
+                    const tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
+                    if (tsOffset === 99 || isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
+                        $('#node-config-input-timeZoneOffset').val(99);
+                        $('#node-config-input-timeZoneDST').attr('disabled', true);
+                        $('.row-timeZoneDST').hide();
+                    } else {
+                        $('.row-timeZoneDST').show();
+                        $('#node-config-input-timeZoneDST').attr('disabled', false);
+                    }
+                });
+                $('#node-config-input-timeZoneOffset').change();
+
+                $('#node-config-input-isValide').val(false);
+                const $lat = $('#node-config-input-posLatitude');
+                const $lon = $('#node-config-input-posLongitude');
+
+                const latOldVal = parseFloat($('#node-config-input-latitude').val());
+                const lonOldVal = parseFloat($('#node-config-input-longitude').val());
+                let latVal = parseFloat($lat.val());
+                let lonVal = parseFloat($lon.val());
+
+                const coordChanged = (_type, _value) => {
+                    const lat = $('#node-config-input-posLatitude').val();
+                    const lon = $('#node-config-input-posLongitude').val();
+
+                    const isValid = !isNaN(lat) && !isNaN(lon) && (lat !== '') && (lon !== '') && (lat !== 0) && (lon !== 0);
+                    $('#node-config-input-isValide').val(isValid);
+
+                    if (isValid) {
+                        $('#node-config-map-row').show();
+                        const clat = parseFloat(lat);
+                        const clon = parseFloat(lon);
+                        $('#node-config-map-content').attr('src', `https://www.openstreetmap.org/export/embed.html?bbox=${(clon-0.004).toFixed(14)}%2C${(clat-0.004).toFixed(14)}%2C${(clon+0.004).toFixed(14)}%2C${(clat+0.004).toFixed(14)}&amp;layer=mapnik&amp;marker=${lat}%2C${lon}`);
+                        // src="https://www.openstreetmap.org/export/embed.html?bbox=13.630465865135195%2C51.088954687366886%2C13.633700609207155%2C51.09019968648441&amp;layer=mapnik&amp;marker=51.089577967896076%2C13.632082700696628
+                        // src="https://www.openstreetmap.org/export/embed.html?bbox=13.61883000000000%2C51.08226000000000%2C13.62883000000000%2C51.09226000000000&amp;layer=mapnik&amp;marker=51.08726%2C13.62383"
+                        //      https://www.openstreetmap.org/export/embed.html?bbox=13.62281000000000%2C51.08621          %2C13.62481          %2C51.08821         &amp;layer=mapnik&amp;marker=51.08721%2C13.62381
+                        // src="https://www.openstreetmap.org/export/embed.html?bbox=51.07726%2C13.61383%2C51.087260.01%2C13.623830.01&amp;layer=mapnik
+                        $('#node-config-map-link').html(`<a href="https://www.openstreetmap.org/#map=17/${lat}/${lon}" target="_blank">Openstreetmap</a>`);
+                    } else {
+                        $('#node-config-map-row').hide();
+                    }
+                };
+                $lat.on('change focus focusin focusout', coordChanged);
+                $lon.on('change focus focusin focusout', coordChanged);
+
+                $lat.spinner({
+                    step: 0.00001,
+                    numberFormat: 'n'
+                });
+                $lon.spinner({
+                    step: 0.00001,
+                    numberFormat: 'n'
+                });
+
+                if ($lat.val() === '' || isNaN(latVal)) {
+                    if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
+                        $lat.val(latOldVal);
+                    } else {
+                        $lat.val('');
+                    }
+                    latVal = parseFloat($lat.val());
+                }
+
+                if ($lon.val() === '' || isNaN(lonVal)) {
+                    if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
+                        $lon.val(lonOldVal);
+                    } else {
+                        $lon.val('');
+                    }
+                    lonVal = parseFloat($lon.val());
+                }
+
+                if ((($lat.val() === '') || isNaN(latVal) || (latVal === 0)) &&
+                (($lon.val() === '') || isNaN(lonVal) || (lonVal === 0))) {
+                    if ('geolocation' in navigator) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            $lat.val(Number(position.coords.latitude.toFixed(5)));
+                            $lon.val(Number(position.coords.longitude.toFixed(5)));
+                        });
+                    }
+                }
+
+                $lat.change();
+                $lon.change();
+
+                const setup = function(_node) {
+                /* global initCombobox */
+                    initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 50, 'isoDate');
+                    initCombobox(node, $('#node-config-input-stateTimeFormatSel'), $('#node-config-input-stateTimeFormat'), 'dateOutFormat', 'outputFormats', node.stateTimeFormat || 3, 50, 'isoTime');
+                }; // setup
+
+                $.getScript('sun-position/js/htmlglobal.js')
+                    .done((_data, _textStatus, _jqxhr) => {
+                        try {
+                            setup(node);
+                        } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                        }
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                    });
+            },
+            oneditsave() {
+            /*
+            this.latitude = '';
+            this.longitude = '';
+            let longitude= $('#node-config-input-longitude').val();
+            longitude = parseFloat(longitude.trim());
+            if (isNaN(longitude)) {
+                $('#node-config-input-posLongitude').val('');
+            } else  {
+                $('#node-config-input-posLongitude').val(longitude);
+            }
+            $('#node-config-input-longitude').val(0);
+
+            let latitude= $('#node-config-input-longitude').val();
+            latitude = parseFloat(latitude.trim());
+            if (isNaN(latitude)) {
+                $('#node-config-input-posLatitude').val('');
+            } else  {
+                $('#node-config-input-posLatitude').val(latitude);
+            }
+            $('#node-config-input-latitude').val(0);
+            /* */
+                $('#node-config-input-latitude').val(0);
+                $('#node-config-input-longitude').val(0);
+            },
+
+            /**
+             * clip a test to a maximum length
+             * @param {string} v text to clip
+             * @param {number} l length to clip the text
+             */
+            clipValueLength(v, l) {
+                l = l || 15;
+                v = String(v);
+                if (v.length > l) {
+                    return v.slice(0, (l - 3)) + '...';
+                }
+                return v;
+            },
+
+            /**
+             * clip a test to a maximum length
+             * @param {string} v text to clip
+             * @param {number} l length to clip the text
+             */
+            clipValueLengthRight(v, l) {
+                l = l || 15;
+                v = String(v);
+                if (v.length > l) {
+                    return '...' + v.slice(-(l - 3));
+                }
+                return v;
+            },
+
+            /**
+             * get the label for a typed input vlaue
+             * @param {*} node - the node object for getting i18N Data (node._())
+             * @param {string} t - the type of the value
+             * @param {string} v - the value
+             * @param {number} [offset] - a optional offset to the value
+             * @param {number} [l] - the desired maximum length (default = 30)
+             * @returns {string} the value clipped to the given length
+             */
+            getValueLabel(node, t, v, offset, l) {
+                // console.log('getValueLabel global');
+                l = l || 30;
+                let suffix = '';
+                if (offset && offset > 0) {
+                    suffix = '↷';
+                } else if (offset && offset < 0) {
+                    suffix = '↶';
+                }
+
+                switch (t) {
+                    case 'levelFixed': {
+                        if (!v) {
+                            return '?%';
+                        }
+                        if (v.includes('open')) {
+                            return node._('blind-control.typeOptions.100') + suffix;
+                        }
+                        if (v.includes('closed')) {
+                            return node._('blind-control.typeOptions.0') + suffix;
+                        }
+                        return String(v) + suffix;
+                    }
+                    case 'jsonata':
+                        v = String(v) + suffix;
+                        if (v.length < l) { return v + suffix; }
+                        return node._('node-red-contrib-sun-position/position-config:common.label.jsonata') + suffix;
+                    case 'json':
+                        v = String(v) + suffix;
+                        if (v.length < l) { return  v + suffix; }
+                        return node._('node-red-contrib-sun-position/position-config:common.label.json') + suffix;
+                    case 'bin':
+                        return node._('node-red-contrib-sun-position/position-config:common.label.binary') + suffix;
+                    case 'date':
+                        return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + suffix;
+                    case 'dateSpecific':
+                        return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
+                    case 'string':
+                    case 'str':
+                    case 'dayOfMonth':
+                        if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
+                        return '"' + RED.nodes.getType('position-config').clipValueLength(v, l) + '"' + suffix;
+                    case 'num':
+                        if (v === '') { return '0' + suffix; }
+                        return String(v) + suffix;
+                    case 'bool':
+                        if (v === '') { return 'false' + suffix; }
+                        return String(v) + suffix;
+                    case 'msg':
+                    case 'env':
+                        return t + '.' + RED.nodes.getType('position-config').clipValueLength(v, l) + suffix;
+                    case 'flow':
+                    case 'global': {
+                        const result = RED.utils.parseContextKey(v);
+                        // special for Homematic Devices
+                        if (/^.+\[('|").{18,}('|")\].*$/.test(result.key)) {
+                            result.key = result.key.replace(/^.+\[('|")/, '').replace(/('|")\].*$/, '');
+                        }
+                        return t + '.' + RED.nodes.getType('position-config').clipValueLengthRight(result.key, l) + suffix;
+                    }
+                    case 'pdsCalcData':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.suncalc')}"${suffix}`;
+                    case 'pdsCalcPercent':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.suninsky')}"${suffix}`;
+                    case 'pdsCalcAzimuth':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth')}"${suffix}`;
+                    case 'pdsCalcAzimuthRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad')}"${suffix}`;
+                    case 'pdsCalcElevation':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
+                    case 'pdsCalcElevationRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
+                    case 'pdmCalcData':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"${suffix}`;
+                    case 'pdmPhase':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.moonPhase')}"${suffix}`;
+                    case 'pdsTime': {
+                        switch (v) {
+                            case 'astronomicalDawn':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn'), l) + suffix;
+                            case 'amateurDawn':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDawn'), l) + suffix;
+                            case 'nauticalDawn':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDawn'), l) + suffix;
+                            case 'blueHourDawnStart':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnStart'), l) + suffix;
+                            case 'civilDawn':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDawn'), l) + suffix;
+                            case 'blueHourDawnEnd':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDawnEnd'), l) + suffix;
+                            case 'goldenHourDawnStart':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart'), l) + suffix;
+                            case 'sunrise':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise'), l) + suffix;
+                            case 'sunriseEnd':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd'), l) + suffix;
+                            case 'goldenHourDawnEnd':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnEnd'), l) + suffix;
+                            case 'solarNoon':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.solarNoon'), l) + suffix;
+                            case 'goldenHourDuskStart':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskStart'), l) + suffix;
+                            case 'sunsetStart':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart'), l) + suffix;
+                            case 'sunset':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset'), l) + suffix;
+                            case 'goldenHourDuskEnd':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd'), l) + suffix;
+                            case 'blueHourDuskStart':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskStart'), l) + suffix;
+                            case 'civilDusk':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.civilDusk'), l) + suffix;
+                            case 'blueHourDuskEnd':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.blueHourDuskEnd'), l) + suffix;
+                            case 'nauticalDusk':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nauticalDusk'), l) + suffix;
+                            case 'amateurDusk':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.amateurDusk'), l) + suffix;
+                            case 'astronomicalDusk':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDusk'), l) + suffix;
+                            case 'nadir':
+                                return RED.nodes.getType('position-config').clipValueLength(node._('node-red-contrib-sun-position/position-config:common.typeOptions.nadir'), l) + suffix;
+                            default: {
+                                const res = v.replace('astronomical', 'astro-').replace('nautical', 'naut-').replace('amateur', 'amat-').replace('blueHour', 'blueHr-').replace('goldenHour', 'goldHr-');
+                                return RED.nodes.getType('position-config').clipValueLength(res, l) + suffix;
+                            }
+                        }
+                    }
+                    case 'pdmTime':
+                        switch (v) {
+                            case 'rise':
+                                return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise') + suffix;
+                            case 'set':
+                                return node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonSet', 'set') + suffix;
+                            default:
+                                return 'moon' + v + suffix;
+                        }
+                    case 'pdsTimeNow':
+                        return node._('node-red-contrib-sun-position/position-config:common.label.suntimeObj') + suffix;
+                    case 'PlT':
+                        return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: RED.nodes.getType('position-config').clipValueLength(v, l), suffix} );
+                    case 'msgPayload':
+                        return 'msg.payload';
+                    case 'msgTs':
+                        return 'msg.ts';
+                    case 'msgLc':
+                        return 'msg.lc';
+                    case 'msgValue':
+                        return 'msg.value';
+                    case 'input':
+                        return 'input data';
+                    case 'timespan':
+                        return 'timespan';
+                    case 'operand1':
+                        return 'operand1 data';
+                    case 'operand2':
+                        return 'operand2 data';
+                    default: {
+                        if (v === '') {
+                            return node._('node-red-contrib-sun-position/position-config:common.label.blank');
+                        }
+                        return RED.nodes.getType('position-config').clipValueLength(v, l) + suffix;
+                    }
+                }
+            }
+        });
+    })();</script>
+
 <script type="text/html" data-template-name="position-config">
     <div class="form-row">
         <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
@@ -164,224 +591,3 @@
         display: none
     }
 </style>
-
-<script type="text/javascript">
-    RED.nodes.registerType('position-config', {
-        category: 'config',
-        credentials: {
-            posLatitude: {
-                type: 'text',
-                value: '',
-                required: true,
-                validate(v){
-                    const n = Number(v);
-                    return RED.validators.number()(v) && ((n >= -90) && (n <= 90));
-                }
-            },
-            posLongitude: {
-                type: 'text',
-                value: '',
-                required: true,
-                validate(v){
-                    const n = Number(v);
-                    return RED.validators.number()(v) && ((n >= -180) && (n <= 180));
-                }
-            }
-        },
-        defaults: {
-            name: {
-                value: '',
-                required: false
-            },
-            isValide: {
-                value: false,
-                required: true,
-                validate(v){
-                    return (v === true) || (v === 'true');
-                }
-            },
-            longitude: {
-                value: '',
-                required: false
-            },
-            latitude: {
-                value: '',
-                required: false
-            },
-            angleType: {
-                value: 'deg',
-                required: true,
-                validate(v){
-                    return (v === 'rad' || v === 'deg');
-                }
-            },
-            timeZoneOffset: {
-                value: 99
-            },
-            timeZoneDST: {
-                value: 0
-            },
-            stateTimeFormat: {
-                value: 3 // 3 - date.toLocaleTimeString()
-            },
-            stateDateFormat: {
-                value: 12 // 12 - date.toLocaleDateString()
-            }
-        },
-        label() {
-            return this.name || 'timeControl';
-        },
-        oneditprepare() {
-            setTimeout(() => {
-                $('.is-to-show-initially').show();
-                $('.is-to-hide-initially').hide();
-            }, 300);
-            $('#node-config-map-row').hide();
-            const node = this;
-            let tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
-            if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
-                this.timeZoneOffset = 99;
-                $('#node-config-input-timeZoneOffset').val(99);
-                tsOffset = 99;
-            }
-
-            const tsDST = parseInt($('#node-config-input-timeZoneOffset').val());
-            if (isNaN(tsDST) || tsDST >= 99 || tsDST <= -99) {
-                this.timeZoneDST = 0;
-                $('#node-config-input-timeZoneDST').val(0);
-            }
-
-            $('#node-config-input-timeZoneOffset').on('change focus focusin focusout', () => {
-                const tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
-                if (tsOffset === 99 || isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
-                    $('#node-config-input-timeZoneOffset').val(99);
-                    $('#node-config-input-timeZoneDST').attr('disabled', true);
-                    $('.row-timeZoneDST').hide();
-                } else {
-                    $('.row-timeZoneDST').show();
-                    $('#node-config-input-timeZoneDST').attr('disabled', false);
-                }
-            });
-            $('#node-config-input-timeZoneOffset').change();
-
-            $('#node-config-input-isValide').val(false);
-            const $lat = $('#node-config-input-posLatitude');
-            const $lon = $('#node-config-input-posLongitude');
-
-            const latOldVal = parseFloat($('#node-config-input-latitude').val());
-            const lonOldVal = parseFloat($('#node-config-input-longitude').val());
-            let latVal = parseFloat($lat.val());
-            let lonVal = parseFloat($lon.val());
-
-            const coordChanged = (_type, _value) => {
-                const lat = $('#node-config-input-posLatitude').val();
-                const lon = $('#node-config-input-posLongitude').val();
-
-                const isValid = !isNaN(lat) && !isNaN(lon) && (lat !== '') && (lon !== '') && (lat !== 0) && (lon !== 0);
-                $('#node-config-input-isValide').val(isValid);
-
-                if (isValid) {
-                    $('#node-config-map-row').show();
-                    const clat = parseFloat(lat);
-                    const clon = parseFloat(lon);
-                    $('#node-config-map-content').attr('src', `https://www.openstreetmap.org/export/embed.html?bbox=${(clon-0.004).toFixed(14)}%2C${(clat-0.004).toFixed(14)}%2C${(clon+0.004).toFixed(14)}%2C${(clat+0.004).toFixed(14)}&amp;layer=mapnik&amp;marker=${lat}%2C${lon}`);
-                    // src="https://www.openstreetmap.org/export/embed.html?bbox=13.630465865135195%2C51.088954687366886%2C13.633700609207155%2C51.09019968648441&amp;layer=mapnik&amp;marker=51.089577967896076%2C13.632082700696628
-                    // src="https://www.openstreetmap.org/export/embed.html?bbox=13.61883000000000%2C51.08226000000000%2C13.62883000000000%2C51.09226000000000&amp;layer=mapnik&amp;marker=51.08726%2C13.62383"
-                    //      https://www.openstreetmap.org/export/embed.html?bbox=13.62281000000000%2C51.08621          %2C13.62481          %2C51.08821         &amp;layer=mapnik&amp;marker=51.08721%2C13.62381
-                    // src="https://www.openstreetmap.org/export/embed.html?bbox=51.07726%2C13.61383%2C51.087260.01%2C13.623830.01&amp;layer=mapnik
-                    $('#node-config-map-link').html(`<a href="https://www.openstreetmap.org/#map=17/${lat}/${lon}" target="_blank">Openstreetmap</a>`);
-                } else {
-                    $('#node-config-map-row').hide();
-                }
-            };
-            $lat.on('change focus focusin focusout', coordChanged);
-            $lon.on('change focus focusin focusout', coordChanged);
-
-            $lat.spinner({
-                step: 0.00001,
-                numberFormat: 'n'
-            });
-            $lon.spinner({
-                step: 0.00001,
-                numberFormat: 'n'
-            });
-
-            if ($lat.val() === '' || isNaN(latVal)) {
-                if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
-                    $lat.val(latOldVal);
-                } else {
-                    $lat.val('');
-                }
-                latVal = parseFloat($lat.val());
-            }
-
-            if ($lon.val() === '' || isNaN(lonVal)) {
-                if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
-                    $lon.val(lonOldVal);
-                } else {
-                    $lon.val('');
-                }
-                lonVal = parseFloat($lon.val());
-            }
-
-            if ((($lat.val() === '') || isNaN(latVal) || (latVal === 0)) &&
-                (($lon.val() === '') || isNaN(lonVal) || (lonVal === 0))) {
-                if ('geolocation' in navigator) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        $lat.val(Number(position.coords.latitude.toFixed(5)));
-                        $lon.val(Number(position.coords.longitude.toFixed(5)));
-                    });
-                }
-            }
-
-            $lat.change();
-            $lon.change();
-
-            const setup = function(_node) {
-                /* global initCombobox */
-                initCombobox(node, $('#node-config-input-stateDateFormatSel'), $('#node-config-input-stateDateFormat'), 'dateOutFormat', 'outputFormats', node.stateDateFormat || 12, 50, 'isoDate');
-                initCombobox(node, $('#node-config-input-stateTimeFormatSel'), $('#node-config-input-stateTimeFormat'), 'dateOutFormat', 'outputFormats', node.stateTimeFormat || 3, 50, 'isoTime');
-            }; // setup
-
-            $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
-                    try {
-                        setup(node);
-                    } catch (err) {
-                        console.log("failed to setup editor"); // eslint-disable-line
-                        console.log(err); // eslint-disable-line
-                        console.log(err.stack); // eslint-disable-line
-                    }
-                })
-                .fail((jqxhr, settings, exception) => {
-                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
-                    console.log(exception); // eslint-disable-line
-                    console.log(exception.stack); // eslint-disable-line
-                });
-        },
-        oneditsave() {
-            /*
-            this.latitude = '';
-            this.longitude = '';
-            let longitude= $('#node-config-input-longitude').val();
-            longitude = parseFloat(longitude.trim());
-            if (isNaN(longitude)) {
-                $('#node-config-input-posLongitude').val('');
-            } else  {
-                $('#node-config-input-posLongitude').val(longitude);
-            }
-            $('#node-config-input-longitude').val(0);
-
-            let latitude= $('#node-config-input-longitude').val();
-            latitude = parseFloat(latitude.trim());
-            if (isNaN(latitude)) {
-                $('#node-config-input-posLatitude').val('');
-            } else  {
-                $('#node-config-input-posLatitude').val(latitude);
-            }
-            $('#node-config-input-latitude').val(0);
-            /* */
-            $('#node-config-input-latitude').val(0);
-            $('#node-config-input-longitude').val(0);
-        }
-    });</script>

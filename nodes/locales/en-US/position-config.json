@@ -2,6 +2,7 @@
     "common": {
         "label": {
             "positionConfig": "configuration",
+            "infoText":"The configuration must be created and deployed for the settings page to work properly.",
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",
@@ -26,6 +27,10 @@
             "timemoon":"moon time",
             "suncalc":"sun calculation",
             "suninsky":"sun in the sky (percent)",
+            "sunAzimuth":"Azimuth of sun",
+            "sunElevation":"Elevation of sun",
+            "sunAzimuthRad":"Azimuth of sun (rad)",
+            "sunElevationRad":"Elevation of sun (rad)",
             "suntime":"sun time",
             "suntimes":"sun times",
             "mooncalc":"moon calculation",
@@ -34,7 +39,7 @@
             "levelfix":"Level",
             "levelfree": "Level entered",
             "levelND": "N/D - use default, sun control or reset",
-            "PlTRes":"msg.payload if topic contains \"__value__\""
+            "PlTRes":"msg.payload if topic contains"
         },
         "typeOptions": {
             "moonRise": "moon rise",
@@ -82,7 +87,8 @@
             "fullMoon": "Full Moon 🌝",
             "waningGibbousMoon": "Waning Gibbous 🌖",
             "lastQuarterMoon": "Last Quarter 🌗",
-            "waningCrescentMoon": "Waning Crescent 🌘"
+            "waningCrescentMoon": "Waning Crescent 🌘",
+            "PlTRes":"msg.payload if topic contains \"__topic__\""
         },
         "multiselectLbl": {
             "operatorTypes": "include into compare"
@@ -228,7 +234,7 @@
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
         ],
-        "month": [
+        "months": [
             "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ],

@@ -53,7 +53,6 @@ module.exports = function (RED) {
         }
         // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
         if (data.outType !== 'none') {
-            // const res = node.positionConfig.getOutDataProp(node, msg, valueType, value, format, offset, offsetType, multiplier, next, days);
             const res = node.positionConfig.getOutDataProp(node, msg, data);
             if (res === null || (typeof res === 'undefined')) {
                 throw new Error('could not evaluate ' + data.type + '.' + data.value);
@@ -89,7 +88,35 @@ module.exports = function (RED) {
         this.time = config.time;
         this.timeType = config.timeType || 'none';
         this.timeDays = config.timeDays;
+        this.timeOnlyOddDays = config.timeOnlyOddDays;
+        this.timeOnlyEvenDays = config.timeOnlyEvenDays;
+        this.timeMonths = config.timeMonths;
         this.timeAltDays = config.timeAltDays;
+        this.timeAltOnlyOddDays = config.timeAltOnlyOddDays;
+        this.timeAltOnlyEvenDays = config.timeAltOnlyEvenDays;
+        this.timeAltMonths = config.timeAltMonths;
+
+        if (this.timeDays === '') {
+            throw new Error('No valid days given! Please check settings!');
+        }
+        if (this.timeAltDays === '') {
+            throw new Error('No valid alternate days given! Please check settings!');
+        }
+        if (this.timeMonths === '') {
+            throw new Error('No valid month given! Please check settings!');
+        }
+        if (this.timeAltMonths === '') {
+            throw new Error('No valid alternate month given! Please check settings!');
+        }
+        if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
+            this.timeOnlyEvenDays = false;
+            this.timeOnlyOddDays = false;
+        }
+        if (this.timeAltOnlyEvenDays && this.timeAltOnlyOddDays) {
+            this.timeAltOnlyEvenDays = false;
+            this.timeAltOnlyOddDays = false;
+        }
+
         this.offset = config.offset || config.timeOffset || 0;
         this.offsetType = config.offsetType;
         if (!this.offsetType) { this.offsetType = ((this.offset === 0) ? 'none' : 'num'); }
@@ -118,6 +145,24 @@ module.exports = function (RED) {
         const node = this;
 
         /**
+         * Recalculate the timeout
+         */
+        function doTimeRecalc() {
+            try {
+                node.debug('needsRecalc');
+                doCreateTimeout(node);
+            } catch (err) {
+                node.error(err.message);
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                });
+            }
+        }
+
+        /**
          * creates the timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
@@ -136,7 +181,6 @@ module.exports = function (RED) {
             }
 
             if (node.timeType !== 'none' && node.positionConfig) {
-                // node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeType, node.time, node.offsetType, node.offset, node.offsetMultiplier, true, node.timeDays);
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeType,
                     value : node.time,
@@ -144,7 +188,10 @@ module.exports = function (RED) {
                     offset : node.offset,
                     multiplier : node.offsetMultiplier,
                     next : true,
-                    days : node.timeDays
+                    days : node.timeDays,
+                    months : node.timeMonths,
+                    onlyOddDays: node.timeOnlyOddDays,
+                    onlyEvenDays: node.timeOnlyEvenDays
                 });
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
@@ -164,8 +211,6 @@ module.exports = function (RED) {
             if (node.propertyType !== 'none' &&
                 node.timeAltType !== 'none' &&
                 node.positionConfig) {
-                // (_srcNode, msg, vType, value, offset, offsetType, multiplier, next, days)
-                // node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltType, node.timeAlt, node.timeAltOffsetType, node.timeAltOffset, node.timeAltOffsetMultiplier, true, node.timeAltDays);
                 node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeAltType,
                     value : node.timeAlt,
@@ -173,7 +218,10 @@ module.exports = function (RED) {
                     offset : node.timeAltOffset,
                     multiplier : node.timeAltOffsetMultiplier,
                     next : true,
-                    days : node.timeAltDays
+                    days : node.timeAltDays,
+                    months : node.timeAltMonths,
+                    onlyOddDays: node.timeAltOnlyOddDays,
+                    onlyEvenDays: node.timeAltOnlyEvenDays
                 });
 
                 if (node.nextTimeAltData.error) {
@@ -190,16 +238,18 @@ module.exports = function (RED) {
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
-
-            if ((node.nextTime !== null) && (errorStatus === '')) {
+            let fill = 'yellow';
+            let shape = 'dot';
+            if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
-                    return { state:'error', done: false, statusMsg: 'internal error!', errorMsg: 'Invalid time format'};
+                    return { state:'error', done: false, statusMsg: 'Invalid time format!', errorMsg: 'Invalid time format'};
                 }
 
                 let millisec = tsGetScheduleTime(node.nextTime, 10);
-                const isAlt = (node.nextTimeAlt);
+                const isAlt = node.nextTimeAlt;
                 if (isAlt) {
+                    shape = 'ring';
                     const millisecAlt = tsGetScheduleTime(node.nextTimeAlt, 10);
                     if (millisecAlt < millisec) {
                         millisec = millisecAlt;
@@ -207,64 +257,68 @@ module.exports = function (RED) {
                     }
                 }
 
-                // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
-                node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
-                    const msg = {
-                        type: 'start',
-                        timeData: {}
-                    };
-                    node.timeOutObj = null;
-                    let useAlternateTime = false;
-                    if (isAlt) {
-                        let needsRecalc = false;
-                        try {
-                            useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
-                                node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
-                            needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
-                        } catch (err) {
-                            needsRecalc = isAltFirst;
-                            hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
-                                type: node.propertyType,
-                                value: node.property
-                            }),  err);
-                        }
+                if (millisec > 345600000) {
+                    // > 4 Days
+                    if (node.intervalObj) {
+                        clearInterval(node.intervalObj);
+                        node.intervalObj = null;
+                    }
 
-                        if (needsRecalc) {
+                    node.timeOutObj = setTimeout(() => {
+                        doTimeRecalc();
+                    }, millisec - 129600000); // 1,5 days before
+                    fill = 'blue';
+                } else {
+                    // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
+                    node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
+                        const msg = {
+                            type: 'start',
+                            timeData: {}
+                        };
+                        node.timeOutObj = null;
+                        let useAlternateTime = false;
+                        if (isAlt) {
+                            let needsRecalc = false;
                             try {
-                                node.debug('needsRecalc');
-                                doCreateTimeout(node);
+                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
+                                    node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
+                                needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                             } catch (err) {
-                                node.error(err.message);
-                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                                node.status({
-                                    fill: 'red',
-                                    shape: 'ring',
-                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                                });
+                                needsRecalc = isAltFirst;
+                                hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
+                                    type: node.propertyType,
+                                    value: node.property
+                                }),  err);
                             }
-                            return { state:'recalc', done: true };
+
+                            if (needsRecalc) {
+                                doTimeRecalc();
+                                return { state:'recalc', done: true };
+                            }
                         }
-                    }
 
-                    if (useAlternateTime && node.nextTimeAltData) {
-                        msg.timeData = node.nextTimeAltData;
-                    } else if (node.nextTimeData) {
-                        msg.timeData = node.nextTimeData;
+                        if (useAlternateTime && node.nextTimeAltData) {
+                            msg.timeData = node.nextTimeAltData;
+                        } else if (node.nextTimeData) {
+                            msg.timeData = node.nextTimeData;
+                        }
+                        node.emit('input', msg);
+                        return { state: 'emit', done: true };
+                    }, millisec, isAlt, isAltFirst);
+                    fill = 'green';
+
+                    if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
+                        node.intervalObj = setInterval(() => {
+                            node.debug('retriggered');
+                            doCreateTimeout(node);
+                        }, node.recalcTime);
+                    } else if (isFixedTime && node.intervalObj) {
+                        clearInterval(node.intervalObj);
+                        node.intervalObj = null;
                     }
-                    node.emit('input', msg);
-                    return { state: 'emit', done: true };
-                }, millisec, isAlt, isAltFirst);
+                }
             }
 
-            if (!isFixedTime && !node.intervalObj && (_onInit !== true)) {
-                node.intervalObj = setInterval(() => {
-                    node.debug('retriggered');
-                    doCreateTimeout(node);
-                }, node.recalcTime);
-            } else if (isFixedTime && node.intervalObj) {
-                clearInterval(node.intervalObj);
-                node.intervalObj = null;
-            }
             if ((errorStatus !== '')) {
                 node.status({
                     fill: 'red',
@@ -276,21 +330,21 @@ module.exports = function (RED) {
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({
-                        fill: 'green',
-                        shape: 'ring',
+                        fill,
+                        shape,
                         text: node.positionConfig.toDateTimeString(node.nextTimeAlt) + ' / ' + node.positionConfig.toTimeString(node.nextTime)
                     });
                 } else {
                     node.status({
-                        fill: 'green',
-                        shape: 'dot',
+                        fill,
+                        shape,
                         text: node.positionConfig.toDateTimeString(node.nextTime) + ' / ' + node.positionConfig.toTimeString(node.nextTimeAlt)
                     });
                 }
             } else if (node.nextTime && node.timeOutObj) {
                 node.status({
-                    fill: 'green',
-                    shape: 'dot',
+                    fill,
+                    shape,
                     text: node.positionConfig.toDateTimeString(node.nextTime)
                 });
             } else {
@@ -325,7 +379,6 @@ module.exports = function (RED) {
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                // const value = node.positionConfig.getOutDataProp(node, msg, config.payloadType, config.payload,  config.payloadTimeFormat, node.payloadOffset, config.payloadOffsetType, config.payloadOffsetMultiplier, true);
                 const value = node.positionConfig.getOutDataProp(node, msg, {
                     type: config.payloadType,
                     value: config.payload,
@@ -413,30 +466,42 @@ module.exports = function (RED) {
                 return;
             }
 
-            const createTO = doCreateTimeout(node, true);
-            if (createTO.done !== true) {
-                if (createTO.errorMsg) {
-                    node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
-                }
-                setTimeout(() => {
-                    try {
-                        doCreateTimeout(node);
-                    } catch (err) {
-                        node.error(err.message);
-                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            setTimeout(() => {
+                try {
+                    const createTO = doCreateTimeout(node, true);
+                    if (createTO.done !== true) {
+                        if (createTO.errorMsg) {
+                            node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
+                        }
+                        setTimeout(() => {
+                            try {
+                                doCreateTimeout(node);
+                            } catch (err) {
+                                node.error(err.message);
+                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                                node.status({
+                                    fill: 'red',
+                                    shape: 'ring',
+                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                                });
+                            }
+                        }, 360000); // 6 Minuten
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
                         });
                     }
-                }, 360000); // 6 Minuten
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
-                });
-            }
+                } catch (err) {
+                    node.error(err.message);
+                    node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    node.status({
+                        fill: 'red',
+                        shape: 'ring',
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                    });
+                }
+            }, 200 + Math.floor(Math.random() * 600));
         } catch (err) {
             node.error(err.message);
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -465,7 +530,7 @@ module.exports = function (RED) {
 
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
         const node = RED.nodes.getNode(req.params.id);
-        if (node !== null) {
+        if (node !== null && typeof node !== 'undefined') {
             try {
                 node.receive();
                 res.sendStatus(200);

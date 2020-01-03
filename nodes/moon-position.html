@@ -1,337 +1,308 @@
 <!DOCTYPE HTML>
-<script type="text/html" data-template-name="moon-position">
-  <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-      <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-      <input type="text" id="node-input-positionConfig">
-      <input type="hidden" id="node-input-outputs"/>
-  </div>
-  <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
-      <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-      <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
-  </div>
-  <hr>
-  <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
-        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="moon-position.label.azimuthpos"></span></label>
-      <ol id="node-input-rule-container"></ol>
-  </div>
-  <hr>
-  <div class="form-row" data-i18n="[title]node-red:common.label.name">
-      <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-      <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-  </div>
-  <div class="form-tips">
-      <span data-i18n="moon-position.tips.moonPosControl"></span>&nbsp;
-  </div>
-</script>
-<style>
-        hr {
-            width: 100%
-        }
-        .block-indent1 {
-            float: left;
-            min-height: 1px;
-            margin-left: 10px;
-            width: 100%
-        }
-        .block-indent2 {
-            float: left;
-            min-height: 1px;
-            margin-left: 20px;
-            width: 100%
-        }
-        .block-noindent .row-full-width {
-            width : calc(100% - 110px);
-        }
-        .block-indent1 .row-full-width {
-            width : calc(100% - 120px);
-        }
-        .block-indent2 .row-full-width {
-            width : calc(100% - 130px);
-        }
-        .block-noindent .ui-spinner {
-            width : calc(100% - 245px);
-        }
-        .block-indent1 .ui-spinner {
-            width : calc(100% - 255px);
-        }
-        .block-indent2 .ui-spinner {
-            width : calc(100% - 265px);
-        }
-        .node-input-multiplier {
-            width: 125px;
-            max-width: 125px;
-            margin-left: 5px;
-        }
-    </style>
 
 <!-- Finally, the node type is registered along with all of its properties   -->
 <!-- The example below shows a small subset of the properties that can be set-->
 <script type="text/javascript">
-    /**
-     * clip a value to a defined length
-     * @param {string} v - the value
-     * @param {number} [l] - the desired length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function clipValueLength(v, l) {
-        l = l || 18;
-        return (v.length > l) ? v.slice(0, (l - 3)) + '...' : v;
-    }
-
-    /**
-     * get the label for a typed input vlaue
-     * @param {string} t - the type of the value
-     * @param {string} v - the value
-     * @param {number} [l] - the desired maximum length (default = 18)
-     * @returns {string} the value clipped to the given length
-     */
-    function getValueLabel(t, v, l) {
-        if (t === 'str') {
-            return '"' + clipValueLength(v, l) + '"';
-        }
-
-        if (t === 'msg') {
-            return t + '.' + clipValueLength(v, l);
-        }
-
-        if (t === 'flow' || t === 'global') {
-            const result = RED.utils.parseContextKey(v);
-            return t + '.' + clipValueLength(result.key, l);
-        }
-
-        return clipValueLength(v, l);
-    }
-
-    RED.nodes.registerType('moon-position', {
-        category: 'time and astro',
-        color: '#F3B567',
-        icon: 'moon-white.png', // saved in  icons/myicon.png - myicon.png
-        inputs: 1, // set the number of inputs - only 0 or 1
-        outputs: 1,
-        defaults: {
-            name: {
-                value: '',
-                required: false
+    (function() {
+        RED.nodes.registerType('moon-position', {
+            category: 'time and astro',
+            color: '#F3B567',
+            icon: 'moon-white.png', // saved in  icons/myicon.png - myicon.png
+            inputs: 1, // set the number of inputs - only 0 or 1
+            outputs: 1,
+            defaults: {
+                name: {
+                    value: '',
+                    required: false
+                },
+                positionConfig: {
+                    value: '',
+                    type: 'position-config',
+                    required: true
+                },
+                rules: {
+                    value: []
+                },
+                onlyOnChange: {
+                    value: 'true',
+                    required: true
+                },
+                topic: {
+                    value: ''
+                },
+                outputs: {
+                    value: 1
+                }
             },
-            positionConfig: {
-                value: '',
-                type: 'position-config',
-                required: true
-            },
-            rules: {
-                value: []
-            },
-            onlyOnChange: {
-                value: 'true',
-                required: true
-            },
-            topic: {
-                value: ''
-            },
-            outputs: {
-                value: 1
-            }
-        },
-        outputLabels(index) {
-            if (index === 0) {
-                return ((this.topic) ? this.topic + ':' : '') + 'moon-position';
-            }
-
-            const rule = this.rules[index - 1];
-            if (rule) {
-                return getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + getValueLabel(rule.valueHighType, rule.valueHigh);
-            }
-            return undefined;
-        },
-        label() {
-            if (this.name) {
-                return this.name;
-            }
-            const result = 'moon-position';
-            if (this.topic && (this.topic.length + result.length <= 32)) {
-                return this.topic + ':' + result;
-            }
-            return result;
-        },
-        labelStyle() {
-            return this.name ? 'node_label_italic' : '';
-        },
-        paletteLabel: 'moon-position',
-        oneditprepare() {
-            const node = this;
-            const setup = function(node) {
-                /* global getTypes */
-                const types = getTypes(node);
-                // #region initialize
-
-                const outputCount = $('#node-input-outputs').val('{}');
-
-                const btwnLabel = node._('moon-position.label.between');
-                const andLabel = node._('moon-position.label.and');
-                /**
-                 * resizes a rule
-                 * @param {jQuery} rule - the jQuery selector of the rule
-                 */
-                function resizeRule(rule) {
-                    const newWidth = rule.width();
-                    const btwnField1 = rule.find('.node-input-rule-btwn-value');
-                    const btwnField2 = rule.find('.node-input-rule-btwn-value2');
-                    const editwidth = (newWidth / 2);
-                    btwnField1.typedInput('width', (editwidth - 70));
-                    btwnField2.typedInput('width', (editwidth - 70));
+            outputLabels(index) {
+                if (index === 0) {
+                    return ((this.topic) ? this.topic + ':' : '') + 'moon-position';
                 }
 
-                $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
-                    addItem(container, i, opt) {
-                        container.css({
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap'
-                        });
-                        if (!Object.prototype.hasOwnProperty.call(opt, 'r')) {
-                            opt.r = {};
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(opt, 'i')) {
-                            opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
-                        }
-
-                        const rule = opt.r;
-                        const row = $('<div/>').appendTo(container);
-
-                        $('<span/>', {
-                            class: 'node-input-rule-btwn-label'
-                        }).text(' ' + btwnLabel + ' ').appendTo(row);
-
-                        $('<input/>', {
-                            class: 'node-input-rule-btwn-value',
-                            type: 'text',
-                            style: 'margin-left: 5px;',
-                            value: rule.valueLow
-                        }).appendTo(row).typedInput({
-                            default: rule.valueLowType || 'num',
-                            types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
-                        });
-
-                        $('<span/>', {
-                            class: 'node-input-rule-btwn-label'
-                        }).text(' ' + andLabel + ' ').appendTo(row);
-                        $('<input/>', {
-                            class: 'node-input-rule-btwn-value2',
-                            type: 'text',
-                            style: 'margin-left:2px;',
-                            value: rule.valueHigh
-                        }).appendTo(row).typedInput({
-                            default: rule.valueHighType || 'num',
-                            types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
-                        });
-
-                        const finalspan = $('<span/>', {
-                            style: 'float: right;margin-top: 6px;'
-                        }).appendTo(row);
-                        finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
-
-                        resizeRule(container);
-                        // {"0":0,"1":-1,"2":-1,"3":-1}
-                        // {"0":0}
-                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                        currentOutputs[Object.prototype.hasOwnProperty.call(opt, 'i') ? opt.i : opt._i] = i;
-                        currentOutputs.m = i + 1;
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    removeItem(opt) {
-                        const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
-                        if (Object.prototype.hasOwnProperty.call(opt, 'i')) {
-                            currentOutputs[opt.i] = -1;
-                        } else {
-                            delete currentOutputs[opt._i];
-                        }
-
-                        const rules = $('#node-input-rule-container').editableList('items');
-                        rules.each(function (i) {
-                            $(this).find('.node-input-rule-index').html(i + 2);
-                            const data = $(this).data('data');
-                            currentOutputs[Object.prototype.hasOwnProperty.call(data, 'i') ? data.i : data._i] = i;
-                        });
-                        currentOutputs.m = rules.length;
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    resizeItem: resizeRule,
-                    sortItems(rules) {
-                        const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                        rules = $('#node-input-rule-container').editableList('items');
-                        rules.each(function (i) {
-                            $(this).find('.node-input-rule-index').html(i + 2);
-                            const data = $(this).data('data');
-                            currentOutputs[Object.prototype.hasOwnProperty.call(data, 'i') ? data.i : data._i] = i;
-                        });
-                        currentOutputs.m = rules.length;
-                        outputCount.val(JSON.stringify(currentOutputs));
-                    },
-                    sortable: true,
-                    removable: true
-                });
-
-                for (let i = 0; i < node.rules.length; i++) {
-                    const rule = node.rules[i];
-                    $('#node-input-rule-container').editableList('addItem', {
-                        r: rule,
-                        i,
-                        l: node.rules.length
-                    });
+                const rule = this.rules[index - 1];
+                if (rule) {
+                    return RED.nodes.getType('position-config').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('position-config').getValueLabel(rule.valueHighType, rule.valueHigh);
                 }
-            }; // setup
-            $.getScript('sun-position/js/htmlglobal.js')
-                .done((_data, _textStatus, _jqxhr) => {
-                    try {
-                        setup(node);
-                    } catch (err) {
-                        console.log("failed to setup editor"); // eslint-disable-line
-                        console.log(err); // eslint-disable-line
-                        console.log(err.stack); // eslint-disable-line
+                return undefined;
+            },
+            label() {
+                if (this.name) {
+                    return this.name;
+                }
+                const result = 'moon-position';
+                if (this.topic && (this.topic.length + result.length <= 32)) {
+                    return this.topic + ':' + result;
+                }
+                return result;
+            },
+            labelStyle() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            paletteLabel: 'moon-position',
+            oneditprepare() {
+                const node = this;
+                const setup = function(node) {
+                    /* global getTypes */
+                    const types = getTypes(node);
+                    // #region initialize
+
+                    const outputCount = $('#node-input-outputs').val('{}');
+
+                    const btwnLabel = node._('moon-position.label.between');
+                    const andLabel = node._('moon-position.label.and');
+                    /**
+                     * resizes a rule
+                     * @param {jQuery} rule - the jQuery selector of the rule
+                     */
+                    function resizeRule(rule) {
+                        const newWidth = rule.width();
+                        const btwnField1 = rule.find('.node-input-rule-btwn-value');
+                        const btwnField2 = rule.find('.node-input-rule-btwn-value2');
+                        const editwidth = (newWidth / 2);
+                        btwnField1.typedInput('width', (editwidth - 70));
+                        btwnField2.typedInput('width', (editwidth - 70));
                     }
-                })
-                .fail((jqxhr, settings, exception) => {
-                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
-                    console.log(exception); // eslint-disable-line
-                    console.log(exception.stack); // eslint-disable-line
+
+                    $('#node-input-rule-container').css('min-height', '100px').css('min-width', '200px').editableList({
+                        addItem(container, i, opt) {
+                            container.css({
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap'
+                            });
+                            if (!Object.prototype.hasOwnProperty.call(opt, 'r')) {
+                                opt.r = {};
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(opt, 'i')) {
+                                opt._i = Math.floor((0x99999 - 0x10000) * Math.random()).toString();
+                            }
+
+                            const rule = opt.r;
+                            const row = $('<div/>').appendTo(container);
+
+                            $('<span/>', {
+                                class: 'node-input-rule-btwn-label'
+                            }).text(' ' + btwnLabel + ' ').appendTo(row);
+
+                            $('<input/>', {
+                                class: 'node-input-rule-btwn-value',
+                                type: 'text',
+                                style: 'margin-left: 5px;',
+                                value: rule.valueLow
+                            }).appendTo(row).typedInput({
+                                default: rule.valueLowType || 'num',
+                                types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
+                            });
+
+                            $('<span/>', {
+                                class: 'node-input-rule-btwn-label'
+                            }).text(' ' + andLabel + ' ').appendTo(row);
+                            $('<input/>', {
+                                class: 'node-input-rule-btwn-value2',
+                                type: 'text',
+                                style: 'margin-left:2px;',
+                                value: rule.valueHigh
+                            }).appendTo(row).typedInput({
+                                default: rule.valueHighType || 'num',
+                                types: [types.Undefined, 'msg', 'flow', 'global', 'num', 'env']
+                            });
+
+                            const finalspan = $('<span/>', {
+                                style: 'float: right;margin-top: 6px;'
+                            }).appendTo(row);
+                            finalspan.append(' &#8594; <span class="node-input-rule-index">' + (i + 2) + '</span> ');
+
+                            resizeRule(container);
+                            // {"0":0,"1":-1,"2":-1,"3":-1}
+                            // {"0":0}
+                            const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                            currentOutputs[Object.prototype.hasOwnProperty.call(opt, 'i') ? opt.i : opt._i] = i;
+                            currentOutputs.m = i + 1;
+                            outputCount.val(JSON.stringify(currentOutputs));
+                        },
+                        removeItem(opt) {
+                            const currentOutputs = JSON.parse(outputCount.val() || '{"-1":-1}');
+                            if (Object.prototype.hasOwnProperty.call(opt, 'i')) {
+                                currentOutputs[opt.i] = -1;
+                            } else {
+                                delete currentOutputs[opt._i];
+                            }
+
+                            const rules = $('#node-input-rule-container').editableList('items');
+                            rules.each(function (i) {
+                                $(this).find('.node-input-rule-index').html(i + 2);
+                                const data = $(this).data('data');
+                                currentOutputs[Object.prototype.hasOwnProperty.call(data, 'i') ? data.i : data._i] = i;
+                            });
+                            currentOutputs.m = rules.length;
+                            outputCount.val(JSON.stringify(currentOutputs));
+                        },
+                        resizeItem: resizeRule,
+                        sortItems(rules) {
+                            const currentOutputs = JSON.parse(outputCount.val() || '{}');
+                            rules = $('#node-input-rule-container').editableList('items');
+                            rules.each(function (i) {
+                                $(this).find('.node-input-rule-index').html(i + 2);
+                                const data = $(this).data('data');
+                                currentOutputs[Object.prototype.hasOwnProperty.call(data, 'i') ? data.i : data._i] = i;
+                            });
+                            currentOutputs.m = rules.length;
+                            outputCount.val(JSON.stringify(currentOutputs));
+                        },
+                        sortable: true,
+                        removable: true
+                    });
+
+                    for (let i = 0; i < node.rules.length; i++) {
+                        const rule = node.rules[i];
+                        $('#node-input-rule-container').editableList('addItem', {
+                            r: rule,
+                            i,
+                            l: node.rules.length
+                        });
+                    }
+                }; // setup
+                $.getScript('sun-position/js/htmlglobal.js')
+                    .done((_data, _textStatus, _jqxhr) => {
+                        try {
+                            setup(node);
+                        } catch (err) {
+                            console.log("failed to setup editor"); // eslint-disable-line
+                            console.log(err); // eslint-disable-line
+                            console.log(err.stack); // eslint-disable-line
+                        }
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                        console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                        console.log(exception); // eslint-disable-line
+                        console.log(exception.stack); // eslint-disable-line
+                    });
+            },
+            oneditsave() {
+                const rules = $('#node-input-rule-container').editableList('items');
+                const node = this;
+
+                node.rules = [];
+                rules.each(function ( _i ) {
+                    const rule = $(this);
+                    const r = {};
+                    r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
+                    r.valueLowType = rule.find('.node-input-rule-btwn-value').typedInput('type');
+                    r.valueHigh = rule.find('.node-input-rule-btwn-value2').typedInput('value');
+                    r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
+                    node.rules.push(r);
                 });
-        },
-        oneditsave() {
-            const rules = $('#node-input-rule-container').editableList('items');
-            const node = this;
+                node.propertyType = $('#node-input-property').typedInput('type');
 
-            node.rules = [];
-            rules.each(function ( _i ) {
-                const rule = $(this);
-                const r = {};
-                r.valueLow = rule.find('.node-input-rule-btwn-value').typedInput('value');
-                r.valueLowType = rule.find('.node-input-rule-btwn-value').typedInput('type');
-                r.valueHigh = rule.find('.node-input-rule-btwn-value2').typedInput('value');
-                r.valueHighType = rule.find('.node-input-rule-btwn-value2').typedInput('type');
-                node.rules.push(r);
-            });
-            node.propertyType = $('#node-input-property').typedInput('type');
+                const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
+                currentOutputs.m = rules.length;
+                $('#node-input-outputs').val(JSON.stringify(currentOutputs));
+            },
+            oneditresize(size) {
+                try {
+                    const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
+                    let height = size.height;
+                    for (let i = 0; i < rows.size(); i++) {
+                        height -= $(rows[i]).outerHeight(true);
+                    }
 
-            const currentOutputs = JSON.parse($('#node-input-outputs').val() || '{"m":0}');
-            currentOutputs.m = rules.length;
-            $('#node-input-outputs').val(JSON.stringify(currentOutputs));
-        },
-        oneditresize(size) {
-            try {
-                const rows = $('#dialog-form>div:not(.node-input-rule-container-row)');
-                let height = size.height;
-                for (let i = 0; i < rows.size(); i++) {
-                    height -= $(rows[i]).outerHeight(true);
+                    const editorRow = $('#dialog-form>div.node-input-rule-container-row');
+                    height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
+                    height -= 50;
+                    if (typeof $().editableList !== 'undefined') {
+                        $('#node-input-rule-container').editableList('height', height);
+                    }
+                } catch (err) {
+                    console.debug(err); // eslint-disable-line no-console
                 }
-
-                const editorRow = $('#dialog-form>div.node-input-rule-container-row');
-                height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')));
-                height -= 50;
-                if (typeof $().editableList !== 'undefined') {
-                    $('#node-input-rule-container').editableList('height', height);
-                }
-            } catch (err) {
-                console.debug(err); // eslint-disable-line no-console
             }
-        }
-    });</script>
+        });
+    })();</script>
+
+<script type="text/html" data-template-name="moon-position">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
+    <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+        <input type="hidden" id="node-input-outputs"/>
+    </div>
+    <div class="form-row time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]node-red:common.label.topic">
+    </div>
+    <hr>
+    <div class="form-row node-input-rule-container-row" data-i18n="[title]sun-position.placeholder.azimuthpos">
+          <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="moon-position.label.azimuthpos"></span></label>
+        <ol id="node-input-rule-container"></ol>
+    </div>
+    <hr>
+    <div class="form-row" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-tips">
+        <span data-i18n="moon-position.tips.moonPosControl"></span>&nbsp;
+    </div>
+  </script>
+  <style>
+          hr {
+              width: 100%
+          }
+          .block-indent1 {
+              float: left;
+              min-height: 1px;
+              margin-left: 10px;
+              width: 100%
+          }
+          .block-indent2 {
+              float: left;
+              min-height: 1px;
+              margin-left: 20px;
+              width: 100%
+          }
+          .block-noindent .row-full-width {
+              width : calc(100% - 110px);
+          }
+          .block-indent1 .row-full-width {
+              width : calc(100% - 120px);
+          }
+          .block-indent2 .row-full-width {
+              width : calc(100% - 130px);
+          }
+          .block-noindent .ui-spinner {
+              width : calc(100% - 245px);
+          }
+          .block-indent1 .ui-spinner {
+              width : calc(100% - 255px);
+          }
+          .block-indent2 .ui-spinner {
+              width : calc(100% - 265px);
+          }
+          .node-input-multiplier {
+              width: 125px;
+              max-width: 125px;
+              margin-left: 5px;
+          }
+      </style>

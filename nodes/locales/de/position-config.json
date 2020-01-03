@@ -226,7 +226,7 @@
             "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend",
             "So", "Mo", "Die", "Mi", "Do", "Fr", "Sa"
         ],
-        "month": [
+        "months": [
             "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember",
             "Jan", "Feb", "März", "Apr", "Mai", "Jun", "Jul", "Aug", "Sept", "Okt", "Nov", "Dez"
         ],

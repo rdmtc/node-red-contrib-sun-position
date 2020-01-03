@@ -19,14 +19,17 @@ module.exports = function (RED) {
         // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         const node = this;
 
-        this.on('input', (msg, send, done) => { // eslint-disable-line complexity
+        this.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
 
             if (node.positionConfig === null ||
+                typeof node.positionConfig === 'undefined' ||
                 config.operator === null ||
-                config.inputType === null) {
+                typeof config.operator === 'undefined' ||
+                config.inputType === null ||
+                typeof config.inputType === 'undefined') {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -54,7 +57,6 @@ module.exports = function (RED) {
                     if (config.result1ValueType === 'input') {
                         resultObj = hlp.getFormattedDateOut(inputData.value, config.result1Format);
                     } else {
-                        // resultObj = node.positionConfig.getOutDataProp(node, msg, config.result1ValueType, config.result1Value, config.result1Format, config.result1Offset, config.result1OffsetType, config.result1Multiplier, true);
                         resultObj = node.positionConfig.getOutDataProp(node, msg, {
                             type: config.result1ValueType,
                             value: config.result1Value,
@@ -66,7 +68,7 @@ module.exports = function (RED) {
                         });
                     }
 
-                    if (resultObj === null) {
+                    if (resultObj === null || typeof resultObj === 'undefined') {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {
                         node.error('error on getting result: ' + resultObj.error);

@@ -184,7 +184,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: 'internal error'
+                    text: 'internal error: ' + err.message
                 });
                 done('internal error sun-position:' + err.message, msg);
             }

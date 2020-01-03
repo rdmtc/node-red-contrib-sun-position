@@ -18,17 +18,24 @@ module.exports = {
     chkValueFilled,
     checkLimits,
     getMsgBoolValue,
+    getMsgBoolValue2,
     getMsgNumberValue,
+    getMsgNumberValue2,
     getSpecialDayOfMonth,
     getStdTimezoneOffset,
     isDSTObserved,
     addOffset,
     calcDayOffset,
+    calcMonthOffset,
     convertDateTimeZone,
     isValidDate,
     normalizeDate,
     getTimeOfText,
     getDateOfText,
+    getDayOfYear,
+    getWeekOfYear,
+    getUTCDayId,
+    getDayId,
     getTimeNumberUTC,
     getNodeId,
     initializeParser,
@@ -191,10 +198,11 @@ function chkValueFilled(val, defaultVal) {
 /**
  * clip a test to a maximum length
  * @param {string} v text to clip
- * @param {number} l length to clip the text
+ * @param {number} [l] length to clip the text
  */
 function clipStrLength(v, l) {
     l = l || 15;
+    v = String(v);
     if (v.length > l) {
         return v.slice(0, (l - 3)) + '...';
     }
@@ -252,7 +260,7 @@ function _getLastDayOfMonth(year, month, dayOfWeek) {
  * @param {number} year year to check
  * @param {number} month month to check
  * @param {number} dayName  Name of the special day
- * @returns {Date} last day of given month or null
+ * @returns {Date|null} last day of given month or null
  */
 function getSpecialDayOfMonth(year, month, dayName) {
     switch (dayName) {
@@ -333,6 +341,22 @@ function getDayOfYear(date) {
     const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
     const oneDay = 1000 * 60 * 60 * 24;
     return [date.getUTCFullYear(),  Math.floor(diff / oneDay)];
+}
+
+/**
+ * gets a day id from a date
+ * @param {Date} d date to get day id from
+ */
+function getUTCDayId(d) {
+    return d.getUTCDay() + (d.getUTCMonth() * 31) + (d.getUTCFullYear() * 372);
+}
+
+/**
+ * gets a day id from a date
+ * @param {Date} d date to get day id from
+ */
+function getDayId(d) {
+    return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -432,6 +456,36 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
  * @param {*} msg message
  * @param {*} name property name
  */
+function getMsgNumberValue2(msg, ids, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== '')) {
+                const res = Number(msg[id]);
+                if (!isNaN(res)) {
+                    if (typeof isFound === 'function') {
+                        return isFound(res);
+                    }
+                    return res;
+                }
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return NaN;
+    }
+    return notFound;
+}
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
 function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     if (ids && msg) {
         if (!Array.isArray(ids)) {
@@ -474,6 +528,33 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     return notFound;
 }
 
+/**
+ * check the type of the message
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgBoolValue2(msg, ids, isFound, notFound) {
+    if (ids && msg) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if ((typeof msg[id] !== 'undefined') && (msg[id] !== null) && (msg[id] !== '')) {
+                if (typeof isFound === 'function') {
+                    return isFound(isTrue(msg[id]), msg[id], msg.topic);
+                }
+                return isTrue(msg[id]);
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return false;
+    }
+    return notFound;
+}
 /*******************************************************************************************************/
 /**
  * get the standard timezone offset without DST
@@ -526,7 +607,7 @@ function isValidDate(d) {
  * @param {Date} d Date object where the offset should be added
  * @param {number} offset the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
  * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
- * @return {Date}  Date with added offset
+ * @return {Date|undefined|null}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
     if (d === null || typeof d === 'undefined') { return d; }
@@ -556,16 +637,11 @@ function addOffset(d, offset, multiplier) {
  */
 function calcDayOffset(days, daystart) {
     let dayx = 0;
-    let daypos = daystart;
-    // while (days.indexOf( ) === -1) {
-    while (!days.includes(daypos)) {
-        dayx += 1;
+    while (!days.includes(daystart + dayx)) {
+        dayx++;
         if ((daystart + dayx) > 6) {
             daystart = (dayx * -1);
         }
-
-        daypos = daystart + dayx;
-
         if (dayx > 7) {
             dayx = -1;
             break;
@@ -574,20 +650,49 @@ function calcDayOffset(days, daystart) {
     return dayx;
 }
 
+/**
+ * calculates the number of month to get a positive date object
+ * @param {Array.<number>} months array of allowed months
+ * @param {number} monthstart start month (0=January)
+ * @return {number} number of months for the next valid day as offset to the monthstart
+ */
+function calcMonthOffset(months, monthstart) {
+    let monthx = 0;
+    while (!months.includes(monthstart + monthx)) {
+        monthx++;
+        if ((monthstart + monthx) > 11) {
+            monthstart = (monthx * -1);
+        }
+        if (monthx > 12) {
+            monthx = -1;
+            break;
+        }
+    }
+    return monthx;
+}
+
 /*******************************************************************************************************/
+/**
+ * @typedef {Object} limitationsObj
+ * @property {number} [next] if greater than 0 the number of days in the future
+ * @property {string} [days] days for which should be calculated the sun time
+ * @property {string} [months] months for which should be calculated the sun time
+ * @property {boolean} [onlyOddDays] - if true only odd days will be used
+ * @property {boolean} [onlyEvenDays] - if true only even days will be used
+ */
+
 /**
  * normalize date by adding offset, get only the next valid date, etc...
  * @param {Date} d input Date to normalize
  * @param {number} offset offset to add tot he Date object
  * @param {number} multiplier multiplier for the offset
- * @param {number} next If date is less then today this number of days will be added to the date
- * @param {Array.<number>} days array of allowed days
+ * @param {limitationsObj} [limit] additional limitations for the calculation
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
-function normalizeDate(d, offset, multiplier, next, days) {
-    // console.debug('normalizeDate d=' + d + ' offset=' + offset + ' next=' + next + ' days=' + days); // eslint-disable-line
+function normalizeDate(d, offset, multiplier, limit) {
+    // console.debug('normalizeDate d=' + d + ' offset=' + offset); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
-    if (next) {
+    if (limit.next) {
         const now = new Date();
         d.setMilliseconds(0);
         now.setMilliseconds(600); // security
@@ -597,10 +702,33 @@ function normalizeDate(d, offset, multiplier, next, days) {
         }
     }
 
-    if (days && (days !== '*') && (days !== '')) {
-        const dayx = calcDayOffset(days, d.getDay());
+    if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
+        const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
+        }
+    }
+    if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
+        const monthx = calcMonthOffset(limit.months, d.getMonth());
+        if (monthx > 0) {
+            d.setMonth(d.getMonth() + monthx);
+        }
+    }
+    if (limit.onlyEvenDays) {
+        let time = d.getDate();
+        while ((time % 2 !== 0)) {
+            // odd
+            d = d.setDate(d.getDate() + 1);
+            time = d.getDate();
+        }
+    }
+
+    if (limit.onlyOddDays) {
+        let time = d.getDate();
+        while((time % 2 === 0)) {
+            // even
+            d = d.setDate(d.getDate() + 1);
+            time = d.getDate();
         }
     }
     return d;
@@ -612,7 +740,7 @@ function normalizeDate(d, offset, multiplier, next, days) {
  * @param {string} t text representation of a time
  * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
  * @param {boolean} [utc] define if the time should be in utc
- * @return {Date} the parsed date object or **null** if can not parsed
+ * @return {Date|null} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date, utc, timeZoneOffset) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
@@ -663,7 +791,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @return {Date} the parsed date object, throws an error if can not parsed
  * @param {boolean} [utc] define if the time should be in utc
  */
-function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-disable-line complexity
+function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     // console.log('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
@@ -703,7 +831,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
     const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P)?)?.*$/;
     if (re.test(String(dt))) {
         const result = getTimeOfText(String(dt), utc, timeZoneOffset);
-        if (result !== null) {
+        if (result !== null && typeof result !== 'undefined') {
             return result;
         }
     }
@@ -725,11 +853,11 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) { // eslint-di
 
     if (typeof dt === 'string') {
         let res = _parseDateTime(dt, preferMonthFirst, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset);
-        if (res !== null) { return res; }
+        if (res !== null && typeof res !== 'undefined') { return res; }
         if (utc || timeZoneOffset === 0) {
             if (!dt.includes('UTC') && !dt.includes('utc') && !dt.includes('+') && !dt.includes('-')) {
                 dt += ' UTC';
@@ -784,7 +912,7 @@ const _dateFormat = (function () {
     // const timezoneClip = /[^-+\dA-Z]/g;
 
     // Regexes and supporting functions are cached through closure
-    return function (date, mask, utc, timeZoneOffset) { // eslint-disable-line complexity
+    return function (date, mask, utc, timeZoneOffset) {
         const dF = _dateFormat;
         // You can't provide utc if you skip other Args. (use the "UTC:" mask prefix)
         if (arguments.length === 1 && Object.prototype.toString.call(date) === '[object String]' && !/\d/.test(date)) {
@@ -991,7 +1119,7 @@ _dateFormat.format = [
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
  */
-function getFormattedDateOut(date, format, utc, timeZoneOffset) { // eslint-disable-line complexity
+function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     // console.debug('getFormattedDateOut date=' + date + ' --> format=' + format + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (timeZoneOffset === 0) {
         utc = true;
@@ -1261,7 +1389,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
-function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disable-line complexity
+function _getDateFromFormat(val, format, utc, timeZoneOffset) {
     // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 
@@ -1314,7 +1442,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
                 y = 4;
             }
             year = _getInt(val, i_val, x, y);
-            if (year === null) {
+            if (year === null && typeof year !== 'undefined') {
                 return { value: null, error: 'invalid year of format "' + token + '"'};
             }
 
@@ -1356,56 +1484,56 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
             }
         } else if (token === 'MM' || token === 'M') {
             month = _getInt(val, i_val, token.length, 2);
-            if (month === null || (month < 1) || (month > 12)) {
+            if (month === null || typeof month === 'undefined' || (month < 1) || (month > 12)) {
                 return { value: null, error: 'invalid month "' + month + '" of format "' + token + '"' };
             }
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
             date = _getInt(val, i_val, token.length, 2);
-            if (date === null || (date < 1) || (date > 31)) {
+            if (date === null || typeof date === 'undefined' || (date < 1) || (date > 31)) {
                 return { value: null, error: 'invalid date "' + date + '"' };
             }
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 1) || (hour > 12)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 12)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 0) || (hour > 23)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 23)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 0) || (hour > 11)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 11)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
             hour = _getInt(val, i_val, token.length, 2);
-            if (hour === null || (hour < 1) || (hour > 24)) {
+            if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 24)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += hour.length;
             hour--;
         } else if (token === 'mm' || token === 'm') {
             min = _getInt(val, i_val, token.length, 2);
-            if (min === null || (min < 0) || (min > 59)) {
+            if (min === null || typeof min === 'undefined' || (min < 0) || (min > 59)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
             i_val += min.length;
         } else if (token === 'ss' || token === 's') {
             sec = _getInt(val, i_val, token.length, 2);
-            if (sec === null || (sec < 0) || (sec > 59)) {
+            if (sec === null || typeof sec === 'undefined' || (sec < 0) || (sec > 59)) {
                 return { value: null, error: 'invalid sec "' + sec + '" of format "' + token + '"' };
             }
             i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
             misec = _getInt(val, i_val, token.length, 3);
-            if (misec === null || (misec < 0) || (misec > 999)) {
+            if (misec === null || typeof misec === 'undefined' || (misec < 0) || (misec > 999)) {
                 return { value: null, error: 'invalid millisecond "' + misec + '" of format "' + token + '"' };
             }
             i_val += misec.length;
@@ -1493,7 +1621,7 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) { // eslint-disabl
 function _parseArray(val, listToCheck, utc, timeZoneOffset) {
     for (let i = 0, n = listToCheck.length; i < n; i++) {
         const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset);
-        if (res.value !== null) {
+        if (res.value !== null && typeof res.value !== 'undefined') {
             return res.value;
         }
     }
@@ -1524,9 +1652,9 @@ function _isTimestamp(str) {
 function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset);
-    if (res !== null) { return res; }
+    if (res !== null && typeof res !== 'undefined') { return res; }
     res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset);
-    if (res !== null) { return res; }
+    if (res !== null && typeof res !== 'undefined') { return res; }
     return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset);
 }
 
@@ -1601,11 +1729,11 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
         const tryparse = (val, preferMonthFirst) => {
             // console.debug('try parse ' + util.inspect(val, { colors: true, compact: 10, breakLength: Infinity }) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
             let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset);
-            if (res !== null) { return res; }
+            if (res !== null && typeof res !== 'undefined') { return res; }
             res = Date.parse(val);
             if (!isNaN(res)) {
                 return new Date(res);

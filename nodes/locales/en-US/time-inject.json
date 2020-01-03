@@ -29,10 +29,17 @@
             "addPayload3Format": "time format",
             "recalcTime": "Reclac.",
             "hours": "hours",
-            "on": "on",
+            "on":"on",
             "once": "additional",
             "onstart": "Inject on start ",
-            "onceDelay": "seconds"
+            "onceDelay": "seconds",
+			"validForDays":"valid days",
+            "validForMonths":"valid months",
+			"specialDays":"special days",
+			"onlyEvenDays":"only even",
+            "onlyOddDays":"only odd",
+            "fewDays": "few days",
+            "fewMonths": "few months"
         },
         "placeholder": {
             "position": "Position",
@@ -46,6 +53,7 @@
             "timeAlt": "alternate time",
             "timeAltOffset": "offset for alternate time",
             "days":"select days wherefore it should be valid",
+            "months":"select months wherefore it should be valid",
             "addPayload": "allow to add additional property to the send message",
             "addPayloadValue": "value of the additional property",
             "addPayloadOffset": "Offset to the value",
