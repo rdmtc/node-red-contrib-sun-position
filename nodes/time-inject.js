@@ -466,30 +466,42 @@ module.exports = function (RED) {
                 return;
             }
 
-            const createTO = doCreateTimeout(node, true);
-            if (createTO.done !== true) {
-                if (createTO.errorMsg) {
-                    node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
-                }
-                setTimeout(() => {
-                    try {
-                        doCreateTimeout(node);
-                    } catch (err) {
-                        node.error(err.message);
-                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            setTimeout(() => {
+                try {
+                    const createTO = doCreateTimeout(node, true);
+                    if (createTO.done !== true) {
+                        if (createTO.errorMsg) {
+                            node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
+                        }
+                        setTimeout(() => {
+                            try {
+                                doCreateTimeout(node);
+                            } catch (err) {
+                                node.error(err.message);
+                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                                node.status({
+                                    fill: 'red',
+                                    shape: 'ring',
+                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                                });
+                            }
+                        }, 360000); // 6 Minuten
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
                         });
                     }
-                }, 360000); // 6 Minuten
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
-                });
-            }
+                } catch (err) {
+                    node.error(err.message);
+                    node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    node.status({
+                        fill: 'red',
+                        shape: 'ring',
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                    });
+                }
+            }, 200 + Math.floor(Math.random() * 600));
         } catch (err) {
             node.error(err.message);
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));

@@ -967,21 +967,27 @@ module.exports = function (RED) {
             if (node.autoTrigger) {
                 setTimeout(() => {
                     node.emit('input', {
-                        topic: 'autoTrigger/triggerOnly/start/1',
+                        topic: 'autoTrigger/triggerOnly/start',
                         payload: 'triggerOnly',
                         triggerOnly: true
                     });
-                }, 30000); // 30s
-                setTimeout(() => {
-                    node.emit('input', {
-                        topic: 'autoTrigger/triggerOnly/start/2',
-                        payload: 'triggerOnly',
-                        triggerOnly: true
-                    });
-                }, 360000); // 6min
+                }, 30000 + Math.floor(Math.random() * 30000)); // 30s - 1min
             }
         }
-        initialize();
+
+        setTimeout(() => {
+            try {
+                initialize();
+            } catch (err) {
+                node.error(err.message);
+                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                });
+            }
+        }, 200 + Math.floor(Math.random() * 600));
     }
 
     RED.nodes.registerType('clock-timer', clockTimerNode);
