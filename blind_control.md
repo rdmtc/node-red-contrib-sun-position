@@ -223,8 +223,8 @@ If the output is set to single, an object property `msg.blindCtrl` will be attac
 If the node is configured with two outputs this object is set as the `msg.payload` property of the message that is send to the second output. The difference is also, that the second output will give this object every time a recalculation will is triggered, where the first output only send a message on blind position change.
 
 * `blindCtrl` a object will be added add as `msg.blindCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
-  * `blindCtrl.reason` object for the reason of the current blind position
-    * `blindCtrl.reason.code` a number representing the reason for the blind position. The possible codes are
+  * `blindCtrl.reason` - __object__ - for the reason of the current blind position
+    * `blindCtrl.reason.code` - __number__ - representing the reason for the blind position. The possible codes are
       * **-1** - the rules was not evaluated, maybe override is active
       * **1**  - defined default blind position, because no other rule/condition/behavior
       * **2**  - manual override
@@ -242,32 +242,44 @@ If the node is configured with two outputs this object is set as the `msg.payloa
       * **14** - change is below defined minimum delta
       * **15** - blind position is below defined minimum blind position by rule
       * **16** - blind position is above defined maximum blind position by rule
-    * `blindCtrl.reason.state` a short text (same as node status text) representing the reason for the blind position
-    * `blindCtrl.reason.description` a text, describe the reason for the blind position
-  * `blindCtrl.level` - the new blind level (numeric value) - equal to `msg.payload` of the first output message.
-  * `blindCtrl.levelInverse` - if `blindCtrl.blind.overwrite.active` is true, the value of `blindCtrl.levelInverse` will be equal to the value of `blindCtrl.level`, otherwise it will be the inverse to `blindCtrl.level`. This means if `blindCtrl.level` indicates how much the blind is open, then `blindCtrl.levelInverse` indicates how much the blind is closed. So if `blindCtrl.level` is equal to **min position**, `blindCtrl.levelInverse` will be **max position**.
-  * `blindCtrl.blind` a object containing all blind settings, only the most interesting ones are explained here
-    * `blindCtrl.blind.overwrite`
-      * `blindCtrl.blind.overwrite.active` - is `true` when overwrite is active, otherwise `false`
-      * `blindCtrl.blind.overwrite.priority` - the priority of the override
-      * `blindCtrl.blind.overwrite.expires` -  is `true` when overwrite expires [exists only if overwrite active]
-      * `blindCtrl.blind.overwrite.expireTs` - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
-      * `blindCtrl.blind.overwrite.expireDate` - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
-  * `blindCtrl.rule` - exists only if no override is active
-    * `blindCtrl.rule.active` - `true` if a rule applies
-    * `blindCtrl.rule.id` - number of the rule who applies (is `-1` if no rule has applied)
-    * `blindCtrl.rule.level` - the blind level defined by the rule if level type is __absolute__, otherwise the defined default blind position [exists only if a rule applies]
-    * `blindCtrl.rule.conditional` - `true` if the rule has a condition [exists only if a rule applies]
-    * `blindCtrl.rule.timeLimited` - `true` if the rule has a time [exists only if a rule applies]
+    * `blindCtrl.reason.state` - __string__ - short text representing the reason for the blind position (same as node status text)
+    * `blindCtrl.reason.description` - __string__ - describe the reason for the blind position
+  * `blindCtrl.level` - __number__ - the new blind level - equal to `msg.payload` of the first output message.
+  * `blindCtrl.levelInverse` - __number__ - if `blindCtrl.blind.overwrite.active` is true, the value of `blindCtrl.levelInverse` will be equal to the value of `blindCtrl.level`, otherwise it will be the inverse to `blindCtrl.level`. This means if `blindCtrl.level` indicates how much the blind is open, then `blindCtrl.levelInverse` indicates how much the blind is closed. So if `blindCtrl.level` is equal to **min position**, `blindCtrl.levelInverse` will be **max position**.
+  * `blindCtrl.blind` - __object__ - containing all blind settings, only the most interesting ones are explained here
+    * `blindCtrl.blind.overwrite` - __object__
+      * `blindCtrl.blind.overwrite.active` - __boolean__ - is `true` when overwrite is active, otherwise `false`
+      * `blindCtrl.blind.overwrite.priority` - __number__ - the priority of the override
+      * `blindCtrl.blind.overwrite.expires` - __boolean__ - is `true` when overwrite expires [exists only if overwrite active]
+      * `blindCtrl.blind.overwrite.expireTs` - __number__ - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
+      * `blindCtrl.blind.overwrite.expireDate` - __string__ - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
+  * `blindCtrl.rule` - __object__ - exists only if no override is active
+    * `blindCtrl.rule.active` - __boolean__ - `true` if a rule applies
+    * `blindCtrl.rule.id` - __number__ - id of the rule who applies (is `-1` if no rule has applied)
+    * `blindCtrl.rule.level` - __number__ - the blind level defined by the rule if level type is __absolute__, otherwise the defined default blind position [exists only if a rule applies]
+    * `blindCtrl.rule.conditional` - __boolean__ - `true` if the rule has a condition [exists only if a rule applies]
+    * `blindCtrl.rule.timeLimited` - __boolean__ - `true` if the rule has a time [exists only if a rule applies]
     * `blindCtrl.rule.conditon` - __object__ with additional data about the condition [exists only if `blindCtrl.rule.conditional` is true] - good for debugging purpose
     * `blindCtrl.rule.time` - __object__ with additional data about the time [exists only if `blindCtrl.rule.timeLimited` is true] - good for debugging purpose
-    * `blindCtrl.rule.hasMinimum` - is __true__ if to the level of the rule an additional __minimum__ rule will be active, otherwise __false__
-    * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMinimum` is __true__ and then contains then the blind level defined by the rule
-    * `blindCtrl.rule.hasMaximum` - is __true__ if  to the level of the rule an additional __maximum__ rule will be active, otherwise __false__
-    * `blindCtrl.rule.levelMinimum` - exists only if `blindCtrl.rule.hasMaximum` is __true__ and then contains then the blind level defined by the rule
-  * `blindCtrl.sunPosition` - calculated sub-position data - exists only if sun position is calculated
+    * `blindCtrl.rule.hasMinimum` - __boolean__ - is __true__ if to the level of the rule an additional __minimum__ rule will be active, otherwise __false__
+    * `blindCtrl.rule.levelMinimum` - __number__ - exists only if `blindCtrl.rule.hasMinimum` is __true__ and then contains then the blind level defined by the rule
+    * `blindCtrl.rule.hasMaximum` - __boolean__ - is __true__ if  to the level of the rule an additional __maximum__ rule will be active, otherwise __false__
+    * `blindCtrl.rule.levelMinimum` - __number__ - exists only if `blindCtrl.rule.hasMaximum` is __true__ and then contains then the blind level defined by the rule
+  * `blindCtrl.sunPosition` - __object__ - calculated sub-position data - exists only if sun position is calculated
     * `blindCtrl.sunPosition.InWindow` - `true` if sun is in window, otherwise `false`
-    * `blindCtrl.sunPosition.oversteer` - object containing the active oversteer data
+    * `blindCtrl.sunPosition.oversteer` - __object__ - containing the active oversteer data
+  * `blindCtrl.autoTrigger` - __object__ - with additional data about the autoTrigger [exists only if auto trigger is enabled in the settings]
+    * `blindCtrl.autoTrigger.deaultTime` - __number__ - in milliseconds the auto trigger time of the settings
+    * `blindCtrl.autoTrigger.time` - __number__ - in milliseconds the next auto trigger time (could be less than the dined time in the settings)
+    * `blindCtrl.autoTrigger.type` - __number__ - the type of the next auto trigger
+      * **0**  - equal to defined `blindCtrl.autoTrigger.deaultTime`
+      * **1**  - by current rule end or `blindCtrl.autoTrigger.deaultTime`
+      * **2**  - by next rule or `blindCtrl.autoTrigger.deaultTime`
+      * **3**  - sun not on horizon (maybe it is night?)
+      * **4**  - sun not visible
+      * **5**  - sun before in window (auto trigger time will be at maximum every 10 minutes)
+      * **6**  - sun in window and smooth time is set (auto trigger time will be maximum the defined smooth time)
+      * **7**  - sun in window and no smooth time defined (auto trigger time will be at maximum every 5 minutes)
 
 ### Node Status
 

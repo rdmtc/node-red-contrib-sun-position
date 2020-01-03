@@ -19,51 +19,51 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ## Table of contents
 
-- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  - [Table of contents](#table-of-contents)
-  - [Preconditions](#preconditions)
-  - [Installation](#installation)
-  - [General](#general)
-    - [Saving resources](#saving-resources)
-    - [second based accuracy](#second-based-accuracy)
-  - [Implemented Nodes](#implemented-nodes)
-    - [sun-position](#sun-position)
-      - [sun-position - Node settings](#sun-position---node-settings)
-      - [Node Input](#node-input)
-      - [sun-position - Node Output](#sun-position---node-output)
-    - [moon-position](#moon-position)
-      - [moon-position - Node settings](#moon-position---node-settings)
-      - [moon-position - Node Output](#moon-position---node-output)
-    - [time-inject](#time-inject)
-      - [time-inject - Node settings](#time-inject---node-settings)
-      - [time-inject - Node Input](#time-inject---node-input)
-      - [time-inject - Node Output](#time-inject---node-output)
-      - [time-inject - Node Status](#time-inject---node-status)
-    - [within-time](#within-time)
-      - [within-time - Node settings](#within-time---node-settings)
-    - [time-comp](#time-comp)
-      - [time-comp - Node settings](#time-comp---node-settings)
-    - [time-span](#time-span)
-      - [time-span - Node settings](#time-span---node-settings)
-    - [blind-control](#blind-control)
-    - [clock-timer](#clock-timer)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
-  - [CHANGELOG](#changelog)
-  - [TODO](#todo)
-  - [Support, Bugs and Feedback](#support-bugs-and-feedback)
-  - [LICENSE](#license)
-  - [Other](#other)
+* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  * [Table of contents](#table-of-contents)
+  * [Preconditions](#preconditions)
+  * [Installation](#installation)
+  * [General](#general)
+    * [Saving resources](#saving-resources)
+    * [second based accuracy](#second-based-accuracy)
+  * [Implemented Nodes](#implemented-nodes)
+    * [sun-position](#sun-position)
+      * [sun-position - Node settings](#sun-position---node-settings)
+      * [Node Input](#node-input)
+      * [sun-position - Node Output](#sun-position---node-output)
+    * [moon-position](#moon-position)
+      * [moon-position - Node settings](#moon-position---node-settings)
+      * [moon-position - Node Output](#moon-position---node-output)
+    * [time-inject](#time-inject)
+      * [time-inject - Node settings](#time-inject---node-settings)
+      * [time-inject - Node Input](#time-inject---node-input)
+      * [time-inject - Node Output](#time-inject---node-output)
+      * [time-inject - Node Status](#time-inject---node-status)
+    * [within-time](#within-time)
+      * [within-time - Node settings](#within-time---node-settings)
+    * [time-comp](#time-comp)
+      * [time-comp - Node settings](#time-comp---node-settings)
+    * [time-span](#time-span)
+      * [time-span - Node settings](#time-span---node-settings)
+    * [blind-control](#blind-control)
+    * [clock-timer](#clock-timer)
+    * [Times definitions](#times-definitions)
+      * [sun times](#sun-times)
+        * [remarks](#remarks)
+          * [blue hour](#blue-hour)
+          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          * [alternate properties](#alternate-properties)
+      * [moon times](#moon-times)
+      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    * [input parse formats](#input-parse-formats)
+    * [output timestamp formats](#output-timestamp-formats)
+    * [output timespan formats](#output-timespan-formats)
+    * [Conditions](#conditions)
+  * [CHANGELOG](#changelog)
+  * [TODO](#todo)
+  * [Support, Bugs and Feedback](#support-bugs-and-feedback)
+  * [LICENSE](#license)
+  * [Other](#other)
 
 ## Preconditions
 
@@ -293,11 +293,15 @@ The output is a message with the defined payload and topic in the settings.
 
 * red  on error
 * green
-  * **dot** normal time is planned and occurs in next 4 days
-  * **ring** alternate time is planned and occurs in next 4 days
+  * the color opf the status is green, if the next trigger time is soon (< 36h).
+  * type of the status
+    * **dot** The next trigger time is normal time. (But that doesn't mean that an inject really takes place.)
+    * **ring** The next trigger time is alternate time. (But that doesn't mean that an inject really takes place.)
 * blue
-  * **dot** normal time will be used, but time occurs in more than 4 days
-  * **ring** alternate time is planned and occurs in next 4 days
+  * the next trigger (alternate or normal time) is far in the future (>36h).
+  * type of the status
+    * **dot** The next trigger time is normal time. (But that doesn't mean that an inject really takes place.)
+    * **ring** The next trigger time is alternate time. (But that doesn't mean that an inject really takes place.)
 
 ### within-time
 

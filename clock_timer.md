@@ -8,17 +8,17 @@ Used to control a flow time based with many possibilities. This can be used to s
 
 ### Table of contents
 
-- [clock-timer Controller](#clock-timer-controller)
-  - [clock-timer](#clock-timer)
-    - [Table of contents](#table-of-contents)
-    - [The node](#the-node)
-    - [Node settings](#node-settings)
-      - [general settings](#general-settings)
-      - [rule settings](#rule-settings)
-      - [overwrite settings](#overwrite-settings)
-    - [Node Input](#node-input)
-    - [Node Output](#node-output)
-  - [Other](#other)
+* [clock-timer Controller](#clock-timer-controller)
+  * [clock-timer](#clock-timer)
+    * [Table of contents](#table-of-contents)
+    * [The node](#the-node)
+    * [Node settings](#node-settings)
+      * [general settings](#general-settings)
+      * [rule settings](#rule-settings)
+      * [overwrite settings](#overwrite-settings)
+    * [Node Input](#node-input)
+    * [Node Output](#node-output)
+  * [Other](#other)
 
 ### The node
 

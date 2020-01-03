@@ -257,7 +257,7 @@ module.exports = function (RED) {
                     }
                 }
 
-                if (millisec > 34560000) {
+                if (millisec > 345600000) {
                     // > 4 Days
                     if (node.intervalObj) {
                         clearInterval(node.intervalObj);
@@ -266,7 +266,7 @@ module.exports = function (RED) {
 
                     node.timeOutObj = setTimeout(() => {
                         doTimeRecalc();
-                    }, millisec - 259200000); // 3 days before
+                    }, millisec - 129600000); // 1,5 days before
                     fill = 'blue';
                 } else {
                     // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');

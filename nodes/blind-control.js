@@ -178,7 +178,7 @@ function getSunPosition_(node, now) {
     node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
     if (node.autoTrigger ) {
         if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
-            node.autoTrigger.type = 3; // Sun not on horizont
+            node.autoTrigger.type = 3; // Sun not on horizon
         } else if (sunPosition.azimuthDegrees <= 72) {
             node.autoTrigger.type = 4; // Sun not visible
         } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthStart) {
