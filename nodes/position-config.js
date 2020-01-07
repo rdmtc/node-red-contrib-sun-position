@@ -121,7 +121,8 @@ module.exports = function (RED) {
 
                 const today = new Date();
                 const dayId = hlp.getDayId(today); // this._getUTCDayId(today);
-                const tomorrow = (new Date(today)).setDate(today.getDate() + 1);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
                 this._sunTimesRefresh(today, tomorrow, dayId);
                 this._moonTimesRefresh(today, tomorrow, dayId);
                 hlp.initializeParser(RED._('common.days', { returnObjects: true}), RED._('common.months', { returnObjects: true}), RED._('common.dayDiffNames', { returnObjects: true}));
@@ -224,7 +225,7 @@ module.exports = function (RED) {
             if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
                 const dayx = hlp.calcDayOffset(limit.days, result.value.getDay());
                 if (dayx > 0) {
-                    date = date.setDate(date.getDate() + dayx);
+                    date.setDate(date.getDate() + dayx);
                     calcSpecial = true;
                 } else if (dayx < 0) {
                     // this.debug('getSunTimeByName - no valid day of week found value=' + value + ' - limit=' + util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity }) + ' - result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
@@ -245,7 +246,7 @@ module.exports = function (RED) {
                 let time = date.getDate();
                 while ((time % 2 !== 0)) {
                     // odd
-                    date = date.setDate(date.getDate() + 1);
+                    date.setDate(date.getDate() + 1);
                     time = date.getDate();
                 }
             }
@@ -253,7 +254,7 @@ module.exports = function (RED) {
                 let time = date.getDate();
                 while((time % 2 === 0)) {
                     // even
-                    date = date.setDate(date.getDate() + 1);
+                    date.setDate(date.getDate() + 1);
                     time = date.getDate();
                 }
             }
@@ -428,7 +429,7 @@ module.exports = function (RED) {
             if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
                 const dayx = hlp.calcDayOffset(limit.days, result.value.getDay());
                 if (dayx > 0) {
-                    date = date.setDate(date.getDate() + dayx);
+                    date.setDate(date.getDate() + dayx);
                     calcSpecial = true;
                 } else if (dayx < 0) {
                     // this.debug('getSunTimeByName - no valid day of week found value=' + value + ' - next=' + next + ' - days=' + days + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
@@ -449,7 +450,7 @@ module.exports = function (RED) {
                 let time = date.getDate();
                 while ((time % 2 !== 0)) {
                     // odd
-                    date = date.setDate(date.getDate() + 1);
+                    date.setDate(date.getDate() + 1);
                     time = date.getDate();
                 }
             }
@@ -457,7 +458,7 @@ module.exports = function (RED) {
                 let time = date.getDate();
                 while((time % 2 === 0)) {
                     // even
-                    date = date.setDate(date.getDate() + 1);
+                    date.setDate(date.getDate() + 1);
                     time = date.getDate();
                 }
             }
@@ -796,6 +797,12 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
+            } else if (data.type === 'randomNumber') {
+                data.value = parseFloat(data.value);
+                if (data.value <0) {
+                    return (Math.random() * Math.abs(data.value || 60));
+                }
+                return Math.floor(Math.random() * ((data.value || 60) + 1));
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {
                     result = msg.payload;
@@ -1155,7 +1162,8 @@ module.exports = function (RED) {
             // this.debug(`_sunTimesCheck ${this.sunDayId} - ${dayId}`);
             if (force || this.sunDayId !== dayId) {
                 this.debug(`_sunTimesCheck - need refresh - force=${force}, base-dayId=${this.sunDayId} current-dayId=${dayId} today=${today}`);
-                const tomorrow = (new Date(today)).setDate(today.getDate() + 1);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
                 this._sunTimesRefresh(today, tomorrow, dayId);
             }
 
@@ -1200,7 +1208,8 @@ module.exports = function (RED) {
             const dayId = hlp.getDayId(today); // this._getUTCDayId(dateb);
             if (force || this.moonDayId !== dayId) {
                 this.debug(`_moonTimesCheck - need refresh - force=${ force }, base-dayId=${ this.moonDayId } current-dayId=${ dayId }`);
-                const tomorrow = (new Date(today)).setDate(today.getDate() + 1);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
                 this._moonTimesRefresh(today, tomorrow, dayId);
             }
 

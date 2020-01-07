@@ -718,7 +718,7 @@ function normalizeDate(d, offset, multiplier, limit) {
         let time = d.getDate();
         while ((time % 2 !== 0)) {
             // odd
-            d = d.setDate(d.getDate() + 1);
+            d.setDate(d.getDate() + 1);
             time = d.getDate();
         }
     }
@@ -727,7 +727,7 @@ function normalizeDate(d, offset, multiplier, limit) {
         let time = d.getDate();
         while((time % 2 === 0)) {
             // even
-            d = d.setDate(d.getDate() + 1);
+            d.setDate(d.getDate() + 1);
             time = d.getDate();
         }
     }

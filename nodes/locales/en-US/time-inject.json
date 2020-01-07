@@ -52,6 +52,7 @@
             "timeOffset": "offset of time",
             "timeAlt": "alternate time",
             "timeAltOffset": "offset for alternate time",
+            "timeLimits":"select days and or month wherefore it should be valid",
             "days":"select days wherefore it should be valid",
             "months":"select months wherefore it should be valid",
             "addPayload": "allow to add additional property to the send message",

@@ -245,6 +245,13 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.lSun')
             }]
         },
+        randomNumber: {
+            value: 'random',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.png',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
         TimeSun: {
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
