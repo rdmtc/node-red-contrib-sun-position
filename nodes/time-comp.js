@@ -26,8 +26,6 @@ module.exports = function (RED) {
 
             if (node.positionConfig === null ||
                 typeof node.positionConfig === 'undefined' ||
-                config.operator === null ||
-                typeof config.operator === 'undefined' ||
                 config.inputType === null ||
                 typeof config.inputType === 'undefined') {
                 node.status({
