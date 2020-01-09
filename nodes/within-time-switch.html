@@ -357,7 +357,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startOffset').typedInput('type');
@@ -418,7 +418,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env'],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endOffset').typedInput('type');
@@ -551,7 +551,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startTimeAltOffset').typedInput('type');
@@ -685,7 +685,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endTimeAltOffset').typedInput('type');
@@ -783,22 +783,18 @@
         <input type="hidden" id="node-input-endOffsetType">
         <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row node-input-row-timeLimits is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.days">
+    <div class="form-row node-input-row-timeLimits is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.timeLimits">
         <div id="within-time-switch-timeDays" class="within-time-switch-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForDays"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.2"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.3"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.5"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.6"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.0"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.8"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.2"><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.9"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.3"><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.10"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.4"><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.11"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.5"><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.12"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.6"><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.13"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.7"></span></label>
                 </div>
             </div>
         </div>
@@ -815,24 +811,18 @@
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForMonths"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.0"></span></label>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.1"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.2"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.3"></span></label>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.4"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.5"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.6"></span></label>
-                    <label><input type='checkbox' checked value='7'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.7"></span></label>
-                    <label><input type='checkbox' checked value='8'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.8"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='9'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.9"></span></label>
-                    <label><input type='checkbox' checked value='10'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.10"></span></label>
-                    <label><input type='checkbox' checked value='11'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.11"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.13"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.2"><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.14"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.3"><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.15"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.4"><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.16"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.5"><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.17"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.6"><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.18"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.7"><input type='checkbox' checked value='7'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.19"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.8"><input type='checkbox' checked value='8'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.20"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.9"><input type='checkbox' checked value='9'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.21"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.10"><input type='checkbox' checked value='10'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.22"></span></label>
+                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.11"><input type='checkbox' checked value='11'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.23"></span></label>
                 </div>
             </div>
         </div>
@@ -978,5 +968,16 @@
     }
     .node-input-row-timeLimits input {
         width: auto !important;
+    }
+    .within-time-switch-days label,
+    .within-time-switch-months label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        max-width: 55px;
+        width: 100px;
     }
 </style>
