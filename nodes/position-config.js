@@ -516,7 +516,7 @@ module.exports = function (RED) {
          * @returns {number} float property
          */
         getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            // _srcNode.debug('getFloatProp type='+type+' value='+value);
+            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0

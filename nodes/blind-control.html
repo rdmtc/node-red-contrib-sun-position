@@ -587,7 +587,9 @@
                     function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
-                            if (!data.valid || !data.isValid) {
+                            if (typeof data.valid === undefined) {
+                                result += '<div>The rule is out of date and should be opened, saved and the node redeployed once so that the data structures are updated.</div>';
+                            } else if (typeof data.valid !== undefined && (!data.valid || !data.isValid)) {
                                 result += '<div>Rule is invalid and needs to be changed!!</div>';
                             }
                             if (data.validOperandAType && data.validOperandAType !== 'none') {

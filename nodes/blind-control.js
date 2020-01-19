@@ -263,7 +263,7 @@ module.exports = function (RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
             return def;
@@ -417,7 +417,7 @@ module.exports = function (RED) {
      * @returns true if override is active, otherwise false
      */
     function checkBlindPosOverwrite(node, msg, now, previousData) {
-        node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
+        // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
@@ -496,10 +496,10 @@ module.exports = function (RED) {
         }
         if (node.blindData.overwrite.active) {
             setOverwriteReason(node);
-            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+            // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
             return true;
         }
-        node.debug(`overwrite exit false node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+        // node.debug(`overwrite exit false node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
         return false;
     }
 
@@ -511,7 +511,7 @@ module.exports = function (RED) {
      * @returns the sun position object
      */
     function calcBlindSunPosition(node, msg, now, tempData, previousData) {
-        node.debug('calcBlindSunPosition: calculate blind position by sun');
+        // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, now);
         const winterMode = 1;
@@ -616,7 +616,7 @@ module.exports = function (RED) {
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current); // node.blindData.levelMin;
         }
-        node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
+        // node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
     }
     /******************************************************************************************/
@@ -883,8 +883,8 @@ module.exports = function (RED) {
 
         livingRuleData.hasMinimum = false;
         if (ruleSelMin) {
-            // node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, -1);
+            // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             if (lev > -1) {
                 livingRuleData.levelMinimum = lev;
                 livingRuleData.hasMinimum = true;
@@ -900,9 +900,9 @@ module.exports = function (RED) {
         }
         livingRuleData.hasMaximum = false;
         if (ruleSelMax) {
-            // node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, -1);
-            if (livingRuleData.levelMaximum > -1) {
+            // node.debug('ruleSelMax ' + lev + ' -- ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }) );
+            if (lev > -1) {
                 livingRuleData.levelMaximum = lev;
                 livingRuleData.hasMaximum = true;
                 livingRuleData.maximum = {
