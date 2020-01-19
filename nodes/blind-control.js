@@ -84,7 +84,7 @@ function getNow_(node, msg) {
     }
     const dto = new Date(value);
     if (hlp.isValidDate(dto)) {
-        node.debug(dto.toISOString());
+        // node.debug(dto.toISOString());
         return dto;
     }
     node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
@@ -175,7 +175,7 @@ function getSunPosition_(node, now) {
     // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
     sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
                            (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
-    node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
+    // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
     if (node.autoTrigger ) {
         if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
             node.autoTrigger.type = 3; // Sun not on horizon
@@ -263,7 +263,7 @@ module.exports = function (RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
             return def;
@@ -407,7 +407,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
             node.reason.description = RED._('blind-control.states.overwriteNoExpire', { prio: node.blindData.overwrite.priority });
         }
-        node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+        // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
     }
 
     /**
@@ -417,7 +417,7 @@ module.exports = function (RED) {
      * @returns true if override is active, otherwise false
      */
     function checkBlindPosOverwrite(node, msg, now, previousData) {
-        node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
+        // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
         const prio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
@@ -436,7 +436,7 @@ module.exports = function (RED) {
         if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && !priook) {
         // if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             setOverwriteReason(node);
-            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
+            // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
             return true;
         }
@@ -454,7 +454,7 @@ module.exports = function (RED) {
                 node.blindData.overwrite.priority = prio;
             }
             setOverwriteReason(node);
-            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, newPos=${newPos}, expire=${expire}`);
+            // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, newPos=${newPos}, expire=${expire}`);
             return true;
         } else if (!onlyTrigger && !isNaN(newPos)) {
             node.debug(`needOverwrite prio=${prio} expire=${expire} newPos=${newPos}`);
@@ -496,10 +496,10 @@ module.exports = function (RED) {
         }
         if (node.blindData.overwrite.active) {
             setOverwriteReason(node);
-            node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+            // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
             return true;
         }
-        node.debug(`overwrite exit false node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
+        // node.debug(`overwrite exit false node.blindData.overwrite.active=${node.blindData.overwrite.active}`);
         return false;
     }
 
@@ -511,7 +511,7 @@ module.exports = function (RED) {
      * @returns the sun position object
      */
     function calcBlindSunPosition(node, msg, now, tempData, previousData) {
-        node.debug('calcBlindSunPosition: calculate blind position by sun');
+        // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = getSunPosition_(node, now);
         const winterMode = 1;
@@ -616,7 +616,7 @@ module.exports = function (RED) {
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current); // node.blindData.levelMin;
         }
-        node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
+        // node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
     }
     /******************************************************************************************/
@@ -782,7 +782,7 @@ module.exports = function (RED) {
        * @returns the active rule or null
        */
     function checkRules(node, msg, now, tempData) {
-        node.debug('checkRules ----------------------------------------------------------------------------');
+        // node.debug('checkRules --------------------');
         const livingRuleData = {};
         const nowNr = now.getTime();
         const dayNr = now.getDay();
@@ -790,7 +790,7 @@ module.exports = function (RED) {
         const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
-        node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
         const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -883,8 +883,8 @@ module.exports = function (RED) {
 
         livingRuleData.hasMinimum = false;
         if (ruleSelMin) {
-            // node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, -1);
+            // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             if (lev > -1) {
                 livingRuleData.levelMinimum = lev;
                 livingRuleData.hasMinimum = true;
@@ -900,9 +900,9 @@ module.exports = function (RED) {
         }
         livingRuleData.hasMaximum = false;
         if (ruleSelMax) {
-            // node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
             const lev = getBlindPosFromTI(node, msg, ruleSelMax.levelType, ruleSelMax.levelValue, -1);
-            if (livingRuleData.levelMaximum > -1) {
+            // node.debug('ruleSelMax ' + lev + ' -- ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }) );
+            if (lev > -1) {
                 livingRuleData.levelMaximum = lev;
                 livingRuleData.hasMaximum = true;
                 livingRuleData.maximum = {
@@ -1154,7 +1154,7 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                node.debug(`blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+                // node.debug(`blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
 
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
@@ -1255,7 +1255,7 @@ module.exports = function (RED) {
                     blindCtrl.level = node.level.current;
                     blindCtrl.levelInverse = node.level.currentInverse;
                 }
-                node.debug(`result pos=${blindCtrl.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
+                // node.debug(`result pos=${blindCtrl.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 setState(blindCtrl);
 
                 let topic = config.topic;

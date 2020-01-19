@@ -1,5 +1,24 @@
 # node-red-contrib-sun-position
 
+#### 1.0.3:  bug fix
+
+- blind-control
+  - fixed maximum rules #96
+
+#### 1.0.2:  bug fix
+
+- time-comp
+  - fixed #93
+
+- general
+  - added random offset (not fully tested) #90
+  - Improve display of days of the week and months (first try) #91
+
+#### 1.0.1:  bug fix
+
+- time-inject
+  - fix downward compatibility for older node settings
+
 #### 1.0.0: mayor release
 
 - new Node: clock-time

@@ -197,10 +197,10 @@ module.exports = function (RED) {
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                this.debug('getSunTimes sunTimesToday');
+                // this.debug('getSunTimes sunTimesToday');
                 result = Object.assign({}, this.sunTimesToday[value]); // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
-                this.debug('getSunTimes sunTimesTomorow');
+                // this.debug('getSunTimes sunTimesTomorow');
                 result = Object.assign({},this.sunTimesTomorow[value]); // needed for a object copy
             } else {
                 this.debug('getSunTimes calc extra time');
@@ -516,7 +516,7 @@ module.exports = function (RED) {
          * @returns {number} float property
          */
         getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            // _srcNode.debug('getFloatProp type='+type+' value='+value);
+            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -777,7 +777,7 @@ module.exports = function (RED) {
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
         getPropValue(_srcNode, msg, data) {
-            _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             let result = undefined;
             if (data.type === '' || data.type === 'none' || typeof data.type === 'undefined' || data.type === null) {
                 result = undefined;
@@ -838,18 +838,18 @@ module.exports = function (RED) {
                 }
             }
             if (typeof data.callback === 'function') {
-                _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
+                // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
                 _srcNode.error(RED._('errors.notEvaluableProperty', data));
                 return undefined;
             }
-            _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
+            // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
         comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
-            _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
+            // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
             if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
                 return false;
             } else if (opTypeA === 'jsonata' || opTypeA === 'pdmPhaseCheck') {
@@ -919,7 +919,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         getSunCalc(date, calcTimes, sunInSky) {
-            this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}"`);
+            // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -951,7 +951,7 @@ module.exports = function (RED) {
             };
 
             if (!calcTimes) {
-                this.debug('getSunCalc - no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                // this.debug('getSunCalc - no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
                 return result;
             }
 
@@ -959,15 +959,15 @@ module.exports = function (RED) {
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
             // this.debug(`getSunTimes value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                this.debug('getSunTimes sunTimesToday');
+                // this.debug('getSunTimes sunTimesToday');
                 result.times =this.sunTimesToday; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonToday;
             } else if (dayid === (today.dayId + 1)) {
-                this.debug('getSunTimes sunTimesTomorow');
+                // this.debug('getSunTimes sunTimesTomorow');
                 result.times = this.sunTimesTomorow; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonTomorow;
             } else {
-                this.debug('getSunTimes calc extra time');
+                // this.debug('getSunTimes calc extra time');
                 result.times = sunCalc.getSunTimes(date, this.latitude, this.longitude, false); // needed for a object copy
                 if (sunInSky && result.times.solarNoon.valid) {
                     result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value, this.latitude, this.longitude);
@@ -983,7 +983,7 @@ module.exports = function (RED) {
             }
 
             this.lastSunCalc = result;
-            this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            // this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 

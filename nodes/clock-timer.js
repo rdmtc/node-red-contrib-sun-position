@@ -34,7 +34,7 @@ function getNow_(node, msg) {
     }
     const dto = new Date(value);
     if (hlp.isValidDate(dto)) {
-        node.debug(dto.toISOString());
+        // node.debug(dto.toISOString());
         return dto;
     }
     node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
@@ -52,7 +52,7 @@ module.exports = function (RED) {
      * @returns {*}  data which was cached
      */
     function evalTempData(node, type, value, data, tempData) {
-        node.debug(`evalTempData type=${type} value=${value} data=${data}`);
+        // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
         const name = `${type}.${value}`;
         if (data === null || typeof data === 'undefined') {
             if (typeof tempData[name] !== 'undefined') {
@@ -179,7 +179,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('clock-timer.states.overwriteNoExpire', { prio: node.timeClockData.overwrite.priority });
             node.reason.description = RED._('clock-timer.states.overwriteNoExpire', { prio: node.timeClockData.overwrite.priority });
         }
-        node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+        // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
     }
 
     /**
@@ -189,7 +189,7 @@ module.exports = function (RED) {
      * @returns true if override is active, otherwise false
      */
     function checkTCPosOverwrite(node, msg, now) {
-        node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
+        // node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue2(msg, ['exactPriority', 'exactPrivilege']);
         const prio = hlp.getMsgNumberValue2(msg, ['prio', 'priority', 'privilege'], null, p => {
@@ -264,10 +264,10 @@ module.exports = function (RED) {
         }
         if (node.timeClockData.overwrite.active) {
             setOverwriteReason(node);
-            node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+            // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
             return true;
         }
-        node.debug(`overwrite exit false node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+        // node.debug(`overwrite exit false node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
         return false;
     }
 
@@ -434,7 +434,7 @@ module.exports = function (RED) {
        * @returns the active rule or null
        */
     function checkRules(node, msg, now, tempData) {
-        node.debug('checkRules ----------------------------------------------------------------------------');
+        // node.debug('checkRules --------------------');
         const livingRuleData = {};
         const nowNr = now.getTime();
         const dayNr = now.getDay();
@@ -442,7 +442,7 @@ module.exports = function (RED) {
         const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
-        node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
         const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -512,7 +512,7 @@ module.exports = function (RED) {
                 if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
-                    node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                     ruleSel = res;
                     break;
                 }
@@ -541,7 +541,7 @@ module.exports = function (RED) {
                 }
             }
             // ruleSel.text = '';
-            node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
+            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             node.reason.code = 4;
@@ -584,8 +584,8 @@ module.exports = function (RED) {
             }
             node.reason.state= RED._('clock-timer.states.'+name, data);
             node.reason.description = RED._('clock-timer.reasons.'+name, data);
-            node.debug(`checkRules data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
-            node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -603,7 +603,7 @@ module.exports = function (RED) {
         node.reason.code = 1;
         node.reason.state = RED._('clock-timer.states.default');
         node.reason.description = RED._('clock-timer.reasons.default');
-        node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -696,7 +696,7 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
+                // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
@@ -733,7 +733,7 @@ module.exports = function (RED) {
                     ruleId = timeCtrl.rule.id;
                 }
 
-                node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
+                // node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 timeCtrl.reason = node.reason;
                 timeCtrl.timeClock = node.timeClockData;
                 setState(node.payload.current);
