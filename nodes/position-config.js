@@ -919,7 +919,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         getSunCalc(date, calcTimes, sunInSky) {
-            // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}"`);
+            // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}" sunInSky="${sunInSky}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -957,9 +957,9 @@ module.exports = function (RED) {
 
             const dayid = hlp.getDayId(date); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTimes value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            this.debug(`getSunTimes dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                // this.debug('getSunTimes sunTimesToday');
+                this.debug('getSunTimes sunTimesToday');
                 result.times =this.sunTimesToday; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonToday;
             } else if (dayid === (today.dayId + 1)) {
@@ -983,7 +983,7 @@ module.exports = function (RED) {
             }
 
             this.lastSunCalc = result;
-            // this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 

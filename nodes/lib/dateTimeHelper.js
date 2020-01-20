@@ -41,7 +41,8 @@ module.exports = {
     initializeParser,
     getFormattedDateOut,
     parseDateFromFormat,
-    topicReplace
+    topicReplace,
+    getNowTimeStamp
 };
 
 /*******************************************************************************************************/
@@ -334,7 +335,6 @@ function getWeekOfYear(date) {
  * For a given date, get the day number
  * @param {Date} date date to get day number
  * @returns {Array} day number, [UTCFullYear, dayNumber]
-
  */
 function getDayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 0);
@@ -357,6 +357,33 @@ function getUTCDayId(d) {
  */
 function getDayId(d) {
     return d.getDay() + (d.getMonth() * 31) + (d.getFullYear() * 372);
+}
+
+/******************************************************************************************/
+/**
+ * the definition of the time to compare
+ * @param {*} node the current node object
+ * @param {*} msg the message object
+* @returns {Date} Date object of given Date or now
+ */
+function getNowTimeStamp(node, msg) {
+    let value = '';
+    if (typeof msg.time === 'number') {
+        value = msg.time;
+        node.debug(`compare time to msg.time = "${value}"`);
+    } else if (typeof msg.ts === 'number') {
+        value = msg.ts;
+        node.debug(`compare time to msg.ts = "${value}"`);
+    } else {
+        return new Date();
+    }
+    const dto = new Date(value);
+    if (isValidDate(dto)) {
+        // node.debug(dto.toISOString());
+        return dto;
+    }
+    node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
+    return new Date();
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */

@@ -15,32 +15,6 @@ const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
 
 /******************************************************************************************/
-/**
-   * the definition of the time to compare
-   * @param {*} compareType type to compare
-   * @param {*} msg the message object
-   * @param {*} node the current node object
-   */
-function getNow_(node, msg) {
-    let value = '';
-    if (typeof msg.time === 'number') {
-        value = msg.time;
-        node.debug(`compare time to msg.time = "${value}"`);
-    } else if (typeof msg.ts === 'number') {
-        value = msg.ts;
-        node.debug(`compare time to msg.ts = "${value}"`);
-    } else {
-        return new Date();
-    }
-    const dto = new Date(value);
-    if (hlp.isValidDate(dto)) {
-        // node.debug(dto.toISOString());
-        return dto;
-    }
-    node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
-    return new Date();
-}
-
 module.exports = function (RED) {
     'use strict';
     /**
@@ -714,7 +688,7 @@ module.exports = function (RED) {
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
                 node.reason.code = NaN;
-                const now = getNow_(node, msg);
+                const now = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.deaultTime;
                     node.autoTrigger.type = 0;
