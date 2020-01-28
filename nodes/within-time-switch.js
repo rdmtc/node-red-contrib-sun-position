@@ -121,7 +121,8 @@ module.exports = function (RED) {
             endSuffix: '',
             altStartTime: (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
             altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg')),
-            valid:false
+            valid: false,
+            warn: ''
         };
 
         if (config.timeDays && config.timeDays !== '*' && !config.timeDays.includes(now.getDay())) {
@@ -129,10 +130,13 @@ module.exports = function (RED) {
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
-        if (config.timeMonths && config.timeMonths !== '*' && !config.timeMonths.includes(now.getMonth())) {
-            node.debug('invalid Day config. today=' + now.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
-            result.warn = RED._('within-time-switch.errors.invalid-month');
-            return result;
+        if (config.timeMonths && config.timeMonths !== '*') {
+            const mn = config.timeMonths.split(',');
+            if (!mn.includes(now.getMonth())) {
+                node.debug('invalid Day config. today=' + now.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
+                result.warn = RED._('within-time-switch.errors.invalid-month');
+                return result;
+            }
         }
         const dateNr = now.getDate();
         if (node.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
@@ -326,7 +330,7 @@ module.exports = function (RED) {
                 const now = getDate(config.tsCompare, msg, node);
                 const result = calcWithinTimes(this, msg, config, now);
 
-                if (result.start.value && result.end.value) {
+                if (result.valid && result.start.value && result.end.value) {
                     const startNr = hlp.getTimeNumberUTC(result.start.value);
                     const endNr = hlp.getTimeNumberUTC(result.end.value);
                     const cmpNow = hlp.getTimeNumberUTC(now);
@@ -346,8 +350,6 @@ module.exports = function (RED) {
                         done();
                         return null;
                     }
-                } else if (!result.valid) {
-                    throw new Error('Error can not calc time!');
                 } else {
                     setstate(node, result);
                 }

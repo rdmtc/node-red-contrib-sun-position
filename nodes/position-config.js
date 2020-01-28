@@ -919,7 +919,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         getSunCalc(date, calcTimes, sunInSky) {
-            // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}"`);
+            // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}" sunInSky="${sunInSky}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -935,19 +935,24 @@ module.exports = function (RED) {
             }
 
             const sunPos = sunCalc.getPosition(date, this.latitude, this.longitude);
-
             const result = {
                 ts: date.getTime(),
-                lastUpdate: date,
-                latitude: this.latitude,
-                longitude: this.longitude,
-                angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
-                altitude: (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
-                altitudeDegrees: sunPos.altitudeDegrees,
-                azimuthDegrees: sunPos.azimuthDegrees,
-                altitudeRadians: sunPos.altitude,
-                azimuthRadians: sunPos.azimuth
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-' // return custom format
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds()),
+                latitude:       this.latitude,
+                longitude:      this.longitude,
+                angleType:      this.angleType,
+                azimuth:        (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
+                altitude:       (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
+                altitudeDegrees:    sunPos.altitudeDegrees,
+                azimuthDegrees:     sunPos.azimuthDegrees,
+                altitudeRadians:    sunPos.altitude,
+                azimuthRadians:     sunPos.azimuth
             };
 
             if (!calcTimes) {
@@ -957,9 +962,9 @@ module.exports = function (RED) {
 
             const dayid = hlp.getDayId(date); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTimes value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            this.debug(`getSunTimes dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                // this.debug('getSunTimes sunTimesToday');
+                this.debug('getSunTimes sunTimesToday');
                 result.times =this.sunTimesToday; // needed for a object copy
                 result.positionAtSolarNoon = this.sunSolarNoonToday;
             } else if (dayid === (today.dayId + 1)) {
@@ -983,7 +988,7 @@ module.exports = function (RED) {
             }
 
             this.lastSunCalc = result;
-            // this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
 
@@ -1058,18 +1063,24 @@ module.exports = function (RED) {
 
             const result = {
                 ts: date.getTime(),
-                lastUpdate: date,
-                latitude: this.latitude,
-                longitude: this.longitude,
-                angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
-                altitude: (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
-                altitudeDegrees: moonPos.altitudeDegrees,
-                azimuthDegrees: moonPos.azimuthDegrees,
-                altitudeRadians: moonPos.altitude,
-                azimuthRadians: moonPos.azimuth,
-                distance: moonPos.distance,
-                parallacticAngle: (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-'
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds()),
+                latitude:       this.latitude,
+                longitude:      this.longitude,
+                angleType:      this.angleType,
+                azimuth:        (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
+                altitude:       (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
+                altitudeDegrees:    moonPos.altitudeDegrees,
+                azimuthDegrees:     moonPos.azimuthDegrees,
+                altitudeRadians:    moonPos.altitude,
+                azimuthRadians:     moonPos.azimuth,
+                distance:           moonPos.distance,
+                parallacticAngle:   (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
                 illumination: {
                     angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
                     fraction: moonIllum.fraction,

@@ -29,18 +29,7 @@ module.exports = function (RED) {
 
             try {
                 const errorStatus = '';
-                let now = new Date();
-                if (typeof msg.time !== 'undefined') {
-                    now = new Date(msg.time);
-                }
-                if (typeof msg.ts !== 'undefined') {
-                    now = new Date(msg.ts);
-                }
-                if (!hlp.isValidDate(now)) {
-                    now = new Date();
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalidParameter', { param: 'msg.ts', type: 'Date', newValue:now}));
-                }
-
+                const now = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));

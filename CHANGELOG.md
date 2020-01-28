@@ -1,5 +1,15 @@
 # node-red-contrib-sun-position
 
+#### 1.0.4:  bug fix
+
+- within-time-switch
+  - fixed error day selection #100
+  - fixed wrong working month selection
+- sun-position
+  - added lastUpdateStr to payload to get the original calculation base time
+- moon-position
+  - added lastUpdateStr to payload to get the original calculation base time
+
 #### 1.0.3:  bug fix
 
 - blind-control
