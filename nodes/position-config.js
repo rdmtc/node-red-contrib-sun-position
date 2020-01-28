@@ -935,19 +935,25 @@ module.exports = function (RED) {
             }
 
             const sunPos = sunCalc.getPosition(date, this.latitude, this.longitude);
-
             const result = {
                 ts: date.getTime(),
-                lastUpdate: date,
-                latitude: this.latitude,
-                longitude: this.longitude,
-                angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
-                altitude: (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
-                altitudeDegrees: sunPos.altitudeDegrees,
-                azimuthDegrees: sunPos.azimuthDegrees,
-                altitudeRadians: sunPos.altitude,
-                azimuthRadians: sunPos.azimuth
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-' // return custom format
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds())
+                                + (date.getTimezoneOffset() === 0 ? 'Z' : 'LOCAL'),
+                latitude:       this.latitude,
+                longitude:      this.longitude,
+                angleType:      this.angleType,
+                azimuth:        (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
+                altitude:       (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
+                altitudeDegrees:    sunPos.altitudeDegrees,
+                azimuthDegrees:     sunPos.azimuthDegrees,
+                altitudeRadians:    sunPos.altitude,
+                azimuthRadians:     sunPos.azimuth
             };
 
             if (!calcTimes) {
@@ -1058,18 +1064,25 @@ module.exports = function (RED) {
 
             const result = {
                 ts: date.getTime(),
-                lastUpdate: date,
-                latitude: this.latitude,
-                longitude: this.longitude,
-                angleType: this.angleType,
-                azimuth: (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
-                altitude: (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
-                altitudeDegrees: moonPos.altitudeDegrees,
-                azimuthDegrees: moonPos.azimuthDegrees,
-                altitudeRadians: moonPos.altitude,
-                azimuthRadians: moonPos.azimuth,
-                distance: moonPos.distance,
-                parallacticAngle: (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-' // return custom format
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getUTCHours()) + ':'
+                                + hlp.pad2(date.getUTCMinutes()) + ':'
+                                + hlp.pad2(date.getUTCSeconds())
+                                + (date.getTimezoneOffset() === 0 ? 'Z' : 'LOCAL'),
+                latitude:       this.latitude,
+                longitude:      this.longitude,
+                angleType:      this.angleType,
+                azimuth:        (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
+                altitude:       (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
+                altitudeDegrees:    moonPos.altitudeDegrees,
+                azimuthDegrees:     moonPos.azimuthDegrees,
+                altitudeRadians:    moonPos.altitude,
+                azimuthRadians:     moonPos.azimuth,
+                distance:           moonPos.distance,
+                parallacticAngle:   (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
                 illumination: {
                     angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
                     fraction: moonIllum.fraction,
