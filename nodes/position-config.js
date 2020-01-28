@@ -943,8 +943,7 @@ module.exports = function (RED) {
                                 + hlp.pad2(date.getDate()) + 'T'
                                 + hlp.pad2(date.getHours()) + ':'
                                 + hlp.pad2(date.getMinutes()) + ':'
-                                + hlp.pad2(date.getSeconds())
-                                + (date.getTimezoneOffset() === 0 ? 'Z' : 'LOCAL'),
+                                + hlp.pad2(date.getSeconds()),
                 latitude:       this.latitude,
                 longitude:      this.longitude,
                 angleType:      this.angleType,
@@ -1065,13 +1064,12 @@ module.exports = function (RED) {
             const result = {
                 ts: date.getTime(),
                 lastUpdate:     date,
-                lastUpdateStr:  date.getFullYear() + '-' // return custom format
+                lastUpdateStr:  date.getFullYear() + '-'
                                 + hlp.pad2(date.getMonth() + 1) + '-'
                                 + hlp.pad2(date.getDate()) + 'T'
-                                + hlp.pad2(date.getUTCHours()) + ':'
-                                + hlp.pad2(date.getUTCMinutes()) + ':'
-                                + hlp.pad2(date.getUTCSeconds())
-                                + (date.getTimezoneOffset() === 0 ? 'Z' : 'LOCAL'),
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds()),
                 latitude:       this.latitude,
                 longitude:      this.longitude,
                 angleType:      this.angleType,
