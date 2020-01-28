@@ -1303,6 +1303,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
         }
     };
 }
+
 // ===================================================================
 // Author: Matt Kruse <matt@mattkruse.com>
 // WWW: http://www.mattkruse.com/
