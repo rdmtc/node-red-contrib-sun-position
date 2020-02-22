@@ -385,7 +385,7 @@ module.exports = function (RED) {
                         node.debug('operatorType ' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity })); */
 
                         let result = false;
-                        switch (rule.operator) {
+                        switch (parseInt(rule.operator)) {
                             case 1: // equal
                                 result = (timeSpan === ruleoperand);
                                 break;

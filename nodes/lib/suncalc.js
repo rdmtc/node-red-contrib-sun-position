@@ -52,11 +52,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      */
     function toDays(date, inUTC) {
         if (!isValidDate(date)) {
+            console.log(`toDays: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
             date = new Date();
         }
         let ms = date.valueOf();
         if (inUTC === false) {
-            ms = ms - date.getTimezoneOffset() * 60 * 1000;
+            ms = ms + (date.getTimezoneOffset() * 60 * 1000);
         }
         return ((ms / dayMs) + J1970) - J2000;
     }
@@ -369,6 +370,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {suntimes} result object of sunTime
      */
     SunCalc.getSunTimes = function (date, lat, lng, inUTC, noDeprecated) {
+        // console.log(`getSunTimes date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}, noDeprecated=${noDeprecated}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -647,6 +649,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             throw new Error('longitude missing');
         }
         if (!isValidDate(date)) {
+            console.log(`getMoonTimes: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
             date = new Date();
         }
 

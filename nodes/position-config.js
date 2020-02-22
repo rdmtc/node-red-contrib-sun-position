@@ -195,7 +195,7 @@ module.exports = function (RED) {
             let result;
             const dayid = hlp.getDayId(now); // this._getUTCDayId(now);
             const today = this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} now=${now} dayid=${dayid} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
                 // this.debug('getSunTimes sunTimesToday');
                 result = Object.assign({}, this.sunTimesToday[value]); // needed for a object copy
@@ -220,6 +220,7 @@ module.exports = function (RED) {
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
             }
+
             let calcSpecial = false;
             let date = result.value;
             if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
@@ -242,6 +243,7 @@ module.exports = function (RED) {
                     result.error = 'No valid month found!';
                 }
             }
+
             if (limit.onlyEvenDays) {
                 let time = date.getDate();
                 while ((time % 2 !== 0)) {
@@ -1167,12 +1169,10 @@ module.exports = function (RED) {
         }
 
         _sunTimesCheck(force) {
-            // this.debug('_sunTimesCheck');
+            // this.debug('_sunTimesCheck force=' + force);
             const today = new Date();
             const dayId = hlp.getDayId(today); // _getUTCDayId(today);
-            // this.debug(`_sunTimesCheck ${this.sunDayId} - ${dayId}`);
             if (force || this.sunDayId !== dayId) {
-                this.debug(`_sunTimesCheck - need refresh - force=${force}, base-dayId=${this.sunDayId} current-dayId=${dayId} today=${today}`);
                 const tomorrow = new Date(today);
                 tomorrow.setDate(today.getDate() + 1);
                 this._sunTimesRefresh(today, tomorrow, dayId);
