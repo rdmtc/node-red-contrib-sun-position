@@ -31,6 +31,8 @@
 			"ruleTimeMonths": "only on month",
 			"ruleDescription": "Description",
 			"ruleBlindLevel": "blind position",
+			"ruleTimeLimitStart": "only from",
+			"ruleTimeLimitEnd": "to",
 			"ruleLevelAbs": "↕ absolute",
 			"ruleLevelMin": "⭳❗ minimum (oversteer)",
 			"ruleLevelMax": "⭱️❗ maximum (oversteer)",
@@ -69,8 +71,10 @@
 			"dialogtitle": "Edit Rule",
 			"autoTrigger": "auto trigger",
 			"autoTrigger2": "dynamic, but max every",
+			"startDelay": "delay output on start",
 			"validForDays": "valid days",
 			"validForMonths": "valid months",
+			"validForDates":"valid period (year is ignored)",
 			"specialDays": "special days",
 			"onlyEven": "only even",
 			"onlyOdd": "only odd",
@@ -109,7 +113,11 @@
 			"level": "level",
 			"ruleTimeDays": "select days wherefore it should be valid",
 			"ruleTimeMonths": "select months wherefore it should be valid",
-			"autoTrigger": "automatic triggers new calculation of the blind position in a dynamic changing time interval"
+			"autoTrigger": "automatic triggers new calculation of the blind position in a dynamic changing time interval",
+			"startDelay": "0",
+			"startDelay2": "delay any output to the first (or only) output on start (Node-Red start, Deplay, ...). Set to 0 to deactivate.",
+			"start":"tt.mm",
+			"end":"tt.mm"
 		},
 		"text": {
 			"blind": "blind settings",

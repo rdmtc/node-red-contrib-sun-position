@@ -40,7 +40,8 @@
 			"btnClear": "leeren",
 			"dialogtitle":"Regel bearbeiten",
 			"autoTrigger":"automatisch triggern",
-			"autoTrigger2":"dynamisch aber max aller"
+			"autoTrigger2":"dynamisch aber max aller",
+			"startDelay": "Ausgabe bei Start verzögern"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",
@@ -59,7 +60,8 @@
 			"level": "Behanghöhe",
 			"ruleTimeDays": "wähle Tage an denen diese Regel gültig sein soll",
 			"ruleTimeMonths": "wähle Monate an denen diese Regel gültig sein soll",
-			"autoTrigger":"automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne"
+			"autoTrigger":"automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne",
+			"startDelay": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten."
 		},
 		"text": {
 			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",

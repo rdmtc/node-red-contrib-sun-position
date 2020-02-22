@@ -67,6 +67,7 @@
 			"dialogtitle": "Regel bearbeiten",
 			"autoTrigger": "automatisch triggern",
 			"autoTrigger2": "dynamisch aber max aller",
+			"startDelay": "Ausgabe bei Start verzögern",
 			"validForDays": "gültige Tage",
 			"validForMonths": "gültige Monate",
 			"specialDays": "spezielle tage",
@@ -105,8 +106,8 @@
 			"time": "Zeit",
 			"offset": "Zeit offset",
 			"level": "Behanghöhe",
-			"autoTrigger": "automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne"
-
+			"autoTrigger": "automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne",
+			"startDelay": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten."
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",

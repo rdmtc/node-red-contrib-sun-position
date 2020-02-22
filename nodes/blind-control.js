@@ -793,6 +793,24 @@ module.exports = function (RED) {
             if (rule.timeOnlyEvenDays && (dateNr % 2 !== 0)) { // odd
                 return null;
             }
+
+            if (rule.timeDateStart || rule.timeDateEnd) {
+                rule.timeDateStart.setFullYear(now.getFullYear());
+                const startnum = rule.timeDateStart.getTime();
+                rule.timeDateEnd.setFullYear(now.getFullYear());
+                const endnum = rule.timeDateEnd.getTime();
+                if (endnum > startnum) {
+                    // in the current year
+                    if (nowNr < startnum || nowNr >= endnum) {
+                        return null;
+                    }
+                } else {
+                    // switch between year from end to start
+                    if (nowNr < startnum && nowNr >= endnum) {
+                        return null;
+                    }
+                }
+            }
             const num = getRuleTimeData(node, msg, rule, now);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
@@ -972,6 +990,9 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || -1);
+        this.startDelayTime = parseFloat(config.startDelayTime);
+        if (isNaN(this.startDelayTime) || this.startDelayTime < 10) { delete this.startDelayTime; }
+
         if (config.autoTrigger) {
             this.autoTrigger = {
                 deaultTime : config.autoTrigger.time || 3600000 // 1h
@@ -1250,7 +1271,8 @@ module.exports = function (RED) {
                 if ((!isNaN(node.level.current)) &&
                     ((node.level.current !== previousData.level) ||
                     (node.reason.code !== previousData.reasonCode) ||
-                    (ruleId !== previousData.usedRule))) {
+                    (ruleId !== previousData.usedRule)) &&
+                    node.startDelayTime) {
                     msg.payload = blindCtrl.level;
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);
@@ -1412,6 +1434,21 @@ module.exports = function (RED) {
                     rule.timeOnlyEvenDays = false;
                 }
 
+                rule.timeDateStart = rule.timeDateStart || '';
+                rule.timeDateEnd = rule.timeDateEnd || '';
+                if (rule.timeDateStart || rule.timeDateEnd) {
+                    if (rule.timeDateStart) {
+                        rule.timeDateStart = new Date(rule.timeDateStart);
+                    } else {
+                        rule.timeDateStart = new Date(2000,0,1);
+                    }
+                    if (rule.timeDateEnd) {
+                        rule.timeDateEnd = new Date(rule.timeDateEnd);
+                    } else {
+                        rule.timeDateStart = new Date(2000,11,31);
+                    }
+                }
+
                 if (rule.conditional) {
                     rule.conditonData = [{
                         result: false,
@@ -1469,30 +1506,29 @@ module.exports = function (RED) {
                 });
                 node.debug('node.rules.data =' + util.inspect(node.rules.data, { colors: true, compact: 10, breakLength: Infinity }));
             } */
-            if (node.autoTrigger) {
+            if (node.autoTrigger || (node.startDelayTime)) {
                 setTimeout(() => {
+                    delete node.startDelayTime;
                     node.emit('input', {
                         topic: 'autoTrigger/triggerOnly/start',
                         payload: 'triggerOnly',
                         triggerOnly: true
                     });
-                }, 30000 + Math.floor(Math.random() * 30000)); // 30s - 1min
+                }, node.startDelayTime || (30000 + Math.floor(Math.random() * 30000))); // 30s - 1min
             }
         }
 
-        setTimeout(() => {
-            try {
-                initialize();
-            } catch (err) {
-                node.error(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                });
-            }
-        }, 200 + Math.floor(Math.random() * 600));
+        try {
+            initialize();
+        } catch (err) {
+            node.error(err.message);
+            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.status({
+                fill: 'red',
+                shape: 'ring',
+                text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+            });
+        }
     }
 
     RED.nodes.registerType('blind-control', sunBlindControlNode);
