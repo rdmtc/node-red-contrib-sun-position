@@ -48,8 +48,8 @@
 			"validForMonths": "valid months",
 			"validForDates":"valid period (year is ignored)",
 			"specialDays": "special days",
-			"onlyEven": "even",
-			"onlyOdd": "odd",
+			"onlyEven": "only even",
+			"onlyOdd": "only odd",
 			"onlyEvenDays": "only even days",
 			"onlyOddDays": "only odd days"
 		},
