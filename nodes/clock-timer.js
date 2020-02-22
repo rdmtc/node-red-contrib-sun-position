@@ -689,7 +689,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.debug(`--- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
+                node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
