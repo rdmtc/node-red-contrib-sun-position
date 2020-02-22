@@ -1,5 +1,23 @@
 # node-red-contrib-sun-position
 
+
+#### 1.0.6:  bug fix
+
+- general
+ - fixed #102 - nodes calculate wrong sun times
+   - this happend between midnight - TimezoneOffset to midnight
+   - maybe fixes also #98
+ - fixed broken rule check for time-span #103
+
+- blind-control + clock-time
+ - first implementation of #92 (needs more test)
+
+#### 1.0.5:  bug fix
+
+- blind-control + clock-time
+ - adde start delay setting where a time can be defined where no output
+
+
 #### 1.0.4:  bug fix
 
 - within-time-switch
