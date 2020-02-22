@@ -386,25 +386,25 @@ module.exports = function (RED) {
 
                         let result = false;
                         switch (rule.operator) {
-                            case 1: // equal
+                            case '1': // equal
                                 result = (timeSpan === ruleoperand);
                                 break;
-                            case 2: // unequal
+                            case '2': // unequal
                                 result = (timeSpan !== ruleoperand);
                                 break;
-                            case 3: // greater
+                            case '3': // greater
                                 result = (timeSpan > ruleoperand);
                                 break;
-                            case 4: // greaterOrEqual
+                            case '4': // greaterOrEqual
                                 result = (timeSpan >= ruleoperand);
                                 break;
-                            case 5: // lesser
+                            case '5': // lesser
                                 result = (timeSpan < ruleoperand);
                                 break;
-                            case 6: // lesserOrEqual
+                            case '6': // lesserOrEqual
                                 result = (timeSpan <= ruleoperand);
                                 break;
-                            case 99: // otherwise
+                            case '99': // otherwise
                                 result = true;
                                 break;
                         }
