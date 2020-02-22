@@ -15,7 +15,7 @@
 #### 1.0.5:  bug fix
 
 - blind-control + clock-time
- - adde start delay setting where a time can be defined where no output
+ - add start delay setting where a time can be defined where no output
 
 
 #### 1.0.4:  bug fix
