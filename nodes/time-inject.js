@@ -148,7 +148,7 @@ module.exports = function (RED) {
          */
         function doTimeRecalc() {
             try {
-                node.debug('needsRecalc');
+                node.debug('performing a recalc of the next inject time');
                 doCreateTimeout(node);
             } catch (err) {
                 node.error(err.message);
@@ -262,10 +262,13 @@ module.exports = function (RED) {
                         clearInterval(node.intervalObj);
                         node.intervalObj = null;
                     }
-
+                    // there is a limitation of nodejs that the maximum setTimeout time
+                    // should not more then 2147483647 ms (24.8 days).
+                    millisec = Math.min((millisec - 129600000), 2147483646);
+                    node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                     node.timeOutObj = setTimeout(() => {
                         doTimeRecalc();
-                    }, millisec - 129600000); // 1,5 days before
+                    }, millisec); // 1,5 days before
                     fill = 'blue';
                 } else {
                     // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
@@ -453,6 +456,9 @@ module.exports = function (RED) {
         node.status({});
         try {
             if (config.once) {
+                if (config.onceDelay > 2147483) {
+                    config.onceDelay = 2147483;
+                }
                 node.status({
                     fill: 'yellow',
                     shape: 'ring',

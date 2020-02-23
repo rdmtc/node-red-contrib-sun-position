@@ -260,7 +260,7 @@ module.exports = function (RED) {
         if (!msg.reSendMsgDelayed && isActive && time) {
             node.lastMsgObj = RED.util.cloneMessage(msg);
             node.lastMsgObj.reSendMsgDelayed = false;
-            const millis = getScheduleTime(time) + 10;
+            const millis =  Math.min(getScheduleTime(time) + 10, 2147483646);
             node.debug('timeout for resend last message ' + time + ' is in ' + millis + 'ms');
             node.timeOutObj = setTimeout(() => {
                 node.debug('setTimeout triggered, resend last message as configured');

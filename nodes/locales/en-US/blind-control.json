@@ -72,6 +72,8 @@
 			"autoTrigger": "auto trigger",
 			"autoTrigger2": "dynamic, but max every",
 			"startDelay": "delay output on start",
+			"timeconstraintshow": "show additional time constraints",
+			"timeconstrainthide": "hide additional time constraints",
 			"validForDays": "valid days",
 			"validForMonths": "valid months",
 			"validForDates":"valid period (year is ignored)",

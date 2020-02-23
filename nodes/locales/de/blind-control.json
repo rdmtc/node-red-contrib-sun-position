@@ -72,6 +72,8 @@
 			"autoTrigger": "automatisch triggern",
 			"autoTrigger2": "dynamisch aber max aller",
 			"startDelay": "Ausgabe bei Start verzögern",
+			"timeconstraintshow": "zeige zusätzliche Zeitbeschränkungen",
+			"timeconstrainthide": "verberge zusätzliche Zeitbeschränkungen",
 			"validForDays": "gültige Tage",
 			"validForMonths": "gültige Monate",
 			"validForDates":"Gültigkeitsdauer (Jahr wird ignoriert)",
