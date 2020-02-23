@@ -1121,8 +1121,9 @@ module.exports = function (RED) {
             if (node.level.current === node.blindData.levelTop) {
                 shape = 'dot';
             }
-
-            if (code <= 3) {
+            if (node.startDelayTime) {
+                fill = 'red'; // block
+            } else if (code <= 3) {
                 fill = 'blue'; // override
             } else if (code === 4 || code === 15 || code === 16) {
                 fill = 'grey'; // rule
@@ -1272,7 +1273,7 @@ module.exports = function (RED) {
                     ((node.level.current !== previousData.level) ||
                     (node.reason.code !== previousData.reasonCode) ||
                     (ruleId !== previousData.usedRule)) &&
-                    node.startDelayTime) {
+                    !node.startDelayTime) {
                     msg.payload = blindCtrl.level;
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);

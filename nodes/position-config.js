@@ -202,9 +202,20 @@ module.exports = function (RED) {
             } else if (dayid === (today.dayId + 1)) {
                 // this.debug('getSunTimes sunTimesTomorow');
                 result = Object.assign({},this.sunTimesTomorow[value]); // needed for a object copy
+            } else if (this.sunTimesCache1 && dayid === this.sunTimesCache1.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = Object.assign({},this.sunTimesCache1.times[value]); // needed for a object copy
+            } else if (this.sunTimesCache2 && dayid === this.sunTimesCache2.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = Object.assign({},this.sunTimesCache2.times[value]); // needed for a object copy
             } else {
                 this.debug('getSunTimes calc extra time');
-                result = Object.assign({},sunCalc.getSunTimes(now, this.latitude, this.longitude, false)[value]); // needed for a object copy
+                this.sunTimesCache2 = this.sunTimesCache1;
+                this.sunTimesCache1 = {
+                    dayid,
+                    times : sunCalc.getSunTimes(now, this.latitude, this.longitude, false)
+                };
+                result = Object.assign({},this.sunTimesCache1.times[value]); // needed for a object copy
             }
 
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -281,12 +292,24 @@ module.exports = function (RED) {
             let result;
             // this.debug(`getSunTimePrevNext now=${now} dayid=${dayid} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayid === today.dayId) {
-                result = this.sunTimesToday; // needed for a object copy
+                result = this.sunTimesToday;
             } else if (dayid === (today.dayId + 1)) {
-                result = this.sunTimesTomorow; // needed for a object copy
+                result = this.sunTimesTomorow;
+            } else if (this.sunTimesCache1 && dayid === this.sunTimesCache1.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = this.sunTimesCache1.times;
+            } else if (this.sunTimesCache2 && dayid === this.sunTimesCache2.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = this.sunTimesCache2.times;
             } else {
-                result = sunCalc.getSunTimes(now, this.latitude, this.longitude, false); // needed for a object copy
+                this.sunTimesCache2 = this.sunTimesCache1;
+                this.sunTimesCache1 = {
+                    dayid,
+                    times : sunCalc.getSunTimes(now, this.latitude, this.longitude, false)
+                };
+                result = this.sunTimesCache1.times;
             }
+
             const sortable = [];
             for (const key in result) {
                 if (result[key].pos >= 0) {
@@ -345,6 +368,12 @@ module.exports = function (RED) {
                 result = this.sunTimesToday; // needed for a object copy
             } else if (dayid === (today.dayId + 1)) {
                 result = this.sunTimesTomorow; // needed for a object copy
+            } else if (this.sunTimesCache1 && dayid === this.sunTimesCache1.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = this.sunTimesCache1.times;
+            } else if (this.sunTimesCache2 && dayid === this.sunTimesCache2.dayId) {
+                // this.debug('getSunTimes sunTimesTomorow');
+                result = this.sunTimesCache2.times;
             } else {
                 const tomorrow = new Date(now);
                 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -409,7 +438,7 @@ module.exports = function (RED) {
                 result.value = hlp.addOffset(new Date(result.value.getTime()), offset, multiplier);
                 if (limit.next && result.value.getTime() <= now.getTime()) {
                     if (dayid === today.dayId) {
-                        result.value = this.sunTimesTomorow[value];
+                        result.value = this.moonTimesTomorow[value];
                         result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                     }
                     while (hlp.isValidDate(result.value) && result.value.getTime() <= now.getTime()) {

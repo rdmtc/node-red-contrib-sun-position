@@ -8,35 +8,36 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 
 ### Table of contents
 
-* [Blind Controller](#blind-controller)
-  * [blind-control](#blind-control)
-    * [Table of contents](#table-of-contents)
-    * [The node](#the-node)
-    * [Node settings](#node-settings)
-      * [general settings](#general-settings)
-      * [blind settings](#blind-settings)
-      * [rule settings](#rule-settings)
-      * [overwrite settings](#overwrite-settings)
-      * [sun settings](#sun-settings)
-        * [maximize sunlight (Winter)](#maximize-sunlight-winter)
-        * [restrict sunlight (Summer)](#restrict-sunlight-summer)
-        * [sun position settings](#sun-position-settings)
-    * [Node Input](#node-input)
-    * [Node Output](#node-output)
-    * [Node Status](#node-status)
-  * [rules](#rules)
-    * [rules execution in detail](#rules-execution-in-detail)
-    * [rules example](#rules-example)
-  * [Samples](#samples)
-    * [Example 1](#example-1)
-    * [Example 2](#example-2)
-    * [Example 3 - testing rules and overrides](#example-3---testing-rules-and-overrides)
-    * [Example 4 - usage of message properties](#example-4---usage-of-message-properties)
-  * [Additional FAQ](#additional-faq)
-    * [Why is there no multi blind controller? (FAQ)](#why-is-there-no-multi-blind-controller-faq)
-    * [How to define a Temperature Overwrite? (FAQ)](#how-to-define-a-temperature-overwrite-faq)
-    * [How do I achieve that when opening a window the blind opens? (FAQ)](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens-faq)
-  * [Other](#other)
+- [Blind Controller](#blind-controller)
+  - [blind-control](#blind-control)
+    - [Table of contents](#table-of-contents)
+    - [The node](#the-node)
+    - [Node settings](#node-settings)
+      - [general settings](#general-settings)
+      - [blind settings](#blind-settings)
+      - [rule settings](#rule-settings)
+      - [overwrite settings](#overwrite-settings)
+      - [sun settings](#sun-settings)
+        - [maximize sunlight (Winter)](#maximize-sunlight-winter)
+        - [restrict sunlight (Summer)](#restrict-sunlight-summer)
+        - [sun position settings](#sun-position-settings)
+      - [special settings](#special-settings)
+    - [Node Input](#node-input)
+    - [Node Output](#node-output)
+    - [Node Status](#node-status)
+  - [rules](#rules)
+    - [rules execution in detail](#rules-execution-in-detail)
+    - [rules example](#rules-example)
+  - [Samples](#samples)
+    - [Example 1](#example-1)
+    - [Example 2](#example-2)
+    - [Example 3 - testing rules and overrides](#example-3---testing-rules-and-overrides)
+    - [Example 4 - usage of message properties](#example-4---usage-of-message-properties)
+  - [Additional FAQ](#additional-faq)
+    - [Why is there no multi blind controller? (FAQ)](#why-is-there-no-multi-blind-controller-faq)
+    - [How to define a Temperature Overwrite? (FAQ)](#how-to-define-a-temperature-overwrite-faq)
+    - [How do I achieve that when opening a window the blind opens? (FAQ)](#how-do-i-achieve-that-when-opening-a-window-the-blind-opens-faq)
+  - [Other](#other)
 
 ### The node
 
@@ -170,6 +171,20 @@ under the simplest assumption starting from the bearing representing the perpend
 * **oversteer2**, **oversteer2 Operator**, **Threshold** equal to **oversteer**, but an additional oversteer possibility. Lower priority than **oversteer**
 * **oversteer3**, **oversteer3 Operator**, **Threshold** equal to **oversteer** and **oversteer2**, but an additional oversteer possibility. Lower priority than **oversteer2**
 
+
+#### special settings
+
+* **output** here is configurable if the node has one single (default) or two outputs. See [Node Output](#node-output) for further details.
+* **auto trigger** Typically the calculation will be triggered by an incoming message or by an expiring timeout from an override. Additionally the node can be configured to have an auto trigger time.
+  * If such a time is configured the node will be trigger a new calculation automatically at the next possible time, taking the following times into account:
+    * every 5 minutes if *restrict sunlight* is active and the sun is in the window
+    * every 10 minutes if *restrict sunlight* is active and the sun will be next time shine in the window
+    * a time for a rule or the next rule occurs or expires
+    * the configured time span in the node
+  * To thus in the most cases it makes no sense to enter a short period (less than 15min) of auto trigger time in the configuration, because the node automatically shortens the time if necessary.
+  * Please note that the node cannot react to changes in times that are configured via a context. If for example times or offsets configured by using a flow or global context, the auto trigger would not change the next trigger time.
+* **start delay** Sometimes on node-red start (or flow re deploy) the node should not send any output before the system has settled (contexts are set, incoming messages processed, ...). To thus it is possible to define a delay time. Setting a time will only block the node to send any output until the time has reached to the first output. All calculations still will be made.
+
 ### Node Input
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
@@ -208,11 +223,12 @@ Useful to know:
   * The maximum adjustable mode is influenced by the settings of the node. The mode can not be set to restrict sunlight (`2`) if in the settings is setup only maximize sunlight (`1`).
 * A message where the topic contains `triggerOnly` or  or with an property `msg.trigger` which is true can not act as override.
 
+
 ### Node Output
 
 In then enhanced option are configurable if the node has one single (default) or two outputs.
 
-An output can be triggered by an incoming message or by an expiring timeout from an override. If the trigger is a incoming message, the incoming message will be forwarded to the first output if the blind position has changed.
+An output can be triggered by an incoming message, by an expiring timeout from an override or by auto trigger. If the trigger is a incoming message, the incoming message will be forwarded to the first output if the blind position has changed.
 
 The incoming message is changed as following:
 
@@ -286,7 +302,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
 The node status representing the value of the `blindCtrl.reason.state` of the output.
 The color of the output is as following:
 
-* red - any error
+* red - any error or a start delay is set and node is currently in this time
 * blue - override active
 * grey - level by rule
 * green - default value or sun not in window

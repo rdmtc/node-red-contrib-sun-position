@@ -659,7 +659,9 @@ module.exports = function (RED) {
             const shape = 'ring';
             let fill = 'yellow';
 
-            if (code <= 3) {
+            if (node.startDelayTime) {
+                fill = 'red'; // block
+            } else if (code <= 3) {
                 fill = 'blue'; // override
             } else if (code === 4 || code === 15 || code === 16) {
                 fill = 'grey'; // rule
@@ -750,7 +752,7 @@ module.exports = function (RED) {
                     node.payload.current !== null &&
                     ((node.reason.code !== previousData.reasonCode) ||
                     (ruleId !== previousData.usedRule))  &&
-                    node.startDelayTime) {
+                    !node.startDelayTime) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
                     msg.timeCtrl = timeCtrl;
@@ -983,7 +985,7 @@ module.exports = function (RED) {
                         payload: 'triggerOnly',
                         triggerOnly: true
                     });
-                }, node.startDelayTime || (30000 + Math.floor(Math.random() * 30000))); // 30s - 1min
+                }, node.startDelayTime || (20000 + Math.floor(Math.random() * 30000))); // 20s - 50s
             }
         }
 

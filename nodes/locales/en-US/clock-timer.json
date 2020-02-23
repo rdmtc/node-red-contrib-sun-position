@@ -48,8 +48,8 @@
 			"validForMonths": "valid months",
 			"validForDates":"valid period (year is ignored)",
 			"specialDays": "special days",
-			"onlyEven": "even",
-			"onlyOdd": "odd",
+			"onlyEven": "only even",
+			"onlyOdd": "only odd",
 			"onlyEvenDays": "only even days",
 			"onlyOddDays": "only odd days"
 		},
@@ -71,7 +71,7 @@
 			"ruleTimeDays": "select days wherefore it should be valid",
 			"ruleTimeMonths": "select months wherefore it should be valid",
 			"autoTrigger": "automatic triggers new calculation of the rule in a dynamic changing time interval",
-			"startDelay": "0",
+			"startDelay": "0 - off",
 			"startDelay2": "delay any output to the first (or only) output on start (Node-Red start, Deplay, ...). Set to 0 to deactivate.",
 			"start":"tt.mm",
 			"end":"tt.mm"

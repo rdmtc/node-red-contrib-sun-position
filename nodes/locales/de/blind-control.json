@@ -27,8 +27,12 @@
 			"ruleTimeNone": "N/A",
 			"ruleTimeMax": "spätestens (max)",
 			"ruleTimeMin": "frühestens (min)",
+			"ruleTimeDays": "nur an bestimmten Wochentagen",
+			"ruleTimeMonths": "nur an bestimmten Monaten",
 			"ruleDescription": "Beschreibung",
 			"ruleBlindLevel": "Rollladenposition",
+			"ruleTimeLimitStart": "nur von",
+			"ruleTimeLimitEnd": "bis",
 			"ruleLevelAbs": "↕  Absolut",
 			"ruleLevelMin": "⭳❗  Minimum (übersteuernd)",
 			"ruleLevelMax": "⭱️❗  Maximum (übersteuernd)",
@@ -70,6 +74,7 @@
 			"startDelay": "Ausgabe bei Start verzögern",
 			"validForDays": "gültige Tage",
 			"validForMonths": "gültige Monate",
+			"validForDates":"Gültigkeitsdauer (Jahr wird ignoriert)",
 			"specialDays": "spezielle tage",
 			"onlyEven": "nur gerade",
 			"onlyOdd": "nur ungerade",
@@ -106,8 +111,13 @@
 			"time": "Zeit",
 			"offset": "Zeit offset",
 			"level": "Behanghöhe",
+			"ruleTimeDays": "Wählen Sie Tage aus, an denen die Regel gültig sein soll",
+			"ruleTimeMonths": "Wählen Sie Monate aus, an denen die Regel gültig sein soll",
 			"autoTrigger": "automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne",
-			"startDelay": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten."
+			"startDelay": "0 - aus",
+			"startDelay2": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten.",
+			"start":"tt.mm",
+			"end":"tt.mm"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
@@ -180,7 +190,6 @@
 			"ruleMax": "__org__ [max rule __number__]"
 		},
 		"errors": {
-			"error": "Fehler: __message__",
 			"warning": "Warnung: __message__",
 			"internal": "Fehler: __message__",
 			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
