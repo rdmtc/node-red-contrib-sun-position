@@ -991,7 +991,11 @@ module.exports = function (RED) {
         this.outputs = Number(config.outputs || 1);
         this.smoothTime = (parseFloat(config.smoothTime) || -1);
         this.startDelayTime = parseFloat(config.startDelayTime);
-        if (isNaN(this.startDelayTime) || this.startDelayTime < 10) { delete this.startDelayTime; }
+        if (isNaN(this.startDelayTime) || this.startDelayTime < 10) {
+            delete this.startDelayTime;
+        } else {
+            this.startDelayTime = Math.min(this.startDelayTime, 2147483646);
+        }
 
         if (config.autoTrigger) {
             this.autoTrigger = {

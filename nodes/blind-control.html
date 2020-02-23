@@ -616,7 +616,7 @@
                         try {
                             if (typeof data.valid === undefined) {
                                 result += '<div>The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
-                            } else if (typeof data.valid !== undefined && (!data.valid || !data.isValid)) {
+                            } else if (!data.valid || !data.isValid) {
                                 result += '<div>Rule is invalid and needs to be changed!!</div>';
                             }
                             if (data.validOperandAType && data.validOperandAType !== 'none') {
@@ -1336,7 +1336,7 @@
                         title: node._('blind-control.label.dialogtitle'),
                         autoOpen: false,
                         resizable: true,
-                        height: Math.min(1024, $(window).height() * 0.9),
+                        height: Math.min(600, $(window).height() * 0.9), // 1024
                         width: Math.min(850, $(window).width() * 0.9),
                         modal: true,
                         closeOnEscape: true,
@@ -1490,6 +1490,16 @@
                     $dialogTimeMaxOffset.typedInput('width', '40%');
                     // #endregion dialogTimeMax
                     // #region dialogTimeLimit
+                    $dialog.find('#dialog-row-timeConstraints-show').click(() => {
+                        $dialog.find('#dialog-row-timeConstraintsPlaceholder').hide();
+                        $dialog.find('#dialog-row-timeConstraints').fadeIn('slow');
+                    });
+
+                    $dialog.find('#dialog-row-timeConstraints-hide').click(() => {
+                        $dialog.find('#dialog-row-timeConstraintsPlaceholder').fadeIn('slow');
+                        $dialog.find('#dialog-row-timeConstraints').hide();
+                    });
+
                     const $dialogTimeLimitOnlyEvenDays = $dialog.find('#dlg-ip-blindctl-rule-timeOnlyEvenDays');
                     const $dialogTimeLimitOnlyOddDays = $dialog.find('#dlg-ip-blindctl-rule-timeOnlyOddDays');
                     const $dialogTimeLimitDateStart = $dialog.find('#dlg-ip-blindctl-rule-timedatelimit-start');
@@ -1539,6 +1549,7 @@
                             $('#dialog-row-offset-timeMin').hide();
                             $('#dialog-row-offset-timeMax').hide();
                             $('.dialog-row-timeLimits').hide();
+                            $('.dialog-row-timeLimits-ph').hide();
                             // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
@@ -1552,11 +1563,13 @@
                         } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').show();
-                            $('.dialog-row-timeLimits').show();
+                            $('.dialog-row-timeLimits').hide();
+                            $('.dialog-row-timeLimits-ph').show();
                         } else {
                             $dialogTimeRegOperator.show();
                             $('#dialog-row-offset-timeReg').hide();
-                            $('.dialog-row-timeLimits').show();
+                            $('.dialog-row-timeLimits').hide();
+                            $('.dialog-row-timeLimits-ph').show();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -1578,15 +1591,15 @@
                             $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
                             _dialogGenHelpText();
                         }, {
-                            nodeId:     node.id,
-                            kind:       'getTimeData',
-                            config:     $nodeConfig.val(),
-                            type:       opType,
-                            value:      $dialogTimeRegInput.typedInput('value'),
-                            offsetType: $dialogTimeRegOffset.typedInput('type'),
-                            offset:     $dialogTimeRegOffset.typedInput('value'),
-                            multiplier: parseInt($dialogTimeRegMultiplier.val()),
-                            noOffsetError: true
+                            nodeId:         node.id,
+                            kind:           'getTimeData',
+                            config:         $nodeConfig.val(),
+                            type:           opType,
+                            value:          $dialogTimeRegInput.typedInput('value'),
+                            offsetType:     $dialogTimeRegOffset.typedInput('type'),
+                            offset:         $dialogTimeRegOffset.typedInput('value'),
+                            multiplier:     parseInt($dialogTimeRegMultiplier.val()),
+                            noOffsetError:  true
                         });
                         $dialogTimeMinInput.change();
                         $dialogTimeMaxInput.change();
@@ -2342,7 +2355,7 @@
     </div>
     <div class="form-row block-noindent spinner-Small" data-i18n="[title]blind-control.placeholder.startDelay2">
         <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> <span data-i18n="blind-control.label.startDelay"></span></label>
-        <span id="blind-control-startDelayTime-edit" >
+        <span id="blind-control-startDelayTime-edit">
             <input type="text" class="spinner-time" id="blind-control-startDelayTime" data-i18n="[placeholder]blind-control.placeholder.startDelay" value=""/>
             <select id="blind-control-startDelayTime-multiplier" class="node-input-multiplier">
                 <option value="1" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.0"></option>
@@ -2437,8 +2450,16 @@
             <select  id="dlg-ip-blindctl-rule-multiplier-timeMax" class="ipadd dlg-ip-blindctl-rule-multiplier-timeMax" >
             </select>
         </div>
-        <div class="dialog-row dialog-row-timeLimits" id="dialog-row-timeDays" data-i18n="[title]blind-control.placeholder.ruleTimeDays">
-            <div id="dlg-ip-blindctl-rule-timeDays" class="dlg-ip-blindctl-rule-days">
+        <div class="dialog-row dialog-row-timeLimits-ph is-to-show-initially" id="dialog-row-timeConstraintsPlaceholder">
+            <div class="dlg-ip-blindctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-show">
+                <button class="dialog-element-clickable" data-i18n="blind-control.label.timeconstraintshow"></button>
+            </div>
+        </div>
+        <div class="dialog-row dialog-row-timeLimits is-initial-hidden" id="dialog-row-timeConstraints">
+            <div class="dlg-ip-blindctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-hide">
+                <button class="dialog-element-clickable" data-i18n="blind-control.label.timeconstrainthide"></button>
+            </div>
+            <div id="dlg-ip-blindctl-rule-timeDays" class="dlg-ip-blindctl-rule-days"  data-i18n="[title]blind-control.placeholder.ruleTimeDays">
                 <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForDays"></div>
                 <div style="display:inline-block;">
                     <div>
@@ -2462,8 +2483,8 @@
                 </div>
             </div>
             <div id="dlg-ip-blindctl-rule-timeMonths" class="dlg-ip-blindctl-rule-months" style="margin-top:5px;border-top: 1px solid #000;">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForMonths"></div>
                 <div style="display:inline-block;">
-                    <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="blind-control.label.validForMonths"></div>
                     <div>
                         <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
                         <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.13"></span></label>
@@ -2569,11 +2590,11 @@
     .block-indent2 .row-full-width {
         width : calc(100% - 130px);
     }
-    .block-noindent .ui-spinner {
-        width : calc(100% - 245px);
-    }
     .spinner-Small .ui-spinner {
         width : 100px !important;
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 245px);
     }
     .block-indent1 .ui-spinner {
         width : calc(100% - 255px);
@@ -2666,6 +2687,17 @@
         width: 45%;
         margin-bottom: 0px !important;
     }
+    .dialog-element-clickable {
+        user-select: none;
+        cursor: pointer;
+        touch-action: manipulation;
+        display: inline-block;
+        /* background: transparent; */
+        /* border: 0; */
+        vertical-align:top;
+        margin-right:5px;
+    }
+    .dlg-ip-blindctl-rule-timecontraintctrl,
     .dlg-ip-blindctl-rule-days,
     .dlg-ip-blindctl-rule-limits,
     .dlg-ip-blindctl-rule-months,

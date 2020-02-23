@@ -28,6 +28,7 @@ Used to control a blind with many possibilities. This can be time-dependent and 
   - [rules](#rules)
     - [rules execution in detail](#rules-execution-in-detail)
     - [rules example](#rules-example)
+    - [time rules additional constraints](#time-rules-additional-constraints)
   - [Samples](#samples)
     - [Example 1](#example-1)
     - [Example 2](#example-2)
@@ -313,7 +314,7 @@ The shape indicates whether the blind is fully closed or not.
 ## rules
 
 The rules are not easy to understand.
-![rule-edit](https://user-images.githubusercontent.com/12692680/68091997-d985ad00-fe86-11e9-827c-967ecf4d6893.png)
+![rule-edit-0](https://user-images.githubusercontent.com/12692680/75113132-1f8b9a00-564b-11ea-9a04-9bc340763a08.png)
 
 There are basically 4 generic types of rules:
 
@@ -326,7 +327,7 @@ There are basically 4 generic types of rules:
   - a rule with a condition will only be active if the condition matches, otherwise the rule will be ignored
   - rules with only a condition are evaluated in the order of time __until__ and time __from__ rules
 - a rule with a given time - time rule
-![rule-type-3](https://user-images.githubusercontent.com/12692680/68092071-a1329e80-fe87-11e9-82ae-dbefb494cea1.png)
+![rule-type-3](https://user-images.githubusercontent.com/12692680/75113146-68435300-564b-11ea-8531-6623311851b8.png)
   - time rules differ again in 2 ways
     - __until__ time rules
       - rules will be active from Midnight __until__ the given time
@@ -336,7 +337,7 @@ There are basically 4 generic types of rules:
       - the last matching __from__ rule with a time earlier than the current time will be considered
       - __from__ rules only considered if no __until__ rule was selected
 - a rule with a condition and a given time
-![rule-type-4](https://user-images.githubusercontent.com/12692680/68092080-c6271180-fe87-11e9-9ec8-8287ac1eb771.png)
+![rule-type-4](https://user-images.githubusercontent.com/12692680/75113183-bc4e3780-564b-11ea-83d8-495e188e4b81.png)
   - these type of rules are a combination. The rules will only be considered if the condition matches and then it act as a normal time rule. Otherwise it will be ignored.
 
 the blind level of a rule could have 5 options:
@@ -414,6 +415,30 @@ starting from a defined time the following rule will be used:
 ![blind-control-rules-2b](https://user-images.githubusercontent.com/12692680/68092401-f91ed480-fe8a-11e9-9799-dac643f963a9.png)
 
 There is a time between the *until* and the *from* rules, where no rules matches. In this time the default defined blind position will be used or if sun control is active the blind position calculated by the sun will be used.
+
+### time rules additional constraints
+
+On a time rule additional constraints can be choose:
+![blind-control-rules-constraints](https://user-images.githubusercontent.com/12692680/75113198-f61f3e00-564b-11ea-835e-7550a9e765af.png)
+
+A rule is only executed if there are no restrictions.
+
+That means:
+
+- if the current day of the week is one of the selected days of the week
+- if the current month is one of the selected months
+- if *only even* is selected and the current day is an even day
+- if *only odd* is selected and the current day is an odd day
+- if the current day is in the time period as selected
+  - For the time period settings the year is ignored.
+    - Normal: the start day and month is less than the end day and month
+      - the rule is only executed if the current month+day is greater than or equal the selected period start **and** less than the selected end month and day.
+      - Example: This can be used To setup a period starting from 17th of March to 7th of May.
+    - over the year: the start day and month is greater than the end day and month
+      - the rule is only executed if the current month+day is greater than or equal the selected period start **or** less than the selected end month and day.
+      - Example: This can be used To setup a period starting from 12th of November to 20th of February.
+
+All constraints are additive. Pleas careful to that, that means it is possible to setup a rule which never would be used.
 
 ## Samples
 
