@@ -71,7 +71,7 @@
 			"ruleTimeDays": "Wählen Sie Tage aus, an denen die Regel gültig sein soll",
 			"ruleTimeMonths": "Wählen Sie Monate aus, an denen die Regel gültig sein soll",
 			"autoTrigger": "automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne",
-			"startDelay": "0",
+			"startDelay": "0 - aus",
 			"startDelay2": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten.",
 			"start":"tt.mm",
 			"end":"tt.mm"

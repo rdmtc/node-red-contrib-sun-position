@@ -54,7 +54,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         if (!isValidDate(date)) {
             console.log(`toDays: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
             date = new Date();
+        } else {
+            date = new Date(date);
         }
+
         let ms = date.valueOf();
         if (inUTC === false) {
             ms = ms + (date.getTimezoneOffset() * 60 * 1000);
@@ -192,6 +195,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {sunposition} result object of sun-position
     */
     SunCalc.getPosition = function (date, lat, lng, inUTC) {
+        // console.log(`getPosition date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -474,6 +478,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {suntimes} result object of sunTime
      */
     SunCalc.getSunTime = function (date, lat, lng, elevationAngle, inUTC) {
+        // console.log(`getSunTime date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}, elevationAngle=${elevationAngle}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -552,6 +557,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {moonposition} result object of moon-position
      */
     SunCalc.getMoonPosition = function (date, lat, lng, inUTC) {
+        // console.log(`getMoonPosition date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -599,6 +605,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @return {moonillumination} result object of moon-illumination
      */
     SunCalc.getMoonIllumination = function (date, inUTC) {
+        // console.log(`getMoonIllumination date=${date.toISOString()}`);
         const d = toDays(date, inUTC);
         const s = sunCoords(d);
         const m = moonCoords(d);

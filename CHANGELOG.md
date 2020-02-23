@@ -1,5 +1,13 @@
 # node-red-contrib-sun-position
 
+#### 1.0.7:  bug fix
+
+- general
+  - added additional caching of sun times calculation to reduce calculation load
+
+- blind-control + clock-time
+ - fixed start delay setting causing no output at all
+ - i18n, spelling, documentation
 
 #### 1.0.6:  bug fix
 
