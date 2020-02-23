@@ -2,6 +2,15 @@
 
 #### 1.0.7:  bug fix
 
+- time-inject
+  - fixes that time inject will do a recalculation every 1 ms (Problem can only occurs if the time constraints are used.) #106
+
+- blind-control + clock-time
+  - documentation
+  - i18n
+
+#### 1.0.7:  bug fix
+
 - general
   - added additional caching of sun times calculation to reduce calculation load
 
