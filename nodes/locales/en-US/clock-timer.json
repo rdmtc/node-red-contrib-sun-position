@@ -96,7 +96,7 @@
 			"rule": "position by fixed rule [__number__] __name__",
 			"ruleMin": "__org__ (__level__ is below minimum) [__number__] __name__",
 			"ruleMax": "__org__ (__level__ is above maximum) [__number__] __name__",
-			"startDelay": "node in startup"
+			"startDelay": "node in startup until __dateISO__"
 		},
 		"states": {
 			"overwriteNoExpire": "overwritten [prio=__prio__]",

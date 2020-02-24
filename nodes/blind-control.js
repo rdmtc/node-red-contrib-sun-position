@@ -1154,9 +1154,6 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                // node.debug(`blindData=${ util.inspect(node.blindData, { colors: true, compact: 10, breakLength: Infinity }) }`);
-
-                // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
                     node.status({
                         fill: 'red',
@@ -1195,7 +1192,6 @@ module.exports = function (RED) {
                     node.sunData.mode = newMode;
                 }
 
-                // node.debug(`start pos=${node.level.current} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 // check for manual overwrite
                 if (!checkBlindPosOverwrite(node, msg, now, previousData)) {
                     // calc times:
@@ -1257,7 +1253,7 @@ module.exports = function (RED) {
                 if (node.startDelayTime) {
                     node.reason.code = NaN;
                     node.reason.state = RED._('blind-control.states.startDelay');
-                    node.reason.description = RED._('blind-control.reasons.startDelay');
+                    node.reason.description = RED._('blind-control.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
                 setState(blindCtrl);
 
@@ -1407,6 +1403,7 @@ module.exports = function (RED) {
                     rule.levelType = 'levelND';
                     rule.levelValue = '';
                 }
+
                 rule.conditional = (rule.validOperandAType !== 'none');
                 rule.timeLimited = (rule.timeType !== 'none');
                 rule.offsetType = rule.offsetType || 'none';
@@ -1503,27 +1500,19 @@ module.exports = function (RED) {
                     node.rules.checkFrom = true;
                 }
             }
-            /* if (node.rules.data) {
-                node.rules.data.sort((a, b) => {
-                    if (a.timeLimited && b.timeLimited) { // both are time limited
-                        const top = (a.timeOp - b.timeOp);
-                        if (top !== 0) { // from/until type different
-                            return top; // from before until
-                        }
-                    }
-                    return a.pos - b.pos;
-                });
-                node.debug('node.rules.data =' + util.inspect(node.rules.data, { colors: true, compact: 10, breakLength: Infinity }));
-            } */
+
             if (node.autoTrigger || (node.startDelayTime)) {
+                const delay = node.startDelayTime || (30000 + Math.floor(Math.random() * 30000)); // 30s - 1min
+                node.startDelayTimeOut = new Date(Date.now() + delay);
                 setTimeout(() => {
                     delete node.startDelayTime;
+                    delete node.startDelayTimeOut;
                     node.emit('input', {
                         topic: 'autoTrigger/triggerOnly/start',
                         payload: 'triggerOnly',
                         triggerOnly: true
                     });
-                }, node.startDelayTime || (30000 + Math.floor(Math.random() * 30000))); // 30s - 1min
+                }, delay);
             }
         }
 
