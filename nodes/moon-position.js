@@ -32,7 +32,6 @@ module.exports = function (RED) {
                 const now = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
-                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',

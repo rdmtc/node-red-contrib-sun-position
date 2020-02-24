@@ -1157,7 +1157,6 @@ module.exports = function (RED) {
 
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
-                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',

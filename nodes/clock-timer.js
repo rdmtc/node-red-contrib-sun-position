@@ -416,7 +416,7 @@ module.exports = function (RED) {
         const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
-        // node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules now=${now.toISOString()}, nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
         const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -464,7 +464,7 @@ module.exports = function (RED) {
                 }
             }
             const num = getRuleTimeData(node, msg, rule, now);
-            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - num=${num}- rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
                 return rule;
             }
@@ -698,7 +698,6 @@ module.exports = function (RED) {
                 node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
                 // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
-                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',

@@ -48,18 +48,15 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * get number of days for a date since 2000
      * @param {Date} date date to get days
      * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
-     * @return {number} cont of days
+     * @return {number} count of days
      */
-    function toDays(date, inUTC) {
+    function toDays(date, doUTCShift) {
         if (!isValidDate(date)) {
             console.log(`toDays: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
             date = new Date();
-        } else {
-            date = new Date(date);
         }
-
         let ms = date.valueOf();
-        if (inUTC === false) {
+        if (doUTCShift === true) {
             ms = ms + (date.getTimezoneOffset() * 60 * 1000);
         }
         return ((ms / dayMs) + J1970) - J2000;
@@ -636,8 +633,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @typedef {Object} moontimes
     * @property {Date} rise - a Date object if the moon is rising on the given Date, otherwhise NaN
     * @property {Date} set - a Date object if the moon is setting on the given Date, otherwhise NaN
-    * @property {boolean} [alwaysUp] - is true if the moon in always up, oitherwise property not exists
-    * @property {boolean} [alwaysDown] - is true if the moon in always up, oitherwise property not exists
+    * @property {boolean} alwaysUp - is true if the moon in always up, oitherwise property not exists
+    * @property {boolean} alwaysDown - is true if the moon in always up, oitherwise property not exists
     */
 
     /**
@@ -733,7 +730,16 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
 
         if (!rise && !set) {
-            result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+            if (ye > 0) {
+                result.alwaysUp = true;
+                result.alwaysDown = false;
+            } else {
+                result.alwaysUp = false;
+                result.alwaysDown = true;
+            }
+        } else {
+            result.alwaysUp = false;
+            result.alwaysDown = false;
         }
         return result;
     };
