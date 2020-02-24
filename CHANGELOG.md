@@ -1,6 +1,12 @@
 # node-red-contrib-sun-position
 
-#### 1.0.7:  bug fix
+#### 1.0.9:  bug fix
+
+- general
+ - fixed #102 again - massive changes in the library with cleanup functions
+ -
+
+#### 1.0.8:  bug fix
 
 - time-inject
   - fixes that time inject will do a recalculation every 1 ms (Problem can only occurs if the time constraints are used.) #106
