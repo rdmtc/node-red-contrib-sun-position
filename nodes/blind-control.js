@@ -1125,8 +1125,9 @@ module.exports = function (RED) {
             if (node.level.current === node.blindData.levelTop) {
                 shape = 'dot';
             }
-            if (node.startDelayTime) {
+            if (isNaN(code)) {
                 fill = 'red'; // block
+                shape = 'dot';
             } else if (code <= 3) {
                 fill = 'blue'; // override
             } else if (code === 4 || code === 15 || code === 16) {
@@ -1253,7 +1254,11 @@ module.exports = function (RED) {
                     blindCtrl.level = node.level.current;
                     blindCtrl.levelInverse = node.level.currentInverse;
                 }
-                // node.debug(`result pos=${blindCtrl.level} manual=${node.blindData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
+                if (node.startDelayTime) {
+                    node.reason.code = NaN;
+                    node.reason.state = RED._('blind-control.states.startDelay');
+                    node.reason.description = RED._('blind-control.reasons.startDelay');
+                }
                 setState(blindCtrl);
 
                 let topic = config.topic;
@@ -1273,10 +1278,10 @@ module.exports = function (RED) {
                 }
 
                 if ((!isNaN(node.level.current)) &&
+                    (!isNaN(node.reason.code)) &&
                     ((node.level.current !== previousData.level) ||
                     (node.reason.code !== previousData.reasonCode) ||
-                    (ruleId !== previousData.usedRule)) &&
-                    !node.startDelayTime) {
+                    (ruleId !== previousData.usedRule))) {
                     msg.payload = blindCtrl.level;
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);

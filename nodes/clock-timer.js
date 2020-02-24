@@ -660,11 +660,12 @@ module.exports = function (RED) {
          */
         function setState(pLoad) {
             const code = node.reason.code;
-            const shape = 'ring';
+            let shape = 'ring';
             let fill = 'yellow';
 
-            if (node.startDelayTime) {
+            if (isNaN(code)) {
                 fill = 'red'; // block
+                shape = 'dot';
             } else if (code <= 3) {
                 fill = 'blue'; // override
             } else if (code === 4 || code === 15 || code === 16) {
@@ -709,9 +710,16 @@ module.exports = function (RED) {
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
+                previousData.payloadType = (typeof node.payload.current);
                 previousData.reasonCode = node.reason.code;
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
+                if (previousData.payloadType === 'string' ||
+                    previousData.payloadType === 'boolean' ||
+                    previousData.payloadType === 'number') {
+                    previousData.payloadValue = node.payload.current;
+                    previousData.payloadSimple = true;
+                }
                 node.reason.code = NaN;
                 const now = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
@@ -735,6 +743,12 @@ module.exports = function (RED) {
                 // node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 timeCtrl.reason = node.reason;
                 timeCtrl.timeClock = node.timeClockData;
+
+                if (node.startDelayTime) {
+                    node.reason.code = NaN;
+                    node.reason.state = RED._('clock-timer.states.startDelay');
+                    node.reason.description = RED._('clock-timer.reasons.startDelay');
+                }
                 setState(node.payload.current);
 
                 let topic = node.payload.topic;
@@ -750,12 +764,14 @@ module.exports = function (RED) {
                     topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
-                if (typeof node.payload.current !== 'undefined' &&
-                    node.payload.current !== 'none' &&
-                    node.payload.current !== null &&
+                if ((typeof node.payload.current !== 'undefined') &&
+                    (node.payload.current !== 'none') &&
+                    (node.payload.current !== null) &&
+                    !isNaN(node.reason.code) &&
                     ((node.reason.code !== previousData.reasonCode) ||
-                    (ruleId !== previousData.usedRule))  &&
-                    !node.startDelayTime) {
+                    (ruleId !== previousData.usedRule) ||
+                    (typeof node.payload.current !== previousData.payloadType) ||
+                    ((typeof previousData.payloadValue  !== 'undefined') && (previousData.payloadValue !== node.payload.current))) ) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
                     msg.timeCtrl = timeCtrl;
