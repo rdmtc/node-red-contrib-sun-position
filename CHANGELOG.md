@@ -1,5 +1,13 @@
 # node-red-contrib-sun-position
 
+#### 1.0.10:  bug fix
+
+- general
+  - next try for #102
+
+- sun-position + moon-position
+  - implements #81 - now it is possible to have `msg.latitude` and `msg.longitude` (or `msg.lat` and `msg.lon`) to override settings in configuration node. The configuration Node still needs to be configured properly.
+
 #### 1.0.9:  bug fix
 
 - general
