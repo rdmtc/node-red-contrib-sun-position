@@ -347,9 +347,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {number} dateValue date as unix timestamp for calculating sun-times
      * @param {number} lat latitude for calculating sun-times
      * @param {number} lng longitude for calculating sun-times
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is local)
      * @return {suntimes} result object of sunTime
      */
-    SunCalc.getSunTimes = function (dateValue, lat, lng, noDeprecated) {
+    SunCalc.getSunTimes = function (dateValue, lat, lng, noDeprecated, inUTC) {
         // console.log(`getSunTimes dateValue=${dateValue}  lat=${lat}, lng=${lng}, noDeprecated=${noDeprecated}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
@@ -357,9 +358,15 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         if (isNaN(lng)) {
             throw new Error('longitude missing');
         }
+        const t = new Date(dateValue);
+        if (inUTC) {
+            t.setUTCHours(12, 0, 0, 0);
+        } else {
+            t.setHours(12, 0, 0, 0);
+        }
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(dateValue);
+        const d = toDays(t.valueOf());
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
         const M = solarMeanAnomaly(ds);
@@ -617,15 +624,23 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {number} dateValue date as unix timestamp for calculating moon-times
      * @param {number} lat latitude for calculating moon-times
      * @param {number} lng longitude for calculating moon-times
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is local)
      * @return {moontimes} result object of sunTime
      */
-    SunCalc.getMoonTimes = function (dateValue, lat, lng) {
+    SunCalc.getMoonTimes = function (dateValue, lat, lng, inUTC) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
         }
+        const t = new Date(dateValue);
+        if (inUTC) {
+            t.setUTCHours(0, 0, 0, 0);
+        } else {
+            t.setHours(0, 0, 0, 0);
+        }
+        dateValue = t.valueOf();
         // console.log(`getMoonTimes lat=${lat} lng=${lng} dateValue=${dateValue} t=${t}`);
 
         const hc = 0.133 * rad;
