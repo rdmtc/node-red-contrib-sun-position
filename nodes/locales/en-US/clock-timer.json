@@ -95,7 +95,8 @@
 			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [__number__] __name__",
 			"rule": "position by fixed rule [__number__] __name__",
 			"ruleMin": "__org__ (__level__ is below minimum) [__number__] __name__",
-			"ruleMax": "__org__ (__level__ is above maximum) [__number__] __name__"
+			"ruleMax": "__org__ (__level__ is above maximum) [__number__] __name__",
+			"startDelay": "node in startup until __dateISO__"
 		},
 		"states": {
 			"overwriteNoExpire": "overwritten [prio=__prio__]",
@@ -106,7 +107,8 @@
 			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [__number__] __name__",
 			"rule": "by fixed rule [__number__] __name__",
 			"ruleMin": "__org__ [min rule __number__]",
-			"ruleMax": "__org__ [max rule __number__]"
+			"ruleMax": "__org__ [max rule __number__]",
+			"startDelay": "startup"
 		},
 		"errors": {
 			"warning": "Warning: __message__",

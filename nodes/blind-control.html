@@ -692,7 +692,7 @@
                                     result += '</var>';
                                     result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
                                     if (enh && enh.timeMax) {
-                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
                                     }
                                     result += '</div>';
                                 }
@@ -776,11 +776,21 @@
                                     result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
                                     result += node._('blind-control.label.ruleTimeLimitStart');
                                     result += '</span> <var>';
-                                    result += (getDateShort(data.timeDateStart) || '01-01');
+                                    if (enh) {
+                                        const year = (new Date()).getFullYear();
+                                        result += data.timeDateStart || year + '-01-01';
+                                    } else {
+                                        result += (getDateShort(data.timeDateStart) || '01-01');
+                                    }
                                     result += '</var> <span> ';
                                     result += node._('blind-control.label.ruleTimeLimitEnd');
                                     result += '</span> <var>';
-                                    result += (getDateShort(data.timeDateEnd) || '12-31');
+                                    if (enh) {
+                                        const year = (new Date()).getFullYear();
+                                        result += data.timeDateEnd || year + '-12-31';
+                                    } else {
+                                        result += (getDateShort(data.timeDateEnd) || '12-31');
+                                    }
                                     result += '</var></div>';
                                 }
                                 result += '</div>';
@@ -809,7 +819,7 @@
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
-                            result = err.message;
+                            result = 'Error: "' + err.message + '"';
                         }
                         return result;
                     }

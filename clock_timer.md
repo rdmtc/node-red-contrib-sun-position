@@ -61,6 +61,17 @@ The node was created out of the desire to be able to use the [blind-control node
 
 ![clock-timer-settings-5](https://user-images.githubusercontent.com/12692680/70744896-fe413000-1d22-11ea-8085-0d37847d74dc.png)
 
+#### special settings
+
+* **output** here is configurable if the node has one single (default) or two outputs. See [Node Output](#node-output) for further details.
+* **auto trigger** Typically the calculation will be triggered by an incoming message or by an expiring timeout from an override. Additionally the node can be configured to have an auto trigger time.
+  * If such a time is configured the node will be trigger a new calculation automatically at the next possible time, taking the following times into account:
+    * a time for a rule or the next rule occurs or expires
+    * the configured time span in the node
+  * To thus in the most cases it makes no sense to enter a short period (less than 15min) of auto trigger time in the configuration, because the node automatically shortens the time if necessary.
+  * Please note that the node cannot react to changes in times that are configured via a context. If for example times or offsets configured by using a flow or global context, the auto trigger would not change the next trigger time.
+* **start delay** Sometimes on node-red start (or flow re deploy) the node should not send any output before the system has settled (contexts are set, incoming messages processed, ...). To thus it is possible to define a delay time. Setting a time will only block the node to send any output until the time has reached to the first output. All calculations still will be made.
+
 ### Node Input
 
 The Input is for triggering the calculation and for setting overwrites of the blind position.
@@ -88,6 +99,7 @@ Useful to know:
   - if additional **exactPriority** is defined, then the message priority must be __equal__ to the existing priority.
 - A message where the topic contains `triggerOnly` or with an property `msg.trigger` which is true can not act as override.
 
+
 ### Node Output
 
 In the enhanced option are configurable if the node has one single (default) or two outputs.
@@ -109,6 +121,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
 * `timeCtrl` a object will be added add as `msg.timeCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
   * `timeCtrl.reason` - __object__ - for the reason of the current blind position
     * `timeCtrl.reason.code` - __number__ - representing the reason for the blind position. The possible codes are
+      * **NaN** - start delay is setup and node is in this time
       * **-1** - the rules was not evaluated, maybe override is active
       * **1**  - defined default payload, because no other rule/condition/behavior
       * **2**  - manual override
@@ -157,7 +170,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
 The node status representing the value of the `timeCtrl.reason.state` of the output.
 The color of the output is as following:
 
-* red - any error
+* red - any error or a start delay is set and node is currently in this time
 * blue - override active
 * grey - payload by rule
 * green - default value

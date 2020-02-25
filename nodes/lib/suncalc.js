@@ -26,43 +26,21 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const J2000 = 2451545;
 
     /**
-     * checks if a value is a valid Date object
-     * @param {*} d - a value to check
-     * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
-     */
-    function isValidDate(d) {
-        return d instanceof Date && !isNaN(d);
-        // d !== 'Invalid Date' && !isNaN(d)
-    }
-
-    /**
      * convert date from Julian calendar
-     * @param {*} date object to convert
-     * @return {date} result date
+     * @param {number} day nmber in julian calendar to convert
+     * @return {number} result date as unix timestamp
      */
     function fromJulianDay(j) {
-        return new Date((j - J1970) * dayMs);
+        return (j - J1970) * dayMs;
     }
 
     /**
-     * get number of days for a date since 2000
-     * @param {Date} date date to get days
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
-     * @return {number} cont of days
+     * get number of days for a dateValue since 2000
+     * @param {number} dateValue date as unix timestamp to get days
+     * @return {number} count of days
      */
-    function toDays(date, inUTC) {
-        if (!isValidDate(date)) {
-            console.log(`toDays: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
-            date = new Date();
-        } else {
-            date = new Date(date);
-        }
-
-        let ms = date.valueOf();
-        if (inUTC === false) {
-            ms = ms + (date.getTimezoneOffset() * 60 * 1000);
-        }
-        return ((ms / dayMs) + J1970) - J2000;
+    function toDays(dateValue) {
+        return ((dateValue / dayMs) + J1970) - J2000;
     }
 
     // general calculations for position
@@ -188,14 +166,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * calculates sun position for a given date and latitude/longitude
-     * @param {Date} date Date object with the  for calculating sun-position
+     * @param {number} dateValue date as unix timestamp for calculating sun-position
      * @param {number} lat latitude for calculating sun-position
      * @param {number} lng longitude for calculating sun-position
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
      * @return {sunposition} result object of sun-position
     */
-    SunCalc.getPosition = function (date, lat, lng, inUTC) {
-        // console.log(`getPosition date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}`);
+    SunCalc.getPosition = function (dateValue, lat, lng) {
+        // console.log(`getPosition dateValue=${dateValue}  lat=${lat}, lng=${lng}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -204,7 +181,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date, inUTC);
+        const d = toDays(dateValue);
         const c = sunCoords(d);
         const H = siderealTime(d, lw) - c.ra;
         const azimuthr = azimuth(H, phi, c.dec);
@@ -367,23 +344,29 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * calculates sun times for a given date and latitude/longitude
-     * @param {Date} date Date object with the  for calculating sun-times
+     * @param {number} dateValue date as unix timestamp for calculating sun-times
      * @param {number} lat latitude for calculating sun-times
      * @param {number} lng longitude for calculating sun-times
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is local)
      * @return {suntimes} result object of sunTime
      */
-    SunCalc.getSunTimes = function (date, lat, lng, inUTC, noDeprecated) {
-        // console.log(`getSunTimes date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}, noDeprecated=${noDeprecated}`);
+    SunCalc.getSunTimes = function (dateValue, lat, lng, noDeprecated, inUTC) {
+        // console.log(`getSunTimes dateValue=${dateValue}  lat=${lat}, lng=${lng}, noDeprecated=${noDeprecated}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
         }
+        const t = new Date(dateValue);
+        if (inUTC) {
+            t.setUTCHours(12, 0, 0, 0);
+        } else {
+            t.setHours(12, 0, 0, 0);
+        }
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date, inUTC);
+        const d = toDays(t.valueOf());
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
         const M = solarMeanAnomaly(ds);
@@ -392,12 +375,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const Jnoon = solarTransitJ(ds, M, L);
         const noonVal = fromJulianDay(Jnoon);
         const nadirVal = fromJulianDay(Jnoon + 0.5);
-        // console.log(`getSunTimes ${date.toISOString()} - Jnoon=${Jnoon} - JulianNoon=${noonVal.toISOString()} - JulianNadir=${nadirVal.toISOString()} ds=${ds}, M=${M}, L=${L}, n=${n}, d=${d}, lw=${lw}, phi=${phi}`);
 
         const result = {
             solarNoon: {
-                value: noonVal,
-                ts: noonVal.getTime(),
+                value: new Date(noonVal),
+                ts: noonVal,
                 name: 'solarNoon',
                 // elevation: 90,
                 julian: Jnoon,
@@ -405,8 +387,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 pos: sunTimes.length
             },
             nadir: {
-                value: nadirVal,
-                ts: nadirVal.getTime(),
+                value: new Date(nadirVal),
+                ts: nadirVal,
                 name: 'nadir',
                 // elevation: 270,
                 julian: Jnoon + 0.5,
@@ -436,8 +418,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             const v2 = fromJulianDay(Jrise);
 
             result[time[2]] = {
-                value: v1,
-                ts: v1.getTime(),
+                value: new Date(v1),
+                ts: v1,
                 name: time[2],
                 elevation: sa,
                 julian: Jset,
@@ -445,8 +427,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 pos: len + i + 1
             };
             result[time[1]] = {
-                value: v2,
-                ts: v2.getTime(),
+                value: new Date(v2),
+                ts: v2,
                 name: time[1],
                 elevation: sa, // (180 + (sa * -1)),
                 julian: Jrise,
@@ -470,15 +452,14 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * calculates sun times for a given date and latitude/longitude
-     * @param {Date} date Date object with the  for calculating sun-times
+     * @param {number} dateValue date as unix timestamp for calculating sun-times
      * @param {number} lat latitude for calculating sun-times
      * @param {number} lng longitude for calculating sun-times
      * @param {number} elevationAngle sun angle for calculating sun-time
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
      * @return {suntimes} result object of sunTime
-     */
-    SunCalc.getSunTime = function (date, lat, lng, elevationAngle, inUTC) {
-        // console.log(`getSunTime date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}, elevationAngle=${elevationAngle}`);
+     ***
+    SunCalc.getSunTime = function (dateValue, lat, lng, elevationAngle) {
+        // console.log(`getSunTime dateValue=${dateValue}  lat=${lat}, lng=${lng}, elevationAngle=${elevationAngle}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -490,7 +471,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date, inUTC);
+        const d = toDays(dateValue);
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
         const M = solarMeanAnomaly(ds);
@@ -505,19 +486,19 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         return {
             set: {
-                value: v1,
-                ts: v1.getTime(),
+                value: new Date(v1),
+                ts: v1,
                 elevation: elevationAngle,
                 julian: Jset
             },
             rise: {
-                value: v2,
-                ts: v2.getTime(),
+                value: new Date(v2),
+                ts: v2,
                 elevation: elevationAngle, // (180 + (elevationAngle * -1)),
                 julian: Jrise
             }
         };
-    };
+    }; /* **** */
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
@@ -550,14 +531,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * calculates moon position for a given date and latitude/longitude
-     * @param {Date} date Date object with the  for calculating moon-position
+     * @param {number} dateValue date as unix timestamp for calculating moon-position
      * @param {number} lat latitude for calculating moon-position
      * @param {number} lng longitude for calculating moon-position
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
      * @return {moonposition} result object of moon-position
      */
-    SunCalc.getMoonPosition = function (date, lat, lng, inUTC) {
-        // console.log(`getMoonPosition date=${date.toISOString()}  lat=${lat}, lng=${lng}, inUTC=${inUTC}`);
+    SunCalc.getMoonPosition = function (dateValue, lat, lng) {
+        // console.log(`getMoonPosition dateValue=${dateValue}  lat=${lat}, lng=${lng}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
@@ -567,7 +547,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(date, inUTC);
+        const d = toDays(dateValue);
         const c = moonCoords(d);
         const H = siderealTime(d, lw) - c.ra;
         let h = altitude(H, phi, c.dec);
@@ -600,13 +580,12 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * calculations for illumination parameters of the moon,
      * based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
      * Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-     * @param {Date} date Date object with the  for calculating moon-illumination
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @param {number} dateValue date as unix timestamp for calculating moon-illumination
      * @return {moonillumination} result object of moon-illumination
      */
-    SunCalc.getMoonIllumination = function (date, inUTC) {
-        // console.log(`getMoonIllumination date=${date.toISOString()}`);
-        const d = toDays(date, inUTC);
+    SunCalc.getMoonIllumination = function (dateValue) {
+        // console.log(`getMoonIllumination dateValue=${dateValue}`);
+        const d = toDays(dateValue);
         const s = sunCoords(d);
         const m = moonCoords(d);
         const sdist = 149598000;  // distance from Earth to Sun in km
@@ -624,58 +603,54 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * add hours to a date
-     * @param {date} date - date object to add hours
+     * @param {number} dateValue date as unix timestamp to add hours
      * @param {number} h - hours to add
-     * @returns {Date} new Date with added hours
+     * @returns {number} new Date as unix timestamp with added hours
      */
-    function hoursLater(date, h) {
-        return new Date(date.valueOf() + h * dayMs / 24);
+    function hoursLater(dateValue, h) {
+        return dateValue + h * dayMs / 24;
     }
 
     /**
     * @typedef {Object} moontimes
     * @property {Date} rise - a Date object if the moon is rising on the given Date, otherwhise NaN
     * @property {Date} set - a Date object if the moon is setting on the given Date, otherwhise NaN
-    * @property {boolean} [alwaysUp] - is true if the moon in always up, oitherwise property not exists
-    * @property {boolean} [alwaysDown] - is true if the moon in always up, oitherwise property not exists
+    * @property {boolean} alwaysUp - is true if the moon in always up, oitherwise property not exists
+    * @property {boolean} alwaysDown - is true if the moon in always up, oitherwise property not exists
     */
 
     /**
      * calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
-     * @param {Date} date Date object with the  for calculating moon-times
+     * @param {number} dateValue date as unix timestamp for calculating moon-times
      * @param {number} lat latitude for calculating moon-times
      * @param {number} lng longitude for calculating moon-times
-     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is UTC)
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is local)
      * @return {moontimes} result object of sunTime
      */
-    SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
+    SunCalc.getMoonTimes = function (dateValue, lat, lng, inUTC) {
         if (isNaN(lat)) {
             throw new Error('latitude missing');
         }
         if (isNaN(lng)) {
             throw new Error('longitude missing');
         }
-        if (!isValidDate(date)) {
-            console.log(`getMoonTimes: given date parameter is invalid!! date=${date}`); // eslint-disable-line no-console
-            date = new Date();
-        }
-
-        const t = new Date(date);
-        if (inUTC === false) {
-            t.setHours(0, 0, 0, 0);
-        } else {
+        const t = new Date(dateValue);
+        if (inUTC) {
             t.setUTCHours(0, 0, 0, 0);
+        } else {
+            t.setHours(0, 0, 0, 0);
         }
-        // console.log(`getMoonTimes lat=${lat} lng=${lng} inUTC=${inUTC} date=${date} t=${t}`);
+        dateValue = t.valueOf();
+        // console.log(`getMoonTimes lat=${lat} lng=${lng} dateValue=${dateValue} t=${t}`);
 
         const hc = 0.133 * rad;
-        let h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc;
+        let h0 = SunCalc.getMoonPosition(dateValue, lat, lng).altitude - hc;
         let rise; let set; let ye; let d; let roots; let x1; let x2; let dx;
 
         // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
         for (let i = 1; i <= 26; i += 2) {
-            const h1 = SunCalc.getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
-            const h2 = SunCalc.getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
+            const h1 = SunCalc.getMoonPosition(hoursLater(dateValue, i), lat, lng).altitude - hc;
+            const h2 = SunCalc.getMoonPosition(hoursLater(dateValue, i + 1), lat, lng).altitude - hc;
 
             const a = (h0 + h2) / 2 - h1;
             const b = (h2 - h0) / 2;
@@ -721,19 +696,28 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
         const result = {};
         if (rise) {
-            result.rise = hoursLater(t, rise);
+            result.rise = new Date(hoursLater(dateValue, rise));
         } else {
             result.rise = NaN;
         }
 
         if (set) {
-            result.set = hoursLater(t, set);
+            result.set = new Date(hoursLater(dateValue, set));
         } else {
             result.set = NaN;
         }
 
         if (!rise && !set) {
-            result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+            if (ye > 0) {
+                result.alwaysUp = true;
+                result.alwaysDown = false;
+            } else {
+                result.alwaysUp = false;
+                result.alwaysDown = true;
+            }
+        } else {
+            result.alwaysUp = false;
+            result.alwaysDown = false;
         }
         return result;
     };

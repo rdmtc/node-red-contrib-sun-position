@@ -16,54 +16,54 @@ In addition, there is now a blind controller, which can set blind position time 
 
 ![nodes](https://user-images.githubusercontent.com/12692680/70033601-19d46a00-15b0-11ea-9e36-a7843e20ff85.png)
 
-
 ## Table of contents
 
-* [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
-  * [Table of contents](#table-of-contents)
-  * [Preconditions](#preconditions)
-  * [Installation](#installation)
-  * [General](#general)
-    * [Saving resources](#saving-resources)
-    * [second based accuracy](#second-based-accuracy)
-  * [Implemented Nodes](#implemented-nodes)
-    * [sun-position](#sun-position)
-      * [sun-position - Node settings](#sun-position---node-settings)
-      * [Node Input](#node-input)
-      * [sun-position - Node Output](#sun-position---node-output)
-    * [moon-position](#moon-position)
-      * [moon-position - Node settings](#moon-position---node-settings)
-      * [moon-position - Node Output](#moon-position---node-output)
-    * [time-inject](#time-inject)
-      * [time-inject - Node settings](#time-inject---node-settings)
-      * [time-inject - Node Input](#time-inject---node-input)
-      * [time-inject - Node Output](#time-inject---node-output)
-      * [time-inject - Node Status](#time-inject---node-status)
-    * [within-time](#within-time)
-      * [within-time - Node settings](#within-time---node-settings)
-    * [time-comp](#time-comp)
-      * [time-comp - Node settings](#time-comp---node-settings)
-    * [time-span](#time-span)
-      * [time-span - Node settings](#time-span---node-settings)
-    * [blind-control](#blind-control)
-    * [clock-timer](#clock-timer)
-    * [Times definitions](#times-definitions)
-      * [sun times](#sun-times)
-        * [remarks](#remarks)
-          * [blue hour](#blue-hour)
-          * [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          * [alternate properties](#alternate-properties)
-      * [moon times](#moon-times)
-      * [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    * [input parse formats](#input-parse-formats)
-    * [output timestamp formats](#output-timestamp-formats)
-    * [output timespan formats](#output-timespan-formats)
-    * [Conditions](#conditions)
-  * [CHANGELOG](#changelog)
-  * [TODO](#todo)
-  * [Support, Bugs and Feedback](#support-bugs-and-feedback)
-  * [LICENSE](#license)
-  * [Other](#other)
+- [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  - [Table of contents](#table-of-contents)
+  - [Preconditions](#preconditions)
+  - [Installation](#installation)
+  - [General](#general)
+    - [Saving resources](#saving-resources)
+    - [second based accuracy](#second-based-accuracy)
+  - [Implemented Nodes](#implemented-nodes)
+    - [sun-position](#sun-position)
+      - [sun-position - Node settings](#sun-position---node-settings)
+      - [sun-position - Node Input](#sun-position---node-input)
+      - [sun-position - Node Output](#sun-position---node-output)
+    - [moon-position](#moon-position)
+      - [moon-position - Node settings](#moon-position---node-settings)
+      - [moon-position - Node Input](#moon-position---node-input)
+      - [moon-position - Node Output](#moon-position---node-output)
+    - [time-inject](#time-inject)
+      - [time-inject - Node settings](#time-inject---node-settings)
+      - [time-inject - Node Input](#time-inject---node-input)
+      - [time-inject - Node Output](#time-inject---node-output)
+      - [time-inject - Node Status](#time-inject---node-status)
+    - [within-time](#within-time)
+      - [within-time - Node settings](#within-time---node-settings)
+    - [time-comp](#time-comp)
+      - [time-comp - Node settings](#time-comp---node-settings)
+    - [time-span](#time-span)
+      - [time-span - Node settings](#time-span---node-settings)
+    - [blind-control](#blind-control)
+    - [clock-timer](#clock-timer)
+    - [Times definitions](#times-definitions)
+      - [sun times](#sun-times)
+        - [remarks](#remarks)
+          - [blue hour](#blue-hour)
+          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
+          - [alternate properties](#alternate-properties)
+      - [moon times](#moon-times)
+      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
+    - [input parse formats](#input-parse-formats)
+    - [output timestamp formats](#output-timestamp-formats)
+    - [output timespan formats](#output-timespan-formats)
+    - [Conditions](#conditions)
+  - [CHANGELOG](#changelog)
+  - [TODO](#todo)
+  - [Support, Bugs and Feedback](#support-bugs-and-feedback)
+  - [LICENSE](#license)
+  - [Other](#other)
 
 ## Preconditions
 
@@ -109,9 +109,11 @@ The node calculates the current sun position on any input message. This node is 
 * **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 * **Name** name of the Node
 
-#### Node Input
+#### sun-position - Node Input
 
 The Input is for triggering the calculation. If limits are defined the input message will send to the output associated to the limit.
+
+It is possible that the incoming message have properties `msg.latitude` and `msg.longitude` (or `msg.lat` and `msg.lon`) defined to override settings in configuration node. The configuration Node still needs to be configured properly.
 
 #### sun-position - Node Output
 
@@ -165,6 +167,12 @@ The node calculates the current sun position on any input message.
 * **Topic** defines the topic of the first output
 * **position container** here you can define multiple lower and upper limits for azimuth. If the calculated value of the azimuth is inside the defined limit the input message will send to the associated output.
 * **Name** name of the Node
+
+#### moon-position - Node Input
+
+The Input is for triggering the calculation.
+
+It is possible that the incoming message have properties `msg.latitude` and `msg.longitude` (or `msg.lat` and `msg.lon`) defined to override settings in configuration node. The configuration Node still needs to be configured properly.
 
 #### moon-position - Node Output
 
@@ -293,7 +301,7 @@ The output is a message with the defined payload and topic in the settings.
 
 * red  on error
 * green
-  * the color opf the status is green, if the next trigger time is soon (< 36h).
+  * the color of the status is green, if the next trigger time is soon (< 36h).
   * type of the status
     * **dot** The next trigger time is normal time. (But that doesn't mean that an inject really takes place.)
     * **ring** The next trigger time is alternate time. (But that doesn't mean that an inject really takes place.)
@@ -672,14 +680,14 @@ A JSONata expression in the *property* must be always a boolean with value true,
 
 ## CHANGELOG
 
-- see [here the releases at npm](https://github.com/rdmtc/node-red-contrib-sun-position/releases).
-- see [here the changelog of master](https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/CHANGELOG.md)
-- see [here the changelog of dev](https://github.com/rdmtc/node-red-contrib-sun-position/blob/dev/CHANGELOG.md)
+* see [here the releases at npm](https://github.com/rdmtc/node-red-contrib-sun-position/releases).
+* see [here the changelog of master](https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/CHANGELOG.md)
+* see [here the changelog of dev](https://github.com/rdmtc/node-red-contrib-sun-position/blob/dev/CHANGELOG.md)
 
 ## TODO
 
-- [ ] add possibility to select input/output timezone
-- [ ] Add new node time-control as a stripped down node of the blind control with only rules for control other devices like dimmer and thermostats
+* [ ] add possibility to select input/output timezone
+* [ ] Add new node time-control as a stripped down node of the blind control with only rules for control other devices like dimmer and thermostats
 
 ## Support, Bugs and Feedback
 

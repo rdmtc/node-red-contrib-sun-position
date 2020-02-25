@@ -95,7 +95,8 @@
 			"ruleTimeCond": "Position durch Zeit Regel __timeOp__ __timeLocal__ und Bedingung __text__ [rule __number__]",
 			"rule": "Position durch feste Regel __number__",
 			"ruleMin": "__org__ (__level__ ist unter minimum) [__number__] __name__",
-			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__"
+			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__",
+			"startDelay": "verzögerter Start bis __dateISO__"
 		},
 		"states": {
 			"overwriteNoExpire": "überschrieben [Prio=__prio__]",
@@ -106,7 +107,8 @@
 			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [rule __number__]",
 			"rule": "durch feste Regel __number__",
 			"ruleMin": "__org__ [min rule __number__]",
-			"ruleMax": "__org__ [max rule __number__]"
+			"ruleMax": "__org__ [max rule __number__]",
+			"startDelay": "verzögerter Start"
 		},
 		"errors": {
 			"warning": "Warnung: __message__",

@@ -168,7 +168,8 @@
 			"sunInWinMax": "Die Sonne scheint ins Fenster und die maximale Rollladenposition ist gesetzt",
 			"sunNotInWinMin": "Die Sonne scheint nicht ins Fenster und die minimale Rollladenposition ist gesetzt",
 			"ruleMin": "__org__ (__level__ ist unter minimum) [__number__] __name__",
-			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__"
+			"ruleMax": "__org__ (__level__ ist über maximum) [__number__] __name__",
+			"startDelay": "verzögerter Start bis __dateISO__"
 		},
 		"states": {
 			"overwriteNoExpire": "überschrieben [Prio=__prio__]",
@@ -189,7 +190,8 @@
 			"sunInWinMax": "Sonne scheint ins Fenster (max)",
 			"sunNotInWinMin": "Sonne scheint nicht ins Fenster (min)",
 			"ruleMin": "__org__ [min rule __number__]",
-			"ruleMax": "__org__ [max rule __number__]"
+			"ruleMax": "__org__ [max rule __number__]",
+			"startDelay": "verzögerter Start"
 		},
 		"errors": {
 			"warning": "Warnung: __message__",

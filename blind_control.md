@@ -242,6 +242,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
 * `blindCtrl` a object will be added add as `msg.blindCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
   * `blindCtrl.reason` - __object__ - for the reason of the current blind position
     * `blindCtrl.reason.code` - __number__ - representing the reason for the blind position. The possible codes are
+      * **NaN** - start delay is setup and node is in this time
       * **-1** - the rules was not evaluated, maybe override is active
       * **1**  - defined default blind position, because no other rule/condition/behavior
       * **2**  - manual override

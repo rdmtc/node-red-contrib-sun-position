@@ -1,6 +1,31 @@
 # node-red-contrib-sun-position
 
-#### 1.0.7:  bug fix
+#### 1.0.10:  bug fix
+
+- general
+  - next try for #102
+
+- sun-position + moon-position
+  - implements #81 - now it is possible to have `msg.latitude` and `msg.longitude` (or `msg.lat` and `msg.lon`) to override settings in configuration node. The configuration Node still needs to be configured properly.
+
+#### 1.0.9:  bug fix
+
+- general
+  - fixed #102 again - massive changes in the library with cleanup lot of functions
+  - fixed and reworked caching of calculated sunTimes, MoonTimes
+
+- blind-control + clock-time
+  - documentation
+  - if in startup delay, the reason code is set to `NaN` and node state, reason description stated that node is in startup
+  - after startup delay ended default output will be send (due to reason code change)
+
+- clock-time
+  - additional to reason or rule change, the payload will also output on these changes
+    - if type of payload has changed
+    - if payload is of type `string`, `number` or `boolean` and value of the payload has changed
+      - changes on `arrays`, `objects` will not detected
+
+#### 1.0.8:  bug fix
 
 - time-inject
   - fixes that time inject will do a recalculation every 1 ms (Problem can only occurs if the time constraints are used.) #106
@@ -15,25 +40,24 @@
   - added additional caching of sun times calculation to reduce calculation load
 
 - blind-control + clock-time
- - fixed start delay setting causing no output at all
- - i18n, spelling, documentation
+  - fixed start delay setting causing no output at all
+  - i18n, spelling, documentation
 
 #### 1.0.6:  bug fix
 
 - general
- - fixed #102 - nodes calculate wrong sun times
-   - this happend between midnight - TimezoneOffset to midnight
-   - maybe fixes also #98
- - fixed broken rule check for time-span #103
+  - fixed #102 - nodes calculate wrong sun times
+    - this happend between midnight - TimezoneOffset to midnight
+    - maybe fixes also #98
+  - fixed broken rule check for time-span #103
 
 - blind-control + clock-time
- - first implementation of #92 (needs more test)
+  - first implementation of #92 (needs more test)
 
 #### 1.0.5:  bug fix
 
 - blind-control + clock-time
- - add start delay setting where a time can be defined where no output
-
+  - add start delay setting where a time can be defined where no output
 
 #### 1.0.4:  bug fix
 

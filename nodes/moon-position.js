@@ -32,7 +32,6 @@ module.exports = function (RED) {
                 const now = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
-                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
@@ -43,7 +42,7 @@ module.exports = function (RED) {
                 }
                 const ports = new Array(this.rules.length);
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getMoonCalc(now,false);
+                ports[0].payload = this.positionConfig.getMoonCalc(now,false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
                 ports[0].topic = this.topic;
                 if (!ports[0].payload.azimuth) {
                     // this.error('Azimuth could not calculated!');

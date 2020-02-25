@@ -416,7 +416,7 @@ module.exports = function (RED) {
         const monthNr = now.getMonth();
         const dayId =  hlp.getDayId(now);
         prepareRules(node, msg, tempData);
-        // node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules now=${now.toISOString()}, nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
         const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
@@ -464,7 +464,7 @@ module.exports = function (RED) {
                 }
             }
             const num = getRuleTimeData(node, msg, rule, now);
-            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - num=${num}- rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
                 return rule;
             }
@@ -660,11 +660,12 @@ module.exports = function (RED) {
          */
         function setState(pLoad) {
             const code = node.reason.code;
-            const shape = 'ring';
+            let shape = 'ring';
             let fill = 'yellow';
 
-            if (node.startDelayTime) {
+            if (isNaN(code)) {
                 fill = 'red'; // block
+                shape = 'dot';
             } else if (code <= 3) {
                 fill = 'blue'; // override
             } else if (code === 4 || code === 15 || code === 16) {
@@ -696,9 +697,7 @@ module.exports = function (RED) {
 
             try {
                 node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
-                // node.debug('input ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })); // Object.getOwnPropertyNames(msg)
                 if (!this.positionConfig) {
-                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     node.status({
                         fill: 'red',
                         shape: 'dot',
@@ -710,9 +709,16 @@ module.exports = function (RED) {
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 const previousData = node.context().get('previous',node.storeName) || {};
+                previousData.payloadType = (typeof node.payload.current);
                 previousData.reasonCode = node.reason.code;
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
+                if (previousData.payloadType === 'string' ||
+                    previousData.payloadType === 'boolean' ||
+                    previousData.payloadType === 'number') {
+                    previousData.payloadValue = node.payload.current;
+                    previousData.payloadSimple = true;
+                }
                 node.reason.code = NaN;
                 const now = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
@@ -725,7 +731,7 @@ module.exports = function (RED) {
                 const timeCtrl = {
                     autoTrigger : node.autoTrigger
                 };
-                // node.debug(`start pos=${node.payload.current} manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
+
                 // check for manual overwrite
                 if (!checkTCPosOverwrite(node, msg, now)) {
                     // calc times:
@@ -736,6 +742,12 @@ module.exports = function (RED) {
                 // node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 timeCtrl.reason = node.reason;
                 timeCtrl.timeClock = node.timeClockData;
+
+                if (node.startDelayTime) {
+                    node.reason.code = NaN;
+                    node.reason.state = RED._('clock-timer.states.startDelay');
+                    node.reason.description = RED._('clock-timer.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
+                }
                 setState(node.payload.current);
 
                 let topic = node.payload.topic;
@@ -751,12 +763,14 @@ module.exports = function (RED) {
                     topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
-                if (typeof node.payload.current !== 'undefined' &&
-                    node.payload.current !== 'none' &&
-                    node.payload.current !== null &&
+                if ((typeof node.payload.current !== 'undefined') &&
+                    (node.payload.current !== 'none') &&
+                    (node.payload.current !== null) &&
+                    !isNaN(node.reason.code) &&
                     ((node.reason.code !== previousData.reasonCode) ||
-                    (ruleId !== previousData.usedRule))  &&
-                    !node.startDelayTime) {
+                    (ruleId !== previousData.usedRule) ||
+                    (typeof node.payload.current !== previousData.payloadType) ||
+                    ((typeof previousData.payloadValue  !== 'undefined') && (previousData.payloadValue !== node.payload.current))) ) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
                     msg.timeCtrl = timeCtrl;
@@ -893,6 +907,7 @@ module.exports = function (RED) {
                 } else {
                     rule.timeDays = rule.timeDays.split(',');
                 }
+
                 if (!rule.timeMonths || rule.timeMonths === '*') {
                     rule.timeMonths = null;
                 } else {
@@ -968,28 +983,19 @@ module.exports = function (RED) {
                     node.rules.checkFrom = true;
                 }
             }
-            /* if (node.rules.data) {
-                node.rules.data.sort((a, b) => {
-                    if (a.timeLimited && b.timeLimited) { // both are time limited
-                        const top = (a.timeOp - b.timeOp);
-                        if (top !== 0) { // from/until type different
-                            return top; // from before until
-                        }
-                    }
-                    return a.pos - b.pos;
-                });
-                node.debug('node.rules.data =' + util.inspect(node.rules.data, { colors: true, compact: 10, breakLength: Infinity }));
-            } */
 
             if (node.autoTrigger || (node.startDelayTime)) {
+                const delay = node.startDelayTime || (30000 + Math.floor(Math.random() * 30000)); // 30s - 1min
+                node.startDelayTimeOut = new Date(Date.now() + delay);
                 setTimeout(() => {
                     delete node.startDelayTime;
+                    delete node.startDelayTimeOut;
                     node.emit('input', {
                         topic: 'autoTrigger/triggerOnly/start',
                         payload: 'triggerOnly',
                         triggerOnly: true
                     });
-                }, node.startDelayTime || (20000 + Math.floor(Math.random() * 30000))); // 20s - 50s
+                }, delay);
             }
         }
 
