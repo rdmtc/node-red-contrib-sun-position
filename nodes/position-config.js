@@ -99,6 +99,12 @@ module.exports = function (RED) {
                 this.tzDST = parseInt(config.timeZoneDST || 0);
 
                 this.cache = {
+                    lastSunCalc: {
+                        ts: 0
+                    },
+                    lastMoonCalc: {
+                        ts: 0
+                    },
                     sunTimesToday: {},
                     sunTimesTomorrow: {},
                     sunTimesAdd1: {},
@@ -123,12 +129,7 @@ module.exports = function (RED) {
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
                 // this.debug('load position-config ' + this.name + ' latitude:' + this.latitude + ' long:' + this.longitude + ' angelt:' + this.angleType + ' TZ:' + this.tzOffset);
-                this.lastSunCalc = {
-                    ts: 0
-                };
-                this.lastMoonCalc = {
-                    ts: 0
-                };
+
 
                 const today = new Date();
                 const dayId = hlp.getDayId(today); // this._getUTCDayId(today);
@@ -200,34 +201,40 @@ module.exports = function (RED) {
          * @param {limitationsObj} [limit] additional limitations for the calculation
          * @return {timeresult|erroresult} result object of sunTime
          */
-        getSunTimeByName(now, value, offset, multiplier, limit) {
+        getSunTimeByName(now, value, offset, multiplier, limit, latitude, longitude) {
             let result;
             const dayId = hlp.getDayId(now); // this._getUTCDayId(now);
-            this._sunTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} now=${now} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
-            if (dayId === this.cache.sunTimesToday.dayId) {
-                // this.debug('load sun-times from cache - sunTimesToday');
-                result = Object.assign({}, this.cache.sunTimesToday.times[value]); // needed for a object copy
-            } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
-                // this.debug('load sun-times from cache - sunTimesTomorrow');
-                result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]); // needed for a object copy
-            } else if (dayId === this.cache.sunTimesAdd1.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache1');
-                result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
-            } else if (dayId === this.cache.sunTimesAdd2.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache2');
-                result = Object.assign({},this.cache.sunTimesAdd2.times[value]); // needed for a object copy
+            if (latitude && longitude) {
+                result = Object.assign({},sunCalc.getSunTimes(now.valueOf(), latitude, longitude)[value]);
             } else {
-                this.debug('sun-time not in cache - calc time');
-                this.cache.sunTimesAdd2 = {
-                    dayId: this.cache.sunTimesAdd1.dayId,
-                    times: this.cache.sunTimesAdd1.times
-                };
-                this.cache.sunTimesAdd1 = {
-                    dayId,
-                    times : sunCalc.getSunTimes(now.valueOf(), this.latitude, this.longitude)
-                };
-                result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
+                latitude = this.latitude;
+                longitude = this.longitude;
+                this._sunTimesCheck(); // refresh if needed, get dayId
+                // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} now=${now} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+                if (dayId === this.cache.sunTimesToday.dayId) {
+                    // this.debug('load sun-times from cache - sunTimesToday');
+                    result = Object.assign({}, this.cache.sunTimesToday.times[value]); // needed for a object copy
+                } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
+                    // this.debug('load sun-times from cache - sunTimesTomorrow');
+                    result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]); // needed for a object copy
+                } else if (dayId === this.cache.sunTimesAdd1.dayId) {
+                    // this.debug('load sun-times from cache - sunTimesCache1');
+                    result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
+                } else if (dayId === this.cache.sunTimesAdd2.dayId) {
+                    // this.debug('load sun-times from cache - sunTimesCache2');
+                    result = Object.assign({},this.cache.sunTimesAdd2.times[value]); // needed for a object copy
+                } else {
+                    this.debug('sun-time not in cache - calc time');
+                    this.cache.sunTimesAdd2 = {
+                        dayId: this.cache.sunTimesAdd1.dayId,
+                        times: this.cache.sunTimesAdd1.times
+                    };
+                    this.cache.sunTimesAdd1 = {
+                        dayId,
+                        times : sunCalc.getSunTimes(now.valueOf(), latitude, longitude)
+                    };
+                    result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
+                }
             }
 
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
@@ -239,7 +246,7 @@ module.exports = function (RED) {
                 const datebase = new Date(now);
                 while (result.value.getTime() <= now.getTime()) {
                     datebase.setUTCDate(datebase.getUTCDate() + 1);
-                    result = Object.assign(result, sunCalc.getSunTimes(datebase.valueOf(), this.latitude, this.longitude)[value]);
+                    result = Object.assign(result, sunCalc.getSunTimes(datebase.valueOf(), latitude, longitude)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
             }
@@ -285,7 +292,7 @@ module.exports = function (RED) {
             }
             if (calcSpecial) {
                 this._checkCoordinates();
-                result = Object.assign(result, sunCalc.getSunTimes(date.valueOf(), this.latitude, this.longitude)[value]);
+                result = Object.assign(result, sunCalc.getSunTimes(date.valueOf(), latitude, longitude)[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
 
@@ -327,7 +334,6 @@ module.exports = function (RED) {
                 };
                 result = this.cache.sunTimesAdd1.times;
             }
-
             const sortable = [];
             for (const key in result) {
                 if (result[key].pos >= 0) {
@@ -434,19 +440,26 @@ module.exports = function (RED) {
         * @param {limitationsObj} [limit] additional limitations for the calculation
         * @return {moontime|erroresult} result object of moon time
         */
-        getMoonTimeByName(now, value, offset, multiplier, limit) {
+        getMoonTimeByName(now, value, offset, multiplier, limit, latitude, longitude) {
             const result = {};
             const datebase = new Date(now);
             const dayId = hlp.getDayId(now); // this._getUTCDayId(now);
-            this._moonTimesCheck(); // refresh if needed, get dayId
-            // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayId=${dayId} today=${today}`);
-
-            if (dayId === this.cache.moonTimesToday.dayId) {
-                result.value = this.cache.moonTimesToday.times[value]; // needed for a object copy
-            } else if (dayId === this.cache.moonTimesTomorrow.dayId) {
-                result.value = this.cache.moonTimesTomorrow.times[value]; // needed for a object copy
+            if (latitude && longitude) {
+                result.value = sunCalc.getMoonTimes(now.valueOf(), latitude, longitude)[value];
             } else {
-                result.value = sunCalc.getMoonTimes(now.valueOf(), this.latitude, this.longitude)[value]; // needed for a object copy
+                latitude = this.latitude;
+                longitude = this.longitude;
+
+                this._moonTimesCheck(); // refresh if needed, get dayId
+                // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} now=${now} dayId=${dayId} today=${today}`);
+
+                if (dayId === this.cache.moonTimesToday.dayId) {
+                    result.value = this.cache.moonTimesToday.times[value]; // needed for a object copy
+                } else if (dayId === this.cache.moonTimesTomorrow.dayId) {
+                    result.value = this.cache.moonTimesTomorrow.times[value]; // needed for a object copy
+                } else {
+                    result.value = sunCalc.getMoonTimes(now.valueOf(), this.latitude, this.longitude)[value]; // needed for a object copy
+                }
             }
             if (hlp.isValidDate(result.value)) {
                 result.value = hlp.addOffset(new Date(result.value.getTime()), offset, multiplier);
@@ -457,7 +470,7 @@ module.exports = function (RED) {
                     }
                     while (hlp.isValidDate(result.value) && result.value.getTime() <= now.getTime()) {
                         datebase.setUTCDate(datebase.getUTCDate() + 1);
-                        result.value = sunCalc.getMoonTimes(datebase.valueOf(), this.latitude, this.longitude)[value];
+                        result.value = sunCalc.getMoonTimes(datebase.valueOf(), latitude, longitude)[value];
                         result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                     }
                 }
@@ -465,7 +478,7 @@ module.exports = function (RED) {
 
             while (!hlp.isValidDate(result.value)) {
                 datebase.setUTCDate(datebase.getUTCDate() + 1);
-                result.value = sunCalc.getMoonTimes(datebase.valueOf(), this.latitude, this.longitude)[value];
+                result.value = sunCalc.getMoonTimes(datebase.valueOf(), latitude, longitude)[value];
             }
             result.value = new Date(result.value.getTime());
 
@@ -509,7 +522,7 @@ module.exports = function (RED) {
             }
             if (calcSpecial) {
                 this._checkCoordinates();
-                result.value = new Date(sunCalc.getMoonTimes(date.valueOf(), this.latitude, this.longitude)[value]);
+                result.value = new Date(sunCalc.getMoonTimes(date.valueOf(), latitude, longitude)[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
 
@@ -626,10 +639,10 @@ module.exports = function (RED) {
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data);
+                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
                 } else if (data.type === 'pdmTime') { // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data);
+                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
                 }
                 if (result && result.value && !result.error) {
                     return hlp.getFormattedDateOut(result.value, data.format, (this.tzOffset === 0), this.tzOffset);
@@ -740,7 +753,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdsTime') {
                     // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data);
+                    result = this.getSunTimeByName(now, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -748,7 +761,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdmTime') {
                     // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data);
+                    result = this.getMoonTimeByName(now, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -963,7 +976,7 @@ module.exports = function (RED) {
             }
         }
         /**************************************************************************************************************/
-        getSunCalc(date, calcTimes, sunInSky) {
+        getSunCalc(date, calcTimes, sunInSky, specLatitude,  specLongitude) {
             // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}" sunInSky="${sunInSky}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
@@ -974,12 +987,15 @@ module.exports = function (RED) {
                 }
             }
 
-            if (this.lastSunCalc && (Math.abs(date.getTime() - this.lastSunCalc.ts) < 3000)) {
+            const cacheEnabled = isNaN(specLatitude) && isNaN(specLongitude);
+            if (cacheEnabled && (Math.abs(date.getTime() - this.cache.lastSunCalc.ts) < 3000)) {
                 this.log('getSunCalc, time difference since last output to low, do no calculation');
-                return this.lastSunCalc;
+                return this.cache.lastSunCalc;
             }
+            specLatitude = specLatitude || this.latitude;
+            specLongitude = specLongitude || this.longitude;
 
-            const sunPos = sunCalc.getPosition(date.valueOf(), this.latitude, this.longitude);
+            const sunPos = sunCalc.getPosition(date.valueOf(), specLatitude, specLongitude);
             const result = {
                 ts: date.getTime(),
                 lastUpdate:     date,
@@ -989,8 +1005,8 @@ module.exports = function (RED) {
                                 + hlp.pad2(date.getHours()) + ':'
                                 + hlp.pad2(date.getMinutes()) + ':'
                                 + hlp.pad2(date.getSeconds()),
-                latitude:       this.latitude,
-                longitude:      this.longitude,
+                latitude:       specLatitude,
+                longitude:      specLongitude,
                 angleType:      this.angleType,
                 azimuth:        (this.angleType === 'deg') ? sunPos.azimuthDegrees : sunPos.azimuth,
                 altitude:       (this.angleType === 'deg') ? sunPos.altitudeDegrees : sunPos.altitude, // elevation = altitude
@@ -1000,25 +1016,26 @@ module.exports = function (RED) {
                 azimuthRadians:     sunPos.azimuth
             };
 
-            if (!calcTimes) {
-                // this.debug('getSunCalc - no times result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-                return result;
-            }
+            if (!calcTimes) { return result; }
 
-            const dayId = hlp.getDayId(date); // this._getUTCDayId(now);
             this._sunTimesCheck(); // refresh if needed, get dayId
-            if (dayId === this.cache.sunTimesToday.dayId) {
+            const dayId = hlp.getDayId(date); // this._getUTCDayId(now);
+            if (cacheEnabled && dayId === this.cache.sunTimesToday.dayId) {
                 result.times = this.cache.sunTimesToday.times;
                 result.positionAtSolarNoon = this.cache.sunTimesToday.sunPosAtSolarNoon;
-            } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
+            } else if (cacheEnabled && dayId === this.cache.sunTimesTomorrow.dayId) {
                 result.times = this.cache.sunTimesTomorrow.times;
                 result.positionAtSolarNoon = this.cache.sunTimesTomorrow.sunPosAtSolarNoon;
+            } else if (cacheEnabled && dayId === this.cache.sunTimesAdd1.dayId) {
+                result.times = this.cache.sunTimesAdd1.times;
+            } else if (cacheEnabled && dayId === this.cache.sunTimesAdd2.dayId) {
+                result.times = this.cache.sunTimesAdd2.times;
             } else {
                 // this.debug('getSunTimes calc extra time');
-                result.times = sunCalc.getSunTimes(date.valueOf(), this.latitude, this.longitude); // needed for a object copy
-                if (sunInSky && result.times.solarNoon.valid) {
-                    result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
-                }
+                result.times = sunCalc.getSunTimes(date.valueOf(), specLatitude, specLongitude); // needed for a object copy
+            }
+            if (!result.positionAtSolarNoon && sunInSky && result.times.solarNoon.valid) {
+                result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value.valueOf(), specLatitude, specLongitude);
             }
 
             if (result.positionAtSolarNoon && result.times.solarNoon.valid) {
@@ -1029,7 +1046,9 @@ module.exports = function (RED) {
                 }
             }
 
-            this.lastSunCalc = result;
+            if (cacheEnabled) {
+                this.cache.lastSunCalc = result;
+            }
             // this.debug('getSunCalc result= ' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
@@ -1085,7 +1104,7 @@ module.exports = function (RED) {
             return result;
         }
 
-        getMoonCalc(date, calcTimes) {
+        getMoonCalc(date, calcTimes, specLatitude,  specLongitude) {
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -1095,12 +1114,15 @@ module.exports = function (RED) {
                 }
             }
 
-            if (this.lastMoonCalc && (Math.abs(date.getTime() - this.lastMoonCalc.ts) < 3000)) {
+            const cacheEnabled = isNaN(specLatitude) && isNaN(specLongitude);
+            if (cacheEnabled && (Math.abs(date.getTime() - this.cache.lastMoonCalc.ts) < 3000)) {
                 this.log('getMoonCalc, time difference since last output to low, do no calculation');
-                return this.lastMoonCalc;
+                return this.cache.lastMoonCalc;
             }
+            specLatitude = specLatitude || this.latitude;
+            specLongitude = specLongitude || this.longitude;
 
-            const moonPos = sunCalc.getMoonPosition(date.valueOf(), this.latitude, this.longitude);
+            const moonPos = sunCalc.getMoonPosition(date.valueOf(), specLatitude, specLongitude);
             const moonIllum = this.getMoonIllumination(date.valueOf());
 
             const result = {
@@ -1112,8 +1134,8 @@ module.exports = function (RED) {
                                 + hlp.pad2(date.getHours()) + ':'
                                 + hlp.pad2(date.getMinutes()) + ':'
                                 + hlp.pad2(date.getSeconds()),
-                latitude:       this.latitude,
-                longitude:      this.longitude,
+                latitude:       specLatitude,
+                longitude:      specLongitude,
                 angleType:      this.angleType,
                 azimuth:        (this.angleType === 'deg') ? moonPos.azimuthDegrees : moonPos.azimuth,
                 altitude:       (this.angleType === 'deg') ? moonPos.altitudeDegrees : moonPos.altitude, // elevation = altitude
@@ -1132,10 +1154,20 @@ module.exports = function (RED) {
             };
 
             if (!calcTimes) { return result; }
+
             this._moonTimesCheck();
-            result.times = this.cache.moonTimesToday.times;
-            // getAngle : angle / 57.2957795130823209 //angle(rad) * (180° / Pi) = angle(deg)
-            this.lastMoonCalc = result;
+            const dayId = hlp.getDayId(date);
+            if (cacheEnabled && dayId === this.cache.moonTimesToday.dayId) {
+                result.times = this.cache.moonTimesToday.times;
+            } else if (cacheEnabled && dayId === this.cache.moonTimesTomorrow.dayId) {
+                result.times = this.cache.moonTimesTomorrow.times;
+            } else {
+                result.times = sunCalc.getMoonTimes(date.valueOf(), specLatitude, specLongitude);
+            }
+
+            if (cacheEnabled) {
+                this.cache.lastMoonCalc = result;
+            }
 
             return result;
         }
