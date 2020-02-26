@@ -169,6 +169,7 @@ module.exports = function (RED) {
          */
         function doCreateTimeout(node, _onInit) {
             let errorStatus = '';
+            let warnStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
             node.nextTime = null;
@@ -178,7 +179,41 @@ module.exports = function (RED) {
                 clearTimeout(node.timeOutObj);
                 node.timeOutObj = null;
             }
-
+            if (config.timedatestart || config.timedateend) {
+                let d1, d2;
+                const now = new Date();
+                if (config.timedatestart) {
+                    d1 = new Date(config.timedatestart);
+                    d1.setFullYear(now.getFullYear());
+                } else {
+                    d1 = new Date(now.getFullYear(), 0, 1);
+                }
+                if (config.timedateend) {
+                    d2 = new Date(config.timedateend);
+                } else {
+                    d2 = new Date(now.getFullYear(), 11, 31);
+                }
+                const startnum = d1.getTime();
+                const endnum = d2.getTime();
+                const nowNr = now.getTime();
+                if (endnum > startnum) {
+                    // in the current year
+                    if (nowNr < startnum || nowNr >= endnum) {
+                        warnStatus = RED._('time-inject.errors.invalid-daterange', { year:d1.getFullYear, month:d1.getMonth, day:d1.getDay});
+                        node.timeType = 'none';
+                        node.timeAltType = 'none';
+                        node.nextTime = new Date(d1.getFullYear, d1.getMonth, d1.getDay, 0, 0, 1);
+                    }
+                } else {
+                    // switch between year from end to start
+                    if (nowNr < startnum && nowNr >= endnum) {
+                        warnStatus = RED._('time-inject.errors.invalid-daterange', { year: d2.getFullYear + 1, month: d2.getMonth, day: d2.getDay });
+                        node.timeType = 'none';
+                        node.timeAltType = 'none';
+                        node.nextTime = new Date(d2.getFullYear + 1, d2.getMonth, d2.getDay,0,0,1);
+                    }
+                }
+            }
             if (node.timeType !== 'none' && node.positionConfig) {
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeType,
@@ -329,6 +364,12 @@ module.exports = function (RED) {
                 });
                 return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
             // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
+            } else if ((warnStatus !== '')) {
+                node.status({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
+                });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({

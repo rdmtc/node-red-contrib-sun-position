@@ -138,6 +138,36 @@ module.exports = function (RED) {
                 return result;
             }
         }
+        if (config.timedatestart || config.timedateend) {
+            let d1,d2;
+            if (config.timedatestart) {
+                d1 = new Date(config.timedatestart);
+                d1.setFullYear(now.getFullYear());
+            } else {
+                d1 = new Date(now.getFullYear(), 0, 1);
+            }
+            if (config.timedateend) {
+                d2 = new Date(config.timedateend);
+            } else {
+                d2 = new Date(now.getFullYear(), 11, 31);
+            }
+            const startnum = d1.getTime();
+            const endnum = d2.getTime();
+            const nowNr = now.getTime();
+            if (endnum > startnum) {
+                // in the current year
+                if (nowNr < startnum || nowNr >= endnum) {
+                    result.warn = RED._('within-time-switch.errors.invalid-daterange');
+                    return result;
+                }
+            } else {
+                // switch between year from end to start
+                if (nowNr < startnum && nowNr >= endnum) {
+                    result.warn = RED._('within-time-switch.errors.invalid-daterange');
+                    return result;
+                }
+            }
+        }
         const dateNr = now.getDate();
         if (node.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
             result.warn = RED._('within-time-switch.errors.only-odd-day');

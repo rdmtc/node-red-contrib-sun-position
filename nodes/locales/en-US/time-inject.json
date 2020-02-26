@@ -74,7 +74,8 @@
         },
         "errors": {
             "failed": "inject failed, see log for details",
-            "invalid-property-type": "Invalid Property Type: __type__"
+            "invalid-property-type": "Invalid Property Type: __type__",
+            "invalid-daterange": "Day is not in valid range. Recalc __year__-__month__-__day__"
         }
     }
 }
