@@ -62,6 +62,7 @@
             "invalid-propertyEnd-type": "Invalid Property Type for alternate end: __type__",
             "invalid-day": "Day is not selected.",
             "invalid-month": "Month is not selected.",
+            "invalid-daterange": "Day is not in valid range.",
             "only-odd-day": "Not an odd Day!",
             "only-even-day": "Not an even Day!"
         }

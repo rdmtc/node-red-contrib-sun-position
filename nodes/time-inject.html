@@ -73,6 +73,26 @@
                     value: '*',
                     required: true
                 },
+                timedatestart: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
+                        );
+                    }
+                },
+                timedateend: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return (
+                            typeof v === 'undefined' ||
+                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
+                        );
+                    }
+                },
                 offset: {
                     value: 0,
                     validate(v){
@@ -572,6 +592,24 @@
                             suffix += ']';
                         }
                     }
+                    if (this.timedatestart && this.timedateend) {
+                        const getDateShort = value => {
+                            if (value) {
+                                const val = value.split('-');
+                                if (val.length > 2) {
+                                    return val[1] + '-' + val[2];
+                                } else if (val.length === 2) {
+                                    return val[0] + '-' + val[1];
+                                }
+                            }
+                            return '';
+                        };
+                        suffix += '[';
+                        suffix += getDateShort(this.timedatestart) || '01-01';
+                        suffix += '>';
+                        suffix += getDateShort(this.timedateend) || '12-31';
+                        suffix += ']';
+                    }
                     const part1 = RED.nodes.getType('position-config').getValueLabel(this, this.timeType, this.time, this.offset);
                     if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
                         return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
@@ -855,6 +893,51 @@
                             }
                         }
                     }).change();
+
+                    const getDateShort = value => {
+                        if (value) {
+                            const val = value.split('-');
+                            if (val.length > 2) {
+                                return val[1] + '-' + val[2];
+                            } else if (val.length === 2) {
+                                return val[0] + '-' + val[1];
+                            }
+                        }
+                        return '';
+                    };
+                    const $timeLimitDateStart = $('#node-input-timedatestart');
+                    const $timeLimitDateEnd = $('#node-input-timedateend');
+                    $timeLimitDateStart.change(() => {
+                        const year = (new Date()).getFullYear();
+                        $timeLimitDateEnd.attr('min', year + '-' + (getDateShort($timeLimitDateStart.val() || '01-01')));
+                        $timeLimitDateEnd.attr('max', (year + 1) + '-' + (getDateShort($timeLimitDateStart.val()) || '12-31'));
+                    });
+                    $timeLimitDateEnd.change(() => {
+                        const year = (new Date()).getFullYear();
+                        $timeLimitDateStart.attr('min', year + '-01-01');
+                        $timeLimitDateStart.attr('max', $timeLimitDateEnd.val() || (year + '-12-31'));
+                    });
+
+                    const year = (new Date()).getFullYear();
+                    if (node.timedatestart) {
+                        $timeLimitDateStart.val(year + '-' +(getDateShort(node.timedatestart) || '01-01'));
+                    }
+                    if (node.timedatestart && node.timedateend) {
+                        const year = (new Date()).getFullYear();
+                        const d1 = new Date(node.timedatestart);
+                        const d2 = new Date(node.timedateend);
+                        d1.setFullYear(year);
+                        d2.setFullYear(year);
+                        if (d2.getTime() < d1.getTime()) {
+                            d2.setFullYear(year + 1);
+                        }
+                        const pad = (n, z = 2) => ('00' + n).slice(-z);
+                        $timeLimitDateEnd.val(year + '-' + pad(d2.getMonth() + 1) + '-' + pad(d2.getDate()));
+                    } else if (node.timedateend) {
+                        $timeLimitDateEnd.val(year + '-' + (getDateShort(node.timedateend) || '12-31'));
+                    }
+                    $timeLimitDateStart.change();
+                    $timeLimitDateEnd.change();
                     // #endregion time
                     // #region property
                     setupTInput(node, {
@@ -1601,6 +1684,13 @@
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.10"><input type='checkbox' checked value='10'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.22"></span></label>
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.11"><input type='checkbox' checked value='11'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.23"></span></label>
                 </div>
+            </div>
+        </div>
+        <div id="time-inject-timeDateLimit" class="time-inject-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="blind-control.label.validForDates"></span></div>
+            <div style="display:inline-block;">
+                <input type="date" id="node-input-timedatestart" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.start" min="2000-01-01" max="2000-12-31">
+                <input type="date" id="node-input-timedateend" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.end" min="2000-01-01" max="2000-12-31">
             </div>
         </div>
     </div>

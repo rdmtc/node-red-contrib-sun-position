@@ -18,8 +18,8 @@ module.exports = function (RED) {
      * @returns {number} milliseconds until the defined Date
      */
     function tsGetScheduleTime(time, limit) {
-        const now = new Date();
-        let millisec = time.getTime() - now.getTime();
+        const dNow = new Date();
+        let millisec = time.getTime() - dNow.getTime();
         if (limit) {
             while (millisec < limit) {
                 millisec += 86400000; // 24h
@@ -169,6 +169,7 @@ module.exports = function (RED) {
          */
         function doCreateTimeout(node, _onInit) {
             let errorStatus = '';
+            let warnStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
             node.nextTime = null;
@@ -178,7 +179,42 @@ module.exports = function (RED) {
                 clearTimeout(node.timeOutObj);
                 node.timeOutObj = null;
             }
+            if (config.timedatestart || config.timedateend) {
+                let dStart, dEnd;
+                const dNow = new Date();
+                if (config.timedatestart) {
+                    dStart = new Date(config.timedatestart);
+                    dStart.setFullYear(dNow.getFullYear());
+                    dStart.setHours(0, 0, 0, 0);
+                } else {
+                    dStart = new Date(dNow.getFullYear(), 0, 0, 0, 0, 0, 1);
+                }
+                if (config.timedateend) {
+                    dEnd = new Date(config.timedateend);
+                    dEnd.setFullYear(dNow.getFullYear());
+                    dEnd.setHours(23, 59, 59, 999);
+                } else {
+                    dEnd = new Date(dNow.getFullYear(), 11, 31, 23, 59, 59, 999);
+                }
 
+                if (dStart < dEnd) {
+                    // in the current year - e.g. 6.4. - 7.8.
+                    if (dNow < dStart || dNow > dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear() + ((dNow >= dEnd) ? 1 : 0), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
+                        node.timeType = 'none';
+                        node.timeAltType = 'none';
+                    }
+                } else {
+                    // switch between year from end to start - e.g. 2.11. - 20.3.
+                    if (dNow < dStart && dNow > dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
+                        node.timeType = 'none';
+                        node.timeAltType = 'none';
+                    }
+                }
+            }
             if (node.timeType !== 'none' && node.positionConfig) {
                 node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
                     type: node.timeType,
@@ -241,7 +277,7 @@ module.exports = function (RED) {
             let shape = 'dot';
             if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
-                    hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
+                    hlp.handleError(this, 'Invalid time format "' + node.nextTime + '"', undefined, 'internal error!');
                     return { state:'error', done: false, statusMsg: 'Invalid time format!', errorMsg: 'Invalid time format'};
                 }
 
@@ -329,6 +365,12 @@ module.exports = function (RED) {
                 });
                 return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
             // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
+            } else if ((warnStatus !== '')) {
+                node.status({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
+                });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
                     node.status({
@@ -375,7 +417,7 @@ module.exports = function (RED) {
 
             try {
                 msg._srcid = node.id;
-                node.debug('input ');
+                node.debug('--------- time-inject - input');
                 doCreateTimeout(node);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {

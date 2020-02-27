@@ -38,7 +38,7 @@ module.exports = function (RED) {
 
             try {
                 let errorStatus = '';
-                const now = hlp.getNowTimeStamp(this, msg);
+                const dNow = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
                     node.status({
@@ -52,7 +52,7 @@ module.exports = function (RED) {
                 const ports = new Array(this.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getSunCalc(now, true, false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
+                ports[0].payload = this.positionConfig.getSunCalc(dNow, true, false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
                 ports[0].topic = this.topic;
                 if (!ports[0].payload.azimuth) {
                     // this.error('Azimuth could not calculated!');
@@ -71,7 +71,7 @@ module.exports = function (RED) {
                         offsetType : node.startOffsetType,
                         offset : node.startOffset,
                         multiplier : node.startOffsetMultiplier,
-                        now,
+                        now: dNow,
                         latitude: msg.latitude || msg.lat,
                         longitude: msg.longitude || msg.lon
                     });
@@ -94,7 +94,7 @@ module.exports = function (RED) {
                         offsetType : node.endOffsetType,
                         offset : node.endOffset,
                         multiplier : node.endOffsetMultiplier,
-                        now,
+                        now: dNow,
                         latitude: msg.latitude || msg.lat,
                         longitude: msg.longitude || msg.lon
                     });
@@ -110,7 +110,7 @@ module.exports = function (RED) {
                 }
 
                 if (ports[0].payload.startTime && ports[0].payload.endTime) {
-                    const nowMillis = now.getTime();
+                    const nowMillis = dNow.getTime();
                     ports[0].payload.sunInSky = nowMillis > ports[0].payload.startTime && nowMillis < ports[0].payload.endTime;
                 }
 
