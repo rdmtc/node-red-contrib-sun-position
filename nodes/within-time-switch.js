@@ -112,7 +112,7 @@ module.exports = function (RED) {
      * @param {*} config - the configuration
      * @returns {object} containing start and end Dates
      */
-    function calcWithinTimes(node, msg, config, now) {
+    function calcWithinTimes(node, msg, config, dNow) {
         // node.debug('calcWithinTimes');
         const result = {
             start: {},
@@ -125,50 +125,48 @@ module.exports = function (RED) {
             warn: ''
         };
 
-        if (config.timeDays && config.timeDays !== '*' && !config.timeDays.includes(now.getDay())) {
-            node.debug('invalid Day config. today=' + now.getDay() + ' timeDays=' + util.inspect(config.timeDays, Object.getOwnPropertyNames(config.timeDays)));
+        if (config.timeDays && config.timeDays !== '*' && !config.timeDays.includes(dNow.getDay())) {
+            node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(config.timeDays, Object.getOwnPropertyNames(config.timeDays)));
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
         if (config.timeMonths && config.timeMonths !== '*') {
             const mn = config.timeMonths.split(',');
-            if (!mn.includes(now.getMonth())) {
-                node.debug('invalid Day config. today=' + now.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
+            if (!mn.includes(dNow.getMonth())) {
+                node.debug('invalid Day config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
                 result.warn = RED._('within-time-switch.errors.invalid-month');
                 return result;
             }
         }
         if (config.timedatestart || config.timedateend) {
-            let d1,d2;
+            let dStart,dEnd;
             if (config.timedatestart) {
-                d1 = new Date(config.timedatestart);
-                d1.setFullYear(now.getFullYear());
+                dStart = new Date(config.timedatestart);
+                dStart.setFullYear(dNow.getFullYear());
             } else {
-                d1 = new Date(now.getFullYear(), 0, 1);
+                dStart = new Date(dNow.getFullYear(), 0, 1);
             }
             if (config.timedateend) {
-                d2 = new Date(config.timedateend);
+                dEnd = new Date(config.timedateend);
+                dEnd.setFullYear(dNow.getFullYear());
             } else {
-                d2 = new Date(now.getFullYear(), 11, 31);
+                dEnd = new Date(dNow.getFullYear(), 11, 31);
             }
-            const startnum = d1.getTime();
-            const endnum = d2.getTime();
-            const nowNr = now.getTime();
-            if (endnum > startnum) {
-                // in the current year
-                if (nowNr < startnum || nowNr >= endnum) {
+            if (dStart < dEnd) {
+                // in the current year - e.g. 6.4. - 7.8.
+                if (dNow < dStart || dNow >= dEnd) {
                     result.warn = RED._('within-time-switch.errors.invalid-daterange');
                     return result;
                 }
             } else {
-                // switch between year from end to start
-                if (nowNr < startnum && nowNr >= endnum) {
+                // switch between year from end to start - e.g. 2.11. - 20.3.
+                if (dNow < dStart && dNow >= dEnd) {
                     result.warn = RED._('within-time-switch.errors.invalid-daterange');
                     return result;
                 }
             }
         }
-        const dateNr = now.getDate();
+        const dateNr = dNow.getDate();
         if (node.timeOnlyOddDays && (dateNr % 2 === 0)) { // even
             result.warn = RED._('within-time-switch.errors.only-odd-day');
             return result;
@@ -265,8 +263,8 @@ module.exports = function (RED) {
      * @returns {number} milliseconds until the defined Date
      */
     function getScheduleTime(time) {
-        const now = new Date();
-        let millis = time.getTime() - now.getTime();
+        const dNow = new Date();
+        let millis = time.getTime() - dNow.getTime();
         while (millis < 10) {
             millis += 86400000; // 24h
         }

@@ -300,11 +300,11 @@ module.exports = function (RED) {
     /**
      * setup the expiring of n override or update an existing expiring
      * @param {*} node node data
-     * @param {Date} now the current timestamp
+     * @param {Date} dNow the current timestamp
      * @param {number} expire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
      */
-    function setExpiringOverwrite(node, now, expire) {
-        node.debug(`setExpiringOverwrite now=${now}, expire=${expire}`);
+    function setExpiringOverwrite(node, dNow, expire) {
+        node.debug(`setExpiringOverwrite now=${dNow}, expire=${expire}`);
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
@@ -322,7 +322,7 @@ module.exports = function (RED) {
             delete node.blindData.overwrite.expireDate;
             return;
         }
-        node.blindData.overwrite.expireTs = (now.getTime() + expire);
+        node.blindData.overwrite.expireTs = (dNow.getTime() + expire);
         node.blindData.overwrite.expireDate = new Date(node.blindData.overwrite.expireTs);
         node.blindData.overwrite.expireDateISO = node.blindData.overwrite.expireDate.toISOString();
         node.blindData.overwrite.expireDateUTC = node.blindData.overwrite.expireDate.toUTCString();
@@ -341,12 +341,12 @@ module.exports = function (RED) {
      * check if an override can be reset
      * @param {*} node node data
      * @param {*} msg message object
-     * @param {*} now current timestamp
+     * @param {*} dNow current timestamp
      */
-    function checkOverrideReset(node, msg, now, prioOk) {
+    function checkOverrideReset(node, msg, dNow, prioOk) {
         if (node.blindData.overwrite &&
             node.blindData.overwrite.expires &&
-            (node.blindData.overwrite.expireTs < now.getTime())) {
+            (node.blindData.overwrite.expireTs < dNow.getTime())) {
             blindPosOverwriteReset(node);
         }
         if (prioOk) {
@@ -483,10 +483,10 @@ module.exports = function (RED) {
      * @param {*} msg the message object
      * @returns the sun position object
      */
-    function calcBlindSunPosition(node, msg, now, tempData, previousData) {
+    function calcBlindSunPosition(node, msg, dNow, tempData, previousData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
-        const sunPosition = getSunPosition_(node, now);
+        const sunPosition = getSunPosition_(node, dNow);
         const winterMode = 1;
         const summerMode = 2;
 
@@ -552,7 +552,7 @@ module.exports = function (RED) {
 
         const delta = Math.abs(previousData.level - node.level.current);
 
-        if ((node.smoothTime > 0) && (node.sunData.changeAgain > now.getTime())) {
+        if ((node.smoothTime > 0) && (node.sunData.changeAgain > dNow.getTime())) {
             node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
             node.reason.state = RED._('blind-control.states.smooth', { pos: getRealLevel_(node).toString()});
@@ -569,8 +569,8 @@ module.exports = function (RED) {
             node.reason.code = 9;
             node.reason.state = RED._('blind-control.states.sunCtrl');
             node.reason.description = RED._('blind-control.reasons.sunCtrl');
-            node.sunData.changeAgain = now.getTime() + node.smoothTime;
-            // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} now=` + now.getTime());
+            node.sunData.changeAgain = dNow.getTime() + node.smoothTime;
+            // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} now=` + dNow.getTime());
         }
         if (node.level.current < node.blindData.levelMin)  {
             // min
@@ -754,14 +754,14 @@ module.exports = function (RED) {
        * @param {*} config the configuration object
        * @returns the active rule or null
        */
-    function checkRules(node, msg, now, tempData) {
+    function checkRules(node, msg, dNow, tempData) {
         // node.debug('checkRules --------------------');
         const livingRuleData = {};
-        const nowNr = now.getTime();
-        const dayNr = now.getDay();
-        const dateNr = now.getDate();
-        const monthNr = now.getMonth();
-        const dayId =  hlp.getDayId(now);
+        const nowNr = dNow.getTime();
+        const dayNr = dNow.getDay();
+        const dateNr = dNow.getDate();
+        const monthNr = dNow.getMonth();
+        const dayId =  hlp.getDayId(dNow);
         prepareRules(node, msg, tempData);
         // node.debug(`checkRules nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
@@ -795,9 +795,9 @@ module.exports = function (RED) {
             }
 
             if (rule.timeDateStart || rule.timeDateEnd) {
-                rule.timeDateStart.setFullYear(now.getFullYear());
+                rule.timeDateStart.setFullYear(dNow.getFullYear());
                 const startnum = rule.timeDateStart.getTime();
-                rule.timeDateEnd.setFullYear(now.getFullYear());
+                rule.timeDateEnd.setFullYear(dNow.getFullYear());
                 const endnum = rule.timeDateEnd.getTime();
                 if (endnum > startnum) {
                     // in the current year
@@ -811,7 +811,7 @@ module.exports = function (RED) {
                     }
                 }
             }
-            const num = getRuleTimeData(node, msg, rule, now);
+            const num = getRuleTimeData(node, msg, rule, dNow);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
                 return rule;
@@ -918,7 +918,7 @@ module.exports = function (RED) {
                         if (!rule.timeLimited) {
                             continue;
                         }
-                        const num = getRuleTimeData(node, msg, rule, now);
+                        const num = getRuleTimeData(node, msg, rule, dNow);
                         if (num > nowNr) {
                             const diff = num - nowNr;
                             node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);

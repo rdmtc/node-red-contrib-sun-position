@@ -720,10 +720,10 @@ function normalizeDate(d, offset, multiplier, limit) {
     // console.debug('normalizeDate d=' + d + ' offset=' + offset); // eslint-disable-line
     d = addOffset(d, offset, multiplier);
     if (limit.next) {
-        const now = new Date();
+        const dNow = new Date();
         d.setMilliseconds(0);
-        now.setMilliseconds(600); // security
-        const cmp = now.getTime();
+        dNow.setMilliseconds(600); // security
+        const cmp = dNow.getTime();
         while (d.getTime() <= cmp) {
             d.setDate(d.getDate() + 1);
         }
@@ -948,12 +948,12 @@ const _dateFormat = (function () {
         }
 
         // Passing date through Date applies Date.parse, if necessary
-        const now = new Date();
-        date = date ? new Date(date) : now;
+        const dNow = new Date();
+        date = date ? new Date(date) : dNow;
         if (!isValidDate(date)) {
             throw new SyntaxError('invalid date');
         }
-        const dayDiff = (date.getDate() - now.getDate());
+        const dayDiff = (date.getDate() - dNow.getDate());
         if (timeZoneOffset === 0) {
             utc = true;
         } else if (timeZoneOffset) {
@@ -1276,8 +1276,8 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
             return !(getDayOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
     }
 
-    const now = new Date();
-    const delay = (date.getTime() - now.getTime());
+    const dNow = new Date();
+    const delay = (date.getTime() - dNow.getTime());
     const weekOfYear = getWeekOfYear(date);
     const dayOfYear = getDayOfYear(date);
     return {
@@ -1287,7 +1287,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
         timeISOStr: date.toISOString(),
         delay,
         delaySec: Math.round(delay / 1000),
-        lc: now.getTime(),
+        lc: dNow.getTime(),
         ofYear: {
             year : dayOfYear[0],
             day: {
@@ -1432,17 +1432,17 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
 
     val = String(val);
     format = String(format);
-    const now = new Date();
+    const dNow = new Date();
     let i_val = 0;
     let i_format = 0;
     let x; let y;
-    let year = now.getFullYear();
-    let month = now.getMonth() + 1;
-    let date = now.getDate();
-    let hour = now.getHours();
-    let min = now.getMinutes();
-    let sec = now.getSeconds();
-    let misec = now.getMilliseconds();
+    let year = dNow.getFullYear();
+    let month = dNow.getMonth() + 1;
+    let date = dNow.getDate();
+    let hour = dNow.getHours();
+    let min = dNow.getMinutes();
+    let sec = dNow.getSeconds();
+    let misec = dNow.getMilliseconds();
     let ampm = '';
 
     while (i_format < format.length) {

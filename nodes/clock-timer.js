@@ -73,11 +73,11 @@ module.exports = function (RED) {
     /**
      * setup the expiring of n override or update an existing expiring
      * @param {*} node node data
-     * @param {Date} now the current timestamp
+     * @param {Date} dNow the current timestamp
      * @param {number} expire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
      */
-    function setExpiringOverwrite(node, now, expire) {
-        node.debug(`setExpiringOverwrite now=${now}, expire=${expire}`);
+    function setExpiringOverwrite(node, dNow, expire) {
+        node.debug(`setExpiringOverwrite now=${dNow}, expire=${expire}`);
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
@@ -95,7 +95,7 @@ module.exports = function (RED) {
             delete node.timeClockData.overwrite.expireDate;
             return;
         }
-        node.timeClockData.overwrite.expireTs = (now.getTime() + expire);
+        node.timeClockData.overwrite.expireTs = (dNow.getTime() + expire);
         node.timeClockData.overwrite.expireDate = new Date(node.timeClockData.overwrite.expireTs);
         node.timeClockData.overwrite.expireDateISO = node.timeClockData.overwrite.expireDate.toISOString();
         node.timeClockData.overwrite.expireDateUTC = node.timeClockData.overwrite.expireDate.toUTCString();
@@ -114,12 +114,12 @@ module.exports = function (RED) {
      * check if an override can be reset
      * @param {*} node node data
      * @param {*} msg message object
-     * @param {*} now current timestamp
+     * @param {*} dNow current timestamp
      */
-    function checkOverrideReset(node, msg, now, prioOk) {
+    function checkOverrideReset(node, msg, dNow, prioOk) {
         if (node.timeClockData.overwrite &&
             node.timeClockData.overwrite.expires &&
-            (node.timeClockData.overwrite.expireTs < now.getTime())) {
+            (node.timeClockData.overwrite.expireTs < dNow.getTime())) {
             timePosOverwriteReset(node);
         }
         if (prioOk) {
@@ -325,6 +325,7 @@ module.exports = function (RED) {
      * @param {*} node node data
      * @param {*} msg the message object
      * @param {*} rule the rule data
+     * @return {number} timestamp of the rule
      */
     function getRuleTimeData(node, msg, rule, now) {
         rule.timeData = node.positionConfig.getTimeProp(node, msg, {
@@ -401,23 +402,38 @@ module.exports = function (RED) {
     }
 
     /**
-       * calculates the times
-       * @param {*} node node data
-       * @param {*} msg the message object
-       * @param {*} config the configuration object
-       * @returns the active rule or null
-       */
-    function checkRules(node, msg, now, tempData) {
+     * check all rules and determinate the active rule
+     * @param {Object} node node data
+     * @param {Object} msg the message object
+     * @param {Date} dNow the *current* date Object
+     * @param {Object} tempData the object storing the temporary caching data
+     * @returns
+     */
+    function checkRules(node, msg, dNow, tempData) {
         // node.debug('checkRules --------------------');
         const livingRuleData = {};
-        const nowNr = now.getTime();
-        const dayNr = now.getDay();
-        const dateNr = now.getDate();
-        const monthNr = now.getMonth();
-        const dayId =  hlp.getDayId(now);
+        const nowNr = dNow.getTime();
+        const dayNr = dNow.getDay();
+        const dateNr = dNow.getDate();
+        const monthNr = dNow.getMonth();
+        const dayId =  hlp.getDayId(dNow);
         prepareRules(node, msg, tempData);
-        // node.debug(`checkRules now=${now.toISOString()}, nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules now=${dNow.toISOString()}, nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
 
+        /**
+        * Timestamp compare function
+        * @name ICompareTimeStamp
+        * @function
+        * @param {number} timeStamp The timestamp which should be compared
+        * @returns {Boolean} return true if if the timestamp is valid, otherwise false
+        */
+
+        /**
+         * function to check a rule
+         * @param {object} rule a rule object to test
+         * @param {ICompareTimeStamp} cmp a function to compare two timestamps.
+         * @returns {Object|null} returns the rule if rule is valid, otherwhise null
+         */
         const fktCheck = (rule, cmp) => {
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
@@ -447,25 +463,23 @@ module.exports = function (RED) {
                 return null;
             }
             if (rule.timeDateStart || rule.timeDateEnd) {
-                rule.timeDateStart.setFullYear(now.getFullYear());
-                const startnum = rule.timeDateStart.getTime();
-                rule.timeDateEnd.setFullYear(now.getFullYear());
-                const endnum = rule.timeDateEnd.getTime();
-                if (endnum > startnum) {
+                rule.timeDateStart.setFullYear(dNow.getFullYear());
+                rule.timeDateEnd.setFullYear(dNow.getFullYear());
+                if (rule.timeDateEnd > rule.timeDateStart) {
                     // in the current year
-                    if (nowNr < startnum || nowNr >= endnum) {
+                    if (dNow < rule.timeDateStart || dNow >= rule.timeDateEnd) {
                         return null;
                     }
                 } else {
                     // switch between year from end to start
-                    if (nowNr < startnum && nowNr >= endnum) {
+                    if (dNow < rule.timeDateStart && dNow >= rule.timeDateEnd) {
                         return null;
                     }
                 }
             }
-            const num = getRuleTimeData(node, msg, rule, now);
+            const num = getRuleTimeData(node, msg, rule, dNow);
             // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - num=${num}- rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-            if (dayId === rule.timeData.dayId && num >=0  && cmp(num)) {
+            if (dayId === rule.timeData.dayId && num >=0  && (cmp(num) === true)) {
                 return rule;
             }
             return null;
@@ -522,7 +536,7 @@ module.exports = function (RED) {
                         if (!rule.timeLimited) {
                             continue;
                         }
-                        const num = getRuleTimeData(node, msg, rule, now);
+                        const num = getRuleTimeData(node, msg, rule, dNow);
                         if (num > nowNr) {
                             const diff = num - nowNr;
                             node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
@@ -696,7 +710,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload}`);
+                node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload} msg.ts=${msg.ts}`);
                 if (!this.positionConfig) {
                     node.status({
                         fill: 'red',
@@ -720,7 +734,7 @@ module.exports = function (RED) {
                     previousData.payloadSimple = true;
                 }
                 node.reason.code = NaN;
-                const now = hlp.getNowTimeStamp(node, msg);
+                const dNow = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.deaultTime;
                     node.autoTrigger.type = 0;
@@ -733,9 +747,9 @@ module.exports = function (RED) {
                 };
 
                 // check for manual overwrite
-                if (!checkTCPosOverwrite(node, msg, now)) {
+                if (!checkTCPosOverwrite(node, msg, dNow)) {
                     // calc times:
-                    timeCtrl.rule = checkRules(node, msg, now, tempData);
+                    timeCtrl.rule = checkRules(node, msg, dNow, tempData);
                     ruleId = timeCtrl.rule.id;
                 }
 

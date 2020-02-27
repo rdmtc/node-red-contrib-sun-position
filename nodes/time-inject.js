@@ -18,8 +18,8 @@ module.exports = function (RED) {
      * @returns {number} milliseconds until the defined Date
      */
     function tsGetScheduleTime(time, limit) {
-        const now = new Date();
-        let millisec = time.getTime() - now.getTime();
+        const dNow = new Date();
+        let millisec = time.getTime() - dNow.getTime();
         if (limit) {
             while (millisec < limit) {
                 millisec += 86400000; // 24h
@@ -180,37 +180,38 @@ module.exports = function (RED) {
                 node.timeOutObj = null;
             }
             if (config.timedatestart || config.timedateend) {
-                let d1, d2;
-                const now = new Date();
+                let dStart, dEnd;
+                const dNow = new Date();
                 if (config.timedatestart) {
-                    d1 = new Date(config.timedatestart);
-                    d1.setFullYear(now.getFullYear());
+                    dStart = new Date(config.timedatestart);
+                    dStart.setFullYear(dNow.getFullYear());
+                    dStart.setHours(0, 0, 0, 0);
                 } else {
-                    d1 = new Date(now.getFullYear(), 0, 1);
+                    dStart = new Date(dNow.getFullYear(), 0, 1);
                 }
                 if (config.timedateend) {
-                    d2 = new Date(config.timedateend);
+                    dEnd = new Date(config.timedateend);
+                    dEnd.setFullYear(dNow.getFullYear());
+                    dEnd.setHours(0, 0, 0, 0);
                 } else {
-                    d2 = new Date(now.getFullYear(), 11, 31);
+                    dEnd = new Date(dNow.getFullYear(), 11, 31);
                 }
-                const startnum = d1.getTime();
-                const endnum = d2.getTime();
-                const nowNr = now.getTime();
-                if (endnum > startnum) {
-                    // in the current year
-                    if (nowNr < startnum || nowNr >= endnum) {
-                        warnStatus = RED._('time-inject.errors.invalid-daterange', { year:d1.getFullYear, month:d1.getMonth, day:d1.getDay});
+
+                if (dStart < dEnd) {
+                    // in the current year - e.g. 6.4. - 7.8.
+                    if (dNow < dStart || dNow >= dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear() + ((dNow >= dEnd) ? 1 : 0), dStart.getMonth(), dStart.getDay(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange');
                         node.timeType = 'none';
                         node.timeAltType = 'none';
-                        node.nextTime = new Date(d1.getFullYear, d1.getMonth, d1.getDay, 0, 0, 1);
                     }
                 } else {
-                    // switch between year from end to start
-                    if (nowNr < startnum && nowNr >= endnum) {
-                        warnStatus = RED._('time-inject.errors.invalid-daterange', { year: d2.getFullYear + 1, month: d2.getMonth, day: d2.getDay });
+                    // switch between year from end to start - e.g. 2.11. - 20.3.
+                    if (dNow < dStart && dNow >= dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDay(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange');
                         node.timeType = 'none';
                         node.timeAltType = 'none';
-                        node.nextTime = new Date(d2.getFullYear + 1, d2.getMonth, d2.getDay,0,0,1);
                     }
                 }
             }
@@ -276,7 +277,7 @@ module.exports = function (RED) {
             let shape = 'dot';
             if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
-                    hlp.handleError(this, 'Invalid time format', undefined, 'internal error!');
+                    hlp.handleError(this, 'Invalid time format "' + node.nextTime + '"', undefined, 'internal error!');
                     return { state:'error', done: false, statusMsg: 'Invalid time format!', errorMsg: 'Invalid time format'};
                 }
 
@@ -368,7 +369,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'dot',
-                    text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
+                    text: warnStatus + ((node.nextTime) ? ' [' + node.positionConfig.toDateString(node.nextTime)+ ']' : '') + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
