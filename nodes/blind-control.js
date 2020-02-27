@@ -801,12 +801,12 @@ module.exports = function (RED) {
                 const endnum = rule.timeDateEnd.getTime();
                 if (endnum > startnum) {
                     // in the current year
-                    if (nowNr < startnum || nowNr >= endnum) {
+                    if (nowNr < startnum || nowNr > endnum) {
                         return null;
                     }
                 } else {
                     // switch between year from end to start
-                    if (nowNr < startnum && nowNr >= endnum) {
+                    if (nowNr < startnum && nowNr > endnum) {
                         return null;
                     }
                 }
@@ -1445,13 +1445,16 @@ module.exports = function (RED) {
                 if (rule.timeDateStart || rule.timeDateEnd) {
                     if (rule.timeDateStart) {
                         rule.timeDateStart = new Date(rule.timeDateStart);
+                        rule.timeDateStart.setHours(0, 0, 0, 1);
                     } else {
-                        rule.timeDateStart = new Date(2000,0,1);
+                        rule.timeDateStart = new Date(2000,0,1,0, 0, 0, 1);
                     }
+
                     if (rule.timeDateEnd) {
                         rule.timeDateEnd = new Date(rule.timeDateEnd);
+                        rule.timeDateStart.setHours(23, 59, 59, 999);
                     } else {
-                        rule.timeDateStart = new Date(2000,11,31);
+                        rule.timeDateStart = new Date(2000,11,31, 23, 59, 59, 999);
                     }
                 }
 

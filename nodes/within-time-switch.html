@@ -415,7 +415,7 @@
 
                     const year = (new Date()).getFullYear();
                     if (node.timedatestart) {
-                        $timeLimitDateStart.val(year + (getDateShort(node.timedatestart) || '-01-01'));
+                        $timeLimitDateStart.val(year + '-' +(getDateShort(node.timedatestart) || '01-01'));
                     }
                     if (node.timedatestart && node.timedateend) {
                         const year = (new Date()).getFullYear();
@@ -429,7 +429,7 @@
                         const pad = (n, z = 2) => ('00' + n).slice(-z);
                         $timeLimitDateEnd.val(year + '-' + pad(d2.getMonth() + 1) + '-' + pad(d2.getDate()));
                     } else if (node.timedateend) {
-                        $timeLimitDateEnd.val(year + (getDateShort(node.timedateend) || '-12-31'));
+                        $timeLimitDateEnd.val(year + '-' + (getDateShort(node.timedateend) || '12-31'));
                     }
                     $timeLimitDateStart.change();
                     $timeLimitDateEnd.change();

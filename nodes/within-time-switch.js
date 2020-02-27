@@ -143,24 +143,26 @@ module.exports = function (RED) {
             if (config.timedatestart) {
                 dStart = new Date(config.timedatestart);
                 dStart.setFullYear(dNow.getFullYear());
+                dStart.setHours(0, 0, 0, 1);
             } else {
-                dStart = new Date(dNow.getFullYear(), 0, 1);
+                dStart = new Date(dNow.getFullYear(), 0, 0, 0, 0, 0, 1);
             }
             if (config.timedateend) {
                 dEnd = new Date(config.timedateend);
                 dEnd.setFullYear(dNow.getFullYear());
+                dEnd.setHours(23, 59, 59, 999);
             } else {
-                dEnd = new Date(dNow.getFullYear(), 11, 31);
+                dEnd = new Date(dNow.getFullYear(), 11, 31, 23, 59, 59, 999);
             }
             if (dStart < dEnd) {
                 // in the current year - e.g. 6.4. - 7.8.
-                if (dNow < dStart || dNow >= dEnd) {
+                if (dNow < dStart || dNow > dEnd) {
                     result.warn = RED._('within-time-switch.errors.invalid-daterange');
                     return result;
                 }
             } else {
                 // switch between year from end to start - e.g. 2.11. - 20.3.
-                if (dNow < dStart && dNow >= dEnd) {
+                if (dNow < dStart && dNow > dEnd) {
                     result.warn = RED._('within-time-switch.errors.invalid-daterange');
                     return result;
                 }
@@ -347,6 +349,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
+                node.debug('--------- within-time-switch - input');
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
                     setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')});

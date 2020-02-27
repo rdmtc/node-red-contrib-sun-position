@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 1.0.11:  enhancement
+
+- blind-control + clock-time + time-inject + within-time
+  - implement #92 additional date restriction
+
 #### 1.0.10:  bug fix
 
 - general

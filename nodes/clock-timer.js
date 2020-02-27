@@ -467,12 +467,12 @@ module.exports = function (RED) {
                 rule.timeDateEnd.setFullYear(dNow.getFullYear());
                 if (rule.timeDateEnd > rule.timeDateStart) {
                     // in the current year
-                    if (dNow < rule.timeDateStart || dNow >= rule.timeDateEnd) {
+                    if (dNow < rule.timeDateStart || dNow > rule.timeDateEnd) {
                         return null;
                     }
                 } else {
                     // switch between year from end to start
-                    if (dNow < rule.timeDateStart && dNow >= rule.timeDateEnd) {
+                    if (dNow < rule.timeDateStart && dNow > rule.timeDateEnd) {
                         return null;
                     }
                 }
@@ -942,13 +942,16 @@ module.exports = function (RED) {
                 if (rule.timeDateStart || rule.timeDateEnd) {
                     if (rule.timeDateStart) {
                         rule.timeDateStart = new Date(rule.timeDateStart);
+                        rule.timeDateStart.setHours(0, 0, 0, 1);
                     } else {
-                        rule.timeDateStart = new Date(2000,0,1);
+                        rule.timeDateStart = new Date(2000,0,1,0, 0, 0, 1);
                     }
+
                     if (rule.timeDateEnd) {
                         rule.timeDateEnd = new Date(rule.timeDateEnd);
+                        rule.timeDateStart.setHours(23, 59, 59, 999);
                     } else {
-                        rule.timeDateStart = new Date(2000,11,31);
+                        rule.timeDateStart = new Date(2000,11,31, 23, 59, 59, 999);
                     }
                 }
 

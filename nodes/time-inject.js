@@ -187,29 +187,29 @@ module.exports = function (RED) {
                     dStart.setFullYear(dNow.getFullYear());
                     dStart.setHours(0, 0, 0, 0);
                 } else {
-                    dStart = new Date(dNow.getFullYear(), 0, 1);
+                    dStart = new Date(dNow.getFullYear(), 0, 0, 0, 0, 0, 1);
                 }
                 if (config.timedateend) {
                     dEnd = new Date(config.timedateend);
                     dEnd.setFullYear(dNow.getFullYear());
-                    dEnd.setHours(0, 0, 0, 0);
+                    dEnd.setHours(23, 59, 59, 999);
                 } else {
-                    dEnd = new Date(dNow.getFullYear(), 11, 31);
+                    dEnd = new Date(dNow.getFullYear(), 11, 31, 23, 59, 59, 999);
                 }
 
                 if (dStart < dEnd) {
                     // in the current year - e.g. 6.4. - 7.8.
-                    if (dNow < dStart || dNow >= dEnd) {
-                        node.nextTime = new Date(dStart.getFullYear() + ((dNow >= dEnd) ? 1 : 0), dStart.getMonth(), dStart.getDay(), 0, 0, 1);
-                        warnStatus = RED._('time-inject.errors.invalid-daterange');
+                    if (dNow < dStart || dNow > dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear() + ((dNow >= dEnd) ? 1 : 0), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
                         node.timeType = 'none';
                         node.timeAltType = 'none';
                     }
                 } else {
                     // switch between year from end to start - e.g. 2.11. - 20.3.
-                    if (dNow < dStart && dNow >= dEnd) {
-                        node.nextTime = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDay(), 0, 0, 1);
-                        warnStatus = RED._('time-inject.errors.invalid-daterange');
+                    if (dNow < dStart && dNow > dEnd) {
+                        node.nextTime = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
+                        warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
                         node.timeType = 'none';
                         node.timeAltType = 'none';
                     }
@@ -369,7 +369,7 @@ module.exports = function (RED) {
                 node.status({
                     fill: 'red',
                     shape: 'dot',
-                    text: warnStatus + ((node.nextTime) ? ' [' + node.positionConfig.toDateString(node.nextTime)+ ']' : '') + ((node.intervalObj) ? ' ↺🖩' : '')
+                    text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
             } else if (node.nextTimeAlt && node.timeOutObj) {
                 if (isAltFirst) {
@@ -417,7 +417,7 @@ module.exports = function (RED) {
 
             try {
                 msg._srcid = node.id;
-                node.debug('input ');
+                node.debug('--------- time-inject - input');
                 doCreateTimeout(node);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
