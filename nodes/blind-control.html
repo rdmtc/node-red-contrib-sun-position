@@ -911,12 +911,19 @@
                                 class:'blind-rule-finalspan'
                             }).appendTo($row0);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
-                            const $btn = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn'
+                            const $btnEdit = $('<a />', {
+                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn',
+                                title: node._('blind-control.label.editRule')
                             }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
-                            // $btn.button();
-                            $btn.click(() => {
+                            const $btnCpy = $('<a />', {
+                                class: 'red-ui-button red-ui-button-small blind-rule-duplicateBtn',
+                                title: node._('blind-control.label.duplicateRule')
+                            }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
+                            $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
+                            });
+                            $btnCpy.click(() => {
+                                _dialogDuplicateRule(containerIndex, $containerRow);
                             });
 
                             if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
@@ -1516,8 +1523,8 @@
                     const $dialogTimeLimitDateEnd = $dialog.find('#dlg-ip-blindctl-rule-timedatelimit-end');
                     $dialogTimeLimitDateStart.change(() => {
                         const year = (new Date()).getFullYear();
-                        $dialogTimeLimitDateEnd.attr('min', getDateLimit($dialogTimeLimitDateStart.val(), year + '-01-01'));
-                        $dialogTimeLimitDateEnd.attr('max', (year + 1) + (getDateShort($dialogTimeLimitDateStart.val()) || '-12-31'));
+                        $dialogTimeLimitDateEnd.attr('min', year + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '01-01'));
+                        $dialogTimeLimitDateEnd.attr('max', (year + 1) + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '12-31'));
 
                     });
                     $dialogTimeLimitDateEnd.change(() => {
@@ -1570,16 +1577,26 @@
                             }
                             _dialogGenHelpText();
                             return;
-                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                            $dialogTimeRegOperator.show();
+                        }
+                        $dialogTimeRegOperator.show();
+                        if(opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $('#dialog-row-offset-timeReg').hide();
+                        } else {
                             $('#dialog-row-offset-timeReg').show();
+                        }
+
+                        const noLimit =   getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
+                                        getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12) === '*' &&
+                                        $dialogTimeLimitOnlyEvenDays.is(':checked') !== true &&
+                                        $dialogTimeLimitOnlyOddDays.is(':checked') !== true &&
+                                        $dialogTimeLimitDateStart.val() === '' &&
+                                        $dialogTimeLimitDateEnd.val() === '';
+                        if (noLimit) {
                             $('.dialog-row-timeLimits').hide();
                             $('.dialog-row-timeLimits-ph').show();
                         } else {
-                            $dialogTimeRegOperator.show();
-                            $('#dialog-row-offset-timeReg').hide();
-                            $('.dialog-row-timeLimits').hide();
-                            $('.dialog-row-timeLimits-ph').show();
+                            $('.dialog-row-timeLimits').show();
+                            $('.dialog-row-timeLimits-ph').hide();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -1847,23 +1864,6 @@
                     }
 
                     /**
-                     * get a formated date limit
-                     */
-                    function getDateLimit(value, def) {
-                        if (value) {
-                            const val = value.split('-');
-                            const year = (new Date()).getFullYear();
-                            if (val.length > 2) {
-                                return year + '-' + val[1] + '-' + val[2];
-                            } else if (val.length === 2) {
-                                return year + '-' + val[0] + '-' + val[1];
-                            }
-                            return def;
-                        }
-                        return def;
-                    }
-
-                    /**
                      * generates the help text of the dialog
                      */
                     function _dialogGenHelpText() {
@@ -1907,23 +1907,38 @@
                             $dialogTimeLimitOnlyEvenDays.attr('checked', data.timeOnlyEvenDays);
                             $dialogTimeLimitOnlyOddDays.attr('checked', data.timeOnlyOddDays);
 
-                            $dialogTimeLimitDateStart.val(getDateLimit(data.timeDateStart,''));
-                            if (data.timeDateEnd && data.timeDateStart) {
+                            if (data.timeDateEnd || data.timeDateStart) {
                                 const year = (new Date()).getFullYear();
-                                const d1 = new Date(data.timeDateStart);
-                                const d2 = new Date(data.timeDateEnd);
-                                d1.setFullYear(year);
-                                d2.setFullYear(year);
-                                if (d2.getTime() < d1.getTime()) {
-                                    d2.setFullYear(year + 1);
+                                let dStart, dEnd;
+                                if (data.timeDateStart) {
+                                    dStart = new Date(data.timeDateStart);
+                                    dStart.setHours(0, 0, 0, 1);
+                                    dStart.setFullYear(year);
+                                } else {
+                                    dStart = new Date(year, 0, 1, 0, 0, 0, 1);
+                                }
+
+                                if (data.timeDateEnd) {
+                                    dEnd = new Date(data.timeDateEnd);
+                                    dEnd.setHours(23, 59, 59, 999);
+                                    dEnd.setFullYear(year);
+                                } else {
+                                    dEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+                                }
+
+                                if (dEnd.getTime() < dStart.getTime()) {
+                                    dEnd.setFullYear(year + 1);
                                 }
                                 const pad = (n, z = 2) => ('00' + n).slice(-z);
-                                $dialogTimeLimitDateEnd.val(year+'-'+ pad(d2.getMonth()+1) + '-' + pad(d2.getDate()));
-                            } else {
-                                $dialogTimeLimitDateEnd.val(getDateLimit(data.timeDateEnd,''));
+                                if (data.timeDateStart) {
+                                    $dialogTimeLimitDateStart.val(dStart.getFullYear() + '-' + pad(dStart.getMonth() + 1) + '-' + pad(dStart.getDate()));
+                                }
+                                if (data.timeDateEnd) {
+                                    $dialogTimeLimitDateEnd.val(dEnd.getFullYear() + '-'+ pad(dEnd.getMonth()+1) + '-' + pad(dEnd.getDate()));
+                                }
+                                $dialogTimeLimitDateStart.change();
+                                $dialogTimeLimitDateEnd.change();
                             }
-                            $dialogTimeLimitDateStart.change();
-                            $dialogTimeLimitDateEnd.change();
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
@@ -1967,6 +1982,7 @@
                             offsetValue: $dialogTimeRegOffset.typedInput('value'),
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            // limitations:
                             timeDays: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'),7),
                             timeMonths: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
                             timeOnlyEvenDays: $dialogTimeLimitOnlyEvenDays.is(':checked'),
@@ -2058,6 +2074,29 @@
                         $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
                         resizeContainer();
+                    }
+
+                    /**
+                     * Duplicates an existing rule
+                     */
+                    function _dialogDuplicateRule(containerIndex, $containerRow) {
+                        try {
+                            $dialogDataRow = $containerRow;
+                            dialogDataIndex = containerIndex;
+                            const data = JSON.parse($dialogDataRow.data('ruleData'));
+                            const nm = parseInt(data.name.match(/[0-9]+(?!.*[0-9])/), 10);
+                            if (nm) {
+                                data.name = data.name.replace(/[0-9]+(?!.*[0-9])/, nm + 1);
+                            } else {
+                                data.name += ' - copy 1';
+                            }
+                            data.description = getRuleDescription(node, selFields, data);
+                            $('#node-input-rule-container').editableList('addItem', data);
+                        } catch (err) {
+                            console.log(err.message); // eslint-disable-line no-console
+                            console.log(err.stack); // eslint-disable-line no-console
+                            $dialogName.val(err.message);
+                        }
                     }
                     // #endregion dialogload & save
                     // #endregion dialog
@@ -2759,10 +2798,16 @@
         right: 66px;
         margin-top: -9px;
     }
-    .blind-rule-editBtn {
-        top: 50%;
+    .blind-rule-editBtn,
+    .blind-rule-duplicateBtn {
         position: absolute;
         right: 28px;
         margin-top: -9px !important;
+    }
+    .blind-rule-editBtn {
+        top: 25%;
+    }
+    .blind-rule-duplicateBtn {
+        top: 70%;
     }
 </style>

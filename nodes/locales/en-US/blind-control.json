@@ -81,7 +81,9 @@
 			"onlyEven": "only even",
 			"onlyOdd": "only odd",
 			"onlyEvenDays": "only even days",
-			"onlyOddDays": "only odd days"
+			"onlyOddDays": "only odd days",
+			"editRule": "edit the rule",
+			"duplicateRule": "duplicate the rule"
 		},
 		"placeholder": {
 			"windowTop": "top of the window",

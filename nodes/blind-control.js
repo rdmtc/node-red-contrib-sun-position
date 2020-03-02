@@ -1457,9 +1457,9 @@ module.exports = function (RED) {
 
                     if (rule.timeDateEnd) {
                         rule.timeDateEnd = new Date(rule.timeDateEnd);
-                        rule.timeDateStart.setHours(23, 59, 59, 999);
+                        rule.timeDateEnd.setHours(23, 59, 59, 999);
                     } else {
-                        rule.timeDateStart = new Date(2000,11,31, 23, 59, 59, 999);
+                        rule.timeDateEnd = new Date(2000,11,31, 23, 59, 59, 999);
                     }
                 }
 
