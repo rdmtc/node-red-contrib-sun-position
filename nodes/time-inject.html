@@ -764,7 +764,8 @@
                             if (plVType ===  types.TimeEntered.value ||
                                 plVType === types.TimeSun.value ||
                                 plVType === types.TimeMoon.value ||
-                                plVType === types.DateSpecific.value) {
+                                plVType === types.DateSpecific.value ||
+                                plVType === types.DayOfMonth.value) {
                                 $('.time-inject-row-payloadTimeFormat').show();
                                 $('.time-inject-row-payloadOffset').show();
                             } else if (plVType ===  types.TimeSunNow.value) {
@@ -1128,7 +1129,6 @@
                                     $('.time-inject-row-addPayload1days').hide();
                                 } else if (plVType === types.DateSpecific.value ||
                                     plVType === types.DateEntered.value ||
-                                    plVType === types.DayOfMonth.value ||
                                     plVType === types.DayOfMonth.value) {
                                     $('.time-inject-row-addPayload1Format').show();
                                     $('.time-inject-row-addPayload1Offset').show();
