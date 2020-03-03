@@ -71,7 +71,7 @@
 			"condoperand": "operand",
 			"time": "time",
 			"offset": "time offset",
-			"level": "level",
+			"ruleTopic": "allows to define a seperate topic for outgoing message per rule, if not defined default topic will be used",
 			"ruleTimeDays": "select days wherefore it should be valid",
 			"ruleTimeMonths": "select months wherefore it should be valid",
 			"autoTrigger": "automatic triggers new calculation of the rule in a dynamic changing time interval",

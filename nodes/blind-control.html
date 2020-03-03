@@ -126,7 +126,7 @@
                 rules: {
                     value: {}
                 },
-                // #endregion time settings
+                // #endregion rule settings
                 // #region sun settings
                 sunControlMode: {
                     value: '0',
@@ -196,6 +196,10 @@
                                 (v === '') ||
                                 (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
+                },
+                sunTopic: {
+                    value: '',
+                    required: false
                 },
                 // #endregion sun settings
                 // #region window settings
@@ -349,6 +353,10 @@
                 },
                 oversteer3BlindPosType: {
                     value: 'levelFixed'
+                },
+                oversteerTopic: {
+                    value: '',
+                    required: false
                 }
                 // #endregion oversteering settings
             },
@@ -812,8 +820,16 @@
                                     result += '</var>';
                                     // <meter value="2" min="0" max="10">2 out of 10</meter>
                                 }
+                                if (data.topic) {
+                                    result += '<div class="indent-topic-text"> <span>';
+                                    result += node._('blind-control.label.ruleTopic');
+                                    result += '</span> <var>';
+                                    result += data.topic;
+                                    result += '</var>';
+                                    result += '</div>';
+                                }
                             } else {
-                                result += '-';
+                                result += node._('blind-control.label.ruleLevelND');
                             }
                             result += '</div>';
                         } catch (err) {
@@ -1544,6 +1560,7 @@
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    const $dialogTopic = $dialog.find('#dlg-ip-blindctl-rule-topic');
                     // #endregion dialogLevel
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
@@ -1952,6 +1969,7 @@
                             setTI($dialogLevel, data.levelValue, data.levelType);
                             $dialogLevel.typedInput('value',data.levelValue);
                             $dialogLevel.typedInput('type',data.levelType);
+                            $dialogTopic.val(data.topic);
                             _dialogGenHelpText();
 
                             dialogDataOnLoading = false;
@@ -2006,6 +2024,7 @@
                             levelType: $dialogLevel.typedInput('type'),
                             levelOp: parseInt($dialogLevelOperator.val()),
                             levelOpText: $dialogLevelOperator.find('option:selected').text(),
+                            topic: $dialogTopic.val(),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2225,8 +2244,12 @@
         <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
         <input type="hidden" id="node-input-blindPosDefaultType">
     </div>
+    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+    </div>
     <hr>
-    <!-- overwrite blind ######################################################################## -->
+    <!-- overwrite ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
         <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
     </div>
@@ -2243,8 +2266,8 @@
     <hr>
     <!-- sun ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-            <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
-            <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
+        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
+        <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
         <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
@@ -2259,6 +2282,10 @@
     </div>
     <div class="form-row form-row-sunControlMaximization block-noindent">
         <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.sunTopic">
+        <label for="node-input-sunTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.sunTopic"></span></label>
+        <input type="text" id="node-input-sunTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
     </div>
     <hr class="form-row-sunControlActive" >
     <!-- window ######################################################################## -->
@@ -2379,6 +2406,10 @@
         <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteer3BlindPosType">
     </div>
+    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
+        <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
+        <input type="text" id="node-input-oversteerTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+    </div>
     <hr>
     <!-- Enhanced ######################################################################## -->
     <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
@@ -2416,10 +2447,6 @@
     </div>
     <hr>
     <!-- End ######################################################################## -->
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
-    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
@@ -2565,6 +2592,10 @@
             <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
+        </div>
+        <div class="dialog-row pt-2 block-noindent" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+            <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">

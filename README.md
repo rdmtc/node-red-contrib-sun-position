@@ -47,6 +47,13 @@ In addition, there is now a blind controller, which can set blind position time 
       - [time-span - Node settings](#time-span---node-settings)
     - [blind-control](#blind-control)
     - [clock-timer](#clock-timer)
+    - [Possible Node Output Formats](#possible-node-output-formats)
+      - [Standard node Output Formats](#standard-node-output-formats)
+      - [enhanced timestamp OutputFormat](#enhanced-timestamp-outputformat)
+        - [offset](#offset)
+        - [formats](#formats)
+        - [timestamp values](#timestamp-values)
+      - [special output](#special-output)
     - [Times definitions](#times-definitions)
       - [sun times](#sun-times)
         - [remarks](#remarks)
@@ -251,55 +258,7 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 - **Position** connects to the central configuration node, which contains the current position, but also handles internal shared functions
 - **Payload** defines the payload of the message object send to the output
-  - Compared to the standard inject node, this node has more options for the payload ![image](https://user-images.githubusercontent.com/12692680/75714307-c3201e80-5ccb-11ea-97cc-2fb456dd0809.png)
-  - The possible options are:
-    - same as standard inject node - see Node-Red documentation for more Information
-      - timestamp - equal to the standard payload of the inject node the inject timestamp as the number of millisecond since midnight January 1, 1970 UTC
-      - flow
-      - global
-      - string
-      - number
-      - boolean
-      - JSON
-      - buffer
-      - env variable
-      - JSONATA expression
-    - time stamps - these timestamps has the possibility to add or sub an offset and define the format in which the timestamp should be send as payload
-    ![image](https://user-images.githubusercontent.com/12692680/75715251-66256800-5ccd-11ea-9a53-a733110c925c.png)
-    complete free definition of the format:
-    ![image](https://user-images.githubusercontent.com/12692680/75715301-7b01fb80-5ccd-11ea-9acc-da4acaf00ee3.png)
-      - timestamp enhanced - the inject timestamp
-      - time (next) - a definable time in the format
-        - HH:MM
-        - HH:MM:SS
-        - HH:MM pm
-        - HH:MM am
-        - HH:MM:SS pm
-        - HH:MM:SS am
-        - ...
-      - date - a date time in the format:
-        - YYYY-MM-DD
-        - YYYY-M-D
-        - D.M.YYYY
-        - DD.MM.YYYY
-        - YYYY-MM-DD HH:MM
-        - YYYY-MM-DDTHH:MM:SS.MS
-        - YYYY-MM-DD HH:MM:SS
-        - DD.MM.YYYY HH:MM
-        - DD.MM.YYYY HH:MM:SS
-        - ...
-      - sun time - a timestamp based on a sun time (e.g. sunrise or sunset)
-        - moon time - a timestamp based on a moon rise or moon set
-      - day of month - a day based of the month for the inject timestamp
-    - special data
-      - sun calculation - the sun position object equal to the output of the sun-position node
-      - sun in the sky (percent) - the percentage of the sun in the sky
-      - moon calculation - the moon position object equal to the output of the moon-position node
-      - moon phase - the current moon-phase
-      - azimuth of sun - the azimuth of the sun on the inject timestamp in decimal degree
-      - elevation of sun - the elevation of the sun on the inject timestamp in decimal degree
-      - azimuth of sun (rad) - the azimuth of the sun on the inject timestamp in rad
-      - elevation of sun (rad) - the azimuth of the sun on the inject timestamp in rad
+  - Compared to the standard inject node, this node has more options for the payload see [Possible Node Output Formats](#possible-node-output-formats) for these options.
 - **Topic** defines the topic of the send message
 - **Time** An optional property that can be [configured](#times-definitions) when the inject node should emit a message on that timestamp.
   - if a time is choose additional settings available
@@ -318,31 +277,7 @@ Injects a message into a flow either manually or at timestamps which can also de
 
 - **Set additional** With this selection you can
   - set __global__, __flow__ context or set additional property of the message object (if the property is __payload__ the payload will be overridden.)
-  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise.
-    - **set additional timestamp**:
-      !![time-inject-settings-addProp1](https://user-images.githubusercontent.com/12692680/57134519-b4fd2b00-6da6-11e9-843a-dd1d83555b8b.png)
-    - **set additional sun timestamp**:
-      ![time-inject-settings-addProp2](https://user-images.githubusercontent.com/12692680/57134520-b4fd2b00-6da6-11e9-9832-a3d8beda4897.png)
-    - **possible formats of timestamp output**
-      - number - milliseconds UNIX timestamp
-      - string - ECMA-262
-      - string - local date and time
-      - string - local time
-      - string - UTC date and time
-      - string - ISO date and time
-      - string - YYYYMMDDHHMMSS
-      - string - YYYYMMDD.HHMMSS
-      - number - milliseconds since emit
-      - number - seconds since emit
-      - number - minutes since emit
-      - number - hour since emit
-      - number - week number
-      - boolean - true if week number is even, otherwise false
-      - as object
-
-time-inject-settings-addProp1
-
-If this checkbox is set the inject node
+  - for any timestamp properties like __timestamp__, __sun time__, __moon time__ there are a lot of possibilities to influence this. You can add an offset or select the days wherefore the timestamp should be calculated. The output format could be Unix, ECMA timestamp, object or the time difference between timestamp and emit the message. This is useful to to send a payload of true on sunset with an additional message property as __on time__ with the seconds until sunrise. see  [Possible Node Output Formats](#possible-node-output-formats) for possible information
 
 #### time-inject - Node Input
 
@@ -473,6 +408,94 @@ Used to control a blind with many possibilities. This can be time-dependent and 
 Used to control a flow time based with many possibilities. This can be used to switch something which is time-dependent (e.g. Christmas lights).
 
 [clock-timer](clock_timer.md)
+
+### Possible Node Output Formats
+
+Lot of the nodes of these package allows to define additional output formats of payload or message properties additional to the standard Node-Red data types.
+
+![payload Formats](https://user-images.githubusercontent.com/12692680/75714307-c3201e80-5ccb-11ea-97cc-2fb456dd0809.png)
+
+#### Standard node Output Formats
+
+see Node-Red documentation for more Information
+
+- timestamp - timestamp as the number of millisecond since midnight January 1, 1970 UTC
+- flow
+- global
+- string
+- number
+- boolean
+- JSON
+- buffer
+- env variable
+- JSONATA expression
+
+#### enhanced timestamp OutputFormat
+
+Additional to the node-red standard `timestamp` output which represents the current timestamp as the number of millisecond since midnight January 1, 1970 UTC there are possibility for different timestamps with different output format.
+
+![timestamp output](https://user-images.githubusercontent.com/12692680/75715301-7b01fb80-5ccd-11ea-9acc-da4acaf00ee3.png)
+
+##### offset
+
+Typical it is that there is the possibility to can add an offset or subtract an offset by using a negative offset value.
+
+![offset](https://user-images.githubusercontent.com/12692680/75762629-488ee780-5d3b-11ea-9761-aada4f6ccfdc.png)
+
+The Offset itself must be a number which is defined direct as number or given by a flow or global context. Additional the offset could be random number then the offset will be between 0 and the given value.
+
+##### formats
+
+For the enhances timestamps the output format could be defined.
+
+![output format definition](https://user-images.githubusercontent.com/12692680/75715251-66256800-5ccd-11ea-9a53-a733110c925c.png)
+
+See the following chapters for possible formats:
+
+- [output timestamp formats](#output-timestamp-formats)
+- [output timespan formats](#output-timespan-formats)
+
+##### timestamp values
+
+complete free definition of the format:
+
+- timestamp enhanced
+  - equal to th Node-Red standard timestamp the current timestamp (e.g. inject timestamp) with all the enhanced offset and output format options
+- time (next) - a definable time in the format
+  - HH:MM
+  - HH:MM:SS
+  - HH:MM pm
+  - HH:MM am
+  - HH:MM:SS pm
+  - HH:MM:SS am
+  - ...
+- date - a date and time in the format:
+  - YYYY-MM-DD
+  - YYYY-M-D
+  - D.M.YYYY
+  - DD.MM.YYYY
+  - YYYY-MM-DD HH:MM
+  - YYYY-MM-DDTHH:MM:SS.MS
+  - YYYY-MM-DD HH:MM:SS
+  - DD.MM.YYYY HH:MM
+  - DD.MM.YYYY HH:MM:SS
+  - ...
+- sun time - a timestamp based on a sun time (e.g. sunrise or sunset)
+  - moon time - a timestamp based on a moon rise or moon set
+- day of month - a day based of the month for the inject timestamp
+
+#### special output
+
+Additional special values could be defined as output.
+
+- sun calculation - the sun position object equal to the output of the sun-position node
+- sun in the sky (percent) - the percentage of the sun in the sky
+- moon calculation - the moon position object equal to the output of the moon-position node
+- moon phase - the current moon-phase
+- azimuth of sun - the azimuth of the sun on the inject timestamp in decimal degree
+- elevation of sun - the elevation of the sun on the inject timestamp in decimal degree
+- azimuth of sun (rad) - the azimuth of the sun on the inject timestamp in rad
+- elevation of sun (rad) - the azimuth of the sun on the inject timestamp in rad
 
 ### Times definitions
 

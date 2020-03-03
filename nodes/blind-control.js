@@ -457,6 +457,7 @@ module.exports = function (RED) {
                 }
                 node.level.current = newPos;
                 node.level.currentInverse = newPos;
+                node.level.topic = msg.topic;
             }
 
             if (Number.isFinite(expire) || (prio <= 0)) {
@@ -499,6 +500,7 @@ module.exports = function (RED) {
             if (node.sunData.mode === winterMode) {
                 node.level.current = node.blindData.levelMin;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.topic = node.sunData.topic;
                 node.reason.code = 13;
                 node.reason.state = RED._('blind-control.states.sunNotInWinMin');
                 node.reason.description = RED._('blind-control.reasons.sunNotInWin');
@@ -522,6 +524,7 @@ module.exports = function (RED) {
             if (res) {
                 node.level.current = res.blindPos;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.topic = node.oversteer.topic;
                 node.reason.code = 10;
                 node.reason.state = RED._('blind-control.states.oversteer');
                 node.reason.description = RED._('blind-control.reasons.oversteer');
@@ -535,6 +538,7 @@ module.exports = function (RED) {
         if (node.sunData.mode === winterMode) {
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.topic = node.sunData.topic;
             node.reason.code = 12;
             node.reason.state = RED._('blind-control.states.sunInWinMax');
             node.reason.description = RED._('blind-control.reasons.sunInWinMax');
@@ -547,12 +551,15 @@ module.exports = function (RED) {
         if (height <= node.windowSettings.bottom) {
             node.level.current = node.blindData.levelBottom;
             node.level.currentInverse = node.blindData.levelTop;
+            node.level.topic = node.sunData.topic;
         } else if (height >= node.windowSettings.top) {
             node.level.current = node.blindData.levelTop;
             node.level.currentInverse = node.blindData.levelBottom;
+            node.level.topic = node.sunData.topic;
         } else {
             node.level.current = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
             node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.topic = node.sunData.topic;
         }
 
         const delta = Math.abs(previousData.level - node.level.current);
@@ -564,12 +571,14 @@ module.exports = function (RED) {
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: getRealLevel_(node).toString()});
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
+            node.level.topic = previousData.topic;
         } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.blindData.levelBottom) && (node.level.current < node.blindData.levelTop)) {
             node.reason.code = 14;
             node.reason.state = RED._('blind-control.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
             node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
+            node.level.topic = previousData.topic;
         } else {
             node.reason.code = 9;
             node.reason.state = RED._('blind-control.states.sunCtrl');
@@ -950,6 +959,7 @@ module.exports = function (RED) {
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.level.current = livingRuleData.level;
             node.level.currentInverse = getInversePos_(node, livingRuleData.level);
+            node.level.topic = livingRuleData.topic;
             const data = { number: ruleSel.pos, name: ruleSel.name };
             let name = 'rule';
             if (ruleSel.conditional) {
@@ -978,6 +988,7 @@ module.exports = function (RED) {
         livingRuleData.id = -1;
         node.level.current = node.blindData.levelDefault;
         node.level.currentInverse = getInversePos_(node, node.blindData.levelDefault);
+        node.level.topic = node.blindData.topic;
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
@@ -1028,6 +1039,7 @@ module.exports = function (RED) {
             /** Defines if the sun control is active or not */
             active: false,
             mode: Number(hlp.chkValueFilled(config.sunControlMode, 0)),
+            topic: config.sunTopic,
             /** define how long could be the sun on the floor **/
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
@@ -1054,6 +1066,7 @@ module.exports = function (RED) {
             levelDefault: NaN,
             levelMin: NaN,
             levelMax: NaN,
+            topic: config.topic,
             /** The override settings */
             overwrite: {
                 active: false,
@@ -1074,6 +1087,7 @@ module.exports = function (RED) {
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelTop);
         node.oversteer = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
+            topic: config.oversteerTopic || config.sunTopic,
             isChecked: false
         };
         node.oversteerData = [];
@@ -1173,11 +1187,13 @@ module.exports = function (RED) {
                 const previousData = node.context().get('previous',node.storeName) || {};
                 previousData.level = node.level.current;
                 previousData.levelInverse = node.level.currentInverse;
+                previousData.topic = node.level.topic;
                 previousData.reasonCode = node.reason.code;
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
+                node.level.topic = '';
                 const now = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.deaultTime;
@@ -1262,7 +1278,7 @@ module.exports = function (RED) {
                 }
                 setState(blindCtrl);
 
-                let topic = config.topic;
+                let topic = node.level.topic || node.blindData.topic || msg.topic;
                 if (topic) {
                     const topicAttrs = {
                         name: node.name,
@@ -1275,7 +1291,7 @@ module.exports = function (RED) {
                         topic: msg.topic,
                         payload: msg.payload
                     };
-                    topic = hlp.topicReplace(config.topic, topicAttrs);
+                    topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
                 if ((!isNaN(node.level.current)) &&
@@ -1287,7 +1303,7 @@ module.exports = function (RED) {
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);
                     } else {
-                        msg.topic = topic || msg.topic;
+                        msg.topic = topic;
                         msg.blindCtrl = blindCtrl;
                         send(msg, null); // node.send(msg, null);
                     }
