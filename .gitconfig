@@ -1,2 +1,18 @@
 [credential]
     helper = !'C:/Program Files (x86)/GitExtensions/GitCredentialWinStore/git-credential-winstore.exe'
+
+[diff]
+    tool = beyondcompare4
+
+[difftool "beyondcompare4"]
+    cmd = \"C:\\Program Files\\Beyond Compare 4\\bcomp.exe\" \"$LOCAL\" \"$REMOTE\"
+
+[merge]
+    tool = beyondcompare4
+
+[mergetool]
+    keepbackup = false
+
+[mergetool "beyondcompare4"]
+    cmd = \"C:\\Program Files\\Beyond Compare 4\\bcomp.exe\" \"$REMOTE\" \"$LOCAL\" \"$BASE\" \"$MERGED\"
+    trustexitcode = true
