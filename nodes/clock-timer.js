@@ -670,8 +670,8 @@ module.exports = function (RED) {
             data: config.rules || []
         };
         node.payload = {
-            current:undefined,
-            topic:node.timeClockData.topic
+            current: undefined,
+            topic: node.timeClockData.topic
         };
 
         /**

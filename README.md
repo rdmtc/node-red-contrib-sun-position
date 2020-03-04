@@ -10,9 +10,9 @@
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->
 
-This is a ultimate Node-Red Timer based flow control with dusk, dawn (and variations) and much more.
+This is a ultimate (Swiss-Army-Knife) Node-Red Timer based flow control with dusk, dawn (and variations) and much more.
 Additional you can get sun and moon position or to control a flow by sun or moon position. It is ideal for usage of control smart home, but also for all other time based flow control.
-In addition, there is now a blind controller, which can set blind position time and sun controlled. ( see [blind-control](blind_control.md) )
+There is also a roller [blind control](blind_control.md) node and a [clock timer](clock_timer.md) node. The [blind control](blind_control.md) node can determine the position of the roller shutter by time or position of the sun. The [timer](clock_timer.md) can send different payloads depending on the time.
 
 ![nodes](https://user-images.githubusercontent.com/12692680/70033601-19d46a00-15b0-11ea-9e36-a7843e20ff85.png)
 

@@ -1098,6 +1098,7 @@
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
                             if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                                $('.row-oversteerTopic').hide();
                                 $('.row-oversteerBlindPos').hide();
                                 $('#node-input-oversteerCompare').hide();
                                 $('.row-oversteerThreshold').hide();
@@ -1105,6 +1106,7 @@
                             } else if (oversteerValueType === 'jsonata' ||
                                        oversteerValueType === types.PhaseMoon.value ||
                                        oversteerValueType === types.MsgPayloadByTopic.value) {
+                                $('.row-oversteerTopic').show();
                                 $('.row-oversteerBlindPos').show();
                                 $('#node-input-oversteerCompare').show();
                                 $('#node-input-oversteerCompare').attr('disabled', true);
@@ -1112,6 +1114,7 @@
                                 $('.row-oversteerThreshold').hide();
                                 $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
                             } else {
+                                $('.row-oversteerTopic').show();
                                 $('.row-oversteerBlindPos').show();
                                 $('#node-input-oversteerCompare').show();
                                 $('#node-input-oversteerCompare').attr('disabled', false);
@@ -2119,6 +2122,7 @@
                     }
                     // #endregion dialogload & save
                     // #endregion dialog
+                    $('#node-input-sunControlMode').change();
                 }; // setup
                 $.getScript('sun-position/js/htmlglobal.js')
                     .done((_data, _textStatus,  _bmvfj) => {
@@ -2406,7 +2410,7 @@
         <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteer3BlindPosType">
     </div>
-    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
+    <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
         <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
         <input type="text" id="node-input-oversteerTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
     </div>
@@ -2593,7 +2597,7 @@
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>
-        <div class="dialog-row pt-2 block-noindent" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
             <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>

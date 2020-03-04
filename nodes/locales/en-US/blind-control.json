@@ -58,7 +58,7 @@
 			"oversteer3Value": "oversteer add",
 			"oversteer3Threshold": "Threshold",
 			"oversteer3BlindPos": "blind position",
-			"oversteerTopic":"Topic",
+			"oversteerTopic":"oversteer topic",
 			"smoothTime": "smoothTime",
 			"showEnhSettings": "Enhanced settings",
 			"outputs": "Outputs",
