@@ -857,9 +857,10 @@ module.exports = function (RED) {
                 result = msg.lc;
             } else if (data.type === 'randomNumber') {
                 data.value = parseFloat(data.value);
+                /*
                 if (data.value < 0) {
                     return (Math.random() * Math.abs(data.value || 60));
-                }
+                } */
                 return Math.floor(Math.random() * ((data.value || 60) + 1));
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {
