@@ -246,7 +246,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             }]
         },
         randomNumber: {
-            value: 'random',
+            value: 'randomNum',
             label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.png',
             hasValue: true,
