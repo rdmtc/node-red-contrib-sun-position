@@ -4,7 +4,11 @@
             "property": "Property",
             "propertyThreshold": "Threshold",
             "time": "Time",
+            "timeStart": "Time start",
+            "timeEnd": "Time end",
             "timeOffset": "Offset",
+            "timeStartOffset": "Start Offset",
+            "timeEndOffset": "End Offset",
             "timeAlt": "Alternate time",
             "timeAltOffset": "Offset",
             "payloadOffset": "Offset",
@@ -39,7 +43,9 @@
 			"onlyEvenDays":"only even",
             "onlyOddDays":"only odd",
             "fewDays": "few days",
-            "fewMonths": "few months"
+            "fewMonths": "few months",
+            "between":"between",
+            "and":"and"
         },
         "placeholder": {
             "position": "Position",

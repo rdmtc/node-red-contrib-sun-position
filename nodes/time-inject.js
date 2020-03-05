@@ -83,6 +83,11 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        this.timeType = config.timeType || 'none';
+        this.injectType = config.injectTypeSelect || (this.timeType === 'none' ? 'none' : 'time');
+        this.intervalCount = config.intervalCount || 0;
+        this.intervalCountType = config.intervalCountType || 'num';
+        this.intervalCountMultiplier = config.intervalCountMultiplier || 60000;
 
         this.time = config.time;
         this.timeType = config.timeType || 'none';
@@ -397,6 +402,21 @@ module.exports = function (RED) {
             return { state:'ok', done: true };
         }
 
+        /**
+         * creates the interval
+         * @param {*} node - the node representation
+         * @param {boolean} [_onInit] - _true_ if is in initialisation
+         * @returns {object} state or error
+         */
+        function doCreateInterval(node, _onInit) {
+            /*
+                    config.injectTypeSelect || (this.timeType === 'none' ? 'none' : 'time');
+                    this.intervalCount = config.intervalCount || 0;
+                    this.intervalCountType = config.intervalCountType || 'num';
+                    this.intervalCountMultiplier = config.intervalCountMultiplier || 60000;
+    */
+        }
+
         this.on('close', () => {
             if (node.timeOutObj) {
                 clearTimeout(node.timeOutObj);
@@ -418,7 +438,11 @@ module.exports = function (RED) {
             try {
                 msg._srcid = node.id;
                 node.debug('--------- time-inject - input');
-                doCreateTimeout(node);
+                if (node.injectType === 'time') {
+                    doCreateTimeout(node);
+                } else if (node.injectType === 'interval' || node.injectType === 'interval-time') {
+                    doCreateInterval(node);
+                }
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
@@ -511,21 +535,34 @@ module.exports = function (RED) {
                     node.emit('input', {
                         type: 'once'
                     });
-                    doCreateTimeout(node);
+                    if (node.injectType === 'time') {
+                        doCreateTimeout(node);
+                    } else if (node.injectType === 'interval' || node.injectType === 'interval-time') {
+                        doCreateInterval(node);
+                    }
                 }, (config.onceDelay || 0.1) * 1000);
                 return;
             }
 
             setTimeout(() => {
                 try {
-                    const createTO = doCreateTimeout(node, true);
+                    let createTO = { done: false};
+                    if (node.injectType === 'time') {
+                        createTO = doCreateTimeout(node, true);
+                    } else if (node.injectType === 'interval' || node.injectType === 'interval-time') {
+                        createTO = doCreateInterval(node, true);
+                    }
                     if (createTO.done !== true) {
                         if (createTO.errorMsg) {
                             node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
                         }
                         setTimeout(() => {
                             try {
-                                doCreateTimeout(node);
+                                if (node.injectType === 'time') {
+                                    doCreateTimeout(node);
+                                } else if (node.injectType === 'interval' || node.injectType === 'interval-time') {
+                                    doCreateInterval(node);
+                                }
                             } catch (err) {
                                 node.error(err.message);
                                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
