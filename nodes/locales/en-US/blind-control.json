@@ -198,7 +198,7 @@
 			"sunNotInWinMin": "Sun not in window (min)",
 			"ruleMin": "__org__ [min rule __number__]",
 			"ruleMax": "__org__ [max rule __number__]",
-			"startDelay": "startup"
+			"startDelay": "startup [__date__]"
 		},
 		"errors": {
 			"warning": "Warning: __message__",

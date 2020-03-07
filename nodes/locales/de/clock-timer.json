@@ -53,7 +53,9 @@
 			"onlyEven": "nur gerade",
 			"onlyOdd": "nur ungerade",
 			"onlyEvenDays": "nur gerade Tage",
-			"onlyOddDays": "nur ungerade Tage"
+			"onlyOddDays": "nur ungerade Tage",
+			"editRule": "Regel editieren",
+			"duplicateRule": "Regel duplizieren"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",

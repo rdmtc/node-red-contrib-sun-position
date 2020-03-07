@@ -23,15 +23,23 @@
             "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
             "timesunnow": "nächste Uhrzeit Sonnenstand",
-            "suninsky":"Sonne am Himmel (Prozent)",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
-            "suncalc": "Sonnenposition",
+            "randomNumber":"zufällig",
+            "suncalc":"Sonnenstand berechnet",
+            "suninsky":"Sonne am Himmel (Prozent)",
+            "sunAzimuth":"Azimuth of sun",
+            "sunElevation":"Elevation of sun",
+            "sunAzimuthRad":"Azimuth of sun (rad)",
+            "sunElevationRad":"Elevation of sun (rad)",
             "suntime":"Sonnenzeit",
+            "suntimes":"Sonnenzeiten",
             "mooncalc": "Mondposition",
             "moonPhase": "Mondphase",
             "moonPhaseCheck": "Mondphase",
             "levelfix": "Position",
-            "levelfree": "Position eingeben"
+            "levelfree": "Position eingeben",
+            "levelND": "N/D - benutze standard, sonnensteuerung oder reset",
+            "PlTRes":"msg.payload wenn msg.topic enthält"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",
@@ -79,7 +87,8 @@
             "fullMoon": "Vollmond 🌝",
             "waningGibbousMoon": "Abnehmender Dreiviertelmond 🌖",
             "lastQuarterMoon": "Abnehmender Halbmond 🌗",
-            "waningCrescentMoon": "Abnehmender Sichelmond 🌘"
+            "waningCrescentMoon": "Abnehmender Sichelmond 🌘",
+            "PlTRes":"msg.payload wenn msg.topic enthält \"__topic__\""
         },
         "multiselectLbl": {
             "operatorTypes": "in Vergleich einbeziehen"
@@ -221,7 +230,6 @@
             "enthält irgendeins",
             "enthält alle"
         ],
-
         "days": [
             "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend",
             "So", "Mo", "Die", "Mi", "Do", "Fr", "Sa"
