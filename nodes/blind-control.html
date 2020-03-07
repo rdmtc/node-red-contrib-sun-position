@@ -126,7 +126,7 @@
                 rules: {
                     value: {}
                 },
-                // #endregion time settings
+                // #endregion rule settings
                 // #region sun settings
                 sunControlMode: {
                     value: '0',
@@ -196,6 +196,10 @@
                                 (v === '') ||
                                 (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
+                },
+                sunTopic: {
+                    value: '',
+                    required: false
                 },
                 // #endregion sun settings
                 // #region window settings
@@ -349,6 +353,10 @@
                 },
                 oversteer3BlindPosType: {
                     value: 'levelFixed'
+                },
+                oversteerTopic: {
+                    value: '',
+                    required: false
                 }
                 // #endregion oversteering settings
             },
@@ -812,8 +820,16 @@
                                     result += '</var>';
                                     // <meter value="2" min="0" max="10">2 out of 10</meter>
                                 }
+                                if (data.topic) {
+                                    result += '<div class="indent-topic-text"> <span>';
+                                    result += node._('blind-control.label.ruleTopic');
+                                    result += '</span> <var>';
+                                    result += data.topic;
+                                    result += '</var>';
+                                    result += '</div>';
+                                }
                             } else {
-                                result += '-';
+                                result += node._('blind-control.label.ruleLevelND');
                             }
                             result += '</div>';
                         } catch (err) {
@@ -911,12 +927,19 @@
                                 class:'blind-rule-finalspan'
                             }).appendTo($row0);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
-                            const $btn = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn'
+                            const $btnEdit = $('<a />', {
+                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn',
+                                title: node._('blind-control.label.editRule')
                             }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
-                            // $btn.button();
-                            $btn.click(() => {
+                            const $btnCpy = $('<a />', {
+                                class: 'red-ui-button red-ui-button-small blind-rule-duplicateBtn',
+                                title: node._('blind-control.label.duplicateRule')
+                            }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
+                            $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
+                            });
+                            $btnCpy.click(() => {
+                                _dialogDuplicateRule(containerIndex, $containerRow);
                             });
 
                             if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
@@ -1075,6 +1098,7 @@
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
                             if ((oversteerValueType === types.Undefined.value) || (sunControlMode <= 0)) {
+                                $('.row-oversteerTopic').hide();
                                 $('.row-oversteerBlindPos').hide();
                                 $('#node-input-oversteerCompare').hide();
                                 $('.row-oversteerThreshold').hide();
@@ -1082,6 +1106,7 @@
                             } else if (oversteerValueType === 'jsonata' ||
                                        oversteerValueType === types.PhaseMoon.value ||
                                        oversteerValueType === types.MsgPayloadByTopic.value) {
+                                $('.row-oversteerTopic').show();
                                 $('.row-oversteerBlindPos').show();
                                 $('#node-input-oversteerCompare').show();
                                 $('#node-input-oversteerCompare').attr('disabled', true);
@@ -1089,6 +1114,7 @@
                                 $('.row-oversteerThreshold').hide();
                                 $('#node-input-oversteerValue').typedInput('width','calc(100% - 220px)');
                             } else {
+                                $('.row-oversteerTopic').show();
                                 $('.row-oversteerBlindPos').show();
                                 $('#node-input-oversteerCompare').show();
                                 $('#node-input-oversteerCompare').attr('disabled', false);
@@ -1516,8 +1542,8 @@
                     const $dialogTimeLimitDateEnd = $dialog.find('#dlg-ip-blindctl-rule-timedatelimit-end');
                     $dialogTimeLimitDateStart.change(() => {
                         const year = (new Date()).getFullYear();
-                        $dialogTimeLimitDateEnd.attr('min', getDateLimit($dialogTimeLimitDateStart.val(), year + '-01-01'));
-                        $dialogTimeLimitDateEnd.attr('max', (year + 1) + (getDateShort($dialogTimeLimitDateStart.val()) || '-12-31'));
+                        $dialogTimeLimitDateEnd.attr('min', year + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '01-01'));
+                        $dialogTimeLimitDateEnd.attr('max', (year + 1) + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '12-31'));
 
                     });
                     $dialogTimeLimitDateEnd.change(() => {
@@ -1537,6 +1563,7 @@
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    const $dialogTopic = $dialog.find('#dlg-ip-blindctl-rule-topic');
                     // #endregion dialogLevel
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
@@ -1570,16 +1597,26 @@
                             }
                             _dialogGenHelpText();
                             return;
-                        } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                            $dialogTimeRegOperator.show();
+                        }
+                        $dialogTimeRegOperator.show();
+                        if(opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            $('#dialog-row-offset-timeReg').hide();
+                        } else {
                             $('#dialog-row-offset-timeReg').show();
+                        }
+
+                        const noLimit =   getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
+                                        getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12) === '*' &&
+                                        $dialogTimeLimitOnlyEvenDays.is(':checked') !== true &&
+                                        $dialogTimeLimitOnlyOddDays.is(':checked') !== true &&
+                                        $dialogTimeLimitDateStart.val() === '' &&
+                                        $dialogTimeLimitDateEnd.val() === '';
+                        if (noLimit) {
                             $('.dialog-row-timeLimits').hide();
                             $('.dialog-row-timeLimits-ph').show();
                         } else {
-                            $dialogTimeRegOperator.show();
-                            $('#dialog-row-offset-timeReg').hide();
-                            $('.dialog-row-timeLimits').hide();
-                            $('.dialog-row-timeLimits-ph').show();
+                            $('.dialog-row-timeLimits').show();
+                            $('.dialog-row-timeLimits-ph').hide();
                         }
                         getBackendData(d => {
                             // console.log('getBackendData of $dialogTimeRegInput ',d);
@@ -1847,23 +1884,6 @@
                     }
 
                     /**
-                     * get a formated date limit
-                     */
-                    function getDateLimit(value, def) {
-                        if (value) {
-                            const val = value.split('-');
-                            const year = (new Date()).getFullYear();
-                            if (val.length > 2) {
-                                return year + '-' + val[1] + '-' + val[2];
-                            } else if (val.length === 2) {
-                                return year + '-' + val[0] + '-' + val[1];
-                            }
-                            return def;
-                        }
-                        return def;
-                    }
-
-                    /**
                      * generates the help text of the dialog
                      */
                     function _dialogGenHelpText() {
@@ -1907,23 +1927,38 @@
                             $dialogTimeLimitOnlyEvenDays.attr('checked', data.timeOnlyEvenDays);
                             $dialogTimeLimitOnlyOddDays.attr('checked', data.timeOnlyOddDays);
 
-                            $dialogTimeLimitDateStart.val(getDateLimit(data.timeDateStart,''));
-                            if (data.timeDateEnd && data.timeDateStart) {
+                            if (data.timeDateEnd || data.timeDateStart) {
                                 const year = (new Date()).getFullYear();
-                                const d1 = new Date(data.timeDateStart);
-                                const d2 = new Date(data.timeDateEnd);
-                                d1.setFullYear(year);
-                                d2.setFullYear(year);
-                                if (d2.getTime() < d1.getTime()) {
-                                    d2.setFullYear(year + 1);
+                                let dStart, dEnd;
+                                if (data.timeDateStart) {
+                                    dStart = new Date(data.timeDateStart);
+                                    dStart.setHours(0, 0, 0, 1);
+                                    dStart.setFullYear(year);
+                                } else {
+                                    dStart = new Date(year, 0, 1, 0, 0, 0, 1);
+                                }
+
+                                if (data.timeDateEnd) {
+                                    dEnd = new Date(data.timeDateEnd);
+                                    dEnd.setHours(23, 59, 59, 999);
+                                    dEnd.setFullYear(year);
+                                } else {
+                                    dEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+                                }
+
+                                if (dEnd.getTime() < dStart.getTime()) {
+                                    dEnd.setFullYear(year + 1);
                                 }
                                 const pad = (n, z = 2) => ('00' + n).slice(-z);
-                                $dialogTimeLimitDateEnd.val(year+'-'+ pad(d2.getMonth()+1) + '-' + pad(d2.getDate()));
-                            } else {
-                                $dialogTimeLimitDateEnd.val(getDateLimit(data.timeDateEnd,''));
+                                if (data.timeDateStart) {
+                                    $dialogTimeLimitDateStart.val(dStart.getFullYear() + '-' + pad(dStart.getMonth() + 1) + '-' + pad(dStart.getDate()));
+                                }
+                                if (data.timeDateEnd) {
+                                    $dialogTimeLimitDateEnd.val(dEnd.getFullYear() + '-'+ pad(dEnd.getMonth()+1) + '-' + pad(dEnd.getDate()));
+                                }
+                                $dialogTimeLimitDateStart.change();
+                                $dialogTimeLimitDateEnd.change();
                             }
-                            $dialogTimeLimitDateStart.change();
-                            $dialogTimeLimitDateEnd.change();
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
                             setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
@@ -1937,6 +1972,7 @@
                             setTI($dialogLevel, data.levelValue, data.levelType);
                             $dialogLevel.typedInput('value',data.levelValue);
                             $dialogLevel.typedInput('type',data.levelType);
+                            $dialogTopic.val(data.topic);
                             _dialogGenHelpText();
 
                             dialogDataOnLoading = false;
@@ -1967,6 +2003,7 @@
                             offsetValue: $dialogTimeRegOffset.typedInput('value'),
                             offsetType: $dialogTimeRegOffset.typedInput('type'),
                             multiplier: parseInt($dialogTimeRegMultiplier.val()),
+                            // limitations:
                             timeDays: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'),7),
                             timeMonths: getCheckboxesStr($('#dlg-ip-blindctl-rule-timeMonths input[type=checkbox]:checked'), 12),
                             timeOnlyEvenDays: $dialogTimeLimitOnlyEvenDays.is(':checked'),
@@ -1990,6 +2027,7 @@
                             levelType: $dialogLevel.typedInput('type'),
                             levelOp: parseInt($dialogLevelOperator.val()),
                             levelOpText: $dialogLevelOperator.find('option:selected').text(),
+                            topic: $dialogTopic.val(),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2059,8 +2097,32 @@
                         $('#rule-description-'+dialogDataIndex).html(data.description);
                         resizeContainer();
                     }
+
+                    /**
+                     * Duplicates an existing rule
+                     */
+                    function _dialogDuplicateRule(containerIndex, $containerRow) {
+                        try {
+                            $dialogDataRow = $containerRow;
+                            dialogDataIndex = containerIndex;
+                            const data = JSON.parse($dialogDataRow.data('ruleData'));
+                            const nm = parseInt(data.name.match(/[0-9]+(?!.*[0-9])/), 10);
+                            if (nm) {
+                                data.name = data.name.replace(/[0-9]+(?!.*[0-9])/, nm + 1);
+                            } else {
+                                data.name += ' - copy 1';
+                            }
+                            data.description = getRuleDescription(node, selFields, data);
+                            $('#node-input-rule-container').editableList('addItem', data);
+                        } catch (err) {
+                            console.log(err.message); // eslint-disable-line no-console
+                            console.log(err.stack); // eslint-disable-line no-console
+                            $dialogName.val(err.message);
+                        }
+                    }
                     // #endregion dialogload & save
                     // #endregion dialog
+                    $('#node-input-sunControlMode').change();
                 }; // setup
                 $.getScript('sun-position/js/htmlglobal.js')
                     .done((_data, _textStatus,  _bmvfj) => {
@@ -2186,8 +2248,12 @@
         <input type="text" id="node-input-blindPosDefault" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelDefault"/>
         <input type="hidden" id="node-input-blindPosDefaultType">
     </div>
+    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+    </div>
     <hr>
-    <!-- overwrite blind ######################################################################## -->
+    <!-- overwrite ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
         <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
     </div>
@@ -2204,8 +2270,8 @@
     <hr>
     <!-- sun ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-            <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
-            <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
+        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span></span>
+        <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row block-noindent" ata-i18n="[title]blind-control.placeholder.sunControlMode">
         <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
@@ -2220,6 +2286,10 @@
     </div>
     <div class="form-row form-row-sunControlMaximization block-noindent">
         <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.sunTopic">
+        <label for="node-input-sunTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.sunTopic"></span></label>
+        <input type="text" id="node-input-sunTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
     </div>
     <hr class="form-row-sunControlActive" >
     <!-- window ######################################################################## -->
@@ -2340,6 +2410,10 @@
         <input type="text" id="node-input-oversteer3BlindPos" data-i18n="[placeholder]blind-control.placeholder.oversteerValue"/>
         <input type="hidden" id="node-input-oversteer3BlindPosType">
     </div>
+    <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
+        <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
+        <input type="text" id="node-input-oversteerTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+    </div>
     <hr>
     <!-- Enhanced ######################################################################## -->
     <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.outputs">
@@ -2377,10 +2451,6 @@
     </div>
     <hr>
     <!-- End ######################################################################## -->
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
-    </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
@@ -2526,6 +2596,10 @@
             <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
+        </div>
+        <div class="dialog-row pt-0 block-noindent" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+            <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-blindctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">
@@ -2759,10 +2833,16 @@
         right: 66px;
         margin-top: -9px;
     }
-    .blind-rule-editBtn {
-        top: 50%;
+    .blind-rule-editBtn,
+    .blind-rule-duplicateBtn {
         position: absolute;
         right: 28px;
         margin-top: -9px !important;
+    }
+    .blind-rule-editBtn {
+        top: 25%;
+    }
+    .blind-rule-duplicateBtn {
+        top: 70%;
     }
 </style>

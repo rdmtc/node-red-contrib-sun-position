@@ -630,26 +630,22 @@ function isValidDate(d) {
 }
 /*******************************************************************************************************/
 /**
- * adds an offset to a given Date object
+ * adds an offset to a given Date object (Warning: No copy of Date Object will be created and original Date Object could be changed!!)
  * @param {Date} d Date object where the offset should be added
  * @param {number} offset the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
  * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
  * @return {Date|undefined|null}  Date with added offset
  */
 function addOffset(d, offset, multiplier) {
-    if (d === null || typeof d === 'undefined') { return d; }
-    if (d.value) { d = d.value; }
-    if (!(d instanceof Date)) { d = Date(d); }
-
     if (offset && !isNaN(offset) && offset !== 0) {
         if (offset !== 0 && multiplier > 0) {
-            return new Date(d.getTime() + offset * multiplier);
+            return new Date(d.getTime() + Math.floor(offset * multiplier));
         } else if (multiplier === -1) {
-            d.setMonth(d.getMonth() + offset);
+            d.setMonth(Math.floor(d.getMonth() + offset));
         } else if (multiplier === -2) {
-            d.setFullYear(d.getFullYear() + offset);
+            d.setFullYear(Math.floor(d.getFullYear() + offset));
         } else {
-            return new Date(d.getTime() + offset); // if multiplier is not a valid value
+            return new Date(d.getTime() + Math.floor(offset)); // if multiplier is not a valid value
         }
     }
     return d;
@@ -718,6 +714,9 @@ function calcMonthOffset(months, monthstart) {
  */
 function normalizeDate(d, offset, multiplier, limit) {
     // console.debug('normalizeDate d=' + d + ' offset=' + offset); // eslint-disable-line
+    if (d === null || typeof d === 'undefined') { return d; }
+    if (d.value) { d = d.value; }
+    if (!(d instanceof Date)) { d = Date(d); }
     d = addOffset(d, offset, multiplier);
     if (limit.next) {
         const dNow = new Date();

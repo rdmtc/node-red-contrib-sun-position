@@ -1,5 +1,18 @@
 # node-red-contrib-sun-position
 
+#### 1.0.12:  BugFix + enhancement
+
+- general
+  - BugFix: Allow 0 as value for any time input, mainly for time-compare or time-span node, but affects potentially all nodes.
+  - BugFix: random offset #90 now working as expected
+  - BugFix: node error output for time input if time can not be evaluated has missing original message.
+  - prepared new Node interval-inject (not finished, not available) - is the same as standard node-red inject node for intervals with start and end of interval able to use sun-times.
+
+enhancements
+
+  - Blind-control allows now granular settings of topic
+  - documentation enhanced for clock-timer and general
+
 #### 1.0.11:  enhancement
 
 - blind-control + clock-time + time-inject + within-time

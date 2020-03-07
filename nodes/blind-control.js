@@ -303,8 +303,8 @@ module.exports = function (RED) {
      * @param {Date} dNow the current timestamp
      * @param {number} expire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
      */
-    function setExpiringOverwrite(node, dNow, expire) {
-        node.debug(`setExpiringOverwrite now=${dNow}, expire=${expire}`);
+    function setExpiringOverwrite(node, dNow, expire, reason) {
+        node.debug(`setExpiringOverwrite now=${dNow}, expire=${expire}, reason=${reason}`);
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
@@ -317,7 +317,8 @@ module.exports = function (RED) {
         node.blindData.overwrite.expires = Number.isFinite(expire) && (expire > 0);
 
         if (!node.blindData.overwrite.expires) {
-            node.debug(`expireNever expire=${expire} ${  typeof expire  } - isNaN=${  isNaN(expire)  } - finite=${  !isFinite(expire)  } - min=${  expire < 100}`);
+            node.log(`Overwrite is set which never expire (${reason})`);
+            node.debug(`expireNever expire=${expire}ms ${  typeof expire  } - isNaN=${  isNaN(expire)  } - finite=${  !isFinite(expire)  } - min=${  expire < 100}`);
             delete node.blindData.overwrite.expireTs;
             delete node.blindData.overwrite.expireDate;
             return;
@@ -329,9 +330,9 @@ module.exports = function (RED) {
         node.blindData.overwrite.expireDateLocal = node.positionConfig.toDateString(node.blindData.overwrite.expireDate);
         node.blindData.overwrite.expireTimeLocal = node.positionConfig.toTimeString(node.blindData.overwrite.expireDate);
 
-        node.debug(`expires in ${expire}ms = ${node.blindData.overwrite.expireDate}`);
+        node.log(`Overwrite is set which expires in ${expire}ms = ${node.blindData.overwrite.expireDateISO} (${reason})`);
         node.timeOutObj = setTimeout(() => {
-            node.debug('timeout - overwrite expired');
+            node.log(`Overwrite is expired (timeout)`);
             blindPosOverwriteReset(node);
             node.emit('input', { payload: -1, topic: 'internal-triggerOnly-overwriteExpired', force: false });
         }, expire);
@@ -347,6 +348,7 @@ module.exports = function (RED) {
         if (node.blindData.overwrite &&
             node.blindData.overwrite.expires &&
             (node.blindData.overwrite.expireTs < dNow.getTime())) {
+            node.log(`Overwrite is expired (trigger)`);
             blindPosOverwriteReset(node);
         }
         if (prioOk) {
@@ -354,6 +356,9 @@ module.exports = function (RED) {
                 val => {
                     node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
                     if (val) {
+                        if (node.blindData.overwrite && node.blindData.overwrite.active) {
+                            node.log(`Overwrite reset by incoming message`);
+                        }
                         blindPosOverwriteReset(node);
                     }
                 });
@@ -420,7 +425,7 @@ module.exports = function (RED) {
             node.debug(`overwrite active, check of prio=${prio} or expire=${expire}, newPos=${newPos}`);
             if (Number.isFinite(expire)) {
                 // set to new expiring time
-                setExpiringOverwrite(node, now, expire);
+                setExpiringOverwrite(node, now, expire, 'set new expiring time by message');
             }
             if (prio > 0) {
                 // set to new priority
@@ -452,15 +457,16 @@ module.exports = function (RED) {
                 }
                 node.level.current = newPos;
                 node.level.currentInverse = newPos;
+                node.level.topic = msg.topic;
             }
 
             if (Number.isFinite(expire) || (prio <= 0)) {
                 // will set expiring if prio is 0 or if expire is explizit defined
-                setExpiringOverwrite(node, now, expire);
+                setExpiringOverwrite(node, now, expire, 'set expiring time by message');
             } else if ((!prioMustEqual && (node.blindData.overwrite.priority < prio)) || (!node.blindData.overwrite.expireTs)) {
                 // priook
                 // no expiring on prio change or no existing expiring
-                setExpiringOverwrite(node, now, -1);
+                setExpiringOverwrite(node, now, -1, 'no expire defined');
             }
             if (prio > 0) {
                 node.blindData.overwrite.priority = prio;
@@ -494,6 +500,7 @@ module.exports = function (RED) {
             if (node.sunData.mode === winterMode) {
                 node.level.current = node.blindData.levelMin;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.topic = node.sunData.topic;
                 node.reason.code = 13;
                 node.reason.state = RED._('blind-control.states.sunNotInWinMin');
                 node.reason.description = RED._('blind-control.reasons.sunNotInWin');
@@ -517,6 +524,7 @@ module.exports = function (RED) {
             if (res) {
                 node.level.current = res.blindPos;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.topic = node.oversteer.topic;
                 node.reason.code = 10;
                 node.reason.state = RED._('blind-control.states.oversteer');
                 node.reason.description = RED._('blind-control.reasons.oversteer');
@@ -530,6 +538,7 @@ module.exports = function (RED) {
         if (node.sunData.mode === winterMode) {
             node.level.current = node.blindData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.topic = node.sunData.topic;
             node.reason.code = 12;
             node.reason.state = RED._('blind-control.states.sunInWinMax');
             node.reason.description = RED._('blind-control.reasons.sunInWinMax');
@@ -542,12 +551,15 @@ module.exports = function (RED) {
         if (height <= node.windowSettings.bottom) {
             node.level.current = node.blindData.levelBottom;
             node.level.currentInverse = node.blindData.levelTop;
+            node.level.topic = node.sunData.topic;
         } else if (height >= node.windowSettings.top) {
             node.level.current = node.blindData.levelTop;
             node.level.currentInverse = node.blindData.levelBottom;
+            node.level.topic = node.sunData.topic;
         } else {
             node.level.current = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
             node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.topic = node.sunData.topic;
         }
 
         const delta = Math.abs(previousData.level - node.level.current);
@@ -559,12 +571,14 @@ module.exports = function (RED) {
             node.reason.description = RED._('blind-control.reasons.smooth', { pos: getRealLevel_(node).toString()});
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
+            node.level.topic = previousData.topic;
         } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.blindData.levelBottom) && (node.level.current < node.blindData.levelTop)) {
             node.reason.code = 14;
             node.reason.state = RED._('blind-control.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
             node.reason.description = RED._('blind-control.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
             node.level.current = previousData.level;
             node.level.currentInverse = previousData.levelInverse;
+            node.level.topic = previousData.topic;
         } else {
             node.reason.code = 9;
             node.reason.state = RED._('blind-control.states.sunCtrl');
@@ -945,6 +959,7 @@ module.exports = function (RED) {
             livingRuleData.timeLimited = ruleSel.timeLimited;
             node.level.current = livingRuleData.level;
             node.level.currentInverse = getInversePos_(node, livingRuleData.level);
+            node.level.topic = livingRuleData.topic;
             const data = { number: ruleSel.pos, name: ruleSel.name };
             let name = 'rule';
             if (ruleSel.conditional) {
@@ -973,6 +988,7 @@ module.exports = function (RED) {
         livingRuleData.id = -1;
         node.level.current = node.blindData.levelDefault;
         node.level.currentInverse = getInversePos_(node, node.blindData.levelDefault);
+        node.level.topic = node.blindData.topic;
         node.reason.code = 1;
         node.reason.state = RED._('blind-control.states.default');
         node.reason.description = RED._('blind-control.reasons.default');
@@ -1023,6 +1039,7 @@ module.exports = function (RED) {
             /** Defines if the sun control is active or not */
             active: false,
             mode: Number(hlp.chkValueFilled(config.sunControlMode, 0)),
+            topic: config.sunTopic,
             /** define how long could be the sun on the floor **/
             floorLength: Number(hlp.chkValueFilled(config.sunFloorLength,0)),
             /** minimum altitude of the sun */
@@ -1049,6 +1066,7 @@ module.exports = function (RED) {
             levelDefault: NaN,
             levelMin: NaN,
             levelMax: NaN,
+            topic: config.topic,
             /** The override settings */
             overwrite: {
                 active: false,
@@ -1069,6 +1087,7 @@ module.exports = function (RED) {
         node.blindData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.blindData.levelTop);
         node.oversteer = {
             active: (typeof config.oversteerValueType !== 'undefined') && (config.oversteerValueType !== 'none'),
+            topic: config.oversteerTopic || config.sunTopic,
             isChecked: false
         };
         node.oversteerData = [];
@@ -1168,11 +1187,13 @@ module.exports = function (RED) {
                 const previousData = node.context().get('previous',node.storeName) || {};
                 previousData.level = node.level.current;
                 previousData.levelInverse = node.level.currentInverse;
+                previousData.topic = node.level.topic;
                 previousData.reasonCode = node.reason.code;
                 previousData.reasonState = node.reason.state;
                 previousData.reasonDescription = node.reason.description;
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
+                node.level.topic = '';
                 const now = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.deaultTime;
@@ -1257,7 +1278,7 @@ module.exports = function (RED) {
                 }
                 setState(blindCtrl);
 
-                let topic = config.topic;
+                let topic = node.level.topic || node.blindData.topic || msg.topic;
                 if (topic) {
                     const topicAttrs = {
                         name: node.name,
@@ -1270,7 +1291,7 @@ module.exports = function (RED) {
                         topic: msg.topic,
                         payload: msg.payload
                     };
-                    topic = hlp.topicReplace(config.topic, topicAttrs);
+                    topic = hlp.topicReplace(topic, topicAttrs);
                 }
 
                 if ((!isNaN(node.level.current)) &&
@@ -1282,7 +1303,7 @@ module.exports = function (RED) {
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: blindCtrl }]); // node.send([msg, { topic, payload: blindCtrl }]);
                     } else {
-                        msg.topic = topic || msg.topic;
+                        msg.topic = topic;
                         msg.blindCtrl = blindCtrl;
                         send(msg, null); // node.send(msg, null);
                     }
@@ -1452,9 +1473,9 @@ module.exports = function (RED) {
 
                     if (rule.timeDateEnd) {
                         rule.timeDateEnd = new Date(rule.timeDateEnd);
-                        rule.timeDateStart.setHours(23, 59, 59, 999);
+                        rule.timeDateEnd.setHours(23, 59, 59, 999);
                     } else {
-                        rule.timeDateStart = new Date(2000,11,31, 23, 59, 59, 999);
+                        rule.timeDateEnd = new Date(2000,11,31, 23, 59, 59, 999);
                     }
                 }
 

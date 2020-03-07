@@ -574,7 +574,7 @@ module.exports = function (RED) {
          * @returns {number} float property
          */
         getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
+            _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -712,7 +712,7 @@ module.exports = function (RED) {
                 fix: true
             };
             let dNow = new Date(data.now);
-            if (!hlp.isValidDate(data.now)) { dNow = new Date(); _srcNode.debug('given ate Parameter ' + data.now + ' is invalid!!');}
+            if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('given date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
                     result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
@@ -770,7 +770,7 @@ module.exports = function (RED) {
                     result = this.getSunTimePrevNext(dNow).next;
                     result.fix = true;
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result.value = hlp.addOffset(result.value, offsetX, data.multiplier, data.next);
+                    result.value = hlp.addOffset(new Date(result.value), offsetX, data.multiplier, data.next);
                 } else if (data.type === 'str') {
                     result.fix = true;
                     if (data.format) {
@@ -787,7 +787,7 @@ module.exports = function (RED) {
                     // can handle context, json, jsonata, env, ...
                     result.fix = false; // is not a fixed time if can be changed
                     const res = this.getPropValue(_srcNode, msg, data);
-                    if (res) {
+                    if (typeof res !== undefined && res !== null) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
@@ -805,7 +805,7 @@ module.exports = function (RED) {
                 }
             } catch (err) {
                 _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:result.error}));
+                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:err.message}));
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
@@ -855,12 +855,13 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
-            } else if (data.type === 'randomNumber') {
+            } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
-                if (data.value <0) {
+                /*
+                if (data.value < 0) {
                     return (Math.random() * Math.abs(data.value || 60));
-                }
-                return Math.floor(Math.random() * ((data.value || 60) + 1));
+                } */
+                return Math.random() * ((data.value || 60) + 1);
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {
                     result = msg.payload;
