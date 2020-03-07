@@ -1701,11 +1701,11 @@
                     $('#node-input-autoTriggerTime').val(val);
                 }
 
-                const startDelayTime = parseFloat($('#clock-timer-startDelayTime').val());
+                const startDelayTime = parseFloat($('#time-control-startDelayTime').val());
                 if (isNaN(startDelayTime) || startDelayTime === '' || startDelayTime === 0) {
                     $('#node-input-startDelayTime').val(0);
                 } else {
-                    let val = startDelayTime * parseFloat($('#clock-timer-startDelayTime-multiplier').val());
+                    let val = startDelayTime * parseFloat($('#time-control-startDelayTime-multiplier').val());
                     if (val < 0) {
                         val = 0;
                     }
@@ -1807,9 +1807,9 @@
     </div>
     <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.startDelay2">
         <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> <span data-i18n="clock-timer.label.startDelay"></span></label>
-        <span id="clock-timer-startDelayTime-edit">
-            <input type="text" class="spinner-time" id="clock-timer-startDelayTime" data-i18n="[placeholder]clock-timer.placeholder.startDelay" value=""/>
-            <select id="clock-timer-startDelayTime-multiplier" class="node-input-multiplier">
+        <span id="time-control-startDelayTime-edit">
+            <input type="text" class="spinner-time" id="time-control-startDelayTime" data-i18n="[placeholder]clock-timer.placeholder.startDelay" value=""/>
+            <select id="time-control-startDelayTime-multiplier" class="node-input-multiplier">
                 <option value="1" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.0"></option>
                 <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
                 <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>

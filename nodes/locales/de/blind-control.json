@@ -46,6 +46,7 @@
 			"sunFloorLength": "Länge auf dem Boden",
 			"sunMinAltitude": "Minimaler Höhenwinkel",
 			"sunMinDelta": "Mindeständerung",
+			"sunTopic": "Topic 🌞/⛄",
 			"time": "Zeit",
 			"name": "name",
 			"oversteerValue": "Übersteuerung",
@@ -57,6 +58,7 @@
 			"oversteer3Value": "Übersteuerung zus.",
 			"oversteer3Threshold": "Schwelle",
 			"oversteer3BlindPos": "Rollladenposition",
+			"oversteerTopic":"Übersteuerungs topic",
 			"smoothTime": "glätten",
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"outputs": "Ausgänge",
@@ -81,7 +83,9 @@
 			"onlyEven": "nur gerade",
 			"onlyOdd": "nur ungerade",
 			"onlyEvenDays": "nur gerade Tage",
-			"onlyOddDays": "nur ungerade Tage"
+			"onlyOddDays": "nur ungerade Tage",
+			"editRule": "Regel editieren",
+			"duplicateRule": "Regel duplizieren"
 		},
 		"placeholder": {
 			"windowTop": "Oberkante Fenster",
@@ -113,6 +117,9 @@
 			"time": "Zeit",
 			"offset": "Zeit offset",
 			"level": "Behanghöhe",
+			"ruleTopic":"Erlaubt es die topic der ausgesendeten Nachricht speziell für die Regel angepasst werden. Wenn diese leer ist, wird die Standard topic verwendet.",
+			"sunTopic": "Erlaubt es die topic der ausgesendeten Nachricht anzupassen wenn die sonnensteuerung aktiv ist. Wenn diese leer ist, wird die Standard topic verwendet.",
+			"oversteerTopic":"Erlaubt es die topic der ausgesendeten Nachricht anzupassen wenn eine Übersteuerung aktiv ist. Wenn diese leer ist, wird die topic der Sonnensteuerung verwendet.",
 			"ruleTimeDays": "Wählen Sie Tage aus, an denen die Regel gültig sein soll",
 			"ruleTimeMonths": "Wählen Sie Monate aus, an denen die Regel gültig sein soll",
 			"autoTrigger": "automatisches triggern der Neuberechnung der Rollladenposition nach einer dynamischen Zeitspanne",

@@ -32,7 +32,16 @@
             "on": "nur",
             "once": "zusätzlich",
             "onstart": "Inject bei start ",
-            "onceDelay": "Sekunden"
+            "onceDelay": "Sekunden",
+			"validForDays":"gültig für Tage",
+            "validForMonths":"gültig für Monate",
+			"specialDays":"spezielle Tage",
+			"onlyEvenDays":"nur gerade",
+            "onlyOddDays":"nur ungerade",
+            "fewDays": "ein paar Tage",
+            "fewMonths": "ein paar Monate",
+            "between":"zwischen",
+            "and":"und"
         },
         "placeholder": {
             "position": "Position",
@@ -45,7 +54,9 @@
             "timeOffset": "offset der Zeit",
             "timeAlt": "alternativer Zeitpunkt",
             "timeAltOffset": "offset des alternativen Zeitpunktes",
+            "timeLimits":"Wählen Sie Tage und / oder Monate aus, für welche es gültig sein soll",
             "days": "Tage auswählen, an denen die nachricht gesendet werden soll",
+            "months":"Monate auswählen, an denen die nachricht gesendet werden soll",
             "addPayload": "zusätzliche Eigenschaften der gesendeten nachricht festlegen",
             "addPayloadValue": "Wert der zusätzlichen Eigenschaft",
             "addPayloadOffset": "Offset des Wertes",
@@ -64,8 +75,9 @@
             "onceDelay": "verzögert um __seconds__s"
         },
         "errors": {
-	    "failed": "inject fehlgeschlagen, sehen sie ins Log für mehr Informationen",
-            "invalid-property-type": "Ungültiger Datentyp: __type__"
+            "failed": "inject fehlgeschlagen, sehen sie ins Log für mehr Informationen",
+            "invalid-property-type": "Ungültiger Datentyp: __type__",
+            "invalid-daterange": "Tag ist heute nicht im gültigen Bereich."
         }
     }
 }
