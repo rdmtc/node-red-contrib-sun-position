@@ -49,10 +49,41 @@
                 topic: {
                     value: ''
                 },
+                injectTypeSelect: {
+                    value: 'none'
+                },
+                intervalCount: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (this.payloadOffsetType !== 'interval') ||
+                            RED.validators.typedInput('intervalCountType')(v)
+                        );
+                    }
+                },
+                intervalCountType: {
+                    value: 'num'
+                },
+                intervalCountMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return (
+                            (this.payloadOffsetType !== 'interval') ||
+                            RED.validators.number()(v)
+                        );
+                    }
+                },
                 time: {
                     value: '',
                     required: false,
-                    validate: RED.validators.typedInput('timeType')
+                    validate(v) {
+                        return (
+                            ((this.payloadOffsetType !== 'interval-time') &&
+                            (this.payloadOffsetType !== 'time')) ||
+                            RED.validators.typedInput('timeType')(v)
+                        );
+                    }
                 },
                 timeType: {
                     value: 'none'
@@ -63,6 +94,8 @@
                         return (
                             (typeof v === 'undefined') ||
                             (typeof this.offsetType === 'undefined') ||
+                            ((this.payloadOffsetType !== 'interval-time') &&
+                            (this.payloadOffsetType !== 'time')) ||
                             RED.validators.typedInput('offsetType')(v) ||
                             ($('#node-input-time').length ?
                                 $('#node-input-time').typedInput('type') === 'none' :
@@ -80,6 +113,8 @@
                         return (
                             typeof v === 'undefined' ||
                             RED.validators.number()(v) ||
+                            ((this.payloadOffsetType !== 'interval-time') &&
+                            (this.payloadOffsetType !== 'time')) ||
                             $('#node-input-offsetType').typedInput('type') === 'none' ||
                             this.offsetType === 'none' ||
                             ($('#node-input-time').length ?
@@ -150,6 +185,8 @@
                     validate(v) {
                         return (
                             typeof v === 'undefined' ||
+                            ((this.payloadOffsetType !== 'interval-time') &&
+                            (this.payloadOffsetType !== 'time')) ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -160,6 +197,8 @@
                     validate(v) {
                         return (
                             typeof v === 'undefined' ||
+                            ((this.payloadOffsetType !== 'interval-time') &&
+                            (this.payloadOffsetType !== 'time')) ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -172,6 +211,7 @@
                             typeof v === 'undefined' ||
                             typeof this.propertyType === 'undefined' ||
                             RED.validators.typedInput('propertyType')(v) ||
+                            (this.payloadOffsetType !== 'time') ||
                             ($('#node-input-time').length ?
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none')
@@ -194,6 +234,7 @@
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none') ||
                             typeof this.propertyType === 'undefined' ||
+                            (this.payloadOffsetType !== 'time') ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
                                 this.propertyType === 'none')
@@ -213,6 +254,7 @@
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none') ||
                             typeof this.propertyType === 'undefined' ||
+                            (this.payloadOffsetType !== 'time') ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
                                 this.propertyType === 'none')
@@ -249,6 +291,7 @@
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none') ||
                             typeof this.propertyType === 'undefined' ||
+                            (this.payloadOffsetType !== 'time') ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
                                 this.propertyType === 'none')
@@ -271,6 +314,7 @@
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none') ||
                             typeof this.propertyType === 'undefined' ||
+                            (this.payloadOffsetType !== 'time') ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
                                 this.propertyType === 'none')
@@ -756,6 +800,11 @@
                         step: 0.1,
                         numberFormat: 'n'
                     });
+                    /* $('#node-input-intervalCount').spinner({
+                        min: 0.5,
+                        step: 0.1,
+                        numberFormat: 'n'
+                    }); */
                     // #endregion spinner
                     // #region payload
                     if (node.payloadType === null) {
@@ -853,17 +902,66 @@
                         }
                     }).change();
                     // #endregion payload
-                    // #region onceDelay
+                    // #region onceDelay + TimeType
                     $('#node-input-once').change(() => {
                         $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                     });
-                    // #endregion onceDelay
+                    const id = $('#node-input-injectTypeSelect').val();
+                    const timeType = $('#node-input-timeType').val();
+                    if (!id) {
+                        if (!timeType || timeType === types.Undefined.value) {
+                            $('#node-input-injectTypeSelect').val('none');
+                        } else {
+                            $('#node-input-injectTypeSelect').val('time');
+                        }
+                    }
+                    if (timeType === types.Undefined.value) {
+                        $('#node-input-time').typedInput('type', types.TimeEntered.value);
+                    }
+                    $('#node-input-injectTypeSelect').on('change', () => {
+                        const id = $('#node-input-injectTypeSelect').val();
+                        switch (id) {
+                            case 'none':
+                                $('.time-inject-row').hide();
+                                break;
+                            case 'interval':
+                                $('.time-inject-row').hide();
+                                $('#time-inject-row-interval').show();
+                                break;
+                            case 'interval-time':
+                                $('.time-inject-row').hide();
+                                $('#time-inject-row-interval').show();
+                                $('#time-inject-row-timeMain').show();
+                                $('#time-inject-row-timeEndMain').show();
+                                $('.time-inject-row-interval-time').show();
+                                break;
+                            case 'time':
+                                $('.time-inject-row').hide();
+                                $('#time-inject-row-timeMain').show();
+                                break;
+                            default:
+                                break;
+                        }
+                        $('#node-input-time').change(); // also property change
+                        $('#node-input-timeEnd').change(); // also property change
+                    });
+                    // #endregion onceDelay + TimeType
                     // #region time
+                    node.intervalCountMultiplier = multiplierUpdate(node.intervalCountMultiplier, 'intervalCountMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'intervalCountType',
+                        valueProp: 'intervalCount',
+                        width: 'calc(100% - 255px)',
+                        defaultType: 'num',
+                        defaultValue: 0,
+                        types: ['num', 'flow', 'global', 'env', types.randomNumber]
+                    }).change();
+
                     setupTInput(node, {
                         typeProp: 'timeType',
                         valueProp: 'time',
                         width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
+                        defaultType: types.TimeEntered.value,
                         defaultValue: '',
                         types: [
                             types.Undefined,
@@ -877,7 +975,8 @@
                         ],
                         onChange(_type, _value) {
                             const type = $('#node-input-time').typedInput('type');
-                            if (type === types.Undefined.value) {
+                            const injectType = $('#node-input-injectTypeSelect').val();
+                            if (injectType === 'none' || injectType === 'interval' || type === types.Undefined.value) {
                                 $('.time-inject-row-offset').hide();
                                 $('.time-inject-row-timeLimits').hide();
                                 $('.time-inject-row-alt').hide();
@@ -889,13 +988,15 @@
                                 $('#node-input-property').change();
                                 return;
                             } else if (type === types.TimeSunNow.value){
-                                $('.time-inject-row-offset').show();
                                 $('.time-inject-row-timeLimits').hide();
+                            } else {
+                                $('.time-inject-row-timeLimits').show();
+                            }
+                            $('.time-inject-row-offset').show();
+                            if (injectType === 'time') {
                                 $('.time-inject-row-alt').show();
                             } else {
-                                $('.time-inject-row-offset').show();
-                                $('.time-inject-row-timeLimits').show();
-                                $('.time-inject-row-alt').show();
+                                $('.time-inject-row-alt').hide();
                             }
                             $('#node-input-property').change();
                             getBackendData(d => {
@@ -920,9 +1021,6 @@
                             });
                         }
                     });
-                    initCheckboxesBlock('#time-inject-timeDays', node.timeDays);
-                    initCheckboxesBlock('#time-inject-timeMonths', node.timeMonths);
-
                     node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
                     setupTInput(node, {
                         typeProp: 'offsetType',
@@ -941,6 +1039,73 @@
                         }
                     }).change();
 
+                    setupTInput(node, {
+                        typeProp: 'timeEndType',
+                        valueProp: 'timeEnd',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.TimeEntered,
+                        defaultValue: '',
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env'
+                        ],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-timeEnd').typedInput('type');
+                            const injectType = $('#node-input-injectTypeSelect').val();
+                            if (injectType !== 'interval-time') {
+                                $('.time-inject-row-timeEndOffset').hide();
+                                const $div = $('#time-inject-row-timeEndMain');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', titleOrg);
+                                return;
+                            }
+                            $('.time-inject-row-timeEndOffset').show();
+                            getBackendData(d => {
+                                const $div = $('#time-inject-row-timeEndMain');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                            }, {
+                                nodeId: node.id,
+                                kind: 'getTimeData',
+                                config: $nodeConfig.val(),
+                                type,
+                                value: $('#node-input-timeEnd').typedInput('value'),
+                                offsetType: $('#node-input-timeEndOffset').typedInput('type'),
+                                offset: $('#node-input-timeEndOffset').typedInput('value'),
+                                multiplier: $('#node-input-timeEndOffsetMultiplier').val(),
+                                next: 1,
+                                days: getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
+                                months: getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
+                                onlyOddDays: $('#node-input-timeOnlyOddDays').val(),
+                                onlyEvenDays: $('#node-input-timeOnlyEvenDays').val(),
+                                noOffsetError: true
+                            });
+                        }
+                    });
+                    node.timeEndOffsetMultiplier = multiplierUpdate(node.timeEndOffsetMultiplier, 'timeEndOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'timeEndOffsetType',
+                        valueProp: 'timeEndOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.timeEndOffset === 0 || node.timeEndOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-timeEndOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-timeEndOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-timeEndOffsetMultiplier').prop('disabled', false);
+                            }
+                        }
+                    }).change();
+
+                    initCheckboxesBlock('#time-inject-timeDays', node.timeDays);
+                    initCheckboxesBlock('#time-inject-timeMonths', node.timeMonths);
                     const getDateShort = value => {
                         if (value) {
                             const val = value.split('-');
@@ -1005,9 +1170,9 @@
                             types.SunAzimuthRad,
                             types.SunElevationRad],
                         onChange(_type, _value) {
-                            const timeType = $('#node-input-time').typedInput('type');
+                            // const timeType = $('#node-input-time').typedInput('type'); // timeType === types.Undefined.value ||
                             const propType = $('#node-input-property').typedInput('type');
-                            if ( timeType === types.Undefined.value || propType === types.Undefined.value ) {
+                            if ( propType === types.Undefined.value ) {
                                 $('.time-inject-row-timeAlt').hide();
                                 $('.time-inject-row-timeAltOffset').hide();
                                 $('.time-inject-row-timeAltLimits').hide();
@@ -1049,7 +1214,7 @@
                                     $('.row-propertyThreshold').hide(); // condOpB
                                 }
                             }
-
+                            const timeType = $('#node-input-time').typedInput('type');
                             if ( timeType === 'flow' || timeType === 'global' || propType !== types.Undefined.value ) {
                                 $('.time-inject-recalc').show();
                             } else {
@@ -1679,6 +1844,26 @@
         <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
         <span data-i18n="time-inject.label.onceDelay"></span>
     </div>
+    <div class="form-row">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="node-red:inject.label.repeat"></span></label>
+        <select id="node-input-injectTypeSelect">
+            <option value="none" data-i18n="node-red:inject.none"></option>
+            <option value="interval" data-i18n="node-red:inject.interval"></option>
+            <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
+            <option value="time" data-i18n="node-red:inject.time"></option>
+        </select>
+    </div>
+
+    <div class="form-row time-inject-row is-initial-hidden" id="time-inject-row-interval">
+        <span data-i18n="node-red:inject.every"></span>
+        <input id="node-input-intervalCount" class="time-inject-intervalCount" data-i18n="[placeholder]time-inject.placeholder.intervalCount"/>
+        <input type="hidden" id="node-input-intervalCountType">
+        <select id="node-input-intervalCountMultiplier" class="node-input-multiplier"></select>
+    </div>
+
+    <div class="form-row time-inject-row is-initial-hidden time-inject-row-interval-time">
+        <span data-i18n="time-inject.label.between"></span>
+    </div>
 
     <div class="form-row time-inject-row block-noindent is-initial-hidden" id="time-inject-row-timeMain"  data-i18n="[titleOrg]time-inject.placeholder.time">
         <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
@@ -1690,6 +1875,20 @@
         <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
         <input type="hidden" id="node-input-offsetType">
         <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row time-inject-row is-initial-hidden time-inject-row-interval-time">
+        <span data-i18n="time-inject.label.and"></span>
+    </div>
+    <div class="form-row time-inject-row block-noindent is-initial-hidden" id="time-inject-row-timeEndMain"  data-i18n="[titleOrg]time-inject.placeholder.timeEnd">
+        <label for="node-input-timeEnd"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeEnd"></span></label>
+        <input type="text" id="node-input-timeEnd" />
+        <input type="hidden" id="node-input-timeEndType">
+    </div>
+    <div class="form-row time-inject-row block-indent1 time-inject-row-timeEndOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
+        <label for="node-input-timeEndOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeEndOffset"></span></label>
+        <input id="node-input-timeEndOffset" data-i18n="[placeholder]time-inject.placeholder.timeEndOffset"/>
+        <input type="hidden" id="node-input-timeEndOffsetType">
+        <select id="node-input-timeEndOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row time-inject-row time-inject-row-timeLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
         <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
@@ -1742,7 +1941,6 @@
             </div>
         </div>
     </div>
-    <div class="form-row form-tips" data-i18n="[html]time-inject.tips.config"></div>
     <hr class="time-inject-row block-noindent time-inject-row-alt is-initial-hidden">
     <div class="form-row time-inject-row time-inject-row-alt is-initial-hidden" data-i18n="[title]time-inject.placeholder.property">
         <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
@@ -2047,4 +2245,7 @@
         max-width: 100px;
         margin-left: 5px;
     }
+    /* .time-inject-intervalCount {
+        width: 40px !important;
+    } */
 </style>

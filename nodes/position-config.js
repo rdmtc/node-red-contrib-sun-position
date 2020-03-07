@@ -787,7 +787,7 @@ module.exports = function (RED) {
                     // can handle context, json, jsonata, env, ...
                     result.fix = false; // is not a fixed time if can be changed
                     const res = this.getPropValue(_srcNode, msg, data);
-                    if (res) {
+                    if (typeof res !== undefined && res !== null) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
@@ -805,7 +805,7 @@ module.exports = function (RED) {
                 }
             } catch (err) {
                 _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
-                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:result.error}));
+                const e = new Error(RED._('errors.notEvaluablePropertyAdd', {type:data.type, value: data.value, err:err.message}));
                 e.original = err;
                 e.stack = e.stack.split('\n').slice(0,2).join('\n')+'\n'+err.stack;
                 throw e;
