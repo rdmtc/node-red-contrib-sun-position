@@ -410,7 +410,7 @@ module.exports = function (RED) {
                         }
                         if (result) {
                             resObj.push(msg);
-                            if (!config.checkall) {
+                            if (config.checkall != 'true') { // eslint-disable-line eqeqeq
                                 break;
                             }
                         } else {

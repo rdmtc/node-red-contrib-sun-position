@@ -2,9 +2,15 @@
 
 #### 1.0.13:  BugFix
 
+- time-inject
+  - fix not visible time input field
+
 - blind-control + clock-time + time-inject + within-time
   - fixed bug where default expire time is not considered #112
   - reduced usage of context for store data
+
+- time-comp / time-span
+  - fixed __after first match__ #115
 
 - general
   - i18N

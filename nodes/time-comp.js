@@ -233,7 +233,9 @@ module.exports = function (RED) {
 
                         if (result) {
                             resObj.push(msg);
-                            if (!config.checkall) {
+                            node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                            if (config.checkall != 'true') { // eslint-disable-line eqeqeq
+                                node.debug(i + ' end cause checkall');
                                 break;
                             }
                         } else {
