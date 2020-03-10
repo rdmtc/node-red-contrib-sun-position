@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 1.0.14:  BugFix
+
+- blind-control + clock-time
+  - fixed bug for day of the week (String/integer format)
+
 #### 1.0.13:  BugFix
 
 - time-inject

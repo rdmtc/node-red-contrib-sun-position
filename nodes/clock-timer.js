@@ -424,7 +424,7 @@ module.exports = function (RED) {
         const monthNr = dNow.getMonth();
         const dayId =  hlp.getDayId(dNow);
         prepareRules(node, msg, tempData);
-        // node.debug(`checkRules now=${dNow.toISOString()}, nowNr=${nowNr}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`); // {colors:true, compact:10}
+        // node.debug(`checkRules now=${dNow.toISOString()}, nowNr=${nowNr}, dayNr=${dayNr}, dateNr=${dateNr}, monthNr=${monthNr}, dayId=${dayId}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`);
 
         /**
         * Timestamp compare function
@@ -911,12 +911,14 @@ module.exports = function (RED) {
                     rule.timeDays = null;
                 } else {
                     rule.timeDays = rule.timeDays.split(',');
+                    rule.timeDays = rule.timeDays.map( e => parseInt(e) );
                 }
 
                 if (!rule.timeMonths || rule.timeMonths === '*') {
                     rule.timeMonths = null;
                 } else {
                     rule.timeMonths = rule.timeMonths.split(',');
+                    rule.timeMonths = rule.timeMonths.map( e => parseInt(e) );
                 }
 
                 if (!rule.timeLimited) {

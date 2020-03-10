@@ -1444,12 +1444,14 @@ module.exports = function (RED) {
                     rule.timeDays = null;
                 } else {
                     rule.timeDays = rule.timeDays.split(',');
+                    rule.timeDays = rule.timeDays.map( e => parseInt(e) );
                 }
 
                 if (!rule.timeMonths || rule.timeMonths === '*') {
                     rule.timeMonths = null;
                 } else {
                     rule.timeMonths = rule.timeMonths.split(',');
+                    rule.timeMonths = rule.timeMonths.map( e => parseInt(e) );
                 }
 
                 if (!rule.timeLimited) {
