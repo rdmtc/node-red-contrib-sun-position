@@ -125,18 +125,15 @@ module.exports = function (RED) {
             warn: ''
         };
 
-        if (config.timeDays && config.timeDays !== '*' && !config.timeDays.includes(dNow.getDay())) {
+        if (config.timeDays && !config.timeDays.includes(dNow.getDay())) {
             node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(config.timeDays, Object.getOwnPropertyNames(config.timeDays)));
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
-        if (config.timeMonths && config.timeMonths !== '*') {
-            const mn = config.timeMonths.split(',');
-            if (!mn.includes(dNow.getMonth())) {
-                node.debug('invalid Day config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
-                result.warn = RED._('within-time-switch.errors.invalid-month');
-                return result;
-            }
+        if (config.timeMonths && !config.timeMonths.includes(dNow.getDay())) {
+            node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
+            result.warn = RED._('within-time-switch.errors.invalid-month');
+            return result;
         }
         if (config.timedatestart || config.timedateend) {
             let dStart,dEnd;
@@ -329,10 +326,22 @@ module.exports = function (RED) {
 
         if (config.timeDays === '') {
             throw new Error('No valid days given! Please check settings!');
+        } else if (!config.timeDays || config.timeDays === '*') {
+            config.timeDays = null;
+        } else {
+            config.timeDays = config.timeDays.split(',');
+            config.timeDays = config.timeDays.map( e => parseInt(e) );
         }
+
         if (config.timeMonths === '') {
             throw new Error('No valid month given! Please check settings!');
+        } else if (!config.timeMonths || config.timeMonths === '*') {
+            config.timeMonths = null;
+        } else {
+            config.timeMonths = config.timeMonths.split(',');
+            config.timeMonths = config.timeMonths.map( e => parseInt(e) );
         }
+
         if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
             this.timeOnlyEvenDays = false;
             this.timeOnlyOddDays = false;
