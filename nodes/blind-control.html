@@ -1599,10 +1599,12 @@
                             return;
                         }
                         $dialogTimeRegOperator.show();
-                        if(opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                            $('#dialog-row-offset-timeReg').hide();
-                        } else {
+                        if(opType === types.TimeEntered.value ||
+                           opType === types.TimeSun.value ||
+                           opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeReg').show();
+                        } else {
+                            $('#dialog-row-offset-timeReg').hide();
                         }
 
                         const noLimit =   getCheckboxesStr($('#dlg-ip-blindctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
@@ -1669,7 +1671,9 @@
                                 $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
                                 _dialogGenHelpText();
                                 return;
-                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMin').show();
                             } else {
                                 $('#dialog-row-offset-timeMin').hide();
@@ -1723,7 +1727,9 @@
                                 $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
                                 _dialogGenHelpText();
                                 return;
-                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMax').show();
                             } else {
                                 $('#dialog-row-offset-timeMax').hide();
