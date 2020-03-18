@@ -696,9 +696,9 @@
                     * @param {string} name - the name of the element
                     * @returns {number} the updated multiplier value
                     */
-                    function multiplierUpdate(mp, name) {
-                        const field = $('#node-input-' + name);
-                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                    function multiplierUpdate(mp, name, onchange) {
+                        const $field = $('#node-input-' + name);
+                        appendOptions(node, $field, 'multiplier', data => (data.id > 0));
                         if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
                         } else {
@@ -711,7 +711,8 @@
                                 mp = 3600000;
                             }
                         }
-                        field.val(mp);
+                        $field.val(mp);
+                        $field.on('change', onchange);
                         return mp;
                     }
 
@@ -767,7 +768,7 @@
                     } else if (node.payloadType === 'string' || node.payloadType === types.Undefined.value) {
                         node.payloadType = 'str';
                     }
-                    const $payload = setupTInput(node, {
+                    setupTInput(node, {
                         typeProp: 'payloadType',
                         valueProp: 'payload',
                         width: 'calc(100% - 110px)',
@@ -817,8 +818,7 @@
                             }
                             getBackendData(d => {
                                 const $div = $('#node-input-payload-div');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + $div.attr('titleOrg'));
                             }, {
                                 nodeId:         node.id,
                                 kind:           'getOutDataData',
@@ -835,7 +835,7 @@
                     });
                     initCombobox(node, $('#node-input-payloadTimeFormatsel'), $('#node-input-payloadTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadTimeFormat || 0, 30);
 
-                    node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier');
+                    node.payloadOffsetMultiplier = multiplierUpdate(node.payloadOffsetMultiplier, 'payloadOffsetMultiplier', () => $('#node-input-payload').change());
                     setupTInput(node, {
                         typeProp: 'payloadOffsetType',
                         valueProp: 'payloadOffset',
@@ -850,8 +850,9 @@
                             } else {
                                 $('#node-input-payloadOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-payload').change();
                         }
-                    }).change();
+                    });
                     // #endregion payload
                     // #region onceDelay
                     $('#node-input-once').change(() => {
@@ -900,8 +901,9 @@
                             $('#node-input-property').change();
                             getBackendData(d => {
                                 const $div = $('#time-inject-row-timeMain');
-                                const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                                const $div2 = $('#time-inject-row-timeMainOffset');
+                                $div.attr('title', bdDateToTime(d, ' - ') + $div.attr('titleOrg'));
+                                $div2.attr('title', bdDateToTime(d, ' - ') + $div2.attr('titleOrg'));
                             }, {
                                 nodeId:         node.id,
                                 kind:           'getTimeData',
@@ -923,7 +925,7 @@
                     initCheckboxesBlock('#time-inject-timeDays', node.timeDays);
                     initCheckboxesBlock('#time-inject-timeMonths', node.timeMonths);
 
-                    node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
+                    node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
                     setupTInput(node, {
                         typeProp: 'offsetType',
                         valueProp: 'offset',
@@ -938,8 +940,9 @@
                             } else {
                                 $('#node-input-offsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-time').change();
                         }
-                    }).change();
+                    });
 
                     const getDateShort = value => {
                         if (value) {
@@ -1100,8 +1103,9 @@
                                 }
                                 getBackendData(d => {
                                     const $div = $('#node-input-timeAlt-div');
-                                    const titleOrg = $div.attr('titleOrg');
-                                    $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                                    const $div2 = $('#node-input-timeAltOffset-div');
+                                    $div.attr('title', bdDateToTime(d, ' - ') + $div.attr('titleOrg'));
+                                    $div2.attr('title', bdDateToTime(d, ' - ') + $div2.attr('titleOrg'));
                                 }, {
                                     nodeId:         node.id,
                                     kind:           'getTimeData',
@@ -1125,7 +1129,7 @@
                     initCheckboxesBlock('#time-inject-timeAltDays', node.timeAltDays);
                     initCheckboxesBlock('#time-inject-timeAltMonths', node.timeAltMonths);
 
-                    node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
+                    node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier', () => $('#node-input-timeAlt').change());
                     setupTInput(node, {
                         typeProp: 'timeAltOffsetType',
                         valueProp: 'timeAltOffset',
@@ -1140,15 +1144,16 @@
                             } else {
                                 $('#node-input-timeAltOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-timeAlt').change();
                         }
-                    }).change();
+                    });
                     // #endregion timeAlt
                     // #region addPayload1
                     if (node.addPayload1Type === types.MsgPayload.value) {
                         node.addPayload1Type = 'msg';
                         node.addPayload1 = 'payload';
                     }
-                    const $addPayload1 = setupTInput(node, {
+                    setupTInput(node, {
                         typeProp: 'addPayload1Type',
                         valueProp: 'addPayload1',
                         width: 'calc(100% - 110px)',
@@ -1258,7 +1263,7 @@
 
                     initCombobox(node, $('#node-input-addPayload1Formatsel'), $('#node-input-addPayload1Format'), 'dateOutFormat', 'outputFormats', node.addPayload1Format || 0, 30);
 
-                    node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier');
+                    node.addPayload1OffsetMultiplier = multiplierUpdate(node.addPayload1OffsetMultiplier, 'addPayload1OffsetMultiplier', () => $('#node-input-addPayload1Value').change());
 
                     setupTInput(node, {
                         typeProp: 'addPayload1OffsetType',
@@ -1274,8 +1279,9 @@
                             } else {
                                 $('#node-input-addPayload1OffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-addPayload1Value').change();
                         }
-                    }).change();
+                    });
                     // #endregion addPayload1
                     // #region addPayload2
                     if (node.addPayload2Type === types.MsgPayload.value) {
@@ -1393,7 +1399,7 @@
 
                     initCombobox(node, $('#node-input-addPayload2Formatsel'), $('#node-input-addPayload2Format'), 'dateOutFormat', 'outputFormats', node.addPayload2Format || 0, 30);
 
-                    node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier');
+                    node.addPayload2OffsetMultiplier = multiplierUpdate(node.addPayload2OffsetMultiplier, 'addPayload2OffsetMultiplier', () => $('#node-input-addPayload2Value').change());
                     setupTInput(node, {
                         typeProp: 'addPayload2OffsetType',
                         valueProp: 'addPayload2Offset',
@@ -1408,8 +1414,9 @@
                             } else {
                                 $('#node-input-addPayload2OffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-addPayload2Value').change();
                         }
-                    }).change();
+                    });
                     // #endregion addPayload2
                     // #region addPayload3
                     if (node.addPayload3Type === types.MsgPayload.value) {
@@ -1523,7 +1530,7 @@
 
                     initCombobox(node, $('#node-input-addPayload3Formatsel'), $('#node-input-addPayload3Format'), 'dateOutFormat', 'outputFormats', node.addPayload3Format || 0, 30);
 
-                    node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier');
+                    node.addPayload3OffsetMultiplier = multiplierUpdate(node.addPayload3OffsetMultiplier, 'addPayload3OffsetMultiplier', () => $('#node-input-addPayload3Value').change());
                     setupTInput(node, {
                         typeProp: 'addPayload3OffsetType',
                         valueProp: 'addPayload3Offset',
@@ -1538,12 +1545,16 @@
                             } else {
                                 $('#node-input-addPayload3OffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-addPayload3Value').change();
                         }
-                    }).change();
+                    });
                     // #endregion addPayload3
-                    $payload.change();
-                    $('#node-input-time').change(); // also time + property change
-                    $addPayload1.change(); // addPayload2 + addPayload3
+                    $('#node-input-payloadOffset').change(); // includes payload change
+                    $('#node-input-timeAltOffset').change(); // includes time + property change
+                    $('#node-input-offset').change(); // includes time + property change
+                    $('#node-input-addPayload1Offset').change(); // includes time + property change
+                    $('#node-input-addPayload2Offset').change(); // includes time + property change
+                    $('#node-input-addPayload3Offset').change(); // includes time + property change
                 }; // setup
 
                 $.getScript('sun-position/js/htmlglobal.js')
@@ -1680,12 +1691,12 @@
         <span data-i18n="time-inject.label.onceDelay"></span>
     </div>
 
-    <div class="form-row time-inject-row block-noindent" id="time-inject-row-timeMain"  data-i18n="[titleOrg]time-inject.placeholder.time">
+    <div class="form-row time-inject-row block-noindent" id="time-inject-row-timeMain" data-i18n="[titleOrg]time-inject.placeholder.time">
         <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
         <input type="text" id="node-input-time" />
         <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
+    <div class="form-row time-inject-row block-indent1 time-inject-row-offset is-initial-hidden"  id="time-inject-row-timeMainOffset" data-i18n="[titleOrg]time-inject.placeholder.timeOffset">
         <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
         <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
         <input type="hidden" id="node-input-offsetType">
@@ -1761,7 +1772,7 @@
         <input type="text" id="node-input-timeAlt" data-i18n="[placeholder]time-inject.placeholder.timeAlt"/>
         <input type="hidden" id="node-input-timeAltType">
     </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeAltOffset">
+    <div class="form-row time-inject-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" id="node-input-timeAltOffset-div" data-i18n="[titleOrg]time-inject.placeholder.timeAltOffset">
         <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
         <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"/>
         <input type="hidden" id="node-input-timeAltOffsetType">
