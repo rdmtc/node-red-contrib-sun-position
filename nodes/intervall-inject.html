@@ -608,11 +608,12 @@
                     * update multiplier settings from a previous version
                     * @param {number} mp - the multiplier value
                     * @param {string} name - the name of the element
+                    * @param {function} onchange - the function to be called on field change
                     * @returns {number} the updated multiplier value
                     */
-                    function multiplierUpdate(mp, name) {
-                        const field = $('#node-input-' + name);
-                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                    function multiplierUpdate(mp, name, onchange) {
+                        const $field = $('#node-input-' + name);
+                        appendOptions(node, $field, 'multiplier', data => (data.id > 0));
                         if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
                         } else {
@@ -625,7 +626,8 @@
                                 mp = 3600000;
                             }
                         }
-                        field.val(mp);
+                        $field.val(mp);
+                        $field.on('change', onchange);
                         return mp;
                     }
 
