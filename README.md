@@ -1,5 +1,3 @@
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rdmtc/node-red-contrib-sun-position) 
-
 # node-red-contrib-sun-position for NodeRED
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rdmtc/node-red-contrib-sun-position/graphs/commit-activity)
@@ -799,3 +797,4 @@ specific language governing permissions and limitations under the License.
 - [Github](https://github.com/rdmtc/node-red-contrib-sun-position)
 - [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
 - [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)
+- [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rdmtc/node-red-contrib-sun-position) 
