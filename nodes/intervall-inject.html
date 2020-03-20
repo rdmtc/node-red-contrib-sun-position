@@ -74,7 +74,7 @@
                         );
                     }
                 },
-                time: {
+                timeStart: {
                     value: '',
                     required: false,
                     validate(v) {
@@ -85,28 +85,28 @@
                         );
                     }
                 },
-                timeType: {
+                timeStartType: {
                     value: 'none'
                 },
-                offset: {
+                timeStartOffset: {
                     value: 0,
                     validate(v) {
                         return (
                             (typeof v === 'undefined') ||
-                            (typeof this.offsetType === 'undefined') ||
+                            (typeof this.timeStartOffsetType === 'undefined') ||
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
-                            RED.validators.typedInput('offsetType')(v) ||
+                            RED.validators.typedInput('timeStartOffsetType')(v) ||
                             ($('#node-input-time').length ?
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none')
                         );
                     }
                 },
-                offsetType: {
+                timeStartOffsetType: {
                     value: 'none'
                 },
-                offsetMultiplier: {
+                timeStartOffsetMultiplier: {
                     value: 60000,
                     required: true,
                     validate(v) {
@@ -115,8 +115,8 @@
                             RED.validators.number()(v) ||
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
-                            $('#node-input-offsetType').typedInput('type') === 'none' ||
-                            this.offsetType === 'none' ||
+                            $('#node-input-timeStartOffsetType').typedInput('type') === 'none' ||
+                            this.timeStartOffsetType === 'none' ||
                             ($('#node-input-time').length ?
                                 $('#node-input-time').typedInput('type') === 'none' :
                                 this.timeType === 'none')
@@ -200,124 +200,6 @@
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
-                        );
-                    }
-                },
-                property: {
-                    value: '',
-                    required: false,
-                    validate(v){
-                        return (
-                            typeof v === 'undefined' ||
-                            typeof this.propertyType === 'undefined' ||
-                            RED.validators.typedInput('propertyType')(v) ||
-                            (this.payloadOffsetType !== 'time') ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
-                        );
-                    }
-                },
-                propertyType: {
-                    value: 'none'
-                },
-                propertyCompare: {
-                    value: 'true'
-                },
-                propertyThreshold: {
-                    value: '',
-                    validate(v){
-                        return (
-                            typeof v === 'undefined' ||
-                            RED.validators.typedInput('propertyThresholdType')(v) ||
-                            ($('#node-input-timeType').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
-                            typeof this.propertyType === 'undefined' ||
-                            (this.payloadOffsetType !== 'time') ||
-                            ($('#node-input-propertyType').length ?
-                                $('#node-input-property').typedInput('type') === 'none' :
-                                this.propertyType === 'none')
-                        );
-                    }
-                },
-                propertyThresholdType: {
-                    value: 'num'
-                },
-                timeAlt: {
-                    value: '',
-                    required: false,
-                    validate(v){
-                        return (
-                            RED.validators.typedInput('timeAltType')(v) ||
-                            ($('#node-input-timeType').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
-                            typeof this.propertyType === 'undefined' ||
-                            (this.payloadOffsetType !== 'time') ||
-                            ($('#node-input-propertyType').length ?
-                                $('#node-input-property').typedInput('type') === 'none' :
-                                this.propertyType === 'none')
-                        );
-                    }
-                },
-                timeAltType: {
-                    value: 'entered'
-                },
-                timeAltDays: {
-                    value: '*',
-                    required: true
-                },
-                timeAltOnlyOddDays: {
-                    value: false,
-                    required: true
-                },
-                timeAltOnlyEvenDays: {
-                    value: false,
-                    required: true
-                },
-                timeAltMonths: {
-                    value: '*',
-                    required: true
-                },
-                timeAltOffset: {
-                    value: 0,
-                    validate(v){
-                        return (
-                            typeof v === 'undefined' ||
-                            (typeof this.timeAltOffsetType === 'undefined') ||
-                            RED.validators.typedInput('timeAltOffsetType')(v) ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
-                            typeof this.propertyType === 'undefined' ||
-                            (this.payloadOffsetType !== 'time') ||
-                            ($('#node-input-propertyType').length ?
-                                $('#node-input-property').typedInput('type') === 'none' :
-                                this.propertyType === 'none')
-                        );
-                    }
-                },
-                timeAltOffsetType: {
-                    value: 'none'
-                },
-                timeAltOffsetMultiplier: {
-                    value: 60000,
-                    required: true,
-                    validate(v){
-                        return (
-                            typeof v === 'undefined' ||
-                            RED.validators.number()(v) ||
-                            $('#node-input-timeAltOffsetType').typedInput('type') === 'none' ||
-                            this.timeAltOffsetType === 'none' ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
-                            typeof this.propertyType === 'undefined' ||
-                            (this.payloadOffsetType !== 'time') ||
-                            ($('#node-input-propertyType').length ?
-                                $('#node-input-property').typedInput('type') === 'none' :
-                                this.propertyType === 'none')
                         );
                     }
                 },
@@ -528,17 +410,6 @@
                 addPayload3Days: {
                     value: '*',
                     required: true
-                },
-                recalcTime: {
-                    value: 2,
-                    validate(v){
-                        return (
-                            RED.validators.number()(v) ||
-                            v === '' ||
-                            v === null ||
-                            typeof v === 'undefined'
-                        );
-                    }
                 }
             },
             outputLabels(_index) {
@@ -694,10 +565,9 @@
                         suffix += getDateShort(this.timedateend) || '12-31';
                         suffix += ']';
                     }
-                    const part1 = RED.nodes.getType('position-config').getValueLabel(this, this.timeType, this.time, this.offset);
-                    if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
-                        return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
-                    }
+                    let part1 = RED.nodes.getType('position-config').getValueLabel(this, this.timeStartType, this.timeStart, this.timeStartOffsetType);
+                    part1 += ' - ';
+                    part1 += RED.nodes.getType('position-config').getValueLabel(this, this.timeEndType, this.timeEnd, this.timeEndOffsetType);
                     return part1 + suffix;
                 };
 
@@ -738,11 +608,12 @@
                     * update multiplier settings from a previous version
                     * @param {number} mp - the multiplier value
                     * @param {string} name - the name of the element
+                    * @param {function} onchange - the function to be called on field change
                     * @returns {number} the updated multiplier value
                     */
-                    function multiplierUpdate(mp, name) {
-                        const field = $('#node-input-' + name);
-                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                    function multiplierUpdate(mp, name, onchange) {
+                        const $field = $('#node-input-' + name);
+                        appendOptions(node, $field, 'multiplier', data => (data.id > 0));
                         if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
                         } else {
@@ -755,7 +626,8 @@
                                 mp = 3600000;
                             }
                         }
-                        field.val(mp);
+                        $field.val(mp);
+                        $field.on('change', onchange);
                         return mp;
                     }
 
@@ -788,15 +660,7 @@
                         $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                     });
 
-                    $('.wt-offset-time').spinner({
-                        max: 1439,
-                        min: -1439
-                    });
                     $('#node-input-onceDelay').spinner({
-                        step: 0.1,
-                        numberFormat: 'n'
-                    });
-                    $('#node-input-recalcTime').spinner({
                         step: 0.1,
                         numberFormat: 'n'
                     });
@@ -942,11 +806,11 @@
                             default:
                                 break;
                         }
-                        $('#node-input-time').change(); // also property change
+                        $('#node-input-timeStart').change(); // also property change
                         $('#node-input-timeEnd').change(); // also property change
                     });
                     // #endregion onceDelay + TimeType
-                    // #region time
+                    // #region interval
                     node.intervalCountMultiplier = multiplierUpdate(node.intervalCountMultiplier, 'intervalCountMultiplier');
                     setupTInput(node, {
                         typeProp: 'intervalCountType',
@@ -957,9 +821,11 @@
                         types: ['num', 'flow', 'global', 'env', types.randomNumber]
                     }).change();
 
+                    // #endregion interval
+                    // #region timeStart / time ENd
                     setupTInput(node, {
-                        typeProp: 'timeType',
-                        valueProp: 'time',
+                        typeProp: 'timeStartType',
+                        valueProp: 'timeStart',
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
@@ -974,12 +840,11 @@
                             'env'
                         ],
                         onChange(_type, _value) {
-                            const type = $('#node-input-time').typedInput('type');
+                            const type = $('#node-input-timeStart').typedInput('type');
                             const injectType = $('#node-input-injectTypeSelect').val();
                             if (injectType === 'none' || injectType === 'interval' || type === types.Undefined.value) {
-                                $('.time-inject-row-offset').hide();
+                                $('.time-inject-row-timeStartOffset').hide();
                                 $('.time-inject-row-timeLimits').hide();
-                                $('.time-inject-row-alt').hide();
 
                                 const $div = $('#time-inject-row-timeMain');
                                 const titleOrg = $div.attr('titleOrg');
@@ -992,7 +857,7 @@
                             } else {
                                 $('.time-inject-row-timeLimits').show();
                             }
-                            $('.time-inject-row-offset').show();
+                            $('.time-inject-row-timeStartOffset').show();
                             if (injectType === 'time') {
                                 $('.time-inject-row-alt').show();
                             } else {
@@ -1008,10 +873,10 @@
                                 kind:           'getTimeData',
                                 config:         $nodeConfig.val(),
                                 type,
-                                value:          $('#node-input-time').typedInput('value'),
-                                offsetType:     $('#node-input-offset').typedInput('type'),
-                                offset:         $('#node-input-offset').typedInput('value'),
-                                multiplier:     $('#node-input-offsetMultiplier').val(),
+                                value:          $('#node-input-timeStart').typedInput('value'),
+                                offsetType:     $('#node-input-timeStartOffset').typedInput('type'),
+                                offset:         $('#node-input-timeStartOffset').typedInput('value'),
+                                multiplier:     $('#node-input-timeStartOffsetMultiplier').val(),
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
@@ -1021,20 +886,20 @@
                             });
                         }
                     });
-                    node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier');
+                    node.timeStartOffsetMultiplier = multiplierUpdate(node.timeStartOffsetMultiplier, 'timeStartOffsetMultiplier');
                     setupTInput(node, {
-                        typeProp: 'offsetType',
-                        valueProp: 'offset',
+                        typeProp: 'timeStartOffsetType',
+                        valueProp: 'timeStartOffset',
                         width: 'calc(100% - 255px)',
-                        defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
+                        defaultType: (node.timeStartOffset === 0 || node.timeStartOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
-                            const type = $('#node-input-offset').typedInput('type');
+                            const type = $('#node-input-timeStartOffset').typedInput('type');
                             if (type === types.Undefined.value) {
-                                $('#node-input-offsetMultiplier').prop('disabled', true);
+                                $('#node-input-timeStartOffsetMultiplier').prop('disabled', true);
                             } else {
-                                $('#node-input-offsetMultiplier').prop('disabled', false);
+                                $('#node-input-timeStartOffsetMultiplier').prop('disabled', false);
                             }
                         }
                     }).change();
@@ -1151,163 +1016,6 @@
                     $timeLimitDateStart.change();
                     $timeLimitDateEnd.change();
                     // #endregion time
-                    // #region property
-                    setupTInput(node, {
-                        typeProp: 'propertyType',
-                        valueProp: 'property',
-                        width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
-                        defaultValue: '',
-                        types: [types.Undefined,
-                            'flow',
-                            'global',
-                            'env',
-                            'jsonata',
-                            types.PhaseMoon,
-                            types.SunInSky,
-                            types.SunAzimuth,
-                            types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad],
-                        onChange(_type, _value) {
-                            // const timeType = $('#node-input-time').typedInput('type'); // timeType === types.Undefined.value ||
-                            const propType = $('#node-input-property').typedInput('type');
-                            if ( propType === types.Undefined.value ) {
-                                $('.time-inject-row-timeAlt').hide();
-                                $('.time-inject-row-timeAltOffset').hide();
-                                $('.time-inject-row-timeAltLimits').hide();
-                                $('#node-input-propertyCompare').hide();
-                                $('.row-propertyThreshold').hide();
-                                $('#node-input-property').typedInput('width', 'calc(100% - 110px)');
-                            } else if(propType === 'jsonata' ||
-                                      propType === types.PhaseMoon.value) {
-                                $('.time-inject-row-timeAlt').show();
-                                $('.time-inject-row-timeAltOffset').show();
-                                $('.time-inject-row-timeAltLimits').show();
-                                $('#node-input-propertyCompare').show();
-                                $('#node-input-propertyCompare').attr('disabled', true);
-                                $('#node-input-propertyCompare').val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $('.row-propertyThreshold').hide();
-                                $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
-                            } else {
-                                $('.time-inject-row-timeAlt').show();
-                                $('.time-inject-row-timeAltOffset').show();
-                                $('.time-inject-row-timeAltLimits').show();
-                                $('#node-input-propertyCompare').show();
-                                $('#node-input-propertyCompare').attr('disabled', false);
-                                $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
-                                const condOp = $('#node-input-propertyCompare').val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for(let index = 0; index<fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-
-                                if (operatorCount > 1) {
-                                    $('.row-propertyThreshold').show(); // condOpB
-                                } else {
-                                    $('.row-propertyThreshold').hide(); // condOpB
-                                }
-                            }
-                            const timeType = $('#node-input-time').typedInput('type');
-                            if ( timeType === 'flow' || timeType === 'global' || propType !== types.Undefined.value ) {
-                                $('.time-inject-recalc').show();
-                            } else {
-                                $('.time-inject-recalc').hide();
-                                $('#time-inject-recalcTime').val('');
-                            }
-                            $('#node-input-propertyThreshold').change();
-                        }
-                    });
-                    const propertyCompareField = $('#node-input-propertyCompare');
-                    appendOptions(node, propertyCompareField, 'comparator');
-                    propertyCompareField.val(node.propertyCompare || 'true');
-                    propertyCompareField.change(() => { $('#node-input-property').change(); });
-                    setupTInput(node, {
-                        typeProp: 'propertyThresholdType',
-                        valueProp: 'propertyThreshold',
-                        width: 'calc(100% - 130px)',
-                        defaultType: 'num',
-                        defaultValue: '',
-                        types: ['num', 'str', 'flow', 'global', 'env']
-                    });
-                    // #endregion property
-                    // #region timeAlt
-                    setupTInput(node, {
-                        typeProp: 'timeAltType',
-                        valueProp: 'timeAlt',
-                        width: 'calc(100% - 120px)',
-                        defaultType: 'entered',
-                        defaultValue: '',
-                        types: [
-                            types.TimeEntered,
-                            types.TimeSun,
-                            types.TimeSunNow,
-                            types.TimeMoon,
-                            'flow',
-                            'global',
-                            'env'
-                        ],
-                        onChange (_type, _value) {
-                            if (!$('.time-inject-row-timeAlt').is(':hidden')) {
-                                const type = $('#node-input-timeAlt').typedInput('type');
-                                if (type === types.TimeSunNow.value){
-                                    $('.time-inject-row-timeAltOffset').show();
-                                    $('.time-inject-row-timeAltLimits').hide();
-                                } else {
-                                    $('.time-inject-row-timeAltOffset').show();
-                                    $('.time-inject-row-timeAltLimits').show();
-                                }
-                                getBackendData(d => {
-                                    const $div = $('#node-input-timeAlt-div');
-                                    const titleOrg = $div.attr('titleOrg');
-                                    $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
-                                }, {
-                                    nodeId:         node.id,
-                                    kind:           'getTimeData',
-                                    config:         $nodeConfig.val(),
-                                    type,
-                                    value:          $('#node-input-timeAlt').typedInput('value'),
-                                    offsetType:     $('#node-input-timeAltOffset').typedInput('type'),
-                                    offset:         $('#node-input-timeAltOffset').typedInput('value'),
-                                    multiplier:     $('#node-input-timeAltOffsetMultiplier').val(),
-                                    next:           1,
-                                    days:           getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7),
-                                    months:         getCheckboxesStr($('#time-inject-timeAltMonths input[type=checkbox]:checked'), 12),
-                                    onlyOddDays:     $('#node-input-timeAltOnlyOddDays').val(),
-                                    onlyEvenDays:    $('#node-input-timeAltOnlyEvenDays').val(),
-                                    noOffsetError:  true
-                                });
-                            }
-                        }
-                    });
-
-                    initCheckboxesBlock('#time-inject-timeAltDays', node.timeAltDays);
-                    initCheckboxesBlock('#time-inject-timeAltMonths', node.timeAltMonths);
-
-                    node.timeAltOffsetMultiplier = multiplierUpdate(node.timeAltOffsetMultiplier, 'timeAltOffsetMultiplier');
-                    setupTInput(node, {
-                        typeProp: 'timeAltOffsetType',
-                        valueProp: 'timeAltOffset',
-                        width: 'calc(100% - 255px)',
-                        defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
-                        defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
-                        onChange(_type, _value) {
-                            const type = $('#node-input-timeAltOffset').typedInput('type');
-                            if (type === types.Undefined.value) {
-                                $('#node-input-timeAltOffsetMultiplier').prop('disabled', true);
-                            } else {
-                                $('#node-input-timeAltOffsetMultiplier').prop('disabled', false);
-                            }
-                        }
-                    }).change();
-                    // #endregion timeAlt
                     // #region addPayload1
                     if (node.addPayload1Type === types.MsgPayload.value) {
                         node.addPayload1Type = 'msg';
@@ -1870,11 +1578,11 @@
         <input type="text" id="node-input-time" />
         <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-offset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
-        <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
-        <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
-        <input type="hidden" id="node-input-offsetType">
-        <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
+    <div class="form-row time-inject-row block-indent1 time-inject-row-timeStartOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeOffset">
+        <label for="node-input-timeStartOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
+        <input id="node-input-timeStartOffset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
+        <input type="hidden" id="node-input-timeStartOffsetType">
+        <select id="node-input-timeStartOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row time-inject-row is-initial-hidden time-inject-row-interval-time">
         <span data-i18n="time-inject.label.and"></span>

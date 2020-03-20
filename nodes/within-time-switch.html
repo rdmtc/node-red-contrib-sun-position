@@ -302,11 +302,12 @@
                     * update multiplier settings from a previous version
                     * @param {number} mp - the multiplier value
                     * @param {string} name - the name of the element
+                    * @param {function} onchange - the function to be called on field change
                     * @returns {number} the updated multiplier value
                     */
-                    function multiplierUpdate(mp, name) {
-                        const field = $('#node-input-' + name);
-                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                    function multiplierUpdate(mp, name, onchange) {
+                        const $field = $('#node-input-' + name);
+                        appendOptions(node, $field, 'multiplier', data => (data.id > 0));
                         if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
                         } else {
@@ -319,7 +320,8 @@
                                 mp = 3600000;
                             }
                         }
-                        field.val(mp);
+                        $field.val(mp);
+                        $field.on('change', onchange);
                         return mp;
                     }
                     // #endregion initialize
@@ -329,7 +331,7 @@
                     initCheckboxesBlock('#within-time-switch-timeDays', node.timeDays);
                     initCheckboxesBlock('#within-time-switch-timeMonths', node.timeMonths);
 
-                    const $startTime = setupTInput(node, {
+                    setupTInput(node, {
                         typeProp: 'startTimeType',
                         valueProp: 'startTime',
                         width: 'calc(100% - 110px)',
@@ -370,7 +372,7 @@
                         }
                     });
 
-                    node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier');
+                    node.startOffsetMultiplier = multiplierUpdate(node.startOffsetMultiplier, 'startOffsetMultiplier', () => $('#node-input-startTime').change());
                     setupTInput(node, {
                         typeProp: 'startOffsetType',
                         valueProp: 'startOffset',
@@ -386,8 +388,9 @@
                             } else {
                                 $('#node-input-startOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-startTime').change();
                         }
-                    }).change();
+                    });
 
                     const getDateShort = value => {
                         if (value) {
@@ -435,7 +438,7 @@
                     $timeLimitDateEnd.change();
                     // #endregion timeStart
                     // #region timeEnd
-                    const $endTime = setupTInput(node, {
+                    setupTInput(node, {
                         typeProp: 'endTimeType',
                         valueProp: 'endTime',
                         width: 'calc(100% - 110px)',
@@ -476,7 +479,7 @@
                         }
                     });
 
-                    node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier');
+                    node.endOffsetMultiplier = multiplierUpdate(node.endOffsetMultiplier, 'endOffsetMultiplier', () => $('#node-input-endTime').change());
                     setupTInput(node, {
                         typeProp: 'endOffsetType',
                         valueProp: 'endOffset',
@@ -492,8 +495,9 @@
                             } else {
                                 $('#node-input-endOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-endTime').change();
                         }
-                    }).change();
+                    });
                     // #endregion timeEnd
                     // #region propertyStart
                     const $propertyStart = setupTInput(node, {
@@ -609,7 +613,7 @@
                         }
                     });
 
-                    node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier');
+                    node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier', () => $('#node-input-startTimeAlt').change());
                     setupTInput(node, {
                         typeProp: 'startTimeAltOffsetType',
                         valueProp: 'startTimeAltOffset',
@@ -625,8 +629,9 @@
                             } else {
                                 $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-startTimeAlt').change();
                         }
-                    }).change();
+                    });
                     // #endregion timeAltStart
                     // #region propertyEnd
                     const $propertyEnd = setupTInput(node, {
@@ -743,7 +748,7 @@
                         }
                     });
 
-                    node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier');
+                    node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier', () => $('#node-input-endTimeAlt').change());
                     setupTInput(node, {
                         typeProp: 'endTimeAltOffsetType',
                         valueProp: 'endTimeAltOffset',
@@ -759,8 +764,9 @@
                             } else {
                                 $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-endTimeAlt').change();
                         }
-                    }).change();
+                    });
                     // #endregion timeAltEnd
                     // #region Enhanced settings
                     initializeValue(node, 'tsCompare', 0);
@@ -781,8 +787,10 @@
                     }
                     // #endregion Enhanced settings
                     onInit = false;
-                    $startTime.change();
-                    $endTime.change();
+                    $('#node-input-startOffset').change();
+                    $('#node-input-endOffset').change();
+                    $('#node-input-startTimeAltOffset').change();
+                    $('#node-input-endTimeAltOffset').change();
                     $propertyStart.change();
                     $propertyEnd.change();
                 }; // setup

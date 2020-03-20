@@ -126,11 +126,12 @@
                     * update multiplier settings from a previous version
                     * @param {number} mp - the multiplier value
                     * @param {string} name - the name of the element
+                    * @param {function} onchange - the function to be called on field change
                     * @returns {number} the updated multiplier value
                     */
-                    function multiplierUpdate(mp, name) {
-                        const field = $('#node-input-' + name);
-                        appendOptions(node, field, 'multiplier', data => (data.id > 0));
+                    function multiplierUpdate(mp, name, onchange) {
+                        const $field = $('#node-input-' + name);
+                        appendOptions(node, $field, 'multiplier', data => (data.id > 0));
                         if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
                             mp = 60000;
                         } else {
@@ -143,7 +144,8 @@
                                 mp = 3600000;
                             }
                         }
-                        field.val(mp);
+                        $field.val(mp);
+                        $field.on('change', onchange);
                         return mp;
                     }
                     /**
@@ -206,7 +208,7 @@
                     } else if (node.payloadDefaultType === 'string') {
                         node.payloadDefaultType = 'str';
                     }
-                    const $payloadDefault = setupTInput(node, {
+                    setupTInput(node, {
                         typeProp: 'payloadDefaultType',
                         valueProp: 'payloadDefault',
                         width: 'calc(100% - 110px)',
@@ -277,7 +279,7 @@
                     });
                     initCombobox(node, $('#node-input-payloadDefaultTimeFormatsel'), $('#node-input-payloadDefaultTimeFormat'), 'dateOutFormat', 'outputFormats', node.payloadDefaultTimeFormat || 0, 30);
 
-                    node.payloadDefaultOffsetMultiplier = multiplierUpdate(node.payloadDefaultOffsetMultiplier, 'payloadDefaultOffsetMultiplier');
+                    node.payloadDefaultOffsetMultiplier = multiplierUpdate(node.payloadDefaultOffsetMultiplier, 'payloadDefaultOffsetMultiplier', () => $('#node-input-payloadDefault').change());
                     setupTInput(node, {
                         typeProp: 'payloadDefaultOffsetType',
                         valueProp: 'payloadDefaultOffset',
@@ -292,8 +294,9 @@
                             } else {
                                 $('#node-input-payloadDefaultOffsetMultiplier').prop('disabled', false);
                             }
+                            $('#node-input-payloadDefault').change();
                         }
-                    }).change();
+                    });
                     // #endregion payloadDefault
                     // #region rules
                     // console.log('clock-timer rules');
@@ -663,7 +666,7 @@
                             if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
                             resizeContainerTO = setTimeout(() => {
                                 resizeContainerTO = null;
-                                $payloadDefault.change();
+                                $('#node-input-payloadDefaultOffset').change();
                                 resizeContainer();
                             }, 1000);
                         },
@@ -1053,10 +1056,12 @@
                         }
 
                         $dialogTimeRegOperator.show();
-                        if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
-                            $('#dialog-row-offset-timeReg').hide();
-                        } else {
+                        if (opType === types.TimeEntered.value ||
+                            opType === types.TimeSun.value ||
+                            opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeReg').show();
+                        } else {
+                            $('#dialog-row-offset-timeReg').hide();
                         }
 
                         const noLimit = getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
@@ -1123,7 +1128,9 @@
                                 $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
                                 _dialogGenHelpText();
                                 return;
-                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMin').show();
                             } else {
                                 $('#dialog-row-offset-timeMin').hide();
@@ -1177,7 +1184,9 @@
                                 $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
                                 _dialogGenHelpText();
                                 return;
-                            } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value) {
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMax').show();
                             } else {
                                 $('#dialog-row-offset-timeMax').hide();

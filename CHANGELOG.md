@@ -1,5 +1,13 @@
 # node-red-contrib-sun-position
 
+#### 1.0.15:  BugFix + maintenance
+
+- blind-control + clock-time
+  - fixed not visible offset field in rule edit for sun/moon times
+
+- time-Inject, within-time
+  - enhanced refresh for tooltip on offset or multiplier change
+
 #### 1.0.14:  BugFix
 
 - blind-control + clock-time
