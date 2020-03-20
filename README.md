@@ -1,4 +1,6 @@
-﻿# node-red-contrib-sun-position for NodeRED
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rdmtc/node-red-contrib-sun-position) 
+
+# node-red-contrib-sun-position for NodeRED
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rdmtc/node-red-contrib-sun-position/graphs/commit-activity)
 [![HitCount](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position)
