@@ -97,7 +97,8 @@
     "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-jsdoc": "^22.1.0",
     "eslint-plugin-json": "^2.1.1",
-    "eslint-plugin-node": "^11.0.0"
+    "eslint-plugin-node": "^11.0.0",
+    "minimist": ">=1.2.2"
   },
   "disabledSettings": {
     "devDependencies-disabled": {
