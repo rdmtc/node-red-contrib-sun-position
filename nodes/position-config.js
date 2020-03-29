@@ -712,7 +712,7 @@ module.exports = function (RED) {
                 fix: true
             };
             let dNow = new Date(data.now);
-            if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('given date Parameter ' + data.now + ' is invalid!!');}
+            if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('getTimeProp: Date parameter not given or date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
                     result.error = 'wrong type "' + data.type + '"="' + data.value+'"';

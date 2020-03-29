@@ -84,54 +84,63 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
 
-        this.time = config.time;
-        this.timeType = config.timeType || 'none';
-        this.timeDays = config.timeDays;
-        this.timeOnlyOddDays = config.timeOnlyOddDays;
-        this.timeOnlyEvenDays = config.timeOnlyEvenDays;
-        this.timeMonths = config.timeMonths;
-        this.timeAltDays = config.timeAltDays;
-        this.timeAltOnlyOddDays = config.timeAltOnlyOddDays;
-        this.timeAltOnlyEvenDays = config.timeAltOnlyEvenDays;
-        this.timeAltMonths = config.timeAltMonths;
+        this.timeData = {
+            type: config.timeType || 'none',
+            value : config.time,
+            offsetType : config.offsetType,
+            offset : config.offset || config.timeOffset || 0,
+            multiplier : config.offsetMultiplier || config.timeOffsetMultiplier || 60,
+            next : true,
+            days : config.timeDays,
+            months : config.timeMonths,
+            onlyOddDays: config.timeOnlyOddDays,
+            onlyEvenDays: config.timeOnlyEvenDays
+        };
 
-        if (this.timeDays === '') {
+        if (!this.timeData.offsetType) {
+            this.timeData.offsetType = ((this.timeData.offset === 0) ? 'none' : 'num');
+        }
+        if (this.timeData.days === '') {
             throw new Error('No valid days given! Please check settings!');
         }
-        if (this.timeAltDays === '') {
-            throw new Error('No valid alternate days given! Please check settings!');
-        }
-        if (this.timeMonths === '') {
+        if (this.timeData.months === '') {
             throw new Error('No valid month given! Please check settings!');
         }
-        if (this.timeAltMonths === '') {
-            throw new Error('No valid alternate month given! Please check settings!');
-        }
-        if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
-            this.timeOnlyEvenDays = false;
-            this.timeOnlyOddDays = false;
-        }
-        if (this.timeAltOnlyEvenDays && this.timeAltOnlyOddDays) {
-            this.timeAltOnlyEvenDays = false;
-            this.timeAltOnlyOddDays = false;
+        if (this.timeData.onlyEvenDays && this.timeData.onlyOddDays) {
+            this.timeData.onlyEvenDays = false;
+            this.timeData.onlyOddDays = false;
         }
 
-        this.offset = config.offset || config.timeOffset || 0;
-        this.offsetType = config.offsetType;
-        if (!this.offsetType) { this.offsetType = ((this.offset === 0) ? 'none' : 'num'); }
-        this.offsetMultiplier = config.offsetMultiplier || config.timeOffsetMultiplier || 60;
+        this.timeAltData = {
+            type: config.timeAltType || 'none',
+            value : config.timeAlt || '',
+            offsetType : config.timeAltOffsetType,
+            offset : config.timeAltOffset || 0,
+            multiplier : config.timeAltOffsetMultiplier || 60,
+            next : true,
+            days : config.timeAltDays,
+            months : config.timeAltMonths,
+            onlyOddDays: config.timeAltOnlyOddDays,
+            onlyEvenDays: config.timeAltOnlyEvenDays
+        };
+        if (!this.timeAltData.offsetType) { this.timeAltData.offsetType = ((this.timeAltData.offset === 0) ? 'none' : 'num'); }
+
+        if (this.timeAltData.days === '') {
+            throw new Error('No valid alternate days given! Please check settings!');
+        }
+        if (this.timeAltData.months === '') {
+            throw new Error('No valid alternate month given! Please check settings!');
+        }
+        if (this.timeAltData.onlyEvenDays && this.timeAltData.onlyOddDays) {
+            this.timeAltData.onlyEvenDays = false;
+            this.timeAltData.onlyOddDays = false;
+        }
 
         this.property = config.property || '';
         this.propertyType = config.propertyType || 'none';
         this.propertyOperator = config.propertyCompare || 'true';
         this.propertyThresholdValue = config.propertyThreshold;
         this.propertyThresholdType = config.propertyThresholdType;
-        this.timeAlt = config.timeAlt || '';
-        this.timeAltType = config.timeAltType || 'none';
-        this.timeAltOffset = config.timeAltOffset || 0;
-        this.timeAltOffsetType = config.timeAltOffsetType;
-        if (!this.timeAltOffsetType) { this.timeAltOffsetType = ((this.timeAltOffset === 0) ? 'none' : 'num'); }
-        this.timeAltOffsetMultiplier = config.timeAltOffsetMultiplier || 60;
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
 
@@ -168,10 +177,13 @@ module.exports = function (RED) {
          * @returns {object} state or error
          */
         function doCreateTimeout(node, _onInit) {
+            node.debug(`doCreateTimeout _onInit=${_onInit} node=${util.inspect(node, { colors: true, compact: 10, breakLength: Infinity })}`);
             let errorStatus = '';
             let warnStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
+            let timeValid = (node.timeData && node.timeData.type !== 'none');
+            let timeAltValid = (node.timeAltData && node.propertyType !== 'none' && node.timeAltData.type !== 'none');
             node.nextTime = null;
             node.nextTimeAlt = null;
 
@@ -202,32 +214,21 @@ module.exports = function (RED) {
                     if (dNow < dStart || dNow > dEnd) {
                         node.nextTime = new Date(dStart.getFullYear() + ((dNow >= dEnd) ? 1 : 0), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
                         warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
-                        node.timeType = 'none';
-                        node.timeAltType = 'none';
+                        timeValid = false;
+                        timeAltValid = false;
                     }
                 } else {
                     // switch between year from end to start - e.g. 2.11. - 20.3.
                     if (dNow < dStart && dNow > dEnd) {
                         node.nextTime = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate(), 0, 0, 1);
                         warnStatus = RED._('time-inject.errors.invalid-daterange') + ' [' + node.positionConfig.toDateString(node.nextTime)+ ']';
-                        node.timeType = 'none';
-                        node.timeAltType = 'none';
+                        timeValid = false;
+                        timeAltValid = false;
                     }
                 }
             }
-            if (node.timeType !== 'none' && node.positionConfig) {
-                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, {
-                    type: node.timeType,
-                    value : node.time,
-                    offsetType : node.offsetType,
-                    offset : node.offset,
-                    multiplier : node.offsetMultiplier,
-                    next : true,
-                    days : node.timeDays,
-                    months : node.timeMonths,
-                    onlyOddDays: node.timeOnlyOddDays,
-                    onlyEvenDays: node.timeOnlyEvenDays
-                });
+            if (timeValid && node.positionConfig) {
+                node.nextTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeData);
                 if (node.nextTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextTime = null;
@@ -243,21 +244,8 @@ module.exports = function (RED) {
                 }
             }
 
-            if (node.propertyType !== 'none' &&
-                node.timeAltType !== 'none' &&
-                node.positionConfig) {
-                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, {
-                    type: node.timeAltType,
-                    value : node.timeAlt,
-                    offsetType : node.timeAltOffsetType,
-                    offset : node.timeAltOffset,
-                    multiplier : node.timeAltOffsetMultiplier,
-                    next : true,
-                    days : node.timeAltDays,
-                    months : node.timeAltMonths,
-                    onlyOddDays: node.timeAltOnlyOddDays,
-                    onlyEvenDays: node.timeAltOnlyEvenDays
-                });
+            if (timeAltValid && node.positionConfig) {
+                node.nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeAltData);
 
                 if (node.nextTimeAltData.error) {
                     errorStatus = 'could not evaluate alternate time';
@@ -417,7 +405,7 @@ module.exports = function (RED) {
 
             try {
                 msg._srcid = node.id;
-                node.debug('--------- time-inject - input');
+                node.debug('--------- time-inject - input (type=' + msg.type + ')');
                 doCreateTimeout(node);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
@@ -509,7 +497,7 @@ module.exports = function (RED) {
 
                 config.onceTimeout = setTimeout(() => {
                     node.emit('input', {
-                        type: 'once'
+                        type: 'once/startup'
                     });
                     doCreateTimeout(node);
                 }, (config.onceDelay || 0.1) * 1000);
