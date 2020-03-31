@@ -174,16 +174,20 @@ module.exports = function (RED) {
          * creates the timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
+         * @param {Date} [dNow] - Date object with the calculation base
          * @returns {object} state or error
          */
-        function doCreateTimeout(node, _onInit) {
-            node.debug(`doCreateTimeout _onInit=${_onInit} node=${util.inspect(node, { colors: true, compact: 10, breakLength: Infinity })}`);
+        function doCreateTimeout(node, _onInit, dNow) {
+            node.debug(`doCreateTimeout _onInit=${_onInit}`);
             let errorStatus = '';
             let warnStatus = '';
             let isAltFirst = false;
             let isFixedTime = true;
             let timeValid = (node.timeData && node.timeData.type !== 'none');
             let timeAltValid = (node.timeAltData && node.propertyType !== 'none' && node.timeAltData.type !== 'none');
+            node.timeData.now = dNow || new Date();
+            node.timeAltData.now = node.timeData.now;
+
             node.nextTime = null;
             node.nextTimeAlt = null;
 
@@ -402,11 +406,12 @@ module.exports = function (RED) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
+            let dNow = new Date();
 
             try {
                 msg._srcid = node.id;
                 node.debug('--------- time-inject - input (type=' + msg.type + ')');
-                doCreateTimeout(node);
+                doCreateTimeout(node, false, dNow);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
@@ -418,7 +423,8 @@ module.exports = function (RED) {
                     offsetType: config.payloadOffsetType,
                     offset: config.payloadOffset,
                     multiplier: config.payloadOffsetMultiplier,
-                    next: true
+                    next: true,
+                    now: dNow
                 });
                 if (value === null || (typeof value === 'undefined')) {
                     throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
@@ -440,7 +446,8 @@ module.exports = function (RED) {
                         offset: config.addPayload1Offset,
                         multiplier: config.addPayload1OffsetMultiplier,
                         next: config.addPayload1Next,
-                        days: config.addPayload1Days
+                        days: config.addPayload1Days,
+                        now: dNow
                     });
                     tsSetAddProp(this, msg, {
                         outType: config.addPayload2Type,
@@ -452,7 +459,8 @@ module.exports = function (RED) {
                         offset: config.addPayload2Offset,
                         multiplier: config.addPayload2OffsetMultiplier,
                         next: config.addPayload2Next,
-                        days: config.addPayload2Days
+                        days: config.addPayload2Days,
+                        now: dNow
                     });
                     tsSetAddProp(this, msg, {
                         outType: config.addPayload3Type,
@@ -464,7 +472,8 @@ module.exports = function (RED) {
                         offset: config.addPayload3Offset,
                         multiplier: config.addPayload3OffsetMultiplier,
                         next: config.addPayload3Next,
-                        days: config.addPayload3Days
+                        days: config.addPayload3Days,
+                        now: dNow
                     });
                 }
                 send(msg); // node.send(msg);

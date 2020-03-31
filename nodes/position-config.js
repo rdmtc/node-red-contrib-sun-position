@@ -202,6 +202,7 @@ module.exports = function (RED) {
          * @return {timeresult|erroresult} result object of sunTime
          */
         getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude) {
+            // this.debug('getSunTimeByName dNow=' + dNow + ' limit=' + util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity }));
             let result;
             const dayId = hlp.getDayId(dNow); // this._getUTCDayId(dNow);
             if (latitude && longitude) {
@@ -240,7 +241,7 @@ module.exports = function (RED) {
             result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             if (limit.next && result.value.getTime() <= dNow.getTime()) {
                 if (dayId === this.cache.sunTimesToday.dayId) {
-                    result = Object.assign(result, this.cache.sunTimesTomorrow[value]);
+                    result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
                 const datebase = new Date(dNow);
@@ -263,6 +264,7 @@ module.exports = function (RED) {
                     result.error = 'No valid day of week found!';
                 }
             }
+
             if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
                 const monthx = hlp.calcMonthOffset(limit.months, result.value.getMonth());
                 if (monthx > 0) {
@@ -1217,15 +1219,15 @@ module.exports = function (RED) {
         _sunTimesRefresh(todayValue, dayId) {
             this._checkCoordinates();
             if (this.cache.sunTimesToday.dayId === (dayId + 1)) {
-                this.cache.sunTimesToday.dayId = this.cache.sunTimesTomorrow.dayId;
                 this.cache.sunTimesToday.times = this.cache.sunTimesTomorrow.times;
                 this.cache.sunTimesToday.sunPosAtSolarNoon = this.cache.sunTimesTomorrow.sunPosAtSolarNoon;
-                this.cache.sunTimesTomorrow = {};
+                this.cache.sunTimesToday.dayId = this.cache.sunTimesTomorrow.dayId;
             } else {
-                this.cache.sunTimesToday.dayId = dayId;
                 this.cache.sunTimesToday.times = sunCalc.getSunTimes(todayValue, this.latitude, this.longitude);
                 this.cache.sunTimesToday.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesToday.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
+                this.cache.sunTimesToday.dayId = dayId;
             }
+            this.cache.sunTimesTomorrow = {};
             this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + dayMs, this.latitude, this.longitude);
             this.cache.sunTimesTomorrow.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesTomorrow.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
             this.cache.sunTimesTomorrow.dayId = (dayId + 1);
