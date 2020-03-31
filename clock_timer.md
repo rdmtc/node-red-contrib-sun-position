@@ -93,7 +93,7 @@ The Input is for triggering the calculation and for setting overwrites of the bl
   - A message property  `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value.
   - A `boolean` value `true` is considered as numeric `1`.
   - A higher number is a higher priority. So prio 1 is the lowest priority.
-- **expire** (optional) Enables to define an override as automatically expiring. As default value for overrides of priority `0` the value in the settings is be used. Overrides with a priority higher than `0` will not expire by default.
+- **expire** (optional) Enables to define an override as automatically expiring. As default value the value in the settings is be used.
   - A message property `msg.expire`
   - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
   - If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.

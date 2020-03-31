@@ -98,10 +98,11 @@ function getInversePos_(node, level) {
  */
 function getRealLevel_(node) {
     if (node.levelReverse) {
-        return node.level.currentInverse;
+        return isNaN(node.level.currentInverse) ? node.previousData.levelInverse: node.level.currentInverse;
     }
-    return node.level.current;
+    return isNaN(node.level.current) ? node.previousData.level : node.level.current;
 }
+
 /**
  * round a level to the next increment
  * @param {*} node node data
@@ -318,7 +319,7 @@ module.exports = function (RED) {
 
         if (!node.blindData.overwrite.expires) {
             node.log(`Overwrite is set which never expire (${reason})`);
-            node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100} state=${String(node.timeClockData.overwrite.expires)}`);
+            node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100}}`);
             delete node.blindData.overwrite.expireTs;
             delete node.blindData.overwrite.expireDate;
             return;
@@ -400,7 +401,7 @@ module.exports = function (RED) {
      * @returns true if override is active, otherwise false
      */
     function checkBlindPosOverwrite(node, msg, dNow) {
-        // node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
+        node.debug(`checkBlindPosOverwrite act=${node.blindData.overwrite.active} `);
         let priook = false;
         const prioMustEqual = hlp.getMsgBoolValue(msg, ['exactPriority', 'exactPrivilege'], ['exactPrio', 'exactPrivilege']);
         const nPrio = hlp.getMsgNumberValue(msg, ['prio', 'priority', 'privilege'], ['prio', 'alarm', 'privilege'], p => {
@@ -420,11 +421,15 @@ module.exports = function (RED) {
             // if (node.blindData.overwrite.active && (node.blindData.overwrite.priority > 0) && (node.blindData.overwrite.priority > prio)) {
             // node.debug(`overwrite exit true node.blindData.overwrite.active=${node.blindData.overwrite.active}, prio=${prio}, node.blindData.overwrite.priority=${node.blindData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
+            node.debug(`do not check any overwrite, priority of message ${nPrio} not matches current overwrite priority ${node.blindData.overwrite.priority}`);
             return setOverwriteReason(node);
         }
         const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);
         let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
-        const nExpire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
+        let nExpire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
+        if (msg.topic && String(msg.topic).includes('noExpir')) {
+            nExpire = -1;
+        }
         if (!onlyTrigger && node.blindData.overwrite.active && isNaN(newPos)) {
             node.debug(`overwrite active, check of prio=${nPrio} or nExpire=${nExpire}, newPos=${newPos}`);
             if (Number.isFinite(nExpire)) {
@@ -1154,7 +1159,7 @@ module.exports = function (RED) {
                 code = node.previousData.reasonCode;
             }
 
-            if (node.level.current === node.blindData.levelTop) {
+            if (blindCtrl.level === node.blindData.levelTop) {
                 shape = 'dot';
             }
             if (isNaN(code)) {
@@ -1168,7 +1173,7 @@ module.exports = function (RED) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
 
-            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : getRealLevel_(node).toString() + ' - ' + node.reason.state;
+            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + node.reason.state;
             node.status({
                 fill,
                 shape,
@@ -1197,12 +1202,14 @@ module.exports = function (RED) {
                 }
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
-                node.previousData.level = node.level.current;
-                node.previousData.levelInverse = node.level.currentInverse;
-                node.previousData.topic = node.level.topic;
-                node.previousData.reasonCode = node.reason.code;
-                node.previousData.reasonState = node.reason.state;
-                node.previousData.reasonDescription = node.reason.description;
+                if (!isNaN(node.level.current)) {
+                    node.previousData.level = node.level.current;
+                    node.previousData.levelInverse = node.level.currentInverse;
+                    node.previousData.topic = node.level.topic;
+                    node.previousData.reasonCode = node.reason.code;
+                    node.previousData.reasonState = node.reason.state;
+                    node.previousData.reasonDescription = node.reason.description;
+                }
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
                 node.level.topic = '';
@@ -1277,12 +1284,13 @@ module.exports = function (RED) {
                 }
 
                 if (node.levelReverse) {
-                    blindCtrl.level = node.level.currentInverse;
-                    blindCtrl.levelInverse = node.level.current;
+                    blindCtrl.level = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
+                    blindCtrl.levelInverse = isNaN(node.level.current) ? node.previousData.level : node.level.current;
                 } else {
-                    blindCtrl.level = node.level.current;
-                    blindCtrl.levelInverse = node.level.currentInverse;
+                    blindCtrl.level = isNaN(node.level.current) ? node.previousData.level : node.level.current;
+                    blindCtrl.levelInverse = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
                 }
+
                 if (node.startDelayTimeOut) {
                     node.reason.code = NaN;
                     node.reason.state = RED._('blind-control.states.startDelay', {date:node.positionConfig.toTimeString(node.startDelayTimeOut)});
