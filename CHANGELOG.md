@@ -1,5 +1,17 @@
 # node-red-contrib-sun-position
 
+#### 1.0.16:  BugFix
+
+- general
+  - fix #119
+    - if a positive offset is used the next time was calculated wrong
+
+- blind-control + clock-time
+  - fix #128 for blind-control + clock-time
+    - with #127 the also overrides with a priority higher than `0` will be expire. The documentation is changed to reflect this.
+  - fixed problem that an override can not set as not expiring
+  - fixed state text and level output if level-value of -1 is used
+
 #### 1.0.15:  BugFix + maintenance
 
 - blind-control + clock-time

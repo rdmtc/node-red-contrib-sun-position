@@ -638,7 +638,7 @@ function isValidDate(d) {
  */
 function addOffset(d, offset, multiplier) {
     if (offset && !isNaN(offset) && offset !== 0) {
-        if (offset !== 0 && multiplier > 0) {
+        if (multiplier > 0) {
             return new Date(d.getTime() + Math.floor(offset * multiplier));
         } else if (multiplier === -1) {
             d.setMonth(Math.floor(d.getMonth() + offset));

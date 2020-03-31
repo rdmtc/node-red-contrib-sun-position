@@ -91,7 +91,7 @@ module.exports = function (RED) {
 
         if (!node.timeClockData.overwrite.expires) {
             node.log(`Overwrite is set which never expire (${reason})`);
-            node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100} state=${String(node.timeClockData.overwrite.expires)}`);
+            node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100}`);
             delete node.timeClockData.overwrite.expireTs;
             delete node.timeClockData.overwrite.expireDate;
             return;
@@ -193,6 +193,7 @@ module.exports = function (RED) {
         // if (node.timeClockData.overwrite.active && (node.timeClockData.overwrite.priority > 0) && (node.timeClockData.overwrite.priority > prio)) {
             // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}, prio=${nPrio}, node.timeClockData.overwrite.priority=${node.timeClockData.overwrite.priority}`);
             // if active, the prio must be 0 or given with same or higher as current overwrite otherwise this will not work
+            node.debug(`do not check any overwrite, priority of message ${nPrio} not matches current overwrite priority ${node.blindData.overwrite.priority}`);
             return setOverwriteReason(node);
         }
         const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);
@@ -210,7 +211,10 @@ module.exports = function (RED) {
             }
         }
 
-        const nExpire = hlp.getMsgNumberValue(msg, 'expire');
+        let nExpire = hlp.getMsgNumberValue(msg, 'expire');
+        if (msg.topic && String(msg.topic).includes('noExpir')) {
+            nExpire = -1;
+        }
         if (!overrideData && node.timeClockData.overwrite.active) {
             node.debug(`overwrite active, check of prio=${nPrio} or nExpire=${nExpire}`);
             if (Number.isFinite(nExpire)) {
@@ -240,7 +244,7 @@ module.exports = function (RED) {
                 // priook
                 // no expiring on prio change or no existing expiring
                 node.debug(`no expire defined, using default or will not expire`);
-                setExpiringOverwrite(node, dNow, NaN, 'no expire defined');
+                setExpiringOverwrite(node, dNow, NaN, 'no special expire defined');
             }
             if (nPrio > 0) {
                 node.timeClockData.overwrite.priority = nPrio;
