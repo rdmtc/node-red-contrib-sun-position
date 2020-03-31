@@ -471,7 +471,7 @@ module.exports = function (RED) {
                 // priook
                 // no expiring on prio change or no existing expiring
                 node.debug(`no expire defined, using default or will not expire`);
-                setExpiringOverwrite(node, dNow, NaN, 'no expire defined');
+                setExpiringOverwrite(node, dNow, NaN, 'no special expire defined');
             }
             if (nPrio > 0) {
                 node.blindData.overwrite.priority = nPrio;
