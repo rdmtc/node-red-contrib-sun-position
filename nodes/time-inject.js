@@ -406,7 +406,7 @@ module.exports = function (RED) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
-            let dNow = new Date();
+            const dNow = new Date();
 
             try {
                 msg._srcid = node.id;
