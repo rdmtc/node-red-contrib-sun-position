@@ -1093,7 +1093,28 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
+                        types: [
+                            types.Undefined,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteerValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1170,7 +1191,28 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
+                        types: [
+                            types.Undefined,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteer1ValueType = $('#node-input-oversteerValue').typedInput('type');
@@ -1256,7 +1298,28 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad],
+                        types: [
+                            types.Undefined,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             const sunControlMode = Number($('#node-input-sunControlMode').val());
                             const oversteer2ValueType = $('#node-input-oversteer2Value').typedInput('type');
@@ -1408,7 +1471,28 @@
                     const $dialogCondAOperand = $dialog.find('#dlg-ip-blindctl-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
-                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
+                        types: [
+                            types.Unlimited,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -1430,7 +1514,27 @@
                     const $dialogCond2AOperand = $dialog.find('#dlg-ip-blindctl-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
-                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
+                        types: [
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 

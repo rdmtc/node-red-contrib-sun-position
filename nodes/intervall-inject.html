@@ -439,7 +439,12 @@
                     pdsCalcData: 'object of sun position',
                     pdmCalcData: 'object of moon position',
                     pdmPhase: 'object of moon phase',
-                    pdmPhaseCheck: 'boolean indicates if moon in specific phase'
+                    pdmPhaseCheck: 'boolean indicates if moon in specific phase',
+                    pdbIsDST: 'is DST',
+                    pdnWeekOfYear: 'week number',
+                    pdbWeekOfYearEven: 'is week even',
+                    pdnDayOfYear: 'day number',
+                    pdbDayOfYearEven: 'is day even'
                 };
                 let lab = labels[this.payloadType] || this.payloadType;
                 if (lab === 'object') {
@@ -600,9 +605,9 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initCheckboxesBlock initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr getCheckboxesStr */
+                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initCheckboxesBlock initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr getCheckboxesStr */ // eslint-disable-line
                     const types = getTypes(node);
-                    const selFields = getSelectFields();
+                    // const selFields = getSelectFields();
                     // #region initialize
                     /**
                     * update multiplier settings from a previous version
@@ -710,7 +715,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payload').typedInput('type');
@@ -1102,7 +1112,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload1').change();
@@ -1237,7 +1252,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload2').change();
@@ -1367,7 +1387,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload3').change();

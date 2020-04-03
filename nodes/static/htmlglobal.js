@@ -378,6 +378,31 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
             hasValue: false
         },
+        isDST: {
+            value: 'pdbIsDST',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.isDST','is daylight saving time'),
+            hasValue: false
+        },
+        WeekOfYear: {
+            value: 'pdnWeekOfYear',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.WeekOfYear','week Of year'),
+            hasValue: false
+        },
+        WeekOfYearEven: {
+            value: 'pdbWeekOfYearEven',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.isWeekOfYearEven','week Of year'),
+            hasValue: false
+        },
+        DayOfYear: {
+            value: 'pdnDayOfYear',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.DayOfYear','day Of year'),
+            hasValue: false
+        },
+        DayOfYearEven: {
+            value: 'pdbDayOfYearEven',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.isDayOfYearEven','day Of year'),
+            hasValue: false
+        },
         MoonCalc: {
             value: 'pdmCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
