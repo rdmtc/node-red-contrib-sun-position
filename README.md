@@ -500,6 +500,8 @@ Additional special values could be defined as output.
 - elevation of sun - the elevation of the sun on the inject timestamp in decimal degree
 - azimuth of sun (rad) - the azimuth of the sun on the inject timestamp in rad
 - elevation of sun (rad) - the azimuth of the sun on the inject timestamp in rad
+- is daylight saving time - gives a `boolean` of _true_ if is daylight saving time, otherwise _false_
+- week of the year - gives a `number` of the current week of the year
 - week of the year is even - gives a `boolean` of _true_ if the current week of the year is even, otherwise _false_
 - day of the year - gives a `number` of the current day of the year
 - day of the year is even - gives a `boolean` of _true_ if the current day of the year is even, otherwise _false_
