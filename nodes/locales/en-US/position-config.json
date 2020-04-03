@@ -40,7 +40,12 @@
             "levelfix":"Level",
             "levelfree": "Level entered",
             "levelND": "N/D - use default, sun control or reset",
-            "PlTRes":"msg.payload if msg.topic contains"
+            "PlTRes":"msg.payload if msg.topic contains",
+            "isDST":"is DST (true/false)",
+            "WeekOfYear":"week number",
+            "isWeekOfYearEven":"is week even (true/false)",
+            "DayOfYear":"day number",
+            "isDayOfYearEven":"is day even (true/false)"
         },
         "typeOptions": {
             "moonRise": "moon rise",

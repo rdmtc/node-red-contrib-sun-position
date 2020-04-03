@@ -74,7 +74,7 @@ There is also a roller [blind control](blind_control.md) node and a [clock timer
 
 ## Preconditions
 
-These nodes need at least Node-Red with Version 0.18! Any early Version of Node-Red will not work!
+These nodes need at least NodeJS Version __8.0__ and Node-Red with Version __1.0__! Any early Version of Node-Red will not work!
 
 ## Installation
 
@@ -415,6 +415,10 @@ Lot of the nodes of these package allows to define additional output formats of 
 
 ![payload Formats](https://user-images.githubusercontent.com/12692680/75714307-c3201e80-5ccb-11ea-97cc-2fb456dd0809.png)
 
+Many of these output formats can also be used when choosing a property for a condition, example if the alternate time should be used in the  - [time-inject](#time-inject) node or the if a rule should be valid in a [blind-control](#blind-control) or [clock-timer](#clock-timer) node.
+
+![property for a condition](https://user-images.githubusercontent.com/12692680/78409659-87e67780-760a-11ea-9c96-dcfa93b2528d.png)
+
 #### Standard node Output Formats
 
 see Node-Red documentation for more Information
@@ -496,6 +500,9 @@ Additional special values could be defined as output.
 - elevation of sun - the elevation of the sun on the inject timestamp in decimal degree
 - azimuth of sun (rad) - the azimuth of the sun on the inject timestamp in rad
 - elevation of sun (rad) - the azimuth of the sun on the inject timestamp in rad
+- week of the year is even - gives a `boolean` of _true_ if the current week of the year is even, otherwise _false_
+- day of the year - gives a `number` of the current day of the year
+- day of the year is even - gives a `boolean` of _true_ if the current day of the year is even, otherwise _false_
 
 ### Times definitions
 

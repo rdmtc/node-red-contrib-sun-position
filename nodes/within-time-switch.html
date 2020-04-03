@@ -518,7 +518,13 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad],
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             if (onInit) { return; }
                             const propCompare = $('#node-input-propertyStartCompare');
@@ -652,7 +658,13 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad],
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const propCompare = $('#node-input-propertyEndCompare');

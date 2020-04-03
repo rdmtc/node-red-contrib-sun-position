@@ -415,6 +415,16 @@
                         return 'operand1 data';
                     case 'operand2':
                         return 'operand2 data';
+                    case 'pdbIsDST':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.isDST')}"${suffix}`;
+                    case 'pdnWeekOfYear':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.WeekOfYear')}"${suffix}`;
+                    case 'pdbWeekOfYearEven':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.isWeekOfYearEven')}"${suffix}`;
+                    case 'pdnDayOfYear':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.DayOfYear')}"${suffix}`;
+                    case 'pdbDayOfYearEven':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.isDayOfYearEven')}"${suffix}`;
                     default: {
                         if (v === '') {
                             return node._('node-red-contrib-sun-position/position-config:common.label.blank');
