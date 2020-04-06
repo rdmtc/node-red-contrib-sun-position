@@ -82,6 +82,7 @@
     "nodes": {
       "position-config": "nodes/position-config.js",
       "time-inject": "nodes/time-inject.js",
+      "intervall-inject": "nodes/intervall-inject.js",
       "within-time-switch": "nodes/within-time-switch.js",
       "clock-timer": "nodes/clock-timer.js",
       "time-comp": "nodes/time-comp.js",
