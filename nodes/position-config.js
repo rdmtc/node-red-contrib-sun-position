@@ -891,6 +891,16 @@ module.exports = function (RED) {
                 result = (pahse === data.value);
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
+            } else if (data.type === 'pdbIsDST') {
+                result = hlp.isDSTObserved(msg.ts);
+            } else if (data.type === 'pdnWeekOfYear') {
+                result = hlp.getWeekOfYear(msg.ts);
+            } else if (data.type === 'pdbWeekOfYearEven') {
+                result = (hlp.getWeekOfYear(msg.ts) % 2 === 0);
+            } else if (data.type === 'pdnDayOfYear') {
+                result = hlp.getDayOfYear(msg.ts);
+            } else if (data.type === 'pdbDayOfYearEven') {
+                result = (hlp.getDayOfYear(msg.ts) % 2 === 0);
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);

@@ -164,7 +164,7 @@ module.exports = function (RED) {
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({
                     fill: 'red',
-                    shape: 'ring',
+                    shape: 'dot',
                     text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
@@ -178,7 +178,10 @@ module.exports = function (RED) {
          * @returns {object} state or error
          */
         function doCreateTimeout(node, _onInit, dNow) {
-            node.debug(`doCreateTimeout _onInit=${_onInit}`);
+            // node.debug(`doCreateTimeout _onInit=${_onInit} node.timeData=${util.inspect(node.timeData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            let fill = 'yellow';
+            let shape = 'dot';
+
             let errorStatus = '';
             let warnStatus = '';
             let isAltFirst = false;
@@ -265,8 +268,6 @@ module.exports = function (RED) {
                     isFixedTime = isFixedTime && node.nextTimeAltData.fix;
                 }
             }
-            let fill = 'yellow';
-            let shape = 'dot';
             if ((node.nextTime !== null) && (typeof node.nextTime !== undefined) && (errorStatus === '')) {
                 if (!hlp.isValidDate(node.nextTime)) {
                     hlp.handleError(this, 'Invalid time format "' + node.nextTime + '"', undefined, 'internal error!');
@@ -301,9 +302,13 @@ module.exports = function (RED) {
                 } else {
                     // node.debug('timeout ' + node.nextTime + ' is in ' + millisec + 'ms (isAlt=' + isAlt + ' isAltFirst=' + isAltFirst + ')');
                     node.timeOutObj = setTimeout((isAlt, isAltFirst) => {
+                        // node.debug(`timeOutObj isAlt=${isAlt} isAltFirst=${isAltFirst}`);
+
                         const msg = {
                             type: 'start',
                             timeData: {}
+                            // settingData: node.timeData,
+                            // settingDataAlt: node.timeAltData
                         };
                         node.timeOutObj = null;
                         let useAlternateTime = false;
@@ -313,6 +318,8 @@ module.exports = function (RED) {
                                 useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
                                     node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
                                 needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
+                                // node.debug(`timeOutObj isAlt=${isAlt} isAltFirst=${isAltFirst} needsRecalc=${needsRecalc}`);
+
                             } catch (err) {
                                 needsRecalc = isAltFirst;
                                 hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
@@ -322,16 +329,20 @@ module.exports = function (RED) {
                             }
 
                             if (needsRecalc) {
+                                // node.debug(`doTimeRecalc, no send message!`);
                                 doTimeRecalc();
                                 return { state:'recalc', done: true };
                             }
                         }
 
                         if (useAlternateTime && node.nextTimeAltData) {
+                            // node.debug(`useAlternateTime!`);
                             msg.timeData = node.nextTimeAltData;
                         } else if (node.nextTimeData) {
+                            // node.debug(`usenormalTime!`);
                             msg.timeData = node.nextTimeData;
                         }
+                        // node.debug(`usenormalTime!`);
                         node.emit('input', msg);
                         return { state: 'emit', done: true };
                     }, millisec, isAlt, isAltFirst);
@@ -352,7 +363,7 @@ module.exports = function (RED) {
             if ((errorStatus !== '')) {
                 node.status({
                     fill: 'red',
-                    shape: 'dot',
+                    shape,
                     text: errorStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
                 return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
@@ -360,7 +371,7 @@ module.exports = function (RED) {
             } else if ((warnStatus !== '')) {
                 node.status({
                     fill: 'red',
-                    shape: 'dot',
+                    shape,
                     text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
             } else if (node.nextTimeAlt && node.timeOutObj) {

@@ -524,7 +524,12 @@
                     pdsCalcData: 'object of sun position',
                     pdmCalcData: 'object of moon position',
                     pdmPhase: 'object of moon phase',
-                    pdmPhaseCheck: 'boolean indicates if moon in specific phase'
+                    pdmPhaseCheck: 'boolean indicates if moon in specific phase',
+                    pdbIsDST: 'is DST',
+                    pdnWeekOfYear: 'week number',
+                    pdbWeekOfYearEven: 'is week even',
+                    pdnDayOfYear: 'day number',
+                    pdbDayOfYearEven: 'is day even'
                 };
                 let lab = labels[this.payloadType] || this.payloadType;
                 if (lab === 'object') {
@@ -799,7 +804,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payload').typedInput('type');
@@ -1007,7 +1017,13 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad],
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ],
                         onChange(_type, _value) {
                             const timeType = $('#node-input-time').typedInput('type');
                             const propType = $('#node-input-property').typedInput('type');
@@ -1235,7 +1251,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload1').change();
@@ -1371,7 +1392,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload2').change();
@@ -1502,7 +1528,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload3').change();

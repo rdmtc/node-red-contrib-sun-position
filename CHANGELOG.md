@@ -1,5 +1,15 @@
 # node-red-contrib-sun-position
 
+#### 1.0.17:  small enhancement
+
+- inspired by #132 added for a property the possibility to control by
+  - is DST (Daylight saving)
+  - week of the year
+  - is week of the year even
+  - day of the year
+  - is day of the year even
+With this for example the time-inject could distinguish between using standard or alternate time if Daylight saving or the week of the year is less or below a number.
+
 #### 1.0.16:  BugFix
 
 - general

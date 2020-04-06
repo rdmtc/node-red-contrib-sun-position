@@ -39,7 +39,12 @@
             "levelfix": "Position",
             "levelfree": "Position eingeben",
             "levelND": "N/D - benutze standard, sonnensteuerung oder reset",
-            "PlTRes":"msg.payload wenn msg.topic enthält"
+            "PlTRes":"msg.payload wenn msg.topic enthält",
+            "isDST":"ist Sommerzeit (true/false)",
+            "WeekOfYear":"Kalenderwoche (KW)",
+            "isWeekOfYearEven":"gerade Kalenderwoche (true/false)",
+            "DayOfYear":"Tag des Jahres (Zahl)",
+            "isDayOfYearEven":"gerader Tag des Jahres (true/false)"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",

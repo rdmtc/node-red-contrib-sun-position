@@ -439,7 +439,12 @@
                     pdsCalcData: 'object of sun position',
                     pdmCalcData: 'object of moon position',
                     pdmPhase: 'object of moon phase',
-                    pdmPhaseCheck: 'boolean indicates if moon in specific phase'
+                    pdmPhaseCheck: 'boolean indicates if moon in specific phase',
+                    pdbIsDST: 'is DST',
+                    pdnWeekOfYear: 'week number',
+                    pdbWeekOfYearEven: 'is week even',
+                    pdnDayOfYear: 'day number',
+                    pdbDayOfYearEven: 'is day even'
                 };
                 let lab = labels[this.payloadType] || this.payloadType;
                 if (lab === 'object') {
@@ -600,9 +605,8 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput initCombobox initCheckboxesBlock initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr getCheckboxesStr */
+                    /* global initializeValue getTypes appendOptions setupTInput initCombobox initCheckboxesBlock initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr getCheckboxesStr */
                     const types = getTypes(node);
-                    const selFields = getSelectFields();
                     // #region initialize
                     /**
                     * update multiplier settings from a previous version
@@ -632,9 +636,7 @@
                     }
 
                     initializeValue(node, 'timeDays', '*');
-                    initializeValue(node, 'timeAltDays', '*');
                     initializeValue(node, 'timeMonths', '*');
-                    initializeValue(node, 'timeAltMonths', '*');
                     initializeValue(node, 'addPayload1Days', '*');
                     initializeValue(node, 'addPayload2Days', '*');
                     initializeValue(node, 'addPayload3Days', '*');
@@ -710,7 +712,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payload').typedInput('type');
@@ -1102,7 +1109,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload1').change();
@@ -1237,7 +1249,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload2').change();
@@ -1367,7 +1384,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             $('#node-input-addPayload3').change();
@@ -1451,9 +1473,7 @@
                         $('#node-input-payloadOffset').typedInput('value'));
                 }
                 this.timeDays = getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7);
-                this.timeAltDays = getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7);
                 this.timeMonths = getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12);
-                this.timeAltMonths = getCheckboxesStr($('#time-inject-timeAltMonths input[type=checkbox]:checked'), 12);
                 this.addPayload1Days = getCheckboxesStr($('#time-inject-addPayload1Days input[type=checkbox]:checked'), 7);
                 if (Number($('#node-input-addPayload1Formatsel').val()) !== 99) {
                     $('#node-input-addPayload1Format').val($('#node-input-addPayload1Formatsel').val());
@@ -1649,77 +1669,6 @@
             </div>
         </div>
     </div>
-    <hr class="time-inject-row block-noindent time-inject-row-alt is-initial-hidden">
-    <div class="form-row time-inject-row time-inject-row-alt is-initial-hidden" data-i18n="[title]time-inject.placeholder.property">
-        <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
-        <input type="text" id="node-input-property" data-i18n="[placeholder]time-inject.placeholder.property"/>
-        <input type="hidden" id="node-input-propertyType">
-        <select id="node-input-propertyCompare" class="node-input-addOn">
-        </select>
-    </div>
-    <div class="form-row time-inject-row block-indent2 row-propertyThreshold is-initial-hidden" data-i18n="[title]time-inject.placeholder.propertyThreshold">
-        <label for="node-input-propertyThreshold"><i class="fa fa-compress"></i> <span data-i18n="time-inject.label.propertyThreshold"></span></label>
-        <input type="text" id="node-input-propertyThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyThreshold">
-        <input type="hidden" id="node-input-propertyThresholdType">
-    </div>
-    <div class="form-row block-indent1 time-inject-row-timeAlt is-initial-hidden" id="node-input-timeAlt-div" data-i18n="[titleOrg]time-inject.placeholder.timeAlt">
-        <label for="node-input-timeAlt"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeAlt"></span></label>
-        <input type="text" id="node-input-timeAlt" data-i18n="[placeholder]time-inject.placeholder.timeAlt"/>
-        <input type="hidden" id="node-input-timeAltType">
-    </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeAltOffset">
-        <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
-        <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"/>
-        <input type="hidden" id="node-input-timeAltOffsetType">
-        <select id="node-input-timeAltOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row time-inject-row time-inject-row-timeAltLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
-        <div id="time-inject-timeAltDays" class="time-inject-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.8"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.2"><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.9"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.3"><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.10"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.4"><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.11"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.5"><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.12"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.6"><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.13"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.7"></span></label>
-                </div>
-            </div>
-        </div>
-        <div class="time-inject-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.specialDays"></div>
-            <div style="display:inline-block">
-                <div>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="time-inject.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyOddDays"/> <span data-i18n="time-inject.label.onlyOddDays"></span></label>
-                </div>
-            </div>
-        </div>
-        <div id="time-inject-timeAltMonths" class="time-inject-months" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
-            <div style="display:inline-block;">
-                <div>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.13"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.2"><input type='checkbox' checked value='2'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.14"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.3"><input type='checkbox' checked value='3'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.15"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.4"><input type='checkbox' checked value='4'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.16"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.5"><input type='checkbox' checked value='5'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.17"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.6"><input type='checkbox' checked value='6'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.18"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.7"><input type='checkbox' checked value='7'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.19"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.8"><input type='checkbox' checked value='8'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.20"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.9"><input type='checkbox' checked value='9'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.21"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.10"><input type='checkbox' checked value='10'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.22"></span></label>
-                    <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.11"><input type='checkbox' checked value='11'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.23"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row time-inject-row form-tips time-inject-row-alt is-initial-hidden">
-        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
-    </div>
     <hr class="time-inject-recalc is-initial-hidden">
     <div class="form-row time-inject-recalc is-initial-hidden" data-i18n="[title]time-inject.placeholder.recalcTime">
         <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="time-inject.label.recalcTime"></span></label>
@@ -1913,21 +1862,18 @@
         margin-left: 5px;
     }
     .time-inject-row-timeLimits,
-    .time-inject-row-timeAltLimits,
     .time-inject-row-addPayload1days,
     .time-inject-row-addPayload2days,
     .time-inject-row-addPayload3days {
         padding-left: 110px;
     }
     .time-inject-row-timeLimits input,
-    .time-inject-row-timeAltLimits input,
     .time-inject-row-addPayload1days input,
     .time-inject-row-addPayload2days input,
     .time-inject-row-addPayload3days input {
         width: auto !important;
     }
     .time-inject-row-timeLimits select,
-    .time-inject-row-timeAltLimits select,
     .time-inject-row-addPayload1days select,
     .time-inject-row-addPayload2days select,
     .time-inject-row-addPayload2days select {

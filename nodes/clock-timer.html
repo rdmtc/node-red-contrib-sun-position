@@ -242,7 +242,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
                             const plVType = $('#node-input-payloadDefault').typedInput('type');
@@ -824,7 +829,28 @@
                     const $dialogCondAOperand = $dialog.find('#dlg-ip-clktime-rule-condAOperand');
                     $dialogCondAOperand.typedInput({
                         default: types.Unlimited.value,
-                        types: [types.Unlimited, 'msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
+                        types: [
+                            types.Unlimited,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -846,7 +872,27 @@
                     const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktime-rule-cond2AOperand');
                     $dialogCond2AOperand.typedInput({
                         default: 'msg',
-                        types: ['msg', 'flow', 'global', 'env', 'jsonata', types.PhaseMoon, types.MsgPayloadByTopic, types.SunInSky, types.SunAzimuth, types.SunElevation, types.SunAzimuthRad, types.SunElevationRad]
+                        types: [
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.PhaseMoon,
+                            types.MsgPayload,
+                            types.MsgValue,
+                            types.MsgPayloadByTopic,
+                            types.SunInSky,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
+                        ]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
 
@@ -999,7 +1045,12 @@
                             types.SunAzimuth,
                             types.SunElevation,
                             types.SunAzimuthRad,
-                            types.SunElevationRad
+                            types.SunElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven
                         ]
                     });
                     $dialogPayload.typedInput('width', '40%');
