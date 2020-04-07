@@ -4,8 +4,8 @@
     (function() {
         RED.nodes.registerType('interval-inject', {
             category: 'time and astro',
-            color: '#a6bbcf',
-            icon: 'injectSun-white.png',
+            color: '#a6bbcc',
+            icon: 'injectvISun-white.png',
             inputs: 0,
             outputs: 1,
             defaults: {
@@ -81,12 +81,14 @@
                         return (
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
-                            RED.validators.typedInput('timeType')(v)
+                            RED.validators.typedInput('timeStartType')(v) ||
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
                 timeStartType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 timeStartOffset: {
                     value: 0,
@@ -97,9 +99,8 @@
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
                             RED.validators.typedInput('timeStartOffsetType')(v) ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -117,9 +118,8 @@
                             (this.payloadOffsetType !== 'time')) ||
                             $('#node-input-timeStartOffsetType').typedInput('type') === 'none' ||
                             this.timeStartOffsetType === 'none' ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -129,12 +129,14 @@
                     validate(v) {
                         return (
                             (this.payloadOffsetType !== 'interval-time') ||
-                            RED.validators.typedInput('timeEndType')(v)
+                            RED.validators.typedInput('timeEndType')(v) ||
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
                 timeEndType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 timeEndOffset: {
                     value: 0,
@@ -143,7 +145,9 @@
                             (typeof v === 'undefined') ||
                             (typeof this.timeEndOffsetType === 'undefined') ||
                             (this.payloadOffsetType !== 'interval-time') ||
-                            RED.validators.typedInput('timeEndOffsetType')(v)
+                            RED.validators.typedInput('timeEndOffsetType')(v) ||
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -158,8 +162,8 @@
                             typeof v === 'undefined' ||
                             RED.validators.number()(v) ||
                             (this.payloadOffsetType !== 'interval-time') ||
-                            $('#node-input-timeEndOffsetType').typedInput('type') === 'none' ||
-                            this.timeEndOffsetType === 'none'
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -187,7 +191,9 @@
                             typeof v === 'undefined' ||
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
-                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
+                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v) ||
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -199,7 +205,9 @@
                             typeof v === 'undefined' ||
                             ((this.payloadOffsetType !== 'interval-time') &&
                             (this.payloadOffsetType !== 'time')) ||
-                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
+                            RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v) ||
+                            ($('#node-input-injectTypeSelect').val() !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time')
                         );
                     }
                 },
@@ -448,7 +456,7 @@
                     return part1 + suffix;
                 };
 
-                if (this.timeType === 'none' || this.timeType === '') {
+                if (this.injectTypeSelect !== 'interval-time') {
                     result += (this.nameInt || RED.nodes.getType('position-config').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
                 } else {
                     const timeTxt = getTimeId();
@@ -467,7 +475,7 @@
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
             },
-            paletteLabel: 'inject at time',
+            paletteLabel: 'inject by interval',
             align: 'left',
             oneditprepare() {
                 setTimeout(() => {
@@ -637,18 +645,6 @@
                     $('#node-input-once').change(() => {
                         $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                     });
-                    const id = $('#node-input-injectTypeSelect').val();
-                    const timeType = $('#node-input-timeType').val();
-                    if (!id) {
-                        if (!timeType || timeType === types.Undefined.value) {
-                            $('#node-input-injectTypeSelect').val('none');
-                        } else {
-                            $('#node-input-injectTypeSelect').val('time');
-                        }
-                    }
-                    if (timeType === types.Undefined.value) {
-                        $('#node-input-time').typedInput('type', types.TimeEntered.value);
-                    }
                     $('#node-input-injectTypeSelect').on('change', () => {
                         const id = $('#node-input-injectTypeSelect').val();
                         switch (id) {
@@ -662,14 +658,14 @@
                             case 'interval-time':
                                 $('.interval-inject-row').hide();
                                 $('#interval-inject-row-interval').show();
-                                $('#interval-inject-row-timeMain').show();
+                                $('#interval-inject-row-timeStartMain').show();
                                 $('#interval-inject-row-timeEndMain').show();
                                 $('.interval-inject-row-interval-time').show();
                                 break;
-                            case 'time':
+                            /* case 'time':
                                 $('.interval-inject-row').hide();
-                                $('#interval-inject-row-timeMain').show();
-                                break;
+                                $('#interval-inject-row-timeStartMain').show();
+                                break; */
                             default:
                                 break;
                         }
@@ -685,7 +681,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: 'num',
                         defaultValue: 0,
-                        types: ['num', 'flow', 'global', 'env', types.randomNumber]
+                        types: ['num', 'env']
                     }).change();
 
                     // #endregion interval
@@ -697,7 +693,6 @@
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
                         types: [
-                            types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
                             types.TimeSunNow,
@@ -709,15 +704,13 @@
                         onChange(_type, _value) {
                             const type = $('#node-input-timeStart').typedInput('type');
                             const injectType = $('#node-input-injectTypeSelect').val();
-                            if (injectType === 'none' || injectType === 'interval' || type === types.Undefined.value) {
+                            if (injectType !== 'interval-time') {
                                 $('.interval-inject-row-timeStartOffset').hide();
                                 $('.interval-inject-row-timeLimits').hide();
 
-                                const $div = $('#interval-inject-row-timeMain');
+                                const $div = $('#interval-inject-row-timeStartMain');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', titleOrg);
-                                $('#node-input-property').typedInput('type',  types.Undefined.value);
-                                $('#node-input-property').change();
                                 return;
                             } else if (type === types.TimeSunNow.value){
                                 $('.interval-inject-row-timeLimits').hide();
@@ -732,7 +725,7 @@
                             }
                             $('#node-input-property').change();
                             getBackendData(d => {
-                                const $div = $('#interval-inject-row-timeMain');
+                                const $div = $('#interval-inject-row-timeStartMain');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
@@ -1151,7 +1144,7 @@
             <option value="none" data-i18n="node-red:inject.none"></option>
             <option value="interval" data-i18n="node-red:inject.interval"></option>
             <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
-            <option value="time" data-i18n="node-red:inject.time"></option>
+            <!-- option value="time" data-i18n="node-red:inject.time"></option -->
         </select>
     </div>
 
@@ -1166,10 +1159,10 @@
         <span data-i18n="interval-inject.label.between"></span>
     </div>
 
-    <div class="form-row interval-inject-row block-noindent is-initial-hidden" id="interval-inject-row-timeMain"  data-i18n="[titleOrg]interval-inject.placeholder.time">
-        <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="interval-inject.label.time"></span></label>
-        <input type="text" id="node-input-time" />
-        <input type="hidden" id="node-input-timeType">
+    <div class="form-row interval-inject-row block-noindent is-initial-hidden" id="interval-inject-row-timeStartMain"  data-i18n="[titleOrg]interval-inject.placeholder.timeStart">
+        <label for="node-input-timeStart"><i class="fa fa-clock-o"></i> <span data-i18n="interval-inject.label.timeStart"></span></label>
+        <input type="text" id="node-input-timeStart" />
+        <input type="hidden" id="node-input-timeStartType">
     </div>
     <div class="form-row interval-inject-row block-indent1 interval-inject-row-timeStartOffset is-initial-hidden" data-i18n="[title]interval-inject.placeholder.timeOffset">
         <label for="node-input-timeStartOffset"><i class="fa fa-calculator"></i> <span data-i18n="interval-inject.label.timeOffset"></span></label>
@@ -1242,13 +1235,6 @@
             </div>
         </div>
     </div>
-    <hr class="interval-inject-recalc is-initial-hidden">
-    <div class="form-row interval-inject-recalc is-initial-hidden" data-i18n="[title]interval-inject.placeholder.recalcTime">
-        <label for="node-input-recalcTime"><i class="fa fa-arrows-h"></i> <span data-i18n="interval-inject.label.recalcTime"></span></label>
-        <input type="text" id="node-input-recalcTime" placeholder="2" style="width:65px; height:28px;">&nbsp;
-        <span data-i18n="interval-inject.label.hours"></span>
-    </div>
-    <div class="form-tips interval-inject-recalc is-initial-hidden" data-i18n="[html]interval-inject.tips.recalc"></div>
     <hr class="interval-inject-addPayload">
     <div class="form-row block-noindent time-addPayload1" data-i18n="[title]interval-inject.placeholder.addPayload">
         <label for="node-input-addPayload1"><i class="fa fa-plus-square-o"></i> <span data-i18n="interval-inject.label.addPayload1"></span></label>

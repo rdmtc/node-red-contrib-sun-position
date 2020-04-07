@@ -30,51 +30,6 @@ module.exports = function (RED) {
     }
 
     /**
-     *
-     * @param {*} node
-     * @param {*} msg
-     * @param {*} type
-     * @param {*} name
-     * @param {*} valueType
-     * @param {*} value
-     * @param {*} format
-     * @param {*} offset
-     * @param {*} offsetType
-     * @param {*} multiplier
-     * @param {*} days
-     * @param {*} next
-     */
-    function tsSetAddProp(node, msg, data) {
-        if (typeof data.next === 'undefined' || data.next === null || data.next === true || data.next === 'true') {
-            data.next = true;
-        } else if (data.next === 'false' || data.next === false) {
-            data.next = false;
-        }
-        // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
-        if (data.outType !== 'none') {
-            const res = node.positionConfig.getOutDataProp(node, msg, data);
-            if (res === null || (typeof res === 'undefined')) {
-                this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
-            } else if (res.error) {
-                this.error('Eerror on getting additional payload: "' + res.error + '"');
-            } else if (data.outType === 'msgPayload') {
-                msg.payload = res;
-            } else if (data.outType === 'msgTs') {
-                msg.ts = res;
-            } else if (data.outType === 'msgLc') {
-                msg.lc = res;
-            } else if (data.outType === 'msgValue') {
-                msg.value = res;
-            } else if (data.outType === 'msg') {
-                RED.util.setMessageProperty(msg, data.outValue, res);
-            } else if ((data.outType === 'flow' || data.outType === 'global')) {
-                const contextKey = RED.util.parseContextStore(data.outValue);
-                node.context()[data.outType].set(contextKey.key, res, contextKey.store);
-            }
-        }
-    }
-
-    /**
      * intervalInjectNode
      * @param {*} config - configuration
      */
@@ -84,66 +39,100 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize intervalInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         this.timeType = config.timeType || 'none';
-        this.injectType = config.injectTypeSelect || (this.timeType === 'none' ? 'none' : 'time');
         this.intervalCount = config.intervalCount || 0;
-        this.intervalCountType = config.intervalCountType || 'num';
+        this.intervalCountType = (config.injectTypeSelect === 'interval' || config.injectTypeSelect === 'interval-time') ? config.intervalCountType || 'num' : 'none';
         this.intervalCountMultiplier = config.intervalCountMultiplier || 60000;
 
-        this.timeStartData = {
-            type: config.timeStartType || 'none',
-            value : config.timeStart,
-            offsetType : config.timeStartOffsetType,
-            offset : config.timeStartOffset || 0,
-            multiplier : config.timeStartOffsetMultiplierr || 60,
-            next : true,
-            days : config.timeDays,
-            months : config.timeMonths,
-            onlyOddDays: config.timeOnlyOddDays,
-            onlyEvenDays: config.timeOnlyEvenDays
+        this.payloadData = {
+            type: config.payloadType,
+            value: config.payload,
+            format: config.payloadTimeFormat,
+            offsetType: config.payloadOffsetType,
+            offset: config.payloadOffset,
+            multiplier: config.payloadOffsetMultiplier,
+            next: true
         };
 
-        this.timeEndData = {
-            type: config.timeEndType || 'none',
-            value : config.timeEnd,
-            offsetType : config.timeEndOffsetType,
-            offset : config.timeEndOffset || 0,
-            multiplier : config.timeEndOffsetMultiplierr || 60,
-            next : true,
-            days : config.timeDays,
-            months : config.timeMonths,
-            onlyOddDays: config.timeOnlyOddDays,
-            onlyEvenDays: config.timeOnlyEvenDays
-        };
+        if (typeof config.addPayload1Type !== 'undefined' &&
+            typeof config.addPayload1ValueType !== 'undefined') {
 
-        if (!this.timeStartData.offsetType) {
-            this.timeStartData.offsetType = ((this.timeStartData.offset === 0) ? 'none' : 'num');
-        }
-        if (this.timeStartData.days === '') {
-            throw new Error('No valid days given! Please check settings!');
-        }
-        if (this.timeStartData.months === '') {
-            throw new Error('No valid month given! Please check settings!');
-        }
-        if (this.timeStartData.onlyEvenDays && this.timeStartData.onlyOddDays) {
-            this.timeStartData.onlyEvenDays = false;
-            this.timeStartData.onlyOddDays = false;
+            this.addPayload1Data = {
+                outType: config.addPayload1Type,
+                outValue: config.addPayload1,
+                type: config.addPayload1ValueType,
+                value: config.addPayload1Value,
+                format: config.addPayload1Format,
+                offsetType: config.addPayload1OffsetType,
+                offset: config.addPayload1Offset,
+                multiplier: config.addPayload1OffsetMultiplier,
+                next: config.addPayload1Next,
+                days: config.addPayload1Days
+            };
+            if (typeof this.addPayload1Data.next === 'undefined' ||
+                this.addPayload1Data.next === null ||
+                this.addPayload1Data.next === true ||
+                this.addPayload1Data.next === 'true') {
+                this.addPayload1Data.next = true;
+            } else if (this.addPayload1Data.next === 'false' || this.addPayload1Data.next === false) {
+                this.addPayload1Data.next = false;
+            }
         }
 
-        if (!this.timeEndData.offsetType) {
-            this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');
-        }
-        if (this.timeEndData.days === '') {
-            throw new Error('No valid days given! Please check settings!');
-        }
-        if (this.timeEndData.months === '') {
-            throw new Error('No valid month given! Please check settings!');
-        }
-        if (this.timeEndData.onlyEvenDays && this.timeEndData.onlyOddDays) {
-            this.timeEndData.onlyEvenDays = false;
-            this.timeEndData.onlyOddDays = false;
-        }
+        if (config.injectTypeSelect === 'interval-time') {
+            this.timeStartData = {
+                type: config.timeStartType,
+                value : config.timeStart,
+                offsetType : config.timeStartOffsetType,
+                offset : config.timeStartOffset || 0,
+                multiplier : config.timeStartOffsetMultiplierr || 60,
+                next : true,
+                days : config.timeDays,
+                months : config.timeMonths,
+                onlyOddDays: config.timeOnlyOddDays,
+                onlyEvenDays: config.timeOnlyEvenDays
+            };
 
-        this.recalcTime = (config.recalcTime || 2) * 3600000;
+            this.timeEndData = {
+                type: config.timeEndType,
+                value : config.timeEnd,
+                offsetType : config.timeEndOffsetType,
+                offset : config.timeEndOffset || 0,
+                multiplier : config.timeEndOffsetMultiplierr || 60,
+                next : true,
+                days : config.timeDays,
+                months : config.timeMonths,
+                onlyOddDays: config.timeOnlyOddDays,
+                onlyEvenDays: config.timeOnlyEvenDays
+            };
+
+            if (!this.timeStartData.offsetType) {
+                this.timeStartData.offsetType = ((this.timeStartData.offset === 0) ? 'none' : 'num');
+            }
+            if (this.timeStartData.days === '') {
+                throw new Error('No valid days given! Please check settings!');
+            }
+            if (this.timeStartData.months === '') {
+                throw new Error('No valid month given! Please check settings!');
+            }
+            if (this.timeStartData.onlyEvenDays && this.timeStartData.onlyOddDays) {
+                this.timeStartData.onlyEvenDays = false;
+                this.timeStartData.onlyOddDays = false;
+            }
+
+            if (!this.timeEndData.offsetType) {
+                this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');
+            }
+            if (this.timeEndData.days === '') {
+                throw new Error('No valid days given! Please check settings!');
+            }
+            if (this.timeEndData.months === '') {
+                throw new Error('No valid month given! Please check settings!');
+            }
+            if (this.timeEndData.onlyEvenDays && this.timeEndData.onlyOddDays) {
+                this.timeEndData.onlyEvenDays = false;
+                this.timeEndData.onlyOddDays = false;
+            }
+        }
 
         this.timeOutStartObj = null;
         this.timeOutEndObj = null;
@@ -156,7 +145,7 @@ module.exports = function (RED) {
         /**
          * Recalculate the timeout
          */
-        node.getTimeParameter = (dNow) => {
+        node.getTimeParameter = dNow => {
             const result = {
                 value: null,
                 isFixedTime: false,
@@ -205,26 +194,30 @@ module.exports = function (RED) {
             return result;
         };
 
-        node.doCreateEndTimeout = () => {
+        /**
+         * creates the end timeout
+         * @param {*} node - the node representation
+         * @returns {object} state or error
+         */
+        node.doCreateEndTimeout = node => {
+            if (!node.timeEndData) {
+                return;
+            }
+            node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.timeOutEndObj) {
                 clearTimeout(node.timeOutEndObj);
                 node.timeOutEndObj = null;
             }
             node.nextEndTime = null;
-
-            let nextEndTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeEndData);
+            let errorStatus = '';
+            const nextEndTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeEndData);
             if (nextEndTimeData.error) {
                 errorStatus = 'could not evaluate time';
                 node.nextEndTime = null;
-                isFixedTime = false;
-                if (_onInit === true) {
-                    return { state: 'error', done: false, statusMsg: errorStatus, errorMsg: nextEndTimeData.error };
-                }
                 node.debug('nextEndTimeData=' + util.inspect(nextEndTimeData, { colors: true, compact: 10, breakLength: Infinity }));
                 node.error(nextEndTimeData.error);
             } else {
                 node.nextEndTime = nextEndTimeData.value;
-                isFixedTime = isFixedTime && nextEndTimeData.fix;
             }
 
             let millisecEnd = 1000 * 60 * 60 * 24; // 24h
@@ -233,10 +226,10 @@ module.exports = function (RED) {
                 millisecEnd = tsGetScheduleTime(node.nextEndTime, 10);
             }
 
-            if ((millisecEnd - millisecStart) > 345600000) {
+            if (millisecEnd> 345600000) {
                 millisecEnd = Math.min((millisecEnd - 129600000), 2147483646);
                 node.timeOutEndObj = setTimeout(() => {
-                    node.doCreateEndTimeout();
+                    node.doCreateEndTimeout(node);
                 }, millisecEnd); // 1,5 days before
                 return;
             }
@@ -244,28 +237,28 @@ module.exports = function (RED) {
                 node.timeOutEndObj = null;
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
-                node.doCreateStartTimeout(false);
+                node.doCreateStartTimeout(node, false);
             }, millisecEnd);
-        }
+        };
         /**
-         * creates the timeout
+         * creates the start timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
          * @param {Date} [dNow] - Date object with the calculation base
          * @returns {object} state or error
          */
-        node.doCreateStartTimeout = (_onInit, dNow) => {
-            // node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        node.doCreateStartTimeout = (node, _onInit, dNow) => {
+            node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (!node.positionConfig) {
                 throw new Error('configuration missing!');
             }
             node.nextStartTime = null;
-            node.intervalTime = node.positionConfig.getFloatProp(node, null, config.intervalCountType, config.intervalCount, 0);
+            node.intervalTime = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
             if (node.intervalTime <= 0) {
                 throw new Error('Interval wrong!');
             } else {
-                if (config.intervalCountMultiplier > 0) {
-                    node.intervalTime = Math.floor(node.intervalTime * config.intervalCountMultiplier);
+                if (node.intervalCountMultiplier > 0) {
+                    node.intervalTime = Math.floor(node.intervalTime * node.intervalCountMultiplier);
                 }
             }
 
@@ -274,12 +267,15 @@ module.exports = function (RED) {
                 node.timeOutStartObj = null;
             }
 
-            if (node.injectType === 'interval' || node.timeStartData.type === 'none' || node.timeEndData.type === 'none') {
+            node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
+            if (!node.timeStartData) {
+                node.debug('doCreateStartTimeout - absolute Intervall');
                 clearInterval(node.intervalObj);
+                node.emit('input', { type: 'interval-start' });
                 node.intervalObj = setInterval(() => {
-                    node.emit('input', {});
+                    node.emit('input', { type: 'interval' });
                 }, node.intervalTime);
-               return;
+                return { state:'ok', done: true };
             }
 
             let fill = 'yellow';
@@ -287,16 +283,14 @@ module.exports = function (RED) {
 
             let errorStatus = '';
             let warnStatus = '';
-            let isFixedTime = true;
             node.timeStartData.now = dNow || new Date();
 
-            let startLimit = node.getTimeParameter(node.timeStartData.now);
+            const startLimit = node.getTimeParameter(node.timeStartData.now);
             if (startLimit.valid) {
-                let nextStartTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeStartData);
+                const nextStartTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeStartData);
                 if (nextStartTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     node.nextStartTime = null;
-                    isFixedTime = false;
                     if (_onInit === true) {
                         return { state: 'error', done: false, statusMsg: errorStatus, errorMsg: nextStartTimeData.error };
                     }
@@ -304,11 +298,9 @@ module.exports = function (RED) {
                     node.error(nextStartTimeData.error);
                 } else {
                     node.nextStartTime = nextStartTimeData.value;
-                    isFixedTime = nextStartTimeData.fix;
                 }
             } else {
                 warnStatus = startLimit.warnStatus;
-                isFixedTime = true;
                 node.nextStartTime = startLimit.value;
             }
 
@@ -327,17 +319,18 @@ module.exports = function (RED) {
                     millisecStart = Math.min((millisecStart - 129600000), 2147483646);
                     node.debug('next inject is far far away, plan a inject time recalc in ' + millisecStart + ' ms');
                     node.timeOutStartObj = setTimeout(() => {
-                        node.doCreateStartTimeout(false);
+                        node.doCreateStartTimeout(node, false);
                     }, millisecStart); // 1,5 days before
                     fill = 'blue';
                 } else {
                     node.timeEndData.now = node.nextStartTime;
                     node.timeOutStartObj = setTimeout(() => {
                         node.timeOutStartObj = null;
-                        node.doCreateEndTimeout();
+                        node.doCreateEndTimeout(node);
                         clearInterval(node.intervalObj);
+                        node.emit('input', { type: 'interval-time-start'});
                         node.intervalObj = setInterval(() => {
-                            node.emit('input', { });
+                            node.emit('input', { type: 'interval-time' });
                         }, node.intervalTime);
                     }, millisecStart);
                 }
@@ -367,7 +360,7 @@ module.exports = function (RED) {
                 node.status({});
             }
             return { state:'ok', done: true };
-        }
+        };
 
         this.on('close', () => {
             if (node.timeOutStartObj) {
@@ -402,40 +395,19 @@ module.exports = function (RED) {
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                const value = node.positionConfig.getOutDataProp(node, msg, {
-                    type: config.payloadType,
-                    value: config.payload,
-                    format: config.payloadTimeFormat,
-                    offsetType: config.payloadOffsetType,
-                    offset: config.payloadOffset,
-                    multiplier: config.payloadOffsetMultiplier,
-                    next: true
-                });
-                if (value === null || (typeof value === 'undefined')) {
-                    throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
-                } else if (value.error) {
-                    throw new Error('could not getting payload: ' + value.error);
-                } else {
-                    msg.payload = value;
-                }
+                msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
 
-                if (typeof config.addPayload1Type !== 'undefined' &&
-                    typeof config.addPayload1ValueType !== 'undefined') {
-                    tsSetAddProp(this, msg, {
-                        outType: config.addPayload1Type,
-                        outValue: config.addPayload1,
-                        type: config.addPayload1ValueType,
-                        value: config.addPayload1Value,
-                        format: config.addPayload1Format,
-                        offsetType: config.addPayload1OffsetType,
-                        offset: config.addPayload1Offset,
-                        multiplier: config.addPayload1OffsetMultiplier,
-                        next: config.addPayload1Next,
-                        days: config.addPayload1Days
-                    });
+                if (node.addPayload1Data) {
+                    node.positionConfig.setMessageProperty(this, msg, node.addPayload1Data);
                 }
                 send(msg); // node.send(msg);
-                done();
+                if (msg.payload === null || (typeof msg.payload === 'undefined')) {
+                    done('could not evaluate ' + config.payloadType + '.' + config.payload);
+                } else if (msg.payload.error) {
+                    done('could not getting payload: ' + msg.payload.error);
+                } else {
+                    done();
+                }
                 return null;
             } catch (err) {
                 node.log(err.message);
@@ -466,48 +438,52 @@ module.exports = function (RED) {
                     node.emit('input', {
                         type: 'once'
                     });
-                    node.doCreateStartTimeout(node);
+                    if (node.intervalCountType !== 'none') {
+                        node.doCreateStartTimeout(node);
+                    }
                 }, (config.onceDelay || 0.1) * 1000);
                 return;
             }
 
-            setTimeout(() => {
-                try {
-                    let createTO = { done: false};
-                    createTO = node.doCreateStartTimeout(node, true);
-                    if (createTO.done !== true) {
-                        if (createTO.errorMsg) {
-                            node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
-                        }
-                        setTimeout(() => {
-                            try {
-                                node.doCreateStartTimeout(node);
-                            } catch (err) {
-                                node.error(err.message);
-                                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                                node.status({
-                                    fill: 'red',
-                                    shape: 'ring',
-                                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                                });
+            if (node.intervalCountType !== 'none') {
+                setTimeout(() => {
+                    try {
+                        let createTO = { done: false };
+                        createTO = node.doCreateStartTimeout(node, true);
+                        if (createTO.done !== true) {
+                            if (createTO.errorMsg) {
+                                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
                             }
-                        }, 360000); // 6 Minuten
+                            setTimeout(() => {
+                                try {
+                                    node.doCreateStartTimeout(node);
+                                } catch (err) {
+                                    node.error(err.message);
+                                    node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                                    node.status({
+                                        fill: 'red',
+                                        shape: 'ring',
+                                        text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
+                                    });
+                                }
+                            }, 360000); // 6 Minuten
+                            node.status({
+                                fill: 'red',
+                                shape: 'ring',
+                                text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
+                            });
+                        }
+                    } catch (err) {
+                        node.error(err.message);
+                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                         node.status({
                             fill: 'red',
                             shape: 'ring',
-                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', { message: createTO.statusMsg, time: '6min'})
+                            text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
-                } catch (err) {
-                    node.error(err.message);
-                    node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                    node.status({
-                        fill: 'red',
-                        shape: 'ring',
-                        text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
-                    });
-                }
-            }, 200 + Math.floor(Math.random() * 600));
+                }, 200 + Math.floor(Math.random() * 600));
+            }
         } catch (err) {
             node.error(err.message);
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -523,7 +499,7 @@ module.exports = function (RED) {
 
     intervalInjectNode.prototype.close = function () {
         if (this.onceTimeout) {
-            clearTimeout(node.onceTimeout);
+            clearTimeout(this.onceTimeout);
             this.onceTimeout = null;
         }
         if (this.timeOutStartObj) {

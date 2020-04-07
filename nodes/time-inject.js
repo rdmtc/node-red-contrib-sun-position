@@ -30,51 +30,6 @@ module.exports = function (RED) {
     }
 
     /**
-     *
-     * @param {*} node
-     * @param {*} msg
-     * @param {*} type
-     * @param {*} name
-     * @param {*} valueType
-     * @param {*} value
-     * @param {*} format
-     * @param {*} offset
-     * @param {*} offsetType
-     * @param {*} multiplier
-     * @param {*} days
-     * @param {*} next
-     */
-    function tsSetAddProp(node, msg, data) {
-        if (typeof data.next === 'undefined' || data.next === null || data.next === true || data.next === 'true') {
-            data.next = true;
-        } else if (data.next === 'false' || data.next === false) {
-            data.next = false;
-        }
-        // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
-        if (data.outType !== 'none') {
-            const res = node.positionConfig.getOutDataProp(node, msg, data);
-            if (res === null || (typeof res === 'undefined')) {
-                this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
-            } else if (res.error) {
-                this.error('Eerror on getting additional payload: "' + res.error + '"');
-            } else if (data.outType === 'msgPayload') {
-                msg.payload = res;
-            } else if (data.outType === 'msgTs') {
-                msg.ts = res;
-            } else if (data.outType === 'msgLc') {
-                msg.lc = res;
-            } else if (data.outType === 'msgValue') {
-                msg.value = res;
-            } else if (data.outType === 'msg') {
-                RED.util.setMessageProperty(msg, data.outValue, res);
-            } else if ((data.outType === 'flow' || data.outType === 'global')) {
-                const contextKey = RED.util.parseContextStore(data.outValue);
-                node.context()[data.outType].set(contextKey.key, res, contextKey.store);
-            }
-        }
-    }
-
-    /**
      * timeInjectNode
      * @param {*} config - configuration
      */
@@ -83,6 +38,82 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+
+        this.payloadData = {
+            type: config.payloadType,
+            value: config.payload,
+            format: config.payloadTimeFormat,
+            offsetType: config.payloadOffsetType,
+            offset: config.payloadOffset,
+            multiplier: config.payloadOffsetMultiplier,
+            next: true
+        };
+
+        if (typeof config.addPayload1Type !== 'undefined' &&
+            typeof config.addPayload1ValueType !== 'undefined') {
+            this.addPayload1Data = {
+                outType: config.addPayload1Type,
+                outValue: config.addPayload1,
+                type: config.addPayload1ValueType,
+                value: config.addPayload1Value,
+                format: config.addPayload1Format,
+                offsetType: config.addPayload1OffsetType,
+                offset: config.addPayload1Offset,
+                multiplier: config.addPayload1OffsetMultiplier,
+                next: config.addPayload1Next,
+                days: config.addPayload1Days
+            };
+            if (typeof this.addPayload1Data.next === 'undefined' ||
+                this.addPayload1Data.next === null ||
+                this.addPayload1Data.next === true ||
+                this.addPayload1Data.next === 'true') {
+                this.addPayload1Data.next = true;
+            } else if (this.addPayload1Data.next === 'false' || this.addPayload1Data.next === false) {
+                this.addPayload1Data.next = false;
+            }
+            this.addPayload2Data = {
+                outType: config.addPayload2Type,
+                outValue: config.addPayload2,
+                type: config.addPayload2ValueType,
+                value: config.addPayload2Value,
+                format: config.addPayload2Format,
+                offsetType: config.addPayload2OffsetType,
+                offset: config.addPayload2Offset,
+                multiplier: config.addPayload2OffsetMultiplier,
+                next: config.addPayload2Next,
+                days: config.addPayload2Days
+            };
+            if (typeof this.addPayload2Data.next === 'undefined' ||
+                this.addPayload2Data.next === null ||
+                this.addPayload2Data.next === true ||
+                this.addPayload2Data.next === 'true') {
+                this.addPayload2Data.next = true;
+            } else if (this.addPayload2Data.next === 'false' ||
+                       this.addPayload2Data.next === false) {
+                this.addPayload2Data.next = false;
+            }
+            this.addPayload3Data = {
+                outType: config.addPayload3Type,
+                outValue: config.addPayload3,
+                type: config.addPayload3ValueType,
+                value: config.addPayload3Value,
+                format: config.addPayload3Format,
+                offsetType: config.addPayload3OffsetType,
+                offset: config.addPayload3Offset,
+                multiplier: config.addPayload3OffsetMultiplier,
+                next: config.addPayload3Next,
+                days: config.addPayload3Days
+            };
+            if (typeof this.addPayload3Data.next === 'undefined' ||
+                this.addPayload3Data.next === null ||
+                this.addPayload3Data.next === true ||
+                this.addPayload3Data.next === 'true') {
+                this.addPayload3Data.next = true;
+            } else if (this.addPayload3Data.next === 'false' ||
+                       this.addPayload3Data.next === false) {
+                this.addPayload3Data.next = false;
+            }
+        }
 
         this.timeData = {
             type: config.timeType || 'none',
@@ -417,78 +448,31 @@ module.exports = function (RED) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
-            const dNow = new Date();
 
             try {
+                node.payloadData.now = new Date();
                 msg._srcid = node.id;
                 node.debug('--------- time-inject - input (type=' + msg.type + ')');
-                doCreateTimeout(node, false, dNow);
+                doCreateTimeout(node, false, node.payloadData.now);
                 msg.topic = config.topic;
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                const value = node.positionConfig.getOutDataProp(node, msg, {
-                    type: config.payloadType,
-                    value: config.payload,
-                    format: config.payloadTimeFormat,
-                    offsetType: config.payloadOffsetType,
-                    offset: config.payloadOffset,
-                    multiplier: config.payloadOffsetMultiplier,
-                    next: true,
-                    now: dNow
-                });
-                if (value === null || (typeof value === 'undefined')) {
-                    throw new Error('could not evaluate ' + config.payloadType + '.' + config.payload);
-                } else if (value.error) {
-                    throw new Error('could not getting payload: ' + value.error);
-                } else {
-                    msg.payload = value;
-                }
+                msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
 
-                if (typeof config.addPayload1Type !== 'undefined' &&
-                    typeof config.addPayload1ValueType !== 'undefined') {
-                    tsSetAddProp(this, msg, {
-                        outType: config.addPayload1Type,
-                        outValue: config.addPayload1,
-                        type: config.addPayload1ValueType,
-                        value: config.addPayload1Value,
-                        format: config.addPayload1Format,
-                        offsetType: config.addPayload1OffsetType,
-                        offset: config.addPayload1Offset,
-                        multiplier: config.addPayload1OffsetMultiplier,
-                        next: config.addPayload1Next,
-                        days: config.addPayload1Days,
-                        now: dNow
-                    });
-                    tsSetAddProp(this, msg, {
-                        outType: config.addPayload2Type,
-                        outValue: config.addPayload2,
-                        type: config.addPayload2ValueType,
-                        value: config.addPayload2Value,
-                        format: config.addPayload2Format,
-                        offsetType: config.addPayload2OffsetType,
-                        offset: config.addPayload2Offset,
-                        multiplier: config.addPayload2OffsetMultiplier,
-                        next: config.addPayload2Next,
-                        days: config.addPayload2Days,
-                        now: dNow
-                    });
-                    tsSetAddProp(this, msg, {
-                        outType: config.addPayload3Type,
-                        outValue: config.addPayload3,
-                        type: config.addPayload3ValueType,
-                        value: config.addPayload3Value,
-                        format: config.addPayload3Format,
-                        offsetType: config.addPayload3OffsetType,
-                        offset: config.addPayload3Offset,
-                        multiplier: config.addPayload3OffsetMultiplier,
-                        next: config.addPayload3Next,
-                        days: config.addPayload3Days,
-                        now: dNow
-                    });
+                if (node.addPayload1Data) {
+                    node.positionConfig.setMessageProperty(this, msg, node.addPayload1Data, node.payloadData.now);
+                    node.positionConfig.setMessageProperty(this, msg, node.addPayload2Data, node.payloadData.now);
+                    node.positionConfig.setMessageProperty(this, msg, node.addPayload3Data, node.payloadData.now);
                 }
                 send(msg); // node.send(msg);
-                done();
+                if (msg.payload === null || (typeof msg.payload === 'undefined')) {
+                    done('could not evaluate ' + config.payloadType + '.' + config.payload);
+                } else if (msg.payload.error) {
+                    done('could not getting payload: ' + msg.payload.error);
+                } else {
+                    done();
+                }
                 return null;
             } catch (err) {
                 node.log(err.message);

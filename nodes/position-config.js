@@ -677,6 +677,46 @@ module.exports = function (RED) {
             // _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
             return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
+
+        /**
+         *
+         * @param {*} node
+         * @param {*} msg
+         * @param {*} type
+         * @param {*} name
+         * @param {*} valueType
+         * @param {*} value
+         * @param {*} format
+         * @param {*} offset
+         * @param {*} offsetType
+         * @param {*} multiplier
+         * @param {*} days
+         * @param {*} next
+         */
+        setMessageProperty(node, msg, data, dNow) {
+            if (!data || data.outType !== 'none') { return; }
+            data.now = dNow || new Date();
+            // node.debug(`tsSetAddProp  ${msg}, ${type}, ${name}, ${valueType}, ${value}, ${format}, ${offset}, ${offsetType}, ${multiplier}, ${days}`);
+            const res = node.positionConfig.getOutDataProp(node, msg, data);
+            if (res === null || (typeof res === 'undefined')) {
+                this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
+            } else if (res.error) {
+                this.error('Eerror on getting additional payload: "' + res.error + '"');
+            } else if (data.outType === 'msgPayload') {
+                msg.payload = res;
+            } else if (data.outType === 'msgTs') {
+                msg.ts = res;
+            } else if (data.outType === 'msgLc') {
+                msg.lc = res;
+            } else if (data.outType === 'msgValue') {
+                msg.value = res;
+            } else if (data.outType === 'msg') {
+                RED.util.setMessageProperty(msg, data.outValue, res);
+            } else if ((data.outType === 'flow' || data.outType === 'global')) {
+                const contextKey = RED.util.parseContextStore(data.outValue);
+                node.context()[data.outType].set(contextKey.key, res, contextKey.store);
+            }
+        }
         /*******************************************************************************************************/
         /**
         * @typedef {Object} timePropType
