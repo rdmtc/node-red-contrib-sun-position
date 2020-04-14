@@ -2,14 +2,19 @@
 
 <script type="text/javascript">
     (function() {
+        // category: 'time and astro',
         RED.nodes.registerType('within-time-switch', {
-            category: 'time and astro',
+            category: 'common',
             color: '#f37a33',
             icon: 'switch-white.png',
             inputs: 1,
             outputs: 2,
             defaults: {
                 name: {
+                    value: '',
+                    required: false
+                },
+                nameInt: {
                     value: '',
                     required: false
                 },

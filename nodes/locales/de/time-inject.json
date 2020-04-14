@@ -66,7 +66,6 @@
             "once": "zusätzlich soll beim Start des Flows eine Nachricht (unabhängig von der Zeit) gesendet werden"
         },
         "tips": {
-            "config": "Wenn die Zeit auf 'nicht verwendet' eingestellt ist, kann die Time-Inject-Node nur manuell oder einmal bei Start triggern!",
             "addTimes": "Alternative Zeit: Wenn die angegebene Eigenschaft den Wert 'true' besitzt, wird anstatt zur normal angegebenen zeit zum angegebenem alternativen Zeitpunkt getriggert. Dies ist nützlich, um an Feiertagen oder anderen besonderen Tagen zu einem anderen Zeitpunkt einen Flow zu triggern.",
             "recalc": "Wenn der Zeitstempel durch einen flow oder global context definiert ist, führen Änderungen an den Werten nicht unmittelbar zu einer Änderung der geplanten Trigger-Zeit, sondern immer nur wenn eine Neuberechnung durchgeführt wird. Hiermit kann eine reguläre Neuberechnung eingestellt werden.",
             "addPayload": "Mit diesen zusätzlichen Eigenschaften können Sie bis zu 3 zusätzliche Werte zum Trigger Zeitpunkt in der Nachricht,im Flow oder globalen Kontext setzen. Das kann nützlich sein um beispielsweise einen extra Zeitstempel in Bezug auf den Zeitpunkt des Triggers der Nachricht zu definieren. So kann beispielsweise beim Einschalten gleich der Ausschaltzeitpunkt mitgegeben werden."

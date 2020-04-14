@@ -1,5 +1,17 @@
 # node-red-contrib-sun-position
 
+#### 1.1.0:  mayor release
+
+- time-inject
+  - added possibility for interval inject
+
+in work:
+- time-span
+  - rework
+- time-comp
+  - rework
+
+
 #### 1.0.17:  small enhancement
 
 - inspired by #132 added for a property the possibility to control by
