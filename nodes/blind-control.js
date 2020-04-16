@@ -1429,11 +1429,14 @@ module.exports = function (RED) {
             node.rules.checkUntil = false;
             node.rules.checkFrom = false;
             node.rules.firstFrom = node.rules.lastUntil;
+            node.rules.maxImportance = 0;
 
             for (let i = 0; i < node.rules.count; ++i) {
                 const rule = node.rules.data[i];
                 rule.pos = i + 1;
                 rule.name = rule.name || 'rule ' + rule.pos;
+                rule.importance = Number(rule.importance) || 0;
+                node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
                 rule.levelOp = Number(rule.levelOp) || cRuleAbsolute;
                 if (rule.levelOp === 3) { // cRuleMinReset = 3; // ⭳✋ reset minimum

@@ -193,7 +193,7 @@ under the simplest assumption starting from the bearing representing the perpend
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
 - **reset** an incoming message with `msg.reset` is `true` or `msg.payload.reset` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  - **importance** (optional) when a importance is given the existing override will only reset if the importance of the message is __equal or higher__ then the importance of the existing override. For a reset, the same applies to the importance as for the overrise (see below).
+  - **importance** (optional) when a importance is given the existing override will only reset if the importance of the message is __equal or higher__ then the importance of the existing override. For a reset, the same applies to the importance as for the override (see below).
 - **position** an incoming message with a numeric property of `msg.blindPosition`, `msg.position`, `msg.level`, `msg.blindLevel`,  `msg.payload.blindPosition`, `msg.payload.position`, `msg.payload.level`, `msg.payload.blindLevel` or where the  `msg.topic` contains `manual` or `levelOverwrite` and the value of `msg.payload` is a numeric value will override any of rule/sun/.. based level of the blind.
   - If an override is already active a new message changes the blind level if the **importance** of the existing override allows this.
     - The override could also limited if  a property `msg.ignoreSameValue`, `msg.payload.ignoreSameValue` is set to true an existing override will only be changed if the position value differs from the active override position.
@@ -215,21 +215,13 @@ The Input is for triggering the calculation and for setting overwrites of the bl
 
 Useful to know:
 
-<<<<<<< Updated upstream
-- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
-- An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
-  - if additional **exactPrio** is defined, then the message priority must be __equal__ to the existing priority.
-- There are a special configuration for rules with a condition, with which it can be prevented to allow overrides.
-=======
 - If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **importance** will be considered.
 - An already existing Override can only be changed if the importance of the existing is `0` (default - can always be changed) or the message object has a **importance** set with a value that is equal or greater than the existing override. If that is given the **expire**, **importance** or **position** can be changed.
   - if additional **exactImportance** is defined, then the message importance must be __equal__ to the existing importance.
->>>>>>> Stashed changes
 - an incoming message with `msg.mode`, `msg.payload.mode` or where the `msg.topic` contains `setMode` and the value of `msg.payload` is a valid number, will allow to set the mode of the sun control.
   - a value of `0` will deactivate sun control, `1` will set to maximize sunlight (Winter) and `2` will set to restrict sunlight (Summer).
   - The maximum adjustable mode is influenced by the settings of the node. The mode can not be set to restrict sunlight (`2`) if in the settings is setup only maximize sunlight (`1`).
 - A message where the topic contains `triggerOnly` or  or with an property `msg.trigger` which is true can not act as override.
-
 
 ### Node Output
 

@@ -677,8 +677,6 @@ module.exports = function (RED) {
             _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
             return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
-<<<<<<< Updated upstream
-=======
         /*******************************************************************************************************/
         /**
          * Creates a out object, based on input data
@@ -710,7 +708,6 @@ module.exports = function (RED) {
                 _srcNode.context()[data.outType].set(contextKey.key, res, contextKey.store);
             }
         }
->>>>>>> Stashed changes
         /*******************************************************************************************************/
         /**
         * @typedef {Object} timePropType
