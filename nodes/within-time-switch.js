@@ -179,8 +179,8 @@ module.exports = function (RED) {
         if (result.altStartTime) {
             // node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
             try {
-                result.altStartTime = node.positionConfig.comparePropValue(node, msg, node.propertyStartType, node.propertyStart,
-                    node.propertyStartOperator, node.propertyStartThresholdType, node.propertyStartThresholdValue);
+                result.altStartTime = node.positionConfig.comparePropValue(node, msg, { type:node.propertyStartType, value:node.propertyStart},
+                    node.propertyStartOperator, {type: node.propertyStartThresholdType, value:node.propertyStartThresholdValue});
             } catch (err) {
                 result.altStartTime = false;
                 hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', {
@@ -194,8 +194,8 @@ module.exports = function (RED) {
         if (result.altEndTime) {
             // node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.propertyEnd);
             try {
-                result.altEndTime = node.positionConfig.comparePropValue(node, msg, node.propertyEndType, node.propertyEnd,
-                    node.propertyEndOperator, node.propertyEndThresholdType, node.propertyEndThresholdValue);
+                result.altEndTime = node.positionConfig.comparePropValue(node, msg, { type:node.propertyEndType, value:node.propertyEnd},
+                    node.propertyEndOperator, {type:node.propertyEndThresholdType, value:node.propertyEndThresholdValue});
             } catch (err) {
                 result.altEndTime = false;
                 hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyEnd-type', {

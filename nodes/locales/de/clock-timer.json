@@ -89,8 +89,8 @@
 			"timerControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/clock_timer.md\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
-			"overwriteNoExpire": "manuell überschrieben (Priorität __prio__), kein Verfall",
-			"overwriteExpire": "manuell überschrieben (Priorität __prio__), verfällt __dateISO__",
+			"overwriteNoExpire": "manuell überschrieben (Wichtigkeit __importance__), kein Verfall",
+			"overwriteExpire": "manuell überschrieben (Wichtigkeit __importance__), verfällt __dateISO__",
 			"default": "Position ist auf Standard gesetzt, weil keine Regel zutrifft",
 			"ruleTime": "Position durch Zeitregel - rule __timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "Position durch bedingte Regel __text__ [rule __number__]",
@@ -101,8 +101,8 @@
 			"startDelay": "verzögerter Start bis __dateISO__"
 		},
 		"states": {
-			"overwriteNoExpire": "überschrieben [Prio=__prio__]",
-			"overwriteExpire": "überschrieben [Prio=__prio__], bis __timeLocal__",
+			"overwriteNoExpire": "überschrieben [Prio=__importance__]",
+			"overwriteExpire": "überschrieben [Prio=__importance__], bis __timeLocal__",
 			"default": "Standard",
 			"ruleTime": "__timeOp__ __timeLocal__ [rule __number__]",
 			"ruleCond": "__textShort__ [rule __number__]",
