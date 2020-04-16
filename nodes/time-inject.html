@@ -2,8 +2,9 @@
 
 <script type="text/javascript">
     (function() {
+        // category: 'time and astro',
         RED.nodes.registerType('time-inject', {
-            category: 'time and astro',
+            category: 'common',
             color: '#a6bbcf',
             icon: 'injectSun-white.png',
             inputs: 0,
@@ -49,13 +50,49 @@
                 topic: {
                     value: ''
                 },
+                injectTypeSelect: {
+                    value: 'none'
+                },
+                intervalCount: {
+                    value: 1,
+                    validate(v) {
+                        return (
+                            (typeof this.injectTypeSelect === 'undefined') ||
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'time') ||
+                            RED.validators.typedInput('intervalCountType')(v) ||
+                            (v > 0)
+                        );
+                    }
+                },
+                intervalCountType: {
+                    value: 'num'
+                },
+                intervalCountMultiplier: {
+                    value: 60000,
+                    required: true,
+                    validate(v) {
+                        return (
+                            (typeof this.injectTypeSelect === 'undefined') ||
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'time') ||
+                            RED.validators.number()(v)
+                        );
+                    }
+                },
                 time: {
                     value: '',
                     required: false,
-                    validate: RED.validators.typedInput('timeType')
+                    validate(v) {
+                        return (
+                            ((this.injectTypeSelect !== 'interval-time') &&
+                            (this.injectTypeSelect !== 'time')) ||
+                            RED.validators.typedInput('timeType')(v)
+                        );
+                    }
                 },
                 timeType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 offset: {
                     value: 0,
@@ -63,10 +100,9 @@
                         return (
                             (typeof v === 'undefined') ||
                             (typeof this.offsetType === 'undefined') ||
-                            RED.validators.typedInput('offsetType')(v) ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'interval') ||
+                            RED.validators.typedInput('offsetType')(v)
                         );
                     }
                 },
@@ -80,11 +116,10 @@
                         return (
                             typeof v === 'undefined' ||
                             RED.validators.number()(v) ||
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'interval') ||
                             $('#node-input-offsetType').typedInput('type') === 'none' ||
-                            this.offsetType === 'none' ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
+                            this.offsetType === 'none'
                         );
                     }
                 },
@@ -93,13 +128,13 @@
                     required: false,
                     validate(v) {
                         return (
-                            (this.payloadOffsetType !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time') ||
                             RED.validators.typedInput('timeEndType')(v)
                         );
                     }
                 },
                 timeEndType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 timeEndOffset: {
                     value: 0,
@@ -107,7 +142,7 @@
                         return (
                             (typeof v === 'undefined') ||
                             (typeof this.timeEndOffsetType === 'undefined') ||
-                            (this.payloadOffsetType !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time') ||
                             RED.validators.typedInput('timeEndOffsetType')(v)
                         );
                     }
@@ -122,7 +157,7 @@
                         return (
                             typeof v === 'undefined' ||
                             RED.validators.number()(v) ||
-                            (this.payloadOffsetType !== 'interval-time') ||
+                            (this.injectTypeSelect !== 'interval-time') ||
                             $('#node-input-timeEndOffsetType').typedInput('type') === 'none' ||
                             this.timeEndOffsetType === 'none'
                         );
@@ -150,6 +185,8 @@
                     validate(v) {
                         return (
                             typeof v === 'undefined' ||
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'interval') ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -160,6 +197,8 @@
                     validate(v) {
                         return (
                             typeof v === 'undefined' ||
+                            (this.injectTypeSelect === 'none') ||
+                            (this.injectTypeSelect === 'interval') ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -171,10 +210,8 @@
                         return (
                             typeof v === 'undefined' ||
                             typeof this.propertyType === 'undefined' ||
-                            RED.validators.typedInput('propertyType')(v) ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none')
+                            (this.injectTypeSelect !== 'time') ||
+                            RED.validators.typedInput('propertyType')(v)
                         );
                     }
                 },
@@ -190,9 +227,7 @@
                         return (
                             typeof v === 'undefined' ||
                             RED.validators.typedInput('propertyThresholdType')(v) ||
-                            ($('#node-input-timeType').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
+                            (this.injectTypeSelect !== 'time') ||
                             typeof this.propertyType === 'undefined' ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
@@ -209,9 +244,7 @@
                     validate(v){
                         return (
                             RED.validators.typedInput('timeAltType')(v) ||
-                            ($('#node-input-timeType').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
+                            (this.injectTypeSelect !== 'time') ||
                             typeof this.propertyType === 'undefined' ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
@@ -244,10 +277,8 @@
                         return (
                             typeof v === 'undefined' ||
                             (typeof this.timeAltOffsetType === 'undefined') ||
+                            (this.injectTypeSelect !== 'time') ||
                             RED.validators.typedInput('timeAltOffsetType')(v) ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
                             typeof this.propertyType === 'undefined' ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
@@ -267,9 +298,7 @@
                             RED.validators.number()(v) ||
                             $('#node-input-timeAltOffsetType').typedInput('type') === 'none' ||
                             this.timeAltOffsetType === 'none' ||
-                            ($('#node-input-time').length ?
-                                $('#node-input-time').typedInput('type') === 'none' :
-                                this.timeType === 'none') ||
+                            (this.injectTypeSelect !== 'time') ||
                             typeof this.propertyType === 'undefined' ||
                             ($('#node-input-propertyType').length ?
                                 $('#node-input-property').typedInput('type') === 'none' :
@@ -548,140 +577,22 @@
                 return lab;
             },
             label() {
-                if (this.name) {
-                    return this.name;
-                }
-
                 let result = '';
-                if (this.once) {
-                    result += '¹';
+                if (!this.positionConfig || !this.nameInt) {
+                    result += '⚠ ';
                 }
-
-                const getTimeId = () => {
-                    let suffix = '';
-                    if (this.timeDays && this.timeDays !== '*') {
-                        const daysarr = this.timeDays.split(',');
-                        if (daysarr.length === 1) {
-                            suffix += '[' + RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ']';
-                        } else if (this.timeDays === '5,6,0') {
-                            suffix += '[';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.12');
-                            suffix += '-';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.7');
-                            suffix += ']';
-                        } else if (daysarr.length === 2) {
-                            suffix += '[';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
-                            suffix += ',';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
-                            suffix += ']';
-                        } else {
-                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
-                            let isok = true;
-                            let elF = parseInt(daysarr[0]);
-                            suffix += '[';
-                            daysarr[0] = RED._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
-                            for (let index = 1; index < daysarr.length; index++) {
-                                const element = parseInt(daysarr[index]);
-                                isok = isok && (element === elF+1);
-                                elF = element;
-                                daysarr[index] = RED._('node-red-contrib-sun-position/position-config:common.days.'+(element + 7));
-                            }
-                            if (isok) {
-                                suffix += daysarr[0];
-                                suffix += '-';
-                                suffix += daysarr[daysarr.length-1];
-                            } else if (daysarr.length < 5) {
-                                suffix += daysarr.join(',');
-                            } else  {
-                                suffix += this._('time-inject.label.fewDays');
-                            }
-                            suffix += ']';
-                        }
-                    }
-
-                    if (this.timeMonths && this.timeMonths !== '*') {
-                        const montharr = this.timeMonths.split(',');
-                        if (montharr.length === 2) {
-                            suffix += '[';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                            suffix += ',';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
-                            suffix += ']';
-                        } else if (montharr.length === 1) {
-                            suffix += '[';
-                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                            suffix += ']';
-                        } else {
-                            montharr.sort((a, b) => parseInt(a) - parseInt(b));
-                            let isok = true;
-                            let elF = parseInt(montharr[0]);
-                            suffix += '[';
-                            montharr[0] = RED._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
-                            for (let index = 1; index < montharr.length; index++) {
-                                const element = parseInt(montharr[index]);
-                                isok = isok && (element === elF+1);
-                                elF = element;
-                                montharr[index] = RED._('node-red-contrib-sun-position/position-config:common.months.'+(element + 12));
-                            }
-                            if (isok) {
-                                suffix += montharr[0];
-                                suffix += '-';
-                                suffix += montharr[montharr.length-1];
-                            } else if (montharr.length < 5) {
-                                suffix += montharr.join(',');
-                            } else  {
-                                suffix += this._('time-inject.label.fewMonths');
-                            }
-
-                            suffix += ']';
-                        }
-                    }
-                    if (this.timedatestart && this.timedateend) {
-                        const getDateShort = value => {
-                            if (value) {
-                                const val = value.split('-');
-                                if (val.length > 2) {
-                                    return val[1] + '-' + val[2];
-                                } else if (val.length === 2) {
-                                    return val[0] + '-' + val[1];
-                                }
-                            }
-                            return '';
-                        };
-                        suffix += '[';
-                        suffix += getDateShort(this.timedatestart) || '01-01';
-                        suffix += '>';
-                        suffix += getDateShort(this.timedateend) || '12-31';
-                        suffix += ']';
-                    }
-                    const part1 = RED.nodes.getType('position-config').getValueLabel(this, this.timeType, this.time, this.offset);
-                    if (this.propertyType !== 'none' && this.propertyType !== '' && this.timeAlt) {
-                        return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this, this.timeAltType, this.timeAlt, this.timeAltOffset) + suffix);
-                    }
-                    return part1 + suffix;
-                };
-
-                if (this.timeType === 'none' || this.timeType === '') {
-                    result += (this.nameInt || RED.nodes.getType('position-config').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
-                } else {
-                    const timeTxt = getTimeId();
-                    if (timeTxt.length > 26) {
-                        result += timeTxt + ' =...';
-                    } else {
-                        result += timeTxt + ' = ' + (this.nameInt || RED.nodes.getType('position-config').getValueLabel(this, this.payloadType, this.payload, this.payloadOffset, 20));
-                    }
+                if (this.name) {
+                    return result + this.name;
                 }
-                if (this.topic && this.topic.length + result.length <= 32) {
-                    return this.topic + ':' + result;
+                if (this.nameInt) {
+                    return result + this.nameInt;
                 }
-
-                return result;
+                return result + this._('time-inject.label.time-inject');
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
             },
-            paletteLabel: 'inject at time',
+            paletteLabel: 'inject enhanced',
             align: 'left',
             oneditprepare() {
                 setTimeout(() => {
@@ -865,20 +776,62 @@
                         }
                     });
                     // #endregion payload
-                    // #region onceDelay
+                    // #region onceDelay + TimeType
                     $('#node-input-once').change(() => {
                         $('#node-input-onceDelay').attr('disabled', !$('#node-input-once').prop('checked'));
                     });
-                    // #endregion onceDelay
+                    const id = $('#node-input-injectTypeSelect').val();
+                    if (!id) {
+                        const timeType = $('#node-input-timeType').val();
+                        if (!timeType || timeType === types.Undefined.value) {
+                            $('#node-input-injectTypeSelect').val('none');
+                            $('#node-input-timeType').val(types.TimeEntered.value);
+                            node.timeType = types.TimeEntered.value;
+                        } else {
+                            $('#node-input-injectTypeSelect').val('time');
+                        }
+                    }
+                    $('#node-input-injectTypeSelect').on('change', () => {
+                        const id = $('#node-input-injectTypeSelect').val();
+                        $('.time-inject-row-all').hide();
+                        switch (id) {
+                            case 'interval':
+                                $('.time-inject-row-interval').show();
+                                break;
+                            case 'interval-time':
+                                $('.time-inject-row-intervalTime').show();
+                                break;
+                            case 'time':
+                                $('.time-inject-row-timeOnly').show();
+                                break;
+                            default:
+                                break;
+                        }
+                        // $('.time-inject-row-all').hide();
+                        $('#node-input-offset').change(); // includes time + property change
+                        $('#node-input-timeEndOffset').change(); // also timeEnd change
+                        $('#node-input-timeAltOffset').change(); // includes time + property change
+                    });
+                    // #endregion onceDelay + TimeType
+                    // #region interval
+                    node.intervalCountMultiplier = multiplierUpdate(node.intervalCountMultiplier, 'intervalCountMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'intervalCountType',
+                        valueProp: 'intervalCount',
+                        width: 'calc(100% - 255px)',
+                        defaultType: 'num',
+                        defaultValue: 1,
+                        types: ['num', 'env']
+                    }); // intervalCount
+                    // #endregion interval
                     // #region time
                     setupTInput(node, {
                         typeProp: 'timeType',
                         valueProp: 'time',
                         width: 'calc(100% - 110px)',
-                        defaultType: types.Undefined.value,
+                        defaultType: types.TimeEntered.value,
                         defaultValue: '',
                         types: [
-                            types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
                             types.TimeSunNow,
@@ -888,31 +841,34 @@
                             'env'
                         ],
                         onChange(_type, _value) {
-                            const type = $('#node-input-time').typedInput('type');
-                            if (type === types.Undefined.value) {
-                                $('.time-inject-row-offset').hide();
+                            const injectType = $('#node-input-injectTypeSelect').val();
+                            // console.log('time onChange -> ' + injectType + ' / type = ' + type);
+                            if (injectType === 'none' || injectType === 'interval') {
+                                $('.time-inject-row-timeStartOffset').hide();
                                 $('.time-inject-row-timeLimits').hide();
-                                $('.time-inject-row-alt').hide();
-
-                                const $div = $('#time-inject-row-timeMain');
+                                $('.time-inject-row-altStart').hide();
+                                const $div = $('#time-inject-row-timeStart');
                                 const titleOrg = $div.attr('titleOrg');
                                 $div.attr('title', titleOrg);
                                 $('#node-input-property').typedInput('type',  types.Undefined.value);
                                 $('#node-input-property').change();
                                 return;
-                            } else if (type === types.TimeSunNow.value){
-                                $('.time-inject-row-offset').show();
+                            }
+                            const type = $('#node-input-time').typedInput('type');
+                            if (type === types.TimeSunNow.value) {
+                                $('.time-inject-row-timeStartOffset').show();
                                 $('.time-inject-row-timeLimits').hide();
-                                $('.time-inject-row-alt').show();
                             } else {
-                                $('.time-inject-row-offset').show();
+                                $('.time-inject-row-timeStartOffset').show();
                                 $('.time-inject-row-timeLimits').show();
-                                $('.time-inject-row-alt').show();
+                            }
+                            if (injectType === 'time') {
+                                $('.time-inject-row-altStart').show();
                             }
                             $('#node-input-property').change();
                             getBackendData(d => {
-                                const $div = $('#time-inject-row-timeMain');
-                                const $div2 = $('#time-inject-row-timeMainOffset');
+                                const $div = $('#time-inject-row-timeStart');
+                                const $div2 = $('#time-inject-row-timeStartOffset');
                                 $div.attr('title', bdDateToTime(d, ' - ') + $div.attr('titleOrg'));
                                 $div2.attr('title', bdDateToTime(d, ' - ') + $div2.attr('titleOrg'));
                             }, {
@@ -932,9 +888,7 @@
                                 noOffsetError: true
                             });
                         }
-                    });
-                    initCheckboxesBlock('#time-inject-timeDays', node.timeDays);
-                    initCheckboxesBlock('#time-inject-timeMonths', node.timeMonths);
+                    }); // time
 
                     node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
                     setupTInput(node, {
@@ -953,7 +907,80 @@
                             }
                             $('#node-input-time').change();
                         }
-                    });
+                    }); // offset
+                    // #endregion time
+                    // #region timeEnd
+                    setupTInput(node, {
+                        typeProp: 'timeEndType',
+                        valueProp: 'timeEnd',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.TimeEntered.value,
+                        defaultValue: '',
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env'
+                        ],
+                        onChange(_type, _value) {
+                            const injectType = $('#node-input-injectTypeSelect').val();
+                            if (injectType !== 'interval-time') {
+                                $('.time-inject-row-timeEndOffset').hide();
+
+                                const $div = $('#time-inject-row-timeEnd');
+                                const titleOrg = $div.attr('titleOrg');
+                                $div.attr('title', titleOrg);
+                                return;
+                            }
+                            $('.time-inject-row-timeEndOffset').show();
+                            getBackendData(d => {
+                                const $div = $('#time-inject-row-timeEnd');
+                                const $div2 = $('#time-inject-row-timeEndOffset');
+                                $div.attr('title', bdDateToTime(d, ' - ') + $div.attr('titleOrg'));
+                                $div2.attr('title', bdDateToTime(d, ' - ') + $div2.attr('titleOrg'));
+                            }, {
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           $('#node-input-timeEnd').typedInput('type'),
+                                value:          $('#node-input-timeEnd').typedInput('value'),
+                                offsetType:     $('#node-input-timeEndOffset').typedInput('type'),
+                                offset:         $('#node-input-timeEndOffset').typedInput('value'),
+                                multiplier:     $('#node-input-timeEndOffsetMultiplier').val(),
+                                next:           1,
+                                days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
+                                months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
+                                onlyOddDays:    $('#node-input-timeOnlyOddDays').val(),
+                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').val(),
+                                noOffsetError:  true
+                            });
+                        }
+                    }); // timeEnd
+
+                    node.timeEndOffsetMultiplier = multiplierUpdate(node.timeEndOffsetMultiplier, 'timeEndOffsetMultiplier');
+                    setupTInput(node, {
+                        typeProp: 'timeEndOffsetType',
+                        valueProp: 'timeEndOffset',
+                        width: 'calc(100% - 255px)',
+                        defaultType: (node.timeEndOffset === 0 || node.timeEndOffset === '') ? types.Undefined.value : 'num',
+                        defaultValue: 0,
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        onChange(_type, _value) {
+                            const type = $('#node-input-timeEndOffset').typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('#node-input-timeEndOffsetMultiplier').prop('disabled', true);
+                            } else {
+                                $('#node-input-timeEndOffsetMultiplier').prop('disabled', false);
+                            }
+                            $('#node-input-timeEnd').change();
+                        }
+                    }); // timeEndOffset
+                    // #endregion timeEnd
+                    // #region time constraints
+                    initCheckboxesBlock('#time-inject-timeDays', node.timeDays);
+                    initCheckboxesBlock('#time-inject-timeMonths', node.timeMonths);
 
                     const getDateShort = value => {
                         if (value) {
@@ -999,7 +1026,7 @@
                     }
                     $timeLimitDateStart.change();
                     $timeLimitDateEnd.change();
-                    // #endregion time
+                    // #endregion time constraints
                     // #region property
                     setupTInput(node, {
                         typeProp: 'propertyType',
@@ -1025,9 +1052,9 @@
                             types.DayOfYearEven
                         ],
                         onChange(_type, _value) {
-                            const timeType = $('#node-input-time').typedInput('type');
+                            const injectType = $('#node-input-injectTypeSelect').val();
                             const propType = $('#node-input-property').typedInput('type');
-                            if ( timeType === types.Undefined.value || propType === types.Undefined.value ) {
+                            if ( injectType !== 'time' || propType === types.Undefined.value ) {
                                 $('.time-inject-row-timeAlt').hide();
                                 $('.time-inject-row-timeAltOffset').hide();
                                 $('.time-inject-row-timeAltLimits').hide();
@@ -1069,7 +1096,7 @@
                                     $('.row-propertyThreshold').hide(); // condOpB
                                 }
                             }
-
+                            const timeType = $('#node-input-time').typedInput('type');
                             if ( timeType === 'flow' || timeType === 'global' || propType !== types.Undefined.value ) {
                                 $('.time-inject-recalc').show();
                             } else {
@@ -1078,7 +1105,7 @@
                             }
                             $('#node-input-propertyThreshold').change();
                         }
-                    });
+                    }); // property
                     const propertyCompareField = $('#node-input-propertyCompare');
                     appendOptions(node, propertyCompareField, 'comparator');
                     propertyCompareField.val(node.propertyCompare || 'true');
@@ -1584,12 +1611,12 @@
                         }
                     });
                     // #endregion addPayload3
+                    // console.log('Loading done, trigegr changes');
                     $('#node-input-payloadOffset').change(); // includes payload change
-                    $('#node-input-timeAltOffset').change(); // includes time + property change
-                    $('#node-input-offset').change(); // includes time + property change
                     $('#node-input-addPayload1Offset').change(); // includes time + property change
                     $('#node-input-addPayload2Offset').change(); // includes time + property change
                     $('#node-input-addPayload3Offset').change(); // includes time + property change
+                    $('#node-input-injectTypeSelect').change();
                 }; // setup
 
                 $.getScript('sun-position/js/htmlglobal.js')
@@ -1609,20 +1636,6 @@
                     });
             },
             oneditsave() {
-                const plt = $('#node-input-payload').typedInput('type');
-                if (plt === 'dateSpecific') {
-                    if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
-                        this.nameInt = RED.nodes.getType('position-config').clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
-                    } else {
-                        let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
-                        txt = $.trim(txt.split(',')[0]);
-                        this.nameInt = RED.nodes.getType('position-config').clipValueLength(txt, 20);
-                    }
-                } else {
-                    this.nameInt = RED.nodes.getType('position-config').getValueLabel(this, plt,
-                        $('#node-input-payload').typedInput('value'),
-                        $('#node-input-payloadOffset').typedInput('value'));
-                }
                 this.timeDays = getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7);
                 this.timeAltDays = getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7);
                 this.timeMonths = getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12);
@@ -1641,6 +1654,202 @@
                 if (Number($('#node-input-addPayload3Formatsel').val()) !== 99) {
                     $('#node-input-addPayload3Format').val($('#node-input-addPayload3Formatsel').val());
                     this.addPayload3Format = $('#node-input-addPayload3Formatsel').val();
+                }
+
+                this.nameInt = '';
+                if ($('#node-input-once').prop('checked')) {
+                    this.nameInt += '¹';
+                }
+
+                const getTimeConstraints = () => {
+                    let suffix = '';
+                    if (this.timeDays && this.timeDays !== '*') {
+                        const daysarr = this.timeDays.split(',');
+                        if (daysarr.length === 1) {
+                            suffix += '[' + RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ']';
+                        } else if (this.timeDays === '5,6,0') {
+                            suffix += '[';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.12');
+                            suffix += '-';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.7');
+                            suffix += ']';
+                        } else if (daysarr.length === 2) {
+                            suffix += '[';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                            suffix += ',';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                            suffix += ']';
+                        } else {
+                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                            let isok = true;
+                            let elF = parseInt(daysarr[0]);
+                            suffix += '[';
+                            daysarr[0] = RED._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                            for (let index = 1; index < daysarr.length; index++) {
+                                const element = parseInt(daysarr[index]);
+                                isok = isok && (element === elF+1);
+                                elF = element;
+                                daysarr[index] = RED._('node-red-contrib-sun-position/position-config:common.days.'+(element + 7));
+                            }
+                            if (isok) {
+                                suffix += daysarr[0];
+                                suffix += '-';
+                                suffix += daysarr[daysarr.length-1];
+                            } else if (daysarr.length < 5) {
+                                suffix += daysarr.join(',');
+                            } else  {
+                                suffix += this._('time-inject.label.fewDays');
+                            }
+                            suffix += ']';
+                        }
+                    }
+
+                    if (this.timeMonths && this.timeMonths !== '*') {
+                        const montharr = this.timeMonths.split(',');
+                        if (montharr.length === 2) {
+                            suffix += '[';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                            suffix += ',';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
+                            suffix += ']';
+                        } else if (montharr.length === 1) {
+                            suffix += '[';
+                            suffix += RED._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                            suffix += ']';
+                        } else {
+                            montharr.sort((a, b) => parseInt(a) - parseInt(b));
+                            let isok = true;
+                            let elF = parseInt(montharr[0]);
+                            suffix += '[';
+                            montharr[0] = RED._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
+                            for (let index = 1; index < montharr.length; index++) {
+                                const element = parseInt(montharr[index]);
+                                isok = isok && (element === elF+1);
+                                elF = element;
+                                montharr[index] = RED._('node-red-contrib-sun-position/position-config:common.months.'+(element + 12));
+                            }
+                            if (isok) {
+                                suffix += montharr[0];
+                                suffix += '-';
+                                suffix += montharr[montharr.length-1];
+                            } else if (montharr.length < 5) {
+                                suffix += montharr.join(',');
+                            } else  {
+                                suffix += this._('time-inject.label.fewMonths');
+                            }
+
+                            suffix += ']';
+                        }
+                    }
+                    if ($('#node-input-timedatestart').val() && $('#node-input-timedateend').val()) {
+                        const getDateShort = value => {
+                            if (value) {
+                                const val = value.split('-');
+                                if (val.length > 2) {
+                                    return val[1] + '-' + val[2];
+                                } else if (val.length === 2) {
+                                    return val[0] + '-' + val[1];
+                                }
+                            }
+                            return '';
+                        };
+                        suffix += '[';
+                        suffix += getDateShort($('#node-input-timedatestart').val()) || '01-01';
+                        suffix += '>';
+                        suffix += getDateShort($('#node-input-timedateend').val()) || '12-31';
+                        suffix += ']';
+                    }
+                    return suffix;
+                };
+
+                const getTimeId = () => {
+                    const part1 = RED.nodes.getType('position-config').getValueLabel(this,
+                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'));
+                    if ($('#node-input-property').typedInput('type') !== 'none') {
+                        return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this,
+                            $('#node-input-timeAlt').typedInput('type'), $('#node-input-timeAlt').typedInput('value'), $('#node-input-timeAltOffset').typedInput('value'))) +
+                                getTimeConstraints();
+                    }
+                    return part1 + getTimeConstraints();
+                };
+
+                const getInterval = () => {
+                    let res = ' ↻';
+                    if ($('#node-input-intervalCount').typedInput('type') === 'num') {
+                        res += $('#node-input-intervalCount').typedInput('value');
+                        const num = parseInt($('#node-input-intervalCountMultiplier').val());
+                        if (num === 1) {
+                            res += 'ms';
+                        } else if (num === 1000) {
+                            res += 's';
+                        } else if (num === 60000) {
+                            res += 'min';
+                        } else if (num === 3600000) {
+                            res += 'h';
+                        }
+                    }
+                    return res;
+                };
+
+                const getPayloadLbl = () => {
+                    const plt = $('#node-input-payload').typedInput('type');
+                    if (plt === 'dateSpecific') {
+                        if (Number($('#node-input-payloadTimeFormatsel').val()) === 99) {
+                            return RED.nodes.getType('position-config').clipValueLength($('#node-input-payloadTimeFormat').val(), 20);
+                        }
+                        let txt = $('#node-input-payloadTimeFormatsel option:selected').text();
+                        txt = $.trim(txt.split(',')[0]);
+                        return RED.nodes.getType('position-config').clipValueLength(txt, 20);
+                    }
+                    return RED.nodes.getType('position-config').getValueLabel(this, plt,
+                        $('#node-input-payload').typedInput('value'),
+                        $('#node-input-payloadOffset').typedInput('value'));
+                };
+
+                if ($('#node-input-injectTypeSelect').val() === 'none' ||
+                    this.timeType === 'none' ||
+                    this.timeType === '') {
+                    this.nameInt += getPayloadLbl();
+                } else if ($('#node-input-injectTypeSelect').val() === 'interval') {
+                    this.nameInt += getPayloadLbl();
+                    this.nameInt += '';
+                    this.nameInt += getInterval();
+                } else if ($('#node-input-injectTypeSelect').val() === 'interval-time') {
+                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
+                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'), 20);
+                    this.nameInt += ' - ';
+                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
+                        $('#node-input-timeEnd').typedInput('type'), $('#node-input-timeEnd').typedInput('value'), $('#node-input-timeEndOffset').typedInput('value'), 20);
+                    this.nameInt += getTimeConstraints();
+                    if (this.nameInt.length > 35) {
+                        this.nameInt += ' =...';
+                    } else {
+                        this.nameInt += ' = ';
+                        this.nameInt += getPayloadLbl();
+                    }
+                    this.nameInt += '';
+                    this.nameInt += getInterval();
+                } else {
+                    this.nameInt += '⏲ ';
+                    if ($('#node-input-time').typedInput('type') === $('#node-input-payload').typedInput('type')) {
+                        this.nameInt += '...';
+                        this.nameInt += getTimeConstraints();
+                        this.nameInt += ' = ';
+                        this.nameInt += getPayloadLbl();
+                    } else {
+                        const timeTxt = getTimeId();
+                        if (timeTxt.length > 26) {
+                            this.nameInt += timeTxt + ' =...';
+                        } else {
+                            this.nameInt += timeTxt;
+                            this.nameInt += ' = ';
+                            this.nameInt += getPayloadLbl();
+                        }
+                    }
+                }
+                this.topic = $('#node-input-topic').val();
+                if (this.topic && this.topic.length + this.nameInt.length <= 35) {
+                    this.nameInt = $('#node-input-topic').val() + ':' + this.nameInt;
                 }
             },
             button: {
@@ -1725,19 +1934,52 @@
         <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
         <span data-i18n="time-inject.label.onceDelay"></span>
     </div>
+    <div class="form-row block-noindent">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="node-red:inject.label.repeat"></span></label>
+        <select id="node-input-injectTypeSelect" class="node-input-injectTypeSelect row-full-width">
+            <option value="none" data-i18n="node-red:inject.none"></option>
+            <option value="interval" data-i18n="node-red:inject.interval"></option>
+            <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
+            <option value="time" data-i18n="node-red:inject.time"></option>
+        </select>
+    </div>
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-interval time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-interval">
+        <label for="node-input-intervalCount"><i class="fa fa-hourglass"></i> <span data-i18n="node-red:inject.every"></span></label>
+        <input id="node-input-intervalCount" class="time-inject-intervalCount" data-i18n="[placeholder]time-inject.placeholder.intervalCount"/>
+        <input type="hidden" id="node-input-intervalCountType">
+        <select id="node-input-intervalCountMultiplier" class="node-input-multiplier"></select>
+    </div>
 
-    <div class="form-row time-inject-row block-noindent" id="time-inject-row-timeMain" data-i18n="[titleOrg]time-inject.placeholder.time">
+    <div class="form-row time-inject-row-all time-inject-row-intervalTime is-initial-hidden ">
+        <span data-i18n="time-inject.label.between"></span>
+    </div>
+
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-timeStart time-inject-row-intervalTime time-inject-row-timeOnly is-initial-hidden" id="time-inject-row-timeStart"  data-i18n="[titleOrg]time-inject.placeholder.time">
         <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
         <input type="text" id="node-input-time" />
         <input type="hidden" id="node-input-timeType">
     </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-offset is-initial-hidden"  id="time-inject-row-timeMainOffset" data-i18n="[titleOrg]time-inject.placeholder.timeOffset">
+    <div class="form-row time-inject-row-all block-indent1 time-inject-row-timeStartOffset is-initial-hidden"  id="time-inject-row-timeStartOffset" data-i18n="[titleOrg]time-inject.placeholder.timeOffset">
         <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeOffset"></span></label>
         <input id="node-input-offset" data-i18n="[placeholder]time-inject.placeholder.timeOffset"/>
         <input type="hidden" id="node-input-offsetType">
         <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row time-inject-row time-inject-row-timeLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
+    <div class="form-row time-inject-row-all time-inject-row-intervalTime is-initial-hidden">
+        <span data-i18n="time-inject.label.and"></span>
+    </div>
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-timeEnd"  data-i18n="[titleOrg]time-inject.placeholder.timeEnd">
+        <label for="node-input-timeEnd"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeEnd"></span></label>
+        <input type="text" id="node-input-timeEnd" />
+        <input type="hidden" id="node-input-timeEndType">
+    </div>
+    <div class="form-row time-inject-row-all block-indent1 time-inject-row-timeEndOffset is-initial-hidden" id="time-inject-row-timeEndOffset" data-i18n="[title]time-inject.placeholder.timeOffset">
+        <label for="node-input-timeEndOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeEndOffset"></span></label>
+        <input id="node-input-timeEndOffset" data-i18n="[placeholder]time-inject.placeholder.timeEndOffset"/>
+        <input type="hidden" id="node-input-timeEndOffsetType">
+        <select id="node-input-timeEndOffsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <div class="form-row time-inject-row-all time-inject-row-timeLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
         <div id="time-inject-timeDays" class="time-inject-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.validForDays"></div>
             <div style="display:inline-block;">
@@ -1788,16 +2030,15 @@
             </div>
         </div>
     </div>
-    <div class="form-row form-tips" data-i18n="[html]time-inject.tips.config"></div>
-    <hr class="time-inject-row block-noindent time-inject-row-alt is-initial-hidden">
-    <div class="form-row time-inject-row time-inject-row-alt is-initial-hidden" data-i18n="[title]time-inject.placeholder.property">
+    <hr class="time-inject-row-all block-noindent time-inject-row-altStart is-initial-hidden">
+    <div class="form-row time-inject-row-all time-inject-row-altStart is-initial-hidden time-inject-row-timeOnly" data-i18n="[title]time-inject.placeholder.property">
         <label for="node-input-property"><i class="fa fa-sun-o"></i> <span data-i18n="time-inject.label.property"></span></label>
         <input type="text" id="node-input-property" data-i18n="[placeholder]time-inject.placeholder.property"/>
         <input type="hidden" id="node-input-propertyType">
         <select id="node-input-propertyCompare" class="node-input-addOn">
         </select>
     </div>
-    <div class="form-row time-inject-row block-indent2 row-propertyThreshold is-initial-hidden" data-i18n="[title]time-inject.placeholder.propertyThreshold">
+    <div class="form-row time-inject-row-all block-indent2 row-propertyThreshold is-initial-hidden" data-i18n="[title]time-inject.placeholder.propertyThreshold">
         <label for="node-input-propertyThreshold"><i class="fa fa-compress"></i> <span data-i18n="time-inject.label.propertyThreshold"></span></label>
         <input type="text" id="node-input-propertyThreshold" data-i18n="[placeholder]time-inject.placeholder.propertyThreshold">
         <input type="hidden" id="node-input-propertyThresholdType">
@@ -1807,13 +2048,16 @@
         <input type="text" id="node-input-timeAlt" data-i18n="[placeholder]time-inject.placeholder.timeAlt"/>
         <input type="hidden" id="node-input-timeAltType">
     </div>
-    <div class="form-row time-inject-row block-indent1 time-inject-row-timeAltOffset is-initial-hidden" id="node-input-timeAltOffset-div" data-i18n="[titleOrg]time-inject.placeholder.timeAltOffset">
+    <div class="form-row time-inject-row-all block-indent1 time-inject-row-timeAltOffset is-initial-hidden" id="node-input-timeAltOffset-div" data-i18n="[titleOrg]time-inject.placeholder.timeAltOffset">
         <label for="node-input-timeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="time-inject.label.timeAltOffset"></span></label>
         <input id="node-input-timeAltOffset" data-i18n="[placeholder]time-inject.placeholder.timeAltOffset"/>
         <input type="hidden" id="node-input-timeAltOffsetType">
         <select id="node-input-timeAltOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row time-inject-row time-inject-row-timeAltLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
+    <div class="form-row time-inject-row-all form-tips time-inject-row-altStart is-initial-hidden">
+        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
+    </div>
+    <div class="form-row time-inject-row-all time-inject-row-timeAltLimits is-initial-hidden" data-i18n="[title]time-inject.placeholder.timeLimits">
         <div id="time-inject-timeAltDays" class="time-inject-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="time-inject.label.on"></div>
             <div style="display:inline-block;">
@@ -1856,9 +2100,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="form-row time-inject-row form-tips time-inject-row-alt is-initial-hidden">
-        <span data-i18n="[html]time-inject.tips.addTimes"></span>&nbsp;
     </div>
     <hr class="time-inject-recalc is-initial-hidden">
     <div class="form-row time-inject-recalc is-initial-hidden" data-i18n="[title]time-inject.placeholder.recalcTime">

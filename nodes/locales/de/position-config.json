@@ -6,7 +6,7 @@
             "json": "json",
             "jsonata": "jsonata Ausdr.",
             "timestamp": "Zeitpunkt",
-            "suntimeObj": "{Sonnenzeit}",
+            "suntimeObj": "{nächste Sonnenzeit}",
             "blank": "\"\"",
             "nothing": "nichts",
             "checkall" : "Alle Regeln überprüfen",
