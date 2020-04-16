@@ -170,7 +170,7 @@ module.exports = function (RED) {
      * check if a manual overwrite of the rule should be set
      * @param {*} node node data
      * @param {*} msg message object
-     * @returns true if override is active, otherwise false
+     * @returns {boolean} true if override is active, otherwise false
      */
     function checkTCPosOverwrite(node, msg, dNow) {
         // node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
@@ -273,6 +273,8 @@ module.exports = function (RED) {
                     const el = rule.conditonData[i];
                     if (rule.conditon.result === true && el.condition.value === cRuleLogOperatorOr) {
                         break; // not nessesary, becaue already tue
+                    } else if (rule.conditon.result === false && el.condition.value === cRuleLogOperatorAnd) {
+                        break; // should never bekome true
                     }
                     delete el.operandValue;
                     delete el.thresholdValue;
@@ -295,13 +297,6 @@ module.exports = function (RED) {
                             }
                         }
                     );
-                    if (el.result === false) {
-                        if (el.condition.value === cRuleLogOperatorAnd) {
-                            rule.conditon.result = false;
-                            break; // and should not evaluate anymore
-                        }
-                        continue; // maybe next is true
-                    }
                     rule.conditon = {
                         index : i,
                         result : el.result,
@@ -313,7 +308,6 @@ module.exports = function (RED) {
                         rule.conditon.textShort += ' ' + hlp.clipStrLength(el.thresholdValue, 10);
                     }
                 }
-                // console.log(util.inspect(rule, Object.getOwnPropertyNames(rule)));
             }
         }
     }
@@ -547,6 +541,7 @@ module.exports = function (RED) {
             // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
+            livingRuleData.importance = ruleSel.importance;
             node.reason.code = 4;
 
             livingRuleData.active = true;
@@ -555,7 +550,7 @@ module.exports = function (RED) {
 
             livingRuleData.conditional = ruleSel.conditional;
             livingRuleData.timeLimited = ruleSel.timeLimited;
-            node.payload.current = node.positionConfig.getOutDataProp(node, msg, {
+            livingRuleData.payloadData = {
                 type: ruleSel.payloadType,
                 value: ruleSel.payloadValue,
                 format: ruleSel.payloadFormat,
@@ -563,9 +558,7 @@ module.exports = function (RED) {
                 offset: ruleSel.payloadOffsetValue,
                 multiplier: ruleSel.payloadOffsetMultiplier,
                 next: true
-            });
-            node.payload.topic = ruleSel.topic;
-
+            };
             const data = { number: ruleSel.pos, name: ruleSel.name };
             let name = 'rule';
             if (ruleSel.conditional) {
@@ -593,7 +586,8 @@ module.exports = function (RED) {
         }
         livingRuleData.active = false;
         livingRuleData.id = -1;
-        node.payload.current = node.positionConfig.getOutDataProp(node, msg, {
+        livingRuleData.importance = 0;
+        livingRuleData.payloadData = {
             type: node.timeClockData.payloadDefaultType,
             value: node.timeClockData.payloadDefault,
             format: node.timeClockData.payloadDefaultTimeFormat,
@@ -601,8 +595,8 @@ module.exports = function (RED) {
             offset: node.timeClockData.payloadDefaultOffset,
             multiplier: node.timeClockData.payloadDefaultOffsetMultiplier,
             next: true
-        });
-        node.payload.topic = node.timeClockData.topic;
+        };
+        livingRuleData.topic = node.timeClockData.topic;
         node.reason.code = 1;
         node.reason.state = RED._('clock-timer.states.default');
         node.reason.description = RED._('clock-timer.reasons.default');
@@ -741,11 +735,18 @@ module.exports = function (RED) {
                     autoTrigger : node.autoTrigger
                 };
 
+
                 // check for manual overwrite
-                if (!checkTCPosOverwrite(node, msg, dNow)) {
+                let overwrite = checkTCPosOverwrite(node, msg, now);
+                if (!overwrite || node.rules.maxImportance === 0) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
-                    ruleId = timeCtrl.rule.id;
+                    if (!overwrite || timeCtrl.rule.importance > node.timeClockData.overwrite.importance) {
+                        ruleId = timeCtrl.rule.id;
+                        node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData);
+                        node.payload.topic = timeCtrl.rule.topic;
+
+                    }
                 }
 
                 // node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
