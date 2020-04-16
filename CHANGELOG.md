@@ -3,14 +3,18 @@
 #### 1.1.0:  mayor release
 
 - time-inject
-  - added possibility for interval inject
+  - added possibility for interval inject #135
+  - added warning sign if node needs to be opened, saved and deployed
+- blind-control + clock-time
+  - fixed and/Or condition of rule conditions #138
+  - renamed priority for Overrides to importance
+  - implemented importance for rules #138
 
 in work:
 - time-span
   - rework
 - time-comp
   - rework
-
 
 #### 1.0.17:  small enhancement
 

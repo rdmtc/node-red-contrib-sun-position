@@ -578,7 +578,7 @@
             },
             label() {
                 let result = '';
-                if (!this.positionConfig || !this.nameInt) {
+                if (!this.positionConfig || !this.nameInt || !this.injectTypeSelect) {
                     result += '⚠ ';
                 }
                 if (this.name) {
