@@ -19,7 +19,7 @@ module.exports = function (RED) {
      */
     function tsGetScheduleTime(time, limit) {
         const dNow = new Date();
-        let millisec = time.getTime() - dNow.getTime();
+        let millisec = time.valueOf() - dNow.valueOf();
         if (limit) {
             while (millisec < limit) {
                 millisec += 86400000; // 24h
@@ -97,6 +97,7 @@ module.exports = function (RED) {
             onlyEvenDays: config.timeOnlyEvenDays
         };
 
+<<<<<<< Updated upstream
         if (!this.timeData.offsetType) {
             this.timeData.offsetType = ((this.timeData.offset === 0) ? 'none' : 'num');
         }
@@ -141,6 +142,228 @@ module.exports = function (RED) {
         this.propertyOperator = config.propertyCompare || 'true';
         this.propertyThresholdValue = config.propertyThreshold;
         this.propertyThresholdType = config.propertyThresholdType;
+=======
+        this.addPayloadData = [];
+        if (typeof config.addPayload1Type !== 'undefined' &&
+            typeof config.addPayload1ValueType !== 'undefined' &&
+            config.addPayload1Type !== 'none' &&
+            config.addPayload1ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload1Type,
+                outValue: config.addPayload1,
+                type: config.addPayload1ValueType,
+                value: config.addPayload1Value,
+                format: config.addPayload1Format,
+                offsetType: config.addPayload1OffsetType,
+                offset: config.addPayload1Offset,
+                multiplier: config.addPayload1OffsetMultiplier,
+                next: config.addPayload1Next,
+                days: config.addPayload1Days
+            });
+        }
+        if (typeof config.addPayload2Type !== 'undefined' &&
+            typeof config.addPayload2ValueType !== 'undefined' &&
+            config.addPayload2Type !== 'none' &&
+            config.addPayload2ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload2Type,
+                outValue: config.addPayload2,
+                type: config.addPayload2ValueType,
+                value: config.addPayload2Value,
+                format: config.addPayload2Format,
+                offsetType: config.addPayload2OffsetType,
+                offset: config.addPayload2Offset,
+                multiplier: config.addPayload2OffsetMultiplier,
+                next: config.addPayload2Next,
+                days: config.addPayload2Days
+            });
+        }
+        if (typeof config.addPayload3Type !== 'undefined' &&
+            typeof config.addPayload3ValueType !== 'undefined' &&
+            config.addPayload3Type !== 'none' &&
+            config.addPayload3ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload3Type,
+                outValue: config.addPayload3,
+                type: config.addPayload3ValueType,
+                value: config.addPayload3Value,
+                format: config.addPayload3Format,
+                offsetType: config.addPayload3OffsetType,
+                offset: config.addPayload3Offset,
+                multiplier: config.addPayload3OffsetMultiplier,
+                next: config.addPayload3Next,
+                days: config.addPayload3Days
+            });
+        }
+        for (let i = 0; i < this.addPayloadData.length; i++) {
+            const el = this.addPayloadData[i];
+            if (typeof el.next === 'undefined' ||
+                el.next === null ||
+                el.next === true ||
+                el.next === 'true') {
+                el.next = true;
+            } else if (el.next === 'false' ||
+                el.next === false) {
+                el.next = false;
+            }
+        }
+
+        /*    if (typeof this.addPayload1Data.next === 'undefined' ||
+                this.addPayload1Data.next === null ||
+                this.addPayload1Data.next === true ||
+                this.addPayload1Data.next === 'true') {
+                this.addPayload1Data.next = true;
+            } else if (this.addPayload1Data.next === 'false' || this.addPayload1Data.next === false) {
+                this.addPayload1Data.next = false;
+            }
+
+            if (typeof config.addPayload2Type !== 'undefined' &&
+                typeof config.addPayload2ValueType !== 'undefined' &&
+                config.addPayload2Type !== 'none' &&
+                config.addPayload2ValueType !== 'none' &&) {
+                this.addPayload2Data = {
+                    outType: config.addPayload2Type,
+                    outValue: config.addPayload2,
+                    type: config.addPayload2ValueType,
+                    value: config.addPayload2Value,
+                    format: config.addPayload2Format,
+                    offsetType: config.addPayload2OffsetType,
+                    offset: config.addPayload2Offset,
+                    multiplier: config.addPayload2OffsetMultiplier,
+                    next: config.addPayload2Next,
+                    days: config.addPayload2Days
+                };
+                if (typeof this.addPayload2Data.next === 'undefined' ||
+                    this.addPayload2Data.next === null ||
+                    this.addPayload2Data.next === true ||
+                    this.addPayload2Data.next === 'true') {
+                    this.addPayload2Data.next = true;
+                } else if (this.addPayload2Data.next === 'false' ||
+                        this.addPayload2Data.next === false) {
+                    this.addPayload2Data.next = false;
+                }
+
+                if (typeof config.addPayload3Type !== 'undefined' &&
+                    typeof config.addPayload3ValueType !== 'undefined' &&
+                    config.addPayload3Type !== 'none' &&
+                    config.addPayload3ValueType !== 'none') {
+                    this.addPayload3Data = {
+                        outType: config.addPayload3Type,
+                        outValue: config.addPayload3,
+                        type: config.addPayload3ValueType,
+                        value: config.addPayload3Value,
+                        format: config.addPayload3Format,
+                        offsetType: config.addPayload3OffsetType,
+                        offset: config.addPayload3Offset,
+                        multiplier: config.addPayload3OffsetMultiplier,
+                        next: config.addPayload3Next,
+                        days: config.addPayload3Days
+                    };
+                    if (typeof this.addPayload3Data.next === 'undefined' ||
+                        this.addPayload3Data.next === null ||
+                        this.addPayload3Data.next === true ||
+                        this.addPayload3Data.next === 'true') {
+                        this.addPayload3Data.next = true;
+                    } else if (this.addPayload3Data.next === 'false' ||
+                            this.addPayload3Data.next === false) {
+                        this.addPayload3Data.next = false;
+                    }
+                } // has addPayload3
+            } // has addPayload2
+        } // has addPayload1 */
+
+        if (this.injType === tInj.intervalTime ||
+            this.injType === tInj.timer) {
+            this.timeStartData = {
+                type: config.timeType,
+                value : config.time,
+                offsetType : config.offsetType,
+                offset : config.offset || config.timeOffset || 0,
+                multiplier : config.offsetMultiplier || config.timeOffsetMultiplier || 60,
+                next : true,
+                days : config.timeDays,
+                months : config.timeMonths,
+                onlyOddDays: config.timeOnlyOddDays,
+                onlyEvenDays: config.timeOnlyEvenDays
+            };
+
+            if (!this.timeStartData.offsetType) {
+                this.timeStartData.offsetType = ((this.timeStartData.offset === 0) ? 'none' : 'num');
+            }
+            if (this.timeStartData.days === '') {
+                throw new Error('No valid days given! Please check settings!');
+            }
+            if (this.timeStartData.months === '') {
+                throw new Error('No valid month given! Please check settings!');
+            }
+            if (this.timeStartData.onlyEvenDays && this.timeStartData.onlyOddDays) {
+                this.timeStartData.onlyEvenDays = false;
+                this.timeStartData.onlyOddDays = false;
+            }
+            this.property = config.property || '';
+            this.propertyType = config.propertyType || 'none';
+            this.propertyOperator = config.propertyCompare || 'true';
+            this.propertyThresholdValue = config.propertyThreshold;
+            this.propertyThresholdType = config.propertyThresholdType;
+
+            if (this.injType === tInj.timer && config.timeAltType &&
+                config.timeAltType !== 'none' &&
+                this.propertyType !== 'none') {
+                this.timeStartAltData = {
+                    type: config.timeAltType || 'none',
+                    value : config.timeAlt || '',
+                    offsetType : config.timeAltOffsetType,
+                    offset : config.timeAltOffset || 0,
+                    multiplier : config.timeAltOffsetMultiplier || 60,
+                    next : true,
+                    days : config.timeAltDays,
+                    months : config.timeAltMonths,
+                    onlyOddDays: config.timeAltOnlyOddDays,
+                    onlyEvenDays: config.timeAltOnlyEvenDays
+                };
+                if (!this.timeStartAltData.offsetType) { this.timeStartAltData.offsetType = ((this.timeStartAltData.offset === 0) ? 'none' : 'num'); }
+
+                if (this.timeStartAltData.days === '') {
+                    throw new Error('No valid alternate days given! Please check settings!');
+                }
+                if (this.timeStartAltData.months === '') {
+                    throw new Error('No valid alternate month given! Please check settings!');
+                }
+                if (this.timeStartAltData.onlyEvenDays && this.timeStartAltData.onlyOddDays) {
+                    this.timeStartAltData.onlyEvenDays = false;
+                    this.timeStartAltData.onlyOddDays = false;
+                }
+            } // timeAlt
+        } // timeStartData
+
+        if (this.injType === tInj.intervalTime) {
+            this.timeEndData = {
+                type: config.timeEndType,
+                value : config.timeEnd,
+                offsetType : config.timeEndOffsetType,
+                offset : config.timeEndOffset || 0,
+                multiplier : config.timeEndOffsetMultiplierr || 60,
+                next : true,
+                days : config.timeDays,
+                months : config.timeMonths,
+                onlyOddDays: config.timeOnlyOddDays,
+                onlyEvenDays: config.timeOnlyEvenDays
+            };
+            if (!this.timeEndData.offsetType) {
+                this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');
+            }
+            if (this.timeEndData.days === '') {
+                throw new Error('No valid days given! Please check settings!');
+            }
+            if (this.timeEndData.months === '') {
+                throw new Error('No valid month given! Please check settings!');
+            }
+            if (this.timeEndData.onlyEvenDays && this.timeEndData.onlyOddDays) {
+                this.timeEndData.onlyEvenDays = false;
+                this.timeEndData.onlyOddDays = false;
+            }
+        } // timeEndData
+>>>>>>> Stashed changes
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
 
@@ -168,7 +391,28 @@ module.exports = function (RED) {
                     text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                 });
             }
+<<<<<<< Updated upstream
         }
+=======
+        };
+
+        /**
+         * Prepaes a message object for sending
+         */
+        node.prepOutMsg = msg => {
+            node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+            msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
+            msg.topic = config.topic;
+            for (let i = 0; i < node.addPayloadData.length; i++) {
+                node.debug(`prepOutMsg-${i} node.addPayload[${i}]=${util.inspect(node.addPayloadData[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                node.positionConfig.setMessageProp(this, msg, node.addPayloadData[i], node.payloadData.now);
+                node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+            }
+            msg._srcid = node.id;
+            msg._ts = node.payloadData.now.valueOf();
+            return msg;
+        };
+>>>>>>> Stashed changes
 
         /**
          * creates the timeout
@@ -315,10 +559,17 @@ module.exports = function (RED) {
                         if (isAlt) {
                             let needsRecalc = false;
                             try {
+<<<<<<< Updated upstream
                                 useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
                                     node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
                                 needsRecalc = (isAltFirst && !useAlternateTime) || (!isAltFirst && useAlternateTime);
                                 // node.debug(`timeOutObj isAlt=${isAlt} isAltFirst=${isAltFirst} needsRecalc=${needsRecalc}`);
+=======
+                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, { type: node.propertyType, value: node.property},
+                                    node.propertyOperator, { type:node.propertyThresholdType, value:node.propertyThresholdValue});
+                                needsRecalc = (node.timeStartData.isAltFirst && !useAlternateTime) || (!node.timeStartData.isAltFirst && useAlternateTime);
+                                // node.debug(`timeOutStartObj isAltAvailable=${node.timeStartData.isAltAvailable} isAltFirst=${node.timeStartData.isAltFirst} needsRecalc=${needsRecalc}`);
+>>>>>>> Stashed changes
 
                             } catch (err) {
                                 needsRecalc = isAltFirst;

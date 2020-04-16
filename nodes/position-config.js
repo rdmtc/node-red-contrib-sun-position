@@ -575,8 +575,8 @@ module.exports = function (RED) {
          * @param {*} [opCallback] - callback function for getting getPropValue
          * @returns {number} float property
          */
-        getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
+        getFloatProp(_srcNode, msg, type, value, def, callback, noError) {
+            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} callback=${callback} noError=${noError}`);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -588,7 +588,7 @@ module.exports = function (RED) {
             } else if (type === 'none') {
                 return def || NaN;
             } else {
-                data = this.getPropValue(_srcNode, msg, { type, value, callback:opCallback });
+                data = this.getPropValue(_srcNode, msg, { type, value, callback });
             }
             if (data === null || typeof data === 'undefined') {
                 if (noError) { return NaN; }
@@ -620,12 +620,12 @@ module.exports = function (RED) {
          * @param {*} _srcNode - source node for logging
          * @param {*} [msg] - the message object
          * @param {outPropType} data - a Data object
+         * @param {*} [dNow] base Date to use for Date time functions
          * @returns {*} output Data
          */
-        getOutDataProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
-            let dNow = new Date(data.now);
-            if (!hlp.isValidDate(data.now)) { dNow = new Date(); }
+        getOutDataProp(_srcNode, msg, data, dNow) {
+            _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
+            dNow = dNow || (hlp.isValidDate(data.now)) ? new Date(data.now) : new Date();
             let result = null;
             if (data.type === null || data.type === 'none' || data.type === '' || data.type === 'null' || (typeof data.type === 'undefined')) {
                 return null;
@@ -674,9 +674,43 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            // _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
+            _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
             return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
+<<<<<<< Updated upstream
+=======
+        /*******************************************************************************************************/
+        /**
+         * Creates a out object, based on input data
+         * @param {*} node The base node
+         * @param {*} msg The Message Object to set the Data
+         * @param {*} data Data object
+         * @param {*} [dNow] base Date to use for Date time functions
+         */
+        setMessageProp(_srcNode, msg, data, dNow) {
+            _srcNode.debug(`setMessageProp dNow=${dNow} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            const res = this.getOutDataProp(_srcNode, msg, data, dNow);
+            _srcNode.debug(`setMessageProp res=${util.inspect(res, { colors: true, compact: 10, breakLength: Infinity })}`);
+            if (res === null || (typeof res === 'undefined')) {
+                this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
+            } else if (res.error) {
+                this.error('Error on getting additional payload: "' + res.error + '"');
+            } else if (data.outType === 'msgPayload') {
+                msg.payload = res;
+            } else if (data.outType === 'msgTs') {
+                msg.ts = res;
+            } else if (data.outType === 'msgLc') {
+                msg.lc = res;
+            } else if (data.outType === 'msgValue') {
+                msg.value = res;
+            } else if (data.outType === 'msg') {
+                RED.util.setMessageProperty(msg, data.outValue, res, true);
+            } else if ((data.outType === 'flow' || data.outType === 'global')) {
+                const contextKey = RED.util.parseContextStore(data.outValue);
+                _srcNode.context()[data.outType].set(contextKey.key, res, contextKey.store);
+            }
+        }
+>>>>>>> Stashed changes
         /*******************************************************************************************************/
         /**
         * @typedef {Object} timePropType
@@ -704,16 +738,17 @@ module.exports = function (RED) {
          * @param {*} _srcNode - source node for logging
          * @param {*} [msg] - the message object
          * @param {timePropType} data - a Data object
+         * @param {*} [dNow] base Date to use for Date time functions
          * @returns {timePropResultType} value of the type input
          */
-        getTimeProp(_srcNode, msg, data) {
+        getTimeProp(_srcNode, msg, data, dNow) {
             // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
                 fix: true
             };
-            let dNow = new Date(data.now);
+            dNow = dNow || (hlp.isValidDate(data.now)) ? new Date(data.now) : new Date();
             if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('getTimeProp: Date parameter not given or date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
@@ -919,15 +954,24 @@ module.exports = function (RED) {
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
+        /**
+        * get a property value from a type input in Node-Red
+        * @param {*} _srcNode - source node information
+        * @param {*} msg - message object
+        * @property {propValueType} operandA - first operand
+        * @property {string} compare - compare between the both operands
+        * @property {propValueType} operandB - second operand
+        * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
+        */
+        comparePropValue(_srcNode, msg, operandA, compare, operandB) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
-            if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
+            if (operandA.type === 'none' || operandA.type === '' || typeof operandA.type === 'undefined' || operandA.type === null) {
                 return false;
-            } else if (opTypeA === 'jsonata' || opTypeA === 'pdmPhaseCheck') {
+            } else if (operandA.type === 'jsonata' || operandA.type === 'pdmPhaseCheck') {
                 compare = 'true';
             }
 
-            const a = this.getPropValue(_srcNode, msg, { type: opTypeA, value: opValueA, callback: opCallback, addID: 1 });
+            const a = this.getPropValue(_srcNode, msg, operandA);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -960,31 +1004,31 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
+                    return (a == this.getPropValue(_srcNode, msg, operandB));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
+                    return (a != this.getPropValue(_srcNode, msg, operandB));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a < this.getPropValue(_srcNode, msg, operandB));
                 case 'lte':
-                    return (a <= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a <= this.getPropValue(_srcNode, msg, operandB));
                 case 'gt':
-                    return (a > this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a > this.getPropValue(_srcNode, msg, operandB));
                 case 'gte':
-                    return (a >= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a >= this.getPropValue(_srcNode, msg, operandB));
                 case 'contain':
-                    return ((a + '').includes(this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 })));
+                    return ((a + '').includes(this.getPropValue(_srcNode, msg, operandB)));
                 case 'containSome': {
-                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
                 default:
-                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare, opTypeA, opValueA, opTypeB, opValueB }));
+                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare}));
                     return hlp.isTrue(a);
             }
         }
