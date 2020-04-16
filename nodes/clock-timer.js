@@ -542,7 +542,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
-            node.reason.code = 4;
+            livingRuleData.code = 4;
 
             livingRuleData.active = true;
             livingRuleData.outputValue = ruleSel.outputValue;
@@ -578,10 +578,10 @@ module.exports = function (RED) {
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
-            node.reason.state= RED._('clock-timer.states.'+name, data);
-            node.reason.description = RED._('clock-timer.reasons.'+name, data);
+            livingRuleData.state= RED._('clock-timer.states.'+name, data);
+            livingRuleData.description = RED._('clock-timer.reasons.'+name, data);
             // node.debug(`checkRules data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
-            // node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -597,10 +597,10 @@ module.exports = function (RED) {
             next: true
         };
         livingRuleData.topic = node.timeClockData.topic;
-        node.reason.code = 1;
-        node.reason.state = RED._('clock-timer.states.default');
-        node.reason.description = RED._('clock-timer.reasons.default');
-        // node.debug(`checkRules end pos=${node.payload.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        livingRuleData.code = 1;
+        livingRuleData.state = RED._('clock-timer.states.default');
+        livingRuleData.description = RED._('clock-timer.reasons.default');
+        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -738,14 +738,16 @@ module.exports = function (RED) {
 
                 // check for manual overwrite
                 let overwrite = checkTCPosOverwrite(node, msg, now);
-                if (!overwrite || node.rules.maxImportance === 0) {
+                if (!overwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
                     if (!overwrite || timeCtrl.rule.importance > node.timeClockData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
                         node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData);
                         node.payload.topic = timeCtrl.rule.topic;
-
+                        node.reason.code = timeCtrl.rule.code;
+                        node.reason.state = timeCtrl.rule.state;
+                        node.reason.description = timeCtrl.rule.description;
                     }
                 }
 

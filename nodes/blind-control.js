@@ -956,7 +956,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
-            node.reason.code = 4;
+            livingRuleData.code = 4;
 
             if (ruleSel.levelOp === cRuleAbsolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, -1);
@@ -987,19 +987,19 @@ module.exports = function (RED) {
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
-            node.reason.state= RED._('blind-control.states.'+name, data);
-            node.reason.description = RED._('blind-control.reasons.'+name, data);
-            // node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            livingRuleData.state = RED._('blind-control.states.'+name, data);
+            livingRuleData.description = RED._('blind-control.reasons.'+name, data);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
         livingRuleData.id = -1;
         livingRuleData.level = node.blindData.levelDefault;
         livingRuleData.topic = node.blindData.topic;
-        node.reason.code = 1;
-        node.reason.state = RED._('blind-control.states.default');
-        node.reason.description = RED._('blind-control.reasons.default');
-        // node.debug(`checkRules end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description} all=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        livingRuleData.code = 1;
+        livingRuleData.state = RED._('blind-control.states.default');
+        livingRuleData.description = RED._('blind-control.reasons.default');
+        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -1234,14 +1234,19 @@ module.exports = function (RED) {
 
                 // check for manual overwrite
                 let overwrite = checkBlindPosOverwrite(node, msg, now);
-                if (!overwrite || node.rules.maxImportance === 0) {
+                node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}`);
+                if (!overwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.blindData.overwrite.importance)) {
                     // calc times:
                     blindCtrl.rule = checkRules(node, msg, now, tempData);
+                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
                     if (!overwrite || blindCtrl.rule.importance > node.blindData.overwrite.importance) {
                         ruleId = blindCtrl.rule.id;
                         node.level.current = blindCtrl.rule.level;
                         node.level.currentInverse = getInversePos_(node, blindCtrl.rule.level);
                         node.level.topic = blindCtrl.rule.topic;
+                        node.reason.code = blindCtrl.rule.code;
+                        node.reason.state = blindCtrl.rule.state;
+                        node.reason.description = blindCtrl.rule.description;
                         if (!blindCtrl.rule.active && (node.sunData.mode > 0)) {
                             // calc sun position:
                             blindCtrl.sunPosition = calcBlindSunPosition(node, msg, now, tempData);
