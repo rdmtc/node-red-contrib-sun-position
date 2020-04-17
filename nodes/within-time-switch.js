@@ -257,49 +257,6 @@ module.exports = function (RED) {
     }
 
     /**
-     * get the schedule time
-     * @param {Date} time - time to schedule
-     * @returns {number} milliseconds until the defined Date
-     */
-    function getScheduleTime(time) {
-        const dNow = new Date();
-        let millis = time.getTime() - dNow.getTime();
-        while (millis < 10) {
-            millis += 86400000; // 24h
-        }
-
-        return millis;
-    }
-
-    /**
-     * check if message should be resend
-     * @param {boolean} isActive - define if resend is active
-     * @param {*} node - thew node Data
-     * @param {Date} time - the time to schedule
-     * @param {*} msg - the message object
-     */
-    function checkReSendMsgDelayed(isActive, node, time, msg) {
-        if (node.timeOutObj) {
-            clearTimeout(node.timeOutObj);
-            node.timeOutObj = null;
-        }
-
-        if (!msg.reSendMsgDelayed && isActive && time) {
-            node.lastMsgObj = RED.util.cloneMessage(msg);
-            node.lastMsgObj.reSendMsgDelayed = false;
-            const millis =  Math.min(getScheduleTime(time) + 10, 2147483646);
-            node.debug('timeout for resend last message ' + time + ' is in ' + millis + 'ms');
-            node.timeOutObj = setTimeout(() => {
-                node.debug('setTimeout triggered, resend last message as configured');
-                node.timeOutObj = null;
-                if (node.lastMsgObj) {
-                    node.lastMsgObj.reSendMsgDelayed = true;
-                    node.emit('input', node.lastMsgObj);
-                }
-            }, millis);
-        }
-    }
-    /**
      * withinTimeSwitchNode
      * @param {*} config - configuration
      */
@@ -379,14 +336,12 @@ module.exports = function (RED) {
                         if (cmpNow >= startNr && cmpNow < endNr) {
                             this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                             send([msg, null]); // this.send([msg, null]);
-                            checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                             done();
                             return null;
                         }
                     } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
                         this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                         send([msg, null]); // this.send([msg, null]);
-                        checkReSendMsgDelayed(config.lastMsgOnEndOut, this, result.end.value, msg);
                         done();
                         return null;
                     }
@@ -396,7 +351,6 @@ module.exports = function (RED) {
 
                 this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix);
                 send([null, msg]); // this.send([null, msg]);
-                checkReSendMsgDelayed(config.lastMsgOnStartOut, this, result.start.value, msg);
                 done();
                 return null;
             } catch (err) {

@@ -973,6 +973,140 @@ module.exports = function (RED) {
                 result = hlp.getDayOfYear(msg.ts);
             } else if (data.type === 'pdbDayOfYearEven') {
                 result = (hlp.getDayOfYear(msg.ts) % 2 === 0);
+            } else if (data.type === 'jsonata') {
+                try {
+                    var expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
+                    // expr.assign('sunTimes', function (val, store) {
+                    //     return node.context().global.get(val, store);
+                    // });
+                    // expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
+                    expr.registerFunction('isValidDate', (date) => {
+                        return hlp.isValidDate(date);
+                    }, '<x?:b>');
+                    expr.registerFunction('isBool', (val) => {
+                        return hlp.isBool(val);
+                    }, '<x:b>');
+                    expr.registerFunction('isTrue', (val) => {
+                        return hlp.isTrue(val);
+                    }, '<x:b>');
+                    expr.registerFunction('isFalse', (val) => {
+                        return hlp.isFalse(val);
+                    }, '<x:b>');
+                    expr.registerFunction('XOR', (a,b) => {
+                        return hlp.XOR(a,b);
+                    }, '<bb:b>');
+                    expr.registerFunction('XAND', (a, b) => {
+                        return hlp.XAND(a,b);
+                    }, '<bb:b>');
+                    expr.registerFunction('countDecimals', (val) => {
+                        return hlp.countDecimals(val);
+                    }, '<n:n>');
+                    expr.registerFunction('pad', (val, len) => {
+                        return hlp.pad(val, len);
+                    }, '<(nsb)n?:s>');
+                    expr.registerFunction('clipStrLength', (val, len) => {
+                        return hlp.clipStrLength(val, len);
+                    }, '<sn:s>');
+                    expr.registerFunction('getLastDayOfMonth', (year, month, weekday) => {
+                        if (weekday < 0) { weekday = 6; }
+                        if (weekday > 6) { weekday = 0; }
+                        return hlp.getLastDayOfMonth(year, month, weekday);
+                    }, '<nnn?n?:s>');
+                    expr.registerFunction('getNthWeekdayOfMonth', (year, month, weekday, nTh) => {
+                        return hlp.getNthWeekdayOfMonth(year, month, weekday, nTh);
+                    }, '<nnn?n?:s>');
+                    expr.registerFunction('getWeekOfYear', (date) => {
+                        return hlp.getWeekOfYear(new Date(date));
+                    }, '<(osn)?:a<n>>');
+                    expr.registerFunction('getDayOfYear', (date) => {
+                        return hlp.getDayOfYear(new Date(date));
+                    }, '<(osn)?:a<n>>');
+                    expr.registerFunction('getStdTimezoneOffset', (date) => {
+                        return hlp.getStdTimezoneOffset(new Date(date));
+                    }, '<(osn)?:n>');
+                    expr.registerFunction('isDSTObserved', (date) => {
+                        return hlp.isDSTObserved(new Date(date));
+                    }, '<(osn)?:b>');
+                    expr.registerFunction('addOffsetToDate', (date, offset, multiplier) => {
+                        const dto = new Date(dadNowte);
+                        if (hlp.isValidDate(dNow)) {
+                            dNow = dto;
+                        } else {
+                            dNow = new Date();
+                        }
+                        return hlp.addOffsetToDate(new Date(date), offset, multiplier);
+                    }, '<(osn)?nn:b>');
+                    expr.registerFunction('getFormattedDateOut', (date, format, utc, timeZoneOffset) => {
+                        const dto = new Date(dadNowte);
+                        if (hlp.isValidDate(dNow)) {
+                            dNow = dto;
+                        } else {
+                            dNow = new Date();
+                        }
+                        return hlp.getFormattedDateOut(date, format, utc, timeZoneOffset);
+                    }, '<(osn)?(sn)?b?n?:o>');
+                    expr.registerFunction('parseDateFromFormat', (date, format, utc, timeZoneOffset, dayNames, monthNames, dayDiffNames) => {
+                        return hlp.parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset);
+                    }, '<xs?b?n?a<s>?a<s>?a<s>?:s>');
+                    expr.registerFunction('parseTimeString', (text, date, utc, timeZoneOffset) => {
+                        return hlp.getTimeOfText(text, date, utc, timeZoneOffset);
+                    }, '<s(osn)?b?n?:o>');
+                    expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
+                        return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
+                    }, '<xb?n?b?:o>');
+
+                    expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dadNowte);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getSunTimeByName(dNow, value, offset, multiplier).value;
+                    }, '<sn?n?(osn)?:(ol)>');
+                    expr.registerFunction('getSunTimePrevNext', (dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dadNowte);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getSunTimePrevNext(dNow);
+                    }, '<(osn)?:(ol)>');
+                    expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dadNowte);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getMoonTimeByName(dNow, value, offset, multiplier).value;
+                    }, '<sn?n?(osn)?:(ol)>');
+                    expr.registerFunction('getSunCalc', (date, calcTimes, sunInSky) => {
+                        return this.getSunCalc(date, calcTimes, sunInSky);
+                    }, '<(osn)?b?b?:(ol)>');
+                    expr.registerFunction('getSunInSky', (date) => {
+                        return this.getSunInSky(date);
+                    }, '<(osn)?:n>');
+                    expr.registerFunction('getMoonCalc', (date, calcTimes) => {
+                        return this.getMoonCalc(new Date(date), calcTimes);
+                    }, '<(osn)?b?:(ol)>');
+                    expr.registerFunction('getMoonIllumination', (date) => {
+                        return this.getMoonIllumination(date);
+                    }, '<(osn)?:(ol)>');
+                    expr.registerFunction('getMoonPhase', (date) => {
+                        return this.getMoonPhase(date);
+                    }, '<(osn)?:(ol)>');
+                    result = RED.util.evaluateJSONataExpression(expr, msg);
+                } catch (err) {
+                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                }
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
