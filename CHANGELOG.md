@@ -8,8 +8,8 @@
 - blind-control + clock-time
   - fixed and/Or condition of rule conditions #138
   - renamed priority for Overrides to importance
-  - implemented importance for rules #138
-  - fixed rules "priority" execution
+  - implemented importance for rules #137
+  - fixed rules "priority" execution #139
 - within-time
   - Removed options for message resend!
 - removed interval-inject --> has moved to time-inject
