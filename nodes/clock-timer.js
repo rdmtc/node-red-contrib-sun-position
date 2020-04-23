@@ -77,7 +77,7 @@ module.exports = function (RED) {
      * @param {number} dExpire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
      */
     function setExpiringOverwrite(node, dNow, dExpire, reason) {
-        node.debug(`setExpiringOverwrite now=${dNow}, dExpire=${dExpire}, reason=${reason}`);
+        node.debug(`setExpiringOverwrite dNow=${dNow}, dExpire=${dExpire}, reason=${reason}`);
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
@@ -410,7 +410,7 @@ module.exports = function (RED) {
         const monthNr = dNow.getMonth();
         const dayId =  hlp.getDayId(dNow);
         prepareRules(node, msg, tempData);
-        // node.debug(`checkRules now=${dNow.toISOString()}, nowNr=${nowNr}, dayNr=${dayNr}, dateNr=${dateNr}, monthNr=${monthNr}, dayId=${dayId}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`);
+        // node.debug(`checkRules dNow=${dNow.toISOString()}, nowNr=${nowNr}, dayNr=${dayNr}, dateNr=${dateNr}, monthNr=${monthNr}, dayId=${dayId}, rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}`);
 
         /**
         * Timestamp compare function
@@ -480,7 +480,7 @@ module.exports = function (RED) {
         let ruleSel = null;
         let ruleindex = -1;
         // node.debug('first loop ' + node.rules.count);
-        for (let i = 0; i < node.rules.count; ++i) { //  node.rules.lastUntil
+        for (let i = 0; i < node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (rule.timeOp === cRuleFrom) { continue; }
@@ -737,7 +737,7 @@ module.exports = function (RED) {
 
 
                 // check for manual overwrite
-                let overwrite = checkTCPosOverwrite(node, msg, now);
+                const overwrite = checkTCPosOverwrite(node, msg, dNow);
                 if (!overwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
@@ -953,29 +953,37 @@ module.exports = function (RED) {
                         const operandAValue = rule[pretext+'OperandAValue'];
                         const operandBType = rule[pretext+'OperandBType'];
                         const operandBValue = rule[pretext+'OperandBValue'];
-                        rule.conditonData.push(
-                            {
-                                result: false,
-                                operandName: getName(operandAType, operandAValue),
-                                thresholdName: getName(operandBType, operandBValue),
-                                operand: {
-                                    type:operandAType,
-                                    value:operandAValue
-                                },
-                                threshold: {
-                                    type:operandBType,
-                                    value:operandBValue
-                                },
-                                operator: {
-                                    value : rule[pretext+'Operator'],
-                                    text : rule[pretext+'OperatorText'],
-                                    description: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule[pretext+'Operator'])
-                                },
-                                condition:  {
-                                    value : conditionValue,
-                                    text : rule[pretext+'LogOperatorText']
-                                }
-                            });
+                        const el =  {
+                            result: false,
+                            operandName: getName(operandAType, operandAValue),
+                            thresholdName: getName(operandBType, operandBValue),
+                            operand: {
+                                type:operandAType,
+                                value:operandAValue
+                            },
+                            threshold: {
+                                type:operandBType,
+                                value:operandBValue
+                            },
+                            operator: {
+                                value : rule[pretext+'Operator'],
+                                text : rule[pretext+'OperatorText'],
+                                description: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule[pretext+'Operator'])
+                            },
+                            condition:  {
+                                value : conditionValue,
+                                text : rule[pretext+'LogOperatorText']
+                            }
+                        };
+                        if (el.operandName.length > 25) {
+                            el.operandNameShort = getNameShort(operandAType, operandAValue);
+                        }
+                        if (el.thresholdName.length > 25) {
+                            el.thresholdNameShort = getNameShort(operandBType, operandBValue);
+                        }
+                        el.text = el.operandName + ' ' + el.operator.text;
+                        el.textShort = (el.operandNameShort || el.operandName) + ' ' + el.operator.text;
+                        rule.conditonData.push(el);
                     }
                     delete rule[pretext+'OperandAType'];
                     delete rule[pretext+'OperandAValue'];

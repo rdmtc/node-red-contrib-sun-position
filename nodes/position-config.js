@@ -213,16 +213,12 @@ module.exports = function (RED) {
                 this._sunTimesCheck(); // refresh if needed, get dayId
                 // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} dNow=${dNow} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
                 if (dayId === this.cache.sunTimesToday.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesToday');
                     result = Object.assign({}, this.cache.sunTimesToday.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesTomorrow');
                     result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesAdd1.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesCache1');
                     result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesAdd2.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesCache2');
                     result = Object.assign({},this.cache.sunTimesAdd2.times[value]); // needed for a object copy
                 } else {
                     this.debug('sun-time not in cache - calc time');
@@ -313,16 +309,12 @@ module.exports = function (RED) {
             let result;
             // this.debug(`getSunTimePrevNext dNow=${dNow} dayId=${dayId} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayId === this.cache.sunTimesToday.dayId) {
-                // this.debug('load sun-times from cache - sunTimesToday (2)');
                 result = this.cache.sunTimesToday.times;
             } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
-                // this.debug('load sun-times from cache - sunTimesTomorrow (2)');
                 result = this.cache.sunTimesTomorrow.times;
             } else if (dayId === this.cache.sunTimesAdd1.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache1 (2)');
                 result = this.cache.sunTimesAdd1.times;
             } else if (dayId === this.cache.sunTimesAdd2.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache2 (2)');
                 result = this.cache.sunTimesAdd2.times;
             } else {
                 this.debug('sun-time not in cache - calc time (2)');
@@ -624,7 +616,7 @@ module.exports = function (RED) {
          * @returns {*} output Data
          */
         getOutDataProp(_srcNode, msg, data, dNow) {
-            _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
+            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
             dNow = dNow || (hlp.isValidDate(data.now)) ? new Date(data.now) : new Date();
             let result = null;
             if (data.type === null || data.type === 'none' || data.type === '' || data.type === 'null' || (typeof data.type === 'undefined')) {
@@ -674,7 +666,7 @@ module.exports = function (RED) {
                 }
                 return null;
             }
-            _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
             return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value });
         }
 
@@ -726,9 +718,8 @@ module.exports = function (RED) {
          * @param {*} [dNow] base Date to use for Date time functions
          */
         setMessageProp(_srcNode, msg, data, dNow) {
-            _srcNode.debug(`setMessageProp dNow=${dNow} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`setMessageProp dNow=${dNow} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             const res = this.getOutDataProp(_srcNode, msg, data, dNow);
-            _srcNode.debug(`setMessageProp res=${util.inspect(res, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (res === null || (typeof res === 'undefined')) {
                 this.error('Could not evaluate ' + data.type + '.' + data.value + '. - Maybe settings outdated (open and save again)!');
             } else if (res.error) {
@@ -975,21 +966,21 @@ module.exports = function (RED) {
                 result = (hlp.getDayOfYear(msg.ts) % 2 === 0);
             } else if (data.type === 'jsonata') {
                 try {
-                    var expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
+                    const expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
                     // expr.assign('sunTimes', function (val, store) {
                     //     return node.context().global.get(val, store);
                     // });
                     // expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
-                    expr.registerFunction('isValidDate', (date) => {
+                    expr.registerFunction('isValidDate', date => {
                         return hlp.isValidDate(date);
                     }, '<x?:b>');
-                    expr.registerFunction('isBool', (val) => {
+                    expr.registerFunction('isBool', val => {
                         return hlp.isBool(val);
                     }, '<x:b>');
-                    expr.registerFunction('isTrue', (val) => {
+                    expr.registerFunction('isTrue', val => {
                         return hlp.isTrue(val);
                     }, '<x:b>');
-                    expr.registerFunction('isFalse', (val) => {
+                    expr.registerFunction('isFalse', val => {
                         return hlp.isFalse(val);
                     }, '<x:b>');
                     expr.registerFunction('XOR', (a,b) => {
@@ -998,7 +989,7 @@ module.exports = function (RED) {
                     expr.registerFunction('XAND', (a, b) => {
                         return hlp.XAND(a,b);
                     }, '<bb:b>');
-                    expr.registerFunction('countDecimals', (val) => {
+                    expr.registerFunction('countDecimals', val => {
                         return hlp.countDecimals(val);
                     }, '<n:n>');
                     expr.registerFunction('pad', (val, len) => {
@@ -1015,34 +1006,22 @@ module.exports = function (RED) {
                     expr.registerFunction('getNthWeekdayOfMonth', (year, month, weekday, nTh) => {
                         return hlp.getNthWeekdayOfMonth(year, month, weekday, nTh);
                     }, '<nnn?n?:s>');
-                    expr.registerFunction('getWeekOfYear', (date) => {
+                    expr.registerFunction('getWeekOfYear', date => {
                         return hlp.getWeekOfYear(new Date(date));
                     }, '<(osn)?:a<n>>');
-                    expr.registerFunction('getDayOfYear', (date) => {
+                    expr.registerFunction('getDayOfYear', date => {
                         return hlp.getDayOfYear(new Date(date));
                     }, '<(osn)?:a<n>>');
-                    expr.registerFunction('getStdTimezoneOffset', (date) => {
+                    expr.registerFunction('getStdTimezoneOffset', date => {
                         return hlp.getStdTimezoneOffset(new Date(date));
                     }, '<(osn)?:n>');
-                    expr.registerFunction('isDSTObserved', (date) => {
+                    expr.registerFunction('isDSTObserved', date => {
                         return hlp.isDSTObserved(new Date(date));
                     }, '<(osn)?:b>');
                     expr.registerFunction('addOffsetToDate', (date, offset, multiplier) => {
-                        const dto = new Date(dadNowte);
-                        if (hlp.isValidDate(dNow)) {
-                            dNow = dto;
-                        } else {
-                            dNow = new Date();
-                        }
                         return hlp.addOffsetToDate(new Date(date), offset, multiplier);
                     }, '<(osn)?nn:b>');
                     expr.registerFunction('getFormattedDateOut', (date, format, utc, timeZoneOffset) => {
-                        const dto = new Date(dadNowte);
-                        if (hlp.isValidDate(dNow)) {
-                            dNow = dto;
-                        } else {
-                            dNow = new Date();
-                        }
                         return hlp.getFormattedDateOut(date, format, utc, timeZoneOffset);
                     }, '<(osn)?(sn)?b?n?:o>');
                     expr.registerFunction('parseDateFromFormat', (date, format, utc, timeZoneOffset, dayNames, monthNames, dayDiffNames) => {
@@ -1057,7 +1036,7 @@ module.exports = function (RED) {
 
                     expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
                         if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dadNowte);
+                            const dto = new Date(dNow);
                             if (hlp.isValidDate(dNow)) {
                                 dNow = dto;
                             } else {
@@ -1066,9 +1045,9 @@ module.exports = function (RED) {
                         }
                         return this.getSunTimeByName(dNow, value, offset, multiplier).value;
                     }, '<sn?n?(osn)?:(ol)>');
-                    expr.registerFunction('getSunTimePrevNext', (dNow) => {
+                    expr.registerFunction('getSunTimePrevNext', dNow => {
                         if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dadNowte);
+                            const dto = new Date(dNow);
                             if (hlp.isValidDate(dNow)) {
                                 dNow = dto;
                             } else {
@@ -1079,7 +1058,7 @@ module.exports = function (RED) {
                     }, '<(osn)?:(ol)>');
                     expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
                         if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dadNowte);
+                            const dto = new Date(dNow);
                             if (hlp.isValidDate(dNow)) {
                                 dNow = dto;
                             } else {
@@ -1091,16 +1070,16 @@ module.exports = function (RED) {
                     expr.registerFunction('getSunCalc', (date, calcTimes, sunInSky) => {
                         return this.getSunCalc(date, calcTimes, sunInSky);
                     }, '<(osn)?b?b?:(ol)>');
-                    expr.registerFunction('getSunInSky', (date) => {
+                    expr.registerFunction('getSunInSky', date => {
                         return this.getSunInSky(date);
                     }, '<(osn)?:n>');
                     expr.registerFunction('getMoonCalc', (date, calcTimes) => {
                         return this.getMoonCalc(new Date(date), calcTimes);
                     }, '<(osn)?b?:(ol)>');
-                    expr.registerFunction('getMoonIllumination', (date) => {
+                    expr.registerFunction('getMoonIllumination', date => {
                         return this.getMoonIllumination(date);
                     }, '<(osn)?:(ol)>');
-                    expr.registerFunction('getMoonPhase', (date) => {
+                    expr.registerFunction('getMoonPhase', date => {
                         return this.getMoonPhase(date);
                     }, '<(osn)?:(ol)>');
                     result = RED.util.evaluateJSONataExpression(expr, msg);

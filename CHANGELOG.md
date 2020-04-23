@@ -9,15 +9,10 @@
   - fixed and/Or condition of rule conditions #138
   - renamed priority for Overrides to importance
   - implemented importance for rules #138
+  - fixed rules "priority" execution
 - within-time
   - Removed options for message resend!
 - removed interval-inject --> has moved to time-inject
-
-in work:
-- time-span
-  - rework
-- time-comp
-  - rework
 
 #### 1.0.17:  small enhancement
 
