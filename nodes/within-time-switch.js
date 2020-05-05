@@ -17,7 +17,7 @@ module.exports = function (RED) {
      * @param {*} node - node object
      * @returns {*} Date value
      */
-    function getDate(comparetype, msg, node) {
+    function getIntDate(comparetype, msg, node) {
         let id = '';
         let value = '';
         switch (comparetype) {
@@ -130,7 +130,7 @@ module.exports = function (RED) {
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
-        if (config.timeMonths && !config.timeMonths.includes(dNow.getDay())) {
+        if (config.timeMonths && !config.timeMonths.includes(dNow.getMonth())) {
             node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
             result.warn = RED._('within-time-switch.errors.invalid-month');
             return result;
@@ -324,7 +324,7 @@ module.exports = function (RED) {
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('config ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
-                const now = getDate(config.tsCompare, msg, node);
+                const now = getIntDate(config.tsCompare, msg, node);
                 const result = calcWithinTimes(this, msg, config, now);
 
                 if (result.valid && result.start.value && result.end.value) {

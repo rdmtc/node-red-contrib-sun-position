@@ -252,8 +252,7 @@
                     if (property !== 'none' && property !== '' && value2) {
                         return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12) + '/' + RED.nodes.getType('position-config').getValueLabel(this, type2, value2, offset2, 12);
                     }
-
-                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, undefined, 12);
+                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12);
                 };
 
                 if (this.name) {
@@ -263,9 +262,9 @@
                 if (this.startTime && this.endTime) {
                     return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
                         this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-                +
-                getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                    this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset);
+                            ' - ' +
+                            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
+                                this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset);
                 }
 
                 return 'within-time';

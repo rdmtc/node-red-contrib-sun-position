@@ -358,7 +358,14 @@ module.exports = function (RED) {
             msg.topic = config.topic;
             for (let i = 0; i < node.addPayloadData.length; i++) {
                 node.debug(`prepOutMsg-${i} node.addPayload[${i}]=${util.inspect(node.addPayloadData[i], { colors: true, compact: 10, breakLength: Infinity })}`);
-                node.positionConfig.setMessageProp(this, msg, node.addPayloadData[i], node.payloadData.now);
+                const res = this.getOutDataProp(this, msg, node.addPayloadData[i], node.payloadData.now);
+                if (res === null || (typeof res === 'undefined')) {
+                    this.error('Could not evaluate ' + node.addPayloadData[i].type + '.' + node.addPayloadData[i].value + '. - Maybe settings outdated (open and save again)!');
+                } else if (res.error) {
+                    this.error('Error on getting additional payload: "' + res.error + '"');
+                } else {
+                    node.positionConfig.setMessageProp(this, msg, node.addPayloadData[i].outType, node.addPayloadData[i].outValue, res);
+                }
                 node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
             msg._srcid = node.id;
