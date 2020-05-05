@@ -53,10 +53,9 @@ module.exports = function (RED) {
      * set the node state
      * @param {*} node - the node Data
      * @param {*} data - the state data
-     * @param {boolean} [_onInit] - indicates if the node in in initialisation
      * @returns {boolean}
      */
-    function setstate(node, data, _onInit) {
+    function setstate(node, data) {
         if (data.error) {
             node.status({
                 fill: 'red',
@@ -74,26 +73,8 @@ module.exports = function (RED) {
             return false;
         }
         if (data.start && data.start.error) {
-            if (_onInit === true) {
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', data.start.error)
-                });
-                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', data.start.error));
-                return true;
-            }
             hlp.handleError(node, RED._('within-time-switch.errors.error-start-time', { message : data.start.error}), undefined, data.start.error);
         } else if (data.end && data.end.error) {
-            if (_onInit === true) {
-                node.status({
-                    fill: 'red',
-                    shape: 'ring',
-                    text: RED._('node-red-contrib-sun-position/position-config:errors.error-init', data.end.error)
-                });
-                node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', data.end.error));
-                return true;
-            }
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : data.end.error}), undefined, data.end.error);
         } else if (data.start && data.start.value && data.end && data.end.value) {
             node.status({
@@ -206,8 +187,7 @@ module.exports = function (RED) {
         }
 
         if (result.altStartTime && config.startTimeAltType !== 'none') {
-            // node.debug('using alternate start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            // result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeAltType, config.startTimeAlt, config.startOffsetAltType, config.startOffsetAlt, config.startOffsetAltMultiplier);
+            // node.debug(`using alternate start time  config.startTimeType=${ config.startTimeType},config.startTime=${ config.startTime}, result.altStartTime=${ result.altStartTime}, config.startTimeAltType=${ config.startTimeAltType}`);
             result.start = node.positionConfig.getTimeProp(node, msg, {
                 type: config.startTimeAltType,
                 value : config.startTimeAlt,
@@ -217,9 +197,8 @@ module.exports = function (RED) {
             });
 
             result.startSuffix = '⎇ ';
-        } else {
-            // node.debug('using standard start time ' + result.altStartTime + ' - ' + config.startTimeAltType);
-            // result.start = node.positionConfig.getTimeProp(node, msg, config.startTimeType, config.startTime, config.startOffsetType, config.startOffset, config.startOffsetMultiplier);
+        } else if (msg || (node.startTimeType !== 'msg')) {
+            // node.debug(`using standard start time  config.startTimeType=${ config.startTimeType},config.startTime=${ config.startTime}, result.altStartTime=${ result.altStartTime}, config.startTimeAltType=${ config.startTimeAltType}`);
             result.start = node.positionConfig.getTimeProp(node, msg, {
                 type: config.startTimeType,
                 value : config.startTime,
@@ -230,8 +209,7 @@ module.exports = function (RED) {
         }
 
         if (result.altEndTime && config.endTimeAltType !== 'none') {
-            // node.debug('using alternate end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            // result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeAltType, config.endTimeAlt, config.endOffsetAltType, config.endOffsetAlt, config.endOffsetAltMultiplier);
+            // node.debug(`using alternate end time  config.endTimeType=${ config.endTimeType},config.endTime=${ config.endTime}, result.altEndTime=${ result.altEndTime}, config.endTimeAltType=${ config.endTimeAltType}`);
             result.end = node.positionConfig.getTimeProp(node, msg, {
                 type: config.endTimeAltType,
                 value : config.endTimeAlt,
@@ -240,9 +218,8 @@ module.exports = function (RED) {
                 multiplier : config.endOffsetAltMultiplier
             });
             result.endSuffix = ' ⎇';
-        } else {
-            // node.debug('using standard end time ' + result.altEndTime + ' - ' + config.startTimeAltType);
-            // result.end = node.positionConfig.getTimeProp(node, msg, config.endTimeType, config.endTime, config.endOffsetType, config.endOffset, config.endOffsetMultiplier);
+        } else if (msg || (node.endTimeType !== 'msg')) {
+            // node.debug(`using standard end time  config.endTimeType=${ config.endTimeType},config.endTime=${ config.endTime}, result.altEndTime=${ result.altEndTime}, config.endTimeAltType=${ config.endTimeAltType}`);
             result.end = node.positionConfig.getTimeProp(node, msg, {
                 type: config.endTimeType,
                 value : config.endTime,
@@ -369,21 +346,6 @@ module.exports = function (RED) {
                 return null;
             }
             node.status({});
-            const result = calcWithinTimes(this, null, config, new Date());
-            // if an error occurred, will retry in 6 minutes. This will prevent errors on initialization.
-            if (setstate(this, result, true)) {
-                node.debug('node is in initialization, retrigger time calculation in 6 min');
-                setTimeout(() => {
-                    try {
-                        const result = calcWithinTimes(this, null, config, new Date());
-                        setstate(this, result);
-                    } catch (err) {
-                        node.error(err.message);
-                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-                        setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
-                    }
-                }, 360000); // 6 Minuten
-            }
         } catch (err) {
             node.error(err.message);
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));

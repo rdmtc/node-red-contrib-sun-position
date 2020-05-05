@@ -10,8 +10,14 @@
   - renamed priority for Overrides to importance
   - implemented importance for rules #137
   - fixed rules "priority" execution #139
+  - enhanced autoTrigger rule selection #143
 - within-time
+  - fixed month limitation #141
   - Removed options for message resend!
+  - Removed initial calculation trigger
+  - fixed `internal error` if a time could not evaluated into better error
+- time-comp
+  - fixed out value, if context store or any special message object
 - removed interval-inject --> has moved to time-inject
 
 #### 1.0.17:  small enhancement
