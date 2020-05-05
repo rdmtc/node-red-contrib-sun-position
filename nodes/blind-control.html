@@ -10,7 +10,7 @@
          */
         function getVal(node,name) {
             const v = $('#node-input-' + name).val();
-            if (v === undefined) {
+            if (typeof v === 'undefined') {
                 return node[name];
             }
             return v;
@@ -622,7 +622,7 @@
                     function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
-                            if (typeof data.valid === undefined) {
+                            if (typeof data.valid === 'undefined') {
                                 result += '<div>The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
                             } else if (!data.valid || !data.isValid) {
                                 result += '<div>Rule is invalid and needs to be changed!!</div>';

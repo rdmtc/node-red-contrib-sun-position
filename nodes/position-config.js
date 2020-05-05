@@ -580,7 +580,7 @@ module.exports = function (RED) {
             } else if (type === 'none') {
                 return def || NaN;
             } else {
-                data = this.getPropValue(_srcNode, msg, { type, value, callback });
+                data = this.getPropValue(_srcNode, msg, { type, value, callback }, noError);
             }
             if (data === null || typeof data === 'undefined') {
                 if (noError) { return NaN; }
@@ -807,8 +807,8 @@ module.exports = function (RED) {
                 } else {
                     // can handle context, json, jsonata, env, ...
                     result.fix = false; // is not a fixed time if can be changed
-                    const res = this.getPropValue(_srcNode, msg, data);
-                    if (typeof res !== undefined && res !== null) {
+                    const res = this.getPropValue(_srcNode, msg, data, true);
+                    if (typeof res !== 'undefined' && res !== null) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
@@ -855,7 +855,7 @@ module.exports = function (RED) {
         * @param {propValueType} data - data object with more information
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
-        getPropValue(_srcNode, msg, data) {
+        getPropValue(_srcNode, msg, data, noError) {
             // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             let result = undefined;
             if (data.type === '' || data.type === 'none' || typeof data.type === 'undefined' || data.type === null) {
@@ -1053,7 +1053,9 @@ module.exports = function (RED) {
                 // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
-                _srcNode.error(RED._('errors.notEvaluableProperty', data));
+                if (noError !== true) {
+                    _srcNode.error(RED._('errors.notEvaluableProperty', data));
+                }
                 return undefined;
             }
             // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);

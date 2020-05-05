@@ -311,7 +311,7 @@ module.exports = function (RED) {
             }
 
             let millisecEnd = 1000 * 60 * 60 * 24; // 24h
-            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== undefined) && (errorStatus === '')) {
+            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined') && (errorStatus === '')) {
                 // node.debug('timeout ' + node.nextEndTime + ' is in ' + millisec + 'ms');
                 millisecEnd = tsGetScheduleTime(node.nextEndTime, 10);
             }
@@ -353,12 +353,13 @@ module.exports = function (RED) {
          * Prepaes a message object for sending
          */
         node.prepOutMsg = msg => {
-            node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+            const dNow = new Date();
             msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
             msg.topic = config.topic;
             for (let i = 0; i < node.addPayloadData.length; i++) {
                 node.debug(`prepOutMsg-${i} node.addPayload[${i}]=${util.inspect(node.addPayloadData[i], { colors: true, compact: 10, breakLength: Infinity })}`);
-                const res = this.getOutDataProp(this, msg, node.addPayloadData[i], node.payloadData.now);
+                const res = node.positionConfig.getOutDataProp(this, msg, node.addPayloadData[i], dNow);
                 if (res === null || (typeof res === 'undefined')) {
                     this.error('Could not evaluate ' + node.addPayloadData[i].type + '.' + node.addPayloadData[i].value + '. - Maybe settings outdated (open and save again)!');
                 } else if (res.error) {
@@ -369,7 +370,7 @@ module.exports = function (RED) {
                 node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
             msg._srcid = node.id;
-            msg._ts = node.payloadData.now.valueOf();
+            msg._ts = dNow.valueOf();
             return msg;
         };
 
@@ -377,11 +378,10 @@ module.exports = function (RED) {
          * creates the timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
-         * @param {Date} [dNow] - Date object with the calculation base
          * @returns {object} state or error
          */
-        node.doCreateStartTimeout = (node, _onInit, dNow) => {
-            node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        node.doCreateStartTimeout = (node, _onInit) => {
+            // node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             node.nextStartTime = null;
             node.nextStartTimeAlt = null;
 
@@ -406,7 +406,7 @@ module.exports = function (RED) {
                 }
             }
 
-            node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (!node.timeStartData) {
                 node.debug('doCreateStartTimeout - absolute Intervall');
                 clearInterval(node.intervalObj);
@@ -426,7 +426,7 @@ module.exports = function (RED) {
             node.timeStartData.isAltFirst = false;
             let isFixedTime = true;
 
-            node.timeStartData.now = dNow || new Date();
+            node.timeStartData.now = new Date();
             const startLimit = node.getTimeLimitation(node.timeStartData.now);
             if (startLimit.valid) {
                 node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -626,12 +626,11 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.payloadData.now = new Date();
                 node.debug('--------- time-inject - input (type=' + msg.type + ')');
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                node.doCreateStartTimeout(node, false, node.payloadData.now);
+                node.doCreateStartTimeout(node, false);
                 send(node.prepOutMsg(msg));
                 if (msg.payload === null || (typeof msg.payload === 'undefined')) {
                     done('could not evaluate ' + config.payloadType + '.' + config.payload);
