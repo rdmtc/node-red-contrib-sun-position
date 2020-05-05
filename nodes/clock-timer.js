@@ -516,9 +516,19 @@ module.exports = function (RED) {
             }
         }
 
+        const checkRuleForAT = rule => {
+            const num = getRuleTimeData(node, msg, rule, dNow);
+            if (num > nowNr) {
+                node.debug('autoTrigger set to rule ' + rule.pos);
+                const diff = num - nowNr;
+                node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                node.autoTrigger.type = 2; // next rule
+            }
+        };
         if (ruleSel) {
             if (node.autoTrigger) {
                 if (ruleSel.timeLimited && ruleSel.timeData.ts > nowNr) {
+                    node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
                     const diff = ruleSel.timeData.ts - nowNr;
                     node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
                     node.autoTrigger.type = 1; // current rule end
@@ -528,12 +538,11 @@ module.exports = function (RED) {
                         if (!rule.timeLimited) {
                             continue;
                         }
-                        const num = getRuleTimeData(node, msg, rule, dNow);
-                        if (num > nowNr) {
-                            const diff = num - nowNr;
-                            node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                            node.autoTrigger.type = 2; // next rule
-                        }
+                        checkRuleForAT(rule);
+                    }
+                    // check first rule, maybe next day
+                    if ((node.autoTrigger.type !== 2) && (node.rules.firstTimeLimited < node.rules.count)) {
+                        checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
                     }
                 }
             }
@@ -600,6 +609,15 @@ module.exports = function (RED) {
         livingRuleData.code = 1;
         livingRuleData.state = RED._('clock-timer.states.default');
         livingRuleData.description = RED._('clock-timer.reasons.default');
+        if (node.autoTrigger) {
+            // check first rule, maybe next day
+            if ((node.rules.firstTimeLimited < node.rules.count)) {
+                checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
+            }
+            if ((node.rules.firstTimeLimited !== node.rules.firstFrom) && (node.autoTrigger.type !== 2)) {
+                checkRuleForAT(node.rules.data[node.rules.firstFrom]);
+            }
+        }
         // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
         return livingRuleData;
     }
@@ -875,11 +893,12 @@ module.exports = function (RED) {
                 }
                 return type + '.' + value;
             };
+
+            // Prepare Rules
             node.rules.count = node.rules.data.length;
             node.rules.lastUntil = node.rules.count -1;
-            node.rules.checkUntil = false;
-            node.rules.checkFrom = false;
             node.rules.firstFrom = node.rules.lastUntil;
+            node.rules.firstTimeLimited = node.rules.count;
             node.rules.maxImportance = 0;
 
             for (let i = 0; i < node.rules.count; ++i) {
@@ -891,57 +910,85 @@ module.exports = function (RED) {
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
 
                 rule.timeLimited = (rule.timeType !== 'none');
-                rule.offsetType = rule.offsetType || 'none';
-                rule.multiplier = rule.multiplier || 60000;
-
-                rule.timeMinType = rule.timeMinType || 'none';
-                rule.timeMinValue = (rule.timeMinValue || '');
-                rule.offsetMinType = rule.offsetMinType || 'none';
-                rule.multiplierMin = rule.multiplierMin || 60000;
-
-                rule.timeMaxType = rule.timeMaxType || 'none';
-                rule.timeMaxValue = (rule.timeMaxValue || '');
-                rule.offsetMaxType = rule.offsetMaxType || 'none';
-                rule.multiplierMax = rule.multiplierMax || 60000;
-
-                if (!rule.timeDays || rule.timeDays === '*') {
-                    rule.timeDays = null;
-                } else {
-                    rule.timeDays = rule.timeDays.split(',');
-                    rule.timeDays = rule.timeDays.map( e => parseInt(e) );
-                }
-
-                if (!rule.timeMonths || rule.timeMonths === '*') {
-                    rule.timeMonths = null;
-                } else {
-                    rule.timeMonths = rule.timeMonths.split(',');
-                    rule.timeMonths = rule.timeMonths.map( e => parseInt(e) );
-                }
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;
-                }
+                    delete rule.offsetType;
+                    delete rule.multiplier;
 
-                if (rule.timeOnlyOddDays && rule.timeOnlyEvenDays) {
-                    rule.timeOnlyOddDays = false;
-                    rule.timeOnlyEvenDays = false;
-                }
+                    delete rule.timeMinType;
+                    delete rule.timeMinValue;
+                    delete rule.offsetMinType;
+                    delete rule.multiplierMin;
 
-                rule.timeDateStart = rule.timeDateStart || '';
-                rule.timeDateEnd = rule.timeDateEnd || '';
-                if (rule.timeDateStart || rule.timeDateEnd) {
-                    if (rule.timeDateStart) {
-                        rule.timeDateStart = new Date(rule.timeDateStart);
-                        rule.timeDateStart.setHours(0, 0, 0, 1);
-                    } else {
-                        rule.timeDateStart = new Date(2000,0,1,0, 0, 0, 1);
+                    delete rule.timeMaxType;
+                    delete rule.timeMaxValue;
+                    delete rule.offsetMaxType;
+                    delete rule.multiplierMax;
+
+                    delete rule.timeDays;
+                    delete rule.timeMonths;
+                    delete rule.timeOnlyOddDays;
+                    delete rule.timeOnlyEvenDays;
+                    delete rule.timeDateStart;
+                    delete rule.timeDateEnd;
+                } else {
+                    rule.offsetType = rule.offsetType || 'none';
+                    rule.multiplier = rule.multiplier || 60000;
+
+                    rule.timeMinType = rule.timeMinType || 'none';
+                    rule.timeMinValue = (rule.timeMinValue || '');
+                    rule.offsetMinType = rule.offsetMinType || 'none';
+                    rule.multiplierMin = rule.multiplierMin || 60000;
+
+                    rule.timeMaxType = rule.timeMaxType || 'none';
+                    rule.timeMaxValue = (rule.timeMaxValue || '');
+                    rule.offsetMaxType = rule.offsetMaxType || 'none';
+                    rule.multiplierMax = rule.multiplierMax || 60000;
+
+                    node.rules.firstTimeLimited = Math.min(i,node.rules.firstTimeLimited);
+                    if (rule.timeOp === cRuleUntil) {
+                        node.rules.lastUntil = i;
+                    }
+                    if (rule.timeOp === cRuleFrom) {
+                        node.rules.firstFrom = Math.min(i,node.rules.firstFrom);
                     }
 
-                    if (rule.timeDateEnd) {
-                        rule.timeDateEnd = new Date(rule.timeDateEnd);
-                        rule.timeDateEnd.setHours(23, 59, 59, 999);
+                    if (!rule.timeDays || rule.timeDays === '*') {
+                        rule.timeDays = null;
                     } else {
-                        rule.timeDateEnd = new Date(2000,11,31, 23, 59, 59, 999);
+                        rule.timeDays = rule.timeDays.split(',');
+                        rule.timeDays = rule.timeDays.map( e => parseInt(e) );
+                    }
+
+                    if (!rule.timeMonths || rule.timeMonths === '*') {
+                        rule.timeMonths = null;
+                    } else {
+                        rule.timeMonths = rule.timeMonths.split(',');
+                        rule.timeMonths = rule.timeMonths.map( e => parseInt(e) );
+                    }
+
+                    if (rule.timeOnlyOddDays && rule.timeOnlyEvenDays) {
+                        rule.timeOnlyOddDays = false;
+                        rule.timeOnlyEvenDays = false;
+                    }
+
+                    rule.timeDateStart = rule.timeDateStart || '';
+                    rule.timeDateEnd = rule.timeDateEnd || '';
+                    if (rule.timeDateStart || rule.timeDateEnd) {
+                        if (rule.timeDateStart) {
+                            rule.timeDateStart = new Date(rule.timeDateStart);
+                            rule.timeDateStart.setHours(0, 0, 0, 1);
+                        } else {
+                            rule.timeDateStart = new Date(2000,0,1,0, 0, 0, 1);
+                        }
+
+                        if (rule.timeDateEnd) {
+                            rule.timeDateEnd = new Date(rule.timeDateEnd);
+                            rule.timeDateEnd.setHours(23, 59, 59, 999);
+                        } else {
+                            rule.timeDateEnd = new Date(2000,11,31, 23, 59, 59, 999);
+                        }
                     }
                 }
 
@@ -997,15 +1044,6 @@ module.exports = function (RED) {
                 setCondObj('valid', cRuleLogOperatorOr);
                 setCondObj('valid2', cRuleNone);
                 rule.conditional = rule.conditonData.length > 0;
-
-                if (rule.timeOp === cRuleUntil) {
-                    node.rules.lastUntil = i;
-                    node.rules.checkUntil = true;
-                }
-                if (rule.timeOp === cRuleFrom && !node.rules.checkFrom) {
-                    node.rules.firstFrom = i;
-                    node.rules.checkFrom = true;
-                }
             }
 
             if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
