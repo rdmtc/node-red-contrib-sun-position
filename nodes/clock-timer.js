@@ -611,10 +611,10 @@ module.exports = function (RED) {
         livingRuleData.description = RED._('clock-timer.reasons.default');
         if (node.autoTrigger) {
             // check first rule, maybe next day
-            if ((node.rules.firstTimeLimited < node.rules.count)) {
+            if (node.rules.firstTimeLimited < node.rules.count) {
                 checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
             }
-            if ((node.rules.firstTimeLimited !== node.rules.firstFrom) && (node.autoTrigger.type !== 2)) {
+            if (node.rules.firstTimeLimited !== node.rules.firstFrom) {
                 checkRuleForAT(node.rules.data[node.rules.firstFrom]);
             }
         }
