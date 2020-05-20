@@ -16,15 +16,23 @@ There is also a roller [blind control](blind_control.md) node and a [clock timer
 
 ![nodes](https://user-images.githubusercontent.com/12692680/70033601-19d46a00-15b0-11ea-9e36-a7843e20ff85.png)
 
+## Information on Version changes
+
+If a Node has a warning sign on the label like this one:
+![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
+This is not an error, it hides only that the node needs to be opened, saved and deployed to fix the label.
+
 ## Table of contents
 
 - [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)
+  - [Information on Version changes](#information-on-version-changes)
   - [Table of contents](#table-of-contents)
   - [Preconditions](#preconditions)
   - [Installation](#installation)
   - [General](#general)
     - [Saving resources](#saving-resources)
     - [second based accuracy](#second-based-accuracy)
+  - [base functions for all (or the most of the nodes)](#base-functions-for-all-or-the-most-of-the-nodes)
   - [Implemented Nodes](#implemented-nodes)
     - [sun-position](#sun-position)
       - [sun-position - Node settings](#sun-position---node-settings)
@@ -47,25 +55,6 @@ There is also a roller [blind control](blind_control.md) node and a [clock timer
       - [time-span - Node settings](#time-span---node-settings)
     - [blind-control](#blind-control)
     - [clock-timer](#clock-timer)
-    - [Possible Node Output Formats](#possible-node-output-formats)
-      - [Standard node Output Formats](#standard-node-output-formats)
-      - [enhanced timestamp OutputFormat](#enhanced-timestamp-outputformat)
-        - [offset](#offset)
-        - [formats](#formats)
-        - [timestamp values](#timestamp-values)
-      - [special output](#special-output)
-    - [Times definitions](#times-definitions)
-      - [sun times](#sun-times)
-        - [remarks](#remarks)
-          - [blue hour](#blue-hour)
-          - [amateurDawn /amateurDusk](#amateurdawn-amateurdusk)
-          - [alternate properties](#alternate-properties)
-      - [moon times](#moon-times)
-      - [message, flow or global property or JSONATA expression](#message-flow-or-global-property-or-jsonata-expression)
-    - [input parse formats](#input-parse-formats)
-    - [output timestamp formats](#output-timestamp-formats)
-    - [output timespan formats](#output-timespan-formats)
-    - [Conditions](#conditions)
   - [CHANGELOG](#changelog)
   - [TODO](#todo)
   - [Support, Bugs and Feedback](#support-bugs-and-feedback)

@@ -20,6 +20,10 @@
   - fixed out value, if context store or any special message object
 - removed interval-inject --> has moved to time-inject
 
+I a Node has a warning sign on the label the node needs to be opened, saved and deployed to fix the label:
+![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
+
+
 #### 1.0.17:  small enhancement
 
 - inspired by #132 added for a property the possibility to control by
