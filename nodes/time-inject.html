@@ -578,7 +578,7 @@
             },
             label() {
                 let result = '';
-                if (!this.positionConfig || !this.nameInt) {
+                if (!this.positionConfig || !this.nameInt || !this.injectTypeSelect) {
                     result += '⚠ ';
                 }
                 if (this.name) {
@@ -1262,6 +1262,7 @@
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
+                            types.MsgPayload,
                             'flow',
                             'global',
                             'str',
@@ -1403,6 +1404,7 @@
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
+                            types.MsgPayload,
                             'flow',
                             'global',
                             'str',
@@ -1539,6 +1541,7 @@
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
+                            types.MsgPayload,
                             'flow',
                             'global',
                             'str',

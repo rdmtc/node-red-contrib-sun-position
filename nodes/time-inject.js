@@ -19,7 +19,7 @@ module.exports = function (RED) {
      */
     function tsGetScheduleTime(time, limit) {
         const dNow = new Date();
-        let millisec = time.getTime() - dNow.getTime();
+        let millisec = time.valueOf() - dNow.valueOf();
         if (limit) {
             while (millisec < limit) {
                 millisec += 86400000; // 24h
@@ -56,90 +56,6 @@ module.exports = function (RED) {
         this.intervalCount = config.intervalCount || 0;
         this.intervalCountType = (this.injType === tInj.interval || this.injType === tInj.intervalTime) ? config.intervalCountType || 'num' : 'none';
         this.intervalCountMultiplier = config.intervalCountMultiplier || 60000;
-
-        this.payloadData = {
-            type: config.payloadType,
-            value: config.payload,
-            format: config.payloadTimeFormat,
-            offsetType: config.payloadOffsetType,
-            offset: config.payloadOffset,
-            multiplier: config.payloadOffsetMultiplier,
-            next: true
-        };
-
-        if (typeof config.addPayload1Type !== 'undefined' &&
-            typeof config.addPayload1ValueType !== 'undefined') {
-            this.addPayload1Data = {
-                outType: config.addPayload1Type,
-                outValue: config.addPayload1,
-                type: config.addPayload1ValueType,
-                value: config.addPayload1Value,
-                format: config.addPayload1Format,
-                offsetType: config.addPayload1OffsetType,
-                offset: config.addPayload1Offset,
-                multiplier: config.addPayload1OffsetMultiplier,
-                next: config.addPayload1Next,
-                days: config.addPayload1Days
-            };
-            if (typeof this.addPayload1Data.next === 'undefined' ||
-                this.addPayload1Data.next === null ||
-                this.addPayload1Data.next === true ||
-                this.addPayload1Data.next === 'true') {
-                this.addPayload1Data.next = true;
-            } else if (this.addPayload1Data.next === 'false' || this.addPayload1Data.next === false) {
-                this.addPayload1Data.next = false;
-            }
-
-            if (typeof config.addPayload2Type !== 'undefined' &&
-            typeof config.addPayload2ValueType !== 'undefined') {
-                this.addPayload2Data = {
-                    outType: config.addPayload2Type,
-                    outValue: config.addPayload2,
-                    type: config.addPayload2ValueType,
-                    value: config.addPayload2Value,
-                    format: config.addPayload2Format,
-                    offsetType: config.addPayload2OffsetType,
-                    offset: config.addPayload2Offset,
-                    multiplier: config.addPayload2OffsetMultiplier,
-                    next: config.addPayload2Next,
-                    days: config.addPayload2Days
-                };
-                if (typeof this.addPayload2Data.next === 'undefined' ||
-                    this.addPayload2Data.next === null ||
-                    this.addPayload2Data.next === true ||
-                    this.addPayload2Data.next === 'true') {
-                    this.addPayload2Data.next = true;
-                } else if (this.addPayload2Data.next === 'false' ||
-                        this.addPayload2Data.next === false) {
-                    this.addPayload2Data.next = false;
-                }
-
-                if (typeof config.addPayload3Type !== 'undefined' &&
-                typeof config.addPayload3ValueType !== 'undefined') {
-                    this.addPayload3Data = {
-                        outType: config.addPayload3Type,
-                        outValue: config.addPayload3,
-                        type: config.addPayload3ValueType,
-                        value: config.addPayload3Value,
-                        format: config.addPayload3Format,
-                        offsetType: config.addPayload3OffsetType,
-                        offset: config.addPayload3Offset,
-                        multiplier: config.addPayload3OffsetMultiplier,
-                        next: config.addPayload3Next,
-                        days: config.addPayload3Days
-                    };
-                    if (typeof this.addPayload3Data.next === 'undefined' ||
-                        this.addPayload3Data.next === null ||
-                        this.addPayload3Data.next === true ||
-                        this.addPayload3Data.next === 'true') {
-                        this.addPayload3Data.next = true;
-                    } else if (this.addPayload3Data.next === 'false' ||
-                            this.addPayload3Data.next === false) {
-                        this.addPayload3Data.next = false;
-                    }
-                } // has addPayload3
-            } // has addPayload2
-        } // has addPayload1
 
         if (this.injType === tInj.intervalTime ||
             this.injType === tInj.timer) {
@@ -233,6 +149,81 @@ module.exports = function (RED) {
             }
         } // timeEndData
 
+        this.payloadData = {
+            type: config.payloadType,
+            value: config.payload,
+            format: config.payloadTimeFormat,
+            offsetType: config.payloadOffsetType,
+            offset: config.payloadOffset,
+            multiplier: config.payloadOffsetMultiplier,
+            next: true
+        };
+
+        this.addPayloadData = [];
+        if (typeof config.addPayload1Type !== 'undefined' &&
+            typeof config.addPayload1ValueType !== 'undefined' &&
+            config.addPayload1Type !== 'none' &&
+            config.addPayload1ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload1Type,
+                outValue: config.addPayload1,
+                type: config.addPayload1ValueType,
+                value: config.addPayload1Value,
+                format: config.addPayload1Format,
+                offsetType: config.addPayload1OffsetType,
+                offset: config.addPayload1Offset,
+                multiplier: config.addPayload1OffsetMultiplier,
+                next: config.addPayload1Next,
+                days: config.addPayload1Days
+            });
+        }
+        if (typeof config.addPayload2Type !== 'undefined' &&
+            typeof config.addPayload2ValueType !== 'undefined' &&
+            config.addPayload2Type !== 'none' &&
+            config.addPayload2ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload2Type,
+                outValue: config.addPayload2,
+                type: config.addPayload2ValueType,
+                value: config.addPayload2Value,
+                format: config.addPayload2Format,
+                offsetType: config.addPayload2OffsetType,
+                offset: config.addPayload2Offset,
+                multiplier: config.addPayload2OffsetMultiplier,
+                next: config.addPayload2Next,
+                days: config.addPayload2Days
+            });
+        }
+        if (typeof config.addPayload3Type !== 'undefined' &&
+            typeof config.addPayload3ValueType !== 'undefined' &&
+            config.addPayload3Type !== 'none' &&
+            config.addPayload3ValueType !== 'none') {
+            this.addPayloadData.push({
+                outType: config.addPayload3Type,
+                outValue: config.addPayload3,
+                type: config.addPayload3ValueType,
+                value: config.addPayload3Value,
+                format: config.addPayload3Format,
+                offsetType: config.addPayload3OffsetType,
+                offset: config.addPayload3Offset,
+                multiplier: config.addPayload3OffsetMultiplier,
+                next: config.addPayload3Next,
+                days: config.addPayload3Days
+            });
+        }
+        for (let i = 0; i < this.addPayloadData.length; i++) {
+            const el = this.addPayloadData[i];
+            if (typeof el.next === 'undefined' ||
+                el.next === null ||
+                el.next === true ||
+                el.next === 'true') {
+                el.next = true;
+            } else if (el.next === 'false' ||
+                el.next === false) {
+                el.next = false;
+            }
+        }
+
         this.recalcTime = (config.recalcTime || 2) * 3600000;
 
         this.timeOutStartObj = null;
@@ -320,7 +311,7 @@ module.exports = function (RED) {
             }
 
             let millisecEnd = 1000 * 60 * 60 * 24; // 24h
-            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== undefined) && (errorStatus === '')) {
+            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined') && (errorStatus === '')) {
                 // node.debug('timeout ' + node.nextEndTime + ' is in ' + millisec + 'ms');
                 millisecEnd = tsGetScheduleTime(node.nextEndTime, 10);
             }
@@ -362,19 +353,24 @@ module.exports = function (RED) {
          * Prepaes a message object for sending
          */
         node.prepOutMsg = msg => {
-            msg._srcid = node.id;
-            msg.topic = config.topic;
+            // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+            const dNow = new Date();
             msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
-
-            if (node.addPayload1Data) {
-                node.positionConfig.setMessageProperty(this, msg, node.addPayload1Data, node.payloadData.now);
-                if (node.addPayload2Data) {
-                    node.positionConfig.setMessageProperty(this, msg, node.addPayload2Data, node.payloadData.now);
-                    if (node.addPayload3Data) {
-                        node.positionConfig.setMessageProperty(this, msg, node.addPayload3Data, node.payloadData.now);
-                    }
+            msg.topic = config.topic;
+            for (let i = 0; i < node.addPayloadData.length; i++) {
+                node.debug(`prepOutMsg-${i} node.addPayload[${i}]=${util.inspect(node.addPayloadData[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                const res = node.positionConfig.getOutDataProp(this, msg, node.addPayloadData[i], dNow);
+                if (res === null || (typeof res === 'undefined')) {
+                    this.error('Could not evaluate ' + node.addPayloadData[i].type + '.' + node.addPayloadData[i].value + '. - Maybe settings outdated (open and save again)!');
+                } else if (res.error) {
+                    this.error('Error on getting additional payload: "' + res.error + '"');
+                } else {
+                    node.positionConfig.setMessageProp(this, msg, node.addPayloadData[i].outType, node.addPayloadData[i].outValue, res);
                 }
+                node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
+            msg._srcid = node.id;
+            msg._ts = dNow.valueOf();
             return msg;
         };
 
@@ -382,11 +378,10 @@ module.exports = function (RED) {
          * creates the timeout
          * @param {*} node - the node representation
          * @param {boolean} [_onInit] - _true_ if is in initialisation
-         * @param {Date} [dNow] - Date object with the calculation base
          * @returns {object} state or error
          */
-        node.doCreateStartTimeout = (node, _onInit, dNow) => {
-            node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        node.doCreateStartTimeout = (node, _onInit) => {
+            // node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             node.nextStartTime = null;
             node.nextStartTimeAlt = null;
 
@@ -411,7 +406,7 @@ module.exports = function (RED) {
                 }
             }
 
-            node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (!node.timeStartData) {
                 node.debug('doCreateStartTimeout - absolute Intervall');
                 clearInterval(node.intervalObj);
@@ -431,7 +426,7 @@ module.exports = function (RED) {
             node.timeStartData.isAltFirst = false;
             let isFixedTime = true;
 
-            node.timeStartData.now = dNow || new Date();
+            node.timeStartData.now = new Date();
             const startLimit = node.getTimeLimitation(node.timeStartData.now);
             if (startLimit.valid) {
                 node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -534,8 +529,8 @@ module.exports = function (RED) {
                         if (node.timeStartData.isAltAvailable) {
                             let needsRecalc = false;
                             try {
-                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.propertyType, node.property,
-                                    node.propertyOperator, node.propertyThresholdType, node.propertyThresholdValue);
+                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, { type: node.propertyType, value: node.property},
+                                    node.propertyOperator, { type:node.propertyThresholdType, value:node.propertyThresholdValue});
                                 needsRecalc = (node.timeStartData.isAltFirst && !useAlternateTime) || (!node.timeStartData.isAltFirst && useAlternateTime);
                                 // node.debug(`timeOutStartObj isAltAvailable=${node.timeStartData.isAltAvailable} isAltFirst=${node.timeStartData.isAltFirst} needsRecalc=${needsRecalc}`);
 
@@ -631,12 +626,11 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.payloadData.now = new Date();
                 node.debug('--------- time-inject - input (type=' + msg.type + ')');
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
-                node.doCreateStartTimeout(node, false, node.payloadData.now);
+                node.doCreateStartTimeout(node, false);
                 send(node.prepOutMsg(msg));
                 if (msg.payload === null || (typeof msg.payload === 'undefined')) {
                     done('could not evaluate ' + config.payloadType + '.' + config.payload);
