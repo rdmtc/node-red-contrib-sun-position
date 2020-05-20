@@ -360,7 +360,7 @@
                     function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
-                            if (typeof data.valid === undefined) {
+                            if (typeof data.valid === 'undefined') {
                                 result += '<div>The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
                             } else if (!data.valid || !data.isValid) {
                                 result += '<div>Rule is invalid and needs to be changed!!</div>';
@@ -597,6 +597,7 @@
                             data.valid = {};
                             data.isValid = false;
                             data.index = containerIndex;
+                            data.importance = 0;
                             data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
                             data.validOperandBType = (data.validOperandBType || 'num');
                             data.valid2LogOperator = (parseInt(data.valid2LogOperator) || 0);
@@ -1067,11 +1068,19 @@
 
                     const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormat');
                     const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormatsel');
-                    const $dialogTopic = $dialog.find('#dlg-ip-clktime-rule-topic');
-                    // console.log('[IN initCombobox] node=' + node + ' dataList=' + dataList + ' optionElementName=' + optionElementName + ' value=' + value + ' width=' + width); // eslint-disable-line
+
                     appendOptions(node, $dialogPayloadTimeFormatsel, 'outputFormats');
                     autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
                     // #endregion dialogPayload
+                    // #region default topic + importance
+                    const $dialogImportance = $dialog.find('#dlg-ip-clktime-rule-importance');
+                    $dialogImportance.spinner({
+                        max: 1000,
+                        min: 0,
+                        step: 1
+                    });
+                    const $dialogTopic = $dialog.find('#dlg-ip-clktime-rule-topic');
+                    // #endregion dialogLevel
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -1554,6 +1563,7 @@
                                 $dialogPayloadTimeFormatsel.val(valueNum);
                             }
                             $dialogTopic.val(data.topic);
+                            $dialogImportance.val(data.importance || 0);
 
                             _dialogGenHelpText();
 
@@ -1611,6 +1621,7 @@
                             payloadOffsetMultiplier: parseInt($dialogPayloadMultiplier.val()),
                             payloadFormat: $dialogPayloadTimeFormat.val(),
                             topic: $dialogTopic.val(),
+                            importance: parseInt($dialogImportance.val()),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -1680,7 +1691,7 @@
                         const data = _dialogGetData();
                         data.description = getRuleDescription(node, selFields, data);
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
-                        $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
+                        $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
                         resizeContainer();
                     }
@@ -2019,7 +2030,7 @@
             </div>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
+        <div class="dialog-row pt-0" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
             <label for="dlg-ip-clktime-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
             <input type="text" id="dlg-ip-clktime-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
             <input type="hidden" id="dlg-ip-clktime-rule-payloadType">
@@ -2036,12 +2047,13 @@
             </select>
             <input type="text" id="dlg-ip-clktime-rule-payloadTimeFormat" class="ipadd" />
         </div>
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic" data-i18n="[titleOrg]clock-timer.placeholder.ruleTopic">
+        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic" data-i18n="[titleOrg]clock-timer.placeholder.ruleTopic">
             <label for="dlg-ip-clktime-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-clktime-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
+            <input type="text" id="dlg-ip-clktime-rule-importance" class="ipadd" data-i18n="[placeholder]clock-timer.placeholder.ruleImportance"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">
+        <div class="dialog-row pt-0" id="dialog-row-descr">
             <label for="dlg-txt-clktimctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
             <div id="dlg-txt-clktimctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
@@ -2188,6 +2200,10 @@
     }
     .dialog-row .ipadd {
         /* width: calc(20% - 9rem);*/
+        width: 20%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ui-spinner {
         width: 20%;
         margin-bottom: 0px !important;
     }

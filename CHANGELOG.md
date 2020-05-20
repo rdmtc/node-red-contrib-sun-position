@@ -1,5 +1,29 @@
 # node-red-contrib-sun-position
 
+#### 1.1.0:  mayor release
+
+- time-inject
+  - added possibility for interval inject #135
+  - added warning sign if node needs to be opened, saved and deployed
+- blind-control + clock-time
+  - fixed and/Or condition of rule conditions #138
+  - renamed priority for Overrides to importance
+  - implemented importance for rules #137
+  - fixed rules "priority" execution #139
+  - enhanced autoTrigger rule selection #143
+- within-time
+  - fixed month limitation #141
+  - Removed options for message resend!
+  - Removed initial calculation trigger
+  - fixed `internal error` if a time could not evaluated into better error
+- time-comp
+  - fixed out value, if context store or any special message object
+- removed interval-inject --> has moved to time-inject
+
+I a Node has a warning sign on the label the node needs to be opened, saved and deployed to fix the label:
+![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
+
+
 #### 1.0.17:  small enhancement
 
 - inspired by #132 added for a property the possibility to control by

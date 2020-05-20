@@ -10,7 +10,7 @@
          */
         function getVal(node,name) {
             const v = $('#node-input-' + name).val();
-            if (v === undefined) {
+            if (typeof v === 'undefined') {
                 return node[name];
             }
             return v;
@@ -622,7 +622,7 @@
                     function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
                         try {
-                            if (typeof data.valid === undefined) {
+                            if (typeof data.valid === 'undefined') {
                                 result += '<div>The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
                             } else if (!data.valid || !data.isValid) {
                                 result += '<div>Rule is invalid and needs to be changed!!</div>';
@@ -867,6 +867,7 @@
                             data.valid = {};
                             data.isValid = false;
                             data.index = containerIndex;
+                            data.importance = 0;
                             data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
                             data.validOperandBType = (data.validOperandBType || 'num');
                             data.valid2LogOperator = (parseInt(data.valid2LogOperator) || 0);
@@ -1667,6 +1668,14 @@
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    // #endregion dialogLevel
+                    // #region default topic + importance
+                    const $dialogImportance = $dialog.find('#dlg-ip-blindctl-rule-importance');
+                    $dialogImportance.spinner({
+                        max: 1000,
+                        min: 0,
+                        step: 1
+                    });
                     const $dialogTopic = $dialog.find('#dlg-ip-blindctl-rule-topic');
                     // #endregion dialogLevel
                     // #region dialogChange
@@ -2083,6 +2092,8 @@
                             $dialogLevel.typedInput('value',data.levelValue);
                             $dialogLevel.typedInput('type',data.levelType);
                             $dialogTopic.val(data.topic);
+                            $dialogImportance.val(data.importance || 0);
+
                             _dialogGenHelpText();
 
                             dialogDataOnLoading = false;
@@ -2138,6 +2149,7 @@
                             levelOp: parseInt($dialogLevelOperator.val()),
                             levelOpText: $dialogLevelOperator.find('option:selected').text(),
                             topic: $dialogTopic.val(),
+                            importance: parseInt($dialogImportance.val()),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2203,7 +2215,7 @@
                         const data = _dialogGetData();
                         data.description = getRuleDescription(node, selFields, data);
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
-                        $('#rule-name-'+dialogDataIndex).text(data.name || 'rule ' + (dialogDataIndex + 1));
+                        $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
                         resizeContainer();
                     }
@@ -2701,18 +2713,19 @@
             </div>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-level">
+        <div class="dialog-row pt-0" id="dialog-row-level">
             <label for="dlg-ip-blindctl-rule-level"><i class="fa fa-window-maximize"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
             <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
+            <input type="text" id="dlg-ip-blindctl-rule-importance" class="ipadd" data-i18n="[placeholder]blind-control.placeholder.ruleImportance"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0 block-noindent" id="dialog-row-descr">
+        <div class="dialog-row pt-0" id="dialog-row-descr">
             <label for="dlg-txt-blindctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="blind-control.label.ruleDescription" ></span></label>
             <div id="dlg-txt-blindctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
@@ -2862,6 +2875,10 @@
     }
     .dialog-row .ipadd {
         /* width: calc(20% - 9rem);*/
+        width: 20%;
+        margin-bottom: 0px !important;
+    }
+    .dialog-row .ui-spinner {
         width: 20%;
         margin-bottom: 0px !important;
     }

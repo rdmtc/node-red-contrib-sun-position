@@ -23,8 +23,6 @@ If applicable, add screenshots to help explain your problem.
 
 * Version [e.g. 0.4.7]
 * Node-Red Version
-* Hardware [e.g. RaspberryPi3, TinkerboardS, etc.]
 
 **Additional context**
-
 Add any other context about the problem here.

@@ -213,16 +213,12 @@ module.exports = function (RED) {
                 this._sunTimesCheck(); // refresh if needed, get dayId
                 // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} dNow=${dNow} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
                 if (dayId === this.cache.sunTimesToday.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesToday');
                     result = Object.assign({}, this.cache.sunTimesToday.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesTomorrow');
                     result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesAdd1.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesCache1');
                     result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesAdd2.dayId) {
-                    // this.debug('load sun-times from cache - sunTimesCache2');
                     result = Object.assign({},this.cache.sunTimesAdd2.times[value]); // needed for a object copy
                 } else {
                     this.debug('sun-time not in cache - calc time');
@@ -313,16 +309,12 @@ module.exports = function (RED) {
             let result;
             // this.debug(`getSunTimePrevNext dNow=${dNow} dayId=${dayId} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (dayId === this.cache.sunTimesToday.dayId) {
-                // this.debug('load sun-times from cache - sunTimesToday (2)');
                 result = this.cache.sunTimesToday.times;
             } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
-                // this.debug('load sun-times from cache - sunTimesTomorrow (2)');
                 result = this.cache.sunTimesTomorrow.times;
             } else if (dayId === this.cache.sunTimesAdd1.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache1 (2)');
                 result = this.cache.sunTimesAdd1.times;
             } else if (dayId === this.cache.sunTimesAdd2.dayId) {
-                // this.debug('load sun-times from cache - sunTimesCache2 (2)');
                 result = this.cache.sunTimesAdd2.times;
             } else {
                 this.debug('sun-time not in cache - calc time (2)');
@@ -575,8 +567,8 @@ module.exports = function (RED) {
          * @param {*} [opCallback] - callback function for getting getPropValue
          * @returns {number} float property
          */
-        getFloatProp(_srcNode, msg, type, value, def, opCallback, noError) {
-            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} opCallback=${opCallback} noError=${noError}`);
+        getFloatProp(_srcNode, msg, type, value, def, callback, noError) {
+            // _srcNode.debug(`getFloatProp type=${type} value=${value} def=${def} callback=${callback} noError=${noError}`);
             let data; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
             if (type === 'num') {
                 data = Number(value); // extra conversation to handle empty string as 0
@@ -588,7 +580,7 @@ module.exports = function (RED) {
             } else if (type === 'none') {
                 return def || NaN;
             } else {
-                data = this.getPropValue(_srcNode, msg, { type, value, callback:opCallback });
+                data = this.getPropValue(_srcNode, msg, { type, value, callback }, noError);
             }
             if (data === null || typeof data === 'undefined') {
                 if (noError) { return NaN; }
@@ -612,7 +604,6 @@ module.exports = function (RED) {
         * @property {number} [multiplier] - multiplier to the time
         * @property {boolean} [next] - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
         * @property {string} [days] - valid days
-        * @property {Date} [now] - base date, current time as default
         */
 
         /**
@@ -620,12 +611,13 @@ module.exports = function (RED) {
          * @param {*} _srcNode - source node for logging
          * @param {*} [msg] - the message object
          * @param {outPropType} data - a Data object
+         * @param {*} [dNow] base Date to use for Date time functions
          * @returns {*} output Data
          */
-        getOutDataProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset}`);
-            let dNow = new Date(data.now);
-            if (!hlp.isValidDate(data.now)) { dNow = new Date(); }
+        getOutDataProp(_srcNode, msg, data, dNow) {
+            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
+            dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
+
             let result = null;
             if (data.type === null || data.type === 'none' || data.type === '' || data.type === 'null' || (typeof data.type === 'undefined')) {
                 return null;
@@ -679,6 +671,32 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
+         * Creates a out object, based on input data
+         * @param {*} _srcNode The base node
+         * @param {*} msg The Message Object to set the Data
+         * @param {*} type type of the property to set
+         * @param {*} value value of the property to set
+         * @param {*} data Data object to set to the property
+         */
+        setMessageProp(_srcNode, msg, type, value, data) {
+            // _srcNode.debug(`setMessageProp dNow=${dNow} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            if (type === 'msgPayload') {
+                msg.payload = data;
+            } else if (type === 'msgTs') {
+                msg.ts = data;
+            } else if (type === 'msgLc') {
+                msg.lc = data;
+            } else if (type === 'msgValue') {
+                msg.value = data;
+            } else if (type === 'msg') {
+                RED.util.setMessageProperty(msg, value, data, true);
+            } else if ((type === 'flow' || type === 'global')) {
+                const contextKey = RED.util.parseContextStore(value);
+                _srcNode.context()[type].set(contextKey.key, data, contextKey.store);
+            }
+        }
+        /*******************************************************************************************************/
+        /**
         * @typedef {Object} timePropType
         * @property {string} type - type name of the type input
         * @property {string} value - value of the type input
@@ -704,16 +722,17 @@ module.exports = function (RED) {
          * @param {*} _srcNode - source node for logging
          * @param {*} [msg] - the message object
          * @param {timePropType} data - a Data object
+         * @param {*} [dNow] base Date to use for Date time functions
          * @returns {timePropResultType} value of the type input
          */
-        getTimeProp(_srcNode, msg, data) {
+        getTimeProp(_srcNode, msg, data, dNow) {
             // _srcNode.debug(`getTimeProp data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset}`);
             let result = {
                 value: null,
                 error: null,
                 fix: true
             };
-            let dNow = new Date(data.now);
+            dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
             if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('getTimeProp: Date parameter not given or date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
@@ -788,8 +807,8 @@ module.exports = function (RED) {
                 } else {
                     // can handle context, json, jsonata, env, ...
                     result.fix = false; // is not a fixed time if can be changed
-                    const res = this.getPropValue(_srcNode, msg, data);
-                    if (typeof res !== undefined && res !== null) {
+                    const res = this.getPropValue(_srcNode, msg, data, true);
+                    if (typeof res !== 'undefined' && res !== null) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
                         } else {
@@ -836,7 +855,7 @@ module.exports = function (RED) {
         * @param {propValueType} data - data object with more information
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
-        getPropValue(_srcNode, msg, data) {
+        getPropValue(_srcNode, msg, data, noError) {
             // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             let result = undefined;
             if (data.type === '' || data.type === 'none' || typeof data.type === 'undefined' || data.type === null) {
@@ -901,6 +920,128 @@ module.exports = function (RED) {
                 result = hlp.getDayOfYear(msg.ts);
             } else if (data.type === 'pdbDayOfYearEven') {
                 result = (hlp.getDayOfYear(msg.ts) % 2 === 0);
+            } else if (data.type === 'jsonata') {
+                try {
+                    const expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
+                    // expr.assign('sunTimes', function (val, store) {
+                    //     return node.context().global.get(val, store);
+                    // });
+                    // expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
+                    expr.registerFunction('isValidDate', date => {
+                        return hlp.isValidDate(date);
+                    }, '<x?:b>');
+                    expr.registerFunction('isBool', val => {
+                        return hlp.isBool(val);
+                    }, '<x:b>');
+                    expr.registerFunction('isTrue', val => {
+                        return hlp.isTrue(val);
+                    }, '<x:b>');
+                    expr.registerFunction('isFalse', val => {
+                        return hlp.isFalse(val);
+                    }, '<x:b>');
+                    expr.registerFunction('XOR', (a,b) => {
+                        return hlp.XOR(a,b);
+                    }, '<bb:b>');
+                    expr.registerFunction('XAND', (a, b) => {
+                        return hlp.XAND(a,b);
+                    }, '<bb:b>');
+                    expr.registerFunction('countDecimals', val => {
+                        return hlp.countDecimals(val);
+                    }, '<n:n>');
+                    expr.registerFunction('pad', (val, len) => {
+                        return hlp.pad(val, len);
+                    }, '<(nsb)n?:s>');
+                    expr.registerFunction('clipStrLength', (val, len) => {
+                        return hlp.clipStrLength(val, len);
+                    }, '<sn:s>');
+                    expr.registerFunction('getLastDayOfMonth', (year, month, weekday) => {
+                        if (weekday < 0) { weekday = 6; }
+                        if (weekday > 6) { weekday = 0; }
+                        return hlp.getLastDayOfMonth(year, month, weekday);
+                    }, '<nnn?n?:s>');
+                    expr.registerFunction('getNthWeekdayOfMonth', (year, month, weekday, nTh) => {
+                        return hlp.getNthWeekdayOfMonth(year, month, weekday, nTh);
+                    }, '<nnn?n?:s>');
+                    expr.registerFunction('getWeekOfYear', date => {
+                        return hlp.getWeekOfYear(new Date(date));
+                    }, '<(osn)?:a<n>>');
+                    expr.registerFunction('getDayOfYear', date => {
+                        return hlp.getDayOfYear(new Date(date));
+                    }, '<(osn)?:a<n>>');
+                    expr.registerFunction('getStdTimezoneOffset', date => {
+                        return hlp.getStdTimezoneOffset(new Date(date));
+                    }, '<(osn)?:n>');
+                    expr.registerFunction('isDSTObserved', date => {
+                        return hlp.isDSTObserved(new Date(date));
+                    }, '<(osn)?:b>');
+                    expr.registerFunction('addOffsetToDate', (date, offset, multiplier) => {
+                        return hlp.addOffsetToDate(new Date(date), offset, multiplier);
+                    }, '<(osn)?nn:b>');
+                    expr.registerFunction('getFormattedDateOut', (date, format, utc, timeZoneOffset) => {
+                        return hlp.getFormattedDateOut(date, format, utc, timeZoneOffset);
+                    }, '<(osn)?(sn)?b?n?:o>');
+                    expr.registerFunction('parseDateFromFormat', (date, format, utc, timeZoneOffset, dayNames, monthNames, dayDiffNames) => {
+                        return hlp.parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset);
+                    }, '<xs?b?n?a<s>?a<s>?a<s>?:s>');
+                    expr.registerFunction('parseTimeString', (text, date, utc, timeZoneOffset) => {
+                        return hlp.getTimeOfText(text, date, utc, timeZoneOffset);
+                    }, '<s(osn)?b?n?:o>');
+                    expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
+                        return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
+                    }, '<xb?n?b?:o>');
+
+                    expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dNow);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getSunTimeByName(dNow, value, offset, multiplier).value;
+                    }, '<sn?n?(osn)?:(ol)>');
+                    expr.registerFunction('getSunTimePrevNext', dNow => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dNow);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getSunTimePrevNext(dNow);
+                    }, '<(osn)?:(ol)>');
+                    expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dNow);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getMoonTimeByName(dNow, value, offset, multiplier).value;
+                    }, '<sn?n?(osn)?:(ol)>');
+                    expr.registerFunction('getSunCalc', (date, calcTimes, sunInSky) => {
+                        return this.getSunCalc(date, calcTimes, sunInSky);
+                    }, '<(osn)?b?b?:(ol)>');
+                    expr.registerFunction('getSunInSky', date => {
+                        return this.getSunInSky(date);
+                    }, '<(osn)?:n>');
+                    expr.registerFunction('getMoonCalc', (date, calcTimes) => {
+                        return this.getMoonCalc(new Date(date), calcTimes);
+                    }, '<(osn)?b?:(ol)>');
+                    expr.registerFunction('getMoonIllumination', date => {
+                        return this.getMoonIllumination(date);
+                    }, '<(osn)?:(ol)>');
+                    expr.registerFunction('getMoonPhase', date => {
+                        return this.getMoonPhase(date);
+                    }, '<(osn)?:(ol)>');
+                    result = RED.util.evaluateJSONataExpression(expr, msg);
+                } catch (err) {
+                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                }
             } else {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
@@ -912,22 +1053,33 @@ module.exports = function (RED) {
                 // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
-                _srcNode.error(RED._('errors.notEvaluableProperty', data));
+                if (noError !== true) {
+                    _srcNode.error(RED._('errors.notEvaluableProperty', data));
+                }
                 return undefined;
             }
             // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
             return result;
         }
         /*******************************************************************************************************/
-        comparePropValue(_srcNode, msg, opTypeA, opValueA, compare, opTypeB, opValueB, opCallback) {
+        /**
+        * get a property value from a type input in Node-Red
+        * @param {*} _srcNode - source node information
+        * @param {*} msg - message object
+        * @property {propValueType} operandA - first operand
+        * @property {string} compare - compare between the both operands
+        * @property {propValueType} operandB - second operand
+        * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
+        */
+        comparePropValue(_srcNode, msg, operandA, compare, operandB) {
             // _srcNode.debug(`getComparablePropValue opTypeA='${opTypeA}' opValueA='${opValueA}' compare='${compare}' opTypeB='${opTypeB}' opValueB='${opValueB}'`);
-            if (opTypeA === 'none' || opTypeA === '' || typeof opTypeA === 'undefined' || opTypeA === null) {
+            if (operandA.type === 'none' || operandA.type === '' || typeof operandA.type === 'undefined' || operandA.type === null) {
                 return false;
-            } else if (opTypeA === 'jsonata' || opTypeA === 'pdmPhaseCheck') {
+            } else if (operandA.type === 'jsonata' || operandA.type === 'pdmPhaseCheck') {
                 compare = 'true';
             }
 
-            const a = this.getPropValue(_srcNode, msg, { type: opTypeA, value: opValueA, callback: opCallback, addID: 1 });
+            const a = this.getPropValue(_srcNode, msg, operandA);
             switch (compare) {
                 case 'true':
                     return (a === true);
@@ -960,31 +1112,31 @@ module.exports = function (RED) {
                 case 'nfalse_expr':
                     return !hlp.isFalse(a);
                 case 'equal':
-                    return (a == this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
+                    return (a == this.getPropValue(_srcNode, msg, operandB));  // eslint-disable-line eqeqeq
                 case 'nequal':
-                    return (a != this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));  // eslint-disable-line eqeqeq
+                    return (a != this.getPropValue(_srcNode, msg, operandB));  // eslint-disable-line eqeqeq
                 case 'lt':
-                    return (a < this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a < this.getPropValue(_srcNode, msg, operandB));
                 case 'lte':
-                    return (a <= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a <= this.getPropValue(_srcNode, msg, operandB));
                 case 'gt':
-                    return (a > this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a > this.getPropValue(_srcNode, msg, operandB));
                 case 'gte':
-                    return (a >= this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }));
+                    return (a >= this.getPropValue(_srcNode, msg, operandB));
                 case 'contain':
-                    return ((a + '').includes(this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 })));
+                    return ((a + '').includes(this.getPropValue(_srcNode, msg, operandB)));
                 case 'containSome': {
-                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = this.getPropValue(_srcNode, msg, { type: opTypeB, value: opValueB, callback: opCallback, addID: 2 }).split(/,;\|/);
+                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
                 default:
-                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare, opTypeA, opValueA, opTypeB, opValueB }));
+                    _srcNode.error(RED._('errors.unknownCompareOperator', { operator: compare}));
                     return hlp.isTrue(a);
             }
         }
@@ -1327,7 +1479,7 @@ module.exports = function (RED) {
                 }
                 case 'getOutDataData': {
                     try {
-                        obj = posConfig.getOutDataProp(scrNode, undefined, req.query); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
+                        obj = posConfig.getOutDataProp(scrNode, undefined, req.query, req.query.now); // req.query.type, req.query.value, req.query.format, req.query.offset, req.query.offsetType, req.query.multiplier, req.query.next, req.query.days);
                     } catch(err) {
                         obj.value = NaN;
                         obj.error = err.message;

@@ -353,19 +353,8 @@ module.exports = function (RED) {
                         throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
                     } else if (resultObj.error) {
                         node.error('error on getting result: ' + resultObj.error);
-                    } else if (config.result1Type === 'msgPayload') {
-                        msg.payload = resultObj;
-                    } else if (config.result1Type === 'msgTs') {
-                        msg.ts = resultObj;
-                    } else if (config.result1Type === 'msgLc') {
-                        msg.lc = resultObj;
-                    } else if (config.result1Type === 'msgValue') {
-                        msg.value = resultObj;
-                    } else if (config.result1Type === 'msg') {
-                        RED.util.setMessageProperty(msg, config.result1, resultObj);
-                    } else if (config.result1Type === 'flow' || config.result1Type === 'global') {
-                        const contextKey = RED.util.parseContextStore(config.result1);
-                        node.context()[config.result1Type].set(contextKey.key, resultObj, contextKey.store);
+                    } else {
+                        node.positionConfig.setMessageProp(this, msg, config.result1Type, config.result1, resultObj);
                     }
                 }
 

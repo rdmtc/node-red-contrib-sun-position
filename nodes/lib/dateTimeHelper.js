@@ -22,6 +22,8 @@ module.exports = {
     getMsgNumberValue,
     getMsgNumberValue2,
     getSpecialDayOfMonth,
+    getNthWeekdayOfMonth,
+    getLastDayOfMonth,
     getStdTimezoneOffset,
     isDSTObserved,
     addOffset,
@@ -147,6 +149,11 @@ function pad(val, len) {
 }
 
 /*******************************************************************************************************/
+// obj.timer = setTimeoutPromise(60500).then(()
+// const setTimeoutPromise = util.promisify(setTimeout);
+// const setIntervalPromise = util.promisify(setTimeout);
+
+/*******************************************************************************************************/
 /* Node-Red Helper functions                                                                           */
 /*******************************************************************************************************/
 /**
@@ -197,9 +204,10 @@ function chkValueFilled(val, defaultVal) {
 
 /*******************************************************************************************************/
 /**
- * clip a test to a maximum length
+ * clip a text to a maximum length
  * @param {string} v text to clip
  * @param {number} [l] length to clip the text
+* @returns {string} string not longer than the given length
  */
 function clipStrLength(v, l) {
     l = l || 15;
@@ -230,11 +238,14 @@ function clipStrLength(v, l) {
  * get a date for the specific day of week in the given month
  * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} dayOfWeek day of week 0=Sunday, 1=Monday, ..., 6=Saturday
- * @param {number} n the nTh Numer of the day of week - 0 based
+ * @param {number} [dayOfWeek] day of week 0=Sunday, 1=Monday, ..., 6=Saturday
+ * @param {number} [n] the nTh Numer of the day of week - 0 based
+ * @returns {Date} weekday of given month
  */
-function _getNthWeekdayOfMonth(year, month, dayOfWeek, n) {
+function getNthWeekdayOfMonth(year, month, dayOfWeek, n) {
     const date = new Date(year, month, 1);
+    dayOfWeek = dayOfWeek || 1; // Monday
+    n = n || 0; // sunday
     const add = (dayOfWeek - date.getDay() + 7) % 7 + n * 7;
     date.setDate(1 + add);
     return date;
@@ -247,7 +258,7 @@ function _getNthWeekdayOfMonth(year, month, dayOfWeek, n) {
  * @param {number} [dayOfWeek]  Day of week, where 0 is Sunday, 1 Monday ... 6 Saturday
  * @returns {Date} last day of given month
  */
-function _getLastDayOfMonth(year, month, dayOfWeek) {
+function getLastDayOfMonth(year, month, dayOfWeek) {
     const d = new Date(year, month+1, 0);
     dayOfWeek = dayOfWeek || 1; // Monday
     while (d.getDay() !== dayOfWeek) {
@@ -258,7 +269,7 @@ function _getLastDayOfMonth(year, month, dayOfWeek) {
 
 /**
  * get a date for the special day in the given month
- * @param {number} year year to check
+ * @param {string} year year to check
  * @param {number} month month to check
  * @param {number} dayName  Name of the special day
  * @returns {Date|null} last day of given month or null
@@ -266,33 +277,33 @@ function _getLastDayOfMonth(year, month, dayOfWeek) {
 function getSpecialDayOfMonth(year, month, dayName) {
     switch (dayName) {
         case 'fMon':
-            return _getNthWeekdayOfMonth(year, month, 1, 0);
+            return getNthWeekdayOfMonth(year, month, 1, 0);
         case 'fTue':
-            return _getNthWeekdayOfMonth(year, month, 2, 0);
+            return getNthWeekdayOfMonth(year, month, 2, 0);
         case 'fWed':
-            return _getNthWeekdayOfMonth(year, month, 3, 0);
+            return getNthWeekdayOfMonth(year, month, 3, 0);
         case 'fThu':
-            return _getNthWeekdayOfMonth(year, month, 4, 0);
+            return getNthWeekdayOfMonth(year, month, 4, 0);
         case 'fFri':
-            return _getNthWeekdayOfMonth(year, month, 5, 0);
+            return getNthWeekdayOfMonth(year, month, 5, 0);
         case 'fSat':
-            return _getNthWeekdayOfMonth(year, month, 6, 0);
+            return getNthWeekdayOfMonth(year, month, 6, 0);
         case 'fSun':
-            return _getNthWeekdayOfMonth(year, month, 0, 0);
+            return getNthWeekdayOfMonth(year, month, 0, 0);
         case 'lMon':
-            return _getLastDayOfMonth(year, month, 1);
+            return getLastDayOfMonth(year, month, 1);
         case 'lTue':
-            return _getLastDayOfMonth(year, month, 2);
+            return getLastDayOfMonth(year, month, 2);
         case 'lWed':
-            return _getLastDayOfMonth(year, month, 3);
+            return getLastDayOfMonth(year, month, 3);
         case 'lThu':
-            return _getLastDayOfMonth(year, month, 4);
+            return getLastDayOfMonth(year, month, 4);
         case 'lFri':
-            return _getLastDayOfMonth(year, month, 5);
+            return getLastDayOfMonth(year, month, 5);
         case 'lSat':
-            return _getLastDayOfMonth(year, month, 6);
+            return getLastDayOfMonth(year, month, 6);
         case 'lSun':
-            return _getLastDayOfMonth(year, month, 0);
+            return getLastDayOfMonth(year, month, 0);
     }
     return null;
 }
@@ -401,7 +412,7 @@ function getTimeNumberUTC(date) {
  * check if a given number is in given limits
  * @param {number} num number angle to compare
  * @param {number} low low limit
- * @param number*} high high limit
+ * @param {number} high high limit
  * @return {bool}  **true** if the number is inside given limits, at least one limit must be validate, otherwise returns **false**
  */
 function checkLimits(num, low, high) {
@@ -1138,9 +1149,6 @@ _dateFormat.format = [
  * pre defined formats of a given date
  * @param  {Date}            date            -  JavaScript Date to format
  * @param  {string}          [format]        -  format of the date
- * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
- * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
- * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
  * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
@@ -1269,9 +1277,9 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
             return getWeekOfYear(date)[1];
         case 20: // workweek even
             return !(getWeekOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
-        case 21: // workweek even
+        case 21: // day of year
             return getDayOfYear(date)[1]; // eslint-disable-line no-extra-boolean-cast
-        case 22: // workweek even
+        case 22: // day of year even
             return !(getDayOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
     }
 

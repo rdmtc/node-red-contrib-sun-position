@@ -2,14 +2,19 @@
 
 <script type="text/javascript">
     (function() {
+        // category: 'time and astro',
         RED.nodes.registerType('within-time-switch', {
-            category: 'time and astro',
+            category: 'common',
             color: '#f37a33',
             icon: 'switch-white.png',
             inputs: 1,
             outputs: 2,
             defaults: {
                 name: {
+                    value: '',
+                    required: false
+                },
+                nameInt: {
                     value: '',
                     required: false
                 },
@@ -239,14 +244,6 @@
                 },
                 tsCompare: {
                     value: '0'
-                },
-                lastMsgOnStartOut: {
-                    value: false,
-                    required: false
-                },
-                lastMsgOnEndOut: {
-                    value: false,
-                    required: false
                 }
             },
             outputLabels: ['within time', 'out of time'],
@@ -255,8 +252,7 @@
                     if (property !== 'none' && property !== '' && value2) {
                         return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12) + '/' + RED.nodes.getType('position-config').getValueLabel(this, type2, value2, offset2, 12);
                     }
-
-                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, undefined, 12);
+                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12);
                 };
 
                 if (this.name) {
@@ -266,10 +262,9 @@
                 if (this.startTime && this.endTime) {
                     return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
                         this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
-                ((this.lastMsgOnStartOut) ? '⨧ - ' : ' - ') +
-                getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                    this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset) +
-                ((this.lastMsgOnEndOut) ? '⨧' : '');
+                            ' - ' +
+                            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
+                                this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset);
                 }
 
                 return 'within-time';
@@ -790,9 +785,7 @@
                                 (parseFloat($('#node-input-' + name).val()) === val);
                     };
 
-                    if (chkVal('lastMsgOnStartOut', false) &&
-                        chkVal('lastMsgOnEndOut', false) &&
-                        chkVal('tsCompare', 0)) {
+                    if (chkVal('tsCompare', 0)) {
                         $('.enhanced-row').hide();
                     } else {
                         $('.enhanced-row').show();
@@ -981,16 +974,6 @@
                 <option value="3" data-i18n="within-time-switch.label.msgtime"></option>
                 <option value="4" data-i18n="within-time-switch.label.msgvalue"></option>
             </select>
-        </div>
-        <div class="form-row msg-start-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnStartOut">
-            <label for="node-input-lastMsgOnStartOut"><i class="fa fa-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnStartOut"></span></label>
-            <input type="checkbox" id="node-input-lastMsgOnStartOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-            <span data-i18n="within-time-switch.label.lastMsgOnStartOutTxt"></span>
-        </div>
-        <div class="form-row msg-end-out-row" data-i18n="[title]within-time-switch.placeholder.lastMsgOnEndOut">
-            <label for="node-input-lastMsgOnEndOut"><i class="fa fa-fast-forward"></i> <span data-i18n="within-time-switch.label.lastMsgOnEndOut"></span></label>
-            <input type="checkbox" id="node-input-lastMsgOnEndOut" style="display:inline-block; width:15px; vertical-align:baseline;">
-            <span data-i18n="within-time-switch.label.lastMsgOnEndOutTxt"></span>
         </div>
     </div>
     <hr>

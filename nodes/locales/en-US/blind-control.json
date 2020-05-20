@@ -31,6 +31,8 @@
 			"ruleTimeMonths": "only on month",
 			"ruleDescription": "Description",
 			"ruleBlindLevel": "blind position",
+			"ruleTopic": "Topic: ",
+			"ruleImportance":"Override Importance",
 			"ruleTimeLimitStart": "only from",
 			"ruleTimeLimitEnd": "to",
 			"ruleLevelAbs": "↕ absolute",
@@ -117,7 +119,8 @@
 			"time": "time",
 			"offset": "time offset",
 			"level": "level",
-			"ruleTopic":"allows to define a seperate topic for outgoing message per rule, if not defined default topic will be used",
+			"ruleImportance": "defined a importance how the rule should be work to overrides. Only Overrides with a higher or same importance can override the rule.",
+			"ruleTopic": "allows to define a seperate topic for outgoing message per rule, if not defined default topic will be used",
 			"sunTopic": "allows to define a seperate topic for outgoing message if level is set by sun control, if not defined default topic will be used",
 			"oversteerTopic":"allows to define a seperate topic for outgoing message if level is set by sun control oversteer, if not defined default topic of sun Control will be used",
 			"ruleTimeDays": "select days wherefore it should be valid",
@@ -157,8 +160,8 @@
 			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
 		},
 		"reasons": {
-			"overwriteNoExpire": "position is overwritten with priority __prio__",
-			"overwriteExpire": "position is overwritten with priority __prio__, will expire __dateISO__",
+			"overwriteNoExpire": "position is overwritten with importance __importance__",
+			"overwriteExpire": "position is overwritten with importance __importance__, will expire __dateISO__",
 			"default": "position is set to default position because no other rule matches",
 			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [__number__] __name__",
 			"ruleCond": "position by conditional rule __text__ [__number__] __name__",
@@ -179,8 +182,8 @@
 			"startDelay": "node in startup until __dateISO__"
 		},
 		"states": {
-			"overwriteNoExpire": "overwritten [prio=__prio__]",
-			"overwriteExpire": "overwritten [prio=__prio__], till __timeLocal__",
+			"overwriteNoExpire": "overwritten [imp=__importance__]",
+			"overwriteExpire": "overwritten [imp=__importance__], till __timeLocal__",
 			"default": "default",
 			"ruleTime": "__timeOp__ __timeLocal__ [__number__] __name__",
 			"ruleCond": "__textShort__ [__number__] __name__",

@@ -83,26 +83,24 @@ The node was created out of the desire to be able to use the [blind-control node
 The Input is for triggering the calculation and for setting overwrites of the blind position.
 
 - **reset** an incoming message with `msg.reset` or `msg.resetOverwrite` is `true` or where the `msg.topic` contains `resetOverwrite` and the value of `msg.payload` = `true` will reset any existing overrides.
-  - **priority** (optional) when a priority is given the existing override will only reset if the priority of the message is __equal or higher__ then the priority of the existing override. The message priority can be defined by
-    - a property `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value
-    - A higher number is a higher priority. So prio 1 is the lowest priority.
-    - If in the message a property  `msg.exactPriority` or `msg.exactPrivilege` is set to true then the existing override will only reset if the absolute value of the priority of the message is __equal__ then the priority of the existing override.
+  - **importance** (optional) when a importance is given the existing override will only reset if the importance of the message is __equal or higher__ then the importance of the existing override. For a reset, the same applies to the importance as for the overrise (see below).
 - **override** an incoming message with a topic including `manual` or `overwrite` will override any of rule based or default payload.
-  - If an override is already active a new message changes the payload if the **priority** of the existing override allows this.
-- **priority** (optional) Enables to handles overrides of different priorities. Default value will be `0`.
-  - A message property  `msg.prio`, `msg.priority` or `msg.privilege` with a valid numeric value.
+  - If an override is already active a new message changes the payload if the **importance** of the existing override allows this.
+- **importance** (optional) Enables to handles overrides of different importance's. Default value will be `0`.
+  - A message property `msg.importance`, `msg.privilege` with a valid numeric value (due to backward compatibility also `msg.priority` and `msg.prio` is possible)
   - A `boolean` value `true` is considered as numeric `1`.
-  - A higher number is a higher priority. So prio 1 is the lowest priority.
+  - A higher number is a higher importance. So importance 1 is the lowest importance.
+
 - **expire** (optional) Enables to define an override as automatically expiring. As default value the value in the settings is be used.
   - A message property `msg.expire`
   - The value must be a time in milliseconds which is greater than 100. Otherwise the override will be set to not expiring.
-  - If an override is already active a new message with **expire** can change the existing expire behavior if the **priority** of the existing override allows this.
+  - If an override is already active a new message with **expire** can change the existing expire behavior if the **importance** of the existing override allows this.
 
 Useful to know:
 
-- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **priority** will be considered.
-- An already existing Override can only be changed if the prio of the existing is `0` (default - can always be changed) or the message object has a **priority** set with a value that is equal or greater than the existing override. If that is given the **expire**, **priority** or **position** can be changed.
-  - if additional **exactPriority** is defined, then the message priority must be __equal__ to the existing priority.
+- If a **reset** and a new override is set in the same message, any existing override will be reset and the new will be set afterwards. In this scenario no existing override **importance** will be considered.
+- An already existing Override can only be changed if the importance of the existing is `0` (default - can always be changed) or the message object has a **importance** set with a value that is equal or greater than the existing override. If that is given the **expire**, **importance** or **position** can be changed.
+  - if additional **exactImportance** is defined, then the message importance must be __equal__ to the existing importance.
 - A message where the topic contains `triggerOnly` or with an property `msg.trigger` which is true can not act as override.
 
 
@@ -121,7 +119,7 @@ If the output is set to single, an object property `msg.timeCtrl` will be attach
 If the node is configured with two outputs this object is set as the `msg.payload` property of the message that is send to the second output. The difference is also, that the second output will give this object every time a recalculation will is triggered, where the first output only send a message on blind position change.
 
 
-{"rule":{"active":false,"id":-1},"reason":{"code":1,"state":"default","description":"position is set to default position because no other rule matches","stateComplete":"1578080767456 - default"},"timeClock":{"payloadDefault":"","payloadDefaultType":"date","payloadDefaultTimeFormat":0,"payloadDefaultOffset":0,"payloadDefaultOffsetType":"none","payloadDefaultOffsetMultiplier":60000,"topic":"default","overwrite":{"active":false,"expireDuration":null,"priority":0}}}
+{"rule":{"active":false,"id":-1},"reason":{"code":1,"state":"default","description":"position is set to default position because no other rule matches","stateComplete":"1578080767456 - default"},"timeClock":{"payloadDefault":"","payloadDefaultType":"date","payloadDefaultTimeFormat":0,"payloadDefaultOffset":0,"payloadDefaultOffsetType":"none","payloadDefaultOffsetMultiplier":60000,"topic":"default","overwrite":{"active":false,"expireDuration":null,"importance":0}}}
 
 
 - `timeCtrl` a object will be added add as `msg.timeCtrl` property on single output mode or send as `msg.payload` on slit output mode with the following properties:
@@ -142,7 +140,7 @@ If the node is configured with two outputs this object is set as the `msg.payloa
     - `timeCtrl.timeClock.topic` - __string__ - the defined default topic
     - `timeCtrl.timeCtrl.overwrite` - __object__
       - `timeCtrl.timeCtrl.overwrite.active` - __boolean__ - is `true` when overwrite is active, otherwise `false`
-      - `timeCtrl.timeCtrl.overwrite.priority` - __number__ - the priority of the override
+      - `timeCtrl.timeCtrl.overwrite.importance` - __number__ - the importance of the override
       - `timeCtrl.timeCtrl.overwrite.expires` - __boolean__ - is `true` when overwrite expires [exists only if overwrite active]
       - `timeCtrl.timeCtrl.overwrite.expireTs` - __number__ - a timestamp (UNIX) when overwrite expiring [exists only if overwrite expires]
       - `timeCtrl.timeCtrl.overwrite.expireDate` - __string__ - a timestamp (String) when overwrite expiring [exists only if overwrite expires]
