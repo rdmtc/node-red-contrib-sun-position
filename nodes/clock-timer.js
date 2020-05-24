@@ -479,8 +479,8 @@ module.exports = function (RED) {
 
         let ruleSel = null;
         let ruleindex = -1;
-        // node.debug('first loop ' + node.rules.count);
-        for (let i = 0; i < node.rules.lastUntil; ++i) {
+        // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
+        for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (rule.timeOp === cRuleFrom) { continue; }
@@ -552,6 +552,7 @@ module.exports = function (RED) {
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
             livingRuleData.code = 4;
+            livingRuleData.topic = ruleSel.topic;
 
             livingRuleData.active = true;
             livingRuleData.outputValue = ruleSel.outputValue;
@@ -779,7 +780,6 @@ module.exports = function (RED) {
                     node.reason.description = RED._('clock-timer.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
                 node.setState(node.payload.current);
-
                 let topic = node.payload.topic;
                 if (topic) {
                     const topicAttrs = {
@@ -909,7 +909,7 @@ module.exports = function (RED) {
                 node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
 
-                rule.timeLimited = (rule.timeType !== 'none');
+                rule.timeLimited = (rule.timeType && (rule.timeType !== 'none'));
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;

@@ -1,5 +1,16 @@
 # node-red-contrib-sun-position
 
+#### 1.1.1:  BugFix + maintenance
+
+- blind-control + clock-time
+  - fixed missing topic from rules #150
+  - fixed last until rule will not be evaluated
+  - maybe fix of #152
+
+- general
+  - for any simple time input added possibility to add time as format `HH:MM UTC` or `HH:MM:SS UTC` to force UTC Format
+  - added time calculation by azimuth and elevation (is not fully tested) #148
+
 #### 1.1.0:  mayor release
 
 - time-inject
@@ -22,7 +33,6 @@
 
 I a Node has a warning sign on the label the node needs to be opened, saved and deployed to fix the label:
 ![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
-
 
 #### 1.0.17:  small enhancement
 

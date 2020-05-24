@@ -332,7 +332,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.startTimeType || types.TimeEntered.value,
                         defaultValue: node.startTime || '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-startTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
@@ -439,7 +439,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.endTimeType || types.TimeEntered.value,
                         defaultValue: node.endTime || '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env'],
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-endTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
@@ -585,7 +585,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: 'entered',
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyStart').typedInput('type') === 'none')) {
@@ -726,7 +726,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: 'entered',
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyStart').typedInput('type') === 'none')) {

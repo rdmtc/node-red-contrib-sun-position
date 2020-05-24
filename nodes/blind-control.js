@@ -845,7 +845,7 @@ module.exports = function (RED) {
         let ruleSelMax = null;
         let ruleindex = -1;
         // node.debug('first loop ' + node.rules.count);
-        for (let i = 0; i < node.rules.lastUntil; ++i) {
+        for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (rule.timeOp === cRuleFrom) { continue; }
@@ -966,6 +966,7 @@ module.exports = function (RED) {
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
             livingRuleData.code = 4;
+            livingRuleData.topic = ruleSel.topic;
 
             if (ruleSel.levelOp === cRuleAbsolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, -1);
@@ -1467,7 +1468,7 @@ module.exports = function (RED) {
                     rule.levelValue = '';
                 }
 
-                rule.timeLimited = (rule.timeType !== 'none');
+                rule.timeLimited = (rule.timeType && (rule.timeType !== 'none'));
 
                 if (!rule.timeLimited) {
                     rule.timeOp = cRuleNoTime;

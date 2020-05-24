@@ -300,7 +300,7 @@ module.exports = function (RED) {
             }
             node.nextEndTime = null;
             let errorStatus = '';
-            const nextEndTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeEndData);
+            const nextEndTimeData = node.positionConfig.getTimeProp(node, {}, node.timeEndData);
             if (nextEndTimeData.error) {
                 errorStatus = 'could not evaluate end time';
                 node.nextEndTime = null;
@@ -430,7 +430,7 @@ module.exports = function (RED) {
             const startLimit = node.getTimeLimitation(node.timeStartData.now);
             if (startLimit.valid) {
                 node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
-                const nextStartTimeData = node.positionConfig.getTimeProp(node, undefined, node.timeStartData);
+                const nextStartTimeData = node.positionConfig.getTimeProp(node, {}, node.timeStartData);
                 if (nextStartTimeData.error) {
                     errorStatus = 'could not evaluate time';
                     if (_onInit === true) {
@@ -446,7 +446,7 @@ module.exports = function (RED) {
                     if (node.timeStartAltData) {
                         node.timeStartAltData.now = node.timeStartData.now;
                         node.debug(`node.timeStartAltData=${util.inspect(node.timeStartAltData, { colors: true, compact: 10, breakLength: Infinity })}`);
-                        const nextTimeAltData = node.positionConfig.getTimeProp(node, undefined, node.timeStartAltData);
+                        const nextTimeAltData = node.positionConfig.getTimeProp(node, {}, node.timeStartAltData);
 
                         if (nextTimeAltData.error) {
                             errorStatus = 'could not evaluate alternate time';

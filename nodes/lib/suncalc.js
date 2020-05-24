@@ -11,7 +11,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 
     // shortcuts for easier to read formulas
-    const PI = Math.PI;
     const sin = Math.sin;
     const cos = Math.cos;
     const tan = Math.tan;
@@ -69,9 +68,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
     * get azimuth
-    * @param {number} H
-    * @param {number} phi
-    * @param {number} dec
+    * @param {number} H - siderealTime
+    * @param {number} phi - PI constant
+    * @param {number} dec - The declination of the sun
     * @returns {number}
     */
     function azimuth(H, phi, dec) {
@@ -80,9 +79,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
     * get altitude
-    * @param {number} H
-    * @param {number} phi
-    * @param {number} dec
+    * @param {number} H - siderealTime
+    * @param {number} phi - PI constant
+    * @param {number} dec - The declination of the sun
     * @returns {number}
     */
     function altitude(H, phi, dec) {
@@ -132,7 +131,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
         // equation of center
         const P = rad * 102.9372; // perihelion of the Earth
-        return M + C + P + PI;
+        return M + C + P + Math.PI;
     }
 
     /**
@@ -143,7 +142,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
      * sun coordinates
-     * @param {number} d
+     * @param {number} d days in julian calendar
      * @returns {sunCoordsObj}
      */
     function sunCoords(d) {
@@ -160,8 +159,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
 
     /**
     * @typedef {Object} sunposition
-    * @property {number} azimuth - The azimuth of the sun
-    * @property {number} altitude - The altitude of the sun
+    * @property {number} azimuth - The azimuth of the sun in radians
+    * @property {number} altitude - The altitude of the sun in radians
+    * @property {number} zenith - The zenith of the sun in radians
+    * @property {number} azimuthDegrees - The azimuth of the sun in decimal degree
+    * @property {number} altitudeDegrees - The altitude of the sun in decimal degree
+    * @property {number} zenithDegrees - The zenith of the sun in decimal degree
+    * @property {number} declination - The declination of the sun
     */
 
     /**
@@ -191,8 +195,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return {
             azimuth: azimuthr,
             altitude: altituder,
-            azimuthDegrees: 180 + 180 / PI * azimuthr,
-            altitudeDegrees: 180 / PI * altituder,
+            zenith: (90*Math.PI/180) - altituder,
+            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
+            altitudeDegrees: 180 / Math.PI * altituder,
+            zenithDegrees: 90 - (180 / Math.PI * altituder),
             declination: c.dec
         };
     };
@@ -299,7 +305,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @returns {number}
      */
     function approxTransit(Ht, lw, n) {
-        return J0 + (Ht + lw) / (2 * PI) + n;
+        return J0 + (Ht + lw) / (2 * Math.PI) + n;
     }
 
     /**
@@ -456,9 +462,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
      * @param {number} lat latitude for calculating sun-times
      * @param {number} lng longitude for calculating sun-times
      * @param {number} elevationAngle sun angle for calculating sun-time
+     * @param {boolean} [degree] defines if the elevationAngle is in degree not in radians
+     * @param {boolean} [inUTC] defines if the calculation should be in utc or local time (default is local)
      * @return {suntimes} result object of sunTime
-     ***
-    SunCalc.getSunTime = function (dateValue, lat, lng, elevationAngle) {
+     ***/
+    SunCalc.getSunTime = function (dateValue, lat, lng, elevationAngle, degree, inUTC) {
         // console.log(`getSunTime dateValue=${dateValue}  lat=${lat}, lng=${lng}, elevationAngle=${elevationAngle}`);
         if (isNaN(lat)) {
             throw new Error('latitude missing');
@@ -469,9 +477,18 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         if (isNaN(elevationAngle)) {
             throw new Error('elevationAngle missing');
         }
+        if (degree) {
+            elevationAngle = elevationAngle * rad;
+        }
+        const t = new Date(dateValue);
+        if (inUTC) {
+            t.setUTCHours(12, 0, 0, 0);
+        } else {
+            t.setHours(12, 0, 0, 0);
+        }
         const lw = rad * -lng;
         const phi = rad * lat;
-        const d = toDays(dateValue);
+        const d = toDays(t.valueOf());
         const n = julianCycle(d, lw);
         const ds = approxTransit(0, lw, n);
         const M = solarMeanAnomaly(ds);
@@ -489,16 +506,101 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 value: new Date(v1),
                 ts: v1,
                 elevation: elevationAngle,
-                julian: Jset
+                julian: Jset,
+                valid: !isNaN(Jset)
             },
             rise: {
                 value: new Date(v2),
                 ts: v2,
                 elevation: elevationAngle, // (180 + (elevationAngle * -1)),
-                julian: Jrise
+                julian: Jrise,
+                valid: !isNaN(Jrise)
             }
         };
-    }; /* **** */
+    };
+
+    /**
+     * calculates time for a given azimuth angle for a given date and latitude/longitude
+     * @param {number} date start date for calculating sun-position
+     * @param {number} nazimuth azimuth for calculating sun-position
+     * @param {number} lat latitude for calculating sun-position
+     * @param {number} lng longitude for calculating sun-position
+     * @param {boolean} [degree] true if the angle is in degree and not in rad
+     * @return {sunposition} result object of sun-position
+    */
+    SunCalc.getSunTimeByAzimuth = function (date, lat, lng, nazimuth,  degree) {
+        if (isNaN(nazimuth)) {
+            throw new Error('azimuth missing');
+        }
+        if (isNaN(lat)) {
+            throw new Error('latitude missing');
+        }
+        if (isNaN(lng)) {
+            throw new Error('longitude missing');
+        }
+        if (degree) {
+            nazimuth = nazimuth * rad;
+        }
+        const lw = rad * -lng;
+        const phi = rad * lat;
+
+        let dateValue = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).valueOf();
+        let addval = (dayMs / 2);
+        dateValue += addval;
+
+        while (addval > 200) {
+        // let nazi = this.getPosition(dateValue, lat, lng).azimuth;
+            const d = toDays(dateValue);
+            const c = sunCoords(d);
+            const H = siderealTime(d, lw) - c.ra;
+            const nazim = azimuth(H, phi, c.dec);
+
+            addval /= 2;
+            if (nazim < nazimuth) {
+                dateValue += addval;
+            } else {
+                dateValue -= addval;
+            }
+        }
+        return new Date(Math.floor(dateValue));
+    };
+
+    /* SunCalc.getSunDate2 = function (year, month, day, nazimuth, lat, lng) {
+    if (isNaN(nazimuth)) {
+        throw new Error('azimuth missing');
+    }
+    if (isNaN(lat)) {
+        throw new Error('latitude missing');
+    }
+    if (isNaN(lng)) {
+        throw new Error('longitude missing');
+    }
+    const lw = rad * -lng;
+    const phi = rad * lat;
+
+    let dateValue = new Date(year, month, day, 0, 0, 0).valueOf();
+    let d = ((dateValue / dayMs) + J1970) - J2000;
+
+    console.log(new Date(d));
+    let addval = (dayMs / 2);
+    d += addval;
+
+    while (addval > 200) {
+        const c = sunCoords(d);
+        const H = siderealTime(d, lw) - c.ra;
+        const nazi = azimuth(H, phi, c.dec);
+        console.log(d, addval, nazi, nazimuth);
+
+        addval /= 2;
+        if (nazi < nazimuth) {
+            d += addval;
+        } else {
+            d -= addval;
+        }
+    }
+    dateValue = (((d + J2000) - J1970) * dateValue);
+    return new Date(Math.floor(dateValue));
+}; */
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
@@ -561,11 +663,11 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         return {
             azimuth: azimuthr,
             altitude: h,
-            azimuthDegrees: 180 + 180 / PI * azimuthr,
-            altitudeDegrees: 180 / PI * h,
+            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
+            altitudeDegrees: 180 / Math.PI * h,
             distance: c.dist,
             parallacticAngle: pa,
-            parallacticAngleDegrees: 180 / PI * pa
+            parallacticAngleDegrees: 180 / Math.PI * pa
         };
     };
 

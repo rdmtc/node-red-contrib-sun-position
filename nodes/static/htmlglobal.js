@@ -189,7 +189,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
             hasValue: true,
-            validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm?)?$/
+            validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm|p|PM|P|utc|UTC|local|LOCAL)?$/
         },
         DateEntered: {
             value: 'dateEntered',
@@ -377,6 +377,34 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad','Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
             hasValue: false
+        },
+        SunTimeByElevation: {
+            value: 'pdsTimeByElevation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevation','Time by Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeElevation.png',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByAzimuth: {
+            value: 'pdsTimeByAzimuth',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuth','Time by Azimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeAzimuth.png',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationRad: {
+            value: 'pdsTimeByElevationRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevationRad','Time by Elevation Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeElevation.png',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByAzimuthRad: {
+            value: 'pdsTimeByAzimuthRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuthRad','Time by Azimuth Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeAzimuth.png',
+            hasValue: true,
+            validate: RED.validators.number()
         },
         isDST: {
             value: 'pdbIsDST',

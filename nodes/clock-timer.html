@@ -243,6 +243,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -914,7 +918,7 @@
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-clktime-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
@@ -940,7 +944,7 @@
                     const $dialogTimeMinInput = $dialog.find('#dlg-ip-clktime-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
@@ -966,7 +970,7 @@
                     const $dialogTimeMaxInput = $dialog.find('#dlg-ip-clktime-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 
@@ -1047,6 +1051,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
