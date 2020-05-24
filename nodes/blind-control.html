@@ -1556,7 +1556,7 @@
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-blindctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
@@ -1582,7 +1582,7 @@
                     const $dialogTimeMinInput = $dialog.find('#dlg-ip-blindctl-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
@@ -1608,7 +1608,7 @@
                     const $dialogTimeMaxInput = $dialog.find('#dlg-ip-blindctl-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata']
+                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 

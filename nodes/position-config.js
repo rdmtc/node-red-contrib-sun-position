@@ -199,6 +199,8 @@ module.exports = function (RED) {
          * @param {number} [offset] the offset (positive or negative) which should be added to the date. If no multiplier is given, the offset must be in milliseconds.
          * @param {number} [multiplier] additional multiplier for the offset. Should be a positive Number. Special value -1 if offset is in month and -2 if offset is in years
          * @param {limitationsObj} [limit] additional limitations for the calculation
+         * @param {number} [latitude] latitude
+         * @param {number} [longitude] longitude
          * @return {timeresult|erroresult} result object of sunTime
          */
         getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude) {
@@ -295,6 +297,172 @@ module.exports = function (RED) {
             }
 
             // this.debug('getSunTimeByName result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+            return result;
+        }
+
+        /**
+         * gets sun time by Name
+         * @param {Date} dNow current time
+         * @param {number} elevationAngle name of the sun time
+         * @param {timePropType} [tprop] additional limitations for the calculation
+         * @param {number} [latitude] latitude
+         * @param {number} [longitude] longitude
+         * @return {timeresult|erroresult} result object of sunTime
+         */
+        getSunTimeElevation(dNow, elevationAngle, degree, tprop, latitude, longitude) {
+            if (!hlp.isValidDate(dNow)) {
+                const dto = new Date(dNow);
+                if (hlp.isValidDate(dto)) {
+                    dNow = dto;
+                } else {
+                    dNow = new Date();
+                }
+            }
+            // this.debug('getSunTimeByName dNow=' + dNow + ' tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }));
+            latitude = (latitude || tprop.latitude || this.latitude);
+            longitude = (longitude || tprop.longitude || this.longitude);
+            const result = Object.assign({},sunCalc.getSunTime(dNow.valueOf(), latitude, longitude, elevationAngle, degree));
+
+            const offsetX = this.getFloatProp(this, null, tprop.offsetType, tprop.offset, 0, tprop.offsetCallback, tprop.noOffsetError);
+            const calc = (result, recalc) => {
+                result.value = hlp.addOffset(new Date(result.value), offsetX, tprop.multiplier);
+                if (tprop.next && result.value.getTime() <= dNow.getTime()) {
+                    const datebase = new Date(dNow);
+                    while (result.value.getTime() <= dNow.getTime()) {
+                        datebase.setUTCDate(datebase.getUTCDate() + 1);
+                        result = Object.assign({},recalc(datebase.valueOf()));
+                        result.value = hlp.addOffset(new Date(result.value), offsetX, tprop.multiplier);
+                    }
+                }
+
+                let calcSpecial = false;
+                let date = result.value;
+                if (tprop.days && (tprop.days !== '*') && (tprop.days !== '')) {
+                    const dayx = hlp.calcDayOffset(tprop.days, result.value.getDay());
+                    if (dayx > 0) {
+                        date.setDate(date.getDate() + dayx);
+                        calcSpecial = true;
+                    } else if (dayx < 0) {
+                        // this.debug('getSunTimeByName - no valid day of week found value=' + value + ' - tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }) + ' - result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                        result.error = 'No valid day of week found!';
+                    }
+                }
+
+                if (tprop.months && (tprop.months !== '*') && (tprop.months !== '')) {
+                    const monthx = hlp.calcMonthOffset(tprop.months, result.value.getMonth());
+                    if (monthx > 0) {
+                        date = date.setMonth(date.getMonth() + monthx);
+                        calcSpecial = true;
+                    } else if (monthx < 0) {
+                        // this.debug('getSunTimeByName - no valid day of week found value=' + value + ' - tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }) + ' - result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
+                        result.error = 'No valid month found!';
+                    }
+                }
+
+                if (tprop.onlyEvenDays) {
+                    let time = date.getDate();
+                    while ((time % 2 !== 0)) {
+                        // odd
+                        date.setDate(date.getDate() + 1);
+                        time = date.getDate();
+                    }
+                }
+                if (tprop.onlyOddDays) {
+                    let time = date.getDate();
+                    while((time % 2 === 0)) {
+                        // even
+                        date.setDate(date.getDate() + 1);
+                        time = date.getDate();
+                    }
+                }
+                if (calcSpecial) {
+                    this._checkCoordinates();
+                    result = Object.assign(result, recalc(date.valueOf()));
+                    result.value = hlp.addOffset(new Date(result.value), offsetX, tprop.multiplier);
+                }
+            };
+            calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).rise);
+            calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).set);
+            return result;
+        }
+
+        /**
+         * gets sun time by Name
+         * @param {Date} dNow current time
+         * @param {number} azimuthAngle angle of the sun
+         * @param {timePropType} [tprop] additional limitations for the calculation
+         * @param {number} [latitude] latitude
+         * @param {number} [longitude] longitude
+         * @return {timeresult|erroresult} result object of sunTime
+         */
+        getSunTimeAzimuth(dNow, azimuthAngle, degree, tprop, latitude, longitude) {
+            if (!hlp.isValidDate(dNow)) {
+                const dto = new Date(dNow);
+                if (hlp.isValidDate(dto)) {
+                    dNow = dto;
+                } else {
+                    dNow = new Date();
+                }
+            }
+            // this.debug('getSunTimeByName dNow=' + dNow + ' tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }));
+            latitude = (latitude || tprop.latitude || this.latitude);
+            longitude = (longitude || tprop.longitude || this.longitude);
+            let result = sunCalc.getSunTimeByAzimuth(dNow, latitude, longitude, azimuthAngle, degree);
+
+            const offsetX = this.getFloatProp(this, null, tprop.offsetType, tprop.offset, 0, tprop.offsetCallback, tprop.noOffsetError);
+            result = hlp.addOffset(result, offsetX, tprop.multiplier);
+            if (tprop.next && result.getTime() <= dNow.getTime()) {
+                const datebase = new Date(dNow);
+                while (result.getTime() <= dNow.getTime()) {
+                    datebase.setUTCDate(datebase.getUTCDate() + 1);
+                    result = sunCalc.getSunTimeByAzimuth(datebase, latitude, longitude, azimuthAngle, degree);
+                    result = hlp.addOffset(result, offsetX, tprop.multiplier);
+                }
+            }
+
+            let calcSpecial = false;
+            if (tprop.days && (tprop.days !== '*') && (tprop.days !== '')) {
+                const dayx = hlp.calcDayOffset(tprop.days, result.getDay());
+                if (dayx > 0) {
+                    result.setDate(result.getDate() + dayx);
+                    calcSpecial = true;
+                } else if (dayx < 0) {
+                    result = NaN;
+                }
+            }
+
+            if (tprop.months && (tprop.months !== '*') && (tprop.months !== '')) {
+                const monthx = hlp.calcMonthOffset(tprop.months, result.getMonth());
+                if (monthx > 0) {
+                    result = result.setMonth(result.getMonth() + monthx);
+                    calcSpecial = true;
+                } else if (monthx < 0) {
+                    result = NaN;
+                }
+            }
+
+            if (tprop.onlyEvenDays) {
+                let time = result.getDate();
+                while ((time % 2 !== 0)) {
+                    // odd
+                    result.setDate(result.getDate() + 1);
+                    time = result.getDate();
+                }
+            }
+            if (tprop.onlyOddDays) {
+                let time = result.getDate();
+                while((time % 2 === 0)) {
+                    // even
+                    result.setDate(result.getDate() + 1);
+                    time = result.getDate();
+                }
+            }
+            if (calcSpecial) {
+                this._checkCoordinates();
+                result = sunCalc.getSunTimeByAzimuth(result, latitude, longitude, azimuthAngle, degree);
+                result = hlp.addOffset(result, offsetX, tprop.multiplier);
+            }
+
             return result;
         }
 
@@ -792,6 +960,9 @@ module.exports = function (RED) {
                     result.fix = true;
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
                     result.value = hlp.addOffset(new Date(result.value), offsetX, data.multiplier, data.next);
+                } else if (data.type === 'pdsTimeByAzimuth' ||
+                           data.type === 'pdsTimeByAzimuthRad') {
+                    result.value = this.getPropValue(_srcNode, msg, data, true);
                 } else if (data.type === 'str') {
                     result.fix = true;
                     if (data.format) {
@@ -901,6 +1072,14 @@ module.exports = function (RED) {
                 result = this.getSunCalc(msg.ts, false, false).azimuthRadians;
             } else if (data.type === 'pdsCalcElevationRad') {
                 result = this.getSunCalc(msg.ts, false, false).altitudeRadians;
+            } else if (data.type === 'pdsTimeByElevation') {
+                result = this.getSunTimeElevation(msg.ts, parseFloat(data.value), true, data);
+            } else if (data.type === 'pdsTimeByAzimuth') {
+                result = this.getSunTimeAzimuth(msg.ts, parseFloat(data.value), true, data);
+            } else if (data.type === 'pdsTimeByElevationRad') {
+                result = this.getSunTimeElevation(msg.ts, parseFloat(data.value), false, data);
+            } else if (data.type === 'pdsTimeByAzimuthRad') {
+                result = this.getSunTimeAzimuth(msg.ts, parseFloat(data.value), false, data);
             } else if (data.type === 'pdmCalcData') {
                 result = this.getMoonCalc(msg.ts, true);
             } else if (data.type === 'pdmPhase') {
@@ -1012,6 +1191,17 @@ module.exports = function (RED) {
                         }
                         return this.getSunTimePrevNext(dNow);
                     }, '<(osn)?:(ol)>');
+                    expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
+                        if (!hlp.isValidDate(dNow)) {
+                            const dto = new Date(dNow);
+                            if (hlp.isValidDate(dNow)) {
+                                dNow = dto;
+                            } else {
+                                dNow = new Date();
+                            }
+                        }
+                        return this.getSunTime(dNow, parseFloat(elevation), {});
+                    }, '<sn?n?>');
                     expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
                         if (!hlp.isValidDate(dNow)) {
                             const dto = new Date(dNow);

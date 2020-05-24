@@ -57,6 +57,7 @@ This documents described the default functions, which are used over multiple nod
         - [$getSunTimeByName(param1, [param2], [param3], [param4])](#getsuntimebynameparam1-param2-param3-param4)
         - [$getSunTimePrevNext([param1])](#getsuntimeprevnextparam1)
         - [$getSunCalc([param1], [param2], [param3])](#getsuncalcparam1-param2-param3)
+        - [$getSunTimeByElevation([param1], [param2], [param3])](#getsuntimebyelevationparam1-param2-param3)
         - [$getSunInSky([param1])](#getsuninskyparam1)
       - [moon functions](#moon-functions)
         - [$getMoonTimeByName(param1, [param2], [param3], [param4])](#getmoontimebynameparam1-param2-param3-param4)
@@ -127,6 +128,8 @@ complete free definition of the format:
   - HH:MM am
   - HH:MM:SS pm
   - HH:MM:SS am
+  - HH:MM UTC&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- if the time should be use UTC format.
+  - HH:MM:SS UTC&emsp;&emsp;- if the time should be use UTC format.
   - ...
 - date - a date and time in the format:
   - YYYY-MM-DD
@@ -727,6 +730,15 @@ e.g. 2014/12/29 is Monday in week  1 of 2015
   - `param3` *boolean* - (optional) set to **true** if sun in sky calculation should be included in output object
 - Returns
   - *object* - sun calculated data
+
+##### $getSunTimeByElevation([param1], [param2], [param3])
+
+- gets sun time for rise and set for the given elevation angle
+
+- Parameter
+  - `param1` *number, string* - elevation angle in radians
+- Returns
+  - *object* - set and rise time for the elevation angle
 
 ##### $getSunInSky([param1])
 

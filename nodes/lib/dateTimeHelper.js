@@ -786,7 +786,15 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
     if (t && (!t.includes('.')) && (!t.includes('-'))) {
         t = t.toLocaleLowerCase();
         // const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
-        const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)(?:a|am|m|\s)?\s*(gmt|utc|z)?\s*(?:(\+|-)(\d\d):([0-5]\d)|(\+|-)(\d\d\d\d?))?/);
+        if (t.includes('utc')) {
+            utc = true;
+            t = t.replace('utc','');
+        }
+        if (t.includes('local')) {
+            utc = false;
+            t = t.replace('local','');
+        }
+        const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)(?:a|am|m|\s)?\s*(?:(\+|-)(\d\d):([0-5]\d)|(\+|-)(\d\d\d\d?))?/);
         if (matches) {
             if (utc || matches[5] || matches[6] || matches[9] ) {
                 // matches[5] - GMT, UTC or Z; matches[6] - +/-; matches[9] - +/-
@@ -865,7 +873,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
         }
     }
 
-    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P)?)?.*$/;
+    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P|utc|UTClocal|LOCAL)?)?.*$/;
     if (re.test(String(dt))) {
         const result = getTimeOfText(String(dt), utc, timeZoneOffset);
         if (result !== null && typeof result !== 'undefined') {

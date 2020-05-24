@@ -716,6 +716,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -838,7 +842,9 @@
                             types.TimeMoon,
                             'flow',
                             'global',
-                            'env'
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -922,7 +928,9 @@
                             types.TimeMoon,
                             'flow',
                             'global',
-                            'env'
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -1133,7 +1141,9 @@
                             types.TimeMoon,
                             'flow',
                             'global',
-                            'env'
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
                         ],
                         onChange (_type, _value) {
                             if (!$('.time-inject-row-timeAlt').is(':hidden')) {
@@ -1280,6 +1290,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1422,6 +1436,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1559,6 +1577,10 @@
                             types.SunElevation,
                             types.SunAzimuthRad,
                             types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
