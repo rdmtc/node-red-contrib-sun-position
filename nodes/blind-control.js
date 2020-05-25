@@ -790,7 +790,7 @@ module.exports = function (RED) {
          * @returns {Object|null} returns the rule if rule is valid, otherwhise null
          */
         const fktCheck = (rule, cmp) => {
-            // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
+            // node.debug('fktCheck rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
                     if (!rule.conditon.result) {
@@ -844,7 +844,7 @@ module.exports = function (RED) {
         let ruleSelMin = null;
         let ruleSelMax = null;
         let ruleindex = -1;
-        // node.debug('first loop ' + node.rules.count);
+        // node.debug('first loop ' + node.rules.lastUntil + ' - ' + node.rules.count);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
@@ -1010,7 +1010,7 @@ module.exports = function (RED) {
         livingRuleData.state = RED._('blind-control.states.default');
         livingRuleData.description = RED._('blind-control.reasons.default');
 
-        if (node.autoTrigger) {
+        if (node.autoTrigger && node.rules && node.rules.count > 0) {
             // check first rule, maybe next day
             if (node.rules.firstTimeLimited < node.rules.count) {
                 checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
