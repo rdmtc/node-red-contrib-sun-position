@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 1.1.2:  BugFix
+
+- blind-control + clock-time
+  - fixed Error `Cannot read property 'timeType' of undefined` #152
+
 #### 1.1.1:  BugFix + maintenance
 
 - blind-control + clock-time
