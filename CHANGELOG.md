@@ -1,5 +1,11 @@
 # node-red-contrib-sun-position
 
+#### 1.1.3:  maintenance
+
+only documentation changes
+
+- moved contents of the readme to the wiki
+
 #### 1.1.2:  BugFix
 
 - blind-control + clock-time
