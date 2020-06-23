@@ -607,19 +607,6 @@ module.exports = function (RED) {
             return { state:'ok', done: true };
         };
 
-        this.on('close', () => {
-            if (node.timeOutStartObj) {
-                clearTimeout(node.timeOutStartObj);
-                node.timeOutStartObj = null;
-            }
-
-            if (node.intervalObj) {
-                clearInterval(node.intervalObj);
-                node.intervalObj = null;
-            }
-            // tidy up any state
-        });
-
         this.on('input', (msg, send, done) => { // eslint-disable-line complexity
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
@@ -674,7 +661,7 @@ module.exports = function (RED) {
                     text: RED._('time-inject.message.onceDelay', { seconds: (config.onceDelay || 0.1)})
                 });
 
-                config.onceTimeout = setTimeout(() => {
+                node.onceTimeout = setTimeout(() => {
                     node.emit('input', {
                         type: 'once/startup'
                     }); // will create timeout
@@ -682,14 +669,14 @@ module.exports = function (RED) {
                 return;
             }
 
-            setTimeout(() => {
+            node.onceTimeout = setTimeout(() => {
                 try {
                     const createTO = node.doCreateStartTimeout(node, true);
                     if (createTO.done !== true) {
                         if (createTO.errorMsg) {
                             node.warn(RED._('node-red-contrib-sun-position/position-config:errors.warn-init', { message: createTO.errorMsg, time: 6}));
                         }
-                        setTimeout(() => {
+                        node.onceTimeout2 = setTimeout(() => {
                             try {
                                 node.doCreateStartTimeout(node);
                             } catch (err) {
@@ -732,14 +719,27 @@ module.exports = function (RED) {
     RED.nodes.registerType('time-inject', timeInjectNode);
 
     timeInjectNode.prototype.close = function () {
-        if (this.timeOutStartObj) {
+        if (this.onceTimeout) {
             clearTimeout(this.onceTimeout);
             this.onceTimeout = null;
+        }
+        if (this.onceTimeout2) {
+            clearTimeout(this.onceTimeout2);
+            this.onceTimeout2 = null;
+        }
+        if (this.timeOutStartObj) {
+            clearTimeout(this.timeOutStartObj);
+            this.timeOutStartObj = null;
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
         }
         if (this.intervalObj) {
             clearInterval(this.intervalObj);
             this.intervalObj = null;
+            if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
+        }
+        if (this.timeOutEndObj) {
+            clearTimeout(this.timeOutEndObj);
+            this.timeOutEndObj = null;
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
         }
     };

@@ -311,12 +311,14 @@ module.exports = function (RED) {
                     setstate(this, result);
                     if (startNr < endNr) {
                         if (cmpNow >= startNr && cmpNow < endNr) {
+                            msg.withinTime = true;
                             this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                             send([msg, null]); // this.send([msg, null]);
                             done();
                             return null;
                         }
                     } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
+                        msg.withinTime = true;
                         this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
                         send([msg, null]); // this.send([msg, null]);
                         done();
@@ -325,7 +327,7 @@ module.exports = function (RED) {
                 } else {
                     setstate(node, result);
                 }
-
+                msg.withinTime = false;
                 this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix);
                 send([null, msg]); // this.send([null, msg]);
                 done();

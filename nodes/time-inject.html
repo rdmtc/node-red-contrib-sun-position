@@ -21,17 +21,23 @@
                     type: 'position-config',
                     required: true
                 },
-                payload: {
+                props: {
+                    value: [
+                        {p:'payload', t:'msg', vt: 'date', vo: 0, vot: 'none', vom: 60000, tf: 0},
+                        {p:'topic', t:'msg', vt:'str'}
+                    ]
+                },
+                payload: { // p
                     value: '',
                     validate: RED.validators.typedInput('payloadType')
                 },
-                payloadType: {
+                payloadType: { // vt
                     value: 'date'
                 },
-                payloadTimeFormat: {
+                payloadTimeFormat: { // tf
                     value: 0
                 },
-                payloadOffset: {
+                payloadOffset: { // vo
                     value: 0,
                     validate(v) {
                         return (
@@ -41,13 +47,13 @@
                         );
                     }
                 },
-                payloadOffsetType: {
+                payloadOffsetType: { // vot
                     value: 'none'
                 },
-                payloadOffsetMultiplier: {
+                payloadOffsetMultiplier: { // vom
                     value: 60000
                 },
-                topic: {
+                topic: { // p
                     value: ''
                 },
                 injectTypeSelect: {
@@ -320,7 +326,7 @@
                         );
                     }
                 },
-                addPayload1: {
+                addPayload1: {  // p
                     value: '',
                     validate(v){
                         return (
@@ -1927,6 +1933,9 @@
         <input type="text" id="node-input-positionConfig">
     </div>
     <hr>
+    <div class="form-row node-input-property-container-row">
+        <ol id="node-input-property-container"></ol>
+    </div>
     <div class="form-row block-noindent time-payload" id="node-input-payload-div" data-i18n="[titleOrg]time-inject.placeholder.payload">
         <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="node-red:common.label.payload"></span></label>
         <input type="text" id="node-input-payload" data-i18n="[placeholder]time-inject.placeholder.payload">
