@@ -103,7 +103,7 @@ module.exports = function (RED) {
         node.timeClockData.overwrite.expireDateLocal = node.positionConfig.toDateString(node.timeClockData.overwrite.expireDate);
         node.timeClockData.overwrite.expireTimeLocal = node.positionConfig.toTimeString(node.timeClockData.overwrite.expireDate);
 
-        node.log(`Overwrite is set which expires in ${dExpire}ms = ${node.blindData.overwrite.expireDateISO} (${reason})`);
+        node.log(`Overwrite is set which expires in ${dExpire}ms = ${node.timeClockData.overwrite.expireDateISO} (${reason})`);
         node.timeOutObj = setTimeout(() => {
             node.log(`Overwrite is expired (timeout)`);
             timePosOverwriteReset(node);
@@ -129,7 +129,7 @@ module.exports = function (RED) {
                 val => {
                     node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
                     if (val) {
-                        if (node.blindData.overwrite && node.blindData.overwrite.active) {
+                        if (node.timeClockData.overwrite && node.timeClockData.overwrite.active) {
                             node.log(`Overwrite reset by incoming message`);
                         }
                         timePosOverwriteReset(node);
@@ -193,7 +193,7 @@ module.exports = function (RED) {
         // if (node.timeClockData.overwrite.active && (node.timeClockData.overwrite.importance > 0) && (node.timeClockData.overwrite.importance > importance)) {
             // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}, importance=${nImportance}, node.timeClockData.overwrite.importance=${node.timeClockData.overwrite.importance}`);
             // if active, the importance must be 0 or given with same or higher as current overwrite otherwise this will not work
-            node.debug(`do not check any overwrite, importance of message ${nImportance} not matches current overwrite importance ${node.blindData.overwrite.importance}`);
+            node.debug(`do not check any overwrite, importance of message ${nImportance} not matches current overwrite importance ${node.timeClockData.overwrite.importance}`);
             return setOverwriteReason(node);
         }
         const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);

@@ -179,6 +179,11 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: 'msg.value',
             hasValue: false
         },
+        MsgTopic: {
+            value: 'msgTopic',
+            label: 'msg.topic',
+            hasValue: false
+        },
         MsgPayloadByTopic: {
             value: 'PlT',
             label: node._('node-red-contrib-sun-position/position-config:common.types.PlTRes'),
@@ -1016,6 +1021,8 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
         res = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
         res = 'msg.payload';
+    } else if (data.type === 'msgTopic') {
+        res = 'msg.topic';
     } else if (data.type === 'PlT') {
         res = 'msg.payload if msg.topic contains "' + data.value + '"';
     } else if (data.type === 'msgTs') {

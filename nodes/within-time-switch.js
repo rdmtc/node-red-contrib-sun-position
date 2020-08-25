@@ -305,21 +305,23 @@ module.exports = function (RED) {
                 const result = calcWithinTimes(this, msg, config, now);
 
                 if (result.valid && result.start.value && result.end.value) {
-                    const startNr = hlp.getTimeNumberUTC(result.start.value);
-                    const endNr = hlp.getTimeNumberUTC(result.end.value);
+                    msg.withinTimeStart = result.start;
+                    msg.withinTimeEnd = result.end;
+                    msg.withinTimeStart.id = hlp.getTimeNumberUTC(result.start.value);
+                    msg.withinTimeEnd.id = hlp.getTimeNumberUTC(result.end.value);
                     const cmpNow = hlp.getTimeNumberUTC(now);
                     setstate(this, result);
-                    if (startNr < endNr) {
-                        if (cmpNow >= startNr && cmpNow < endNr) {
+                    if (msg.withinTimeStart.id < msg.withinTimeEnd.id) {
+                        if (cmpNow >= msg.withinTimeStart.id && cmpNow < msg.withinTimeEnd.id) {
                             msg.withinTime = true;
-                            this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                            this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
                             send([msg, null]); // this.send([msg, null]);
                             done();
                             return null;
                         }
-                    } else if (!(cmpNow >= endNr && cmpNow < startNr)) {
+                    } else if (!(cmpNow >= msg.withinTimeEnd.id && cmpNow < msg.withinTimeStart.id)) {
                         msg.withinTime = true;
-                        this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + startNr + ' - ' + cmpNow + ' - ' + endNr + ')');
+                        this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
                         send([msg, null]); // this.send([msg, null]);
                         done();
                         return null;

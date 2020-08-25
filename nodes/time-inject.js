@@ -85,15 +85,31 @@ module.exports = function (RED) {
                 this.timeStartData.onlyEvenDays = false;
                 this.timeStartData.onlyOddDays = false;
             }
-            this.property = config.property || '';
-            this.propertyType = config.propertyType || 'none';
-            this.propertyOperator = config.propertyCompare || 'true';
-            this.propertyThresholdValue = config.propertyThreshold;
-            this.propertyThresholdType = config.propertyThresholdType;
+            if (config.propertyType && config.propertyType !== 'none' && config.timeAltType && config.timeAltType !== 'none') {
+                this.property = {
+                    type: config.propertyType ? config.propertyType : 'none',
+                    value: config.property ? config.property : ''
+                };
 
-            if (this.injType === tInj.timer && config.timeAltType &&
-                config.timeAltType !== 'none' &&
-                this.propertyType !== 'none') {
+                if (this.positionConfig && this.property.type === 'jsonata') {
+                    try {
+                        this.property.expr = this.positionConfig.getJSONataExpression(this.property.value, node);
+                    } catch (err) {
+                        this.error(RED._('inject.errors.invalid-expr', { error:err.message }));
+                        this.property.expr = null;
+                    }
+                }
+
+                if (config.propertyThresholdType && config.propertyThresholdType !== 'none') {
+                    this.propertyThreshold = {
+                        type: config.propertyThresholdType ? config.propertyThresholdType : 'none',
+                        value: config.propertyThreshold ? config.propertyThreshold : ''
+                    };
+                }
+            }
+            this.propertyOperator = config.propertyCompare || 'true';
+
+            if (this.injType === tInj.timer  && this.property && config.timeAltType && config.timeAltType !== 'none') {
                 this.timeStartAltData = {
                     type: config.timeAltType || 'none',
                     value : config.timeAlt || '',
@@ -149,80 +165,151 @@ module.exports = function (RED) {
             }
         } // timeEndData
 
-        this.payloadData = {
-            type: config.payloadType,
-            value: config.payload,
-            format: config.payloadTimeFormat,
-            offsetType: config.payloadOffsetType,
-            offset: config.payloadOffset,
-            multiplier: config.payloadOffsetMultiplier,
-            next: true
-        };
-
-        this.addPayloadData = [];
-        if (typeof config.addPayload1Type !== 'undefined' &&
-            typeof config.addPayload1ValueType !== 'undefined' &&
-            config.addPayload1Type !== 'none' &&
-            config.addPayload1ValueType !== 'none') {
-            this.addPayloadData.push({
-                outType: config.addPayload1Type,
-                outValue: config.addPayload1,
-                type: config.addPayload1ValueType,
-                value: config.addPayload1Value,
-                format: config.addPayload1Format,
-                offsetType: config.addPayload1OffsetType,
-                offset: config.addPayload1Offset,
-                multiplier: config.addPayload1OffsetMultiplier,
-                next: config.addPayload1Next,
-                days: config.addPayload1Days
+        /* Handle legacy */
+        if(!Array.isArray(config.props)){
+            config.props = [];
+            config.props.push({
+                p    : '',
+                pt   : 'msgPayload',
+                v    : config.payload ? config.payload : '',
+                vt   : config.payloadType ? ((config.payloadType === 'string') ? 'str' : config.payloadType) : (config.payload ? 'str' : 'date'),
+                o    : config.payloadOffset ? config.payloadOffset : 1,
+                oT   : (config.payloadOffset === 0 || config.payloadOffset === '') ? 'none' : (config.payloadOffsetType ? config.payloadOffsetType : 'num'),
+                oM   : config.payloadOffsetMultiplier ? config.payloadOffsetMultiplier : 60000,
+                f    : config.payloadTimeFormat ? config.payloadTimeFormat : 0,
+                next : true,
+                days : '*'
             });
-        }
-        if (typeof config.addPayload2Type !== 'undefined' &&
-            typeof config.addPayload2ValueType !== 'undefined' &&
-            config.addPayload2Type !== 'none' &&
-            config.addPayload2ValueType !== 'none') {
-            this.addPayloadData.push({
-                outType: config.addPayload2Type,
-                outValue: config.addPayload2,
-                type: config.addPayload2ValueType,
-                value: config.addPayload2Value,
-                format: config.addPayload2Format,
-                offsetType: config.addPayload2OffsetType,
-                offset: config.addPayload2Offset,
-                multiplier: config.addPayload2OffsetMultiplier,
-                next: config.addPayload2Next,
-                days: config.addPayload2Days
-            });
-        }
-        if (typeof config.addPayload3Type !== 'undefined' &&
-            typeof config.addPayload3ValueType !== 'undefined' &&
-            config.addPayload3Type !== 'none' &&
-            config.addPayload3ValueType !== 'none') {
-            this.addPayloadData.push({
-                outType: config.addPayload3Type,
-                outValue: config.addPayload3,
-                type: config.addPayload3ValueType,
-                value: config.addPayload3Value,
-                format: config.addPayload3Format,
-                offsetType: config.addPayload3OffsetType,
-                offset: config.addPayload3Offset,
-                multiplier: config.addPayload3OffsetMultiplier,
-                next: config.addPayload3Next,
-                days: config.addPayload3Days
-            });
-        }
-        for (let i = 0; i < this.addPayloadData.length; i++) {
-            const el = this.addPayloadData[i];
-            if (typeof el.next === 'undefined' ||
-                el.next === null ||
-                el.next === true ||
-                el.next === 'true') {
-                el.next = true;
-            } else if (el.next === 'false' ||
-                el.next === false) {
-                el.next = false;
+            if (config.topic) {
+                config.props.push({
+                    p    : '',
+                    pt   : 'msgTopic',
+                    v    : config.topic ? config.topic : '',
+                    vt   : 'str',
+                    o    : 1,
+                    oT   : 'none',
+                    oM   : 60000,
+                    f    : 0,
+                    next : false,
+                    days : '*'
+                });
             }
+            if (typeof config.addPayload1Type !== 'undefined' &&
+                typeof config.addPayload1ValueType !== 'undefined' &&
+                config.addPayload1Type !== 'none' &&
+                config.addPayload1ValueType !== 'none') {
+                config.props.push({
+                    p    : config.addPayload1,
+                    pt   : config.addPayload1Type,
+                    v    : config.addPayload1Value,
+                    vt   : config.addPayload1ValueType ? ((config.addPayload1ValueType === 'string') ? 'str' : config.addPayload1ValueType) : (config.addPayload1Value ? 'str' : 'date'),
+                    o    : config.addPayload1Offset ? config.addPayload1Offset : 1,
+                    oT   : (config.addPayload1Offset === 0 || config.addPayload1Offset === '') ? 'none' : (config.addPayload1OffsetType ? config.addPayload1OffsetType : 'num'),
+                    oM   : config.addPayload1OffsetMultiplier ? config.addPayload1OffsetMultiplier : 60000,
+                    f    : config.addPayload1Format ? config.addPayload1Format : 0,
+                    next : false,
+                    days : config.addPayload1Days ? config.addPayload1Days : '*'
+                });
+            }
+            if (typeof config.addPayload2Type !== 'undefined' &&
+                typeof config.addPayload2ValueType !== 'undefined' &&
+                config.addPayload2Type !== 'none' &&
+                config.addPayload2ValueType !== 'none') {
+                config.props.push({
+                    p    : config.addPayload2,
+                    pt   : config.addPayload2Type,
+                    v    : config.addPayload2Value,
+                    vt   : config.addPayload2ValueType ? ((config.addPayload2ValueType === 'string') ? 'str' : config.addPayload2ValueType) : (config.addPayload2Value ? 'str' : 'date'),
+                    o    : config.addPayload2Offset ? config.addPayload2Offset : 1,
+                    oT   : (config.addPayload2Offset === 0 || config.addPayload2Offset === '') ? 'none' : (config.addPayload2OffsetType ? config.addPayload2OffsetType : 'num'),
+                    oM   : config.addPayload2OffsetMultiplier ? config.addPayload2OffsetMultiplier : 60000,
+                    f    : config.addPayload2Format ? config.addPayload2Format : 0,
+                    next : false,
+                    days : config.addPayload2Days ? config.addPayload2Days : '*'
+                });
+            }
+            if (typeof config.addPayload3Type !== 'undefined' &&
+                typeof config.addPayload3ValueType !== 'undefined' &&
+                config.addPayload3Type !== 'none' &&
+                config.addPayload3ValueType !== 'none') {
+                config.props.push({
+                    p  : config.addPayload3,
+                    pt : config.addPayload3Type,
+                    v  : config.addPayload3Value,
+                    vt : config.addPayload3ValueType ? ((config.addPayload3ValueType === 'string') ? 'str' : config.addPayload3ValueType) : (config.addPayload3Value ? 'str' : 'date'),
+                    o  : config.addPayload3Offset ? config.addPayload3Offset : 1,
+                    oT : (config.addPayload3Offset === 0 || config.addPayload3Offset === '') ? 'none' : (config.addPayload3OffsetType ? config.addPayload3OffsetType : 'num'),
+                    oM : config.addPayload3OffsetMultiplier ? config.addPayload3OffsetMultiplier : 60000,
+                    f  : config.addPayload3Format ? config.addPayload3Format : 0,
+                    next : false,
+                    days : config.addPayload3Days ? config.addPayload3Days : '*'
+                });
+            }
+
+            delete config.payload;
+            delete config.payloadType;
+            delete config.payloadTimeFormat;
+            delete config.payloadOffset;
+            delete config.payloadOffsetType;
+            delete config.payloadOffsetMultiplier;
+            delete config.topic;
+            delete config.addPayload1;
+            delete config.addPayload1Type;
+            delete config.addPayload1Value;
+            delete config.addPayload1ValueType;
+            delete config.addPayload1Format;
+            delete config.addPayload1Offset;
+            delete config.addPayload1OffsetType;
+            delete config.addPayload1OffsetMultiplier;
+            delete config.addPayload1Next;
+            delete config.addPayload1Days;
+            delete config.addPayload2;
+            delete config.addPayload2Type;
+            delete config.addPayload2Value;
+            delete config.addPayload2ValueType;
+            delete config.addPayload2Format;
+            delete config.addPayload2Offset;
+            delete config.addPayload2OffsetType;
+            delete config.addPayload2OffsetMultiplier;
+            delete config.addPayload2Next;
+            delete config.addPayload2Days;
+            delete config.addPayload3;
+            delete config.addPayload3Type;
+            delete config.addPayload3Value;
+            delete config.addPayload3ValueType;
+            delete config.addPayload3Format;
+            delete config.addPayload3Offset;
+            delete config.addPayload3OffsetType;
+            delete config.addPayload3OffsetMultiplier;
+            delete config.addPayload3Next;
+            delete config.addPayload3Days;
         }
+
+        this.props = [];
+        config.props.forEach( prop => {
+            const propNew = {
+                outType: prop.pt,
+                outValue: prop.p,
+                type: prop.vt,
+                value: prop.v,
+                format: prop.f,
+                offsetType: prop.oT,
+                offset: prop.o,
+                multiplier: prop.oM,
+                next: (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days: prop.days
+            };
+
+            if (this.positionConfig && propNew.type === 'jsonata') {
+                try {
+                    propNew.expr = this.positionConfig.getJSONataExpression(propNew.value, node);
+                } catch (err) {
+                    this.error(RED._('inject.errors.invalid-expr', { error:err.message }));
+                    propNew.expr = null;
+                }
+            }
+            this.props.push(propNew);
+        });
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
 
@@ -355,19 +442,17 @@ module.exports = function (RED) {
         node.prepOutMsg = msg => {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             const dNow = new Date();
-            msg.payload = node.positionConfig.getOutDataProp(node, msg, node.payloadData);
-            msg.topic = config.topic;
-            for (let i = 0; i < node.addPayloadData.length; i++) {
-                node.debug(`prepOutMsg-${i} node.addPayload[${i}]=${util.inspect(node.addPayloadData[i], { colors: true, compact: 10, breakLength: Infinity })}`);
-                const res = node.positionConfig.getOutDataProp(this, msg, node.addPayloadData[i], dNow);
+            for (let i = 0; i < node.props.length; i++) {
+                node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                const res = node.positionConfig.getOutDataProp(this, msg, node.props[i], dNow);
                 if (res === null || (typeof res === 'undefined')) {
-                    this.error('Could not evaluate ' + node.addPayloadData[i].type + '.' + node.addPayloadData[i].value + '. - Maybe settings outdated (open and save again)!');
+                    this.error('Could not evaluate ' + node.props[i].type + '.' + node.props[i].value + '. - Maybe settings outdated (open and save again)!');
                 } else if (res.error) {
                     this.error('Error on getting additional payload: "' + res.error + '"');
                 } else {
-                    node.positionConfig.setMessageProp(this, msg, node.addPayloadData[i].outType, node.addPayloadData[i].outValue, res);
+                    node.positionConfig.setMessageProp(this, msg, node.props[i].outType, node.props[i].outValue, res);
                 }
-                node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+                // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
             msg._srcid = node.id;
             msg._ts = dNow.valueOf();
@@ -529,17 +614,13 @@ module.exports = function (RED) {
                         if (node.timeStartData.isAltAvailable) {
                             let needsRecalc = false;
                             try {
-                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, { type: node.propertyType, value: node.property},
-                                    node.propertyOperator, { type:node.propertyThresholdType, value:node.propertyThresholdValue});
+                                useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.property, node.propertyOperator, node.propertyThreshold);
                                 needsRecalc = (node.timeStartData.isAltFirst && !useAlternateTime) || (!node.timeStartData.isAltFirst && useAlternateTime);
                                 // node.debug(`timeOutStartObj isAltAvailable=${node.timeStartData.isAltAvailable} isAltFirst=${node.timeStartData.isAltFirst} needsRecalc=${needsRecalc}`);
 
                             } catch (err) {
                                 needsRecalc = node.timeStartData.isAltFirst;
-                                hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', {
-                                    type: node.propertyType,
-                                    value: node.property
-                                }),  err);
+                                hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', node.property),  err);
                             }
 
                             if (needsRecalc) {
