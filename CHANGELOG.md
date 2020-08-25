@@ -1,5 +1,27 @@
 # node-red-contrib-sun-position
 
+#### 1.1.4:  BugFix
+
+- general
+  - for a property compare implemented `contain`, `containSome` and `comtainAll` #158
+
+- time inject
+  - maybe fix of #159 by better memory cleanup on change
+  - added possibility of define which time should be in payload (current or next) #163
+  - now setup of payload, topic and additional payload is similar to the inject node of th newest Node-Red Version #172
+
+- within-time
+  - fix bug not usable/visible offset for alternate times #170
+  - added `withinTimeStart` and `withinTimeEnd` and `withinTime` property to message #156 + #166
+
+- moon-position
+  - moon-times now available #161
+  - has now a `isUp` _Boolean_ property which gives the state if the moon is Up #162
+  - additional properties are `positionAtRise` and `positionAtSet` with position information on rise and set
+
+- clock-time
+  - fixed not working overrides #171
+
 #### 1.1.3:  maintenance
 
 only documentation changes

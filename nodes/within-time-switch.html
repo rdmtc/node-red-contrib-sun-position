@@ -264,7 +264,7 @@
                         this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
                             ' - ' +
                             getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                                this.endTimeAltType, this.endTimeAlt, this.endTimeAltOffset);
+                                this.endTimeAltType, this.endTimeAlt, this.endOffsetAlt);
                 }
 
                 return 'within-time';
@@ -606,29 +606,29 @@
                                 config:         $nodeConfig.val(),
                                 type:           $('#node-input-startTimeAlt').typedInput('type'),
                                 value:          $('#node-input-startTimeAlt').typedInput('value'),
-                                offsetType:     $('#node-input-startTimeAltOffset').typedInput('type'),
-                                offset:         $('#node-input-startTimeAltOffset').typedInput('value'),
-                                multiplier:     $('#node-input-startTimeAltOffsetMultiplier').val(),
+                                offsetType:     $('#node-input-startOffsetAlt').typedInput('type'),
+                                offset:         $('#node-input-startOffsetAlt').typedInput('value'),
+                                multiplier:     $('#node-input-startOffsetAltMultiplier').val(),
                                 noOffsetError:  true
                             });
                         }
                     });
 
-                    node.startTimeAltOffsetMultiplier = multiplierUpdate(node.startTimeAltOffsetMultiplier, 'startTimeAltOffsetMultiplier', () => $('#node-input-startTimeAlt').change());
+                    node.startOffsetAltMultiplier = multiplierUpdate(node.startOffsetAltMultiplier, 'startOffsetAltMultiplier', () => $('#node-input-startTimeAlt').change());
                     setupTInput(node, {
-                        typeProp: 'startTimeAltOffsetType',
-                        valueProp: 'startTimeAltOffset',
+                        typeProp: 'startOffsetAltType',
+                        valueProp: 'startOffsetAlt',
                         width: 'calc(100% - 255px)',
-                        defaultType: (node.startTimeAltOffset === 0 || node.startTimeAltOffset === '') ? types.Undefined.value : 'num',
+                        defaultType: (node.startOffsetAlt === 0 || node.startOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
-                            const type = $('#node-input-startTimeAltOffset').typedInput('type');
+                            const type = $('#node-input-startOffsetAlt').typedInput('type');
                             if (type === types.Undefined.value) {
-                                $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', true);
+                                $('#node-input-startOffsetAltMultiplier').prop('disabled', true);
                             } else {
-                                $('#node-input-startTimeAltOffsetMultiplier').prop('disabled', false);
+                                $('#node-input-startOffsetAltMultiplier').prop('disabled', false);
                             }
                             $('#node-input-startTimeAlt').change();
                         }
@@ -728,11 +728,11 @@
                         defaultValue: '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
-                            if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
-                                ($('#node-input-propertyStart').typedInput('type') === 'none')) {
-                                $('.alternate-time-start-offset').hide();
+                            if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
+                                ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
+                                $('.alternate-time-end-offset').hide();
                             } else {
-                                $('.alternate-time-start-offset').show();
+                                $('.alternate-time-end-offset').show();
                             }
                         },
                         onChange(_type, _value) {
@@ -747,29 +747,29 @@
                                 config:         $nodeConfig.val(),
                                 type:           $('#node-input-endTimeAlt').typedInput('type'),
                                 value:          $('#node-input-endTimeAlt').typedInput('value'),
-                                offsetType:     $('#node-input-endTimeAltOffset').typedInput('type'),
-                                offset:         $('#node-input-endTimeAltOffset').typedInput('value'),
-                                multiplier:     $('#node-input-endTimeAltOffsetMultiplier').val(),
+                                offsetType:     $('#node-input-endOffsetAlt').typedInput('type'),
+                                offset:         $('#node-input-endOffsetAlt').typedInput('value'),
+                                multiplier:     $('#node-input-endOffsetAltMultiplier').val(),
                                 noOffsetError:  true
                             });
                         }
                     });
 
-                    node.endTimeAltOffsetMultiplier = multiplierUpdate(node.endTimeAltOffsetMultiplier, 'endTimeAltOffsetMultiplier', () => $('#node-input-endTimeAlt').change());
+                    node.endOffsetAltMultiplier = multiplierUpdate(node.endOffsetAltMultiplier, 'endOffsetAltMultiplier', () => $('#node-input-endTimeAlt').change());
                     setupTInput(node, {
-                        typeProp: 'endTimeAltOffsetType',
-                        valueProp: 'endTimeAltOffset',
+                        typeProp: 'endOffsetAltType',
+                        valueProp: 'endOffsetAlt',
                         width: 'calc(100% - 255px)',
-                        defaultType: (node.endTimeAltOffset === 0 || node.endTimeAltOffset === '') ? types.Undefined.value : 'num',
+                        defaultType: (node.endOffsetAlt === 0 || node.endOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
                         types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
-                            const type = $('#node-input-endTimeAltOffset').typedInput('type');
+                            const type = $('#node-input-endOffsetAlt').typedInput('type');
                             if (type === types.Undefined.value) {
-                                $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', true);
+                                $('#node-input-endOffsetAltMultiplier').prop('disabled', true);
                             } else {
-                                $('#node-input-endTimeAltOffsetMultiplier').prop('disabled', false);
+                                $('#node-input-endOffsetAltMultiplier').prop('disabled', false);
                             }
                             $('#node-input-endTimeAlt').change();
                         }
@@ -794,8 +794,8 @@
                     onInit = false;
                     $('#node-input-startOffset').change();
                     $('#node-input-endOffset').change();
-                    $('#node-input-startTimeAltOffset').change();
-                    $('#node-input-endTimeAltOffset').change();
+                    $('#node-input-startOffsetAlt').change();
+                    $('#node-input-endOffsetAlt').change();
                     $propertyStart.change();
                     $propertyEnd.change();
                 }; // setup
@@ -819,10 +819,19 @@
             oneditsave() {
                 this.propertyStartType = $('#node-input-propertyStart').typedInput('type');
                 this.propertyEndType = $('#node-input-propertyEnd').typedInput('type');
+                this.propertyStartThresholdType = $('#node-input-propertyStartThreshold').typedInput('type');
+                this.propertyEndThresholdType = $('#node-input-propertyEndThreshold').typedInput('type');
+
                 this.startTimeType = $('#node-input-startTime').typedInput('type');
                 this.endTimeType = $('#node-input-endTime').typedInput('type');
                 this.startTimeAltType = $('#node-input-startTimeAlt').typedInput('type');
                 this.endTimeAltType = $('#node-input-endTimeAlt').typedInput('type');
+
+                this.startOffsetType = $('#node-input-startOffset').typedInput('type');
+                this.endOffsetType = $('#node-input-endOffset').typedInput('type');
+                this.startOffsetAltType = $('#node-input-startOffsetAlt').typedInput('type');
+                this.endOffsetAltType = $('#node-input-endOffsetAlt').typedInput('type');
+
                 this.timeDays = getCheckboxesStr($('#within-time-switch-timeDays input[type=checkbox]:checked'), 7);
                 this.timeMonths = getCheckboxesStr($('#within-time-switch-timeMonths input[type=checkbox]:checked'), 12);
             }
@@ -931,11 +940,11 @@
         <input type="text" id="node-input-startTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAlt"/>
         <input type="hidden" id="node-input-startTimeAltType">
     </div>
-    <div class="form-row block-indent1 alternate-time-start-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.startTimeAltOffset">
-        <label for="node-input-startTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startTimeAltOffset"></span></label>
-        <input id="node-input-startTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.startTimeAltOffset"/>
-        <input type="hidden" id="node-input-startTimeAltOffsetType">
-        <select id="node-input-startTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    <div class="form-row block-indent1 alternate-time-start-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.startOffsetAlt">
+        <label for="node-input-startOffsetAlt"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.startOffsetAlt"></span></label>
+        <input id="node-input-startOffsetAlt" data-i18n="[placeholder]within-time-switch.placeholder.startOffsetAlt"/>
+        <input type="hidden" id="node-input-startOffsetAltType">
+        <select id="node-input-startOffsetAltMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row alternate-property-end is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.propertyEnd">
         <label for="node-input-propertyEnd"><i class="fa fa-sun-o"></i> <span data-i18n="within-time-switch.label.propertyEnd"></span></label>
@@ -954,11 +963,11 @@
         <input type="text" id="node-input-endTimeAlt" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAlt"/>
         <input type="hidden" id="node-input-endTimeAltType">
     </div>
-    <div class="form-row block-indent1 alternate-time-end-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.endTimeAltOffset">
-        <label for="node-input-endTimeAltOffset"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endTimeAltOffset"></span></label>
-        <input id="node-input-endTimeAltOffset" data-i18n="[placeholder]within-time-switch.placeholder.endTimeAltOffset"/>
-        <input type="hidden" id="node-input-endTimeAltOffsetType">
-        <select id="node-input-endTimeAltOffsetMultiplier" class="node-input-multiplier"></select>
+    <div class="form-row block-indent1 alternate-time-end-offset is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.endOffsetAlt">
+        <label for="node-input-endOffsetAlt"><i class="fa fa-calculator"></i> <span data-i18n="within-time-switch.label.endOffsetAlt"></span></label>
+        <input id="node-input-endOffsetAlt" data-i18n="[placeholder]within-time-switch.placeholder.endOffsetAlt"/>
+        <input type="hidden" id="node-input-endOffsetAltType">
+        <select id="node-input-endOffsetAltMultiplier" class="node-input-multiplier"></select>
     </div>
     <hr>
     <div class="form-row is-to-show-initially">

@@ -850,6 +850,8 @@ module.exports = function (RED) {
             // _srcNode.debug(`setMessageProp dNow=${dNow} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (type === 'msgPayload') {
                 msg.payload = data;
+            } else if (type === 'msgTopic') {
+                msg.topic = data;
             } else if (type === 'msgTs') {
                 msg.ts = data;
             } else if (type === 'msgLc') {
@@ -1022,6 +1024,143 @@ module.exports = function (RED) {
         /**
         * get a property value from a type input in Node-Red
         * @param {*} _srcNode - source node information
+        * @param {propValueType} data - data object with more information
+        * @returns {*} JSONataExpression
+        */
+        getJSONataExpression(_srcNode, data) {
+            const expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
+            // expr.assign('sunTimes', function (val, store) {
+            //     return node.context().global.get(val, store);
+            // });
+            // expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
+            expr.registerFunction('isValidDate', date => {
+                return hlp.isValidDate(date);
+            }, '<x?:b>');
+            expr.registerFunction('isBool', val => {
+                return hlp.isBool(val);
+            }, '<x:b>');
+            expr.registerFunction('isTrue', val => {
+                return hlp.isTrue(val);
+            }, '<x:b>');
+            expr.registerFunction('isFalse', val => {
+                return hlp.isFalse(val);
+            }, '<x:b>');
+            expr.registerFunction('XOR', (a,b) => {
+                return hlp.XOR(a,b);
+            }, '<bb:b>');
+            expr.registerFunction('XAND', (a, b) => {
+                return hlp.XAND(a,b);
+            }, '<bb:b>');
+            expr.registerFunction('countDecimals', val => {
+                return hlp.countDecimals(val);
+            }, '<n:n>');
+            expr.registerFunction('pad', (val, len) => {
+                return hlp.pad(val, len);
+            }, '<(nsb)n?:s>');
+            expr.registerFunction('clipStrLength', (val, len) => {
+                return hlp.clipStrLength(val, len);
+            }, '<sn:s>');
+            expr.registerFunction('getLastDayOfMonth', (year, month, weekday) => {
+                if (weekday < 0) { weekday = 6; }
+                if (weekday > 6) { weekday = 0; }
+                return hlp.getLastDayOfMonth(year, month, weekday);
+            }, '<nnn?n?:s>');
+            expr.registerFunction('getNthWeekdayOfMonth', (year, month, weekday, nTh) => {
+                return hlp.getNthWeekdayOfMonth(year, month, weekday, nTh);
+            }, '<nnn?n?:s>');
+            expr.registerFunction('getWeekOfYear', date => {
+                return hlp.getWeekOfYear(new Date(date));
+            }, '<(osn)?:a<n>>');
+            expr.registerFunction('getDayOfYear', date => {
+                return hlp.getDayOfYear(new Date(date));
+            }, '<(osn)?:a<n>>');
+            expr.registerFunction('getStdTimezoneOffset', date => {
+                return hlp.getStdTimezoneOffset(new Date(date));
+            }, '<(osn)?:n>');
+            expr.registerFunction('isDSTObserved', date => {
+                return hlp.isDSTObserved(new Date(date));
+            }, '<(osn)?:b>');
+            expr.registerFunction('addOffsetToDate', (date, offset, multiplier) => {
+                return hlp.addOffsetToDate(new Date(date), offset, multiplier);
+            }, '<(osn)?nn:b>');
+            expr.registerFunction('getFormattedDateOut', (date, format, utc, timeZoneOffset) => {
+                return hlp.getFormattedDateOut(date, format, utc, timeZoneOffset);
+            }, '<(osn)?(sn)?b?n?:o>');
+            expr.registerFunction('parseDateFromFormat', (date, format, utc, timeZoneOffset, dayNames, monthNames, dayDiffNames) => {
+                return hlp.parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset);
+            }, '<xs?b?n?a<s>?a<s>?a<s>?:s>');
+            expr.registerFunction('parseTimeString', (text, date, utc, timeZoneOffset) => {
+                return hlp.getTimeOfText(text, date, utc, timeZoneOffset);
+            }, '<s(osn)?b?n?:o>');
+            expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
+                return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
+            }, '<xb?n?b?:o>');
+
+            expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
+                if (!hlp.isValidDate(dNow)) {
+                    const dto = new Date(dNow);
+                    if (hlp.isValidDate(dNow)) {
+                        dNow = dto;
+                    } else {
+                        dNow = new Date();
+                    }
+                }
+                return this.getSunTimeByName(dNow, value, offset, multiplier).value;
+            }, '<sn?n?(osn)?:(ol)>');
+            expr.registerFunction('getSunTimePrevNext', dNow => {
+                if (!hlp.isValidDate(dNow)) {
+                    const dto = new Date(dNow);
+                    if (hlp.isValidDate(dNow)) {
+                        dNow = dto;
+                    } else {
+                        dNow = new Date();
+                    }
+                }
+                return this.getSunTimePrevNext(dNow);
+            }, '<(osn)?:(ol)>');
+            expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
+                if (!hlp.isValidDate(dNow)) {
+                    const dto = new Date(dNow);
+                    if (hlp.isValidDate(dNow)) {
+                        dNow = dto;
+                    } else {
+                        dNow = new Date();
+                    }
+                }
+                return this.getSunTime(dNow, parseFloat(elevation), {});
+            }, '<sn?n?>');
+            expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
+                if (!hlp.isValidDate(dNow)) {
+                    const dto = new Date(dNow);
+                    if (hlp.isValidDate(dNow)) {
+                        dNow = dto;
+                    } else {
+                        dNow = new Date();
+                    }
+                }
+                return this.getMoonTimeByName(dNow, value, offset, multiplier).value;
+            }, '<sn?n?(osn)?:(ol)>');
+            expr.registerFunction('getSunCalc', (date, calcTimes, sunInSky) => {
+                return this.getSunCalc(date, calcTimes, sunInSky);
+            }, '<(osn)?b?b?:(ol)>');
+            expr.registerFunction('getSunInSky', date => {
+                return this.getSunInSky(date);
+            }, '<(osn)?:n>');
+            expr.registerFunction('getMoonCalc', (date, calcTimes, moonInSky) => {
+                return this.getMoonCalc(new Date(date), calcTimes, moonInSky);
+            }, '<(osn)?b?:(ol)>');
+            expr.registerFunction('getMoonIllumination', date => {
+                return this.getMoonIllumination(date);
+            }, '<(osn)?:(ol)>');
+            expr.registerFunction('getMoonPhase', date => {
+                return this.getMoonPhase(date);
+            }, '<(osn)?:(ol)>');
+            return expr;
+        }
+
+        /**
+        * get a property value from a type input in Node-Red
+        * @param {*} _srcNode - source node information
         * @param {*} msg - message object
         * @param {propValueType} data - data object with more information
         * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
@@ -1041,6 +1180,8 @@ module.exports = function (RED) {
                 result = Date.now();
             } else if (data.type === 'msgPayload') {
                 result = msg.payload;
+            } else if (data.type === 'msgTopic') {
+                result = msg.topic;
             } else if (data.type === 'msgValue') {
                 result = msg.value;
             } else if (data.type === 'msgTs') {
@@ -1061,7 +1202,7 @@ module.exports = function (RED) {
                     result = undefined;
                 }
             } else if (data.type === 'pdsCalcData') {
-                result = this.getSunCalc(msg.ts, true);
+                result = this.getSunCalc(msg.ts, true, false);
             } else if (data.type === 'pdsCalcPercent') {
                 result = this.getSunInSky(msg.ts);
             } else if (data.type === 'pdsCalcAzimuth') {
@@ -1081,7 +1222,7 @@ module.exports = function (RED) {
             } else if (data.type === 'pdsTimeByAzimuthRad') {
                 result = this.getSunTimeAzimuth(msg.ts, parseFloat(data.value), false, data);
             } else if (data.type === 'pdmCalcData') {
-                result = this.getMoonCalc(msg.ts, true);
+                result = this.getMoonCalc(msg.ts, true, false);
             } else if (data.type === 'pdmPhase') {
                 result = this.getMoonPhase(msg.ts);
             } else if (data.type === 'pdmPhaseCheck') {
@@ -1101,134 +1242,10 @@ module.exports = function (RED) {
                 result = (hlp.getDayOfYear(msg.ts) % 2 === 0);
             } else if (data.type === 'jsonata') {
                 try {
-                    const expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
-                    // expr.assign('sunTimes', function (val, store) {
-                    //     return node.context().global.get(val, store);
-                    // });
-                    // expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
-                    expr.registerFunction('isValidDate', date => {
-                        return hlp.isValidDate(date);
-                    }, '<x?:b>');
-                    expr.registerFunction('isBool', val => {
-                        return hlp.isBool(val);
-                    }, '<x:b>');
-                    expr.registerFunction('isTrue', val => {
-                        return hlp.isTrue(val);
-                    }, '<x:b>');
-                    expr.registerFunction('isFalse', val => {
-                        return hlp.isFalse(val);
-                    }, '<x:b>');
-                    expr.registerFunction('XOR', (a,b) => {
-                        return hlp.XOR(a,b);
-                    }, '<bb:b>');
-                    expr.registerFunction('XAND', (a, b) => {
-                        return hlp.XAND(a,b);
-                    }, '<bb:b>');
-                    expr.registerFunction('countDecimals', val => {
-                        return hlp.countDecimals(val);
-                    }, '<n:n>');
-                    expr.registerFunction('pad', (val, len) => {
-                        return hlp.pad(val, len);
-                    }, '<(nsb)n?:s>');
-                    expr.registerFunction('clipStrLength', (val, len) => {
-                        return hlp.clipStrLength(val, len);
-                    }, '<sn:s>');
-                    expr.registerFunction('getLastDayOfMonth', (year, month, weekday) => {
-                        if (weekday < 0) { weekday = 6; }
-                        if (weekday > 6) { weekday = 0; }
-                        return hlp.getLastDayOfMonth(year, month, weekday);
-                    }, '<nnn?n?:s>');
-                    expr.registerFunction('getNthWeekdayOfMonth', (year, month, weekday, nTh) => {
-                        return hlp.getNthWeekdayOfMonth(year, month, weekday, nTh);
-                    }, '<nnn?n?:s>');
-                    expr.registerFunction('getWeekOfYear', date => {
-                        return hlp.getWeekOfYear(new Date(date));
-                    }, '<(osn)?:a<n>>');
-                    expr.registerFunction('getDayOfYear', date => {
-                        return hlp.getDayOfYear(new Date(date));
-                    }, '<(osn)?:a<n>>');
-                    expr.registerFunction('getStdTimezoneOffset', date => {
-                        return hlp.getStdTimezoneOffset(new Date(date));
-                    }, '<(osn)?:n>');
-                    expr.registerFunction('isDSTObserved', date => {
-                        return hlp.isDSTObserved(new Date(date));
-                    }, '<(osn)?:b>');
-                    expr.registerFunction('addOffsetToDate', (date, offset, multiplier) => {
-                        return hlp.addOffsetToDate(new Date(date), offset, multiplier);
-                    }, '<(osn)?nn:b>');
-                    expr.registerFunction('getFormattedDateOut', (date, format, utc, timeZoneOffset) => {
-                        return hlp.getFormattedDateOut(date, format, utc, timeZoneOffset);
-                    }, '<(osn)?(sn)?b?n?:o>');
-                    expr.registerFunction('parseDateFromFormat', (date, format, utc, timeZoneOffset, dayNames, monthNames, dayDiffNames) => {
-                        return hlp.parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset);
-                    }, '<xs?b?n?a<s>?a<s>?a<s>?:s>');
-                    expr.registerFunction('parseTimeString', (text, date, utc, timeZoneOffset) => {
-                        return hlp.getTimeOfText(text, date, utc, timeZoneOffset);
-                    }, '<s(osn)?b?n?:o>');
-                    expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
-                        return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
-                    }, '<xb?n?b?:o>');
-
-                    expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
-                        if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dNow);
-                            if (hlp.isValidDate(dNow)) {
-                                dNow = dto;
-                            } else {
-                                dNow = new Date();
-                            }
-                        }
-                        return this.getSunTimeByName(dNow, value, offset, multiplier).value;
-                    }, '<sn?n?(osn)?:(ol)>');
-                    expr.registerFunction('getSunTimePrevNext', dNow => {
-                        if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dNow);
-                            if (hlp.isValidDate(dNow)) {
-                                dNow = dto;
-                            } else {
-                                dNow = new Date();
-                            }
-                        }
-                        return this.getSunTimePrevNext(dNow);
-                    }, '<(osn)?:(ol)>');
-                    expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
-                        if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dNow);
-                            if (hlp.isValidDate(dNow)) {
-                                dNow = dto;
-                            } else {
-                                dNow = new Date();
-                            }
-                        }
-                        return this.getSunTime(dNow, parseFloat(elevation), {});
-                    }, '<sn?n?>');
-                    expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
-                        if (!hlp.isValidDate(dNow)) {
-                            const dto = new Date(dNow);
-                            if (hlp.isValidDate(dNow)) {
-                                dNow = dto;
-                            } else {
-                                dNow = new Date();
-                            }
-                        }
-                        return this.getMoonTimeByName(dNow, value, offset, multiplier).value;
-                    }, '<sn?n?(osn)?:(ol)>');
-                    expr.registerFunction('getSunCalc', (date, calcTimes, sunInSky) => {
-                        return this.getSunCalc(date, calcTimes, sunInSky);
-                    }, '<(osn)?b?b?:(ol)>');
-                    expr.registerFunction('getSunInSky', date => {
-                        return this.getSunInSky(date);
-                    }, '<(osn)?:n>');
-                    expr.registerFunction('getMoonCalc', (date, calcTimes) => {
-                        return this.getMoonCalc(new Date(date), calcTimes);
-                    }, '<(osn)?b?:(ol)>');
-                    expr.registerFunction('getMoonIllumination', date => {
-                        return this.getMoonIllumination(date);
-                    }, '<(osn)?:(ol)>');
-                    expr.registerFunction('getMoonPhase', date => {
-                        return this.getMoonPhase(date);
-                    }, '<(osn)?:(ol)>');
-                    result = RED.util.evaluateJSONataExpression(expr, msg);
+                    if (!data.expr) {
+                        data.expr = this.getJSONataExpression(data.value, _srcNode);
+                    }
+                    result = RED.util.evaluateJSONataExpression(data.expr, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
@@ -1313,15 +1330,23 @@ module.exports = function (RED) {
                     return (a > this.getPropValue(_srcNode, msg, operandB));
                 case 'gte':
                     return (a >= this.getPropValue(_srcNode, msg, operandB));
-                case 'contain':
-                    return ((a + '').includes(this.getPropValue(_srcNode, msg, operandB)));
+                case 'contain': {
+                    let val = this.getPropValue(_srcNode, msg, operandB);
+                    if (!val) { return false; }
+                    val = (val + '').trim();
+                    return ((a + '').includes(val));
+                }
                 case 'containSome': {
-                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
+                    let vals = this.getPropValue(_srcNode, msg, operandB);
+                    if (!vals) { return false; }
+                    vals = (vals + '').trim().split(/\s*[,;|]\s*/).filter(x => x);
                     const txt = (a + '');
                     return vals.some(v => txt.includes(v));
                 }
                 case 'containEvery': {
-                    const vals = this.getPropValue(_srcNode, msg, operandB).split(/,;\|/);
+                    let vals = this.getPropValue(_srcNode, msg, operandB);
+                    if (!vals) { return false; }
+                    vals = (vals + '').trim().split(/\s*[,;|]\s*/).filter(x => x);
                     const txt = (a + '');
                     return vals.every(v => txt.includes(v));
                 }
@@ -1459,7 +1484,7 @@ module.exports = function (RED) {
             return result;
         }
 
-        getMoonCalc(date, calcTimes, specLatitude,  specLongitude) {
+        getMoonCalc(date, calcTimes, moonInSky, specLatitude, specLongitude) {
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
                 if (hlp.isValidDate(dto)) {
@@ -1514,14 +1539,38 @@ module.exports = function (RED) {
             const dayId = hlp.getDayId(date);
             if (cacheEnabled && dayId === this.cache.moonTimesToday.dayId) {
                 result.times = this.cache.moonTimesToday.times;
+                result.positionAtRise = this.cache.moonTimesToday.positionAtRise;
+                result.positionAtSet = this.cache.moonTimesToday.positionAtSet;
             } else if (cacheEnabled && dayId === this.cache.moonTimesTomorrow.dayId) {
                 result.times = this.cache.moonTimesTomorrow.times;
+                result.positionAtRise = this.cache.moonTimesTomorrow.positionAtRise;
+                result.positionAtSet = this.cache.moonTimesTomorrow.positionAtSet;
             } else {
                 result.times = sunCalc.getMoonTimes(date.valueOf(), specLatitude, specLongitude);
             }
 
             if (cacheEnabled) {
                 this.cache.lastMoonCalc = result;
+            }
+            if (moonInSky) {
+                if (!result.positionAtRise && result.times.rise) {
+                    result.positionAtRise = sunCalc.getMoonPosition(result.times.rise.valueOf(), specLatitude, specLongitude);
+                }
+
+                if (!result.positionAtSet && result.times.set) {
+                    result.positionAtSet = sunCalc.getMoonPosition(result.times.set.valueOf(), specLatitude, specLongitude);
+                }
+            }
+
+            if (result.times.alwaysUp) {
+                result.isUp = true;
+            } else if (result.times.alwaysDown) {
+                result.isUp = false;
+            } else {
+                if (result.positionAtRise && result.positionAtSet) {
+                    result.isUp = (result.positionAtRise.azimuthDegrees < result.azimuthDegrees) &&
+                                  (result.positionAtSet.azimuthDegrees > result.azimuthDegrees);
+                }
             }
 
             return result;
