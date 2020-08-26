@@ -1670,6 +1670,8 @@
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
                     // #endregion dialogLevel
                     // #region default topic + importance
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-blindctl-rule-resetOverwrite');
+
                     const $dialogImportance = $dialog.find('#dlg-ip-blindctl-rule-importance');
                     $dialogImportance.spinner({
                         max: 1000,
@@ -2093,6 +2095,7 @@
                             $dialogLevel.typedInput('type',data.levelType);
                             $dialogTopic.val(data.topic);
                             $dialogImportance.val(data.importance || 0);
+                            $dialogResetOverwrite.attr('checked', data.resetOverwrite);
 
                             _dialogGenHelpText();
 
@@ -2150,6 +2153,7 @@
                             levelOpText: $dialogLevelOperator.find('option:selected').text(),
                             topic: $dialogTopic.val(),
                             importance: parseInt($dialogImportance.val()),
+                            resetOverwrite: $dialogResetOverwrite.is(':checked'),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2718,6 +2722,10 @@
             <input type="text" id="dlg-ip-blindctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level">
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
+        </div>
+        <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
+            <label for="dlg-ip-blindctl-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.resetOverwrite"></span></label>
+            <input type="checkbox" id="dlg-ip-blindctl-rule-resetOverwrite" style="width: auto;">
         </div>
         <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
             <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>

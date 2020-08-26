@@ -756,10 +756,16 @@ module.exports = function (RED) {
 
 
                 // check for manual overwrite
-                const overwrite = checkTCPosOverwrite(node, msg, dNow);
-                if (!overwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
+                let overwrite = checkTCPosOverwrite(node, msg, dNow);
+                if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
+                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
+                    if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
+                        timePosOverwriteReset(node);
+                        overwrite = false;
+                    }
+
                     if (!overwrite || timeCtrl.rule.importance > node.timeClockData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
                         node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, dNow);
@@ -900,13 +906,16 @@ module.exports = function (RED) {
             node.rules.firstFrom = node.rules.lastUntil;
             node.rules.firstTimeLimited = node.rules.count;
             node.rules.maxImportance = 0;
+            node.rules.canResetOverwrite = false;
 
             for (let i = 0; i < node.rules.count; ++i) {
                 const rule = node.rules.data[i];
                 rule.pos = i + 1;
                 rule.name = rule.name || 'rule ' + rule.pos;
+                rule.resetOverwrite = (rule.resetOverwrite === true || rule.resetOverwrite === 'true') ? true : false;
                 rule.importance = Number(rule.importance) || 0;
                 node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
+                node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
 
                 rule.timeLimited = (rule.timeType && (rule.timeType !== 'none'));

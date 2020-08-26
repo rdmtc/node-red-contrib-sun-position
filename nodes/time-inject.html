@@ -2,22 +2,6 @@
 
 <script type="text/javascript">
     (function() {
-        /**
-         * Handles Dialoge resizing
-         */
-        function resizeDialog(size) {
-            size = size || { height: $('.red-ui-tray-content form').height() };
-            const rows = $('#dialog-form>div:not(.node-input-property-container-row):visible');
-            let height = size.height;
-            for (let i=0; i<rows.length; i++) {
-                height -= $(rows[i]).outerHeight(true);
-            }
-            const editorRow = $('#dialog-form>div.node-input-property-container-row');
-            height -= (parseInt(editorRow.css('marginTop'))+parseInt(editorRow.css('marginBottom')));
-            height += 16;
-            $('#node-input-property-container').editableList('height',height);
-        }
-
         // category: 'time and astro',
         RED.nodes.registerType('time-inject', {
             category: 'common',
@@ -560,7 +544,6 @@
 
                     $('#node-input-property-container').css('min-height', '40px').css('min-width', '400px').editableList({
                         addItem(containerRow, containerIndex, data) {
-                            console.log('addItem', containerIndex, data);
                             containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                             const $row1 = $('<div/>').appendTo(containerRow);
                             const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
@@ -818,7 +801,6 @@
                             $propertyValue.change();
                             autocomplete($formatIp, 'dateParseFormat');
                             resizeContainer();
-                            console.log('finished add item');
                         },
                         sortItems(rules) {
                             rules = $('#node-input-property-container').editableList('items');

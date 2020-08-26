@@ -1081,6 +1081,7 @@
                     autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
                     // #endregion dialogPayload
                     // #region default topic + importance
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-clktime-rule-resetOverwrite');
                     const $dialogImportance = $dialog.find('#dlg-ip-clktime-rule-importance');
                     $dialogImportance.spinner({
                         max: 1000,
@@ -1572,6 +1573,7 @@
                             }
                             $dialogTopic.val(data.topic);
                             $dialogImportance.val(data.importance || 0);
+                            $dialogResetOverwrite.attr('checked', data.resetOverwrite);
 
                             _dialogGenHelpText();
 
@@ -1630,6 +1632,7 @@
                             payloadFormat: $dialogPayloadTimeFormat.val(),
                             topic: $dialogTopic.val(),
                             importance: parseInt($dialogImportance.val()),
+                            resetOverwrite: $dialogResetOverwrite.is(':checked'),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
                             validOperandAType: $dialogCondAOperand.typedInput('type'),
@@ -2055,6 +2058,11 @@
             </select>
             <input type="text" id="dlg-ip-clktime-rule-payloadTimeFormat" class="ipadd" />
         </div>
+        <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
+            <label for="dlg-ip-clktime-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.resetOverwrite"></span></label>
+            <input type="checkbox" id="dlg-ip-clktime-rule-resetOverwrite" style="width: auto;">
+        </div>
+
         <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic" data-i18n="[titleOrg]clock-timer.placeholder.ruleTopic">
             <label for="dlg-ip-clktime-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-clktime-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
