@@ -895,6 +895,7 @@ module.exports = function (RED) {
 
         livingRuleData.hasMinimum = false;
         livingRuleData.importance = 0;
+        livingRuleData.resetOverwrite = false;
         if (ruleSelMin) {
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, -1);
             // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
@@ -905,10 +906,12 @@ module.exports = function (RED) {
                     id: ruleSelMin.pos,
                     name: ruleSelMin.name,
                     importance: ruleSelMin.importance,
+                    resetOverwrite: ruleSelMin.resetOverwrite,
                     conditional: ruleSelMin.conditional,
                     timeLimited: ruleSelMin.timeLimited,
                     conditon: ruleSelMin.conditon,
-                    time: ruleSelMin.timeData
+                    time: ruleSelMin.timeData,
+                    topic : ruleSelMin.topic
                 };
             }
         }
@@ -923,10 +926,12 @@ module.exports = function (RED) {
                     id: ruleSelMax.pos,
                     name: ruleSelMax.name,
                     importance: ruleSelMax.importance,
+                    resetOverwrite: ruleSelMax.resetOverwrite,
                     conditional: ruleSelMax.conditional,
                     timeLimited: ruleSelMax.timeLimited,
                     conditon: ruleSelMax.conditon,
-                    time: ruleSelMax.timeData
+                    time: ruleSelMax.timeData,
+                    topic : ruleSelMax.topic
                 };
             }
         }
@@ -965,6 +970,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
+            livingRuleData.resetOverwrite = ruleSel.resetOverwrite;
             livingRuleData.code = 4;
             livingRuleData.topic = ruleSel.topic;
 
@@ -1253,12 +1259,17 @@ module.exports = function (RED) {
                 }
 
                 // check for manual overwrite
-                const overwrite = checkBlindPosOverwrite(node, msg, now);
+                let overwrite = checkBlindPosOverwrite(node, msg, now);
                 node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}`);
-                if (!overwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.blindData.overwrite.importance)) {
+                if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.blindData.overwrite.importance)) {
                     // calc times:
                     blindCtrl.rule = checkRules(node, msg, now, tempData);
                     node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
+                    if (overwrite && blindCtrl.rule.resetOverwrite && blindCtrl.rule.id !== node.previousData.usedRule) {
+                        blindPosOverwriteReset(node);
+                        overwrite = false;
+                    }
+
                     if (!overwrite || blindCtrl.rule.importance > node.blindData.overwrite.importance) {
                         ruleId = blindCtrl.rule.id;
                         node.level.current = blindCtrl.rule.level;
@@ -1449,13 +1460,16 @@ module.exports = function (RED) {
             node.rules.firstFrom = node.rules.lastUntil;
             node.rules.firstTimeLimited = node.rules.count;
             node.rules.maxImportance = 0;
+            node.rules.canResetOverwrite = false;
 
             for (let i = 0; i < node.rules.count; ++i) {
                 const rule = node.rules.data[i];
                 rule.pos = i + 1;
                 rule.name = rule.name || 'rule ' + rule.pos;
+                rule.resetOverwrite = (rule.resetOverwrite === true || rule.resetOverwrite === 'true') ? true : false;
                 rule.importance = Number(rule.importance) || 0;
                 node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
+                node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
                 rule.timeOp = Number(rule.timeOp) || cRuleUntil;
                 rule.levelOp = Number(rule.levelOp) || cRuleAbsolute;
                 if (rule.levelOp === 3) { // cRuleMinReset = 3; // ⭳✋ reset minimum

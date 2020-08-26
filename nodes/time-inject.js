@@ -53,9 +53,9 @@ module.exports = function (RED) {
         } else {
             this.injType = tInj.none;
         }
-        this.intervalCount = config.intervalCount || 0;
-        this.intervalCountType = (this.injType === tInj.interval || this.injType === tInj.intervalTime) ? config.intervalCountType || 'num' : 'none';
-        this.intervalCountMultiplier = config.intervalCountMultiplier || 60000;
+        this.intervalCount = config.intervalCount ? config.intervalCount : 0;
+        this.intervalCountType = (this.injType === tInj.interval || this.injType === tInj.intervalTime) ? (config.intervalCountType || 'num') : 'none';
+        this.intervalCountMultiplier = config.intervalCountMultiplier ? config.intervalCountMultiplier : 60000;
 
         if (this.injType === tInj.intervalTime ||
             this.injType === tInj.timer) {
@@ -64,7 +64,7 @@ module.exports = function (RED) {
                 value : config.time,
                 offsetType : config.offsetType,
                 offset : config.offset || config.timeOffset || 0,
-                multiplier : config.offsetMultiplier || config.timeOffsetMultiplier || 60,
+                multiplier : config.offsetMultiplier ? config.timeOffsetMultiplier : 60,
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
@@ -107,15 +107,15 @@ module.exports = function (RED) {
                     };
                 }
             }
-            this.propertyOperator = config.propertyCompare || 'true';
+            this.propertyOperator = config.propertyCompare ? config.propertyCompare : 'true';
 
             if (this.injType === tInj.timer  && this.property && config.timeAltType && config.timeAltType !== 'none') {
                 this.timeStartAltData = {
-                    type: config.timeAltType || 'none',
-                    value : config.timeAlt || '',
+                    type: config.timeAltType ? config.timeAltType : 'none',
+                    value : config.timeAlt ? config.timeAlt : '',
                     offsetType : config.timeAltOffsetType,
-                    offset : config.timeAltOffset || 0,
-                    multiplier : config.timeAltOffsetMultiplier || 60,
+                    offset : config.timeAltOffset ? config.timeAltOffset : 0,
+                    multiplier : config.timeAltOffsetMultiplier ? config.timeAltOffsetMultiplier : 60,
                     next : true,
                     days : config.timeAltDays,
                     months : config.timeAltMonths,
@@ -142,8 +142,8 @@ module.exports = function (RED) {
                 type: config.timeEndType,
                 value : config.timeEnd,
                 offsetType : config.timeEndOffsetType,
-                offset : config.timeEndOffset || 0,
-                multiplier : config.timeEndOffsetMultiplierr || 60,
+                offset : config.timeEndOffset ? config.timeEndOffset : 0,
+                multiplier : config.timeEndOffsetMultiplier ? config.timeEndOffsetMultiplier : 60,
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,

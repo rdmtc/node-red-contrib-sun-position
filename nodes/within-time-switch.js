@@ -314,14 +314,16 @@ module.exports = function (RED) {
                     if (msg.withinTimeStart.id < msg.withinTimeEnd.id) {
                         if (cmpNow >= msg.withinTimeStart.id && cmpNow < msg.withinTimeEnd.id) {
                             msg.withinTime = true;
-                            this.debug('in time [1] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
+                            this.debug('in time [1] - send msg to first output ' + result.startSuffix +
+                                node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
                             send([msg, null]); // this.send([msg, null]);
                             done();
                             return null;
                         }
                     } else if (!(cmpNow >= msg.withinTimeEnd.id && cmpNow < msg.withinTimeStart.id)) {
                         msg.withinTime = true;
-                        this.debug('in time [2] - send msg to first output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
+                        this.debug('in time [2] - send msg to first output ' + result.startSuffix +
+                            node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
                         send([msg, null]); // this.send([msg, null]);
                         done();
                         return null;
