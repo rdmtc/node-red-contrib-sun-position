@@ -1028,7 +1028,8 @@ module.exports = function (RED) {
         * @returns {*} JSONataExpression
         */
         getJSONataExpression(_srcNode, data) {
-            const expr = RED.util.prepareJSONataExpression(data.value, _srcNode);
+            // _srcNode.debug(`getJSONataExpression - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            const expr = RED.util.prepareJSONataExpression(data, _srcNode);
             // expr.assign('sunTimes', function (val, store) {
             //     return node.context().global.get(val, store);
             // });
@@ -1243,7 +1244,7 @@ module.exports = function (RED) {
             } else if (data.type === 'jsonata') {
                 try {
                     if (!data.expr) {
-                        data.expr = this.getJSONataExpression(data.value, _srcNode);
+                        data.expr = this.getJSONataExpression(_srcNode, data.value);
                     }
                     result = RED.util.evaluateJSONataExpression(data.expr, msg);
                 } catch (err) {
