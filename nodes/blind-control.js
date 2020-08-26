@@ -895,6 +895,7 @@ module.exports = function (RED) {
 
         livingRuleData.hasMinimum = false;
         livingRuleData.importance = 0;
+        livingRuleData.resetOverwrite = false;
         if (ruleSelMin) {
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.levelType, ruleSelMin.levelValue, -1);
             // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
@@ -905,10 +906,12 @@ module.exports = function (RED) {
                     id: ruleSelMin.pos,
                     name: ruleSelMin.name,
                     importance: ruleSelMin.importance,
+                    resetOverwrite: ruleSelMin.resetOverwrite,
                     conditional: ruleSelMin.conditional,
                     timeLimited: ruleSelMin.timeLimited,
                     conditon: ruleSelMin.conditon,
-                    time: ruleSelMin.timeData
+                    time: ruleSelMin.timeData,
+                    topic : ruleSelMin.topic
                 };
             }
         }
@@ -923,10 +926,12 @@ module.exports = function (RED) {
                     id: ruleSelMax.pos,
                     name: ruleSelMax.name,
                     importance: ruleSelMax.importance,
+                    resetOverwrite: ruleSelMax.resetOverwrite,
                     conditional: ruleSelMax.conditional,
                     timeLimited: ruleSelMax.timeLimited,
                     conditon: ruleSelMax.conditon,
-                    time: ruleSelMax.timeData
+                    time: ruleSelMax.timeData,
+                    topic : ruleSelMax.topic
                 };
             }
         }
@@ -965,6 +970,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
+            livingRuleData.resetOverwrite = ruleSel.resetOverwrite;
             livingRuleData.code = 4;
             livingRuleData.topic = ruleSel.topic;
 

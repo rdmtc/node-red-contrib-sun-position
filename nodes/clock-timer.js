@@ -551,6 +551,7 @@ module.exports = function (RED) {
             livingRuleData.id = ruleSel.pos;
             livingRuleData.name = ruleSel.name;
             livingRuleData.importance = ruleSel.importance;
+            livingRuleData.resetOverwrite = ruleSel.resetOverwrite;
             livingRuleData.code = 4;
             livingRuleData.topic = ruleSel.topic;
 
@@ -597,6 +598,7 @@ module.exports = function (RED) {
         livingRuleData.active = false;
         livingRuleData.id = -1;
         livingRuleData.importance = 0;
+        livingRuleData.resetOverwrite = false;
         livingRuleData.payloadData = {
             type: node.timeClockData.payloadDefaultType,
             value: node.timeClockData.payloadDefault,
@@ -760,7 +762,7 @@ module.exports = function (RED) {
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
-                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.blindData.overwrite.importance=${node.blindData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
+                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, timeClockData.overwrite.importance=${node.timeClockData.overwrite.importance}`);
                     if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
                         timePosOverwriteReset(node);
                         overwrite = false;

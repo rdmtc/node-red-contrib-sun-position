@@ -820,13 +820,20 @@
                                     result += '</var>';
                                     // <meter value="2" min="0" max="10">2 out of 10</meter>
                                 }
-                                if (data.topic) {
-                                    result += '<div class="indent-topic-text"> <span>';
-                                    result += node._('blind-control.label.ruleTopic');
-                                    result += '</span> <var>';
-                                    result += data.topic;
-                                    result += '</var>';
-                                    result += '</div>';
+                                if (data.levelOp <= 0 || data.levelType === 'levelND') {
+                                    if (data.topic) {
+                                        result += '<div class="indent-topic-text"> <span>';
+                                        result += node._('blind-control.label.ruleTopic');
+                                        result += '</span> <var>';
+                                        result += data.topic;
+                                        result += '</var>';
+                                        result += '</div>';
+                                    }
+                                    if (data.resetOverwrite) {
+                                        result += '<div class="indent-resetOverwrite-text"> <span>';
+                                        result += node._('blind-control.label.ruleResetOverwrite');
+                                        result += '</span> </div>';
+                                    }
                                 }
                             } else {
                                 result += node._('blind-control.label.ruleLevelND');
@@ -1658,6 +1665,9 @@
                     });
                     // #endregion dialogTimeLimit
                     // #region dialogLevel
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-blindctl-rule-resetOverwrite');
+                    $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
+
                     const $dialogLevel = $dialog.find('#dlg-ip-blindctl-rule-level');
                     $dialogLevel.typedInput({
                         default: types.LevelFix.value,
@@ -1668,18 +1678,30 @@
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    $dialogLevelOperator.change(() => {
+                        if (parseInt($dialogLevelOperator.val()) <= 0) {
+                            $('#dialog-row-resetOverwrite').show();
+                            $('#dialog-row-topic').show();
+                        } else {
+                            $('#dialog-row-resetOverwrite').hide();
+                            $('#dialog-row-topic').hide();
+                        }
+                        _dialogGenHelpText();
+                    });
                     // #endregion dialogLevel
                     // #region default topic + importance
-                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-blindctl-rule-resetOverwrite');
 
                     const $dialogImportance = $dialog.find('#dlg-ip-blindctl-rule-importance');
                     $dialogImportance.spinner({
                         max: 1000,
                         min: 0,
-                        step: 1
+                        step: 1,
+                        stop:(_e, _ui) => { _dialogGenHelpText(); }
                     });
+                    $dialogImportance.change(() => { _dialogGenHelpText(); });
                     const $dialogTopic = $dialog.find('#dlg-ip-blindctl-rule-topic');
-                    // #endregion dialogLevel
+                    $dialogTopic.change(() => { _dialogGenHelpText(); });
+                    // #endregion default topic + importance
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -2097,11 +2119,10 @@
                             $dialogImportance.val(data.importance || 0);
                             $dialogResetOverwrite.attr('checked', data.resetOverwrite);
 
-                            _dialogGenHelpText();
-
                             dialogDataOnLoading = false;
                             $dialogCondAOperand.change();
                             $dialogTimeRegInput.change();
+                            $dialogLevelOperator.change();
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
@@ -2152,7 +2173,7 @@
                             levelOp: parseInt($dialogLevelOperator.val()),
                             levelOpText: $dialogLevelOperator.find('option:selected').text(),
                             topic: $dialogTopic.val(),
-                            importance: parseInt($dialogImportance.val()),
+                            importance: (parseInt($dialogLevelOperator.val()) <= 0) ? parseInt($dialogImportance.val()) : -1,
                             resetOverwrite: $dialogResetOverwrite.is(':checked'),
 
                             validOperandAValue: $dialogCondAOperand.typedInput('value'),
@@ -2723,11 +2744,12 @@
             <select id="dlg-ip-blindctl-rule-level-operator" class="ipadd dlg-ip-blindctl-rule-level-operator" >
             </select>
         </div>
-        <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-blindctl-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.resetOverwrite"></span></label>
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
+            <label for="dlg-ip-blindctl-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-blindctl-rule-resetOverwrite" style="width: auto;">
+            <span data-i18n="blind-control.label.ruleResetOverwrite"></span>
         </div>
-        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
             <label for="dlg-ip-blindctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-blindctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
             <input type="text" id="dlg-ip-blindctl-rule-importance" class="ipadd" data-i18n="[placeholder]blind-control.placeholder.ruleImportance"/>

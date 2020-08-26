@@ -9,6 +9,7 @@
   - maybe fix of #159 by better memory cleanup on change
   - added possibility of define which time should be in payload (current or next) #163
   - now setup of payload, topic and additional payload is similar to the inject node of th newest Node-Red Version #172
+  - time-inject label wrong #176
 
 - within-time
   - fix bug not usable/visible offset for alternate times #170
@@ -21,6 +22,7 @@
 
 - clock-time
   - fixed not working overrides #171
+  - fixed not existing blindCtrl property
 
 #### 1.1.3:  maintenance
 

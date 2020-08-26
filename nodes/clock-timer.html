@@ -562,6 +562,11 @@
                                     result += '</var>';
                                     result += '</div>';
                                 }
+                                if (data.resetOverwrite) {
+                                    result += '<div class="indent-resetOverwrite-text"> <span>';
+                                    result += node._('clock-timer.label.ruleResetOverwrite');
+                                    result += '</span> </div>';
+                                }
                             } else {
                                 result += node._('clock-timer.label.rulePayloadND');
                             }
@@ -1082,14 +1087,18 @@
                     // #endregion dialogPayload
                     // #region default topic + importance
                     const $dialogResetOverwrite = $dialog.find('#dlg-ip-clktime-rule-resetOverwrite');
+                    $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
                     const $dialogImportance = $dialog.find('#dlg-ip-clktime-rule-importance');
                     $dialogImportance.spinner({
                         max: 1000,
                         min: 0,
-                        step: 1
+                        step: 1,
+                        stop:(_e, _ui) => { _dialogGenHelpText(); }
                     });
+                    $dialogImportance.change(() => { _dialogGenHelpText(); });
                     const $dialogTopic = $dialog.find('#dlg-ip-clktime-rule-topic');
-                    // #endregion dialogLevel
+                    $dialogTopic.change(() => { _dialogGenHelpText(); });
+                    // #endregion default topic + importance
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -2059,10 +2068,10 @@
             <input type="text" id="dlg-ip-clktime-rule-payloadTimeFormat" class="ipadd" />
         </div>
         <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-clktime-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.resetOverwrite"></span></label>
+            <label for="dlg-ip-clktime-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-clktime-rule-resetOverwrite" style="width: auto;">
+            <span data-i18n="clock-timer.label.ruleResetOverwrite"></span>
         </div>
-
         <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic" data-i18n="[titleOrg]clock-timer.placeholder.ruleTopic">
             <label for="dlg-ip-clktime-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
             <input type="text" id="dlg-ip-clktime-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>

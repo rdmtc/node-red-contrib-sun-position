@@ -447,8 +447,8 @@
                             lab += ' + ' + (props.length - 4);
                             break;
                         }
-                        lab += (types[props[i].pt] || (props[i].pt + '.' + props[i].p)) + ': ';
-                        let propType = labels[props[i].vt] || props[i].vt;
+                        lab += (types[props[i].pt] ? types[props[i].pt] : (props[i].pt + '.' + props[i].p)) + ': ';
+                        let propType = labels[props[i].vt] ? labels[props[i].vt] : props[i].vt;
                         if (propType === 'json' || propType === 'object') {
                             try {
                                 const parsedProp = JSON.parse(props[i].v);
@@ -664,7 +664,7 @@
                             })
                                 .css('width','calc(100% - 30px)')
                                 .appendTo($row2);
-                            initCombobox(node, $formatSel, $formatIp, 'dateOutFormat', 'outputFormats', prop.f || 0, -70);
+                            initCombobox(node, $formatSel, $formatIp, 'dateOutFormat', 'outputFormats', prop.f ? prop.f : 0, -70);
 
                             // row3 - Offset and Multiplier
                             addLabel($row3, 'node-input-prop-property-offset', 'fa fa-plus');
@@ -672,12 +672,12 @@
                             const $offset = $('<input/>', {
                                 class: 'node-input-prop-property-offset',
                                 type: 'text',
-                                value: (prop.o || '')
+                                value: (prop.o ? prop.o : '')
                             })
                                 .css('width','70%')
                                 .appendTo($row3)
                                 .typedInput({
-                                    default: (prop.oT || types.Undefined.value),
+                                    default: (prop.oT ? prop.oT : types.Undefined.value),
                                     types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber]
                                 });
                             $offset.typedInput('value',prop.o);
@@ -689,7 +689,7 @@
                                 .css('width','calc(30% - 30px)')
                                 .appendTo($row3);
                             appendOptions(node, $multiplier, 'multiplier');
-                            $multiplier.val(prop.oM || 60000);
+                            $multiplier.val(prop.oM ? prop.oM: 60000);
 
                             // row4 - Next and Day selection
                             addLabel($row4, 'node-input-prop-property-Next', '"fa fa-clock-o', node._('time-inject.label.nextOccurrence'));
@@ -1414,7 +1414,7 @@
                             }
                             return RED.nodes.getType('position-config').clipValueLength($.trim(prop.fT.split(',')[0]), 20);
                         }
-                        return RED.nodes.getType('position-config').getValueLabel(this, prop.vt, prop.v, prop.o);
+                        return RED.nodes.getType('position-config').getValueLabel(this, prop.vt, prop.v, (prop.oT !== 'none') ? prop.o : null);
                     }
                     return '{}';
                 };
@@ -1454,7 +1454,7 @@
                         payloadType = p.vt;
                     }
                     if (p.pt === 'msgTopic') {
-                        topicLbl = getPropTLbl(p);
+                        topicLbl = getPropTLbl(p).replace(/(^")|("↷?↶?$)|({}↷?↶?)/g, '').trim();
                     }
                     node.props.push(p);
                 });
@@ -1557,9 +1557,9 @@
                             return '';
                         };
                         suffix += '[';
-                        suffix += getDateShort($('#node-input-timedatestart').val()) || '01-01';
+                        suffix += (getDateShort($('#node-input-timedatestart').val()) || '01-01');
                         suffix += '>';
-                        suffix += getDateShort($('#node-input-timedateend').val()) || '12-31';
+                        suffix += (getDateShort($('#node-input-timedateend').val()) || '12-31');
                         suffix += ']';
                     }
                     return suffix;
