@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 1.1.5:  BugFix
+
+- general
+  - fixed JSONATA are working
+
 #### 1.1.4:  BugFix
 
 - general
@@ -23,6 +28,9 @@
 - clock-time
   - fixed not working overrides #171
   - fixed not existing blindCtrl property
+
+- blind-control + clock-time
+  - first implementation of allow override expire by rules #173 (not fully tested)
 
 #### 1.1.3:  maintenance
 
