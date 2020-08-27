@@ -312,7 +312,8 @@
         "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown! (\"__opTypeA__.__opValueA__\" compare to \"__opTypeB__.__opValueB__\")",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__",
-        "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)"
+        "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)",
+        "invalid-expr": "Invalid JSONata expression: __error__"
     },
     "position-config": {
         "label": {

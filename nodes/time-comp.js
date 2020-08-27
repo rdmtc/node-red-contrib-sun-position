@@ -17,6 +17,41 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        this.input = {
+            type: config.inputType,
+            value: config.input,
+            format: config.inputFormat,
+            offsetType: config.inputOffsetType,
+            offset: config.inputOffset,
+            multiplier: config.inputOffsetMultiplier
+        };
+
+        this.result1 = {
+            type   : config.result1Type,
+            value  : config.result1,
+            format : config.result1Format
+        };
+
+        this.result1Value = {
+            type: config.result1ValueType,
+            value: config.result1Value,
+            format: config.result1Format,
+            offsetType: config.result1OffsetType,
+            offset: config.result1Offset,
+            multiplier: config.result1Multiplier,
+            next: true
+        };
+        if (this.positionConfig && this.result1Value.type === 'jsonata') {
+            try {
+                this.result1Value.expr = this.positionConfig.getJSONataExpression(this, this.result1Value.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                this.result1Value.expr = null;
+            }
+        }
+
+        this.rules = config.rules;
+        this.checkall = config.checkall;
         const node = this;
 
         this.on('input', (msg, send, done) => {
@@ -26,8 +61,8 @@ module.exports = function (RED) {
 
             if (node.positionConfig === null ||
                 typeof node.positionConfig === 'undefined' ||
-                config.inputType === null ||
-                typeof config.inputType === 'undefined') {
+                node.input.type === null ||
+                typeof node.input.type === 'undefined') {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -37,49 +72,33 @@ module.exports = function (RED) {
             }
 
             try {
-                // const inputData = node.positionConfig.getDateFromProp(node, msg, config.inputType, config.input, config.inputFormat, config.inputOffset, config.inputOffsetType, config.inputOffsetMultiplier);
-                const inputData = node.positionConfig.getTimeProp(node, msg, {
-                    type: config.inputType,
-                    value: config.input,
-                    format: config.inputFormat,
-                    offsetType: config.inputOffsetType,
-                    offset: config.inputOffset,
-                    multiplier: config.inputOffsetMultiplier
-                });
+                // const inputData = node.positionConfig.getDateFromProp(node, msg, node.input.type, node.input.value);
+                const inputData = node.positionConfig.getTimeProp(node, msg, node.input);
                 if (inputData.error) {
                     throw new Error(inputData.error);
                 }
 
-                if (config.result1Type !== 'none') {
+                if (node.result1.type !== 'none') {
                     let resultObj = null;
-                    if (config.result1ValueType === 'input') {
-                        resultObj = hlp.getFormattedDateOut(inputData.value, config.result1Format);
+                    if (node.result1Value.type === 'input') {
+                        resultObj = hlp.getFormattedDateOut(inputData.value, node.result1.format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, {
-                            type: config.result1ValueType,
-                            value: config.result1Value,
-                            format: config.result1Format,
-                            offsetType: config.result1OffsetType,
-                            offset: config.result1Offset,
-                            multiplier: config.result1Multiplier,
-                            next: true
-                        });
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, node.result1Value);
                     }
 
                     if (resultObj === null || typeof resultObj === 'undefined') {
-                        throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
+                        throw new Error('could not evaluate ' + node.result1Value.type + '.' + node.result1Value.value);
                     } else if (resultObj.error) {
                         node.error('error on getting result: ' + resultObj.error);
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, config.result1Type, config.result1, resultObj);
+                        node.positionConfig.setMessageProp(this, msg, node.result1.type, node.result1.value, resultObj);
                     }
                 }
 
                 const resObj = [];
-                const rules = config.rules;
-                const rulesLength = rules.length;
+                const rulesLength = node.rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
-                    const rule = rules[i];
+                    const rule = node.rules[i];
                     let operatorValid = true;
                     if (rule.propertyType !== 'none') {
                         const res = RED.util.evaluateNodeProperty(rule.propertyValue, rule.propertyType, node, msg);
@@ -223,7 +242,7 @@ module.exports = function (RED) {
                         if (result) {
                             resObj.push(msg);
                             node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-                            if (config.checkall != 'true') { // eslint-disable-line eqeqeq
+                            if (node.checkall != 'true') { // eslint-disable-line eqeqeq
                                 node.debug(i + ' end cause checkall');
                                 break;
                             }

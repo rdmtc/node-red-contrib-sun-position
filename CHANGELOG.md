@@ -1,5 +1,10 @@
 # node-red-contrib-sun-position
 
+#### 1.1.6:  BugFix
+
+- general
+  - reworked JSONATA (preparation is now done on node creation)
+
 #### 1.1.5:  BugFix
 
 - general
