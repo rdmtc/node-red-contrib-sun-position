@@ -100,8 +100,8 @@ module.exports = function (RED) {
             end: {},
             startSuffix: '',
             endSuffix: '',
-            altStartTime: (node.propertyStartType !== 'none') && (msg || (node.propertyStartType !== 'msg')),
-            altEndTime: (node.propertyEndType !== 'none') && (msg || (node.propertyEndType !== 'msg')),
+            altStartTime: (node.propertyStart.type !== 'none') && (msg || (node.propertyStart.type !== 'msg')),
+            altEndTime: (node.propertyEnd.type !== 'none') && (msg || (node.propertyEnd.type !== 'msg')),
             valid: false,
             warn: ''
         };
@@ -158,31 +158,25 @@ module.exports = function (RED) {
         result.valid = true;
 
         if (result.altStartTime) {
-            // node.debug('alternate start times enabled ' + node.propertyStartType + '.' + node.propertyStart);
+            // node.debug('alternate start times enabled ' + node.propertyStart.type + '.' + node.propertyStart.value);
             try {
-                result.altStartTime = node.positionConfig.comparePropValue(node, msg, { type:node.propertyStartType, value:node.propertyStart},
-                    node.propertyStartOperator, {type: node.propertyStartThresholdType, value:node.propertyStartThresholdValue});
+                result.altStartTime = node.positionConfig.comparePropValue(node, msg, node.propertyStart,
+                    node.propertyStartOperator, node.propertyStartThreshold);
             } catch (err) {
                 result.altStartTime = false;
-                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', {
-                    type: node.propertyStartType,
-                    value: node.propertyStart
-                }), err);
+                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', node.propertyStart), err);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             }
         }
 
         if (result.altEndTime) {
-            // node.debug('alternate end times enabled ' + node.propertyEndType + '.' + node.propertyEnd);
+            // node.debug('alternate end times enabled ' + node.propertyEnd.type + '.' + node.propertyEnd.value);
             try {
-                result.altEndTime = node.positionConfig.comparePropValue(node, msg, { type:node.propertyEndType, value:node.propertyEnd},
-                    node.propertyEndOperator, {type:node.propertyEndThresholdType, value:node.propertyEndThresholdValue});
+                result.altEndTime = node.positionConfig.comparePropValue(node, msg, node.propertyEnd,
+                    node.propertyEndOperator, node.propertyEndThreshold);
             } catch (err) {
                 result.altEndTime = false;
-                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyEnd-type', {
-                    type: node.propertyEndType,
-                    value: node.propertyEnd
-                }), err);
+                hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyEnd-type', node.propertyEnd), err);
             }
         }
 
@@ -243,17 +237,41 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
 
-        this.propertyStart = config.propertyStart || '';
-        this.propertyStartType = config.propertyStartType || 'none';
         this.propertyStartOperator = config.propertyStartCompare || 'true';
-        this.propertyStartThresholdValue = config.propertyStartThreshold;
-        this.propertyStartThresholdType = config.propertyStartThresholdType;
+        this.propertyStart = {
+            type  : config.propertyStartType || 'none',
+            value : config.propertyStart || ''
+        };
+        this.propertyStartThreshold = {
+            type  : config.propertyStartThresholdType || 'none',
+            value : config.propertyStartThreshold || ''
+        };
+        if (this.positionConfig && this.propertyStart.type === 'jsonata') {
+            try {
+                this.propertyStart.expr = this.positionConfig.getJSONataExpression(this, this.propertyStart.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                this.propertyStart.expr = null;
+            }
+        }
 
-        this.propertyEnd = config.propertyEnd || '';
-        this.propertyEndType = config.propertyEndType || 'none';
         this.propertyEndOperator = config.propertyEndCompare || 'true';
-        this.propertyEndThresholdValue = config.propertyEndThreshold;
-        this.propertyEndThresholdType = config.propertyEndThresholdType;
+        this.propertyEnd = {
+            type  : config.propertyEndType || 'none',
+            value : config.propertyEnd || ''
+        };
+        this.propertyEndThreshold = {
+            type  : config.propertyEndThresholdType || 'none',
+            value : config.propertyEndThreshold || ''
+        };
+        if (this.positionConfig && this.propertyEnd.type === 'jsonata') {
+            try {
+                this.propertyEnd.expr = this.positionConfig.getJSONataExpression(this, this.propertyEnd.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                this.propertyEnd.expr = null;
+            }
+        }
 
         this.timeOnlyEvenDays = config.timeOnlyEvenDays;
         this.timeOnlyOddDays = config.timeOnlyOddDays;

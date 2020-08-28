@@ -1159,6 +1159,16 @@ module.exports = function (RED) {
                     blindPos: getBlindPosFromTI(node, undefined, config.oversteer3BlindPosType, config.oversteer3BlindPos, node.blindData.levelTop)
                 });
             }
+            node.oversteerData.forEach( (val, _index) => {
+                if (node.positionConfig && val.operand.type === 'jsonata') {
+                    try {
+                        val.operand.expr = node.positionConfig.getJSONataExpression(node, val.operand.value);
+                    } catch (err) {
+                        node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                        val.operand.expr = null;
+                    }
+                }
+            });
         }
 
         node.rules = {

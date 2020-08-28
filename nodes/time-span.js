@@ -267,6 +267,23 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        this.result1Value = {
+            type: config.result1ValueType,
+            value: config.result1Value,
+            format: config.result1Format,
+            offsetType: config.result1OffsetType,
+            offset: config.result1Offset,
+            multiplier: config.result1Multiplier,
+            next: true
+        };
+        if (this.positionConfig && this.result1Value.type === 'jsonata') {
+            try {
+                this.result1Value.expr = this.positionConfig.getJSONataExpression(this, this.result1Value.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                this.result1Value.expr = null;
+            }
+        }
         const node = this;
 
         this.on('input', (msg, send, done) => {
@@ -331,26 +348,18 @@ module.exports = function (RED) {
 
                 if (config.result1Type !== 'none') {
                     let resultObj = null;
-                    if (config.result1ValueType === 'timespan') {
+                    if (node.result1Value.type === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, config.result1TSFormat);
-                    } else if (config.result1ValueType === 'operand1') {
+                    } else if (node.result1Value.type === 'operand1') {
                         resultObj = hlp.getFormattedDateOut(operand1.value, config.result1Format);
-                    } else if (config.result1ValueType === 'operand2') {
+                    } else if (node.result1Value.type === 'operand2') {
                         resultObj = hlp.getFormattedDateOut(operand2.value, config.result1Format);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, {
-                            type: config.result1ValueType,
-                            value: config.result1Value,
-                            format: config.result1Format,
-                            offsetType: config.result1OffsetType,
-                            offset: config.result1Offset,
-                            multiplier: config.result1Multiplier,
-                            next: true
-                        });
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, node.result1Value);
                     }
                     // node.debug('resultObj=' + util.inspect(resultObj, { colors: true, compact: 10, breakLength: Infinity }));
                     if (resultObj === null || typeof resultObj === 'undefined') {
-                        throw new Error('could not evaluate ' + config.result1ValueType + '.' + config.result1Value);
+                        throw new Error('could not evaluate ' + node.result1Value.type + '.' + node.result1Value.value);
                     } else if (resultObj.error) {
                         node.error('error on getting result: ' + resultObj.error);
                     } else {

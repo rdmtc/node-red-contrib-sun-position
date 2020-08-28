@@ -93,9 +93,9 @@ module.exports = function (RED) {
 
                 if (this.positionConfig && this.property.type === 'jsonata') {
                     try {
-                        this.property.expr = this.positionConfig.getJSONataExpression(this.property.value, node);
+                        this.property.expr = this.positionConfig.getJSONataExpression(this, this.property.value);
                     } catch (err) {
-                        this.error(RED._('inject.errors.invalid-expr', { error:err.message }));
+                        this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
                         this.property.expr = null;
                     }
                 }
@@ -302,9 +302,9 @@ module.exports = function (RED) {
 
             if (this.positionConfig && propNew.type === 'jsonata') {
                 try {
-                    propNew.expr = this.positionConfig.getJSONataExpression(propNew.value, node);
+                    propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
                 } catch (err) {
-                    this.error(RED._('inject.errors.invalid-expr', { error:err.message }));
+                    this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
                     propNew.expr = null;
                 }
             }
