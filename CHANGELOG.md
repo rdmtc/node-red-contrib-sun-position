@@ -1,5 +1,14 @@
 # node-red-contrib-sun-position
 
+#### 1.1.7:  BugFix
+
+- time inject
+  - fix missing data property name. #185
+  - fix not working offset #181
+
+- blind-control + clock-time
+  - prevent irrelevant error when no rule with time constraint exists. #180
+
 #### 1.1.6:  BugFix
 
 - general

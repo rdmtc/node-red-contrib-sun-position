@@ -724,7 +724,7 @@ function calcMonthOffset(months, monthstart) {
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
 function normalizeDate(d, offset, multiplier, limit) {
-    // console.debug('normalizeDate d=' + d + ' offset=' + offset); // eslint-disable-line
+    // console.debug(`normalizeDate d=${d} offset=${ offset }, multiplier=${multiplier}, limit=${limit}`); // eslint-disable-line
     if (d === null || typeof d === 'undefined') { return d; }
     if (d.value) { d = d.value; }
     if (!(d instanceof Date)) { d = Date(d); }

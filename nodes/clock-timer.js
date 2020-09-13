@@ -517,6 +517,9 @@ module.exports = function (RED) {
         }
 
         const checkRuleForAT = rule => {
+            if (!rule.timeLimited) {
+                return;
+            }
             const num = getRuleTimeData(node, msg, rule, dNow);
             if (num > nowNr) {
                 node.debug('autoTrigger set to rule ' + rule.pos);

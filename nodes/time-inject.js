@@ -64,7 +64,7 @@ module.exports = function (RED) {
                 value : config.time,
                 offsetType : config.offsetType,
                 offset : config.offset || config.timeOffset || 0,
-                multiplier : config.offsetMultiplier ? config.timeOffsetMultiplier : 60,
+                multiplier : config.offsetMultiplier ? config.offsetMultiplier : (config.timeOffsetMultiplier ? config.timeOffsetMultiplier : 60),
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
