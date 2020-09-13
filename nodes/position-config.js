@@ -1189,6 +1189,8 @@ module.exports = function (RED) {
                 result =  msg.ts;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
+            } else if (data.type === 'numPct') {
+                return parseFloat(data.value) / 100;
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
                 /*

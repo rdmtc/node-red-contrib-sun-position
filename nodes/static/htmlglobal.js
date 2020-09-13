@@ -187,7 +187,15 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         MsgPayloadByTopic: {
             value: 'PlT',
             label: node._('node-red-contrib-sun-position/position-config:common.types.PlTRes'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
             hasValue: true
+        },
+        numPercent: {
+            value: 'numPct',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numPercent'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
+            hasValue: true,
+            validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
         },
         TimeEntered: {
             value: 'entered',
@@ -199,7 +207,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         DateEntered: {
             value: 'dateEntered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.dateentered','date'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeDate.svg',
             hasValue: true,
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
@@ -260,7 +268,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         TimeSun: {
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.svg',
             options: [{
                 value: 'astronomicalDawn',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn')
@@ -332,7 +340,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         TimeSunNow: {
             value: 'pdsTimeNow',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesunnow'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTime.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeNow.svg',
             hasValue: false
         },
         TimeMoon: {
@@ -350,19 +358,19 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         SunCalc: {
             value: 'pdsCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.suncalc','sun calculation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSun.svg',
             hasValue: false
         },
         SunInSky: {
             value: 'pdsCalcPercent',
             label: node._('node-red-contrib-sun-position/position-config:common.types.suninsky','sun in the sky (percent)'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.svg',
             hasValue: false
         },
         SunAzimuth: {
             value: 'pdsCalcAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
             hasValue: false
         },
         SunElevation: {
@@ -374,7 +382,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         SunAzimuthRad: {
             value: 'pdsCalcAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
             hasValue: false
         },
         SunElevationRad: {
@@ -439,7 +447,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         MoonCalc: {
             value: 'pdmCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.svg',
             hasValue: false
         },
         MoonPhase: {

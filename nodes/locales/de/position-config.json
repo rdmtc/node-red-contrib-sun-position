@@ -25,6 +25,7 @@
             "timesunnow": "nächste Uhrzeit Sonnenstand",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "randomNumber":"zufällig",
+            "numPercent":"Nummer in Prozent %",
             "suncalc":"Sonnenstand berechnet",
             "suninsky":"Sonne am Himmel (Prozent)",
             "sunAzimuth":"Azimuth of sun",
