@@ -735,6 +735,31 @@ module.exports = function (RED) {
                     done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
                     return null;
                 }
+
+                // allow to overwrite settings by incomming message
+                if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                    switch (msg.topic) {
+                        case 'setAutoTriggerTime':
+                            node.autoTrigger.defaultTime = parseFloat(msg.Payload) || node.autoTrigger.defaultTime;
+                            break;
+                        case 'setStoreName':
+                            node.storeName = msg.Payload || node.storeName;
+                            break;
+                        case 'setSettingsTopic':
+                            node.nodeData.topic = msg.Payload || node.nodeData.topic;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (node.nodeData.levelTop < node.nodeData.levelBottom) {
+                        const tmp = node.nodeData.levelBottom;
+                        node.nodeData.levelBottom = node.nodeData.levelTop;
+                        node.nodeData.levelTop = tmp;
+                        node.levelReverse = true;
+                    }
+                }
+
+                // initialize
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 node.previousData.payloadType = (typeof node.payload.current);
@@ -759,7 +784,6 @@ module.exports = function (RED) {
                 const timeCtrl = {
                     autoTrigger : node.autoTrigger
                 };
-
 
                 // check for manual overwrite
                 let overwrite = checkPosOverwrite(node, msg, dNow);

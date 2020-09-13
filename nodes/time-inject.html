@@ -70,6 +70,7 @@
                             (typeof this.injectTypeSelect === 'undefined') ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'time') ||
+                            (this.injectTypeSelect === 'interval-amount') ||
                             RED.validators.number()(v)
                         );
                     }
@@ -80,6 +81,7 @@
                     validate(v) {
                         return (
                             ((this.injectTypeSelect !== 'interval-time') &&
+                            (this.injectTypeSelect !== 'interval-amount') &&
                             (this.injectTypeSelect !== 'time')) ||
                             RED.validators.typedInput('timeType')(v)
                         );
@@ -122,7 +124,8 @@
                     required: false,
                     validate(v) {
                         return (
-                            (this.injectTypeSelect !== 'interval-time') ||
+                            ((this.injectTypeSelect !== 'interval-time') &&
+                            (this.injectTypeSelect !== 'interval-amount')) ||
                             RED.validators.typedInput('timeEndType')(v)
                         );
                     }
@@ -136,7 +139,8 @@
                         return (
                             (typeof v === 'undefined') ||
                             (typeof this.timeEndOffsetType === 'undefined') ||
-                            (this.injectTypeSelect !== 'interval-time') ||
+                            ((this.injectTypeSelect !== 'interval-time') &&
+                            (this.injectTypeSelect !== 'interval-amount')) ||
                             RED.validators.typedInput('timeEndOffsetType')(v)
                         );
                     }
@@ -151,7 +155,8 @@
                         return (
                             typeof v === 'undefined' ||
                             RED.validators.number()(v) ||
-                            (this.injectTypeSelect !== 'interval-time') ||
+                            ((this.injectTypeSelect !== 'interval-time') &&
+                            (this.injectTypeSelect !== 'interval-amount')) ||
                             $('#node-input-timeEndOffsetType').typedInput('type') === 'none' ||
                             this.timeEndOffsetType === 'none'
                         );
@@ -745,7 +750,6 @@
                                 }
 
                             }
-                            // initCheckboxesBlock('#time-inject-addPayload1Days', node.addPayload1Days);
                             // changes
                             $propertyValue.change(() => {
                                 // $operand.show();
@@ -934,6 +938,13 @@
                                 break;
                             case 'interval-time':
                                 $('.time-inject-row-intervalTime').show();
+                                $('#node-input-intervalCountMultiplier').show();
+                                $('#node-input-intervalCountLabel').text(node._('node-red:inject.every'));
+                                break;
+                            case 'interval-amount':
+                                $('.time-inject-row-intervalTime').show();
+                                $('#node-input-intervalCountMultiplier').hide();
+                                $('#node-input-intervalCountLabel').text(node._('time-inject.label.count'));
                                 break;
                             case 'time':
                                 $('.time-inject-row-timeOnly').show();
@@ -955,7 +966,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: 'num',
                         defaultValue: 1,
-                        types: ['num', 'env']
+                        types: ['num', 'env', 'flow', 'global']
                     }); // intervalCount
                     // #endregion interval
                     // #region time
@@ -1064,7 +1075,7 @@
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
-                            if (injectType !== 'interval-time') {
+                            if ((injectType !== 'interval-time') && (injectType !== 'interval-amount')) {
                                 $('.time-inject-row-timeEndOffset').hide();
 
                                 const $div = $('#time-inject-row-timeEnd');
@@ -1619,6 +1630,23 @@
                     }
                     this.nameInt += '';
                     this.nameInt += getInterval();
+                } else if ($('#node-input-injectTypeSelect').val() === 'interval-amount') {
+                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
+                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'), 20);
+                    this.nameInt += ' - ';
+                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
+                        $('#node-input-timeEnd').typedInput('type'), $('#node-input-timeEnd').typedInput('value'), $('#node-input-timeEndOffset').typedInput('value'), 20);
+                    this.nameInt += getTimeConstraints();
+                    if (this.nameInt.length > 35) {
+                        this.nameInt += ' =...';
+                    } else {
+                        this.nameInt += ' = ';
+                        this.nameInt += payloadLbl;
+                    }
+                    this.nameInt += ' ↻';
+                    if ($('#node-input-intervalCount').typedInput('type') === 'num') {
+                        this.nameInt += $('#node-input-intervalCount').typedInput('value');
+                    }
                 } else {
                     this.nameInt += '⏲ ';
                     if ($('#node-input-time').typedInput('type') === payloadType) {
@@ -1727,11 +1755,12 @@
             <option value="none" data-i18n="node-red:inject.none"></option>
             <option value="interval" data-i18n="node-red:inject.interval"></option>
             <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
+            <option value="interval-amount" data-i18n="time-inject.label.interval-amount"></option>
             <option value="time" data-i18n="node-red:inject.time"></option>
         </select>
     </div>
     <div class="form-row time-inject-row-all block-noindent time-inject-row-interval time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-interval">
-        <label for="node-input-intervalCount"><i class="fa fa-hourglass"></i> <span data-i18n="node-red:inject.every"></span></label>
+        <label for="node-input-intervalCount"><i class="fa fa-hourglass"></i> <span id="node-input-intervalCountLabel" data-i18n="node-red:inject.every"></span></label>
         <input id="node-input-intervalCount" class="time-inject-intervalCount" data-i18n="[placeholder]time-inject.placeholder.intervalCount"/>
         <input type="hidden" id="node-input-intervalCountType">
         <select id="node-input-intervalCountMultiplier" class="node-input-multiplier"></select>
@@ -1810,10 +1839,10 @@
             </div>
         </div>
         <div id="time-inject-timeDateLimit" class="time-inject-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="blind-control.label.validForDates"></span></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="time-inject.label.validForDates"></span></div>
             <div style="display:inline-block;">
-                <input type="date" id="node-input-timedatestart" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.start" min="2000-01-01" max="2000-12-31">
-                <input type="date" id="node-input-timedateend" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.end" min="2000-01-01" max="2000-12-31">
+                <input type="date" id="node-input-timedatestart" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]time-inject.placeholder.start" min="2000-01-01" max="2000-12-31">
+                <input type="date" id="node-input-timedateend" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]time-inject.placeholder.end" min="2000-01-01" max="2000-12-31">
             </div>
         </div>
     </div>

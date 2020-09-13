@@ -1,5 +1,15 @@
 # node-red-contrib-sun-position
 
+#### 1.1.8:  small enhancement
+
+- time inject
+  - allow to have a given number of timer events between two times #188
+  - small enhancement in node status, shows interval if defined
+
+- blind-control + clock-time
+  - allow to change general node settings with incoming message #184
+
+
 #### 1.1.7:  BugFix
 
 - general

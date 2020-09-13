@@ -1041,15 +1041,15 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
-        this.smoothTime = (parseFloat(config.smoothTime) || -1);
+        const node = this;
 
+        node.smoothTime = (parseFloat(config.smoothTime) || -1);
         if (config.autoTrigger) {
-            this.autoTrigger = {
+            node.autoTrigger = {
                 defaultTime : config.autoTriggerTime || 3600000 // 1h
             };
-            this.autoTriggerObj = null;
+            node.autoTriggerObj = null;
         }
-        const node = this;
 
         if (node.smoothTime >= 0x7FFFFFFF) {
             node.error(RED._('blind-control.errors.smoothTimeToolong', this));
@@ -1239,6 +1239,75 @@ module.exports = function (RED) {
                     done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
                     return null;
                 }
+
+                // allow to overwrite settings by incomming message
+                const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
+                if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
+                    node.debug(`set mode from ${node.sunData.mode} to ${newMode}`);
+                    node.sunData.mode = newMode;
+                }
+                if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                    switch (msg.topic) {
+                        case 'setSmoothTime':
+                            node.smoothTime = parseFloat(msg.Payload) || node.smoothTime;
+                            break;
+                        case 'setAutoTriggerTime':
+                            node.autoTrigger.defaultTime = parseFloat(msg.Payload) || node.autoTrigger.defaultTime;
+                            break;
+                        case 'setStoreName':
+                            node.storeName = msg.Payload || node.storeName;
+                            break;
+                        case 'setSunDataTopic':
+                            node.sunData.topic = msg.Payload || node.sunData.topic;
+                            break;
+                        case 'setSunDataFloorLength':
+                            node.sunData.floorLength = parseFloat(msg.Payload) || node.sunData.floorLength;
+                            break;
+                        case 'setSunDataMinAltitude':
+                            node.sunData.minAltitude = parseFloat(msg.Payload) || node.sunData.minAltitude;
+                            break;
+                        case 'setSunDataMinDelta':
+                            node.sunData.minDelta = parseFloat(msg.Payload) || node.sunData.minDelta;
+                            break;
+                        case 'setWindowSettingsTop':
+                            node.windowSettings.top = parseFloat(msg.Payload) || node.windowSettings.top;
+                            break;
+                        case 'setWindowSettingsBottom':
+                            node.windowSettings.bottom = parseFloat(msg.Payload) || node.windowSettings.bottom;
+                            break;
+                        case 'setWindowSettingsAzimuthStart':
+                            node.windowSettings.AzimuthStart = parseFloat(msg.Payload) || node.windowSettings.AzimuthStart;
+                            break;
+                        case 'setWindowSettingsAzimuthEnd':
+                            node.windowSettings.AzimuthEnd = parseFloat(msg.Payload) || node.windowSettings.AzimuthEnd;
+                            break;
+                        case 'setBlindSettingsTop':
+                            node.nodeData.levelTop = parseFloat(msg.Payload) || node.nodeData.levelTop;
+                            break;
+                        case 'setBlindSettingsBottom':
+                            node.nodeData.levelBottom = parseFloat(msg.Payload) || node.nodeData.levelBottom;
+                            break;
+                        case 'setBlindSettingsIncrement':
+                            node.nodeData.increment = parseFloat(msg.Payload) || node.nodeData.increment;
+                            break;
+                        case 'setBlindSettingsLevel':
+                            node.nodeData.levelDefault = parseFloat(msg.Payload) || node.nodeData.levelDefault;
+                            break;
+                        case 'setBlindSettingsTopic':
+                            node.nodeData.topic = msg.Payload || node.nodeData.topic;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (node.nodeData.levelTop < node.nodeData.levelBottom) {
+                        const tmp = node.nodeData.levelBottom;
+                        node.nodeData.levelBottom = node.nodeData.levelTop;
+                        node.nodeData.levelTop = tmp;
+                        node.levelReverse = true;
+                    }
+                }
+
+                // initialize
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
                 if (!isNaN(node.level.current)) {
@@ -1262,14 +1331,7 @@ module.exports = function (RED) {
                     blind: node.nodeData,
                     autoTrigger : node.autoTrigger
                 };
-                // check if the message contains any oversteering data
                 let ruleId = -1;
-
-                const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
-                if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
-                    node.debug(`set mode from ${node.sunData.mode} to ${newMode}`);
-                    node.sunData.mode = newMode;
-                }
 
                 // check for manual overwrite
                 let overwrite = checkPosOverwrite(node, msg, dNow);

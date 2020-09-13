@@ -5,5 +5,8 @@ Thumbs.db
 package-lock.json
 dev_*
 Backup/
+Backup/*
 backup/
+backup/*
 test/
+test/*

@@ -38,7 +38,8 @@ module.exports = function (RED) {
             none : 0,
             timer : 1,
             interval : 2,
-            intervalTime : 4
+            intervalTime : 4,
+            intervalAmount : 5
         };
         RED.nodes.createNode(this, config);
         // Retrieve the config node
@@ -50,14 +51,24 @@ module.exports = function (RED) {
             this.injType = tInj.interval;
         } else if ((config.injectTypeSelect === 'time') && (config.timeType && config.timeType !== 'none')) {
             this.injType = tInj.timer;
+        } else if (config.injectTypeSelect === 'interval-amount') {
+            this.injType = tInj.intervalAmount;
         } else {
             this.injType = tInj.none;
         }
         this.intervalCount = config.intervalCount ? config.intervalCount : 0;
-        this.intervalCountType = (this.injType === tInj.interval || this.injType === tInj.intervalTime) ? (config.intervalCountType || 'num') : 'none';
+
+        if (this.injType === tInj.interval ||
+            this.injType === tInj.intervalTime ||
+            this.injType === tInj.intervalAmount) {
+            this.intervalCountType = (config.intervalCountType || 'num');
+        } else {
+            this.intervalCountType = 'none';
+        }
         this.intervalCountMultiplier = config.intervalCountMultiplier ? config.intervalCountMultiplier : 60000;
 
         if (this.injType === tInj.intervalTime ||
+            this.injType === tInj.intervalAmount ||
             this.injType === tInj.timer) {
             this.timeStartData = {
                 type: config.timeType,
@@ -137,7 +148,7 @@ module.exports = function (RED) {
             } // timeAlt
         } // timeStartData
 
-        if (this.injType === tInj.intervalTime) {
+        if (this.injType === tInj.intervalTime ||this.injType === tInj.intervalAmount ) {
             this.timeEndData = {
                 type: config.timeEndType,
                 value : config.timeEnd,
@@ -372,35 +383,44 @@ module.exports = function (RED) {
         };
 
         /**
-         * creates the end timeout
-         * @param {*} node - the node representation
-         * @returns {object} state or error
+         * get the end time in millisecond
+         * @param {*} node the node Data
          */
-        node.doCreateEndTimeout = node => {
+        node.getMillisecEnd = node => {
             if (!node.timeEndData) {
-                return;
+                return null;
             }
             node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.timeOutEndObj) {
                 clearTimeout(node.timeOutEndObj);
                 node.timeOutEndObj = null;
             }
-            node.nextEndTime = null;
-            let errorStatus = '';
             const nextEndTimeData = node.positionConfig.getTimeProp(node, {}, node.timeEndData);
             if (nextEndTimeData.error) {
-                errorStatus = 'could not evaluate end time';
                 node.nextEndTime = null;
                 node.debug('nextEndTimeData=' + util.inspect(nextEndTimeData, { colors: true, compact: 10, breakLength: Infinity }));
                 node.error(nextEndTimeData.error);
-            } else {
-                node.nextEndTime = nextEndTimeData.value;
+                return null;
             }
+            node.nextEndTime = nextEndTimeData.value;
 
             let millisecEnd = 1000 * 60 * 60 * 24; // 24h
-            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined') && (errorStatus === '')) {
+            if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined')) {
                 // node.debug('timeout ' + node.nextEndTime + ' is in ' + millisec + 'ms');
                 millisecEnd = tsGetScheduleTime(node.nextEndTime, 10);
+            }
+            return millisecEnd;
+        };
+
+        /**
+         * creates the end timeout
+         * @param {*} node - the node representation
+         * @returns {object} state or error
+         */
+        node.doCreateEndTimeout = (node, millisecEnd) => {
+            millisecEnd = millisecEnd || node.getMillisecEnd(node);
+            if (millisecEnd === null) {
+                return;
             }
 
             if (millisecEnd> 345600000) {
@@ -469,6 +489,7 @@ module.exports = function (RED) {
             // node.debug(`doCreateStartTimeout _onInit=${_onInit} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             node.nextStartTime = null;
             node.nextStartTimeAlt = null;
+            delete node.intervalTime;
 
             if (node.timeOutStartObj) {
                 clearTimeout(node.timeOutStartObj);
@@ -491,10 +512,18 @@ module.exports = function (RED) {
                 }
             }
 
+            if (node.injType === tInj.intervalAmount) {
+                node.IntervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                delete node.intervalTime;
+            }
+
             // node.debug(`doCreateStartTimeout2 node.intervalTime=${util.inspect(node.intervalTime, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (!node.timeStartData) {
                 node.debug('doCreateStartTimeout - absolute Intervall');
                 clearInterval(node.intervalObj);
+                node.status({
+                    text: '↻' + Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10 + 's'
+                });
                 node.send(node.prepOutMsg({ type: 'interval-start' }));
                 node.intervalObj = setInterval(() => {
                     node.send(node.prepOutMsg({ type: 'interval' }));
@@ -593,11 +622,32 @@ module.exports = function (RED) {
                         node.timeOutStartObj = null;
                         node.doCreateEndTimeout(node);
                         clearInterval(node.intervalObj);
+                        node.doSetStatus(node, 'green');
                         node.send(node.prepOutMsg({ type: 'interval-time-start' }));
                         node.intervalObj = setInterval(() => {
                             node.send(node.prepOutMsg({ type: 'interval-time' }));
                         }, node.intervalTime);
                     }, millisec);
+                    fill = 'grey';
+                } else if (this.injType === tInj.intervalAmount) {
+                    const millisecEnd = node.getMillisecEnd(node);
+                    node.intervalTime = Math.floor((millisecEnd - millisec) / node.IntervalCountMax);
+                    node.IntervalCountCurrent = 0;
+                    node.timeEndData.now = node.nextStartTime;
+                    node.timeOutStartObj = setTimeout(() => {
+                        node.timeOutStartObj = null;
+                        node.doCreateEndTimeout(node);
+                        clearInterval(node.intervalObj);
+                        node.doSetStatus(node, 'green');
+                        node.send(node.prepOutMsg({ type: 'interval-time-start' }));
+                        node.intervalObj = setInterval(() => {
+                            node.IntervalCountCurrent++;
+                            if (node.IntervalCountCurrent < node.IntervalCountMax) {
+                                node.send(node.prepOutMsg({ type: 'interval-amount' }));
+                            }
+                        }, node.intervalTime);
+                    }, millisec);
+                    fill = 'grey';
                 } else { // this.injType === tInj.timer
                     // node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(() => {
@@ -647,14 +697,12 @@ module.exports = function (RED) {
                     }
                 }
             }
-
             if ((errorStatus !== '')) {
                 node.status({
                     fill: 'red',
                     shape,
                     text: errorStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
-                return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
             // if an error occurred, will retry in 10 minutes. This will prevent errors on initialization.
             } else if ((warnStatus !== '')) {
                 node.status({
@@ -662,7 +710,15 @@ module.exports = function (RED) {
                     shape,
                     text: warnStatus + ((node.intervalObj) ? ' ↺🖩' : '')
                 });
-            } else if (node.nextStartTimeAlt && node.timeOutStartObj) {
+                return { state:'error', done: false, statusMsg: errorStatus, errorMsg: errorStatus };
+            } else {
+                node.doSetStatus(node, fill, shape);
+            }
+            return { state:'ok', done: true };
+        };
+
+        node.doSetStatus = (node, fill, shape) => {
+            if (node.nextStartTimeAlt && node.timeOutStartObj) {
                 if (node.timeStartData.isAltFirst) {
                     node.status({
                         fill,
@@ -677,15 +733,35 @@ module.exports = function (RED) {
                     });
                 }
             } else if (node.nextStartTime && node.timeOutStartObj) {
+                let txt = node.positionConfig.toDateTimeString(node.nextStartTime);
+                if (node.nextEndTime) {
+                    txt += ' - ';
+                    txt += node.positionConfig.toDateTimeString(node.nextEndTime);
+                }
+                if (node.intervalTime) {
+                    txt += ' ↻';
+                    txt += Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10;
+                    txt += 's';
+                }
                 node.status({
                     fill,
                     shape,
-                    text: node.positionConfig.toDateTimeString(node.nextStartTime)
+                    text: txt
+                });
+            } else if (node.intervalTime) {
+                let txt = '↻' + Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10 + 's';
+                if (node.nextEndTime) {
+                    txt += ' -> ';
+                    txt += node.positionConfig.toDateTimeString(node.nextEndTime);
+                }
+                node.status({
+                    fill,
+                    shape,
+                    text: txt
                 });
             } else {
                 node.status({});
             }
-            return { state:'ok', done: true };
         };
 
         this.on('input', (msg, send, done) => { // eslint-disable-line complexity
