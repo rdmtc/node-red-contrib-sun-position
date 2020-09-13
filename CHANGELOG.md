@@ -1,5 +1,21 @@
 # node-red-contrib-sun-position
 
+#### 1.1.7:  BugFix
+
+- general
+  - replaced some png type graphics with svg
+
+- time inject
+  - fix missing data property name. #185
+  - fix not working offset #181 #182
+
+- blind-control + clock-time
+  - prevent irrelevant error when no rule with time constraint exists. #180
+  - fix that autotrigger time from configuration is not used #186
+
+- clock-time
+  - fix that overrides with value false or 0 does not work #186
+
 #### 1.1.6:  BugFix
 
 - general

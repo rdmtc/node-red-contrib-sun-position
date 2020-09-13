@@ -51,22 +51,22 @@ module.exports = function (RED) {
      * reset any existing override
      * @param {*} node node data
      */
-    function timePosOverwriteReset(node) {
-        node.debug(`timePosOverwriteReset expire=${node.timeClockData.overwrite.expireTs}`);
-        node.timeClockData.overwrite.active = false;
-        node.timeClockData.overwrite.importance = 0;
+    function posOverwriteReset(node) {
+        node.debug(`posOverwriteReset expire=${node.nodeData.overwrite.expireTs}`);
+        node.nodeData.overwrite.active = false;
+        node.nodeData.overwrite.importance = 0;
         if (node.timeOutObj) {
             clearTimeout(node.timeOutObj);
             node.timeOutObj = null;
         }
-        if (node.timeClockData.overwrite.expireTs || node.timeClockData.overwrite.expires) {
-            delete node.timeClockData.overwrite.expires;
-            delete node.timeClockData.overwrite.expireTs;
-            delete node.timeClockData.overwrite.expireDate;
-            delete node.timeClockData.overwrite.expireDateISO;
-            delete node.timeClockData.overwrite.expireDateUTC;
-            delete node.timeClockData.overwrite.expireTimeLocal;
-            delete node.timeClockData.overwrite.expireDateLocal;
+        if (node.nodeData.overwrite.expireTs || node.nodeData.overwrite.expires) {
+            delete node.nodeData.overwrite.expires;
+            delete node.nodeData.overwrite.expireTs;
+            delete node.nodeData.overwrite.expireDate;
+            delete node.nodeData.overwrite.expireDateISO;
+            delete node.nodeData.overwrite.expireDateUTC;
+            delete node.nodeData.overwrite.expireTimeLocal;
+            delete node.nodeData.overwrite.expireDateLocal;
         }
     }
 
@@ -84,29 +84,29 @@ module.exports = function (RED) {
         }
 
         if (isNaN(dExpire)) {
-            dExpire = node.timeClockData.overwrite.expireDuration;
+            dExpire = node.nodeData.overwrite.expireDuration;
             node.debug(`using default expire value=${dExpire}`);
         }
-        node.timeClockData.overwrite.expires = Number.isFinite(dExpire) && (dExpire > 0);
+        node.nodeData.overwrite.expires = Number.isFinite(dExpire) && (dExpire > 0);
 
-        if (!node.timeClockData.overwrite.expires) {
+        if (!node.nodeData.overwrite.expires) {
             node.log(`Overwrite is set which never expire (${reason})`);
             node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100}`);
-            delete node.timeClockData.overwrite.expireTs;
-            delete node.timeClockData.overwrite.expireDate;
+            delete node.nodeData.overwrite.expireTs;
+            delete node.nodeData.overwrite.expireDate;
             return;
         }
-        node.timeClockData.overwrite.expireTs = (dNow.getTime() + dExpire);
-        node.timeClockData.overwrite.expireDate = new Date(node.timeClockData.overwrite.expireTs);
-        node.timeClockData.overwrite.expireDateISO = node.timeClockData.overwrite.expireDate.toISOString();
-        node.timeClockData.overwrite.expireDateUTC = node.timeClockData.overwrite.expireDate.toUTCString();
-        node.timeClockData.overwrite.expireDateLocal = node.positionConfig.toDateString(node.timeClockData.overwrite.expireDate);
-        node.timeClockData.overwrite.expireTimeLocal = node.positionConfig.toTimeString(node.timeClockData.overwrite.expireDate);
+        node.nodeData.overwrite.expireTs = (dNow.getTime() + dExpire);
+        node.nodeData.overwrite.expireDate = new Date(node.nodeData.overwrite.expireTs);
+        node.nodeData.overwrite.expireDateISO = node.nodeData.overwrite.expireDate.toISOString();
+        node.nodeData.overwrite.expireDateUTC = node.nodeData.overwrite.expireDate.toUTCString();
+        node.nodeData.overwrite.expireDateLocal = node.positionConfig.toDateString(node.nodeData.overwrite.expireDate);
+        node.nodeData.overwrite.expireTimeLocal = node.positionConfig.toTimeString(node.nodeData.overwrite.expireDate);
 
-        node.log(`Overwrite is set which expires in ${dExpire}ms = ${node.timeClockData.overwrite.expireDateISO} (${reason})`);
+        node.log(`Overwrite is set which expires in ${dExpire}ms = ${node.nodeData.overwrite.expireDateISO} (${reason})`);
         node.timeOutObj = setTimeout(() => {
             node.log(`Overwrite is expired (timeout)`);
-            timePosOverwriteReset(node);
+            posOverwriteReset(node);
             node.emit('input', { payload: -1, topic: 'internal-triggerOnly-overwriteExpired', force: false });
         }, dExpire);
     }
@@ -118,21 +118,21 @@ module.exports = function (RED) {
      * @param {*} dNow current timestamp
      */
     function checkOverrideReset(node, msg, dNow, isSignificant) {
-        if (node.timeClockData.overwrite &&
-            node.timeClockData.overwrite.expires &&
-            (node.timeClockData.overwrite.expireTs < dNow.getTime())) {
+        if (node.nodeData.overwrite &&
+            node.nodeData.overwrite.expires &&
+            (node.nodeData.overwrite.expireTs < dNow.getTime())) {
             node.log(`Overwrite is expired (trigger)`);
-            timePosOverwriteReset(node);
+            posOverwriteReset(node);
         }
         if (isSignificant) {
             hlp.getMsgBoolValue(msg, ['reset','resetOverwrite'], 'resetOverwrite',
                 val => {
                     node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
                     if (val) {
-                        if (node.timeClockData.overwrite && node.timeClockData.overwrite.active) {
+                        if (node.nodeData.overwrite && node.nodeData.overwrite.active) {
                             node.log(`Overwrite reset by incoming message`);
                         }
-                        timePosOverwriteReset(node);
+                        posOverwriteReset(node);
                     }
                 });
         }
@@ -142,45 +142,45 @@ module.exports = function (RED) {
      * @param {*} node node data
      */
     function setOverwriteReason(node) {
-        if (node.timeClockData.overwrite.active) {
-            if (node.timeClockData.overwrite.expireTs) {
+        if (node.nodeData.overwrite.active) {
+            if (node.nodeData.overwrite.expireTs) {
                 node.reason.code = 3;
                 const obj = {
-                    importance: node.timeClockData.overwrite.importance,
-                    timeLocal: node.timeClockData.overwrite.expireTimeLocal,
-                    dateLocal: node.timeClockData.overwrite.expireDateLocal,
-                    dateISO: node.timeClockData.overwrite.expireDateISO,
-                    dateUTC: node.timeClockData.overwrite.expireDateUTC
+                    importance: node.nodeData.overwrite.importance,
+                    timeLocal: node.nodeData.overwrite.expireTimeLocal,
+                    dateLocal: node.nodeData.overwrite.expireDateLocal,
+                    dateISO: node.nodeData.overwrite.expireDateISO,
+                    dateUTC: node.nodeData.overwrite.expireDateUTC
                 };
                 node.reason.state = RED._('clock-timer.states.overwriteExpire', obj);
                 node.reason.description = RED._('clock-timer.reasons.overwriteExpire', obj);
             } else {
                 node.reason.code = 2;
-                node.reason.state = RED._('clock-timer.states.overwriteNoExpire', { importance: node.timeClockData.overwrite.importance });
-                node.reason.description = RED._('clock-timer.states.overwriteNoExpire', { importance: node.timeClockData.overwrite.importance });
+                node.reason.state = RED._('clock-timer.states.overwriteNoExpire', { importance: node.nodeData.overwrite.importance });
+                node.reason.description = RED._('clock-timer.states.overwriteNoExpire', { importance: node.nodeData.overwrite.importance });
             }
-            // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+            // node.debug(`overwrite exit true node.nodeData.overwrite.active=${node.nodeData.overwrite.active}`);
             return true;
         }
-        // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+        // node.debug(`overwrite exit true node.nodeData.overwrite.active=${node.nodeData.overwrite.active}`);
         return false;
     }
 
     /**
-     * check if a manual overwrite of the rule should be set
+     * check if a manual overwrite should be set
      * @param {*} node node data
      * @param {*} msg message object
      * @returns {boolean} true if override is active, otherwise false
      */
-    function checkTCPosOverwrite(node, msg, dNow) {
-        // node.debug(`checkTCPosOverwrite act=${node.timeClockData.overwrite.active} `);
+    function checkPosOverwrite(node, msg, dNow) {
+        // node.debug(`checkPosOverwrite act=${node.nodeData.overwrite.active} `);
         let isSignificant = false;
         const exactImportance = hlp.getMsgBoolValue(msg, ['exactImportance', 'exactSignificance', 'exactPriority', 'exactPrivilege']);
         const nImportance = hlp.getMsgNumberValue(msg, ['importance', 'significance', 'prio', 'priority', 'privilege'], null, p => {
             if (exactImportance) {
-                isSignificant = (node.timeClockData.overwrite.importance === p);
+                isSignificant = (node.nodeData.overwrite.importance === p);
             } else {
-                isSignificant = (node.timeClockData.overwrite.importance <= p);
+                isSignificant = (node.nodeData.overwrite.importance <= p);
             }
             checkOverrideReset(node, msg, dNow, isSignificant);
             return p;
@@ -189,11 +189,11 @@ module.exports = function (RED) {
             return 0;
         });
 
-        if (node.timeClockData.overwrite.active && (node.timeClockData.overwrite.importance > 0) && !isSignificant) {
-        // if (node.timeClockData.overwrite.active && (node.timeClockData.overwrite.importance > 0) && (node.timeClockData.overwrite.importance > importance)) {
-            // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}, importance=${nImportance}, node.timeClockData.overwrite.importance=${node.timeClockData.overwrite.importance}`);
+        if (node.nodeData.overwrite.active && (node.nodeData.overwrite.importance > 0) && !isSignificant) {
+        // if (node.nodeData.overwrite.active && (node.nodeData.overwrite.importance > 0) && (node.nodeData.overwrite.importance > importance)) {
+            // node.debug(`overwrite exit true node.nodeData.overwrite.active=${node.nodeData.overwrite.active}, importance=${nImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
             // if active, the importance must be 0 or given with same or higher as current overwrite otherwise this will not work
-            node.debug(`do not check any overwrite, importance of message ${nImportance} not matches current overwrite importance ${node.timeClockData.overwrite.importance}`);
+            node.debug(`do not check any overwrite, importance of message ${nImportance} not matches current overwrite importance ${node.nodeData.overwrite.importance}`);
             return setOverwriteReason(node);
         }
         const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);
@@ -215,7 +215,7 @@ module.exports = function (RED) {
         if (msg.topic && String(msg.topic).includes('noExpir')) {
             nExpire = -1;
         }
-        if (!overrideData && node.timeClockData.overwrite.active) {
+        if ((typeof overrideData === 'undefined') && node.nodeData.overwrite.active) {
             node.debug(`overwrite active, check of importance=${nImportance} or nExpire=${nExpire}`);
             if (Number.isFinite(nExpire)) {
                 node.debug(`set to new expiring time nExpire="${nExpire}"`);
@@ -224,13 +224,13 @@ module.exports = function (RED) {
             }
             if (nImportance > 0) {
                 // set to new importance
-                node.timeClockData.overwrite.importance = nImportance;
+                node.nodeData.overwrite.importance = nImportance;
             }
-            // node.debug(`overwrite exit true node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}, expire=${nExpire}`);
+            // node.debug(`overwrite exit true node.nodeData.overwrite.active=${node.nodeData.overwrite.active}, expire=${nExpire}`);
             return setOverwriteReason(node);
-        } else if (overrideData) {
+        } else if (typeof overrideData !== 'undefined') {
             node.debug(`needOverwrite importance=${nImportance} expire=${nExpire}`);
-            if (overrideData) {
+            if (typeof overrideData !== 'undefined') {
                 node.debug(`overwrite overrideData=${overrideData}`);
                 node.payload.current = overrideData;
                 node.payload.topic = overrideTopic;
@@ -240,18 +240,18 @@ module.exports = function (RED) {
                 // will set expiring if importance is 0 or if expire is explizit defined
                 node.debug(`set expiring - expire is explizit defined "${nExpire}"`);
                 setExpiringOverwrite(node, dNow, nExpire, 'set expiring time by message');
-            } else if ((!exactImportance && (node.timeClockData.overwrite.importance < nImportance)) || (!node.timeClockData.overwrite.expireTs)) {
+            } else if ((!exactImportance && (node.nodeData.overwrite.importance < nImportance)) || (!node.nodeData.overwrite.expireTs)) {
                 // isSignificant
                 // no expiring on importance change or no existing expiring
                 node.debug(`no expire defined, using default or will not expire`);
                 setExpiringOverwrite(node, dNow, NaN, 'no special expire defined');
             }
             if (nImportance > 0) {
-                node.timeClockData.overwrite.importance = nImportance;
+                node.nodeData.overwrite.importance = nImportance;
             }
-            node.timeClockData.overwrite.active = true;
+            node.nodeData.overwrite.active = true;
         }
-        // node.debug(`overwrite exit false node.timeClockData.overwrite.active=${node.timeClockData.overwrite.active}`);
+        // node.debug(`overwrite exit false node.nodeData.overwrite.active=${node.nodeData.overwrite.active}`);
         return setOverwriteReason(node);
     }
 
@@ -319,7 +319,7 @@ module.exports = function (RED) {
      * @param {*} rule the rule data
      * @return {number} timestamp of the rule
      */
-    function getRuleTimeData(node, msg, rule, now) {
+    function getRuleTimeData(node, msg, rule, dNow) {
         rule.timeData = node.positionConfig.getTimeProp(node, msg, {
             type: rule.timeType,
             value : rule.timeValue,
@@ -327,7 +327,7 @@ module.exports = function (RED) {
             offset : rule.offsetValue,
             multiplier : rule.multiplier,
             next : false,
-            now
+            dNow
         });
         if (rule.timeData.error) {
             hlp.handleError(node, RED._('clock-timer.errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
@@ -346,7 +346,7 @@ module.exports = function (RED) {
                 offset: rule.offsetMinValue,
                 multiplier: rule.multiplierMin,
                 next: false,
-                now
+                dNow
             });
             const numMin = rule.timeDataMin.value.getTime();
             rule.timeDataMin.source = 'Min';
@@ -372,7 +372,7 @@ module.exports = function (RED) {
                 offset: rule.offsetMaxValue,
                 multiplier: rule.multiplierMax,
                 next: false,
-                now
+                dNow
             });
             const numMax = rule.timeDataMax.value.getTime();
             rule.timeDataMax.source = 'Max';
@@ -427,7 +427,7 @@ module.exports = function (RED) {
          * @returns {Object|null} returns the rule if rule is valid, otherwhise null
          */
         const fktCheck = (rule, cmp) => {
-            // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10}));
+            // node.debug('fktCheck rule ' + util.inspect(rule, {colors:true, compact:10}));
             if (rule.conditional) {
                 try {
                     if (!rule.conditon.result) {
@@ -470,7 +470,7 @@ module.exports = function (RED) {
                 }
             }
             const num = getRuleTimeData(node, msg, rule, dNow);
-            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - num=${num}- rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+            // node.debug(`pos=${rule.pos} type=${rule.timeOpText} - ${rule.timeValue} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
             if (dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
                 return rule;
             }
@@ -517,6 +517,9 @@ module.exports = function (RED) {
         }
 
         const checkRuleForAT = rule => {
+            if (!rule.timeLimited) {
+                return;
+            }
             const num = getRuleTimeData(node, msg, rule, dNow);
             if (num > nowNr) {
                 node.debug('autoTrigger set to rule ' + rule.pos);
@@ -600,21 +603,22 @@ module.exports = function (RED) {
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.payloadData = {
-            type: node.timeClockData.payloadDefaultType,
-            value: node.timeClockData.payloadDefault,
-            format: node.timeClockData.payloadDefaultTimeFormat,
-            offsetType: node.timeClockData.payloadDefaultOffsetType,
-            offset: node.timeClockData.payloadDefaultOffset,
-            multiplier: node.timeClockData.payloadDefaultOffsetMultiplier,
+            type: node.nodeData.payloadDefaultType,
+            value: node.nodeData.payloadDefault,
+            format: node.nodeData.payloadDefaultTimeFormat,
+            offsetType: node.nodeData.payloadDefaultOffsetType,
+            offset: node.nodeData.payloadDefaultOffset,
+            multiplier: node.nodeData.payloadDefaultOffsetMultiplier,
             next: true
         };
-        livingRuleData.topic = node.timeClockData.topic;
+        livingRuleData.topic = node.nodeData.topic;
         livingRuleData.code = 1;
         livingRuleData.state = RED._('clock-timer.states.default');
         livingRuleData.description = RED._('clock-timer.reasons.default');
-        if (node.autoTrigger) {
+
+        if (node.autoTrigger && node.rules && node.rules.count > 0) {
             // check first rule, maybe next day
-            if (node.autoTrigger && node.rules && node.rules.firstTimeLimited < node.rules.count) {
+            if (node.rules.firstTimeLimited < node.rules.count) {
                 checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
             }
             if (node.rules.firstTimeLimited !== node.rules.firstFrom) {
@@ -637,7 +641,7 @@ module.exports = function (RED) {
 
         if (config.autoTrigger) {
             this.autoTrigger = {
-                deaultTime : config.autoTrigger.time || 20 * 60000 // 20min
+                defaultTime : config.autoTriggerTime || 20 * 60000 // 20min
             };
             this.autoTriggerObj = null;
         }
@@ -651,7 +655,7 @@ module.exports = function (RED) {
         };
         // temporary node Data
         node.storeName = config.storeName || '';
-        node.timeClockData = {
+        node.nodeData = {
             /** The Level of the window */
             payloadDefault: config.payloadDefault,
             payloadDefaultType: config.payloadDefaultType,
@@ -673,7 +677,7 @@ module.exports = function (RED) {
         };
         node.payload = {
             current: undefined,
-            topic: node.timeClockData.topic
+            topic: node.nodeData.topic
         };
         node.previousData = {
             reasonCode: -1,
@@ -746,8 +750,8 @@ module.exports = function (RED) {
                 node.reason.code = NaN;
                 const dNow = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
-                    node.autoTrigger.time = node.autoTrigger.deaultTime;
-                    node.autoTrigger.type = 0;
+                    node.autoTrigger.time = node.autoTrigger.defaultTime;
+                    node.autoTrigger.type = 0; // default time
                 }
 
                 // check if the message contains any oversteering data
@@ -758,17 +762,17 @@ module.exports = function (RED) {
 
 
                 // check for manual overwrite
-                let overwrite = checkTCPosOverwrite(node, msg, dNow);
-                if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.timeClockData.overwrite.importance)) {
+                let overwrite = checkPosOverwrite(node, msg, dNow);
+                if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
-                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, timeClockData.overwrite.importance=${node.timeClockData.overwrite.importance}`);
+                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
                     if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
-                        timePosOverwriteReset(node);
+                        posOverwriteReset(node);
                         overwrite = false;
                     }
 
-                    if (!overwrite || timeCtrl.rule.importance > node.timeClockData.overwrite.importance) {
+                    if (!overwrite || timeCtrl.rule.importance > node.nodeData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
                         node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, dNow);
                         node.payload.topic = timeCtrl.rule.topic;
@@ -778,9 +782,9 @@ module.exports = function (RED) {
                     }
                 }
 
-                // node.debug(`result manual=${node.timeClockData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
+                // node.debug(`result manual=${node.nodeData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
                 timeCtrl.reason = node.reason;
-                timeCtrl.timeClock = node.timeClockData;
+                timeCtrl.timeClock = node.nodeData;
 
                 if (node.startDelayTimeOut) {
                     node.reason.code = NaN;
@@ -824,7 +828,7 @@ module.exports = function (RED) {
                 node.previousData.usedRule = ruleId;
                 node.context().set('cacheData', tempData, node.storeName);
                 if (node.autoTrigger) {
-                    node.debug('------------- autotrigger ---------------- ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
+                    node.debug('------------- autoTrigger ---------------- ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
                         clearTimeout(node.autoTriggerObj);
                         node.autoTriggerObj = null;

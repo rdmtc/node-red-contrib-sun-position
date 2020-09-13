@@ -584,7 +584,7 @@
                                 .css('width','40%')
                                 .appendTo($row1)
                                 .typedInput({
-                                    default:types.MsgPayload.value,
+                                    default: types.MsgPayload.value,
                                     types:[
                                         types.MsgPayload,
                                         types.MsgTopic,
@@ -596,6 +596,9 @@
                                         'global'
                                     ]
                                 });
+                            $propertyName.typedInput('value', prop.p);
+                            $propertyName.typedInput('type', prop.pt);
+                            $propertyName.typedInput('value', prop.p); // fix missing value, thatswhy twice, don't know why not working
 
                             $('<div/>',{style: 'display:inline-block; padding:0px 6px;'})
                                 .text('=')
@@ -643,13 +646,12 @@
                                         types.WeekOfYear,
                                         types.WeekOfYearEven,
                                         types.DayOfYear,
-                                        types.DayOfYearEven
+                                        types.DayOfYearEven,
+                                        types.numPercent
                                     ]
                                 });
-                            $propertyName.typedInput('value',prop.p);
-                            $propertyName.typedInput('type',prop.pt);
-                            $propertyValue.typedInput('value',prop.v);
-                            $propertyValue.typedInput('type',prop.vt);
+                            $propertyValue.typedInput('value', prop.v);
+                            $propertyValue.typedInput('type', prop.vt);
 
                             // row2 - Format Selection
                             const operandSelFieldName = 'node-input-prop-property-FormatSel';

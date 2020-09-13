@@ -143,20 +143,16 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         Unlimited: {
             value: 'none',
             label: node._('node-red-contrib-sun-position/position-config:common.types.unlimited','no limitation'),
-            // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         Undefined: {
             value: 'none',
             label: node._('node-red-contrib-sun-position/position-config:common.types.undefined'),
-            // label: node._('node-red-contrib-sun-position/position-config:common.types.undefined','not used'),
-            // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         DateSpecific: {
             value: 'dateSpecific',
             label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific','timestamp enhanced'),
-            // icon: "icons/node-red-contrib-sun-position/inputTypeNone.png",
             hasValue: false
         },
         MsgPayload: {
@@ -187,19 +183,27 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         MsgPayloadByTopic: {
             value: 'PlT',
             label: node._('node-red-contrib-sun-position/position-config:common.types.PlTRes'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypePayloadByTopic.svg',
             hasValue: true
+        },
+        numPercent: {
+            value: 'numPct',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numPercent'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
+            hasValue: true,
+            validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
         },
         TimeEntered: {
             value: 'entered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeTime.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeTime.svg',
             hasValue: true,
             validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm|p|PM|P|utc|UTC|local|LOCAL)?$/
         },
         DateEntered: {
             value: 'dateEntered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.dateentered','date'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeDate.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeDate.svg',
             hasValue: true,
             validate: /^(\d{1,4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])|(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.\d{1,4}|(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{1,4})([\s.:,-T](00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(:([0-9]|[0-5][0-9])([.:]\d{1,3})?)?)?$/
         },
@@ -253,14 +257,14 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         randomNumber: {
             value: 'randomNum',
             label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
         TimeSun: {
             value: 'pdsTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesun','sun time'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunClock.svg',
             options: [{
                 value: 'astronomicalDawn',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.astronomicalDawn')
@@ -332,13 +336,13 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         TimeSunNow: {
             value: 'pdsTimeNow',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timesunnow'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTime.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeNow.svg',
             hasValue: false
         },
         TimeMoon: {
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonClock.svg',
             options: [{
                 value: 'rise',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.moonRise', 'rise')
@@ -350,64 +354,64 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         SunCalc: {
             value: 'pdsCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.suncalc','sun calculation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSun.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSun.svg',
             hasValue: false
         },
         SunInSky: {
             value: 'pdsCalcPercent',
             label: node._('node-red-contrib-sun-position/position-config:common.types.suninsky','sun in the sky (percent)'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.svg',
             hasValue: false
         },
         SunAzimuth: {
             value: 'pdsCalcAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
             hasValue: false
         },
         SunElevation: {
             value: 'pdsCalcElevation',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation','Elevation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
         },
         SunAzimuthRad: {
             value: 'pdsCalcAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
             hasValue: false
         },
         SunElevationRad: {
             value: 'pdsCalcElevationRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad','Elevation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
         },
         SunTimeByElevation: {
             value: 'pdsTimeByElevation',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevation','Time by Elevation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeElevation.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
         SunTimeByAzimuth: {
             value: 'pdsTimeByAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuth','Time by Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
         SunTimeByElevationRad: {
             value: 'pdsTimeByElevationRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevationRad','Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeElevation.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
         SunTimeByAzimuthRad: {
             value: 'pdsTimeByAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuthRad','Time by Azimuth Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTmeAzimuth.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuthRad.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
@@ -439,19 +443,19 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         MoonCalc: {
             value: 'pdmCalcData',
             label: node._('node-red-contrib-sun-position/position-config:common.types.mooncalc','moon calculation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoon.svg',
             hasValue: false
         },
         MoonPhase: {
             value: 'pdmPhase',
             label: node._('node-red-contrib-sun-position/position-config:common.types.moonPhase','moon phase'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase.svg',
             hasValue: false
         },
         PhaseMoon: {
             value: 'pdmPhaseCheck',
             label: node._('node-red-contrib-sun-position/position-config:common.types.moonPhaseCheck','moon phase'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase.png',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeMoonPhase2.svg',
             options: [{
                 value: 'newMoon',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.newMoon')
