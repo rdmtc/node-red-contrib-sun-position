@@ -4,3 +4,6 @@ node_modules/*
 Thumbs.db
 package-lock.json
 dev_*
+Backup/
+backup/
+test/
