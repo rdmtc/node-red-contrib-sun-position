@@ -432,25 +432,15 @@ module.exports = function (RED) {
             return setOverwriteReason(node);
         }
         const onlyTrigger = hlp.getMsgBoolValue(msg, ['trigger', 'noOverwrite'], ['triggerOnly', 'noOverwrite']);
+        if (onlyTrigger) {
+            return setOverwriteReason(node);
+        }
         let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         let nExpire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
         if (msg.topic && String(msg.topic).includes('noExpir')) {
             nExpire = -1;
         }
-        if (!onlyTrigger && node.nodeData.overwrite.active && isNaN(newPos)) {
-            node.debug(`overwrite active, check of nImportance=${nImportance} or nExpire=${nExpire}, newPos=${newPos}`);
-            if (Number.isFinite(nExpire)) {
-                node.debug(`set to new expiring time nExpire="${nExpire}"`);
-                // set to new expiring time
-                setExpiringOverwrite(node, dNow, nExpire, 'set new expiring time by message');
-            }
-            if (nImportance > 0) {
-                // set to new importance
-                node.nodeData.overwrite.importance = nImportance;
-            }
-            // node.debug(`overwrite exit true node.nodeData.overwrite.active=${node.nodeData.overwrite.active}, newPos=${newPos}, expire=${expire}`);
-            return setOverwriteReason(node);
-        } else if (!onlyTrigger && !isNaN(newPos)) {
+        if (!isNaN(newPos)) {
             node.debug(`needOverwrite nImportance=${nImportance} nExpire=${nExpire} newPos=${newPos}`);
             if (newPos === -1) {
                 node.level.current = NaN;
@@ -489,8 +479,19 @@ module.exports = function (RED) {
                 node.nodeData.overwrite.importance = nImportance;
             }
             node.nodeData.overwrite.active = true;
+        } else if (node.nodeData.overwrite.active) {
+            node.debug(`overwrite active, check of nImportance=${nImportance} or nExpire=${nExpire}`);
+            if (Number.isFinite(nExpire)) {
+                node.debug(`set to new expiring time nExpire="${nExpire}"`);
+                // set to new expiring time
+                setExpiringOverwrite(node, dNow, nExpire, 'set new expiring time by message');
+            }
+            if (nImportance > 0) {
+                // set to new importance
+                node.nodeData.overwrite.importance = nImportance;
+            }
         }
-        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}`);
+        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active};  xpire=${nExpire};  newPos=${newPos}``);
         return setOverwriteReason(node);
     }
 
