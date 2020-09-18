@@ -283,6 +283,20 @@ module.exports = function (RED) {
     }
     /******************************************************************************************/
     /**
+     * clears expire object properties
+     * @param {*} node node data
+     */
+    function deleteExpireProp(node) {
+        delete node.nodeData.overwrite.expires;
+        delete node.nodeData.overwrite.expireTs;
+        delete node.nodeData.overwrite.expireDate;
+        delete node.nodeData.overwrite.expireDateISO;
+        delete node.nodeData.overwrite.expireDateUTC;
+        delete node.nodeData.overwrite.expireTimeLocal;
+        delete node.nodeData.overwrite.expireDateLocal;
+    }
+
+    /**
      * reset any existing override
      * @param {*} node node data
      */
@@ -295,13 +309,7 @@ module.exports = function (RED) {
             node.timeOutObj = null;
         }
         if (node.nodeData.overwrite.expireTs || node.nodeData.overwrite.expires) {
-            delete node.nodeData.overwrite.expires;
-            delete node.nodeData.overwrite.expireTs;
-            delete node.nodeData.overwrite.expireDate;
-            delete node.nodeData.overwrite.expireDateISO;
-            delete node.nodeData.overwrite.expireDateUTC;
-            delete node.nodeData.overwrite.expireTimeLocal;
-            delete node.nodeData.overwrite.expireDateLocal;
+            deleteExpireProp(node);
         }
     }
 
