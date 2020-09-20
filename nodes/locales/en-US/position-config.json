@@ -302,7 +302,54 @@
             "containEvery": "containEvery"
         }
     },
+    "ruleCtrl": {
+        "reasons": {
+			"overwriteNoExpire": "position is overwritten with importance __importance__",
+			"overwriteExpire": "position is overwritten with importance __importance__, will expire __dateISO__",
+			"default": "position is set to default position because no other rule matches",
+			"ruleTime": "position by time - rule __timeOp__ __timeLocal__ [__number__] __name__",
+			"ruleCond": "position by conditional rule __text__ [__number__] __name__",
+			"ruleTimeCond": "position by time rule __timeOp__ __timeLocal__ and condition __text__ [__number__] __name__",
+			"rule": "position by fixed rule [__number__] __name__",
+			"sunMinAltitude": "sun below minimum altitude",
+			"sunMinDelta": "change is less ad min delta",
+			"sunNotInWin": "Sun not in window",
+			"sunCtrl": "sun control",
+			"sunCtrlMin": "__org__ (__level__ is below minimum)",
+			"sunCtrlMax": "__org__ (__level__ is above maximum)",
+			"oversteer": "sun position oversteers",
+			"smooth": "Position is not changed to __pos__ because not enough time has passed since the last change (time smooth)",
+			"sunInWinMax": "Sun in window (Level is maximum)",
+			"sunNotInWinMin": "Sun not in window (Level is minimum)",
+			"ruleMin": "__org__ (__level__ is below minimum) [__number__] __name__",
+			"ruleMax": "__org__ (__level__ is above maximum) [__number__] __name__",
+			"startDelay": "node in startup until __dateISO__"
+        },
+        "states": {
+			"overwriteNoExpire": "overwritten [imp=__importance__]",
+			"overwriteExpire": "overwritten [imp=__importance__], till __timeLocal__",
+			"default": "default",
+			"ruleTime": "__timeOp__ __timeLocal__ [__number__] __name__",
+			"ruleCond": "__textShort__ [__number__] __name__",
+			"ruleTimeCond": "__timeOp__ __timeLocal__ + cond __operatorText__ [__number__] __name__",
+			"rule": "by fixed rule [__number__] __name__",
+			"sunMinAltitude": "min altitude",
+			"sunMinDelta": "min delta",
+			"sunNotInWin": "no sun in window",
+			"sunCtrl": "sun control",
+			"sunCtrlMin": "__org__ (min)",
+			"sunCtrlMax": "__org__ (max)",
+			"oversteer": "oversteer",
+			"smooth": "block change to __pos__",
+			"sunInWinMax": "Sun in window (max)",
+			"sunNotInWinMin": "Sun not in window (min)",
+			"ruleMin": "__org__ [min rule __number__]",
+			"ruleMax": "__org__ [max rule __number__]",
+			"startDelay": "startup [__date__]"
+		}
+    },
     "errors": {
+        "warning": "Warning: __message__",
         "error": "Error: __message__",
         "error-title": "internal error",
         "error-init": "error '__message__', retry in __time__min",
@@ -313,8 +360,11 @@
         "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown! (\"__opTypeA__.__opValueA__\" compare to \"__opTypeB__.__opValueB__\")",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__",
+        "notEvaluablePropertyUsedValue": "could not evaluate __type__.__value__, using \"__usedValue__\"!",
         "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)",
-        "invalid-expr": "Invalid JSONata expression: __error__"
+        "invalid-expr": "Invalid JSONata expression: __error__",
+        "getPropertyData": "error getting condition data: \"__message__\" skipping time",
+        "error-time": "Error get time: __message__"
     },
     "position-config": {
         "label": {
