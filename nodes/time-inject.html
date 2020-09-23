@@ -479,7 +479,7 @@
                     return result + this.name;
                 }
                 if (this.nameInt) {
-                    return result + this.nameInt;
+                    return result + this.nameInt.replace('${lblInject}', this._('time-inject.label.time-inject'));;
                 }
                 return result + this._('time-inject.label.time-inject');
             },
@@ -1416,7 +1416,7 @@
                 delete node.addPayload3Next;
                 delete node.addPayload3Days;
 
-                let payloadLbl = '{}';
+                let payloadLbl = '';
                 let payloadType = '';
                 let topicLbl = '';
                 const getPropTLbl = prop => {
@@ -1471,6 +1471,17 @@
                     }
                     node.props.push(p);
                 });
+                let pos = 0;
+                while (payloadLbl === '' && node.props.length > pos) {
+                    let p = node.props[pos];
+                    if (p.pt !== 'msgTopic') {
+                        payloadLbl = RED.nodes.getType('position-config').getValueLabel(this, p.pt, p.p, null) + '=' + getPropTLbl(p);
+                    }
+                    pos++;
+                }
+                if (payloadLbl === '') {
+                    payloadLbl = '${lblInject}';
+                }
 
                 this.nameInt = '';
                 if ($('#node-input-once').prop('checked')) {
