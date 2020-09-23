@@ -197,7 +197,7 @@ module.exports = function (RED) {
                 node.nodeData.overwrite.importance = nImportance;
             }
         }
-        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active};  xpire=${nExpire};  newPos=${newPos}``);
+        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}; nExpire=${nExpire};  newPos=${newPos}``);
         return ctrlLib.setOverwriteReason(node);
     }
 
@@ -515,7 +515,6 @@ module.exports = function (RED) {
                 const diff = num - nowNr;
                 node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
                 node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.ruleNext; // next rule
-
             }
         };
         if (ruleSel) {
@@ -761,7 +760,7 @@ module.exports = function (RED) {
         /**
          * set the state of the node
          */
-        this.setState = blindCtrl => {
+        this.setState = pLoad => {
             let code = node.reason.code;
             let shape = 'ring';
             let fill = 'yellow';
@@ -769,7 +768,7 @@ module.exports = function (RED) {
                 code = node.previousData.reasonCode;
             }
 
-            if (blindCtrl.level === node.nodeData.levelTop) {
+            if (pLoad.level === node.nodeData.levelTop) {
                 shape = 'dot';
             }
             if (isNaN(code)) {
@@ -783,7 +782,7 @@ module.exports = function (RED) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
 
-            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + node.reason.state;
+            node.reason.stateComplete = (isNaN(pLoad.level)) ? node.reason.state : pLoad.level.toString() + ' - ' + node.reason.state;
             node.status({
                 fill,
                 shape,
@@ -897,7 +896,7 @@ module.exports = function (RED) {
                     node.autoTrigger.time = node.autoTrigger.defaultTime;
                     node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.default; // default time
                 }
-                const blindCtrl = {
+                const nodeCtrl = {
                     reason : node.reason,
                     blind: node.nodeData,
                     autoTrigger : node.autoTrigger
@@ -909,40 +908,40 @@ module.exports = function (RED) {
                 node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
-                    blindCtrl.rule = checkRules(node, msg, dNow, tempData);
-                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
-                    if (overwrite && blindCtrl.rule.resetOverwrite && blindCtrl.rule.id !== node.previousData.usedRule) {
+                    nodeCtrl.rule = checkRules(node, msg, dNow, tempData);
+                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, nodeCtrl.rule.importance=${nodeCtrl.rule.importance}`);
+                    if (overwrite && nodeCtrl.rule.resetOverwrite && nodeCtrl.rule.id !== node.previousData.usedRule) {
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
 
-                    if (!overwrite || blindCtrl.rule.importance > node.nodeData.overwrite.importance) {
-                        ruleId = blindCtrl.rule.id;
-                        node.level.current = blindCtrl.rule.level;
-                        node.level.currentInverse = ctrlLib.getInversePos(node, blindCtrl.rule.level);
-                        node.level.topic = blindCtrl.rule.topic;
-                        node.reason.code = blindCtrl.rule.code;
-                        node.reason.state = blindCtrl.rule.state;
-                        node.reason.description = blindCtrl.rule.description;
-                        if (!blindCtrl.rule.active && (node.sunData.mode > 0)) {
+                    if (!overwrite || nodeCtrl.rule.importance > node.nodeData.overwrite.importance) {
+                        ruleId = nodeCtrl.rule.id;
+                        node.level.current = nodeCtrl.rule.level;
+                        node.level.currentInverse = ctrlLib.getInversePos(node, nodeCtrl.rule.level);
+                        node.level.topic = nodeCtrl.rule.topic;
+                        node.reason.code = nodeCtrl.rule.code;
+                        node.reason.state = nodeCtrl.rule.state;
+                        node.reason.description = nodeCtrl.rule.description;
+                        if (!nodeCtrl.rule.active && (node.sunData.mode > 0)) {
                             // calc sun position:
-                            blindCtrl.sunPosition = calcBlindSunPosition(node, msg, dNow, tempData);
+                            nodeCtrl.sunPosition = calcBlindSunPosition(node, msg, dNow, tempData);
                         }
-                        if (blindCtrl.rule.hasMinimum && (node.level.current < blindCtrl.rule.levelMinimum)) {
-                            node.debug(`${node.level.current} is below rule minimum ${blindCtrl.rule.levelMinimum}`);
+                        if (nodeCtrl.rule.hasMinimum && (node.level.current < nodeCtrl.rule.levelMinimum)) {
+                            node.debug(`${node.level.current} is below rule minimum ${nodeCtrl.rule.levelMinimum}`);
                             node.reason.code = 15;
-                            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name });
+                            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMin', { org: node.reason.state, number: nodeCtrl.rule.minimum.id, name: nodeCtrl.rule.minimum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMin',
-                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
-                            node.level.current = blindCtrl.rule.levelMinimum;
+                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: nodeCtrl.rule.minimum.id, name: nodeCtrl.rule.minimum.name  });
+                            node.level.current = nodeCtrl.rule.levelMinimum;
                             node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
-                        } else if (blindCtrl.rule.hasMaximum && (node.level.current > blindCtrl.rule.levelMaximum)) {
-                            node.debug(`${node.level.current} is above rule maximum ${blindCtrl.rule.levelMaximum}`);
+                        } else if (nodeCtrl.rule.hasMaximum && (node.level.current > nodeCtrl.rule.levelMaximum)) {
+                            node.debug(`${node.level.current} is above rule maximum ${nodeCtrl.rule.levelMaximum}`);
                             node.reason.code = 26;
-                            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
+                            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMax', { org: node.reason.state, number: nodeCtrl.rule.maximum.id, name: nodeCtrl.rule.maximum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMax',
-                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
-                            node.level.current = blindCtrl.rule.levelMaximum;
+                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: nodeCtrl.rule.maximum.id, name: nodeCtrl.rule.maximum.name });
+                            node.level.current = nodeCtrl.rule.levelMaximum;
                             node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
                         }
                         if (node.level.current < node.nodeData.levelBottom) {
@@ -974,11 +973,11 @@ module.exports = function (RED) {
                 }
 
                 if (node.levelReverse) {
-                    blindCtrl.level = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
-                    blindCtrl.levelInverse = isNaN(node.level.current) ? node.previousData.level : node.level.current;
+                    nodeCtrl.level = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
+                    nodeCtrl.levelInverse = isNaN(node.level.current) ? node.previousData.level : node.level.current;
                 } else {
-                    blindCtrl.level = isNaN(node.level.current) ? node.previousData.level : node.level.current;
-                    blindCtrl.levelInverse = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
+                    nodeCtrl.level = isNaN(node.level.current) ? node.previousData.level : node.level.current;
+                    nodeCtrl.levelInverse = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
                 }
 
                 if (node.startDelayTimeOut) {
@@ -986,14 +985,14 @@ module.exports = function (RED) {
                     node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.startDelay', {date:node.positionConfig.toTimeString(node.startDelayTimeOut)});
                     node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
-                node.setState(blindCtrl);
+                node.setState(nodeCtrl);
 
                 let topic = node.level.topic || node.nodeData.topic || msg.topic;
                 if (topic) {
                     const topicAttrs = {
                         name: node.name,
-                        level: blindCtrl.level,
-                        levelInverse: blindCtrl.levelInverse,
+                        level: nodeCtrl.level,
+                        levelInverse: nodeCtrl.levelInverse,
                         code: node.reason.code,
                         state: node.reason.state,
                         rule: ruleId,
@@ -1010,16 +1009,16 @@ module.exports = function (RED) {
                     ((node.level.current !== node.previousData.level) ||
                     (node.reason.code !== node.previousData.reasonCode) ||
                     (ruleId !== node.previousData.usedRule))) {
-                    msg.payload = blindCtrl.level;
+                    msg.payload = nodeCtrl.level;
                     msg.topic =  topic;
-                    msg.blindCtrl = blindCtrl;
+                    msg.blindCtrl = nodeCtrl;
                     if (node.outputs > 1) {
-                        send([msg, { topic, payload: blindCtrl }]);
+                        send([msg, { topic, payload: nodeCtrl }]);
                     } else {
                         send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    send([null, { topic, payload: blindCtrl }]);
+                    send([null, { topic, payload: nodeCtrl }]);
                 }
                 node.previousData.usedRule = ruleId;
                 node.context().set('cacheData', tempData, node.storeName);
