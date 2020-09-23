@@ -7,120 +7,24 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
+/* const ctrlLib.cRuleUntil = 0;
+const ctrlLib.cRuleFrom = 1;
+const ctrlLib.cRuleAbsolute = 0;
+const ctrlLib.cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
+const ctrlLib.cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
+const ctrlLib.cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
+const ctrlLib.cautoTriggerTypes = Object.freeze({
+    default : 0,
+    ruleCurrentEnd: 1,  // current rule end
+    ruleNext: 2, // next rule
+    sunNotOnHorizon : 3,
+    sunNotVisible : 4,
+    sunBeforeInWindow: 5,
+    sunInWindowSmoothTime: 6,
+    sunInWindow: 7,
+}); */
 /******************************************************************************************/
-/**
- * get the absolute level from percentage level
- * @param {*} node the node settings
- * @param {*} percentPos the level in percentage (0-1)
- */
-function posPrcToAbs_(node, levelPercent) {
-    return posRound_(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
-}
-/**
- * get the percentage level from absolute level  (0-1)
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the level percentage
- */
-function posAbsToPrc_(node, levelAbsolute) {
-    return (levelAbsolute - node.nodeData.levelBottom) / (node.nodeData.levelTop - node.nodeData.levelBottom);
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the inverse level
- */
-function getInversePos_(node, level) {
-    return posPrcToAbs_(node, 1 - posAbsToPrc_(node, level));
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @return {number} get the current level
- */
-function getRealLevel_(node) {
-    if (node.levelReverse) {
-        return isNaN(node.level.currentInverse) ? node.previousData.levelInverse: node.level.currentInverse;
-    }
-    return isNaN(node.level.current) ? node.previousData.level : node.level.current;
-}
-
-/**
- * round a level to the next increment
- * @param {*} node node data
- * @param {number} pos level
- * @return {number} rounded level number
- */
-function posRound_(node, pos) {
-    // node.debug(`levelPrcToAbs_ ${pos} - increment is ${node.nodeData.increment}`);
-    // pos = Math.ceil(pos / node.nodeData.increment) * node.nodeData.increment;
-    // pos = Math.floor(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Math.round(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Number(pos.toFixed(hlp.countDecimals(node.nodeData.increment)));
-    if (pos > node.nodeData.levelTop) {
-        pos = node.nodeData.levelTop;
-    }
-    if (pos < node.nodeData.levelBottom) {
-        pos = node.nodeData.levelBottom;
-    }
-    // node.debug(`levelPrcToAbs_ result ${pos}`);
-    return pos;
-}
-
-/**
- * normalizes an angle
- * @param {number} angle to normalize
- */
-function angleNorm_(angle) {
-    while (angle < 0) {
-        angle += 360;
-    }
-    while (angle > 360) {
-        angle -= 360;
-    }
-    return angle;
-}
-/******************************************************************************************/
-/**
- * calculates the current sun level
- * @param {*} node node data
- * @param {*} dNow the current timestamp
- */
-function getSunPosition_(node, dNow) {
-    const sunPosition = node.positionConfig.getSunCalc(dNow, false, false);
-    // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
-    sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
-                           (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
-    // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
-    if (node.autoTrigger ) {
-        if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
-            node.autoTrigger.type = 3; // Sun not on horizon
-        } else if (sunPosition.azimuthDegrees <= 72) {
-            node.autoTrigger.type = 4; // Sun not visible
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthStart) {
-            node.autoTrigger.time = Math.min(node.autoTrigger.time, cautoTriggerTimeBeforeSun);
-            node.autoTrigger.type = 5; // sun before in window
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd) {
-            if (node.smoothTime > 0) {
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, node.smoothTime);
-                node.autoTrigger.type = 6; // sun in window (smooth time set)
-            } else {
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, (cautoTriggerTimeSun));
-                node.autoTrigger.type = 7; // sun in window
-            }
-        }
-    }
-    return sunPosition;
-}
-
 module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
@@ -187,13 +91,13 @@ module.exports = function (RED) {
                     } else if (val > 99) {
                         return node.nodeData.levelTop;
                     }
-                    return posPrcToAbs_(node, val / 100);
+                    return ctrlLib.posPrcToAbs(node, val / 100);
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
             const res = node.positionConfig.getFloatProp(node, msg, type, value, def);
             if (node.levelReverse) {
-                return getInversePos_(node, res);
+                return ctrlLib.getInversePos(node, res);
             }
             return res;
         } catch (err) {
@@ -249,12 +153,12 @@ module.exports = function (RED) {
                 node.level.currentInverse = NaN;
             } else if (!isNaN(newPos)) {
                 const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
-                if (!ctrlLib.validPosition_(node, newPos, allowRound)) {
+                if (!ctrlLib.validPosition(node, newPos, allowRound)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
                     return false;
                 }
                 if (allowRound) {
-                    newPos = posRound_(node, newPos);
+                    newPos = ctrlLib.posRound(node, newPos);
                 }
                 node.debug(`overwrite newPos=${newPos}`);
                 const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
@@ -307,14 +211,14 @@ module.exports = function (RED) {
     function calcBlindSunPosition(node, msg, dNow, tempData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
-        const sunPosition = getSunPosition_(node, dNow);
+        const sunPosition = ctrlLib.getSunPosition(node, dNow);
         const winterMode = 1;
         const summerMode = 2;
 
         if (!sunPosition.InWindow) {
             if (node.sunData.mode === winterMode) {
                 node.level.current = node.nodeData.levelMin;
-                node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
                 node.level.topic = node.sunData.topic;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMin');
@@ -338,7 +242,7 @@ module.exports = function (RED) {
             const res = checkOversteer(node, msg, tempData);
             if (res) {
                 node.level.current = res.blindPos;
-                node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
                 node.level.topic = node.oversteer.topic;
                 node.reason.code = 10;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer');
@@ -352,7 +256,7 @@ module.exports = function (RED) {
 
         if (node.sunData.mode === winterMode) {
             node.level.current = node.nodeData.levelMax;
-            node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
             node.level.topic = node.sunData.topic;
             node.reason.code = 12;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunInWinMax');
@@ -372,8 +276,8 @@ module.exports = function (RED) {
             node.level.currentInverse = node.nodeData.levelBottom;
             node.level.topic = node.sunData.topic;
         } else {
-            node.level.current = posPrcToAbs_(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
-            node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.current = ctrlLib.posPrcToAbs(node, (height - node.windowSettings.bottom) / (node.windowSettings.top - node.windowSettings.bottom));
+            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
             node.level.topic = node.sunData.topic;
         }
 
@@ -382,15 +286,15 @@ module.exports = function (RED) {
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > dNow.getTime())) {
             node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
-            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.smooth', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.smooth', { pos: getRealLevel_(node).toString()});
+            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.smooth', { pos: ctrlLib.getRealLevel(node).toString()});
+            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.smooth', { pos: ctrlLib.getRealLevel(node).toString()});
             node.level.current = node.previousData.level;
             node.level.currentInverse = node.previousData.levelInverse;
             node.level.topic = node.previousData.topic;
         } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.nodeData.levelBottom) && (node.level.current < node.nodeData.levelTop)) {
             node.reason.code = 14;
-            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
+            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunMinDelta', { pos: ctrlLib.getRealLevel(node).toString()});
+            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunMinDelta', { pos: ctrlLib.getRealLevel(node).toString() });
             node.level.current = node.previousData.level;
             node.level.currentInverse = node.previousData.levelInverse;
             node.level.topic = node.previousData.topic;
@@ -408,7 +312,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrlMin', {org: node.reason.state});
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunCtrlMin', {org: node.reason.description, level:node.level.current});
             node.level.current = node.nodeData.levelMin;
-            node.level.currentInverse = getInversePos_(node, node.level.current); // node.nodeData.levelMax;
+            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current); // node.nodeData.levelMax;
         } else if (node.level.current > node.nodeData.levelMax) {
             // max
             node.debug(`${node.level.current} is above ${node.nodeData.levelMax} (max)`);
@@ -416,7 +320,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrlMax', {org: node.reason.state});
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunCtrlMax', {org: node.reason.description, level:node.level.current});
             node.level.current = node.nodeData.levelMax;
-            node.level.currentInverse = getInversePos_(node, node.level.current); // node.nodeData.levelMin;
+            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current); // node.nodeData.levelMin;
         }
         // node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
@@ -513,43 +417,43 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (rule.timeOp === cRuleFrom) { continue; }
+            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (rule.timeOp === ctrlLib.cRuleFrom) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
             let res = null;
-            if (rule.timeOp === cRuleFrom) {
+            if (rule.timeOp === ctrlLib.cRuleFrom) {
                 res = fktCheck(rule, r => (r <= nowNr));
             } else {
                 res = fktCheck(rule, r => (r >= nowNr));
             }
             if (res) {
                 // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (res.levelOp === cRuleMinOversteer) {
+                if (res.levelOp === ctrlLib.cRuleMinOversteer) {
                     ruleSelMin = res;
-                } else if (res.levelOp === cRuleMaxOversteer) {
+                } else if (res.levelOp === ctrlLib.cRuleMaxOversteer) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
                     ruleindex = i;
-                    if (rule.timeOp !== cRuleFrom) {
+                    if (rule.timeOp !== ctrlLib.cRuleFrom) {
                         break;
                     }
                 }
             }
         }
 
-        if (!ruleSel || (ruleSel.timeOp === cRuleFrom) ) {
+        if (!ruleSel || (ruleSel.timeOp === ctrlLib.cRuleFrom) ) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                if (rule.timeOp === ctrlLib.cRuleUntil) { continue; } // - From: timeOp === ctrlLib.cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
                     // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (res.levelOp === cRuleMinOversteer) {
+                    if (res.levelOp === ctrlLib.cRuleMinOversteer) {
                         ruleSelMin = res;
-                    } else if (res.levelOp === cRuleMaxOversteer) {
+                    } else if (res.levelOp === ctrlLib.cRuleMaxOversteer) {
                         ruleSelMax = res;
                     } else {
                         ruleSel = res;
@@ -610,7 +514,8 @@ module.exports = function (RED) {
                 node.debug('autoTrigger set to rule ' + rule.pos);
                 const diff = num - nowNr;
                 node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                node.autoTrigger.type = 2; // next rule
+                node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.ruleNext; // next rule
+
             }
         };
         if (ruleSel) {
@@ -619,7 +524,7 @@ module.exports = function (RED) {
                     node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
                     const diff = ruleSel.timeData.ts - nowNr;
                     node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                    node.autoTrigger.type = 1; // current rule end
+                    node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.ruleCurrentEnd; // current rule end
                 } else {
                     for (let i = (ruleindex+1); i < node.rules.count; ++i) {
                         const rule = node.rules.data[i];
@@ -629,7 +534,7 @@ module.exports = function (RED) {
                         checkRuleForAT(rule);
                     }
                     // check first rule, maybe next day
-                    if ((node.autoTrigger.type !== 2) && (node.rules.firstTimeLimited < node.rules.count)) {
+                    if ((node.autoTrigger.type !== ctrlLib.cAutoTriggerTypes.ruleNext) && (node.rules.firstTimeLimited < node.rules.count)) {
                         checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
                     }
                 }
@@ -643,7 +548,7 @@ module.exports = function (RED) {
             livingRuleData.code = 4;
             livingRuleData.topic = ruleSel.topic;
 
-            if (ruleSel.levelOp === cRuleAbsolute) { // absolute rule
+            if (ruleSel.levelOp === ctrlLib.cRuleAbsolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.levelType, ruleSel.levelValue, -1);
                 livingRuleData.active = (livingRuleData.level > -1);
             } else {
@@ -750,9 +655,9 @@ module.exports = function (RED) {
             /** The bottom of the window */
             bottom: Number(config.windowBottom),
             /** the orientation angle to the geographical north */
-            AzimuthStart: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthStart, 0))),
+            AzimuthStart: ctrlLib.angleNorm(Number(hlp.chkValueFilled(config.windowAzimuthStart, 0))),
             /** an offset for the angle clockwise offset */
-            AzimuthEnd: angleNorm_(Number(hlp.chkValueFilled(config.windowAzimuthEnd, 0)))
+            AzimuthEnd: ctrlLib.angleNorm(Number(hlp.chkValueFilled(config.windowAzimuthEnd, 0)))
         };
         node.nodeData = {
             /** The Level of the window */
@@ -990,7 +895,7 @@ module.exports = function (RED) {
                 const dNow = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.defaultTime;
-                    node.autoTrigger.type = 0; // default time
+                    node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.default; // default time
                 }
                 const blindCtrl = {
                     reason : node.reason,
@@ -1014,7 +919,7 @@ module.exports = function (RED) {
                     if (!overwrite || blindCtrl.rule.importance > node.nodeData.overwrite.importance) {
                         ruleId = blindCtrl.rule.id;
                         node.level.current = blindCtrl.rule.level;
-                        node.level.currentInverse = getInversePos_(node, blindCtrl.rule.level);
+                        node.level.currentInverse = ctrlLib.getInversePos(node, blindCtrl.rule.level);
                         node.level.topic = blindCtrl.rule.topic;
                         node.reason.code = blindCtrl.rule.code;
                         node.reason.state = blindCtrl.rule.state;
@@ -1028,17 +933,17 @@ module.exports = function (RED) {
                             node.reason.code = 15;
                             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMin',
-                                { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
+                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
                             node.level.current = blindCtrl.rule.levelMinimum;
-                            node.level.currentInverse = getInversePos_(node, node.level.current);
+                            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
                         } else if (blindCtrl.rule.hasMaximum && (node.level.current > blindCtrl.rule.levelMaximum)) {
                             node.debug(`${node.level.current} is above rule maximum ${blindCtrl.rule.levelMaximum}`);
                             node.reason.code = 26;
                             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMax',
-                                { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
+                                { org: node.reason.description, level: ctrlLib.getRealLevel(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
                             node.level.current = blindCtrl.rule.levelMaximum;
-                            node.level.currentInverse = getInversePos_(node, node.level.current);
+                            node.level.currentInverse = ctrlLib.getInversePos(node, node.level.current);
                         }
                         if (node.level.current < node.nodeData.levelBottom) {
                             node.debug(`${node.level.current} is below ${node.nodeData.levelBottom}`);

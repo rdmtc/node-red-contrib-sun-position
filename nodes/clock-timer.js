@@ -7,16 +7,14 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
+// const cRuleUntil = 0;
+// const cRuleFrom = 1;
 // const cRuleAbsolute = 0;
 
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
-    /**
-
 
     /**
      * check if a manual overwrite should be set
@@ -198,11 +196,11 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (rule.timeOp === cRuleFrom) { continue; }
+            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (rule.timeOp === ctrlLib.cRuleFrom) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
             let res = null;
-            if (rule.timeOp === cRuleFrom) {
+            if (rule.timeOp === ctrlLib.cRuleFrom) {
                 res = fktCheck(rule, r => (r <= nowNr));
             } else {
                 res = fktCheck(rule, r => (r >= nowNr));
@@ -211,18 +209,18 @@ module.exports = function (RED) {
                 // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 ruleSel = res;
                 ruleindex = i;
-                if (rule.timeOp !== cRuleFrom) {
+                if (rule.timeOp !== ctrlLib.cRuleFrom) {
                     break;
                 }
             }
         }
 
-        if (!ruleSel || (ruleSel.timeOp === cRuleFrom) ) {
+        if (!ruleSel || (ruleSel.timeOp === ctrlLib.cRuleFrom) ) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                if (rule.timeOp === ctrlLib.cRuleUntil) { continue; } // - From: timeOp === ctrlLib.cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
                     // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
