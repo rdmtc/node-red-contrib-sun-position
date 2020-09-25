@@ -10,7 +10,9 @@
             "blank": "\"\"",
             "nothing": "nichts",
             "checkall" : "Alle Regeln überprüfen",
-            "stopfirst" : "Nach erster Übereinstimmung stoppen (if)"
+            "stopfirst" : "Nach erster Übereinstimmung stoppen (if)",
+            "nextOccurrence": "next occurrence",
+            "on": "nur"
         },
         "types": {
             "unlimited": "keine Limitierung",
