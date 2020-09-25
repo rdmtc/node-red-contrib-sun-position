@@ -847,30 +847,6 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
 
     if (typeof dt === 'object') {
         dt = String(dt);
-        /*
-        if (Object.prototype.hasOwnProperty.call(dt, 'now')) {
-            dt = dt.now;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'date')) {
-            dt = dt.date;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'time')) {
-            dt = dt.time;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'ts')) {
-            dt = dt.ts;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'lc')) {
-            dt = dt.lc;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'value')) {
-            dt = dt.lc;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'timeStamp')) {
-            dt = dt.timeStamp;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'created')) {
-            dt = dt.created;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'changed')) {
-            dt = dt.changed;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'payload')) {
-            dt = dt.payload;
-        } else {
-            dt = String(dt);
-        } */
     }
 
     if (!isNaN(dt)) {
