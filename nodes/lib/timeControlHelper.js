@@ -7,27 +7,6 @@ const path = require('path');
 const util = require('util');
 const hlp = require( path.resolve( __dirname, './dateTimeHelper.js') );
 
-const cRuleNoTime = -1;
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-const cRuleNone = 0;
-const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cRuleLogOperatorAnd = 2;
-const cRuleLogOperatorOr = 1;
-const cautoTriggerTypes = Object.freeze({
-    default: 0,
-    ruleCurrentEnd: 1,  // current rule end
-    ruleNext: 2, // next rule
-    sunNotOnHorizon: 3,
-    sunNotVisible: 4,
-    sunBeforeInWindow: 5,
-    sunInWindowSmoothTime: 6,
-    sunInWindow: 7,
-});
-
-
 module.exports = {
     evalTempData,
     posOverwriteReset,
@@ -37,28 +16,18 @@ module.exports = {
     prepareRules,
     getRuleTimeData,
     validPosition,
-    initializeCtrl,
-
-    angleNorm,
-
-    getSunPosition,
-    posPrcToAbs,
-    getInversePos,
-    getRealLevel,
-    posRound,
-
-    cRuleNoTime,
-    cRuleUntil,
-    cRuleFrom,
-    cRuleAbsolute,
-    cRuleNone,
-    cRuleMinOversteer,
-    cRuleMaxOversteer,
-    cRuleLogOperatorAnd,
-    cRuleLogOperatorOr,
-    cautoTriggerTypes
+    initializeCtrl
 };
 
+const cRuleNoTime = -1;
+const cRuleUntil = 0;
+const cRuleFrom = 1;
+const cRuleAbsolute = 0;
+const cRuleNone = 0;
+const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
+const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
+const cRuleLogOperatorAnd = 2;
+const cRuleLogOperatorOr = 1;
 let RED = null;
 
 /**
@@ -89,113 +58,6 @@ function evalTempData(node, type, value, data, tempData) {
     tempData[name] = data;
     return data;
 }
-
-/**
- * get the absolute level from percentage level
- * @param {*} node the node settings
- * @param {*} percentPos the level in percentage (0-1)
- */
-function posPrcToAbs(node, levelPercent) {
-    return posRound(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
-}
-/**
- * get the percentage level from absolute level  (0-1)
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the level percentage
- */
-function posAbsToPrc_(node, levelAbsolute) {
-    return (levelAbsolute - node.nodeData.levelBottom) / (node.nodeData.levelTop - node.nodeData.levelBottom);
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the inverse level
- */
-function getInversePos(node, level) {
-    return posPrcToAbs(node, 1 - posAbsToPrc_(node, level));
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @return {number} get the current level
- */
-function getRealLevel(node) {
-    if (node.levelReverse) {
-        return isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
-    }
-    return isNaN(node.level.current) ? node.previousData.level : node.level.current;
-}
-
-/**
- * round a level to the next increment
- * @param {*} node node data
- * @param {number} pos level
- * @return {number} rounded level number
- */
-function posRound(node, pos) {
-    // node.debug(`levelPrcToAbs_ ${pos} - increment is ${node.nodeData.increment}`);
-    // pos = Math.ceil(pos / node.nodeData.increment) * node.nodeData.increment;
-    // pos = Math.floor(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Math.round(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Number(pos.toFixed(hlp.countDecimals(node.nodeData.increment)));
-    if (pos > node.nodeData.levelTop) {
-        pos = node.nodeData.levelTop;
-    }
-    if (pos < node.nodeData.levelBottom) {
-        pos = node.nodeData.levelBottom;
-    }
-    // node.debug(`levelPrcToAbs_ result ${pos}`);
-    return pos;
-}
-
-/**
- * normalizes an angle
- * @param {number} angle to normalize
- */
-function angleNorm(angle) {
-    while (angle < 0) {
-        angle += 360;
-    }
-    while (angle > 360) {
-        angle -= 360;
-    }
-    return angle;
-}
-/******************************************************************************************/
-/**
- * calculates the current sun level
- * @param {*} node node data
- * @param {*} dNow the current timestamp
- */
-function getSunPosition(node, dNow) {
-    const sunPosition = node.positionConfig.getSunCalc(dNow, false, false);
-    // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
-    sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
-        (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
-    // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
-    if (node.autoTrigger) {
-        if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
-            node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.sunNotOnHorizon; // Sun not on horizon
-        } else if (sunPosition.azimuthDegrees <= 72) {
-            node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.sunNotVisible; // Sun not visible
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthStart) {
-            node.autoTrigger.time = Math.min(node.autoTrigger.time, hlp.cautoTriggerTimeBeforeSun);
-            node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.sunBeforeInWindow; // sun before in window
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd) {
-            if (node.smoothTime > 0) {
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, node.smoothTime);
-                node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.sunInWindowSmoothTime; // sun in window (smooth time set)
-            } else {
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, (ctrlLib.cAutoTriggerTimeSun));
-                node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.sunInWindow; // sun in window
-            }
-        }
-    }
-    return sunPosition;
-}
-
 /******************************************************************************************/
 /**
 * clears expire object properties

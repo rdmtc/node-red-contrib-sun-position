@@ -775,6 +775,17 @@ module.exports = function (RED) {
         */
 
         /**
+         * get an formated date prepared for output
+         * @param {Date} dateValue Date value
+         * @param {outPropType} data - a Data object
+         */
+        formatOutDate(_srcNode, msg, dateValue, data) {
+            const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
+            const result = hlp.normalizeDate(dateValue, offsetX, data.multiplier, data);
+            return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+        }
+
+        /**
          * get the time Data prepared for output
          * @param {*} _srcNode - source node for logging
          * @param {*} [msg] - the message object
@@ -795,9 +806,7 @@ module.exports = function (RED) {
                 }
                 return Date.now();
             } else if (data.type === 'dateSpecific') {
-                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                result = hlp.addOffset(dNow, offsetX, data.multiplier);
-                return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+                return formatOutDate(_srcNode, msg, dNow, data);
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
@@ -822,15 +831,11 @@ module.exports = function (RED) {
                 return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
-                const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                result = hlp.normalizeDate(result, offsetX, data.multiplier, data);
-                return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+                return formatOutDate(_srcNode, msg, result, data);
             } else if (data.type === 'dayOfMonth') {
                 result = hlp.getSpecialDayOfMonth(dNow.getFullYear(),dNow.getMonth(), data.value);
                 if (result !== null && typeof result !== 'undefined') {
-                    const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
-                    result = hlp.normalizeDate(result, offsetX, data.multiplier, data);
-                    return hlp.getFormattedDateOut(result, data.format, (this.tzOffset === 0), this.tzOffset);
+                    return formatOutDate(_srcNode, msg, result, data);
                 }
                 return null;
             }

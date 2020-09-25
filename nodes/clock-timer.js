@@ -7,14 +7,16 @@ const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
 
-// const cRuleUntil = 0;
-// const cRuleFrom = 1;
+const cRuleUntil = 0;
+const cRuleFrom = 1;
 // const cRuleAbsolute = 0;
 
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
+    /**
+
 
     /**
      * check if a manual overwrite should be set
@@ -196,11 +198,11 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (rule.timeOp === ctrlLib.cRuleFrom) { continue; }
+            // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (rule.timeOp === cRuleFrom) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
             let res = null;
-            if (rule.timeOp === ctrlLib.cRuleFrom) {
+            if (rule.timeOp === cRuleFrom) {
                 res = fktCheck(rule, r => (r <= nowNr));
             } else {
                 res = fktCheck(rule, r => (r >= nowNr));
@@ -209,18 +211,18 @@ module.exports = function (RED) {
                 // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 ruleSel = res;
                 ruleindex = i;
-                if (rule.timeOp !== ctrlLib.cRuleFrom) {
+                if (rule.timeOp !== cRuleFrom) {
                     break;
                 }
             }
         }
 
-        if (!ruleSel || (ruleSel.timeOp === ctrlLib.cRuleFrom) ) {
+        if (!ruleSel || (ruleSel.timeOp === cRuleFrom) ) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== ctrlLib.cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                if (rule.timeOp === ctrlLib.cRuleUntil) { continue; } // - From: timeOp === ctrlLib.cRuleFrom
+                // node.debug('rule ' + rule.timeOp + ' - ' + (rule.timeOp !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                if (rule.timeOp === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = fktCheck(rule, r => (r <= nowNr));
                 if (res) {
                     // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
@@ -239,7 +241,7 @@ module.exports = function (RED) {
                 node.debug('autoTrigger set to rule ' + rule.pos);
                 const diff = num - nowNr;
                 node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.ruleNext; // next rule
+                node.autoTrigger.type = 2; // next rule
             }
         };
         if (ruleSel) {
@@ -248,7 +250,7 @@ module.exports = function (RED) {
                     node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
                     const diff = ruleSel.timeData.ts - nowNr;
                     node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                    node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.ruleCurrentEnd; // current rule end
+                    node.autoTrigger.type = 1; // current rule end
                 } else {
                     for (let i = (ruleindex+1); i < node.rules.count; ++i) {
                         const rule = node.rules.data[i];
@@ -258,7 +260,7 @@ module.exports = function (RED) {
                         checkRuleForAT(rule);
                     }
                     // check first rule, maybe next day
-                    if ((node.autoTrigger.type !== ctrlLib.cAutoTriggerTypes.ruleNext) && (node.rules.firstTimeLimited < node.rules.count)) {
+                    if ((node.autoTrigger.type !== 2) && (node.rules.firstTimeLimited < node.rules.count)) {
                         checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
                     }
                 }
@@ -306,7 +308,7 @@ module.exports = function (RED) {
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
-            livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
+            livingRuleData.state= RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
             // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
@@ -359,6 +361,7 @@ module.exports = function (RED) {
             };
             node.autoTriggerObj = null;
         }
+
 
         node.nowarn = {};
         node.reason = {
@@ -489,39 +492,39 @@ module.exports = function (RED) {
                 const dNow = hlp.getNowTimeStamp(node, msg);
                 if (node.autoTrigger) {
                     node.autoTrigger.time = node.autoTrigger.defaultTime;
-                    node.autoTrigger.type = ctrlLib.cAutoTriggerTypes.default; // default time
+                    node.autoTrigger.type = 0; // default time
                 }
 
                 // check if the message contains any oversteering data
-                const nodeCtrl = {
+                const timeCtrl = {
                     autoTrigger : node.autoTrigger
                 };
-                let ruleId = -1;
+                let ruleId = -2;
 
                 // check for manual overwrite
                 let overwrite = checkPosOverwrite(node, msg, dNow);
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
-                    nodeCtrl.rule = checkRules(node, msg, dNow, tempData);
+                    timeCtrl.rule = checkRules(node, msg, dNow, tempData);
                     node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
-                    if (overwrite && nodeCtrl.rule.resetOverwrite && nodeCtrl.rule.id !== node.previousData.usedRule) {
+                    if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
 
-                    if (!overwrite || nodeCtrl.rule.importance > node.nodeData.overwrite.importance) {
-                        ruleId = nodeCtrl.rule.id;
-                        node.payload.current = node.positionConfig.getOutDataProp(node, msg, nodeCtrl.rule.payloadData, dNow);
-                        node.payload.topic = nodeCtrl.rule.topic;
-                        node.reason.code = nodeCtrl.rule.code;
-                        node.reason.state = nodeCtrl.rule.state;
-                        node.reason.description = nodeCtrl.rule.description;
+                    if (!overwrite || timeCtrl.rule.importance > node.nodeData.overwrite.importance) {
+                        ruleId = timeCtrl.rule.id;
+                        node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, dNow);
+                        node.payload.topic = timeCtrl.rule.topic;
+                        node.reason.code = timeCtrl.rule.code;
+                        node.reason.state = timeCtrl.rule.state;
+                        node.reason.description = timeCtrl.rule.description;
                     }
                 }
 
                 // node.debug(`result manual=${node.nodeData.overwrite.active} reasoncode=${node.reason.code} description=${node.reason.description}`);
-                nodeCtrl.reason = node.reason;
-                nodeCtrl.timeClock = node.nodeData;
+                timeCtrl.reason = node.reason;
+                timeCtrl.timeClock = node.nodeData;
 
                 if (node.startDelayTimeOut) {
                     node.reason.code = NaN;
@@ -553,14 +556,14 @@ module.exports = function (RED) {
                     ((typeof node.previousData.payloadValue  !== 'undefined') && (node.previousData.payloadValue !== node.payload.current))) ) {
                     msg.payload = node.payload.current;
                     msg.topic =  topic;
-                    msg.timeCtrl = nodeCtrl;
+                    msg.timeCtrl = timeCtrl;
                     if (node.outputs > 1) {
-                        send([msg, { topic, payload: nodeCtrl, payloadOut: node.payload.current }]);
+                        send([msg, { topic, payload: timeCtrl, payloadOut: node.payload.current }]);
                     } else {
                         send(msg, null);
                     }
                 } else if (node.outputs > 1) {
-                    send([null, { topic, payload: nodeCtrl }]);
+                    send([null, { topic, payload: timeCtrl }]);
                 }
                 node.previousData.usedRule = ruleId;
                 node.context().set('cacheData', tempData, node.storeName);
