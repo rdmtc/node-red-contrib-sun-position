@@ -53,7 +53,8 @@
             "timeLimits":"select days and or month wherefore it should be valid"
         },
         "tips": {
-            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days."
+            "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days.",
+            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/within-time\">Documentation and examples</a>"
         },
        "errors": {
             "error-start-time": "Error get start time: __message__",

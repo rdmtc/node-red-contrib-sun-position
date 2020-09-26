@@ -45,7 +45,8 @@
         },
         "tips": {
             "addTimes": "Alternative time: If the specified property has the value 'true', the trigger is triggered at the specified alternative time instead of the normal specified time. This is useful for triggering a flow at a different time on public holidays or other special days.",
-            "recalc": "If the time stamp is defined by a flow or global context, changes to the values do not lead to an immediate change in the planned trigger time, but only when a recalculation is carried out. This can be used to set a regular recalculation."
+            "recalc": "If the time stamp is defined by a flow or global context, changes to the values do not lead to an immediate change in the planned trigger time, but only when a recalculation is carried out. This can be used to set a regular recalculation.",
+            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/time-inject\">Documentation and examples</a>"
         },
         "message": {
             "onceDelay": "delay __seconds__s"

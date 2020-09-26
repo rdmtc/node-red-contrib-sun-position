@@ -26,6 +26,9 @@
         },
         "timeFormat": {
             "default": ""
-        }
+        },
+        "tips": {
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/time-comp\">Documentation and examples</a>"
+		}
     }
 }

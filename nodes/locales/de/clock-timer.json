@@ -91,7 +91,7 @@
 			"overwrite": "manuelles Überschreiben der Rollladenposition"
 		},
 		"tips": {
-			"timerControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/clock_timer.md\">Dokumentation und Beispiele</a>"
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/clock-timer\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Wichtigkeit __importance__), kein Verfall",

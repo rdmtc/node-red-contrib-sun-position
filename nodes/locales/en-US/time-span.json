@@ -27,6 +27,9 @@
             "resultTSFormat": "output format",
             "resultFormat": "output format",
             "resultOffset": "Offset"
-        }
+        },
+        "tips": {
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/time-span\">Documentation and examples</a>"
+		}
     }
 }

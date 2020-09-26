@@ -160,7 +160,7 @@
 			"0": "closed (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Documentation and examples</a>"
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/blind-control\">Documentation and examples</a>"
 		},
 		"errors": {
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
