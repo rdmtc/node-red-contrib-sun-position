@@ -63,7 +63,7 @@ The documentation of the nodes is moved to the [wiki](https://github.com/rdmtc/n
 
 - [base functions for all (or the most of the nodes)](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/Base-Functions)
 - [Implemented Nodes](https://github.com/rdmtc/node-red-contrib-sun-position/wiki)
-  - [sun-position](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/moon-position)
+  - [sun-position](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/sun-position)
   - [moon-position](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/moon-position)
   - [time-inject](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/time-inject)
   - [within-time](https://github.com/rdmtc/node-red-contrib-sun-position/wiki/within-time)
