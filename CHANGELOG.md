@@ -1,5 +1,23 @@
 # node-red-contrib-sun-position
 
+#### 1.2.0:  rework
+
+- general
+  - changed several links to documentation #151
+  - replaced all remaining png type graphics with svg
+
+- blind-control + clock-time
+  - Standardization and consolidation of the same and similar functions #186
+    - minor bugs fixed with it
+
+- time inject
+  - fixed bug, that interval between times does not start when load node and time in in the interval #189
+  - smaller changes which leads into more options for outgoing data
+
+- time-comp
+  - redesign of the output, allows similar to the inject node set multiple properties
+    - so the node becomes like a kind of a change node
+
 #### 1.1.8:  small enhancement
 
 - time inject
@@ -8,7 +26,6 @@
 
 - blind-control + clock-time
   - allow to change general node settings with incoming message #184
-
 
 #### 1.1.7:  BugFix
 

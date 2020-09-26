@@ -5,7 +5,7 @@
         RED.nodes.registerType('time-comp', {
             category: 'time and astro',
             color: '#FDF0C2',
-            icon: 'time-comp-black.png',
+            icon: 'time-comp-black.svg',
             inputs: 1,
             outputs: 1,
             defaults: {
@@ -147,7 +147,7 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global getSelectFields getTypes appendOptions setupTInput initCombobox autocomplete addLabel setMultiselect multiselect getBackendData bdDateToTime */
+                    /* global getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox getBackendData bdDateToTime getCheckboxesStr setMultiselect multiselect */
                     const types = getTypes(node);
                     const selFields = getSelectFields();
                     const operatorTypesShort = [
@@ -643,7 +643,7 @@
 
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
-                            $divNext = $('<div/>').appendTo($row4);
+                            const $divNext = $('<div/>').appendTo($row4);
                             addLabel($divNext, 'node-input-prop-result-Next', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
                             const $cbNext = $('<input/>', {
                                 class: 'node-input-prop-result-Next',
@@ -658,7 +658,7 @@
                                 $cbNext.prop('checked', false);
                             }
                             // row4 - 2 - Day selection
-                            $divMnDays = $('<div/>', {
+                            const $divMnDays = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
@@ -695,7 +695,7 @@
                                 }
                             }
                             // row4 - 3 - Special Limit selection
-                            $divSpecLimit = $('<div/>', {
+                            const $divSpecLimit = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
@@ -734,7 +734,7 @@
                             $cbOnlyOddDays.prop('checked', (prop.onlyOddDays === 'true' || prop.onlyOddDays === true));
 
                             // row4 - 3 - Month selection
-                            $divMnMonth = $('<div/>', {
+                            const $divMnMonth = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);

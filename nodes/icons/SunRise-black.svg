@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="SunRise-black.svg"
+   id="svg7"
+   version="1.1"
+   viewBox="0 0 40 40"
+   height="40pt"
+   width="40pt">
+  <metadata
+     id="metadata13">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs11" />
+  <sodipodi:namedview
+     inkscape:current-layer="svg7"
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="72"
+     inkscape:cy="26.666667"
+     inkscape:cx="26.666667"
+     inkscape:zoom="18.9"
+     showgrid="false"
+     id="namedview9"
+     inkscape:window-height="1177"
+     inkscape:window-width="1840"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <g
+     style="fill:#000000"
+     id="surface1">
+    <path
+       id="path2"
+       d="M 15 10 L 17.5 10 L 17.5 15 L 22.5 15 L 22.5 10 L 25 10 L 20 2.5 Z M 15 10 "
+       style="stroke:none;fill-rule:nonzero;fill:#000000;fill-opacity:1" />
+    <path
+       id="path4"
+       d="M 31.050781 29.550781 L 33 25 L 28 24.425781 L 27.5 19.5 L 22.949219 21.449219 L 20 17.5 L 17.050781 21.449219 L 12.5 19.5 L 11.925781 24.5 L 7 25 L 8.949219 29.550781 L 5 32.5 L 0 32.5 L 0 35 L 40 35 L 40 32.5 L 35 32.5 Z M 10 32.5 C 10.183594 27.0625 14.542969 22.695312 19.984375 22.5 C 25.425781 22.675781 29.804688 27.039062 30 32.484375 Z M 10 32.5 "
+       style="stroke:none;fill-rule:nonzero;fill:#000000;fill-opacity:1" />
+  </g>
+</svg>

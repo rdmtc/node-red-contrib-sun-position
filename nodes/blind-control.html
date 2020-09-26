@@ -30,7 +30,7 @@
         RED.nodes.registerType('blind-control', {
             category: 'time and astro',
             color: '#FFCC66',
-            icon: 'blind-white.png',
+            icon: 'blind-white.svg',
             inputs: 1,
             outputs: 1,
             defaults: {
@@ -418,7 +418,7 @@
                     types.LevelEntered = {
                         value: 'num',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),
-                        icon: 'red/images/typedInput/09.png',
+                        icon: 'red/images/typedInput/09.svg',
                         validate(v) {
                             if (!RED.validators.number()(v) || (v === '')) {
                                 return false;
@@ -468,7 +468,7 @@
                     types.LevelND= {
                         value: 'levelND',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.levelND'),
-                        icon: 'icons/node-red-contrib-sun-position/inputTypeNone2.png',
+                        icon: 'icons/node-red-contrib-sun-position/inputTypeNone2.svg',
                         hasValue: false
                     };
                     /**

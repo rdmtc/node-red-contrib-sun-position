@@ -6,7 +6,7 @@
         RED.nodes.registerType('time-inject', {
             category: 'common',
             color: '#a6bbcf',
-            icon: 'injectSun-white.png',
+            icon: 'injectSun-white.svg',
             inputs: 0,
             outputs: 1,
             defaults: {
@@ -495,7 +495,7 @@
                     return result + this.name;
                 }
                 if (this.nameInt) {
-                    return result + this.nameInt.replace('${lblInject}', this._('time-inject.label.time-inject'));;
+                    return result + this.nameInt.replace('$!{lblInject}!', this._('time-inject.label.time-inject'));
                 }
                 return result + this._('time-inject.label.time-inject');
             },
@@ -512,7 +512,7 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr getCheckboxesStr */
+                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr */
                     const types = getTypes(node);
                     const selFields = getSelectFields();
                     // #region initialize
@@ -585,7 +585,7 @@
                                     f    : 0,
                                     next : true,
                                     days : '*',
-                                     months: '*',
+                                    months: '*',
                                     onlyEvenDays: false,
                                     onlyOddDays: false
                                 };
@@ -719,7 +719,7 @@
 
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
-                            $divNext = $('<div/>').appendTo($row4);
+                            const $divNext = $('<div/>').appendTo($row4);
                             addLabel($divNext, 'node-input-prop-property-Next', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
                             const $cbNext = $('<input/>', {
                                 class: 'node-input-prop-property-Next',
@@ -734,7 +734,7 @@
                                 $cbNext.prop('checked', false);
                             }
                             // row4 - 2 - Day selection
-                            $divMnDays = $('<div/>', {
+                            const $divMnDays = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
@@ -771,7 +771,7 @@
                                 }
                             }
                             // row4 - 3 - Special Limit selection
-                            $divSpecLimit = $('<div/>', {
+                            const $divSpecLimit = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
@@ -810,7 +810,7 @@
                             $cbOnlyOddDays.prop('checked', (prop.onlyOddDays === 'true' || prop.onlyOddDays === true));
 
                             // row4 - 3 - Month selection
-                            $divMnMonth = $('<div/>', {
+                            const $divMnMonth = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
@@ -1549,7 +1549,7 @@
                         days : getCheckboxesStr(prop.find('#node-input-prop-property-Days input[type=checkbox]:checked'), 7),
                         months: getCheckboxesStr(prop.find('#node-input-prop-property-months input[type=checkbox]:checked'), 12),
                         onlyOddDays: prop.find('.node-input-prop-property-onlyOddDays').is(':checked'),
-                        onlyEvenDays: prop.find('.node-input-prop-property-OnlyEvenDays').is(':checked'),
+                        onlyEvenDays: prop.find('.node-input-prop-property-OnlyEvenDays').is(':checked')
                     };
                     p.f = (p.fS !== 99 ? p.fS : p.fI);
                     if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {
@@ -1575,14 +1575,14 @@
                 });
                 let pos = 0;
                 while (payloadLbl === '' && node.props.length > pos) {
-                    let p = node.props[pos];
+                    const p = node.props[pos];
                     if (p.pt !== 'msgTopic') {
                         payloadLbl = RED.nodes.getType('position-config').getValueLabel(this, p.pt, p.p, null) + '=' + getPropTLbl(p);
                     }
                     pos++;
                 }
                 if (payloadLbl === '') {
-                    payloadLbl = '${lblInject}';
+                    payloadLbl = '$!{lblInject}!';
                 }
 
                 this.nameInt = '';
@@ -2037,6 +2037,9 @@
         <span data-i18n="time-inject.label.hours"></span>
     </div>
     <div class="form-tips time-inject-recalc is-initial-hidden" data-i18n="[html]time-inject.tips.recalc"></div>
+    <div class="form-tips is-to-show-initially">
+        <span data-i18n="[html]time-inject.tips.documentation" style="word-wrap:break-word;"></span>
+    </div>
 </script>
 <style>
     hr {
