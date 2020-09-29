@@ -30,7 +30,9 @@
             "validForMonths":"gültig für Monate",
 			"specialDays":"spezielle Tage",
 			"onlyEvenDays":"nur gerade",
-            "onlyOddDays":"nur ungerade"
+            "onlyOddDays":"nur ungerade",
+            "timeRestrictions":"Zeit begrenzen",
+            "internally":"👇 ist hier definiert"
         },
         "placeholder": {
             "propertyStart": "Eigenschaft for alternative Startzeit",
@@ -45,7 +47,8 @@
             "startOffsetAlt": "0",
             "endTimeAlt": "alternative Endzeit, Bsp.: 18:15",
             "endOffsetAlt": "0",
-            "timeLimits":"Wählen Sie Tage und / oder Monate aus, für welche es gültig sein soll"
+            "timeLimits":"Wählen Sie Tage und / oder Monate aus, für welche es gültig sein soll",
+            "timeRestrictions":"Objekt Pfad"
         },
         "tips": {
             "addTimes": "Hier können alternative Zeiten für Start / Ende definiert werden. Wenn die angegebene Eigenschaft \"true\" ist, werden die alternativen Start- und Endzeiten anstelle der normalen verwendet. Dies kann verwendet werden, um unterschiedliche Start- / Endzeiten für Feiertage oder andere spezielle Tage festzulegen."

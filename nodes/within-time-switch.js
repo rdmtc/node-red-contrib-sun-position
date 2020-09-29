@@ -90,10 +90,10 @@ module.exports = function (RED) {
      * calc the start and end times
      * @param {*} node - thje noide data
      * @param {*} msg - the messege object
-     * @param {*} config - the configuration
+     * @param {Date|null} dNow - the current time
      * @returns {object} containing start and end Dates
      */
-    function calcWithinTimes(node, msg, config, dNow) {
+    function calcWithinTimes(node, msg, dNow) {
         // node.debug('calcWithinTimes');
         const result = {
             start: {},
@@ -106,27 +106,76 @@ module.exports = function (RED) {
             warn: ''
         };
 
-        if (config.timeDays && !config.timeDays.includes(dNow.getDay())) {
-            node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(config.timeDays, Object.getOwnPropertyNames(config.timeDays)));
+        if (node.timeRestrictions.type !== 'none') {
+            try {
+                if (node.timeRestrictions.type === 'jsonata') {
+                    if (!node.timeRestrictions.expr) {
+                        node.timeRestrictions.expr = this.getJSONataExpression(node, node.timeRestrictions.value);
+                    }
+                    node.timeRestrictions.data = RED.util.evaluateJSONataExpression(node.timeRestrictions.expr, msg);
+                } else {
+                    node.timeRestrictions.data = RED.util.evaluateNodeProperty(node.timeRestrictions.value, node.timeRestrictions.type, node, msg);
+                }
+                if (typeof node.timeRestrictions.data === 'object') {
+                    // node.debug(util.inspect(node.timeRestrictions, Object.getOwnPropertyNames(node.timeRestrictions)));
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'days')) {
+                        node.timeDays = node.timeRestrictions.data.days;
+                    } else {
+                        delete node.timeDays;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'months')) {
+                        node.timeMonths = node.timeRestrictions.data.months;
+                    } else {
+                        delete node.timeMonths;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'startDate') && node.timeRestrictions.data.startDate !== '') {
+                        node.timeStartDate = node.timeRestrictions.data.startDate;
+                    } else {
+                        delete node.timeStartDate;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'endDate') && node.timeRestrictions.data.endDate !== '') {
+                        node.timeEndDate = node.timeRestrictions.data.endDate;
+                    } else {
+                        delete node.timeEndDate;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'onlyOddDays')) {
+                        node.timeOnlyOddDays = node.timeRestrictions.data.onlyOddDays;
+                    } else {
+                        delete node.timeOnlyOddDays;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(node.timeRestrictions.data,'onlyEvenDays')) {
+                        node.timeOnlyEvenDays = node.timeRestrictions.data.onlyEvenDays;
+                    } else {
+                        delete node.timeOnlyEvenDays;
+                    }
+                }
+            } catch (err) {
+                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.error(err);
+            }
+        }
+
+        if ((typeof node.timeDays !== 'undefined') && !node.timeDays.includes(dNow.getDay())) {
+            node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(node.timeDays, Object.getOwnPropertyNames(node.timeDays)));
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
-        if (config.timeMonths && !config.timeMonths.includes(dNow.getMonth())) {
-            node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(config.timeMonths, Object.getOwnPropertyNames(config.timeMonths)));
+        if ((typeof node.timeMonths !== 'undefined') && !node.timeMonths.includes(dNow.getMonth())) {
+            node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(node.timeMonths, Object.getOwnPropertyNames(node.timeMonths)));
             result.warn = RED._('within-time-switch.errors.invalid-month');
             return result;
         }
-        if (config.timedatestart || config.timedateend) {
+        if ((typeof node.timeStartDate !== 'undefined') || (typeof node.timeEndDate !== 'undefined')) {
             let dStart,dEnd;
-            if (config.timedatestart) {
-                dStart = new Date(config.timedatestart);
+            if (typeof node.timeStartDate !== 'undefined') {
+                dStart = new Date(node.timeStartDate);
                 dStart.setFullYear(dNow.getFullYear());
                 dStart.setHours(0, 0, 0, 1);
             } else {
                 dStart = new Date(dNow.getFullYear(), 0, 0, 0, 0, 0, 1);
             }
-            if (config.timedateend) {
-                dEnd = new Date(config.timedateend);
+            if (typeof node.timeEndDate !== 'undefined') {
+                dEnd = new Date(node.timeEndDate);
                 dEnd.setFullYear(dNow.getFullYear());
                 dEnd.setHours(23, 59, 59, 999);
             } else {
@@ -169,6 +218,16 @@ module.exports = function (RED) {
             }
         }
 
+        if (result.altStartTime) {
+            // node.debug(`using alternate start time node.timeStart=${ util.inspect(node.timeStart, Object.getOwnPropertyNames(node.timeStart))}, config.timeStartAlt=${ util.inspect(node.timeStartAlt, Object.getOwnPropertyNames(node.timeStartAlt))}`);
+            result.start = node.positionConfig.getTimeProp(node, msg, node.timeStartAlt);
+
+            result.startSuffix = '⎇ ';
+        } else if (msg || (node.timeStart.type !== 'msg')) {
+            // node.debug(`using alternate start time node.timeStart=${ util.inspect(node.timeStart, Object.getOwnPropertyNames(node.timeStart))}`);
+            result.start = node.positionConfig.getTimeProp(node, msg, node.timeStart);
+        }
+
         if (result.altEndTime) {
             // node.debug('alternate end times enabled ' + node.propertyEnd.type + '.' + node.propertyEnd.value);
             try {
@@ -180,47 +239,13 @@ module.exports = function (RED) {
             }
         }
 
-        if (result.altStartTime && config.startTimeAltType !== 'none') {
-            // node.debug(`using alternate start time  config.startTimeType=${ config.startTimeType},config.startTime=${ config.startTime}, result.altStartTime=${ result.altStartTime}, config.startTimeAltType=${ config.startTimeAltType}`);
-            result.start = node.positionConfig.getTimeProp(node, msg, {
-                type: config.startTimeAltType,
-                value : config.startTimeAlt,
-                offsetType : config.startOffsetAltType,
-                offset : config.startOffsetAlt,
-                multiplier : config.startOffsetAltMultiplier
-            });
-
-            result.startSuffix = '⎇ ';
-        } else if (msg || (node.startTimeType !== 'msg')) {
-            // node.debug(`using standard start time  config.startTimeType=${ config.startTimeType},config.startTime=${ config.startTime}, result.altStartTime=${ result.altStartTime}, config.startTimeAltType=${ config.startTimeAltType}`);
-            result.start = node.positionConfig.getTimeProp(node, msg, {
-                type: config.startTimeType,
-                value : config.startTime,
-                offsetType : config.startOffsetType,
-                offset : config.startOffset,
-                multiplier : config.startOffsetMultiplier
-            });
-        }
-
-        if (result.altEndTime && config.endTimeAltType !== 'none') {
-            // node.debug(`using alternate end time  config.endTimeType=${ config.endTimeType},config.endTime=${ config.endTime}, result.altEndTime=${ result.altEndTime}, config.endTimeAltType=${ config.endTimeAltType}`);
-            result.end = node.positionConfig.getTimeProp(node, msg, {
-                type: config.endTimeAltType,
-                value : config.endTimeAlt,
-                offsetType : config.endOffsetAltType,
-                offset : config.endOffsetAlt,
-                multiplier : config.endOffsetAltMultiplier
-            });
+        if (result.altEndTime) {
+            // node.debug(`using alternate start time node.timeEnd=${ util.inspect(node.timeEnd, Object.getOwnPropertyNames(node.timeEnd))}, config.timeEndAlt=${ util.inspect(node.timeEndAlt, Object.getOwnPropertyNames(node.timeEndAlt))}`);
+            result.end = node.positionConfig.getTimeProp(node, msg, node.timeEndAlt);
             result.endSuffix = ' ⎇';
-        } else if (msg || (node.endTimeType !== 'msg')) {
-            // node.debug(`using standard end time  config.endTimeType=${ config.endTimeType},config.endTime=${ config.endTime}, result.altEndTime=${ result.altEndTime}, config.endTimeAltType=${ config.endTimeAltType}`);
-            result.end = node.positionConfig.getTimeProp(node, msg, {
-                type: config.endTimeType,
-                value : config.endTime,
-                offsetType : config.endOffsetType,
-                offset : config.endOffset,
-                multiplier : config.endOffsetMultiplier
-            });
+        } else if (msg || (node.timeEnd.type !== 'msg')) {
+            // node.debug(`using alternate start time node.timeEnd=${ util.inspect(node.timeEnd, Object.getOwnPropertyNames(node.timeEnd))}`);
+            result.end = node.positionConfig.getTimeProp(node, msg, node.timeEnd);
         }
 
         // node.debug(util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
@@ -236,6 +261,30 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+
+        this.timeStart = {
+            type: config.startTimeType,
+            value : config.startTime,
+            offsetType : config.startOffsetType,
+            offset : config.startOffset,
+            multiplier : config.startOffsetMultiplier
+        };
+
+        this.timeEnd = {
+            type: config.endTimeType,
+            value : config.endTime,
+            offsetType : config.endOffsetType,
+            offset : config.endOffset,
+            multiplier : config.endOffsetMultiplier
+        };
+
+        this.timeStartAlt = {
+            type: config.startTimeAltType || 'none',
+            value : config.startTimeAlt,
+            offsetType : config.startOffsetAltType,
+            offset : config.startOffsetAlt,
+            multiplier : config.startOffsetAltMultiplier
+        };
 
         this.propertyStartOperator = config.propertyStartCompare || 'true';
         this.propertyStart = {
@@ -254,6 +303,18 @@ module.exports = function (RED) {
                 this.propertyStart.expr = null;
             }
         }
+        if (this.propertyStart.type === 'none' || this.timeStartAlt.type === 'none') {
+            this.propertyStart.type = 'none';
+            delete this.timeStartAlt;
+        }
+
+        this.timeEndAlt = {
+            type: config.endTimeAltType || 'none',
+            value : config.endTimeAlt,
+            offsetType : config.endOffsetAltType,
+            offset : config.endOffsetAlt,
+            multiplier : config.endOffsetAltMultiplier
+        };
 
         this.propertyEndOperator = config.propertyEndCompare || 'true';
         this.propertyEnd = {
@@ -272,37 +333,63 @@ module.exports = function (RED) {
                 this.propertyEnd.expr = null;
             }
         }
-
-        this.timeOnlyEvenDays = config.timeOnlyEvenDays;
-        this.timeOnlyOddDays = config.timeOnlyOddDays;
-
-        if (config.timeDays === '') {
-            throw new Error('No valid days given! Please check settings!');
-        } else if (!config.timeDays || config.timeDays === '*') {
-            config.timeDays = null;
-        } else {
-            config.timeDays = config.timeDays.split(',');
-            config.timeDays = config.timeDays.map( e => parseInt(e) );
+        if (this.propertyEnd.type === 'none' || this.timeEndAlt.type === 'none') {
+            this.propertyEnd.type = 'none';
+            delete this.timeEndAlt;
         }
 
-        if (config.timeMonths === '') {
-            throw new Error('No valid month given! Please check settings!');
-        } else if (!config.timeMonths || config.timeMonths === '*') {
-            config.timeMonths = null;
-        } else {
-            config.timeMonths = config.timeMonths.split(',');
-            config.timeMonths = config.timeMonths.map( e => parseInt(e) );
+        this.timeRestrictions = {
+            type: config.timeRestrictionsType || 'none',
+            value : config.timeRestrictions
+        };
+        if (this.timeRestrictions.type === 'jsonata') {
+            try {
+                this.timeRestrictions.expr = this.positionConfig.getJSONataExpression(this, this.timeRestrictions.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                this.timeRestrictions.expr = null;
+            }
         }
 
-        if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
-            this.timeOnlyEvenDays = false;
-            this.timeOnlyOddDays = false;
+        if (this.timeRestrictions.type !== 'none') {
+            this.timeOnlyEvenDays = config.timeOnlyEvenDays;
+            this.timeOnlyOddDays = config.timeOnlyOddDays;
+            if (typeof config.timedatestart !== undefined && config.timedatestart !== '') {
+                this.timeStartDate = new Date(config.timedatestart);
+            }
+            if (typeof config.timedateend !== undefined && config.timedateend !== '') {
+                this.timeEndDate = new Date(config.timedateend);
+            }
+
+            if (config.timeDays === '') {
+                throw new Error('No valid days given! Please check settings!');
+            } else if (!config.timeDays || config.timeDays === '*') {
+                // config.timeDays = null;
+                delete this.timeDays;
+            } else {
+                this.timeDays = config.timeDays.split(',');
+                this.timeDays = config.timeDays.map( e => parseInt(e) );
+            }
+
+            if (config.timeMonths === '') {
+                throw new Error('No valid month given! Please check settings!');
+            } else if (!config.timeMonths || config.timeMonths === '*') {
+                // config.timeMonths = null;
+                delete this.timeMonths;
+            } else {
+                this.timeMonths = config.timeMonths.split(',');
+                this.timeMonths = config.timeMonths.map( e => parseInt(e) );
+            }
+
+            if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
+                this.timeOnlyEvenDays = false;
+                this.timeOnlyOddDays = false;
+            }
         }
 
         this.timeOutObj = null;
         this.lastMsgObj = null;
         const node = this;
-
 
         this.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
@@ -318,9 +405,8 @@ module.exports = function (RED) {
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
-                // this.debug('config ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
                 const now = getIntDate(config.tsCompare, msg, node);
-                const result = calcWithinTimes(this, msg, config, now);
+                const result = calcWithinTimes(this, msg, now);
 
                 if (result.valid && result.start.value && result.end.value) {
                     msg.withinTimeStart = result.start;
@@ -328,7 +414,7 @@ module.exports = function (RED) {
                     msg.withinTimeStart.id = hlp.getTimeNumberUTC(result.start.value);
                     msg.withinTimeEnd.id = hlp.getTimeNumberUTC(result.end.value);
                     const cmpNow = hlp.getTimeNumberUTC(now);
-                    setstate(this, result);
+                    setstate(node, result);
                     if (msg.withinTimeStart.id < msg.withinTimeEnd.id) {
                         if (cmpNow >= msg.withinTimeStart.id && cmpNow < msg.withinTimeEnd.id) {
                             msg.withinTime = true;

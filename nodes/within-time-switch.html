@@ -75,6 +75,19 @@
                     required: true,
                     validate: RED.validators.number()
                 },
+                timeRestrictions: {
+                    value: 0,
+                    validate(v) {
+                        return (
+                            (typeof v === 'undefined') ||
+                            (typeof this.timeRestrictionsType === 'undefined') ||
+                            RED.validators.typedInput('timeRestrictionsType')(v)
+                        );
+                    }
+                },
+                timeRestrictionsType: {
+                    value: 'none'
+                },
                 timeDays: {
                     value: '*',
                     required: true
@@ -387,6 +400,28 @@
                         }
                     });
 
+                    const $timeRestrictions = setupTInput(node, {
+                        typeProp: 'timeRestrictionsType',
+                        valueProp: 'timeRestrictions',
+                        width: 'calc(100% - 255px)',
+                        defaultType: node.timeRestrictionsType || types.Undefined.value,
+                        defaultValue: node.timeRestrictions || '',
+                        types: [
+                            {
+                                value: types.Undefined.value,
+                                label: node._('within-time-switch.label.internally'),
+                                hasValue: false
+                            }, 'msg', 'flow', 'global', 'env', 'json', 'jsonata'],
+                        onChange(_type, _value) {
+                            const type = $timeRestrictions.typedInput('type');
+                            if (type === types.Undefined.value) {
+                                $('.node-input-row-timeLimits').show();
+                            } else {
+                                $('.node-input-row-timeLimits').hide();
+                            }
+                        }
+                    });
+
                     const getDateShort = value => {
                         if (value) {
                             const val = value.split('-');
@@ -431,6 +466,7 @@
                     }
                     $timeLimitDateStart.change();
                     $timeLimitDateEnd.change();
+                    $timeRestrictions.change();
                     // #endregion timeStart
                     // #region timeEnd
                     setupTInput(node, {
@@ -832,6 +868,8 @@
                 this.startOffsetAltType = $('#node-input-startOffsetAlt').typedInput('type');
                 this.endOffsetAltType = $('#node-input-endOffsetAlt').typedInput('type');
 
+                this.timeRestrictionsType = $('#node-input-timeRestrictions').typedInput('type');
+
                 this.timeDays = getCheckboxesStr($('#within-time-switch-timeDays input[type=checkbox]:checked'), 7);
                 this.timeMonths = getCheckboxesStr($('#within-time-switch-timeMonths input[type=checkbox]:checked'), 12);
             }
@@ -861,7 +899,7 @@
 
     <div class="form-row block-noindent is-to-show-initially" id="node-input-endTime-div" data-i18n="[titleOrg]within-time-switch.placeholder.endTime">
         <label for="node-input-endTime"><i class="fa fa-clock-o"></i> <span data-i18n="within-time-switch.label.endTime"></span></label>
-        <input type="text" id="node-input-endTime" data-i18n="[placeholder]within-time-switch.label.endTime"/>
+        <input type="text" id="node-input-endTime" data-i18n="[placeholder]within-time-switch.placeholder.endTime"/>
         <input type="hidden" id="node-input-endTimeType">
     </div>
     <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.endOffset">
@@ -870,7 +908,12 @@
         <input type="hidden" id="node-input-endOffsetType">
         <select id="node-input-endOffsetMultiplier" class="node-input-multiplier"></select>
     </div>
-    <div class="form-row node-input-row-timeLimits is-to-show-initially" data-i18n="[title]within-time-switch.placeholder.timeLimits">
+    <div class="form-row block-noindent is-to-show-initially">
+        <label for="node-input-timeRestrictions"><i class="fa fa-calendar-o"></i> <span data-i18n="within-time-switch.label.timeRestrictions"></span></label>
+        <input type="text" id="node-input-timeRestrictions"/>
+        <input type="hidden" id="node-input-timeRestrictionsType">
+    </div>
+    <div class="form-row node-input-row-timeLimits  is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.timeLimits">
         <div id="within-time-switch-timeDays" class="within-time-switch-days" style="margin-top:5px">
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForDays"></div>
             <div style="display:inline-block;">

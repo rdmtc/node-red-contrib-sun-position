@@ -18,6 +18,9 @@
   - redesign of the output, allows similar to the inject node set multiple properties
     - so the node becomes like a kind of a change node
 
+- within-time-switch
+  - allows to have setup the time limitation also by msg, flow, global or env variable. #192
+
 #### 1.1.8:  small enhancement
 
 - time inject

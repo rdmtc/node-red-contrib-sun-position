@@ -806,7 +806,7 @@ module.exports = function (RED) {
                 }
                 return Date.now();
             } else if (data.type === 'dateSpecific') {
-                return formatOutDate(_srcNode, msg, dNow, data);
+                return this.formatOutDate(_srcNode, msg, dNow, data);
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
@@ -831,11 +831,11 @@ module.exports = function (RED) {
                 return result;
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
-                return formatOutDate(_srcNode, msg, result, data);
+                return this.formatOutDate(_srcNode, msg, result, data);
             } else if (data.type === 'dayOfMonth') {
                 result = hlp.getSpecialDayOfMonth(dNow.getFullYear(),dNow.getMonth(), data.value);
                 if (result !== null && typeof result !== 'undefined') {
-                    return formatOutDate(_srcNode, msg, result, data);
+                    return this.formatOutDate(_srcNode, msg, result, data);
                 }
                 return null;
             }

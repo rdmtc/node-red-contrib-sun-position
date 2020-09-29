@@ -35,7 +35,9 @@
 			"validForMonths":"valid months",
 			"specialDays":"special days",
 			"onlyEvenDays":"only even",
-			"onlyOddDays":"only odd"
+            "onlyOddDays":"only odd",
+            "timeRestrictions":"limit time",
+            "internally":"👇 is defined here"
         },
         "placeholder": {
             "propertyStart": "Property for alternate start time",
