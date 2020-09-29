@@ -5,6 +5,7 @@
 - general
   - changed several links to documentation #151
   - replaced all remaining png type graphics with svg
+  - added examples
 
 - blind-control + clock-time
   - Standardization and consolidation of the same and similar functions #186
