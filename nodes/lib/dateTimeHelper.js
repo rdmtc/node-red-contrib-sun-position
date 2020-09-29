@@ -835,7 +835,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @param {boolean} [utc] define if the time should be in utc
  */
 function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
-    // console.log('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
+    // console.debug('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
@@ -1406,7 +1406,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
 function _getDateFromFormat(val, format, utc, timeZoneOffset) {
-    // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
+    // console.debug(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 
     if (format.slice(0, 4) === 'UTC:' || format.slice(0, 4) === 'utc:') {

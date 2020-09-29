@@ -87,6 +87,7 @@ module.exports = function (RED) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
+            const dNow = new Date();
 
             if (node.positionConfig === null ||
                 typeof node.positionConfig === 'undefined' ||
@@ -108,19 +109,21 @@ module.exports = function (RED) {
                 }
 
                 for (let i = 0; i < node.results.length; i++) {
-                    // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(node.results[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                    const prop = node.results[i];
+                    // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
+
                     let resultObj = null;
-                    if (node.result1Value.type === 'input') {
-                        resultObj = node.positionConfig.formatOutDate(this, msg, inputData.value, node.results[i]);
+                    if (prop.type === 'input') {
+                        resultObj = node.positionConfig.formatOutDate(this, msg, inputData.value, prop);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(this, msg, node.results[i], dNow);
+                        resultObj = node.positionConfig.getOutDataProp(this, msg, prop, dNow);
                     }
                     if (resultObj === null || (typeof resultObj === 'undefined')) {
-                        this.error('Could not evaluate ' + node.results[i].type + '.' + node.results[i].value + '. - Maybe settings outdated (open and save again)!');
+                        this.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
                     } else if (resultObj.error) {
                         this.error('error on getting result: "' + resultObj.error + '"');
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, node.results[i].outType, node.results[i].outValue, resultObj);
+                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
                     }
                     // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
