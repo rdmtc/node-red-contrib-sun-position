@@ -26,29 +26,58 @@ module.exports = function (RED) {
             multiplier: config.inputOffsetMultiplier
         };
 
-        this.result1 = {
-            type   : config.result1Type,
-            value  : config.result1,
-            format : config.result1Format
-        };
-
-        this.result1Value = {
-            type: config.result1ValueType,
-            value: config.result1Value,
-            format: config.result1Format,
-            offsetType: config.result1OffsetType,
-            offset: config.result1Offset,
-            multiplier: config.result1Multiplier,
-            next: true
-        };
-        if (this.positionConfig && this.result1Value.type === 'jsonata') {
-            try {
-                this.result1Value.expr = this.positionConfig.getJSONataExpression(this, this.result1Value.value);
-            } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.result1Value.expr = null;
+        if (!Array.isArray(config.results)) {
+            config.results = [];
+            if (config.result1Type && config.result1Type !== 'none') {
+                config.results.push({
+                    p: config.result1 ? config.result1 : 'msgPayload',
+                    pt: config.result1Type ? config.result1Type : 'input',
+                    v: config.result1Value ? config.result1Value : '',
+                    vt: config.result1ValueType ? config.result1ValueType : 'input',
+                    o: config.result1Offset ? config.result1Offset : 1,
+                    oT: (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
+                    oM: config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
+                    f: config.result1Format ? config.result1Format : 0,
+                    next: false,
+                    days: '*'
+                });
             }
+
+            delete config.result1;
+            delete config.result1Type;
+            delete config.result1Value;
+            delete config.result1ValueType;
+            delete config.result1Format;
+            delete config.result1Offset;
+            delete config.result1OffsetType;
+            delete config.result1OffsetMultiplier;
         }
+
+        this.results = [];
+        config.results.forEach(prop => {
+            const propNew = {
+                outType: prop.pt,
+                outValue: prop.p,
+                type: prop.vt,
+                value: prop.v,
+                format: prop.f,
+                offsetType: prop.oT,
+                offset: prop.o,
+                multiplier: prop.oM,
+                next: (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days: prop.days
+            };
+
+            if (this.positionConfig && propNew.type === 'jsonata') {
+                try {
+                    propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
+                } catch (err) {
+                    this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
+                    propNew.expr = null;
+                }
+            }
+            this.results.push(propNew);
+        });
 
         this.rules = config.rules;
         this.checkall = config.checkall;
@@ -58,6 +87,7 @@ module.exports = function (RED) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
+            const dNow = new Date();
 
             if (node.positionConfig === null ||
                 typeof node.positionConfig === 'undefined' ||
@@ -78,21 +108,24 @@ module.exports = function (RED) {
                     throw new Error(inputData.error);
                 }
 
-                if (node.result1.type !== 'none') {
-                    let resultObj = null;
-                    if (node.result1Value.type === 'input') {
-                        resultObj = hlp.getFormattedDateOut(inputData.value, node.result1.format);
-                    } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, node.result1Value);
-                    }
+                for (let i = 0; i < node.results.length; i++) {
+                    const prop = node.results[i];
+                    // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
 
-                    if (resultObj === null || typeof resultObj === 'undefined') {
-                        throw new Error('could not evaluate ' + node.result1Value.type + '.' + node.result1Value.value);
-                    } else if (resultObj.error) {
-                        node.error('error on getting result: ' + resultObj.error);
+                    let resultObj = null;
+                    if (prop.type === 'input') {
+                        resultObj = node.positionConfig.formatOutDate(this, msg, inputData.value, prop);
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, node.result1.type, node.result1.value, resultObj);
+                        resultObj = node.positionConfig.getOutDataProp(this, msg, prop, dNow);
                     }
+                    if (resultObj === null || (typeof resultObj === 'undefined')) {
+                        this.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
+                    } else if (resultObj.error) {
+                        this.error('error on getting result: "' + resultObj.error + '"');
+                    } else {
+                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                    }
+                    // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
 
                 const resObj = [];

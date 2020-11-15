@@ -7,6 +7,7 @@
             "inputFormat": "parse format",
             "inputOffset": "Offset",
             "operatorContainer": "compare with",
+            "resultContainer":"result",
             "onlyif": "only if",
             "result1": "result",
             "result1Value": "value",
@@ -25,6 +26,9 @@
         },
         "timeFormat": {
             "default": ""
-        }
+        },
+        "tips": {
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/time-comp\">Documentation and examples</a>"
+		}
     }
 }

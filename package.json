@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -91,9 +91,9 @@
     }
   },
   "devDependencies": {
-    "eslint": "^7.9.0",
-    "eslint-plugin-html": "^6.1.0",
-    "eslint-plugin-jsdoc": "^30.4.2",
+    "eslint": "^7.13.0",
+    "eslint-plugin-html": "^6.1.1",
+    "eslint-plugin-jsdoc": "^30.7.8",
     "eslint-plugin-json": "^2.1.2",
     "eslint-plugin-node": "^11.1.0"
   },

@@ -6,7 +6,7 @@
             "and":"and"
         },
         "tips": {
-            "moonPosControl" : "If a message arrives through the Input the calculated position of the moon will be always send to the first output. If additionally specified upper and lower limits for the moon radiation and the azimuth is inside the defined limits the incoming message will send to the associated output."
+            "documentation" : "If a message arrives through the Input the calculated position of the moon will be always send to the first output. If additionally specified upper and lower limits for the moon radiation and the azimuth is inside the defined limits the incoming message will send to the associated output. <a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/moon-position\">Documentation and examples</a>"
         }
     }
 }

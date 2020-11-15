@@ -160,7 +160,7 @@
 			"0": "geschlossen (min)"
 		},
 		"tips": {
-			"sunPosControl": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/blob/HEAD/blind_control.md\">Dokumentation und Beispiele</a>"
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/blind-control\">Dokumentation und Beispiele</a>"
 		},
 		"reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Wichtigkeit __importance__), kein Verfall",

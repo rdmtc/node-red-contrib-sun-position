@@ -5,7 +5,7 @@
         RED.nodes.registerType('clock-timer', {
             category: 'time and astro',
             color: '#FFCC66',
-            icon: 'clock-timer-white.png',
+            icon: 'clock-timer-white.svg',
             inputs: 1,
             outputs: 1,
             defaults: {
@@ -1915,7 +1915,7 @@
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
     </div>
     <div class="form-tips is-to-show-initially">
-        <span data-i18n="[html]clock-timer.tips.timerControl" style="word-wrap:break-word;"></span>
+        <span data-i18n="[html]clock-timer.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
 
     <!-- DIALOG ######################################################################## -->
@@ -2124,6 +2124,7 @@
     .input-error {
         border-color: #d6615f !important;
         background-color: #ffcccc !important;
+        color: #555 !important;
     }
 
     .block-indent2 {

@@ -1,5 +1,55 @@
 # node-red-contrib-sun-position
 
+# Installation
+
+Install of a specific Version in Node-Red:
+ - change to the installation directory of Node-Red
+ - enter the command `npm install node-red-contrib-sun-position@1.2.0`
+
+Install of a specific Version in a Homematic:
+- logon per ssh
+- enter the commands:
+  - `source /usr/local/addons/redmatic/home/.profile`
+  - `cd /usr/local/addons/redmatic/var`
+  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
+
+
+#### 1.2.0:  rework
+
+Unfortunately this release is not finished yet and only released as beta. Unfortunately, due to external influences, I am currently unable to continue working here.
+
+- general
+  - changed several links to documentation #151
+  - replaced all remaining png type graphics with svg
+  - added examples
+
+- blind-control + clock-time
+  - Standardization and consolidation of the same and similar functions #186
+    - minor bugs fixed with it
+
+- time inject
+  - fixed bug, that interval between times does not start when load node and time in in the interval #189
+  - smaller changes which leads into more options for outgoing data
+
+- time-comp
+  - redesign of the output, allows similar to the inject node set multiple properties
+    - so the node becomes like a kind of a change node
+
+- time-span
+  - [ ] TODO: redesign of the output similar as time-comp
+
+- within-time-switch
+  - allows to have setup the time limitation also by msg, flow, global or env variable. #192
+
+#### 1.1.8:  small enhancement
+
+- time inject
+  - allow to have a given number of timer events between two times #188
+  - small enhancement in node status, shows interval if defined
+
+- blind-control + clock-time
+  - allow to change general node settings with incoming message #184
+
 #### 1.1.7:  BugFix
 
 - general

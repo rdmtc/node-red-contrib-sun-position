@@ -1,0 +1,107 @@
+[
+    {
+        "id": "792e063e.e37908",
+        "type": "inject",
+        "z": "de4e9c38.0d942",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 2780,
+        "y": 3020,
+        "wires": [
+            [
+                "5192b050.6ff25"
+            ]
+        ]
+    },
+    {
+        "id": "e1b0c506.c45638",
+        "type": "debug",
+        "z": "de4e9c38.0d942",
+        "name": "out1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 3250,
+        "y": 3020,
+        "wires": []
+    },
+    {
+        "id": "92659416.63d118",
+        "type": "debug",
+        "z": "de4e9c38.0d942",
+        "name": "out2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 3250,
+        "y": 3060,
+        "wires": []
+    },
+    {
+        "id": "5192b050.6ff25",
+        "type": "within-time-switch",
+        "z": "de4e9c38.0d942",
+        "name": "",
+        "nameInt": "",
+        "positionConfig": "",
+        "startTime": "7:00",
+        "startTimeType": "entered",
+        "startOffset": 0,
+        "startOffsetType": "none",
+        "startOffsetMultiplier": 60000,
+        "endTime": "9:00",
+        "endTimeType": "entered",
+        "endOffset": 0,
+        "endOffsetType": "none",
+        "endOffsetMultiplier": 60000,
+        "timeRestrictions": 0,
+        "timeRestrictionsType": "none",
+        "timeDays": "*",
+        "timeOnlyOddDays": false,
+        "timeOnlyEvenDays": false,
+        "timeMonths": "*",
+        "timedatestart": "",
+        "timedateend": "",
+        "propertyStart": "",
+        "propertyStartType": "none",
+        "propertyStartCompare": "true",
+        "propertyStartThreshold": "",
+        "propertyStartThresholdType": "num",
+        "startTimeAlt": "",
+        "startTimeAltType": "entered",
+        "startOffsetAlt": 0,
+        "startOffsetAltType": "none",
+        "startOffsetAltMultiplier": 60000,
+        "propertyEnd": "",
+        "propertyEndType": "none",
+        "propertyEndCompare": "true",
+        "propertyEndThreshold": "",
+        "propertyEndThresholdType": "num",
+        "endTimeAlt": "",
+        "endTimeAltType": "entered",
+        "endOffsetAlt": 0,
+        "endOffsetAltType": "none",
+        "endOffsetAltMultiplier": 60000,
+        "tsCompare": "0",
+        "x": 3010,
+        "y": 3020,
+        "wires": [
+            [
+                "e1b0c506.c45638"
+            ],
+            [
+                "92659416.63d118"
+            ]
+        ]
+    }
+]

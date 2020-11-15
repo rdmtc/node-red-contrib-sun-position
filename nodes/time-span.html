@@ -5,7 +5,7 @@
         RED.nodes.registerType('time-span', {
             category: 'time and astro',
             color: '#EDFDBF',
-            icon: 'time-span-black.png',
+            icon: 'time-span-black.svg',
             inputs: 1,
             outputs: 1,
             defaults: {
@@ -773,6 +773,9 @@
     <div class="form-row" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]time-span.placeholder.name">
+    </div>
+    <div class="form-tips is-to-show-initially">
+        <span data-i18n="[html]time-span.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
   </script>
   <style>

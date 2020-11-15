@@ -782,7 +782,6 @@ function normalizeDate(d, offset, multiplier, limit) {
 function getTimeOfText(t, date, utc, timeZoneOffset) {
     // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
     const d = date || new Date();
-    // if (t && (t.indexOf('.') === -1) && (t.indexOf('-') === -1)) {
     if (t && (!t.includes('.')) && (!t.includes('-'))) {
         t = t.toLocaleLowerCase();
         // const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
@@ -814,18 +813,17 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
                     const m = d.getMinutes() + v;
                     d.setMinutes(m);
                 }
-                return d;
+                return d; // timeZoneOffset will be ignored!
             }
             d.setHours((parseInt(matches[1]) + (matches[4] ? 12 : 0)),
                 (parseInt(matches[2]) || 0),
                 (parseInt(matches[3]) || 0), 0);
-        } else {
-            return null;
+
+            if (timeZoneOffset) {
+                return convertDateTimeZone(d, timeZoneOffset);
+            }
+            return d;
         }
-        if (timeZoneOffset) {
-            return convertDateTimeZone(d, timeZoneOffset);
-        }
-        return d;
     }
     return null;
 }
@@ -837,7 +835,7 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * @param {boolean} [utc] define if the time should be in utc
  */
 function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
-    // console.log('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
+    // console.debug('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
     } else if (dt === '') {
@@ -848,37 +846,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     }
 
     if (typeof dt === 'object') {
-        if (Object.prototype.hasOwnProperty.call(dt, 'now')) {
-            dt = dt.now;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'date')) {
-            dt = dt.date;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'time')) {
-            dt = dt.time;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'ts')) {
-            dt = dt.ts;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'lc')) {
-            dt = dt.lc;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'value')) {
-            dt = dt.lc;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'payload')) {
-            dt = dt.payload;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'timeStamp')) {
-            dt = dt.timeStamp;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'created')) {
-            dt = dt.created;
-        } else if (Object.prototype.hasOwnProperty.call(dt, 'changed')) {
-            dt = dt.changed;
-        } else {
-            dt = String(dt);
-        }
-    }
-
-    const re = /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*((pm|p|PM|P|utc|UTClocal|LOCAL)?)?.*$/;
-    if (re.test(String(dt))) {
-        const result = getTimeOfText(String(dt), utc, timeZoneOffset);
-        if (result !== null && typeof result !== 'undefined') {
-            return result;
-        }
+        dt = String(dt);
     }
 
     if (!isNaN(dt)) {
@@ -894,6 +862,11 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
         if (isValidDate(dto)) {
             return dto;
         }
+    }
+
+    const result = getTimeOfText(String(dt), utc, timeZoneOffset);
+    if (result !== null && typeof result !== 'undefined') {
+        return result;
     }
 
     if (typeof dt === 'string') {
@@ -1433,7 +1406,7 @@ function _getInt(str, i, minlength, maxlength) {
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
 function _getDateFromFormat(val, format, utc, timeZoneOffset) {
-    // console.log(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
+    // console.debug(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 
     if (format.slice(0, 4) === 'UTC:' || format.slice(0, 4) === 'utc:') {

@@ -1,0 +1,120 @@
+[
+    {
+        "id": "e9300efa.2abad",
+        "type": "within-time-switch",
+        "z": "de4e9c38.0d942",
+        "name": "",
+        "nameInt": "",
+        "positionConfig": "14613f77.c25991",
+        "startTime": "17:00",
+        "startTimeType": "entered",
+        "startOffset": 0,
+        "startOffsetType": "none",
+        "startOffsetMultiplier": 60000,
+        "endTime": "23:00",
+        "endTimeType": "entered",
+        "endOffset": 0,
+        "endOffsetType": "none",
+        "endOffsetMultiplier": 60000,
+        "timeRestrictions": "timeLimit",
+        "timeRestrictionsType": "msg",
+        "timeDays": "*",
+        "timeOnlyOddDays": false,
+        "timeOnlyEvenDays": false,
+        "timeMonths": "*",
+        "timedatestart": "",
+        "timedateend": "",
+        "propertyStart": "",
+        "propertyStartType": "none",
+        "propertyStartCompare": "true",
+        "propertyStartThreshold": "",
+        "propertyStartThresholdType": "num",
+        "startTimeAlt": "",
+        "startTimeAltType": "entered",
+        "startOffsetAlt": 0,
+        "startOffsetAltType": "none",
+        "startOffsetAltMultiplier": 60000,
+        "propertyEnd": "",
+        "propertyEndType": "none",
+        "propertyEndCompare": "true",
+        "propertyEndThreshold": "",
+        "propertyEndThresholdType": "num",
+        "endTimeAlt": "",
+        "endTimeAltType": "entered",
+        "endOffsetAlt": 0,
+        "endOffsetAltType": "none",
+        "endOffsetAltMultiplier": 60000,
+        "tsCompare": "0",
+        "x": 1840,
+        "y": 580,
+        "wires": [
+            [
+                "fb75a143.291f4"
+            ],
+            [
+                "fb75a143.291f4"
+            ]
+        ]
+    },
+    {
+        "id": "3934cb98.1da914",
+        "type": "inject",
+        "z": "de4e9c38.0d942",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "timeLimit",
+                "v": "{\"days\":[1,2,3,4,6,0],\"months\":[0,1,2,3,4,5,6,7,8,9,10,11],\"startDate\":\"2020-09-28\",\"endDate\":\"2020-10-22\",\"onlyOddDays\":false,\"onlyEvenDays\":false}",
+                "vt": "json"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1600,
+        "y": 580,
+        "wires": [
+            [
+                "e9300efa.2abad"
+            ]
+        ]
+    },
+    {
+        "id": "fb75a143.291f4",
+        "type": "debug",
+        "z": "de4e9c38.0d942",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2050,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "14613f77.c25991",
+        "type": "position-config",
+        "z": "",
+        "name": "zuHause",
+        "isValide": "true",
+        "longitude": "0",
+        "latitude": "0",
+        "angleType": "deg",
+        "timeZoneOffset": "99",
+        "timeZoneDST": "0",
+        "stateTimeFormat": "3",
+        "stateDateFormat": "12"
+    }
+]
