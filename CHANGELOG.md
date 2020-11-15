@@ -1,6 +1,22 @@
 # node-red-contrib-sun-position
 
+# Installation
+
+Install of a specific Version in Node-Red:
+ - change to the installation directory of Node-Red
+ - enter the command `npm install node-red-contrib-sun-position@1.2.0`
+
+Install of a specific Version in a Homematic:
+- logon per ssh
+- enter the commands:
+  - `source /usr/local/addons/redmatic/home/.profile`
+  - `cd /usr/local/addons/redmatic/var`
+  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
+
+
 #### 1.2.0:  rework
+
+Unfortunately this release is not finished yet and only released as beta. Unfortunately, due to external influences, I am currently unable to continue working here.
 
 - general
   - changed several links to documentation #151
@@ -20,7 +36,7 @@
     - so the node becomes like a kind of a change node
 
 - time-span
-  - TODO: similar as time-comp
+  - [ ] TODO: redesign of the output similar as time-comp
 
 - within-time-switch
   - allows to have setup the time limitation also by msg, flow, global or env variable. #192
