@@ -88,6 +88,15 @@ function angleNorm_(angle) {
     }
     return angle;
 }
+
+/**
+ * check if angle is between start and end
+ */
+function angleBetween_(angle, start, end) {
+    if(start<end) return start<=angle && angle<=end;
+    return               start<=angle || angle<=end;
+}
+
 /******************************************************************************************/
 /**
  * calculates the current sun level
@@ -97,18 +106,17 @@ function angleNorm_(angle) {
 function getSunPosition_(node, dNow) {
     const sunPosition = node.positionConfig.getSunCalc(dNow, false, false);
     // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
-    sunPosition.InWindow = (sunPosition.azimuthDegrees >= node.windowSettings.AzimuthStart) &&
-                           (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd);
+    sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, node.windowSettings.AzimuthStart, node.windowSettings.AzimuthEnd);
     // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${node.windowSettings.AzimuthStart} AzimuthEnd=${node.windowSettings.AzimuthEnd}`);
     if (node.autoTrigger ) {
         if ((sunPosition.altitudeDegrees <= 0) || (node.sunData.minAltitude && (sunPosition.altitudeDegrees < node.sunData.minAltitude))) {
             node.autoTrigger.type = 3; // Sun not on horizon
         } else if (sunPosition.azimuthDegrees <= 72) {
             node.autoTrigger.type = 4; // Sun not visible
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthStart) {
+        } else if (!sunPosition.InWindow) {
             node.autoTrigger.time = Math.min(node.autoTrigger.time, cautoTriggerTimeBeforeSun);
             node.autoTrigger.type = 5; // sun before in window
-        } else if (sunPosition.azimuthDegrees <= node.windowSettings.AzimuthEnd) {
+        } else if (sunPosition.InWindow) {
             if (node.smoothTime > 0) {
                 node.autoTrigger.time = Math.min(node.autoTrigger.time, node.smoothTime);
                 node.autoTrigger.type = 6; // sun in window (smooth time set)
