@@ -1017,11 +1017,11 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     // console.log('[IN getBackendData] ',data);  // eslint-disable-line
     let res = '';
-    if (!data || data.type === 'none' || data.type === '' || data.type === 'jsonata' || data.type === 'json' || data.type === 'bin') {
+    if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'bin') {
         res = data.type;
     } else if ( data.type === 'bool') {
         res = data.value;
-    } else if (data.type === 'msg' || data.type === 'flow' || data.type === 'global' || data.type === 'env') {
+    } else if (data.type === 'msg' || data.type === 'env') {
         res = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
         res = 'msg.payload';

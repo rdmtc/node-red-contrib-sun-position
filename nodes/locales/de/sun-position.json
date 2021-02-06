@@ -1,7 +1,7 @@
 {
     "sun-position": {
         "label": {
-            "azimuthpos":"azimuth Position",
+            "azimuthpos":"Sonnenrichtung",
             "between":"zwischen",
             "and":"und",
             "start": "Start",

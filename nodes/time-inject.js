@@ -171,7 +171,10 @@ module.exports = function (RED) {
                 oM   : config.payloadOffsetMultiplier ? config.payloadOffsetMultiplier : 60000,
                 f    : config.payloadTimeFormat ? config.payloadTimeFormat : 0,
                 next : true,
-                days : '*'
+                days : '*',
+                months: '*',
+                onlyEvenDays: false,
+                onlyOddDays: false
             });
             if (config.topic) {
                 config.props.push({
@@ -184,7 +187,10 @@ module.exports = function (RED) {
                     oM   : 60000,
                     f    : 0,
                     next : false,
-                    days : '*'
+                    days : '*',
+                    months: '*',
+                    onlyEvenDays: false,
+                    onlyOddDays: false
                 });
             }
             if (typeof config.addPayload1Type !== 'undefined' &&
@@ -201,7 +207,10 @@ module.exports = function (RED) {
                     oM   : config.addPayload1OffsetMultiplier ? config.addPayload1OffsetMultiplier : 60000,
                     f    : config.addPayload1Format ? config.addPayload1Format : 0,
                     next : false,
-                    days : config.addPayload1Days ? config.addPayload1Days : '*'
+                    days : config.addPayload1Days ? config.addPayload1Days : '*',
+                    months: '*',
+                    onlyEvenDays: false,
+                    onlyOddDays: false
                 });
             }
             if (typeof config.addPayload2Type !== 'undefined' &&
@@ -218,7 +227,10 @@ module.exports = function (RED) {
                     oM   : config.addPayload2OffsetMultiplier ? config.addPayload2OffsetMultiplier : 60000,
                     f    : config.addPayload2Format ? config.addPayload2Format : 0,
                     next : false,
-                    days : config.addPayload2Days ? config.addPayload2Days : '*'
+                    days : config.addPayload2Days ? config.addPayload2Days : '*',
+                    months: '*',
+                    onlyEvenDays: false,
+                    onlyOddDays: false
                 });
             }
             if (typeof config.addPayload3Type !== 'undefined' &&
@@ -226,16 +238,19 @@ module.exports = function (RED) {
                 config.addPayload3Type !== 'none' &&
                 config.addPayload3ValueType !== 'none') {
                 config.props.push({
-                    p  : config.addPayload3,
-                    pt : config.addPayload3Type,
-                    v  : config.addPayload3Value,
-                    vt : config.addPayload3ValueType ? ((config.addPayload3ValueType === 'string') ? 'str' : config.addPayload3ValueType) : (config.addPayload3Value ? 'str' : 'date'),
-                    o  : config.addPayload3Offset ? config.addPayload3Offset : 1,
-                    oT : (config.addPayload3Offset === 0 || config.addPayload3Offset === '') ? 'none' : (config.addPayload3OffsetType ? config.addPayload3OffsetType : 'num'),
-                    oM : config.addPayload3OffsetMultiplier ? config.addPayload3OffsetMultiplier : 60000,
-                    f  : config.addPayload3Format ? config.addPayload3Format : 0,
+                    p    : config.addPayload3,
+                    pt   : config.addPayload3Type,
+                    v    : config.addPayload3Value,
+                    vt   : config.addPayload3ValueType ? ((config.addPayload3ValueType === 'string') ? 'str' : config.addPayload3ValueType) : (config.addPayload3Value ? 'str' : 'date'),
+                    o    : config.addPayload3Offset ? config.addPayload3Offset : 1,
+                    oT   : (config.addPayload3Offset === 0 || config.addPayload3Offset === '') ? 'none' : (config.addPayload3OffsetType ? config.addPayload3OffsetType : 'num'),
+                    oM   : config.addPayload3OffsetMultiplier ? config.addPayload3OffsetMultiplier : 60000,
+                    f    : config.addPayload3Format ? config.addPayload3Format : 0,
                     next : false,
-                    days : config.addPayload3Days ? config.addPayload3Days : '*'
+                    days : config.addPayload3Days ? config.addPayload3Days : '*',
+                    months: '*',
+                    onlyEvenDays: false,
+                    onlyOddDays: false
                 });
             }
 
@@ -281,16 +296,19 @@ module.exports = function (RED) {
         this.props = [];
         config.props.forEach( prop => {
             const propNew = {
-                outType: prop.pt,
-                outValue: prop.p,
-                type: prop.vt,
-                value: prop.v,
-                format: prop.f,
-                offsetType: prop.oT,
-                offset: prop.o,
-                multiplier: prop.oM,
-                next: (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
-                days: prop.days
+                outType     : prop.pt,
+                outValue    : prop.p,
+                type        : prop.vt,
+                value       : prop.v,
+                format      : prop.f,
+                offsetType  : prop.oT,
+                offset      : prop.o,
+                multiplier  : prop.oM,
+                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days        : prop.days,
+                months      : prop.months,
+                onlyEvenDays: prop.onlyEvenDays,
+                onlyOddDays : prop.onlyOddDays
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {
@@ -479,6 +497,7 @@ module.exports = function (RED) {
                     break;
                 case tInj.intervalTime:
                 case tInj.intervalAmount:
+                    node.debug('initialize - Intervall timer/amount');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
@@ -488,6 +507,14 @@ module.exports = function (RED) {
                         node.doCreateStartTimeout(node);
                     }
                     break;
+                default:
+                    node.debug('initialize - default');
+                    node.doSetStatus(node, 'green');
+                    if (doEmit) {
+                        node.emit('input', {
+                            type: 'once/startup'
+                        }); // will create timeout
+                    }
             }
         };
 
@@ -872,7 +899,6 @@ module.exports = function (RED) {
             return null;
         });
 
-        node.status({});
         try {
             if (!node.positionConfig) {
                 node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
@@ -907,6 +933,7 @@ module.exports = function (RED) {
                 }, (config.onceDelay || 0.1) * 1000);
                 return;
             }
+            node.status({});
 
             node.onceTimeout = setTimeout(() => {
                 try {

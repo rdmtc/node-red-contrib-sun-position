@@ -676,7 +676,7 @@
                                 result += data.timeOpText;
                                 result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.timeType, data.timeValue) + '</var>';
                                 result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
-                                if (enh && enh.timeReg) {
+                                if (enh && enh.timeReg && enh.timeReg.text) {
                                     result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
                                 }
 
@@ -687,7 +687,7 @@
                                     result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMinType, data.timeMinValue);
                                     result += '</var>';
                                     result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
-                                    if (enh && enh.timeMin) {
+                                    if (enh && enh.timeMin && enh.timeMin.text) {
                                         result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
                                     }
                                     result += '</div>';
@@ -699,7 +699,7 @@
                                     result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMaxType, data.timeMaxValue);
                                     result += '</var>';
                                     result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
-                                    if (enh && enh.timeMax) {
+                                    if (enh && enh.timeMax && enh.timeMax.text) {
                                         result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
                                     }
                                     result += '</div>';
@@ -1770,7 +1770,7 @@
                                 dialogAddData.timeReg = {
                                     ts : 0,
                                     data : null,
-                                    text : d.value
+                                    text : bdDateToTime(d)
                                 };
                             }
                             $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
@@ -1827,7 +1827,7 @@
                                     dialogAddData.timeMin = {
                                         ts : 0,
                                         data : null,
-                                        text : d.value
+                                        text : bdDateToTime(d)
                                     };
                                 }
                                 $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
@@ -1883,7 +1883,7 @@
                                     dialogAddData.timeMax = {
                                         ts : 0,
                                         data : null,
-                                        text : d.value
+                                        text : bdDateToTime(d)
                                     };
                                 }
                                 $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
@@ -2806,7 +2806,6 @@
         background-color: #ffcccc !important;
         color: #555 !important;
     }
-
     .block-indent2 {
         float: left;
         min-height: 1px;

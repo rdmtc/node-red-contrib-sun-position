@@ -3,11 +3,6 @@
  *********************************************/
 'use strict';
 const util = require('util');
-const path = require('path');
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-
-// const path = require('path');
-// const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 const perSecond = 1000;
 const perMinute = 60000;
@@ -267,36 +262,102 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        this.result1Value = {
-            type: config.result1ValueType,
-            value: config.result1Value,
-            format: config.result1Format,
-            offsetType: config.result1OffsetType,
-            offset: config.result1Offset,
-            multiplier: config.result1Multiplier,
-            next: true
+
+        this.operand1 = {
+            type: config.operand1Type,
+            value: config.operand1,
+            format: config.operand1Format,
+            offsetType: config.operand1OffsetType,
+            offset: config.operand1Offset,
+            multiplier: config.operand1OffsetMultiplier
         };
-        if (this.positionConfig && this.result1Value.type === 'jsonata') {
-            try {
-                this.result1Value.expr = this.positionConfig.getJSONataExpression(this, this.result1Value.value);
-            } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.result1Value.expr = null;
+
+        this.operand2 = {
+            type: config.operand2Type,
+            value: config.operand2,
+            format: config.operand2Format,
+            offsetType: config.operand2OffsetType,
+            offset: config.operand2Offset,
+            multiplier: config.operand2OffsetMultiplier
+        };
+
+        if (!Array.isArray(config.results)) {
+            config.results = [];
+            if (config.result1Type && config.result1Type !== 'none') {
+                config.results.push({
+                    p           : config.result1 ? config.result1 : 'msgPayload',
+                    pt          : config.result1Type ? config.result1Type : 'input',
+                    v           : config.result1Value ? config.result1Value : '',
+                    vt          : config.result1ValueType ? config.result1ValueType : 'input',
+                    fTs         : config.result1TSFormat ? config.result1TSFormat : 1,
+                    o           : config.result1Offset ? config.result1Offset : 1,
+                    oT          : (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
+                    oM          : config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
+                    f           : config.result1Format ? config.result1Format : 0,
+                    next        : true,
+                    days        : '*',
+                    months      : '*',
+                    onlyEvenDays: false,
+                    onlyOddDays : false
+                });
             }
+
+            delete config.result1;
+            delete config.result1Type;
+            delete config.result1Value;
+            delete config.result1ValueType;
+            delete config.result1TSFormat;
+            delete config.result1Format;
+            delete config.result1Offset;
+            delete config.result1OffsetType;
+            delete config.result1OffsetMultiplier;
         }
+
+        this.results = [];
+        config.results.forEach(prop => {
+            const propNew = {
+                outType     : prop.pt,
+                outValue    : prop.p,
+                type        : prop.vt,
+                value       : prop.v,
+                format      : prop.f,
+                offsetType  : prop.oT,
+                offset      : prop.o,
+                multiplier  : prop.oM,
+                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days        : prop.days,
+                months      : prop.months,
+                onlyEvenDays: prop.onlyEvenDays,
+                onlyOddDays : prop.onlyOddDays
+            };
+
+            if (this.positionConfig && propNew.type === 'jsonata') {
+                try {
+                    propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
+                } catch (err) {
+                    this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
+                    propNew.expr = null;
+                }
+            }
+            this.results.push(propNew);
+        });
+        this.operand = config.operand;
+        this.rules = config.rules;
+        this.checkall = config.checkall;
         const node = this;
 
         this.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
+            const dNow = new Date();
 
             if (node.positionConfig === null ||
                 typeof node.positionConfig === 'undefined' ||
-                config.operand1Type === null ||
-                typeof config.operand1Type === 'undefined' ||
-                config.operand2Type === null ||
-                typeof config.operand2Type === 'undefined') {
+                node.operand1.type === null ||
+                typeof node.operand1.type === 'undefined' ||
+                node.operand2.type === null ||
+                typeof node.operand2.type === 'undefined') {
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -306,34 +367,12 @@ module.exports = function (RED) {
             }
 
             try {
-                /*  const operand1 = node.positionConfig.getDateFromProp(node, msg, config.operand1Type, config.operand1, config.operand1Format, config.operand1Offset, config.operand1OffsetType, config.operand1OffsetMultiplier);
-                if (operand1 === null) {
-                    return null;
-                } */
-                const operand1 = node.positionConfig.getTimeProp(node, msg, {
-                    type: config.operand1Type,
-                    value: config.operand1,
-                    format: config.operand1Format,
-                    offsetType: config.operand1OffsetType,
-                    offset: config.operand1Offset,
-                    multiplier: config.operand1OffsetMultiplier
-                });
+                const operand1 = node.positionConfig.getTimeProp(node, msg, node.operand1);
                 if (operand1.error) {
                     throw new Error(operand1.error);
                 }
 
-                /* const operand2 = node.positionConfig.getDateFromProp(node, msg, config.operand2Type, config.operand2, config.operand2Format, config.operand2Offset, config.operand2OffsetType, config.operand2OffsetMultiplier);
-                if (operand2 === null) {
-                    return null;
-                } */
-                const operand2 = node.positionConfig.getTimeProp(node, msg, {
-                    type: config.operand2Type,
-                    value: config.operand2,
-                    format: config.operand2Format,
-                    offsetType: config.operand2OffsetType,
-                    offset: config.operand2Offset,
-                    multiplier: config.operand2OffsetMultiplier
-                });
+                const operand2 = node.positionConfig.getTimeProp(node, msg, node.operand2);
                 if (operand2.error) {
                     throw new Error(operand2.error);
                 }
@@ -342,45 +381,44 @@ module.exports = function (RED) {
                 // node.debug('operand2=' + util.inspect(operand2, { colors: true, compact: 10, breakLength: Infinity }));
 
                 let timeSpan = operand1.value.getTime() - operand2.value.getTime();
-                if (config.operand === 0) {
+                if (node.operand === 0) {
                     timeSpan = Math.abs(timeSpan);
                 }
 
-                if (config.result1Type !== 'none') {
+                for (let i = 0; i < node.results.length; i++) {
+                    const prop = node.results[i];
+                    // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
+
                     let resultObj = null;
                     if (node.result1Value.type === 'timespan') {
-                        resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, config.result1TSFormat);
+                        resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, prop.result1TSFormat);
                     } else if (node.result1Value.type === 'operand1') {
-                        resultObj = hlp.getFormattedDateOut(operand1.value, config.result1Format);
+                        resultObj = node.positionConfig.formatOutDate(this, msg, operand1.value, prop);
                     } else if (node.result1Value.type === 'operand2') {
-                        resultObj = hlp.getFormattedDateOut(operand2.value, config.result1Format);
+                        resultObj = node.positionConfig.formatOutDate(this, msg, operand2.value, prop);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(node, msg, node.result1Value);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, prop, dNow);
                     }
-                    // node.debug('resultObj=' + util.inspect(resultObj, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (resultObj === null || typeof resultObj === 'undefined') {
-                        throw new Error('could not evaluate ' + node.result1Value.type + '.' + node.result1Value.value);
+
+                    if (resultObj === null || (typeof resultObj === 'undefined')) {
+                        this.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
                     } else if (resultObj.error) {
-                        node.error('error on getting result: ' + resultObj.error);
+                        this.error('error on getting result: "' + resultObj.error + '"');
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, config.result1Type, config.result1, resultObj);
+                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
                     }
+                    // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
 
                 const resObj = [];
-                const rules = config.rules;
-                const rulesLength = rules.length;
+                const rulesLength = node.rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
-                    const rule = rules[i];
+                    const rule =  node.rules[i];
                     try {
                         let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue, 0);
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
-                        /*
-                        node.debug('operand ' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
-                        node.debug('operator ' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity })); */
 
                         let result = false;
                         switch (parseInt(rule.operator)) {
@@ -408,7 +446,7 @@ module.exports = function (RED) {
                         }
                         if (result) {
                             resObj.push(msg);
-                            if (config.checkall != 'true') { // eslint-disable-line eqeqeq
+                            if (node.checkall != 'true') { // eslint-disable-line eqeqeq
                                 break;
                             }
                         } else {
@@ -425,7 +463,6 @@ module.exports = function (RED) {
                         resObj.push(null);
                         continue;
                     }
-
                 }
 
                 for (let i = resObj.length; i < rulesLength; ++i) {

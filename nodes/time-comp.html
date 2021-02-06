@@ -98,7 +98,7 @@
                 if (this.rules.length) {
                     const rule = this.rules[index];
                     if (rule) {
-                        label = rule.operatorText +  ' ' + RED.nodes.getType('position-config').getValueLabel(this, rule.operandType, rule.operandValue);
+                        label = rule.operatorText + ' ' + RED.nodes.getType('position-config').getValueLabel(this, rule.operandType, rule.operandValue);
                         if (rule.propertyType !== 'none') {
                             label += ' only if ' + RED.nodes.getType('position-config').getValueLabel(this, rule.propertyType, rule.propertyValue) + ' is true';
                         }
@@ -120,19 +120,14 @@
                 if (!this.rules || this.rules.length <= 1) {
                     const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.inputType, this.input);
                     return op1;
-                }
-
-                if (this.rules && this.rules.length === 1) {
+                } else if (this.rules.length === 1) {
                     const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.inputType, this.input);
-                    const op2 = RED.nodes.getType('position-config').getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
-                    return op1 + this.rules[0].operatorText + op2;
+                    const cmp = RED.nodes.getType('position-config').getValueLabel(this, this.rules[0].operandType, this.rules[0].operandValue);
+                    return op1 + this.rules[0].operatorText + cmp;
                 }
-
-                if (this.rules && this.rules.length === 1) {
-                    const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.inputType, this.input);
-                    return op1 + ' ' + this._('time-comp.label.compare');
-                }
-                return this._('time-comp.label.time-comp');
+                const op1 = RED.nodes.getType('position-config').getValueLabel(this, this.inputType, this.input);
+                return op1 + ' ' + this._('time-comp.label.compare');
+                // return this._('time-comp.label.time-comp');
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
@@ -309,12 +304,12 @@
                     }
 
                     $('#node-input-rule-container').css('min-height', '20px').css('min-width', '300px').editableList({
-                        addItem(containerRow, containerIndex, data) {
-                            containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                            const $row1 = $('<div/>').appendTo(containerRow);
-                            const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                            const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                            const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        addItem($containerRow, containerIndex, data) {
+                            $containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                            const $row1 = $('<div/>').appendTo($containerRow);
+                            const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
+                            const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
+                            const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
                             // row1
                             // operator
                             const $operator = $('<select/>', {
@@ -356,12 +351,12 @@
                             }).appendTo($row1);
                             finalspan.append(' &#8594; <span class="node-input-rule-index">' + (containerIndex + 1) + '</span> ');
                             // row2
-                            const operandSelFieldName = 'node-input-rule-operandFormatSel';
-                            addLabel($row2, operandSelFieldName, 'fa fa-file-code-o');
+                            const operandFormatSelFieldName = 'node-input-rule-operandFormatSel';
+                            addLabel($row2, operandFormatSelFieldName, 'fa fa-file-code-o');
 
                             const $formatSel = $('<select/>', {
-                                class: operandSelFieldName,
-                                id: operandSelFieldName + containerIndex
+                                class: operandFormatSelFieldName,
+                                id: operandFormatSelFieldName + containerIndex
                             }).appendTo($row2);
                             const $formatIp = $('<input/>', {
                                 class: 'node-input-rule-operandFormatIp',
@@ -440,7 +435,7 @@
                                     multiplier: $multiplier.val(),
                                     noOffsetError: true
                                 });
-                                resizeRule(containerRow);
+                                resizeRule($containerRow);
                             });
                             $operator.change(() => $operand.change());
                             $multiplier.change(() => $operand.change());
@@ -448,7 +443,7 @@
                             $formatSel.change(() => $operand.change());
                             $formatIp.change(() => $operand.change());
                             $operand.change();
-                            // resizeRule(containerRow);
+                            // resizeRule($containerRow);
                             autocomplete($formatIp, 'dateParseFormat');
                             resizeRuleContainer();
                         },
@@ -487,12 +482,12 @@
                     }
 
                     $('#node-input-result-container').css('min-height', '40px').css('min-width', '400px').editableList({
-                        addItem(containerRow, containerIndex, data) {
-                            containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
-                            const $row1 = $('<div/>').appendTo(containerRow);
-                            const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                            const $row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
-                            const $row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo(containerRow);
+                        addItem($containerRow, containerIndex, data) {
+                            $containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
+                            const $row1 = $('<div/>').appendTo($containerRow);
+                            const $row2 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo($containerRow);
+                            const $row3 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo($containerRow);
+                            const $row4 = $('<div/>', { style: 'padding-top: 5px;' }).appendTo($containerRow);
                             // row1 - Property / Type Selection
                             let prop = data;
                             if (!Object.prototype.hasOwnProperty.call(prop, 'p')) {
@@ -557,7 +552,7 @@
                                 .css('width', 'calc(60% - 30px)')
                                 .appendTo($row1)
                                 .typedInput({
-                                    default: 'str',
+                                    default: 'input',
                                     types: [
                                         { value: 'input', label: 'Input value', hasValue: false },
                                         'date',
@@ -602,11 +597,11 @@
                             $propertyValue.typedInput('type', prop.vt);
 
                             // row2 - Format Selection
-                            const operandSelFieldName = 'node-input-prop-result-FormatSel';
-                            addLabel($row2, operandSelFieldName, 'fa fa-file-code-o');
+                            const operandFormatSelFieldName = 'node-input-prop-result-FormatSel';
+                            addLabel($row2, operandFormatSelFieldName, 'fa fa-file-code-o');
 
                             const $formatSel = $('<select/>', {
-                                class: operandSelFieldName
+                                class: operandFormatSelFieldName
                             }).appendTo($row2);
                             const $formatIp = $('<input/>', {
                                 class: 'node-input-prop-result-FormatIp',
@@ -799,27 +794,35 @@
                                     $row3.hide(); // offset
                                     $row4.hide(); // next + days + month
                                 }
-                                getBackendData(d => {
-                                    containerRow.attr('title', bdDateToTime(d));
-                                }, {
-                                    nodeId:         node.id,
-                                    kind:           'getOutDataData',
-                                    config:         $nodeConfig.val(),
-                                    type:           plVType,
-                                    value:          $propertyValue.typedInput('value'),
-                                    format:         $formatIp.val(),
-                                    offsetType:     $offset.typedInput('type'),
-                                    offset:         $offset.typedInput('value'),
-                                    multiplier:     $multiplier.val(),
-                                    next:           $cbNext.is(':checked'),
-                                    days:           getCheckboxesStr($divDays.find('input[type=checkbox]:checked'), 7),
-                                    months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
-                                    onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
-                                    onlyEvenDays:   $cbOnlyOddDays.is(':checked'),
-                                    noOffsetError:  true
-                                });
+
+                                const plVValue = $propertyValue.typedInput('value');
+                                if (plVValue === 'input') {
+                                    $containerRow.attr('title', $('#node-input-input').attr('title'));
+
+                                } else {
+                                    getBackendData(d => {
+                                        $containerRow.attr('title', bdDateToTime(d));
+                                    }, {
+                                        nodeId:         node.id,
+                                        kind:           'getOutDataData',
+                                        config:         $nodeConfig.val(),
+                                        type:           plVType,
+                                        value:          plVValue,
+                                        format:         $formatIp.val(),
+                                        offsetType:     $offset.typedInput('type'),
+                                        offset:         $offset.typedInput('value'),
+                                        multiplier:     $multiplier.val(),
+                                        next:           $cbNext.is(':checked'),
+                                        days:           getCheckboxesStr($divDays.find('input[type=checkbox]:checked'), 7),
+                                        months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
+                                        onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
+                                        onlyEvenDays:   $cbOnlyOddDays.is(':checked'),
+                                        noOffsetError:  true
+                                    });
+                                }
                                 resizeResultContainer();
                             });
+
                             $multiplier.change(() => $propertyValue.change());
                             $offset.change(() => {
                                 const type = $offset.typedInput('type');
@@ -984,7 +987,6 @@
             oneditresize(_size) {
                 try {
                     const height1 = $('.node-input-rule-container-row ol').outerHeight(true);
-
                     const rows1 = $('#node-input-rule-container').editableList('items');
                     if (rows1.size() > 0) {
                         $('#node-input-rule-container').editableList('height', height1 + 40);
@@ -1000,7 +1002,7 @@
                         $('#node-input-result-container').editableList('height', 20);
                     }
                 } catch (err) {
-                    console.debug('oneditresize',err); // eslint-disable-line no-console
+                    console.debug('oneditresize', err); // eslint-disable-line no-console
                 }
             }
         });
@@ -1061,7 +1063,6 @@
     <div class="form-tips is-to-show-initially">
         <span data-i18n="[html]time-comp.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
-
   </script>
   <style>
           hr {
