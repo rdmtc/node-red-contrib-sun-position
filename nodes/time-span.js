@@ -3,11 +3,6 @@
  *********************************************/
 'use strict';
 const util = require('util');
-const path = require('path');
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-
-// const path = require('path');
-// const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 const perSecond = 1000;
 const perMinute = 60000;
@@ -416,7 +411,7 @@ module.exports = function (RED) {
                 }
 
                 const resObj = [];
-                const rulesLength =  node.rules.length;
+                const rulesLength = node.rules.length;
                 for (let i = 0; i < rulesLength; ++i) {
                     const rule =  node.rules[i];
                     try {
@@ -424,10 +419,6 @@ module.exports = function (RED) {
                         if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
                             ruleoperand = ruleoperand * rule.multiplier;
                         }
-                        /*
-                        node.debug('operand ' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
-                        node.debug('operator ' + util.inspect(rule.operator, { colors: true, compact: 10, breakLength: Infinity }));
-                        node.debug('operatorType ' + util.inspect(rule.operatorType, { colors: true, compact: 10, breakLength: Infinity })); */
 
                         let result = false;
                         switch (parseInt(rule.operator)) {
@@ -472,7 +463,6 @@ module.exports = function (RED) {
                         resObj.push(null);
                         continue;
                     }
-
                 }
 
                 for (let i = resObj.length; i < rulesLength; ++i) {

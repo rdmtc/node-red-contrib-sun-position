@@ -148,7 +148,6 @@ module.exports = function (RED) {
                         if (rule.format === 'time-calc.timeFormat.default') {
                             rule.format = 0;
                         }
-                        // node.debug(i + ' rule=' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
 
                         let compare = null;
                         let result = false;
@@ -262,16 +261,10 @@ module.exports = function (RED) {
                                             ruleoperand.setFullYear(0);
                                         }
 
-                                        // node.debug(i + ' inputOperant=' + util.inspect(inputOperant, { colors: true, compact: 10, breakLength: Infinity }));
-                                        // node.debug(i + ' ruleoperand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
-
                                         result = compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
                                             result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
-                                        // node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-                                        // node.debug(i + ' inputData=' + util.inspect(inputData, { colors: true, compact: 10, breakLength: Infinity }));
-                                        // node.debug(i + ' operand=' + util.inspect(ruleoperand, { colors: true, compact: 10, breakLength: Infinity }));
                                         break;
                                 }
                             }
