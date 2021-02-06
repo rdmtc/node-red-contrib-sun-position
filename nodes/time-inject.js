@@ -479,6 +479,7 @@ module.exports = function (RED) {
                     break;
                 case tInj.intervalTime:
                 case tInj.intervalAmount:
+                    node.debug('initialize - Intervall timer/amount');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
@@ -488,6 +489,14 @@ module.exports = function (RED) {
                         node.doCreateStartTimeout(node);
                     }
                     break;
+                default:
+                    node.debug('initialize - default');
+                    node.doSetStatus(node, 'green');
+                    if (doEmit) {
+                        node.emit('input', {
+                            type: 'once/startup'
+                        }); // will create timeout
+                    }
             }
         };
 
@@ -872,7 +881,6 @@ module.exports = function (RED) {
             return null;
         });
 
-        node.status({});
         try {
             if (!node.positionConfig) {
                 node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
@@ -907,6 +915,7 @@ module.exports = function (RED) {
                 }, (config.onceDelay || 0.1) * 1000);
                 return;
             }
+            node.status({});
 
             node.onceTimeout = setTimeout(() => {
                 try {

@@ -113,3 +113,4 @@ specific language governing permissions and limitations under the License.
 - [NPM package](https://www.npmjs.com/package/node-red-contrib-sun-position)
 - [Node-Red](https://flows.nodered.org/node/node-red-contrib-sun-position)
 - [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rdmtc/node-red-contrib-sun-position)
+- [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/U7U3315ED)

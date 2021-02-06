@@ -25,7 +25,7 @@ Unfortunately this release is not finished yet and only released as beta. Unfort
 
 - blind-control + clock-time
   - Standardization and consolidation of the same and similar functions #186
-    - minor bugs fixed with it
+    - minor bugs fixed with it (#198, #200)
 
 - time inject
   - fixed bug, that interval between times does not start when load node and time in in the interval #189

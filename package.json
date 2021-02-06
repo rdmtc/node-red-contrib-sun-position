@@ -69,6 +69,18 @@
     {
       "name": "Hypnos3",
       "url": "https://github.com/hypnos3"
+    },
+    {
+      "name": "Marc Hoppe",
+      "url": "https://github.com/mhop"
+    },
+    {
+      "name": "Mauricio Bonani",
+      "url": "https://github.com/bonanitech"
+    },
+    {
+      "name": "Tom Hoover",
+      "url": "https://github.com/tomhoover"
     }
   ],
   "license": "Apache-2.0",
@@ -91,9 +103,9 @@
     }
   },
   "devDependencies": {
-    "eslint": "^7.13.0",
+    "eslint": "^7.19.0",
     "eslint-plugin-html": "^6.1.1",
-    "eslint-plugin-jsdoc": "^31.0.6",
+    "eslint-plugin-jsdoc": "^31.6.0",
     "eslint-plugin-json": "^2.1.2",
     "eslint-plugin-node": "^11.1.0"
   },

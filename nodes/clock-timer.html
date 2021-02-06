@@ -271,7 +271,8 @@
                             getBackendData(d => {
                                 const $div = $('#node-input-payloadDefault-div');
                                 const titleOrg = $div.attr('titleOrg');
-                                $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                // $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                                $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                             }, {
                                 nodeId:     node.id,
                                 kind:       'getOutDataData',
@@ -418,7 +419,7 @@
                                 result += data.timeOpText;
                                 result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.timeType, data.timeValue) + '</var>';
                                 result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
-                                if (enh && enh.timeReg) {
+                                if (enh && enh.timeReg && enh.timeReg.text) {
                                     result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
                                 }
 
@@ -429,7 +430,7 @@
                                     result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMinType, data.timeMinValue);
                                     result += '</var>';
                                     result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
-                                    if (enh && enh.timeMin) {
+                                    if (enh && enh.timeMin && enh.timeMin.text) {
                                         result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
                                     }
                                     result += '</div>';
@@ -441,7 +442,7 @@
                                     result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMaxType, data.timeMaxValue);
                                     result += '</var>';
                                     result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
-                                    if (enh && enh.timeMax) {
+                                    if (enh && enh.timeMax && enh.timeMax.text) {
                                         result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
                                     }
                                     result += '</div>';
@@ -1168,7 +1169,7 @@
                                 dialogAddData.timeReg = {
                                     ts : 0,
                                     data : null,
-                                    text : d.value
+                                    text : bdDateToTime(d)
                                 };
                             }
                             $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
@@ -1225,7 +1226,7 @@
                                     dialogAddData.timeMin = {
                                         ts : 0,
                                         data : null,
-                                        text : d.value
+                                        text : bdDateToTime(d)
                                     };
                                 }
                                 $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
@@ -1281,7 +1282,7 @@
                                     dialogAddData.timeMax = {
                                         ts : 0,
                                         data : null,
-                                        text : d.value
+                                        text : bdDateToTime(d)
                                     };
                                 }
                                 $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
@@ -1434,7 +1435,8 @@
                         getBackendData(d => {
                             const $div = $('#dialog-row-payload');
                             const titleOrg = $div.attr('titleOrg');
-                            $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                            // $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
+                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
                         }, {
                             nodeId:     node.id,
                             kind:       'getOutDataData',
@@ -2120,6 +2122,11 @@
         min-height: 1px;
         margin-left: 10px;
         width: 98%
+    }
+    .input-error {
+        border-color: #d6615f !important;
+        background-color: #ffcccc !important;
+        color: #555 !important;
     }
     .block-indent2 {
         float: left;
