@@ -738,7 +738,6 @@ function normalizeDate(d, offset, multiplier, limit) {
             d.setDate(d.getDate() + 1);
         }
     }
-
     if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
         const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
@@ -759,7 +758,6 @@ function normalizeDate(d, offset, multiplier, limit) {
             time = d.getDate();
         }
     }
-
     if (limit.onlyOddDays) {
         let time = d.getDate();
         while((time % 2 === 0)) {

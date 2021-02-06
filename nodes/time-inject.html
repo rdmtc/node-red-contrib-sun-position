@@ -935,7 +935,10 @@
                             oM   : node.payloadOffsetMultiplier ? node.payloadOffsetMultiplier : 60000,
                             f    : node.payloadTimeFormat ? node.payloadTimeFormat : 0,
                             next : true,
-                            days : '*'
+                            days : '*',
+                            months: '*',
+                            onlyEvenDays: false,
+                            onlyOddDays: false
                         });
                         node.props.push({
                             p    : '',
@@ -947,7 +950,10 @@
                             oM   : 60000,
                             f    : 0,
                             next : false,
-                            days : '*'
+                            days : '*',
+                            months: '*',
+                            onlyEvenDays: false,
+                            onlyOddDays: false
                         });
 
                         if (node.addPayload1Type !== types.Undefined.value) {
@@ -961,7 +967,10 @@
                                 oM   : node.addPayload1OffsetMultiplier ? node.addPayload1OffsetMultiplier : 60000,
                                 f    : node.addPayload1Format ? node.addPayload1Format : 0,
                                 next : node.addPayload1Next,
-                                days : node.addPayload1Days ? node.addPayload1Days : '*'
+                                days : node.addPayload1Days ? node.addPayload1Days : '*',
+                                months: '*',
+                                onlyEvenDays: false,
+                                onlyOddDays: false
                             });
                         }
                         if (node.addPayload2Type !== types.Undefined.value) {
@@ -975,21 +984,27 @@
                                 oM   : node.addPayload2OffsetMultiplier ? node.addPayload2OffsetMultiplier : 60000,
                                 f    : node.addPayload2Format ? node.addPayload2Format : 0,
                                 next : node.addPayload2Next,
-                                days : node.addPayload2Days ? node.addPayload2Days : '*'
+                                days : node.addPayload2Days ? node.addPayload2Days : '*',
+                                months: '*',
+                                onlyEvenDays: false,
+                                onlyOddDays: false
                             });
                         }
                         if (node.addPayload3Type !== types.Undefined.value) {
                             node.props.push({
-                                p  : node.addPayload3,
-                                pt : node.addPayload3Type,
-                                v  : node.addPayload3Value,
-                                vt : node.addPayload3ValueType ? ((node.addPayload3ValueType === 'string') ? 'str' : node.addPayload3ValueType) : (node.addPayload3Value ? 'str' : 'date'),
-                                o  : node.addPayload3Offset ? node.addPayload3Offset : 1,
-                                oT : (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : (node.addPayload3OffsetType ? node.addPayload3OffsetType : 'num'),
-                                oM : node.addPayload3OffsetMultiplier ? node.addPayload3OffsetMultiplier : 60000,
-                                f  : node.addPayload3Format ? node.addPayload3Format : 0,
+                                p    : node.addPayload3,
+                                pt   : node.addPayload3Type,
+                                v    : node.addPayload3Value,
+                                vt   : node.addPayload3ValueType ? ((node.addPayload3ValueType === 'string') ? 'str' : node.addPayload3ValueType) : (node.addPayload3Value ? 'str' : 'date'),
+                                o    : node.addPayload3Offset ? node.addPayload3Offset : 1,
+                                oT   : (node.addPayload3Offset === 0 || node.addPayload3Offset === '') ? types.Undefined.value : (node.addPayload3OffsetType ? node.addPayload3OffsetType : 'num'),
+                                oM   : node.addPayload3OffsetMultiplier ? node.addPayload3OffsetMultiplier : 60000,
+                                f    : node.addPayload3Format ? node.addPayload3Format : 0,
                                 next : node.addPayload3Next,
-                                days : node.addPayload3Days ? node.addPayload3Days : '*'
+                                days : node.addPayload3Days ? node.addPayload3Days : '*',
+                                months: '*',
+                                onlyEvenDays: false,
+                                onlyOddDays: false
                             });
                         }
                     }
@@ -1534,22 +1549,22 @@
                 props.each(function(_i) {
                     const prop = $(this);
                     const p = {
-                        p    : prop.find('.node-input-prop-property-name').typedInput('value'),
-                        pt   : prop.find('.node-input-prop-property-name').typedInput('type'),
-                        v    : prop.find('.node-input-prop-property-value').typedInput('value'),
-                        vt   : prop.find('.node-input-prop-property-value').typedInput('type'),
-                        o    : prop.find('.node-input-prop-property-offset').typedInput('value'),
-                        oT   : prop.find('.node-input-prop-property-offset').typedInput('type'),
-                        oM   : prop.find('.node-input-prop-property-multiplier').val(),
-                        f    : '',
-                        fS   : Number(prop.find('.node-input-prop-property-FormatSel').val()),
-                        fT   : prop.find('.node-input-prop-property-FormatSel option:selected').text(),
-                        fI   : prop.find('.node-input-prop-property-FormatIp').val(),
-                        next : prop.find('.node-input-prop-property-Next').is(':checked'),
-                        days : getCheckboxesStr(prop.find('#node-input-prop-property-Days input[type=checkbox]:checked'), 7),
-                        months: getCheckboxesStr(prop.find('#node-input-prop-property-months input[type=checkbox]:checked'), 12),
-                        onlyOddDays: prop.find('.node-input-prop-property-onlyOddDays').is(':checked'),
-                        onlyEvenDays: prop.find('.node-input-prop-property-OnlyEvenDays').is(':checked')
+                        p       : prop.find('.node-input-prop-property-name').typedInput('value'),
+                        pt      : prop.find('.node-input-prop-property-name').typedInput('type'),
+                        v       : prop.find('.node-input-prop-property-value').typedInput('value'),
+                        vt      : prop.find('.node-input-prop-property-value').typedInput('type'),
+                        o       : prop.find('.node-input-prop-property-offset').typedInput('value'),
+                        oT      : prop.find('.node-input-prop-property-offset').typedInput('type'),
+                        oM      : prop.find('.node-input-prop-property-multiplier').val(),
+                        f       : '',
+                        fS      : Number(prop.find('.node-input-prop-property-FormatSel').val()),
+                        fT      : prop.find('.node-input-prop-property-FormatSel option:selected').text(),
+                        fI      : prop.find('.node-input-prop-property-FormatIp').val(),
+                        next    : prop.find('.node-input-prop-property-Next').is(':checked'),
+                        days    : getCheckboxesStr(prop.find('#node-input-prop-property-Days input[type=checkbox]:checked'), 7),
+                        months  : getCheckboxesStr(prop.find('#node-input-prop-property-months input[type=checkbox]:checked'), 12),
+                        onlyOddDays     : prop.find('.node-input-prop-property-onlyOddDays').is(':checked'),
+                        onlyEvenDays    : prop.find('.node-input-prop-property-OnlyEvenDays').is(':checked')
                     };
                     p.f = (p.fS !== 99 ? p.fS : p.fI);
                     if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {

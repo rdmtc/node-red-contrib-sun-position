@@ -1036,18 +1036,18 @@
                         node.results = [];
                         if (node.result1 !== 'none') {
                             node.results.push({
-                                p       : node.result1 ? node.result1 : types.MsgPayload.value,
-                                pt      : node.result1Type ? node.result1Type : 'input',
-                                v       : node.result1Value ? node.result1Value : '',
-                                vt      : node.result1ValueType ? node.result1ValueType : 'input',
-                                o       : node.result1Offset ? node.result1Offset : 1,
-                                oT      : (node.result1OffsetType === 0 || node.result1OffsetType === '') ? types.Undefined.value : (node.result1OffsetType ? node.result1OffsetType : 'num'),
-                                oM      : node.result1OffsetMultiplier ? node.result1OffsetMultiplier : 60000,
-                                fTs     : node.result1TSFormat ? node.result1TSFormat : 1,
-                                f       : node.result1Format ? node.result1Format : 0,
-                                next    : false,
-                                days    : '*',
-                                months  : '*',
+                                p           : node.result1 ? node.result1 : types.MsgPayload.value,
+                                pt          : node.result1Type ? node.result1Type : 'input',
+                                v           : node.result1Value ? node.result1Value : '',
+                                vt          : node.result1ValueType ? node.result1ValueType : 'input',
+                                fTs         : node.result1TSFormat ? node.result1TSFormat : 1,
+                                o           : node.result1Offset ? node.result1Offset : 1,
+                                oT          : (node.result1OffsetType === 0 || node.result1OffsetType === '') ? types.Undefined.value : (node.result1OffsetType ? node.result1OffsetType : 'num'),
+                                oM          : node.result1OffsetMultiplier ? node.result1OffsetMultiplier : 60000,
+                                f           : node.result1Format ? node.result1Format : 0,
+                                next        : false,
+                                days        : '*',
+                                months      : '*',
                                 onlyEvenDays: false,
                                 onlyOddDays : false
                             });

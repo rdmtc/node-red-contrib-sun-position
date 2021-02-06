@@ -30,16 +30,19 @@ module.exports = function (RED) {
             config.results = [];
             if (config.result1Type && config.result1Type !== 'none') {
                 config.results.push({
-                    p: config.result1 ? config.result1 : 'msgPayload',
-                    pt: config.result1Type ? config.result1Type : 'input',
-                    v: config.result1Value ? config.result1Value : '',
-                    vt: config.result1ValueType ? config.result1ValueType : 'input',
-                    o: config.result1Offset ? config.result1Offset : 1,
-                    oT: (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
-                    oM: config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
-                    f: config.result1Format ? config.result1Format : 0,
-                    next: false,
-                    days: '*'
+                    p           : config.result1 ? config.result1 : 'msgPayload',
+                    pt          : config.result1Type ? config.result1Type : 'input',
+                    v           : config.result1Value ? config.result1Value : '',
+                    vt          : config.result1ValueType ? config.result1ValueType : 'input',
+                    o           : config.result1Offset ? config.result1Offset : 1,
+                    oT          : (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
+                    oM          : config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
+                    f           : config.result1Format ? config.result1Format : 0,
+                    next        : false,
+                    days        : '*',
+                    months      : '*',
+                    onlyEvenDays: false,
+                    onlyOddDays : false
                 });
             }
 
@@ -56,16 +59,19 @@ module.exports = function (RED) {
         this.results = [];
         config.results.forEach(prop => {
             const propNew = {
-                outType: prop.pt,
-                outValue: prop.p,
-                type: prop.vt,
-                value: prop.v,
-                format: prop.f,
-                offsetType: prop.oT,
-                offset: prop.o,
-                multiplier: prop.oM,
-                next: (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
-                days: prop.days
+                outType     : prop.pt,
+                outValue    : prop.p,
+                type        : prop.vt,
+                value       : prop.v,
+                format      : prop.f,
+                offsetType  : prop.oT,
+                offset      : prop.o,
+                multiplier  : prop.oM,
+                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days        : prop.days,
+                months      : prop.months,
+                onlyEvenDays: prop.onlyEvenDays,
+                onlyOddDays : prop.onlyOddDays
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {
