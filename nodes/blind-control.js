@@ -266,8 +266,13 @@ module.exports = function (RED) {
                 }
                 node.debug(`overwrite newPos=${newPos}`);
                 const noSameValue = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
+                const resetOnSameValue = hlp.getMsgBoolValue(msg, 'resetOnSameValue');
                 if (noSameValue && (node.previousData.level === newPos)) {
-                    node.debug(`overwrite exit true noSameValue=${noSameValue}, newPos=${newPos}`);
+                    node.debug(`overwrite exit true ignoreSameValue=${noSameValue}, newPos=${newPos}`);
+                    return ctrlLib.setOverwriteReason(node);
+                } if (resetOnSameValue && (node.previousData.level === newPos)) {
+                    node.debug(`resetOnSameValue active, reset overwrite and exit newPos=${newPos}`);
+                    ctrlLib.posOverwriteReset(node);
                     return ctrlLib.setOverwriteReason(node);
                 }
                 node.level.current = newPos;

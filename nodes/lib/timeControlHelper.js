@@ -207,25 +207,29 @@ function prepareRules(node, msg, tempData) {
                 }
                 delete el.operandValue;
                 delete el.thresholdValue;
-                el.result = node.positionConfig.comparePropValue(node, msg,
-                    {
-                        value: el.operand.value,
-                        type: el.operand.type,
-                        callback: (result, _obj) => { // opCallback
-                            el.operandValue = _obj.value;
-                            return evalTempData(node, _obj.type, _obj.value, result, tempData);
+                if (el.operand.type === 'sunControlMode') {
+                    el.result = (node.sunData && (node.sunData.mode === el.operand.value));
+                } else {
+                    el.result = node.positionConfig.comparePropValue(node, msg,
+                        {
+                            value: el.operand.value,
+                            type: el.operand.type,
+                            callback: (result, _obj) => { // opCallback
+                                el.operandValue = _obj.value;
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
+                            }
+                        },
+                        el.operator.value,
+                        {
+                            value: el.threshold.value,
+                            type: el.threshold.type,
+                            callback: (result, _obj) => { // opCallback
+                                el.thresholdValue = _obj.value;
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
+                            }
                         }
-                    },
-                    el.operator.value,
-                    {
-                        value: el.threshold.value,
-                        type: el.threshold.type,
-                        callback: (result, _obj) => { // opCallback
-                            el.thresholdValue = _obj.value;
-                            return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                        }
-                    }
-                );
+                    );
+                }
                 rule.conditon = {
                     index : i,
                     result : el.result,
@@ -554,6 +558,15 @@ function initializeCtrl(REDLib, node, config) {
                         text : rule[pretext+'LogOperatorText']
                     }
                 };
+                if (operandAType === 'sunControlMode') {
+                    if (operandAValue === 'off' || operandAValue.charAt(0) === '0') {
+                        el.operand.value = 0;
+                    } else if (operandAValue === 'maximize' || operandAValue.charAt(0) === '1') {
+                        el.operand.value = 1;
+                    } else {
+                        el.operand.value = 2;
+                    }
+                }
                 if (el.operandName.length > 25) {
                     el.operandNameShort = getNameShort(operandAType, operandAValue);
                 }

@@ -22,10 +22,15 @@ Unfortunately this release is not finished yet and only released as beta. Unfort
   - changed several links to documentation #151
   - replaced all remaining png type graphics with svg
   - added examples
+  - minor bug fixes (#196, )
 
 - blind-control + clock-time
   - Standardization and consolidation of the same and similar functions #186
     - minor bugs fixed with it (#198, #200)
+
+- blind-control only
+  - for Blind control the current used mode as operator (#197)
+  - add a `msg.resetOnSameValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
 
 - time inject
   - fixed bug, that interval between times does not start when load node and time in in the interval #189

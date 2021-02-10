@@ -58,7 +58,11 @@
             "WeekOfYear":"week number",
             "isWeekOfYearEven":"is week even (true/false)",
             "DayOfYear":"day number",
-            "isDayOfYearEven":"is day even (true/false)"
+            "isDayOfYearEven":"is day even (true/false)",
+            "sunControlMode": "current sun control mode",
+			"sunControlOff": "off",
+			"sunControlRestrict": "restrict sunlight (🌞 Summer)",
+			"sunControlMaximize": "maximize sunlight (⛄ Winter)"
         },
         "typeOptions": {
             "moonRise": "moon rise",

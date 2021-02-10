@@ -85,7 +85,7 @@ The documentation of the nodes is moved to the [wiki](https://github.com/rdmtc/n
 ## Support, Bugs and Feedback
 
 For bugs, questions and feature requests please use the
-[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues), the [Homematic forum](https://homematic-forum.de/forum/viewforum.php?f=77) or the [RedMatic Slack](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU).
+[GitHub Issues](https://github.com/rdmtc/node-red-contrib-sun-position/issues), or the [Homematic forum](https://homematic-forum.de/forum/viewforum.php?f=77).
 
 :moneybag: Donations [![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4PCF5YW5ASHBN)
 
@@ -106,7 +106,6 @@ specific language governing permissions and limitations under the License.
 
 - [npm Releases / changelog](https://github.com/rdmtc/node-red-contrib-sun-position/releases)
 - [newreleases.io](https://newreleases.io/npm/node-red-contrib-sun-position)
-- [RedMatic Slack (chat like WhatsApp or Facebook Messenger)](https://join.slack.com/t/homematicuser/shared_invite/enQtNDgyNDM2OTkyMDA2LWY1YjY0NTE0NmY0OWM3YWUzMzAzMTgxYmRjMTMyOWE3NjkxNDdlMDY5ZjlhYzM5Nzg2N2U2YjdmNzNlYWNhNTU)
 - [RedMatic Forum](https://homematic-forum.de/forum/viewforum.php?f=77)
 - [RedMatic Wiki](https://github.com/rdmtc/RedMatic/wiki)
 - [Github](https://github.com/rdmtc/node-red-contrib-sun-position)
