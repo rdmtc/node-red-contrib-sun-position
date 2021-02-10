@@ -47,7 +47,11 @@
             "WeekOfYear":"Kalenderwoche (KW)",
             "isWeekOfYearEven":"gerade Kalenderwoche (true/false)",
             "DayOfYear":"Tag des Jahres (Zahl)",
-            "isDayOfYearEven":"gerader Tag des Jahres (true/false)"
+            "isDayOfYearEven":"gerader Tag des Jahres (true/false)",
+            "sunControlMode": "Aktueller Modus Sonnensteuerung",
+			"sunControlOff": "aus",
+			"sunControlRestrict": "Sonnenlicht beschränken (🌞 Sommer)",
+			"sunControlMaximize": "Sonnenlicht maximieren (⛄ Winter)"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",

@@ -471,6 +471,22 @@
                         icon: 'icons/node-red-contrib-sun-position/inputTypeNone2.svg',
                         hasValue: false
                     };
+                    types.SunControlModeType= {
+                        value: 'sunControlMode',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMode','moon phase'),
+                        icon: 'icons/node-red-contrib-sun-position/inputTypeSunControl.svg',
+                        options: [{
+                            value: '0-off',
+                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlOff')
+                        }, {
+                            value: '1-maximize',
+                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMaximize')
+                        }, {
+                            value: '2-restrict',
+                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlRestrict')
+                        }]
+                    };
+
                     /**
                      * save rules
                      * @param {*} node - the node representation
@@ -1499,7 +1515,8 @@
                             types.WeekOfYear,
                             types.WeekOfYearEven,
                             types.DayOfYear,
-                            types.DayOfYearEven
+                            types.DayOfYearEven,
+                            types.SunControlModeType
                         ]
                     });
                     $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
@@ -1541,7 +1558,8 @@
                             types.WeekOfYear,
                             types.WeekOfYearEven,
                             types.DayOfYear,
-                            types.DayOfYearEven
+                            types.DayOfYearEven,
+                            types.SunControlModeType
                         ]
                     });
                     $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
@@ -1920,12 +1938,18 @@
                             $dialogCondAOperator.val(selFields.comparator[0].id);
                             $dialogCondAOperator.hide();
                             $('#dialog-row-condB').hide();
-
+                            $dialogCondAOperator.attr('disabled', true);
                             $dialogCond2LogOperator.val(0);
                             $('#dialog-row-cond2LogOperator').hide();
-                        } else if (propType === 'jsonata' ||
-                                   propType === types.PhaseMoon.value ||
-                                   propType === types.MsgPayloadByTopic.value) {
+                        } else if (propType === types.PhaseMoon.value ||
+                                   propType === types.MsgPayloadByTopic.value ||
+                                   propType === types.SunControlModeType.value) {
+                            $dialogCondAOperator.hide();
+                            $dialogCondAOperator.attr('disabled', true);
+                            $dialogCondAOperator.val(selFields.comparator[0].id); // only true is valid
+                            $('#dialog-row-condB').hide();
+                            $('#dialog-row-cond2LogOperator').show();
+                        } else if (propType === 'jsonata') {
                             $dialogCondAOperator.show();
                             $dialogCondAOperator.attr('disabled', true);
                             $dialogCondAOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
@@ -1973,10 +1997,16 @@
                             if (propType === 'none') {
                                 $dialogCond2AOperator.val(selFields.comparator[0].id);
                                 $dialogCond2AOperator.hide();
+                                $dialogCond2AOperator.attr('disabled', true);
                                 $('#dialog-row-cond2B').hide();
-                            } else if (propType === 'jsonata' ||
-                                       propType === types.PhaseMoon.value ||
-                                       propType === types.MsgPayloadByTopic.value) {
+                            } else if (propType === types.PhaseMoon.value ||
+                                       propType === types.MsgPayloadByTopic.value ||
+                                       propType === types.SunControlModeType.value) {
+                                $dialogCond2AOperator.hide();
+                                $dialogCond2AOperator.attr('disabled', true);
+                                $dialogCond2AOperator.val(selFields.comparator[0].id); // only true is valid
+                                $('#dialog-row-cond2B').hide();
+                            } else if (propType === 'jsonata') {
                                 $dialogCond2AOperator.show();
                                 $dialogCond2AOperator.attr('disabled', true);
                                 $dialogCond2AOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
