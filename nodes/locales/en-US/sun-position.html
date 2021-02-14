@@ -35,21 +35,19 @@
             <dt>times <span class="property-type">object</span></dt>
             <dd>
                 the sun times as object
-                <dt>times.sunrise <span class="property-type">Date</span></dt>
-                <dd>sunrise (top edge of the sun appears on the horizon)</dd>
                 <dt>msg.payload.times.astronomicalDawn <span class="property-type">Date</span></dt><dd>night ends (morning astronomical twilight starts)</dd>
                 <dt>msg.payload.times.amateurDawn <span class="property-type">Date</span></dt><dd>amateur astronomical dawn (sun at 12° before sunrise)</dd>
                 <dt>msg.payload.times.nauticalDawn <span class="property-type">Date</span></dt><dd>nautical dawn (morning nautical twilight starts)</dd>
                 <dt>msg.payload.times.blueHourDawnStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
                 <dt>msg.payload.times.civilDawn <span class="property-type">Date</span></dt><dd>dawn (morning nautical twilight ends, morning civil twilight starts)</dd>
                 <dt>msg.payload.times.blueHourDawnEnd <span class="property-type">Date</span></dt><dd>blue Hour end</dd>
-                <dt>msg.payload.times.sunrise <span class="property-type">Date</span></dt><dd>sunrise (top edge of the sun appears on the horizon)</dd>
+                <dt>msg.payload.times.sunriseStart <span class="property-type">Date</span></dt><dd>sunrise starts (top edge of the sun appears on the horizon)</dd>
                 <dt>msg.payload.times.sunriseEnd <span class="property-type">Date</span></dt><dd>sunrise ends (bottom edge of the sun touches the horizon)</dd>
                 <dt>msg.payload.times.goldenHourDawnEnd <span class="property-type">Date</span></dt><dd>morning golden hour (soft light, best time for photography) ends</dd>
                 <dt>msg.payload.times.solarNoon <span class="property-type">Date</span></dt><dd>solar noon (sun is in the highest position)</dd>
                 <dt>msg.payload.times.goldenHourDuskStart <span class="property-type">Date</span></dt><dd>evening golden hour starts</dd>
                 <dt>msg.payload.times.sunsetStart <span class="property-type">Date</span></dt><dd>sunset starts (bottom edge of the sun touches the horizon)</dd>
-                <dt>msg.payload.times.sunset <span class="property-type">Date</span></dt><dd>sunset (sun disappears below the horizon, evening civil twilight starts)</dd>
+                <dt>msg.payload.times.sunsetEnd <span class="property-type">Date</span></dt><dd>sunset ends (sun disappears below the horizon, evening civil twilight starts)</dd>
                 <dt>msg.payload.times.blueHourDuskStart <span class="property-type">Date</span></dt><dd>blue Hour start</dd>
                 <dt>msg.payload.times.civilDusk <span class="property-type">Date</span></dt><dd>dusk (evening nautical twilight starts)</dd>
                 <dt>msg.payload.times.blueHourDuskEnd <span class="property-type">Date</span></dt><dd>blue hour end</dd>
@@ -83,8 +81,8 @@
     "times": {
         "solarNoon":"2018-12-10T10:59:14.814Z",
         "nadir":"2018-12-10T22:59:14.814Z",
-        "sunrise":"2018-12-10T06:58:55.584Z",
-        "sunset":"2018-12-10T14:59:34.044Z",
+        "sunriseStart":"2018-12-10T06:58:55.584Z",
+        "sunsetEnd":"2018-12-10T14:59:34.044Z",
         "sunriseEnd":"2018-12-10T07:03:12.232Z",
         "sunsetStart":"2018-12-10T14:55:17.395Z",
         "blueHourDawnEnd":"2018-12-10T06:34:22.885Z",

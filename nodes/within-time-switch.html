@@ -338,7 +338,6 @@
                     initializeValue(node, 'timeMonths', '*');
                     initCheckboxesBlock('#within-time-switch-timeDays', node.timeDays);
                     initCheckboxesBlock('#within-time-switch-timeMonths', node.timeMonths);
-
                     setupTInput(node, {
                         typeProp: 'startTimeType',
                         valueProp: 'startTime',
@@ -619,8 +618,8 @@
                         typeProp: 'startTimeAltType',
                         valueProp: 'startTimeAlt',
                         width: 'calc(100% - 110px)',
-                        defaultType: 'entered',
-                        defaultValue: '',
+                        defaultType: node.startTimeAltType || types.TimeEntered.value,
+                        defaultValue: node.startTimeAlt || '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
@@ -760,8 +759,8 @@
                         typeProp: 'endTimeAltType',
                         valueProp: 'endTimeAlt',
                         width: 'calc(100% - 110px)',
-                        defaultType: 'entered',
-                        defaultValue: '',
+                        defaultType: node.endTimeAltType || types.TimeEntered.value,
+                        defaultValue: node.endTimeAlt || '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
