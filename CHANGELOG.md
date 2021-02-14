@@ -12,7 +12,14 @@ Install of a specific Version in a Homematic:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
+#### 1.2.2:  BugFix
 
+- general
+  - internal object property `sunset` renamed to `sunsetEnd` and `sunrise` to `sunriseStart` (#213). This leads into problems with backward compatibilities. In any select box where `sunset` or `sunrise` is selected, it needs to reselect the right time.
+
+- blind-control + clock-time
+  - fix that note settings overwrite by message and payload does not working #233
+  - fix bug with missing function #223
 
 #### 1.2.1:  rework
 

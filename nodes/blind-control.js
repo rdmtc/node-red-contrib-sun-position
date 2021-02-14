@@ -257,7 +257,7 @@ module.exports = function (RED) {
                 node.level.currentInverse = NaN;
             } else if (!isNaN(newPos)) {
                 const allowRound = (msg.topic ? (msg.topic.includes('roundLevel') || msg.topic.includes('roundLevel')) : false);
-                if (!ctrlLib.validPosition_(node, newPos, allowRound)) {
+                if (!ctrlLib.validPosition(node, newPos, allowRound)) {
                     node.error(RED._('blind-control.errors.invalid-blind-level', { pos: newPos }));
                     return false;
                 }
@@ -927,53 +927,59 @@ module.exports = function (RED) {
                 }
                 if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
                     switch (msg.topic) {
-                        case 'setSmoothTime':
-                            node.smoothTime = parseFloat(msg.Payload) || node.smoothTime;
-                            break;
-                        case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseFloat(msg.Payload) || node.autoTrigger.defaultTime;
-                            break;
-                        case 'setStoreName':
-                            node.storeName = msg.Payload || node.storeName;
-                            break;
-                        case 'setSunDataTopic':
-                            node.sunData.topic = msg.Payload || node.sunData.topic;
-                            break;
-                        case 'setSunDataFloorLength':
-                            node.sunData.floorLength = parseFloat(msg.Payload) || node.sunData.floorLength;
-                            break;
-                        case 'setSunDataMinAltitude':
-                            node.sunData.minAltitude = parseFloat(msg.Payload) || node.sunData.minAltitude;
-                            break;
-                        case 'setSunDataMinDelta':
-                            node.sunData.minDelta = parseFloat(msg.Payload) || node.sunData.minDelta;
-                            break;
-                        case 'setWindowSettingsTop':
-                            node.windowSettings.top = parseFloat(msg.Payload) || node.windowSettings.top;
-                            break;
-                        case 'setWindowSettingsBottom':
-                            node.windowSettings.bottom = parseFloat(msg.Payload) || node.windowSettings.bottom;
-                            break;
-                        case 'setWindowSettingsAzimuthStart':
-                            node.windowSettings.AzimuthStart = parseFloat(msg.Payload) || node.windowSettings.AzimuthStart;
-                            break;
-                        case 'setWindowSettingsAzimuthEnd':
-                            node.windowSettings.AzimuthEnd = parseFloat(msg.Payload) || node.windowSettings.AzimuthEnd;
-                            break;
+                        /* Blind Settings */
                         case 'setBlindSettingsTop':
-                            node.nodeData.levelTop = parseFloat(msg.Payload) || node.nodeData.levelTop;
+                            node.nodeData.levelTop = parseFloat(msg.payload) || node.nodeData.levelTop;
                             break;
                         case 'setBlindSettingsBottom':
-                            node.nodeData.levelBottom = parseFloat(msg.Payload) || node.nodeData.levelBottom;
+                            node.nodeData.levelBottom = parseFloat(msg.payload) || node.nodeData.levelBottom;
                             break;
                         case 'setBlindSettingsIncrement':
-                            node.nodeData.increment = parseFloat(msg.Payload) || node.nodeData.increment;
+                            node.nodeData.increment = parseFloat(msg.payload) || node.nodeData.increment;
                             break;
+                        /* Default Settings */
                         case 'setBlindSettingsLevel':
-                            node.nodeData.levelDefault = parseFloat(msg.Payload) || node.nodeData.levelDefault;
+                            node.nodeData.levelDefault = parseFloat(msg.payload) || node.nodeData.levelDefault;
                             break;
                         case 'setSettingsTopic':
-                            node.nodeData.topic = msg.Payload || node.nodeData.topic;
+                            node.nodeData.topic = msg.payload || node.nodeData.topic;
+                            break;
+                        /* Window Settings */
+                        case 'setWindowSettingsTop':
+                            node.windowSettings.top = parseFloat(msg.payload) || node.windowSettings.top;
+                            break;
+                        case 'setWindowSettingsBottom':
+                            node.windowSettings.bottom = parseFloat(msg.payload) || node.windowSettings.bottom;
+                            break;
+                        case 'setWindowSettingsAzimuthStart':
+                            node.windowSettings.AzimuthStart = parseFloat(msg.payload) || node.windowSettings.AzimuthStart;
+                            break;
+                        case 'setWindowSettingsAzimuthEnd':
+                            node.windowSettings.AzimuthEnd = parseFloat(msg.payload) || node.windowSettings.AzimuthEnd;
+                            break;
+                        /* sun Control Settings */
+                        case 'setSunDataTopic':
+                            node.sunData.topic = msg.payload || node.sunData.topic;
+                            break;
+                        case 'setSunDataFloorLength':
+                            node.sunData.floorLength = parseFloat(msg.payload) || node.sunData.floorLength;
+                            break;
+                        case 'setSunDataMinAltitude':
+                            node.sunData.minAltitude = parseFloat(msg.payload) || node.sunData.minAltitude;
+                            break;
+                        /* minimum changes Settings */
+                        case 'setSunDataMinDelta':
+                            node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta;
+                            break;
+                        case 'setSmoothTime':
+                            node.smoothTime = parseFloat(msg.payload) || node.smoothTime;
+                            break;
+                        /* advanced Settings */
+                        case 'setAutoTriggerTime':
+                            node.autoTrigger.defaultTime = parseFloat(msg.payload) || node.autoTrigger.defaultTime;
+                            break;
+                        case 'setStoreName':
+                            node.storeName = msg.payload || node.storeName;
                             break;
                         default:
                             break;

@@ -512,7 +512,7 @@
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
-                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr */
+                    /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr setTInputValue */
                     const types = getTypes(node);
                     const selFields = getSelectFields();
                     // #region initialize
@@ -621,9 +621,7 @@
                                         'global'
                                     ]
                                 });
-                            $propertyName.typedInput('value', prop.p);
-                            $propertyName.typedInput('type', prop.pt);
-                            $propertyName.typedInput('value', prop.p); // fix missing value, thatswhy twice, don't know why not working
+                            setTInputValue($propertyName, prop.p, prop.pt);
 
                             $('<div/>', { style: 'display:inline-block; padding:0px 6px;' })
                                 .text('=')
@@ -674,8 +672,7 @@
                                         types.numPercent
                                     ]
                                 });
-                            $propertyValue.typedInput('value', prop.v);
-                            $propertyValue.typedInput('type', prop.vt);
+                            setTInputValue($propertyValue, prop.v, prop.vt);
 
                             // row2 - Format Selection
                             const operandSelFieldName = 'node-input-prop-property-FormatSel';
@@ -706,8 +703,7 @@
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
                                     types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber]
                                 });
-                            $offset.typedInput('value', prop.o);
-                            $offset.typedInput('type', prop.oT);
+                            setTInputValue($offset, prop.o, prop.oT);
 
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-prop-property-multiplier'

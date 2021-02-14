@@ -222,10 +222,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @property {suntime} goldenHourDawnEnd - The sun-time for morning golden hour (soft light, best time for photography)
     * @property {suntime} goldenHourDuskStart - The sun-time for evening golden hour starts
     * @property {suntime} goldenHourDuskEnd - The sun-time for evening golden hour starts
+    * @property {suntime} sunriseStart - The sun-time for sunrise starts (top edge of the sun appears on the horizon)
     * @property {suntime} sunriseEnd - The sun-time for sunrise ends (bottom edge of the sun touches the horizon)
     * @property {suntime} sunsetStart - The sun-time for sunset starts (bottom edge of the sun touches the horizon)
-    * @property {suntime} sunrise - The sun-time for sunrise (top edge of the sun appears on the horizon)
-    * @property {suntime} sunset - The sun-time for sunset (sun disappears below the horizon, evening civil twilight starts)
+    * @property {suntime} sunsetEnd - The sun-time for sunset ends (sun disappears below the horizon, evening civil twilight starts)
     * @property {suntime} blueHourDawnStart - The sun-time for blue Hour start (time for special photography photos starts)
     * @property {suntime} blueHourDawnEnd - The sun-time for blue Hour end (time for special photography photos end)
     * @property {suntime} blueHourDuskStart - The sun-time for blue Hour start (time for special photography photos starts)
@@ -244,8 +244,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @property {suntime} [night] - Deprecated: alternate for astronomicalDusk
     * @property {suntime} [nightStart] - Deprecated: alternate for astronomicalDusk
     * @property {suntime} [goldenHour] - Deprecated: alternate for goldenHourDuskStart
-    * @property {suntime} [sunsetEnd] - Deprecated: alternate for sunset
-    * @property {suntime} [sunriseStart] - Deprecated: alternate for sunrise
+    * @property {suntime} [sunset] - Deprecated: alternate for sunsetEnd
+    * @property {suntime} [sunrise] - Deprecated: alternate for sunriseStart
     * @property {suntime} [goldenHourEnd] - Deprecated: alternate for goldenHourDawnEnd
     * @property {suntime} [goldenHourStart] - Deprecated: alternate for goldenHourDuskStart
     */
@@ -254,7 +254,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const sunTimes = SunCalc.times = [
         [6, 'goldenHourDawnEnd', 'goldenHourDuskStart'], // GOLDEN_HOUR_2
         [-0.3, 'sunriseEnd', 'sunsetStart'], // SUNRISE_END
-        [-0.833, 'sunrise', 'sunset'], // SUNRISE
+        [-0.833, 'sunriseStart', 'sunsetEnd'], // SUNRISE
         [-1, 'goldenHourDawnStart', 'goldenHourDuskEnd'], // GOLDEN_HOUR_1
         [-4, 'blueHourDawnEnd', 'blueHourDuskStart'], // BLUE_HOUR
         [-6, 'civilDawn', 'civilDusk'], // DAWN
@@ -272,8 +272,8 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         ['night', 'astronomicalDusk'],
         ['nightStart', 'astronomicalDusk'],
         ['goldenHour', 'goldenHourDuskStart'],
-        ['sunriseStart', 'sunrise'],
-        ['sunsetEnd', 'sunset'],
+        ['sunrise', 'sunriseStart'],
+        ['sunset', 'sunsetEnd'],
         ['goldenHourEnd', 'goldenHourDawnEnd'],
         ['goldenHourStart', 'goldenHourDuskStart']
     ];

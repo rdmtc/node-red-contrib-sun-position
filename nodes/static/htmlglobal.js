@@ -134,6 +134,36 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
 }
 
 /**
+ * check types of deprecate values
+ * @param {*} type type to check
+ * @param {*} value value to check
+ * @returns original value or replaced one
+ */
+function checkDeprecatedValues(type, value) {
+    if (type === 'pdsTime') {
+        const data = [
+            ['dawn', 'civilDawn'],
+            ['dusk', 'civilDusk'],
+            ['nightEnd', 'astronomicalDawn'],
+            ['night', 'astronomicalDusk'],
+            ['nightStart', 'astronomicalDusk'],
+            ['goldenHour', 'goldenHourDuskStart'],
+            ['sunrise', 'sunriseStart'],
+            ['sunset', 'sunsetEnd'],
+            ['goldenHourEnd', 'goldenHourDawnEnd'],
+            ['goldenHourStart', 'goldenHourDuskStart']
+        ];
+        for (let index = 0; index < data.length; index++) {
+            if (value === data[index][0]) {
+                value = data[index][1];
+                break;
+            }
+        }
+    }
+    return value;
+}
+
+/**
  * get types for typeInputs
  * @param {*} node - node representation for access to i18N function (node._())
  * @returns {Object} object of types
@@ -287,8 +317,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 value: 'goldenHourDawnStart',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDawnStart')
             }, {
-                value: 'sunrise',
-                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunrise')
+                value: 'sunriseStart',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseStart')
             }, {
                 value: 'sunriseEnd',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunriseEnd')
@@ -305,8 +335,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 value: 'sunsetStart',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetStart')
             }, {
-                value: 'sunset',
-                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunset')
+                value: 'sunsetEnd',
+                label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.sunsetEnd')
             }, {
                 value: 'goldenHourDuskEnd',
                 label: node._('node-red-contrib-sun-position/position-config:common.typeOptions.goldenHourDuskEnd')
@@ -749,14 +779,17 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     const $inputField = $('#node-input-' + data.valueProp);
     const $typeField = $('#node-input-' + data.typeProp);
+    let type='';
     if (typeof node[data.typeProp] === 'undefined' ||
         node[data.typeProp] === null) {
         if (typeof data.defaultType !== 'undefined') {
-            node[data.typeProp] = data.defaultType;
-            $typeField.val(data.defaultType);
+            type = data.defaultType;
+            node[data.typeProp] = type;
+            $typeField.val(type);
         }
     } else {
-        $typeField.val(node[data.typeProp]);
+        type = node[data.typeProp];
+        $typeField.val(type);
     }
     if (typeof node[data.valueProp] === 'undefined' ||
         node[data.valueProp] === null) {
@@ -765,6 +798,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
             $inputField.val(data.defaultValue);
         }
     } else {
+        node[data.valueProp] = checkDeprecatedValues(type, node[data.valueProp]);
         $inputField.val(node[data.valueProp]);
     }
     $inputField.typedInput({
@@ -784,6 +818,23 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
         $inputField.on('change focus focusin focusout', data.onFocus);
     }
     return $inputField;
+}
+
+/**
+ * set Data for typed input
+ * @param {*} $field Typed input field
+ * @param {*} value value to set
+ * @param {*} type type to set
+ */
+function setTInputValue($field, value, type) { // eslint-disable-line no-unused-vars
+    if (type === 'flow' || type === 'global') {
+        $field.typedInput('type', 'env'); // env haben alle, bug fix
+        $field.typedInput('value', checkDeprecatedValues(type, value));
+        $field.typedInput('type', type);
+    } else {
+        $field.typedInput('type', type);
+        $field.typedInput('value', checkDeprecatedValues(type, value));
+    }
 }
 
 /**

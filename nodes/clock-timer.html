@@ -118,7 +118,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 const setup = function(node) {
-                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr */
+                    /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
                     // #region initialize
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -1122,11 +1122,9 @@
                             $('#dialog-row-offset-timeMax').hide();
                             $('.dialog-row-timeLimits').hide();
                             $('.dialog-row-timeLimits-ph').hide();
-                            // $dialogTimeMinInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
                             }
-                            // $dialogTimeMaxInput.typedInput('value','');
                             if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
                                 $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
                             }
@@ -1471,21 +1469,6 @@
                     });
                     // #endregion dialogChange
                     // #region dialogload & save
-                    /**
-                     * set Data for typed input
-                     */
-                    function setTI($field, value, type) {
-                        // $field.typedInput('value', value);
-                        if (type === 'flow' || type === 'global') {
-                            $field.typedInput('type', 'env'); // env haben alle, bug fix
-                            $field.typedInput('value', value);
-                            $field.typedInput('type', type);
-                        } else {
-                            $field.typedInput('type', type);
-                            $field.typedInput('value', value);
-                        }
-                        // $field.typedInput('type', type);
-                    }
 
                     /**
                      * generates the help text of the dialog
@@ -1513,18 +1496,18 @@
                             dialogDataOnLoading = true;
 
                             $dialogCondAOperator.val(data.validOperator || selFields.comparator[0].id);
-                            setTI($dialogCondAOperand, data.validOperandAValue, data.validOperandAType);
-                            setTI($dialogCondBOperand, data.validOperandBValue, data.validOperandBType);
+                            setTInputValue($dialogCondAOperand, data.validOperandAValue, data.validOperandAType);
+                            setTInputValue($dialogCondBOperand, data.validOperandBValue, data.validOperandBType);
 
                             $dialogCond2LogOperator.val(data.valid2LogOperator || 0);
                             $dialogCond2AOperator.val(data.valid2Operator || selFields.comparator[0].id);
-                            setTI($dialogCond2AOperand, data.valid2OperandAValue, data.valid2OperandAType);
-                            setTI($dialogCond2BOperand, data.valid2OperandBValue, data.valid2OperandBType);
+                            setTInputValue($dialogCond2AOperand, data.valid2OperandAValue, data.valid2OperandAType);
+                            setTInputValue($dialogCond2BOperand, data.valid2OperandBValue, data.valid2OperandBType);
 
                             $dialogTimeRegOperator.val(data.timeOp || 0);
                             $dialogTimeRegMultiplier.val(data.multiplier || 60000);
-                            setTI($dialogTimeRegInput, data.timeValue, data.timeType);
-                            setTI($dialogTimeRegOffset, data.offsetValue, data.offsetType);
+                            setTInputValue($dialogTimeRegInput, data.timeValue, data.timeType);
+                            setTInputValue($dialogTimeRegOffset, data.offsetValue, data.offsetType);
 
                             initCheckboxesBlock('#dlg-ip-clktime-rule-timeDays', data.timeDays);
                             initCheckboxesBlock('#dlg-ip-clktime-rule-timeMonths', data.timeMonths);
@@ -1565,16 +1548,16 @@
                             }
 
                             $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
-                            setTI($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
-                            setTI($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
+                            setTInputValue($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
+                            setTInputValue($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
 
                             $dialogTimeMaxMultiplier.val(data.multiplierMax || 60000);
-                            setTI($dialogTimeMaxInput, data.timeMaxValue, data.timeMaxType);
-                            setTI($dialogTimeMaxOffset, data.offsetMaxValue, data.offsetMaxType);
+                            setTInputValue($dialogTimeMaxInput, data.timeMaxValue, data.timeMaxType);
+                            setTInputValue($dialogTimeMaxOffset, data.offsetMaxValue, data.offsetMaxType);
 
                             $dialogPayloadMultiplier.val(data.payloadOffsetMultiplier || 60000);
-                            setTI($dialogPayload, data.payloadValue, data.payloadType);
-                            setTI($dialogPayloadOffset, data.payloadOffsetValue, data.payloadOffsetType);
+                            setTInputValue($dialogPayload, data.payloadValue, data.payloadType);
+                            setTInputValue($dialogPayloadOffset, data.payloadOffsetValue, data.payloadOffsetType);
                             const valueNum = Number(data.payloadFormat);
                             if (isNaN(valueNum)) {
                                 $dialogPayloadTimeFormatsel.val(99);

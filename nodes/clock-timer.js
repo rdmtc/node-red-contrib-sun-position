@@ -456,13 +456,13 @@ module.exports = function (RED) {
                 if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
                     switch (msg.topic) {
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseFloat(msg.Payload) || node.autoTrigger.defaultTime;
+                            node.autoTrigger.defaultTime = parseFloat(msg.payload) || node.autoTrigger.defaultTime;
                             break;
                         case 'setStoreName':
-                            node.storeName = msg.Payload || node.storeName;
+                            node.storeName = msg.payload || node.storeName;
                             break;
                         case 'setSettingsTopic':
-                            node.nodeData.topic = msg.Payload || node.nodeData.topic;
+                            node.nodeData.topic = msg.payload || node.nodeData.topic;
                             break;
                         default:
                             break;

@@ -548,78 +548,7 @@
                                         'global'
                                     ]
                                 });
-                            /* ti1
-                            setupTInput(node, {
-                                typeProp: 'result1Type',
-                                valueProp: 'result1',
-                                width: 'calc(100% - 110px)',
-                                defaultType: types.Undefined.value,
-                                types: [types.Undefined, types.MsgPayload, types.MsgTs, 'msg', 'flow', 'global'],
-                                onChange(_type, _value) {
-                                    if ($('#node-input-result1').typedInput('type') !== types.Undefined.value) {
-                                        $('.time-result1Value').show();
-                                        const plVType = $('#node-input-result1Value').typedInput('type');
-                                        if (plVType === types.TimeEntered.value || plVType === types.TimeSun.value || plVType === types.TimeMoon.value || plVType === types.DateSpecific.value || plVType === types.DateEntered.value) {
-                                            $('.time-row-result1Offset').show();
-                                            $('.time-row-result1TSFormat').hide();
-                                            $('.time-row-result1Format').show();
-                                        } else if (plVType === 'timespan') {
-                                            $('.time-row-result1Offset').hide();
-                                            $('.time-row-result1Format').hide();
-                                            $('.time-row-result1TSFormat').show();
-                                        } else if (plVType === 'operand1' || plVType === 'operand2') {
-                                            $('.time-row-result1Offset').hide();
-                                            $('.time-row-result1TSFormat').hide();
-                                            $('.time-row-result1Format').show();
-                                        } else {
-                                            $('.time-row-result1Offset').hide();
-                                            $('.time-row-result1TSFormat').hide();
-                                            $('.time-row-result1Format').hide();
-                                        }
-                                    } else {
-                                        $('.time-result1Value').hide();
-                                        $('.time-row-result1Offset').hide();
-                                        $('.time-row-result1TSFormat').hide();
-                                        $('.time-row-result1Format').hide();
-                                    }
-                                    $('#time-row-result1FormatSel').change(); // show '.time-row-result1Format'
-                                    $('#time-row-result1TSFormatSel').change(); // show '.time-row-result1Format'
-
-                                    const val = $('#node-input-result1Value').typedInput('value');
-                                    if (val === 'operand1') {
-                                        const $div = $('#node-input-result1Value-div');
-                                        $div.attr('title', $('#node-input-operand1').attr('title') + ' - ' + $div.attr('titleOrg'));
-                                    } else if (val === 'operand2') {
-                                        const $div = $('#node-input-result1Value-div');
-                                        $div.attr('title', $('#node-input-operand2').attr('title') + ' - ' + $div.attr('titleOrg'));
-                                    } else if (val === 'optimespanerand2') {
-                                        const $div = $('#node-input-result1Value-div');
-                                        $div.attr('title', 'timespan - ' + $div.attr('titleOrg'));
-                                    } else {
-                                        getBackendData(d => {
-                                            const $div = $('#node-input-result1Value-div');
-                                            const titleOrg = $div.attr('titleOrg');
-                                            $div.attr('title', ((d) ? (String(d) + ' - ') : '') + titleOrg);
-                                        }, {
-                                            nodeId:     node.id,
-                                            kind:       'getOutDataData',
-                                            config:     $nodeConfig.val(),
-                                            type:       $('#node-input-result1Value').typedInput('type'),
-                                            value:      $('#node-input-result1Value').typedInput('value'),
-                                            format:     $('#node-input-result1Format').val(),
-                                            offsetType: $('#node-input-result1Offset').typedInput('type'),
-                                            offset:     $('#node-input-result1Offset').typedInput('value'),
-                                            multiplier: $('#node-input-result1OffsetMultiplier').val(),
-                                            noOffsetError: true
-                                        });
-                                    }
-                                }
-                            });
-                            */
-
-                            $propertyName.typedInput('value', prop.p);
-                            $propertyName.typedInput('type', prop.pt);
-                            $propertyName.typedInput('value', prop.p); // fix missing value, thatswhy twice, don't know why not working
+                            setTInputValue($propertyName, prop.p, prop.pt);
 
                             $('<div/>', { style: 'display:inline-block; padding:0px 6px;' })
                                 .text('=')
@@ -674,57 +603,7 @@
                                         types.numPercent
                                     ]
                                 });
-                            /* ti org
-                            setupTInput(node, {
-                                typeProp: 'result1ValueType',
-                                valueProp: 'result1Value',
-                                width: 'calc(100% - 120px)',
-                                defaultType: 'timespan',
-                                types: [
-                                    { value: 'timespan', label: 'timespan between Inputs', hasValue: false },
-                                    { value: 'operand1', label: 'Input 1 value', hasValue: false },
-                                    { value: 'operand2', label: 'Input 2 value', hasValue: false },
-                                    'date',
-                                    types.DateSpecific,
-                                    types.TimeEntered,
-                                    types.DateEntered,
-                                    types.TimeSun,
-                                    types.TimeSunNow,
-                                    types.TimeMoon,
-                                    'str',
-                                    'num',
-                                    'bool',
-                                    'json',
-                                    'bin',
-                                    'env',
-                                    'msg',
-                                    'flow',
-                                    'global',
-                                    'jsonata',
-                                    types.SunCalc,
-                                    types.SunInSky,
-                                    types.MoonCalc,
-                                    types.MoonPhase,
-                                    types.SunAzimuth,
-                                    types.SunElevation,
-                                    types.SunAzimuthRad,
-                                    types.SunElevationRad,
-                                    types.SunTimeByAzimuth,
-                                    types.SunTimeByElevation,
-                                    types.SunTimeByAzimuthRad,
-                                    types.SunTimeByElevationRad,
-                                    types.isDST,
-                                    types.WeekOfYear,
-                                    types.WeekOfYearEven,
-                                    types.DayOfYear,
-                                    types.DayOfYearEven
-                                ],
-                                onChange(_type, _value) { $('#node-input-result1').change(); }
-                            });
-                            */
-
-                            $propertyValue.typedInput('value', prop.v);
-                            $propertyValue.typedInput('type', prop.vt);
+                            setTInputValue($propertyValue, prop.v, prop.vt);
 
                             // row2a - Format Selection
                             const operandFormatTSSelFieldName = 'node-input-prop-result-FormatTSSel';
@@ -772,8 +651,7 @@
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
                                     types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber]
                                 });
-                            $offset.typedInput('value', prop.o);
-                            $offset.typedInput('type', prop.oT);
+                            setTInputValue($offset, prop.o, prop.oT);
 
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-prop-result-multiplier'
