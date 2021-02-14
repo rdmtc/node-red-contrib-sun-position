@@ -14,9 +14,7 @@ Install of a specific Version in a Homematic:
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
 
 
-#### 1.2.0:  rework
-
-Unfortunately this release is not finished yet and only released as beta. Unfortunately, due to external influences, I am currently unable to continue working here.
+#### 1.2.1:  rework
 
 - general
   - changed several links to documentation #151
