@@ -154,7 +154,6 @@ module.exports = function (RED) {
                 node.error(err);
             }
         }
-
         if ((typeof node.timeDays !== 'undefined') && !node.timeDays.includes(dNow.getDay())) {
             node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(node.timeDays, Object.getOwnPropertyNames(node.timeDays)));
             result.warn = RED._('within-time-switch.errors.invalid-day');
@@ -351,7 +350,7 @@ module.exports = function (RED) {
             }
         }
 
-        if (this.timeRestrictions.type !== 'none') {
+        if (this.timeRestrictions.type === 'none') { // none means limitations would defined internal!
             this.timeOnlyEvenDays = config.timeOnlyEvenDays;
             this.timeOnlyOddDays = config.timeOnlyOddDays;
             if (typeof config.timedatestart !== undefined && config.timedatestart !== '') {
@@ -368,7 +367,7 @@ module.exports = function (RED) {
                 delete this.timeDays;
             } else {
                 this.timeDays = config.timeDays.split(',');
-                this.timeDays = config.timeDays.map( e => parseInt(e) );
+                this.timeDays = this.timeDays.map( e => parseInt(e) );
             }
 
             if (config.timeMonths === '') {
@@ -378,7 +377,7 @@ module.exports = function (RED) {
                 delete this.timeMonths;
             } else {
                 this.timeMonths = config.timeMonths.split(',');
-                this.timeMonths = config.timeMonths.map( e => parseInt(e) );
+                this.timeMonths = this.timeMonths.map( e => parseInt(e) );
             }
 
             if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
