@@ -12,6 +12,12 @@ Install of a specific Version in a Homematic:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
+
+#### 1.2.3:  BugFix
+
+- within-time-switch
+  - fix bug that time limitations does not work #236 upstream of  #192)
+
 #### 1.2.2:  BugFix
 
 - general
