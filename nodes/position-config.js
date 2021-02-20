@@ -775,10 +775,12 @@ module.exports = function (RED) {
         */
 
         /**
-         * get an formated date prepared for output
-         * @param {Date} dateValue Date value
-         * @param {outPropType} data - a Data object
-         */
+          * get an formated date prepared for output
+          * @param {*} _srcNode - source node for logging
+          * @param {*} [msg] - the message object
+          * @param {Date} dateValue - the source date object which should be formated
+          * @param {outPropType} data - additional formating and control data
+          */
         formatOutDate(_srcNode, msg, dateValue, data) {
             const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError);
             const result = hlp.normalizeDate(dateValue, offsetX, data.multiplier, data);

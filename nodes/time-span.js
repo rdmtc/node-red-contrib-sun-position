@@ -316,19 +316,20 @@ module.exports = function (RED) {
         this.results = [];
         config.results.forEach(prop => {
             const propNew = {
-                outType     : prop.pt,
-                outValue    : prop.p,
-                type        : prop.vt,
-                value       : prop.v,
-                format      : prop.f,
-                offsetType  : prop.oT,
-                offset      : prop.o,
-                multiplier  : prop.oM,
-                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
-                days        : prop.days,
-                months      : prop.months,
-                onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays
+                outType         : prop.pt,
+                outValue        : prop.p,
+                type            : prop.vt,
+                value           : prop.v,
+                format          : prop.f,
+                offsetType      : prop.oT,
+                offset          : prop.o,
+                multiplier      : prop.oM,
+                outTSFormat     : prop.fTs,
+                next            : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                days            : prop.days,
+                months          : prop.months,
+                onlyEvenDays    : prop.onlyEvenDays,
+                onlyOddDays     : prop.onlyOddDays
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {
@@ -388,13 +389,12 @@ module.exports = function (RED) {
                 for (let i = 0; i < node.results.length; i++) {
                     const prop = node.results[i];
                     // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
-
                     let resultObj = null;
-                    if (node.result1Value.type === 'timespan') {
-                        resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, prop.result1TSFormat);
-                    } else if (node.result1Value.type === 'operand1') {
+                    if (prop.type === 'timespan') {
+                        resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, prop.outTSFormat);
+                    } else if (prop.type === 'operand1') {
                         resultObj = node.positionConfig.formatOutDate(this, msg, operand1.value, prop);
-                    } else if (node.result1Value.type === 'operand2') {
+                    } else if (prop.type === 'operand2') {
                         resultObj = node.positionConfig.formatOutDate(this, msg, operand2.value, prop);
                     } else {
                         resultObj = node.positionConfig.getOutDataProp(node, msg, prop, dNow);
