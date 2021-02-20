@@ -4,19 +4,40 @@
 
 Install of a specific Version in Node-Red:
  - change to the installation directory of Node-Red
- - enter the command `npm install node-red-contrib-sun-position@1.2.0`
+ - enter the command `npm install node-red-contrib-sun-position@1.2.3`
 
-Install of a specific Version in a Homematic:
+Install of a specific Version in Redmatic (on a Homematic):
 - logon per ssh
-- enter the commands:
+- enter the commands in the order:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
-  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.0`
+  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.3`
+
+This can be also used to go back to an older Version.
+
+#### 1.2.4: maintenance + critical bugfix
+
+- time-span
+  - fixed bug that second operand displayed wrong in config!
+  - fixed critical output bug #240
+
+- blind-control + clock-time
+  - added additional information in the output
+    - last data which contain data from the last evaluation (when the rules was last time evaluated) - #223
+      - for blind-control `msg.blindCtrl.lastEvaluated.sunLevel`, `msg.blindCtrl.lastEvaluated.ruleLevel`, `msg.blindCtrl.lastEvaluated.ruleTopic`, `msg.blindCtrl.lastEvaluated.level`, `msg.blindCtrl.lastEvaluated.ruleId`
+      - for clock-time `msg.timeCtrl.lastEvaluated.payload`, `msg.timeCtrl.lastEvaluated.topic`, `msg.timeCtrl.lastEvaluated.ruleId` `msg.timeCtrl.lastEvaluated.ruleTopic`
+    - `msg.blindCtrl.name` / `msg.timeCtrl.name` which is the name of the node (or the id if no name is given in the config) - #238
+      - this information will be send as `msg.payload.name` to the second output if two outputs are configured
+    - `msg.blindCtrl.id` / `msg.timeCtrl.id` which is the id of the node
+      - this information will be send as `msg.payload.id` to the second output if two outputs are configured
+
+- blind-control only
+  - renamed `msg.resetOnSameValue` to `msg.resetOnSameAsLastValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
 
 #### 1.2.3:  BugFix
 
 - within-time-switch
-  - fix bug that time limitations does not work #236 upstream of  #192)
+  - fix bug that time limitations does not work #236 upstream of #192)
 
 #### 1.2.2:  BugFix
 

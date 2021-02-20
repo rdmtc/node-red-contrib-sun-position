@@ -308,7 +308,7 @@ module.exports = function (RED) {
                 data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
-            livingRuleData.state= RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
+            livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
             // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
             return livingRuleData;
@@ -354,6 +354,8 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
         const node = this;
+        // node.myNamename = config.name;
+        this.debug(`starting ${config.name}, name = ${node.name}`);
 
         if (config.autoTrigger) {
             node.autoTrigger = {
@@ -397,7 +399,8 @@ module.exports = function (RED) {
         };
         node.previousData = {
             reasonCode: -1,
-            usedRule: NaN
+            usedRule: NaN,
+            last : {}
         };
 
         /**
@@ -455,23 +458,19 @@ module.exports = function (RED) {
                 // allow to overwrite settings by incomming message
                 if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
                     switch (msg.topic) {
+                        /* Default Settings */
+                        case 'setSettingsTopic':
+                            node.nodeData.topic = msg.payload || node.nodeData.topic;
+                            break;
+                        /* advanced Settings */
                         case 'setAutoTriggerTime':
                             node.autoTrigger.defaultTime = parseFloat(msg.payload) || node.autoTrigger.defaultTime;
                             break;
                         case 'setStoreName':
                             node.storeName = msg.payload || node.storeName;
                             break;
-                        case 'setSettingsTopic':
-                            node.nodeData.topic = msg.payload || node.nodeData.topic;
-                            break;
                         default:
                             break;
-                    }
-                    if (node.nodeData.levelTop < node.nodeData.levelBottom) {
-                        const tmp = node.nodeData.levelBottom;
-                        node.nodeData.levelBottom = node.nodeData.levelTop;
-                        node.nodeData.levelTop = tmp;
-                        node.levelReverse = true;
                     }
                 }
 
@@ -497,7 +496,10 @@ module.exports = function (RED) {
 
                 // check if the message contains any oversteering data
                 const timeCtrl = {
-                    autoTrigger : node.autoTrigger
+                    autoTrigger : node.autoTrigger,
+                    lastEvaluated: node.previousData.last,
+                    name: node.name || node.id,
+                    id: node.id
                 };
                 let ruleId = -2;
 
@@ -506,6 +508,9 @@ module.exports = function (RED) {
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, dNow, tempData);
+                    node.previousData.last.ruleId = timeCtrl.rule.id;
+                    node.previousData.last.ruleTopic = timeCtrl.rule.topic;
+
                     node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
                     if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
                         ctrlLib.posOverwriteReset(node);
@@ -519,6 +524,8 @@ module.exports = function (RED) {
                         node.reason.code = timeCtrl.rule.code;
                         node.reason.state = timeCtrl.rule.state;
                         node.reason.description = timeCtrl.rule.description;
+                        node.previousData.last.payload = node.payload.current;
+                        node.previousData.last.topic = node.payload.topic;
                     }
                 }
 
@@ -535,7 +542,8 @@ module.exports = function (RED) {
                 let topic = node.payload.topic || msg.topic;
                 if (topic) {
                     const topicAttrs = {
-                        name: node.name,
+                        name: timeCtrl.name,
+                        id: timeCtrl.id,
                         code: node.reason.code,
                         state: node.reason.state,
                         rule: ruleId,
@@ -560,7 +568,7 @@ module.exports = function (RED) {
                     if (node.outputs > 1) {
                         send([msg, { topic, payload: timeCtrl, payloadOut: node.payload.current }]);
                     } else {
-                        send(msg, null);
+                        send([msg, null]);
                     }
                 } else if (node.outputs > 1) {
                     send([null, { topic, payload: timeCtrl }]);
