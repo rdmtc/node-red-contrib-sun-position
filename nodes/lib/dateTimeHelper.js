@@ -12,6 +12,8 @@ module.exports = {
     XAND,
     pad2,
     pad,
+    angleNorm,
+    angleNormRad,
     clipStrLength,
     countDecimals,
     handleError,
@@ -32,6 +34,7 @@ module.exports = {
     convertDateTimeZone,
     isValidDate,
     normalizeDate,
+    limitDate,
     getTimeOfText,
     getDateOfText,
     getDayOfYear,
@@ -44,7 +47,8 @@ module.exports = {
     getFormattedDateOut,
     parseDateFromFormat,
     topicReplace,
-    getNowTimeStamp
+    getNowTimeStamp,
+    getNowObject
 };
 
 /*******************************************************************************************************/
@@ -52,8 +56,27 @@ module.exports = {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
-} */
+}
 
+// Returns the ISO week of the date.
+Date.prototype.getWeek = function() {
+    const date = new Date(this.getTime());
+    date.setHours(0, 0, 0, 0);
+    // Thursday in current week decides the year.
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    // January 4 is always in week 1.
+    const week1 = new Date(date.getFullYear(), 0, 4);
+    // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                          - 3 + (week1.getDay() + 6) % 7) / 7);
+};
+
+// Returns the four-digit year corresponding to the ISO week of the date.
+Date.prototype.getWeekYear = function() {
+    const date = new Date(this.getTime());
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    return date.getFullYear();
+}; */
 /*******************************************************************************************************/
 /* simple functions                                                                                    */
 /*******************************************************************************************************/
@@ -113,6 +136,35 @@ function XAND(a, b) {
  */
 function countDecimals(value) {
     return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
+}
+
+/**
+ * normalizes an angle
+ * @param {number} angle to normalize
+ */
+function angleNorm(angle) {
+    while (angle < 0) {
+        angle += 360;
+    }
+    while (angle > 360) {
+        angle -= 360;
+    }
+    return angle;
+}
+
+/**
+ * normalizes an angle
+ * @param {number} angle to normalize
+ */
+function angleNormRad(angle) {
+    const dr = (2 * Math.PI);
+    while (angle < 0) {
+        angle += dr;
+    }
+    while (angle > dr) {
+        angle -= dr;
+    }
+    return angle;
 }
 /*******************************************************************************************************/
 /**
@@ -186,7 +238,7 @@ function handleError(node, messageText, err, stateText) {
         /* eslint-disable no-console */
         console.error(messageText);
         console.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-        console.trace();
+        console.trace(); // eslint-disable-line
         /* eslint-enable no-console */
     }
 }
@@ -395,6 +447,39 @@ function getNowTimeStamp(node, msg) {
     }
     node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
     return new Date();
+}
+
+
+/**
+* support timeData
+* @name ITimeObject Data
+* @param {Date} dNow
+* @param {number} nowNr
+* @param {number} dayNr
+* @param {number} monthNr
+* @param {number} dateNr
+* @param {number} yearNr
+* @param {number} dayId
+*/
+
+/**
+* the definition of the time to compare
+* @param {*} node the current node object
+* @param {*} msg the message object
+* @returns {ITimeObject} Date object of given Date or now
+*/
+function getNowObject(node, msg) {
+    const dNow = getNowTimeStamp(node, msg);
+    return {
+        dNow,
+        nowNr   : dNow.getTime(),
+        dayNr   : dNow.getDay(),
+        dateNr  : dNow.getDate(),
+        weekNr  : getWeekOfYear(dNow),
+        monthNr : dNow.getMonth(),
+        yearNr  : dNow.getFullYear(),
+        dayId   : getDayId(dNow)
+    };
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -713,6 +798,8 @@ function calcMonthOffset(months, monthstart) {
  * @property {string} [months] months for which should be calculated the sun time
  * @property {boolean} [onlyOddDays] - if true only odd days will be used
  * @property {boolean} [onlyEvenDays] - if true only even days will be used
+ * @property {boolean} [onlyOddWeeks] - if true only odd weeks will be used
+ * @property {boolean} [onlyEvenWeeks] - if true only even weeks will be used
  */
 
 /**
@@ -738,24 +825,49 @@ function normalizeDate(d, offset, multiplier, limit) {
             d.setDate(d.getDate() + 1);
         }
     }
+    const r = limitDate(limit, d);
+    if (r.hasChanged) {
+        return r.date;
+    }
+    return d;
+}
+
+/**
+ * calculates limitation of a date
+ * @param {limitationsObj} limit limitation object
+ * @param {Date} date Date to check
+ * @returns [date, hasChanged, error]
+ */
+function limitDate(limit, d) {
+    let hasChanged = false;
+    let error = '';
     if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
         const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
+            hasChanged = true;
+        } else if (dayx < 0) {
+            error = 'No valid day of week found!';
         }
     }
+
     if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
         const monthx = calcMonthOffset(limit.months, d.getMonth());
         if (monthx > 0) {
             d.setMonth(d.getMonth() + monthx);
+            hasChanged = true;
+        } else if (monthx < 0) {
+            error = 'No valid month found!';
         }
     }
+
     if (limit.onlyEvenDays) {
         let time = d.getDate();
         while ((time % 2 !== 0)) {
             // odd
             d.setDate(d.getDate() + 1);
             time = d.getDate();
+            hasChanged = true;
         }
     }
     if (limit.onlyOddDays) {
@@ -764,9 +876,28 @@ function normalizeDate(d, offset, multiplier, limit) {
             // even
             d.setDate(d.getDate() + 1);
             time = d.getDate();
+            hasChanged = true;
         }
     }
-    return d;
+    if (limit.onlyEvenWeeks) {
+        let time = getWeekOfYear(d);
+        while ((time % 2 !== 0)) {
+            // odd
+            d.setDate(d.getDate() + 1);
+            time = getWeekOfYear(d);
+            hasChanged = true;
+        }
+    }
+    if (limit.onlyOddWeeks) {
+        let time = getWeekOfYear(d);
+        while((time % 2 === 0)) {
+            // even
+            d.setDate(d.getDate() + 1);
+            time = getWeekOfYear(d);
+            hasChanged = true;
+        }
+    }
+    return {date:d, hasChanged, error};
 }
 
 /*******************************************************************************************************/

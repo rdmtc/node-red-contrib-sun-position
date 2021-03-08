@@ -7,7 +7,7 @@
             color: '#FFCC66',
             icon: 'clock-timer-white.svg',
             inputs: 1,
-            outputs: 1,
+            outputs: 2,
             defaults: {
                 name: {
                     value: '',
@@ -17,15 +17,21 @@
                     value: '',
                     required: false
                 },
+                addIdType: {
+                    value: 'none'
+                },
+                addId: {
+                    value: '',
+                    validate: RED.validators.typedInput('addIdType')
+                },
                 positionConfig: {
                     value: '',
                     type: 'position-config',
                     required: true
                 },
-                outputs: { value: '1' },
                 autoTrigger: { value: false },
                 autoTriggerTime: {
-                    value: 20 * 60000,
+                    value: 1200000,
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
@@ -41,6 +47,28 @@
                     }
                 },
                 storeName:  { value: '' },
+                results: {
+                    value: [
+                        {
+                            p: '',
+                            pt: 'msgTopic',
+                            v: '',
+                            vt: 'topic'
+                        },
+                        {
+                            p: '',
+                            pt: 'msgPayload',
+                            v: '',
+                            vt: 'payload'
+                        },
+                        {
+                            p: 'timeCtrl',
+                            pt: 'msg',
+                            v: '',
+                            vt: 'ctrlObj'
+                        }
+                    ]
+                },
                 // #region overwrite settings
                 overwriteExpire: {
                     value: '',
@@ -87,7 +115,86 @@
                 // #endregion time settings
             },
             outputLabels() {
-                return [this._('clock-timer.label.output1'), this._('clock-timer.label.output2')];
+                const types = {
+                    msgPayload : 'msg.payload',
+                    msgTopic   : 'msg.topic',
+                    msgValue   : 'msg.value'
+                };
+                const labels = {
+                    payload: 'the payload',
+                    topic: 'topic',
+                    ctrlObj: 'status object',
+                    str: 'string',
+                    num: 'number',
+                    bool: 'boolean',
+                    flow: 'flow context',
+                    global: 'global context',
+                    bin: 'binary data',
+                    date: 'timestamp',
+                    dateSpecific: 'special timestamp',
+                    entered: 'timestamp',
+                    dateEntered: 'timestamp',
+                    env: 'Environment variable',
+                    jsonata: 'result of jsonata expression',
+                    nodeId: 'additional node ID',
+                    nodeName: this.name
+                };
+
+                // if only payload and topic - display payload type
+                // if only one property - show it's type
+                // if more than one property (other than payload and topic) - show "x properties" where x is the number of properties.
+                // this.results will not be an array for legacy inject nodes until they are re-deployed
+                //
+                let results = this.results;
+                if (!Array.isArray(results)) {
+                    results = [
+                        {
+                            p: '',
+                            pt: 'msgTopic',
+                            v: '',
+                            vt: 'topic'
+                        },
+                        {
+                            p: '',
+                            pt: 'msgPayload',
+                            v: '',
+                            vt: 'payload'
+                        },
+                        {
+                            p: 'timeCtrl',
+                            pt: 'msg',
+                            v: '',
+                            vt: 'ctrlObj'
+                        }];
+                }
+                let lab = '';
+                if (results) {
+                    let cnt = -1;
+                    for (let i=0, l=results.length; i<l; i++) {
+                        if (!results[i].pt.includes('msg')) { continue; }
+                        cnt++;
+                        if (cnt > 0) lab += '\n';
+                        if (cnt === 5) {
+                            lab += ' + ' + (results.length - 4);
+                            break;
+                        }
+                        lab += (types[results[i].pt] ? types[results[i].pt] : (results[i].pt + '.' + results[i].p)) + ': ';
+                        let propType = labels[results[i].vt] ? labels[results[i].vt] : results[i].vt;
+                        if (propType === 'json' || propType === 'object') {
+                            try {
+                                const parsedProp = JSON.parse(results[i].v);
+                                propType = typeof parsedProp;
+                                if (propType === 'object' && Array.isArray(parsedProp)) {
+                                    propType = 'Array';
+                                }
+                            } catch(e) {
+                                propType = 'invalid';
+                            }
+                        }
+                        lab += propType;
+                    }
+                }
+                return [lab, this._('clock-timer.label.output2')];
             },
             label() {
                 let suffix = '';
@@ -114,13 +221,27 @@
                 }, 300);
                 $('.rdg-ui-btn').button();
 
-                this.outputs = this.outputs || 1;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
                     // #region initialize
                     const types = getTypes(node);
+                    types.OutputPayload = {
+                        value: 'payload',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.payload'),
+                        hasValue: false
+                    };
+                    types.OutputTopic = {
+                        value: 'topic',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.topic'),
+                        hasValue: false
+                    };
+                    types.OutputCtrlObj = {
+                        value: 'ctrlObj',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.ctrlObj'),
+                        hasValue: false
+                    };
                     const selFields = getSelectFields();
                     /**
                     * update multiplier settings from a previous version
@@ -215,13 +336,13 @@
                         defaultType: types.Undefined.value,
                         types: [
                             types.Undefined,
-                            types.MsgPayload,
-                            types.MsgValue,
                             'str',
                             'num',
                             'bool',
                             'date',
                             types.DateSpecific,
+                            types.MsgPayload,
+                            types.MsgValue,
                             'msg',
                             'flow',
                             'global',
@@ -307,9 +428,18 @@
                             $('#node-input-payloadDefault').change();
                         }
                     });
+
+                    setupTInput(node, {
+                        typeProp: 'addIdType',
+                        valueProp: 'addId',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.addIdType || (node.addId ? 'str' : types.Undefined.value),
+                        defaultValue: '',
+                        types: [types.Undefined, 'str', 'flow', 'global', 'env']
+                    });
                     // #endregion payloadDefault
                     // #region rules
-                    // console.log('clock-timer rules');
+                    const ruleVersion = 3;
                     /**
                      * get a time in millisecond as string of the format hh:mm, hh:mm:ss or hh:mm:ss.mss
                      * @param {number} s - milisecond
@@ -358,205 +488,260 @@
                         return '';
                     }
                     /**
+                     * sets a property of an object
+                     * @param {object} obj - object to set property
+                     * @param {string|array} arr - property of object to set 'sub1.sub2.propA' or ['sub1', 'sub2', 'propA']
+                     * @param {*} val - value to set
+                     * @returns {object} description of the rule
+                     */
+                    function addProps(obj, arr, val) {
+                        if (typeof arr === 'string')
+                            arr = arr.split('.');
+                        obj[arr[0]] = obj[arr[0]] || {};
+                        const tmpObj = obj[arr[0]];
+                        if (arr.length > 1) {
+                            arr.shift();
+                            addProps(tmpObj, arr, val); // eslint-disable-line no-unused-vars
+                        } else {
+                            obj[arr[0]] = val;
+                        }
+                        return obj;
+                    }
+                    /**
+                     * get number of operand for a comparision opeator
+                     * @param {object} selFields - fields object
+                     * @param {string} operator - value of comperator selection
+                     * @returns {number} description of the rule
+                     */
+                    function getOperandCount(selFields, operator) {
+                        operator = operator || selFields.comparator[0].id;
+                        const fields = selFields.comparator;
+                        const fieldsLength = fields.length;
+                        for (let index = 0; index < fieldsLength; index++) {
+                            const el = fields[index];
+                            if (el.id === operator) {
+                                return el.operandCount;
+                            }
+                        }
+                        return 1;
+                    }
+                    /**
                      * get a description of the rule rules
                      * @param {object} data - a rule description
                      * @returns {string} description of the rule
                      */
                     function getRuleDescription(node, selFields, data, enh) {
                         let result = '';
+                        const length = (enh) ? 60 : 30;
                         try {
-                            if (typeof data.valid === 'undefined') {
-                                result += '<div>The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
-                            } else if (!data.valid || !data.isValid) {
-                                result += '<div>Rule is invalid and needs to be changed!!</div>';
+                            if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && (typeof data.valid === 'undefined' || Object.keys(data.valid).length === 0))) {
+                                result += '<div>⚠️ The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
+                            } else if (!data.isValid) {
+                                result += '<div>⚠️ Rule is invalid and needs to be changed!!</div>';
+                                if (data.valid && Object.keys(data.valid).length > 0) {
+                                    result += '<div><pre>';
+                                    result += JSON.stringify(data.valid, null, '\t');
+                                    result += '</pre></div>';
+                                }
                             }
-                            if (data.validOperandAType && data.validOperandAType !== 'none') {
+                            if (data.conditions && data.conditions.length > 0) {
                                 result += '<div>';
                                 result += '<i class="fa fa-code-fork" aria-hidden="true"></i> ';
+                                const l = data.conditions.length-1;
+                                const addBrac = l > 1;
 
-                                result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, data.validOperandAType,data.validOperandAValue) + '</var>';
-                                // result += node._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + data.validOperator);
-                                result += ' ' + data.validOperatorText;
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === data.validOperator) {
-                                        operatorCount = el.operatorCount;
-                                        break;
+                                for (let i = 0; i <= l; i++) {
+                                    const cond = data.conditions[i];
+                                    if (i > 0) {
+                                        result += '&nbsp;<strong>' + cond.conditionText + '</strong><br/><span class="indent-enh-text" >&nbsp;</span>';
                                     }
-                                }
-
-                                if (operatorCount > 1) {
-                                    result += ' ' + RED.nodes.getType('position-config').getValueLabel(node, data.validOperandBType, data.validOperandBValue);
-                                }
-                                if (data.valid2LogOperator > 0 && data.valid2OperandAType !== 'none') {
-                                    result += '<br/><strong>' + data.valid2LogOperatorText + '</strong> ';
-
-                                    result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, data.valid2OperandAType,data.valid2OperandAValue) + '</var>';
-                                    result += ' ' + data.valid2OperatorText;
-                                    let operatorCount = 1;
-                                    const fields = selFields.comparator;
-                                    const fieldsLength = fields.length;
-                                    for (let index = 0; index < fieldsLength; index++) {
-                                        const el = fields[index];
-                                        if (el.id === data.valid2Operator) {
-                                            operatorCount = el.operatorCount;
-                                            break;
+                                    if (addBrac && i > 0 && i < l) {
+                                        result += '(&nbsp;';
+                                    }
+                                    if (cond.valueType === 'pdmPhaseCheck') {
+                                        result += 'Moon phase is <var>' + cond.value + '</var>';
+                                    } else {
+                                        result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, cond.valueType, cond.value, null, length) + '</var>';
+                                        result += ' ' + cond.operatorText;
+                                        const oc = getOperandCount(selFields, cond.operator);
+                                        if (oc > 1) {
+                                            const ttext = RED.nodes.getType('position-config').getValueLabel(node, cond.thresholdType, cond.threshold, null, length);
+                                            result += ' ';
+                                            result += ttext;
+                                            if (enh && enh.cond && enh.cond[i] && enh.cond[i].operand) {
+                                                result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<kbd>' + enh.cond[i].operand + '</kbd>';
+                                                result += ' ' + cond.operatorText;
+                                                if(enh.cond[i].thersold) {
+                                                    result += ' <i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<kbd>' + enh.cond[i].thersold + '</kbd>';
+                                                } else {
+                                                    result += ttext;
+                                                }
+                                                result += ']</span>';
+                                            }
+                                        } else if (enh && enh.cond && enh.cond[i] && enh.cond[i].operand) {
+                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;is&nbsp;<kbd>' + enh.cond[i].operand + '</kbd>]</span>';
                                         }
                                     }
-
-                                    if (operatorCount > 1) {
-                                        result += ' ' + RED.nodes.getType('position-config').getValueLabel(node, data.valid2OperandBType, data.valid2OperandBValue);
-                                    }
+                                }
+                                if (addBrac) {
+                                    result += '&nbsp;';
+                                    result += Array(l).join(')');
                                 }
                                 result += '</div>';
                             }
-                            if (data.timeType && data.timeType !== 'none') {
-                                result += '<div>';
-                                result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
-                                result += data.timeOpText;
-                                result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.timeType, data.timeValue) + '</var>';
-                                result += _getOffsetText(node, data.offsetType, data.offsetValue, data.multiplier);
-                                if (enh && enh.timeReg && enh.timeReg.text) {
-                                    result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
-                                }
+                            if (data.time) {
+                                if (data.time.type && data.timeType !== 'none') {
+                                    result += '<div>';
+                                    result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                                    result += data.time.operatorText;
+                                    result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.time.type, data.time.value, null, length) + '</var>';
+                                    result += _getOffsetText(node, data.time.offsetType, data.time.offset, data.time.multiplier);
+                                    if (enh && enh.timeReg && enh.timeReg.text) {
+                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
+                                    }
 
-                                if (data.timeMinType && data.timeMinType !== 'none') {
-                                    result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeMin');
-                                    result += '</span> <var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMinType, data.timeMinValue);
-                                    result += '</var>';
-                                    result += _getOffsetText(node, data.offsetMinType, data.offsetMinValue, data.multiplierMin);
-                                    if (enh && enh.timeMin && enh.timeMin.text) {
-                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                    if (data.timeMin && data.timeMin.type && data.timeMin.type !== 'none') {
+                                        result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                                        result += node._('clock-timer.label.ruleTimeMin');
+                                        result += '</span> <var>';
+                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMin.type, data.timeMin.value, null, length);
+                                        result += '</var>';
+                                        result += _getOffsetText(node, data.timeMin.offsetType, data.timeMin.offset, data.timeMin.multiplier);
+                                        if (enh && enh.timeMin && enh.timeMin.text) {
+                                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                        }
+                                        result += '</div>';
                                     }
-                                    result += '</div>';
-                                }
-                                if (data.timeMaxType && data.timeMaxType !== 'none') {
-                                    result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeMax');
-                                    result += '</span> <var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMaxType, data.timeMaxValue);
-                                    result += '</var>';
-                                    result += _getOffsetText(node, data.offsetMaxType, data.offsetMaxValue, data.multiplierMax);
-                                    if (enh && enh.timeMax && enh.timeMax.text) {
-                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
+                                    if (data.timeMax && data.timeMax.type && data.timeMax.type !== 'none') {
+                                        result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
+                                        result += node._('clock-timer.label.ruleTimeMax');
+                                        result += '</span> <var>';
+                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMax.type, data.timeMax.value, null, length);
+                                        result += '</var>';
+                                        result += _getOffsetText(node, data.timeMax.offsetType, data.timeMax.offset, data.timeMax.multiplier);
+                                        if (enh && enh.timeMax && enh.timeMax.text) {
+                                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
+                                        }
+                                        result += '</div>';
                                     }
-                                    result += '</div>';
-                                }
-                                if ((data.timeDays && data.timeDays !== '*') || data.timeOnlyEvenDays || data.timeOnlyOddDays) {
-                                    result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeDays');
-                                    result += '</span> <var>';
-                                    const resultArr = [];
-                                    if (data.timeDays && data.timeDays !== '*') {
-                                        const daysarr = data.timeDays.split(',');
-                                        if (daysarr.length === 1) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
-                                        } else if (data.timeDays === '5,6,0') {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
-                                                node._('node-red-contrib-sun-position/position-config:common.days.7'));
-                                        } else if (daysarr.length === 2) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
-                                                node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
+                                    if ((data.time.days && data.time.days !== '*') || data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                        result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                        result += node._('clock-timer.label.ruleTimeDays');
+                                        result += '</span> <var>';
+                                        const resultArr = [];
+                                        if (data.time.days && data.time.days !== '*') {
+                                            const daysarr = data.time.days.split(',');
+                                            if (daysarr.length === 1) {
+                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
+                                            } else if (data.time.days === '5,6,0') {
+                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
+                                                    node._('node-red-contrib-sun-position/position-config:common.days.7'));
+                                            } else if (daysarr.length === 2) {
+                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
+                                                    node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
+                                            } else {
+                                                daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                                let isok = true;
+                                                let elF = parseInt(daysarr[0]);
+                                                daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                                                for (let index = 1; index < daysarr.length; index++) {
+                                                    const element = parseInt(daysarr[index]);
+                                                    isok = isok && (element === elF+1);
+                                                    elF = element;
+                                                    daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
+                                                }
+                                                if (isok) {
+                                                    resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
+                                                } else {
+                                                    resultArr.push(daysarr.join(','));
+                                                }
+                                            }
+                                        }
+                                        if (data.time.onlyEvenDays) {
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'));
+                                        }
+                                        if (data.time.onlyOddDays) {
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays'));
+                                        }
+                                        if (data.time.onlyEvenWeeks) {
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks'));
+                                        }
+                                        if (data.time.onlyOddWeeks) {
+                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'));
+                                        }
+
+                                        result += resultArr.join(' <b>and</b> ');
+                                        result += '</var></div>';
+                                    }
+
+                                    if (data.time.months && data.time.months !== '*') {
+                                        result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                        result += node._('clock-timer.label.ruleTimeMonths');
+                                        result += '</span> <var>';
+                                        const montharr = data.time.months.split(',');
+                                        if (montharr.length === 2) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                                            result += ',';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
+                                        } else if (montharr.length === 1) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
                                         } else {
-                                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                            montharr.sort((a, b) => parseInt(a) - parseInt(b));
                                             let isok = true;
-                                            let elF = parseInt(daysarr[0]);
-                                            daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
-                                            for (let index = 1; index < daysarr.length; index++) {
-                                                const element = parseInt(daysarr[index]);
+                                            let elF = parseInt(montharr[0]);
+                                            montharr[0] = node._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
+                                            for (let index = 1; index < montharr.length; index++) {
+                                                const element = parseInt(montharr[index]);
                                                 isok = isok && (element === elF+1);
                                                 elF = element;
-                                                daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
+                                                montharr[index] = node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(element) + 12));
                                             }
                                             if (isok) {
-                                                resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
+                                                result += montharr[0];
+                                                result += '-';
+                                                result += montharr[montharr.length-1];
                                             } else {
-                                                resultArr.push(daysarr.join(','));
+                                                result += montharr.join(',');
                                             }
                                         }
+                                        result += '</var></div>';
                                     }
-                                    if (data.timeOnlyEvenDays) {
-                                        resultArr.push(node._('clock-timer.label.onlyOddDays'));
-                                    }
-                                    if (data.timeOnlyOddDays) {
-                                        resultArr.push(node._('clock-timer.label.onlyEvenDays'));
-                                    }
-                                    result += resultArr.join(' <b>and</b> ');
-                                    result += '</var></div>';
-                                }
 
-                                if (data.timeMonths && data.timeMonths !== '*') {
-                                    result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeMonths');
-                                    result += '</span> <var>';
-                                    const montharr = data.timeMonths.split(',');
-                                    if (montharr.length === 2) {
-                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                                        result += ',';
-                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
-                                    } else if (montharr.length === 1) {
-                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                                    } else {
-                                        montharr.sort((a, b) => parseInt(a) - parseInt(b));
-                                        let isok = true;
-                                        let elF = parseInt(montharr[0]);
-                                        montharr[0] = node._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
-                                        for (let index = 1; index < montharr.length; index++) {
-                                            const element = parseInt(montharr[index]);
-                                            isok = isok && (element === elF+1);
-                                            elF = element;
-                                            montharr[index] = node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(element) + 12));
-                                        }
-                                        if (isok) {
-                                            result += montharr[0];
-                                            result += '-';
-                                            result += montharr[montharr.length-1];
+                                    if (data.time.dateStart || data.time.dateEnd) {
+                                        result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                        result += node._('clock-timer.label.ruleTimeLimitStart');
+                                        result += '</span> <var>';
+                                        if (enh) {
+                                            const year = (new Date()).getFullYear();
+                                            result += data.time.dateStart || year + '-01-01';
                                         } else {
-                                            result += montharr.join(',');
+                                            result += (getDateShort(data.time.dateStart) || '01-01');
                                         }
+                                        result += '</var> <span> ';
+                                        result += node._('clock-timer.label.ruleTimeLimitEnd');
+                                        result += '</span> <var>';
+                                        if (enh) {
+                                            const year = (new Date()).getFullYear();
+                                            result += data.time.dateEnd || year + '-12-31';
+                                        } else {
+                                            result += (getDateShort(data.time.dateEnd) || '12-31');
+                                        }
+                                        result += '</var></div>';
                                     }
-                                    result += '</var></div>';
+                                    result += '</div>';
                                 }
-
-                                if (data.timeDateStart || data.timeDateEnd) {
-                                    result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                    result += node._('clock-timer.label.ruleTimeLimitStart');
-                                    result += '</span> <var>';
-                                    if (enh) {
-                                        const year = (new Date()).getFullYear();
-                                        result += data.timeDateStart || year + '-01-01';
-                                    } else {
-                                        result += (getDateShort(data.timeDateStart) || '01-01');
-                                    }
-                                    result += '</var> <span> ';
-                                    result += node._('clock-timer.label.ruleTimeLimitEnd');
-                                    result += '</span> <var>';
-                                    if (enh) {
-                                        const year = (new Date()).getFullYear();
-                                        result += data.timeDateEnd || year + '-12-31';
-                                    } else {
-                                        result += (getDateShort(data.timeDateEnd) || '12-31');
-                                    }
-                                    result += '</var></div>';
-                                }
-                                result += '</div>';
                             }
                             result += '<div>';
-                            if (data.payloadType && data.payloadType !== 'none') {
+                            if (data.payload && data.payload.type && data.payload.type !== 'none') {
                                 result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
                                 result += node._('clock-timer.label.rulePayload');
                                 result += '</span> <var>';
-                                result += RED.nodes.getType('position-config').getValueLabel(node, data.payloadType, data.payloadValue);
+                                result += RED.nodes.getType('position-config').getValueLabel(node, data.payload.type, data.payload.value, null, length);
                                 result += '</var>';
-                                result += _getOffsetText(node, data.payloadOffsetType, data.payloadOffsetValue, data.payloadOffsetMultiplier);
+                                result += _getOffsetText(node, data.payload.offsetType, data.payload.offset, data.payload.multiplier);
                                 result += '</div>';
                                 if (data.topic) {
-                                    result += '<div class="indent-topic-text"> <span>';
+                                    result += '<div class="indent-topic-text"> <i class="fa fa-tasks" aria-hidden="true"></i><span>';
                                     result += node._('clock-timer.label.ruleTopic');
                                     result += '</span> <var>';
                                     result += data.topic;
@@ -564,7 +749,7 @@
                                     result += '</div>';
                                 }
                                 if (data.resetOverwrite) {
-                                    result += '<div class="indent-resetOverwrite-text"> <span>';
+                                    result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-thumbs-o-down" aria-hidden="true"></i><span>';
                                     result += node._('clock-timer.label.ruleResetOverwrite');
                                     result += '</span> </div>';
                                 }
@@ -579,15 +764,13 @@
                         }
                         return result;
                     }
-                    /**
-                     * resizes a rule container
-                     */
-                    function resizeContainer() {
+                    /** resizes a rule container */
+                    function resizeRuleContainer() {
                         try {
                             const editorRow = $('.node-input-rule-container-row ol');
                             const height = editorRow.outerHeight(true);
-                            const rows = $('#node-input-rule-container').editableList('items');
-                            if (rows.size() > 0) {
+                            const rowCount = $('#node-input-rule-container').editableList('length');
+                            if (rowCount > 0) {
                                 $('#node-input-rule-container').editableList('height', height + 40);
                             } else {
                                 $('#node-input-rule-container').editableList('height', 20);
@@ -596,53 +779,160 @@
                             console.log(ex); // eslint-disable-line
                         }
                     }
-
-                    let resizeContainerTO = null;
-                    $('#node-input-rule-container').css('min-height', '80px').css('min-width', '300px').editableList({
+                    let resizeRuleContainerTOB = null;
+                    const resizeRuleContainerCheck = () => {
+                        if (resizeRuleContainerTOB) { clearTimeout(resizeRuleContainerTOB); }
+                        resizeRuleContainerTOB = setTimeout(() => {
+                            resizeRuleContainerTOB = null;
+                            resizeRuleContainer();
+                        }, 1000);
+                    };
+                    $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                         addItem($containerRow, containerIndex, data) {
                             if (data === {}) {
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
+                                data.version = ruleVersion;
                             }
-                            data.valid = {};
-                            data.isValid = false;
                             data.index = containerIndex;
                             data.importance = 0;
-                            data.validOperandAType = (data.validOperandAType || types.Unlimited.value);
-                            data.validOperandBType = (data.validOperandBType || 'num');
-                            data.valid2LogOperator = (parseInt(data.valid2LogOperator) || 0);
-                            data.valid2OperandAType = (data.valid2OperandAType || 'msg');
-                            data.valid2OperandBType = (data.valid2OperandBType || 'num');
-                            data.timeDays = (data.timeDays || '*');
-                            data.timeMonths = (data.timeMonths || '*');
-                            data.timeOnlyOddDays = (data.timeOnlyOddDays || false);
-                            data.timeOnlyEvenDays = (data.timeOnlyEvenDays || false);
-                            data.timeDateStart = (data.timeDateStart || '');
-                            data.timeDateEnd = (data.timeDateEnd || '');
-                            data.timeOp = (parseInt(data.timeOp) || 0);
-                            data.timeType = (data.timeType || types.Undefined.value); // TimeEntered
-                            data.timeValue = (data.timeValue || '');
-                            data.offsetType = (data.offsetType || types.Undefined.value);
-                            data.multiplier = (parseInt(data.multiplier) || 60000);
-
-                            data.timeMinType = (data.timeMinType || types.Undefined.value);
-                            data.timeMinValue = (data.timeMinValue || '');
-                            data.offsetMinType = (data.offsetMinType || types.Undefined.value);
-                            data.multiplierMin = (parseInt(data.multiplierMin) || 60000);
-
-                            data.timeMaxType = (data.timeMaxType || types.Undefined.value);
-                            data.timeMaxValue = (data.timeMaxValue || '');
-                            data.offsetMaxType = (data.offsetMaxType || types.Undefined.value);
-                            data.multiplierMax = (parseInt(data.multiplierMax) || 60000);
-
-                            data.payloadType = (data.payloadType || 'none');
-                            data.payloadValue = (data.payloadValue || '');
-                            data.payloadOffsetType = (data.payloadOffsetType || types.Undefined.value);
-                            data.payloadOffsetMultiplier = (parseInt(data.multiplier) || 60000);
-                            data.payloadFormat = (parseInt(data.payloadFormat) || 99);
-
+                            if (!data.conditions) {
+                                data.valid = {};
+                                data.conditions = [];
+                                if (data.validOperandAType && data.validOperandAType !== types.Unlimited.value) {
+                                    data.conditions.push({
+                                        condition       : 1,        // condition
+                                        conditionText   : '',
+                                        valueType       : data.validOperandAType,
+                                        value           : data.validOperandAValue,
+                                        operator        : data.validOperator || selFields.comparator[0].id,
+                                        operatorText    : data.validOperatorText,
+                                        thresholdType   : (data.validOperandBType || 'num'),
+                                        threshold       : data.validOperandBValue
+                                    });
+                                    if ((parseInt(data.valid2LogOperator) > 0) && data.valid2OperandAType) {
+                                        data.conditions.push({
+                                            condition       : (parseInt(data.valid2LogOperator) || 1), // condition
+                                            conditionText   : data.valid2LogOperatorText,
+                                            valueType       : (data.valid2OperandAType || 'msg'),
+                                            value           : data.valid2OperandAValue,
+                                            operator        : data.valid2Operator || selFields.comparator[0].id,
+                                            operatorText    : data.valid2OperatorText,
+                                            thresholdType   : (data.valid2OperandBType || 'num'),
+                                            threshold       : data.valid2OperandBValue
+                                        });
+                                    }
+                                }
+                                delete data.validOperandAValue;
+                                delete data.validOperandAType;
+                                delete data.validOperator;
+                                delete data.validOperatorText;
+                                delete data.validOperandBValue;
+                                delete data.validOperandBType;
+                                delete data.valid2LogOperator;
+                                delete data.valid2LogOperatorText;
+                                delete data.valid2OperandAValue;
+                                delete data.valid2OperandAType;
+                                delete data.valid2Operator;
+                                delete data.valid2OperatorText;
+                                delete data.valid2OperandBValue;
+                                delete data.valid2OperandBType;
+                            }
+                            if(data.timeType) {
+                                if (!data.time && data.timeType !== types.Undefined.value) {
+                                    data.time = {
+                                        type            : data.timeType,
+                                        value           : (data.timeValue || ''),
+                                        operator        : (parseInt(data.timeOp) || 0),
+                                        offsetType      : (data.offsetType || types.Undefined.value),
+                                        offset          : (data.offsetValue || '1'),
+                                        multiplier      : (parseInt(data.multiplier) || 60000),
+                                        days            : (data.timeDays || '*'),
+                                        months          : (data.timeMonths || '*')
+                                    };
+                                    if (data.timeOnlyOddDays) data.time.onlyOddDays = data.timeOnlyOddDays;
+                                    if (data.timeOnlyEvenDays) data.time.onlyEvenDays = data.timeOnlyEvenDays;
+                                    if (data.timeDateStart) data.time.dateStart = data.timeDateStart;
+                                    if (data.timeDateEnd) data.time.dateEnd = data.timeDateEnd;
+                                    if (data.timeOpText) data.time.operatorText = data.timeOpText;
+                                }
+                                delete data.timeType;
+                                delete data.timeValue;
+                                delete data.timeOp;
+                                delete data.offsetType;
+                                delete data.offsetValue;
+                                delete data.multiplier;
+                                delete data.timeDays;
+                                delete data.timeMonths;
+                                delete data.timeOnlyOddDays;
+                                delete data.timeOnlyEvenDays;
+                                delete data.timeDateStart;
+                                delete data.timeDateEnd;
+                                delete data.timeOpText;
+                                if (data.time && data.time.onlyEvenDays && data.time.onlyOddDays) {
+                                    delete data.time.onlyEvenDays;
+                                    delete data.time.onlyOddDays;
+                                }
+                            }
+                            if (data.timeMinType) {
+                                if (!data.timeMin && data.timeMinType !== types.Undefined.value) {
+                                    data.timeMin = {
+                                        type            : data.timeMinType,
+                                        value           : (data.timeMinValue || ''),
+                                        offsetType      : (data.offsetMinType || types.Undefined.value),
+                                        offset          : (data.offsetMinValue || '1'),
+                                        multiplier      : (parseInt(data.multiplierMin) || 60000)
+                                    };
+                                }
+                                delete data.timeMinType;
+                                delete data.timeMinValue;
+                                delete data.offsetMinType;
+                                delete data.offsetMinValue;
+                                delete data.multiplierMin;
+                                delete data.timeMinOp;
+                            }
+                            if (data.timeMaxType) {
+                                if (!data.timeMax && data.timeMaxType !== types.Undefined.value) {
+                                    data.timeMax = {
+                                        type            : data.timeMaxType,
+                                        value           : (data.timeMaxValue || ''),
+                                        offsetType      : (data.offsetMaxType || types.Undefined.value),
+                                        offset          : (data.offsetMaxValue || '1'),
+                                        multiplier      : (parseInt(data.multiplierMax) || 60000)
+                                    };
+                                }
+                                delete data.timeMaxType;
+                                delete data.timeMaxValue;
+                                delete data.offsetMaxType;
+                                delete data.offsetMaxValue;
+                                delete data.multiplierMax;
+                                delete data.timeMaxOp;
+                            }
+                            if (data.payloadType) {
+                                if (!data.payload && data.payloadType !== types.Undefined.value) {
+                                    data.payload = {
+                                        type            : data.payloadType,
+                                        value           : (data.payloadValue || ''),
+                                        offsetType      : (data.payloadOffsetType || types.Undefined.value),
+                                        offset          : (data.payloadOffsetValue || '1'),
+                                        multiplier      : (parseInt(data.payloadOffsetMultiplier) || 60000),
+                                        format          : (parseInt(data.payloadFormat) || 99)
+                                    };
+                                }
+                                delete data.payloadType;
+                                delete data.payloadValue;
+                                delete data.payloadOffsetType;
+                                delete data.payloadOffsetValue;
+                                delete data.payloadOffsetMultiplier;
+                                delete data.payloadFormat;
+                            }
+                            if (!data.description || !data.version || data.version !== ruleVersion) {
+                                data.description = getRuleDescription(node, selFields, data);
+                                data.version = ruleVersion;
+                            }
                             $containerRow.data('ruleData', JSON.stringify(data));
                             $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
+
                             const $row0 = $('<div/>').appendTo($containerRow);
                             const $div = $('<div/>', {
                                 class: 'clock-timer-rule-mainblock'
@@ -651,9 +941,6 @@
                                 id: 'rule-name-'+containerIndex,
                                 class: 'clock-timer-rule-name-span'
                             }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
-                            if (!data.description) {
-                                data.description = getRuleDescription(node, selFields, data);
-                            }
                             $('<div />', {
                                 id: 'rule-description-'+containerIndex,
                                 class: 'clock-timer-rule-description-span'
@@ -676,29 +963,21 @@
                             $btnCpy.click(() => {
                                 _dialogDuplicateRule(containerIndex, $containerRow);
                             });
-
-                            if (resizeContainerTO) { clearTimeout(resizeContainerTO); }
-                            resizeContainerTO = setTimeout(() => {
-                                resizeContainerTO = null;
-                                $('#node-input-payloadDefaultOffset').change();
-                                resizeContainer();
-                            }, 1000);
+                            resizeRuleContainerCheck();
                         },
                         addButton: false,
                         sortable: true,
                         removable: true,
                         scrollOnAdd: true,
                         removeItem(_opt) {
-                            const rules = $('#node-input-rule-container').editableList('items');
-                            rules.each(function(i) {
+                            $('#node-input-rule-container').editableList('items').each(function(i) {
                                 $(this).find('.node-input-rule-index').html(i+1);
                                 const data = $(this).data('data');
                                 data.index = i;
                             });
-                            resizeContainer();
+                            resizeRuleContainerCheck();
                         },
-                        sortItems(_rules) {
-                            const rules = $('#node-input-rule-container').editableList('items');
+                        sortItems(rules) {
                             rules.each(function(i) {
                                 $(this).find('.node-input-rule-index').html(i+1);
                                 const data = $(this).data('data');
@@ -716,19 +995,17 @@
                     const $btnClear = $('#node-button-clear');
                     $btnClear.click(() => {
                         $('#node-input-rule-container').editableList('empty');
-                        resizeContainer();
+                        resizeRuleContainerCheck();
                     });
 
                     const $btnSort = $('#node-button-sort');
                     $btnSort.click(() => {
-                        const prerules = $('#node-input-rule-container').editableList('items');
-                        prerules.each(function(i) {
+                        $('#node-input-rule-container').editableList('items').each(function(i) {
                             const data = $(this).data('data');
                             data.index = i;
-                            data.conditional = ((data.validOperandAType !== 'none') ? 1 : 0);
-                            data.timeLimited = ((data.timeType !== 'none') ? 1 : 0);
+                            // data.conditional = ((data.conditions.length > 0) ? 1 : 0);
+                            // data.timeLimited = ((data.time && data.time.type !== 'none') ? 1 : 0);
                             data.timeData = (parseFloat($(this).find('.node-input-rule-timeReg').attr('timedata')) || 0);
-                            data.timeOp = (data.timeLimited) ? (Number(data.timeOp) || 0) : -1;
                         });
                         /**
                          * 1 no time
@@ -737,11 +1014,13 @@
                          */
                         $('#node-input-rule-container').editableList('sort', (a, b) => {
                             const pos = (a.index - b.index);
-                            if (!a.timeLimited && !b.timeLimited) { // both not time limited
+                            if (!a.time && !b.time) { // both not time limited
                                 return pos;
                             }
                             // both are time limited
-                            const top = (a.timeOp - b.timeOp);
+                            const atimeop = (a.time) ? (Number(a.time.operator) || 0) : -1;
+                            const btimeop = (b.time) ? (Number(b.time.operator) || 0) : -1;
+                            const top = (atimeop - btimeop);
                             if (top !== 0) {
                                 return top; // from before until; not timeLimited before timeLimited (1-3)
                             }
@@ -752,16 +1031,50 @@
                             }
                             return pos;
                         });
-                        const postrules = $('#node-input-rule-container').editableList('items');
-                        postrules.each(function(i) {
+                        $('#node-input-rule-container').editableList('items').each(function(i) {
                             $(this).find('.node-input-rule-index').html(i+1);
                             const data = $(this).data('data');
                             data.index = i;
                         });
                     });
+
+                    const $btnExport = $('#node-button-export');
+                    $btnExport.click(() => {
+                        const rules = [];
+                        $('#node-input-rule-container').editableList('items').each(function (_i) {
+                            const rule = $(this);
+                            const data = JSON.parse(rule.data('ruleData'));
+                            data.index= _i;
+                            rules.push(data);
+                        });
+                        console.log('export to clipboard', rules); // eslint-disable-line no-console
+                        navigator.clipboard.writeText(JSON.stringify(rules, null, '\t'));
+                    });
+
+                    const $btnImport = $('#node-button-import');
+                    $btnImport.click(() => {
+                        navigator.clipboard.readText().then(
+                            clipText => {
+                                try {
+                                    const rules = JSON.parse(clipText);
+                                    console.log('import from clipboard', rules); // eslint-disable-line no-console
+                                    for (let i = 0; i < rules.length; i++) {
+                                        const rule = rules[i];
+                                        // rule.index = i;
+                                        $('#node-input-rule-container').editableList('addItem', rule);
+                                    }
+                                    resizeRuleContainerCheck();
+                                } catch (err) {
+                                    console.log(err.message); // eslint-disable-line no-console
+                                    console.log(err.stack); // eslint-disable-line no-console
+                                    alert(`Clipboard Data has wrong Format! (${err.message})`);
+                                }
+                            });
+                    });
                     // #endregion Button
                     // fill rules
                     if (node.rules) {
+                        $('#node-input-rule-container').editableList('empty');
                         for (let i = 0; i < node.rules.length; i++) {
                             const rule = node.rules[i];
                             // rule.index = i;
@@ -769,6 +1082,154 @@
                         }
                     }
                     // #endregion rules
+                    // #region result-container
+                    /** resizes result container */
+                    function resizeResultContainer() {
+                        const editorRow = $('.node-input-result-container-row ol');
+                        const height = editorRow.outerHeight(true);
+                        const rowCount = $('#node-input-result-container').editableList('length');
+                        if (rowCount > 0) {
+                            $('#node-input-result-container').editableList('height', height + 40);
+                        } else {
+                            $('#node-input-result-container').editableList('height', 20);
+                        }
+                    }
+
+                    $('#node-input-result-container').css('min-height', '40px').css('min-width', '400px').editableList({
+                        addItem($containerRow, containerIndex, data) {
+                            $containerRow.css({ overflow: 'hidden', whiteSpace: 'nowrap' });
+                            const $row1 = $('<div/>').appendTo($containerRow);
+                            // row1 - Property / Type Selection
+                            let prop = data;
+                            if (!Object.prototype.hasOwnProperty.call(prop, 'p')) {
+                                prop = {
+                                    p: '',
+                                    pt: types.MsgPayload.value,
+                                    v: '',
+                                    vt: types.OutputLevel.value
+                                };
+                            }
+                            if (prop.p === 'payload' && (!prop.pt || prop.pt === 'msg')) {
+                                prop.pt = types.MsgPayload.value;
+                            } else if (prop.p === 'topic' && (!prop.pt || prop.pt === 'msg')) {
+                                prop.pt = types.MsgTopic.value;
+                            } else if (prop.p === 'value' && (!prop.pt || prop.pt === 'msg')) {
+                                prop.pt = types.MsgValue.value;
+                            }
+                            const $propertyName = $('<input/>', {
+                                class: 'node-input-prop-result-name',
+                                type: 'text'
+                            })
+                                .css('width', '40%')
+                                .appendTo($row1)
+                                .typedInput({
+                                    default: types.MsgPayload.value,
+                                    types: [
+                                        types.MsgPayload,
+                                        types.MsgTopic,
+                                        types.MsgValue,
+                                        'msg',
+                                        'flow',
+                                        'global'
+                                    ]
+                                });
+                            setTInputValue($propertyName, prop.p, prop.pt);
+
+                            $('<div/>', { style: 'display:inline-block; padding:0px 6px;' })
+                                .text('=')
+                                .appendTo($row1);
+                            const $propertyValue = $('<input/>', {
+                                class: 'node-input-prop-result-value',
+                                type: 'text'
+                            })
+                                .css('width', 'calc(60% - 30px)')
+                                .appendTo($row1)
+                                .typedInput({
+                                    default: 'input',
+                                    types: [
+                                        types.OutputPayload,
+                                        types.OutputTopic,
+                                        types.OutputCtrlObj,
+                                        'date',
+                                        'str',
+                                        'num',
+                                        'bool',
+                                        'json',
+                                        'bin',
+                                        'env',
+                                        'msg',
+                                        'flow',
+                                        'global',
+                                        'jsonata',
+                                        types.nodeId,
+                                        types.nodeName
+                                    ]
+                                });
+                            setTInputValue($propertyValue, prop.v, prop.vt);
+
+                            // changes
+                            $propertyValue.change(() => {
+                                // $operand.show();
+                                // const plNType = $propertyName.typedInput('type');
+                                const plVType = $propertyValue.typedInput('type');
+                                const plVValue = $propertyValue.typedInput('value');
+                                if (plVValue === 'input') {
+                                    $containerRow.attr('title', $('#node-input-input').attr('title'));
+
+                                } else {
+                                    getBackendData(d => {
+                                        $containerRow.attr('title', bdDateToTime(d));
+                                    }, {
+                                        nodeId:         node.id,
+                                        kind:           'getOutDataData',
+                                        config:         $nodeConfig.val(),
+                                        type:           plVType,
+                                        value:          plVValue
+                                    });
+                                }
+                                resizeResultContainer();
+                            });
+                            $propertyValue.change();
+                            resizeResultContainer();
+                        },
+                        sortItems(rules) {
+                            rules.each(function (i) {
+                                $(this).find('.node-input-rule-index').html(i + 1);
+                            });
+                        },
+                        // resizeItem: resizeRule,
+                        sortable: true,
+                        removable: true,
+                        removeItem: resizeResultContainer
+                    });
+
+                    if (!node.results) {
+                        node.results = [
+                            {
+                                p: '',
+                                pt: 'msgTopic',
+                                v: '',
+                                vt: 'topic'
+                            },
+                            {
+                                p: '',
+                                pt: 'msgPayload',
+                                v: '',
+                                vt: 'payload'
+                            },
+                            {
+                                p: 'timeCtrl',
+                                pt: 'msg',
+                                v: '',
+                                vt: types.OutputCtrlObj.value
+                            }
+                        ];
+                    }
+                    for (let i = 0; i < node.results.length; i++) {
+                        const res = node.results[i];
+                        $('#node-input-result-container').editableList('addItem', res);
+                    }
+                    // #endregion result-container
                     // #region Enhanced settings
                     setMultiplier(node,'overwriteExpire', v => {
                         const n = parseFloat(v);
@@ -782,7 +1243,6 @@
                         const n = parseFloat(v);
                         return (RED.validators.number()(v) && (n >= 0) && (n < 0x7FFFFFFF));
                     }, 600000, 0);
-
                     $('.spinner-time').spinner({
                         max: 1439,
                         min: 0,
@@ -826,110 +1286,253 @@
                         }
                     });
 
-                    const $dialogName = $dialog.find('#dlg-ip-clktime-rule-name');
+                    const $dialogName = $dialog.find('#dlg-ip-btctl-rule-name');
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
                     const dialogAddData = {};
+                    // #region dialogConditions
+                    const $dialogConditionContainer = $dialog.find('#dlg-ip-btctl-rule-condition-container');
                     /**
-                     * Build the dialog
+                     * resizes a rule container
                      */
-                    // #region dialogCond1
-                    const $dialogCondAOperand = $dialog.find('#dlg-ip-clktime-rule-condAOperand');
-                    $dialogCondAOperand.typedInput({
-                        default: types.Unlimited.value,
-                        types: [
-                            types.Unlimited,
-                            'msg',
-                            'flow',
-                            'global',
-                            'env',
-                            'jsonata',
-                            types.PhaseMoon,
-                            types.MsgPayload,
-                            types.MsgValue,
-                            types.MsgPayloadByTopic,
-                            types.SunInSky,
-                            types.SunAzimuth,
-                            types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
-                            types.isDST,
-                            types.WeekOfYear,
-                            types.WeekOfYearEven,
-                            types.DayOfYear,
-                            types.DayOfYearEven
-                        ]
-                    });
-                    $dialogCondAOperand.typedInput('width', '40%'); // calc(100% - 220px)
+                    function resizeConditionContainer() {
+                        const editorRow = $('.dlg-ip-btctl-rule-condition-container-row ol');
+                        const height =  editorRow.outerHeight(true);
+                        const rowCount = $('#node-input-rule-container').editableList('length');
+                        if (rowCount > 0) {
+                            $dialogConditionContainer.editableList('height', height + 40);
+                        } else {
+                            $dialogConditionContainer.editableList('height', 0);
+                        }
+                    }
 
-                    const $dialogCondAOperator = $dialog.find('#dlg-ip-clktime-rule-condAOperator');
-                    appendOptions(node, $dialogCondAOperator, 'comparator');
-                    const $dialogCondBOperand = $dialog.find('#dlg-ip-clktime-rule-condBOperand');
-                    $dialogCondBOperand.typedInput({
-                        default: 'num',
-                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                    });
-                    $dialogCondBOperand.typedInput('width', '70%');
-                    // #endregion dialogCond1
-                    // #region dialogCond2
-                    const $dialogCond2LogOperator = $dialog.find('#dlg-ip-clktime-rule-cond2LogOperator');
-                    $dialogCond2LogOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleCondNone')));
-                    $dialogCond2LogOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleCondOr')));
-                    $dialogCond2LogOperator.append($('<option></option>').val(2).text(node._('clock-timer.label.ruleCondAnd')));
+                    $dialogConditionContainer.css('min-width', '400px').editableList({
+                        addItem(containerRow, containerIndex, data) {
+                            if (!Object.prototype.hasOwnProperty.call(data, 'value')) {
+                                data = {
+                                    condition       : 1,        // condition
+                                    valueType       : 'msg',    // operand type
+                                    value           : '',       // operand
+                                    operator        : 'gte',    // operator
+                                    operatorText    : '>=',
+                                    thresholdType   : 'num',    // threshold type
+                                    threshold       : ''        // threshold
+                                };
+                            }
 
-                    const $dialogCond2AOperand = $dialog.find('#dlg-ip-clktime-rule-cond2AOperand');
-                    $dialogCond2AOperand.typedInput({
-                        default: 'msg',
-                        types: [
-                            'msg',
-                            'flow',
-                            'global',
-                            'env',
-                            'jsonata',
-                            types.PhaseMoon,
-                            types.MsgPayload,
-                            types.MsgValue,
-                            types.MsgPayloadByTopic,
-                            types.SunInSky,
-                            types.SunAzimuth,
-                            types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
-                            types.isDST,
-                            types.WeekOfYear,
-                            types.WeekOfYearEven,
-                            types.DayOfYear,
-                            types.DayOfYearEven
-                        ]
-                    });
-                    $dialogCond2AOperand.typedInput('width', '40%'); // calc(100% - 220px)
+                            containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                            const $row1 = $('<div/>').appendTo(containerRow);
+                            const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                            // row1 - index + logOperator + condOperand
+                            $('<input/>',{
+                                type: 'hidden',
+                                id:'dlg-ip-btctl-rule-condIndex' + containerIndex,
+                                class:'dlg-ip-btctl-rule-condIndex',
+                                value:(containerIndex+1)
+                            }).appendTo($row1);
 
-                    const $dialogCond2AOperator = $dialog.find('#dlg-ip-clktime-rule-cond2AOperator');
-                    appendOptions(node, $dialogCond2AOperator, 'comparator');
-                    const $dialogCond2BOperand = $dialog.find('#dlg-ip-clktime-rule-cond2BOperand');
-                    $dialogCond2BOperand.typedInput({
-                        default: 'num',
-                        types: ['num', 'str', 'bool', 'flow', 'global', 'env']
-                    });
-                    $dialogCond2BOperand.typedInput('width', '70%');
-                    // #endregion dialogCond2
+                            const $dialogCondLogOperator = $('<select/>', {
+                                class: 'dlg-ip-btctl-rule-condLogOperator',
+                                id: 'dlg-ip-btctl-rule-condLogOperator' + containerIndex
+                            })
+                                .css('width', '90px')
+                                .css('margin-bottom', '0px')
+                                .appendTo($row1);
+                            $dialogCondLogOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleCondOr')));
+                            $dialogCondLogOperator.append($('<option></option>').val(2).text(node._('clock-timer.label.ruleCondAnd')));
+                            $dialogCondLogOperator.val(data.condition || 1);
+
+                            const $dialogCondOperand = $('<input/>', {
+                                class: 'dlg-ip-btctl-rule-condOperand',
+                                type: 'text'
+                            })
+                                .css('width', 'calc(100% - 95px)')
+                                .appendTo($row1)
+                                .typedInput({
+                                    default: types.MsgPayload.value,
+                                    types: [
+                                        types.Unlimited,
+                                        'msg',
+                                        'flow',
+                                        'global',
+                                        'env',
+                                        'jsonata',
+                                        types.PhaseMoon,
+                                        types.MsgPayload,
+                                        types.MsgValue,
+                                        types.MsgPayloadByTopic,
+                                        types.SunInSky,
+                                        types.SunAzimuth,
+                                        types.SunElevation,
+                                        types.isDST,
+                                        types.WeekOfYear,
+                                        types.WeekOfYearEven,
+                                        types.DayOfYear,
+                                        types.DayOfYearEven,
+                                        types.nodeId,
+                                        types.nodeName
+                                    ]
+                                });
+                            setTInputValue($dialogCondOperand, data.value, data.valueType);
+
+                            // row2 - compare + Thersold
+                            const $dialogCondOperator = $('<select/>', {
+                                class: 'dlg-ip-btctl-rule-condOperator',
+                                id: 'dlg-ip-btctl-rule-condOperator' + containerIndex
+                            })
+                                .css('width', '140px')
+                                .css('margin-bottom', '0px')
+                                .appendTo($row2);
+                            appendOptions(node, $dialogCondOperator, 'comparator');
+                            $dialogCondOperator.val(data.operator || 'gte');
+
+                            const $dialogCondThreshold = $('<input/>', {
+                                class: 'dlg-ip-btctl-rule-condThreshold',
+                                id: 'dlg-ip-btctl-rule-condThreshold' + containerIndex,
+                                type: 'text'
+                            })
+                                .css('width', 'calc(100% - 145px)')
+                                .appendTo($row2)
+                                .typedInput({
+                                    default: 'num',
+                                    types: ['num', 'str', 'bool', 'flow', 'global', 'env', types.numAzimuth, types.numAltitude]
+                                });
+                            setTInputValue($dialogCondThreshold, data.threshold, data.thresholdType);
+                            // changes
+                            $dialogCondOperand.change(() => {
+                                $dialogCondThreshold.change();
+                                // if (dialogDataOnLoading) { return; }
+                                const propType = $dialogCondOperand.typedInput('type');
+                                if (propType === types.PhaseMoon.value ||
+                                        propType === types.MsgPayloadByTopic.value ||
+                                        propType === types.SunControlModeType.value) {
+                                    $dialogCondOperator.val(selFields.comparator[0].id); // only true is valid
+                                    $dialogCondOperator.attr('disabled', true);
+                                    $dialogCondOperator.hide();
+                                    $dialogCondThreshold.typedInput('hide');
+                                    $row2.hide();
+                                } else if (propType === 'jsonata') {
+                                    $dialogCondOperator.show();
+                                    $dialogCondOperator.attr('disabled', true);
+                                    $dialogCondOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
+                                    $dialogCondThreshold.typedInput('hide');
+                                    $row2.show();
+                                } else {
+                                    $dialogCondOperator.show();
+                                    $dialogCondOperator.attr('disabled', false);
+                                    if (getOperandCount(selFields, $dialogCondOperator.val()) > 1) {
+                                        $dialogCondThreshold.typedInput('show');
+                                    } else {
+                                        $dialogCondThreshold.typedInput('hide');
+                                    }
+                                }
+                                getBackendData(d => {
+                                    if (d.value && d.value !== 'none' && d.useful) {
+                                        addProps(dialogAddData, ['cond', containerIndex, 'operand'], d.value);
+                                        $dialogCondOperand.attr('title', d.value);
+                                        $row1.attr('title', d.value);
+                                    } else {
+                                        addProps(dialogAddData, ['cond', containerIndex, 'operand'], '');
+                                        $dialogCondOperand.attr('title', '');
+                                        $row1.attr('title', '');
+                                    }
+                                    _dialogGenHelpText();
+                                }, {
+                                    nodeId:         node.id,
+                                    kind:           'getOutDataData',
+                                    config:         $nodeConfig.val(),
+                                    type:           propType,
+                                    value:          $dialogCondOperand.typedInput('value'),
+                                    noOffsetError:  true
+                                });
+                                $dialogCondLogOperator.change();
+                                resizeConditionContainer();
+                            });
+                            if (containerIndex === 0) {
+                                $dialogCondLogOperator.hide();
+                            } else {
+                                $dialogCondLogOperator.show();
+                            }
+                            $dialogCondOperator.change(() => {
+                                $dialogCondOperand.change();
+                            });
+                            $dialogCondThreshold.change(() => {
+                                const propType = $dialogCondOperand.typedInput('type');
+                                if (propType === types.SunAzimuth.value) {
+                                    const thersoldValueType = $dialogCondThreshold.typedInput('type');
+                                    if (thersoldValueType.indexOf('num') >=0) {
+                                        $dialogCondThreshold.typedInput('type', types.numAzimuth.value);
+                                    }
+                                } else if (propType === types.SunElevation.value) {
+                                    const thersoldValueType = $dialogCondThreshold.typedInput('type');
+                                    if (thersoldValueType.indexOf('num') >=0) {
+                                        $dialogCondThreshold.typedInput('type', types.numAltitude.value);
+                                    }
+                                }
+                                getBackendData(d => {
+                                    if (d.value && d.value !== 'none' && d.useful) {
+                                        addProps(dialogAddData, ['cond', containerIndex, 'threshold'], d.value);
+                                        $dialogCondThreshold.attr('title', d.value);
+                                        $row2.attr('title', d.value);
+                                    } else {
+                                        addProps(dialogAddData, ['cond', containerIndex, 'threshold'], '');
+                                        $dialogCondThreshold.attr('title', '');
+                                        $row2.attr('title', '');
+                                    }
+                                    _dialogGenHelpText();
+                                }, {
+                                    nodeId:         node.id,
+                                    kind:           'getOutDataData',
+                                    config:         $nodeConfig.val(),
+                                    type:           $dialogCondThreshold.typedInput('type'),
+                                    value:          $dialogCondThreshold.typedInput('value'),
+                                    noOffsetError:  true
+                                });
+                            });
+                            $dialogCondOperand.change();
+                            resizeConditionContainer();
+                            _dialogGenHelpText();
+                        },
+                        sortItems(rules) {
+                            rules.each(function (i) {
+                                const $rule = $(this);
+                                $rule.find('.dlg-ip-btctl-rule-condIndex').val(i + 1);
+                                if (i === 0) {
+                                    $rule.find('.dlg-ip-btctl-rule-condLogOperator').hide();
+                                } else {
+                                    $rule.find('.dlg-ip-btctl-rule-condLogOperator').show();
+                                }
+                            });
+                            _dialogGenHelpText();
+                        },
+                        // resizeItem: resizeRule,
+                        sortable: true,
+                        removable: true,
+                        removeItem() {
+                            resizeConditionContainer();
+                            _dialogGenHelpText();
+                        }
+                    }); // condition-container
+                    $('#dlg-ip-btctl-rule-condition-text').html(node._('clock-timer.text.ruleCondition'));
+
+                    // #endregion dialogConditions
                     // #region dialogTimeReg
-                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-clktime-rule-timeReg-operator');
+                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
                     $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleTimeUntil')));
                     $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleTimeFrom')));
 
-                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-clktime-rule-timeReg');
+                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
-                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeReg');
+                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeReg');
                     appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeReg');
+                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
@@ -945,17 +1548,17 @@
                     $dialogTimeRegOffset.typedInput('width', '40%');
                     // #endregion dialogTimeReg
                     // #region dialogTimeMin
-                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-clktime-rule-timeMin');
+                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-btctl-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
-                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeMin');
+                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeMin');
                     appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeMin');
+                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
@@ -971,17 +1574,17 @@
                     $dialogTimeMinOffset.typedInput('width', '40%');
                     // #endregion dialogTimeMin
                     // #region dialogTimeMax
-                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-clktime-rule-timeMax');
+                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-btctl-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 
-                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-clktime-rule-multiplier-timeMax');
+                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeMax');
                     appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-clktime-rule-offset-timeMax');
+                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
@@ -1006,10 +1609,13 @@
                         $dialog.find('#dialog-row-timeConstraintsPlaceholder').fadeIn('slow');
                         $dialog.find('#dialog-row-timeConstraints').hide();
                     });
-                    const $dialogTimeLimitOnlyEvenDays = $dialog.find('#dlg-ip-clktime-rule-timeOnlyEvenDays');
-                    const $dialogTimeLimitOnlyOddDays = $dialog.find('#dlg-ip-clktime-rule-timeOnlyOddDays');
-                    const $dialogTimeLimitDateStart = $dialog.find('#dlg-ip-clktime-rule-timedatelimit-start');
-                    const $dialogTimeLimitDateEnd = $dialog.find('#dlg-ip-clktime-rule-timedatelimit-end');
+
+                    const $dialogTimeLimitOnlyEvenDays = $dialog.find('#dlg-ip-btctl-rule-timeOnlyEvenDays');
+                    const $dialogTimeLimitOnlyOddDays = $dialog.find('#dlg-ip-btctl-rule-timeOnlyOddDays');
+                    const $dialogTimeLimitOnlyEvenWeeks = $dialog.find('#dlg-ip-btctl-rule-timeOnlyEvenWeeks');
+                    const $dialogTimeLimitOnlyOddWeeks = $dialog.find('#dlg-ip-btctl-rule-timeOnlyOddWeeks');
+                    const $dialogTimeLimitDateStart = $dialog.find('#dlg-ip-btctl-rule-timedatelimit-start');
+                    const $dialogTimeLimitDateEnd = $dialog.find('#dlg-ip-btctl-rule-timedatelimit-end');
                     $dialogTimeLimitDateStart.change(() => {
                         const year = (new Date()).getFullYear();
                         $dialogTimeLimitDateEnd.attr('min', year + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '01-01'));
@@ -1022,7 +1628,7 @@
                     });
                     // #endregion dialogTimeLimit
                     // #region dialogPayload
-                    const $dialogPayload = $dialog.find('#dlg-ip-clktime-rule-payload');
+                    const $dialogPayload = $dialog.find('#dlg-ip-btctl-rule-payload');
                     $dialogPayload.typedInput({
                         default: types.Undefined.value,
                         types: [
@@ -1068,26 +1674,26 @@
                     });
                     $dialogPayload.typedInput('width', '40%');
 
-                    const $dialogPayloadOffset = $dialog.find('#dlg-ip-clktime-rule-payloadOffset');
+                    const $dialogPayloadOffset = $dialog.find('#dlg-ip-btctl-rule-payloadOffset');
                     $dialogPayloadOffset.typedInput({
                         default: types.Undefined.value,
                         types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
                     }).change(() => { $dialogPayload.change(); });
                     $dialogPayloadOffset.typedInput('width', '40%');
 
-                    const $dialogPayloadMultiplier = $dialog.find('#dlg-ip-clktime-rule-payloadOffsetMultiplier');
+                    const $dialogPayloadMultiplier = $dialog.find('#dlg-ip-btctl-rule-payloadOffsetMultiplier');
                     appendOptions(node, $dialogPayloadMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormat');
-                    const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-clktime-rule-payloadTimeFormatsel');
+                    const $dialogPayloadTimeFormat = $dialog.find('#dlg-ip-btctl-rule-payloadTimeFormat');
+                    const $dialogPayloadTimeFormatsel = $dialog.find('#dlg-ip-btctl-rule-payloadTimeFormatsel');
 
                     appendOptions(node, $dialogPayloadTimeFormatsel, 'outputFormats');
                     autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
                     // #endregion dialogPayload
                     // #region default topic + importance
-                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-clktime-rule-resetOverwrite');
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-btctl-rule-resetOverwrite');
                     $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
-                    const $dialogImportance = $dialog.find('#dlg-ip-clktime-rule-importance');
+                    const $dialogImportance = $dialog.find('#dlg-ip-btctl-rule-importance');
                     $dialogImportance.spinner({
                         max: 1000,
                         min: 0,
@@ -1095,7 +1701,7 @@
                         stop:(_e, _ui) => { _dialogGenHelpText(); }
                     });
                     $dialogImportance.change(() => { _dialogGenHelpText(); });
-                    const $dialogTopic = $dialog.find('#dlg-ip-clktime-rule-topic');
+                    const $dialogTopic = $dialog.find('#dlg-ip-btctl-rule-topic');
                     $dialogTopic.change(() => { _dialogGenHelpText(); });
                     // #endregion default topic + importance
                     // #region dialogChange
@@ -1129,7 +1735,6 @@
                             _dialogGenHelpText();
                             return;
                         }
-
                         $dialogTimeRegOperator.show();
                         if (opType === types.TimeEntered.value ||
                             opType === types.TimeSun.value ||
@@ -1139,10 +1744,12 @@
                             $('#dialog-row-offset-timeReg').hide();
                         }
 
-                        const noLimit = getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
-                            getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12) === '*' &&
+                        const noLimit = getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
+                            getCheckboxesStr($('#dlg-ip-btctl-rule-timeMonths input[type=checkbox]:checked'), 12) === '*' &&
                             $dialogTimeLimitOnlyEvenDays.is(':checked') !== true &&
                             $dialogTimeLimitOnlyOddDays.is(':checked') !== true &&
+                            $dialogTimeLimitOnlyEvenWeeks.is(':checked') !== true &&
+                            $dialogTimeLimitOnlyOddWeeks.is(':checked') !== true &&
                             $dialogTimeLimitDateStart.val() === '' &&
                             $dialogTimeLimitDateEnd.val() === '';
                         if (noLimit) {
@@ -1153,7 +1760,6 @@
                             $('.dialog-row-timeLimits-ph').hide();
                         }
                         getBackendData(d => {
-                            // console.log('getBackendData of $dialogTimeRegInput ',d);
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
                                 dialogAddData.timeReg = {
@@ -1308,102 +1914,6 @@
                         },1000);
                     });
 
-                    $dialogCondAOperand.change(() => {
-                        if (dialogDataOnLoading) { return; }
-                        const propType = $dialogCondAOperand.typedInput('type');
-                        if (propType === 'none') {
-                            $dialogCondAOperator.val(selFields.comparator[0].id);
-                            $dialogCondAOperator.hide();
-                            $('#dialog-row-condB').hide();
-
-                            $dialogCond2LogOperator.val(0);
-                            $('#dialog-row-cond2LogOperator').hide();
-                        } else if (propType === 'jsonata' ||
-                                   propType === types.PhaseMoon.value ||
-                                   propType === types.MsgPayloadByTopic.value) {
-                            $dialogCondAOperator.show();
-                            $dialogCondAOperator.attr('disabled', true);
-                            $dialogCondAOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
-                            $('#dialog-row-condB').hide();
-                            $('#dialog-row-cond2LogOperator').show();
-                        } else {
-                            $dialogCondAOperator.show();
-                            $dialogCondAOperator.attr('disabled', false);
-                            const condOp = $dialogCondAOperator.val();
-                            let operatorCount = 1;
-                            const fields = selFields.comparator;
-                            const fieldsLength = fields.length;
-                            for (let index = 0; index < fieldsLength; index++) {
-                                const el = fields[index];
-                                if (el.id === condOp) {
-                                    operatorCount = el.operatorCount;
-                                    break;
-                                }
-                            }
-                            if (operatorCount > 1) {
-                                $('#dialog-row-condB').show();
-                            } else {
-                                $('#dialog-row-condB').hide();
-                            }
-                            $('#dialog-row-cond2LogOperator').show();
-                        }
-                        $dialogCondBOperand.change();
-                        $dialogCond2AOperand.change();
-                        _dialogGenHelpText();
-                    });
-                    $dialogCondAOperator.change(() => { $dialogCondAOperand.change(); });
-
-                    $dialogCond2AOperand.change(() => {
-                        if (dialogDataOnLoading) { return; }
-                        const op2 = parseInt($dialogCond2LogOperator.val());
-                        if (isNaN(op2) || op2 === 0) {
-                            $dialogCond2AOperator.val(selFields.comparator[0].id);
-                            $dialogCond2AOperator.hide();
-                            $('#dialog-row-cond2A').hide();
-                            $('#dialog-row-cond2B').hide();
-                        } else {
-                            $dialogCond2AOperator.show();
-                            $('#dialog-row-cond2A').show();
-                            const propType = $dialogCond2AOperand.typedInput('type');
-                            if (propType === 'none') {
-                                $dialogCond2AOperator.val(selFields.comparator[0].id);
-                                $dialogCond2AOperator.hide();
-                                $('#dialog-row-cond2B').hide();
-                            } else if (propType === 'jsonata' ||
-                                       propType === types.PhaseMoon.value ||
-                                       propType === types.MsgPayloadByTopic.value) {
-                                $dialogCond2AOperator.show();
-                                $dialogCond2AOperator.attr('disabled', true);
-                                $dialogCond2AOperator.val(selFields.comparator[0].id); // only true is valid for jsonata
-                                $('#dialog-row-cond2B').hide();
-                            } else {
-                                $dialogCond2AOperator.show();
-                                $dialogCond2AOperator.attr('disabled', false);
-                                const condOp = $dialogCond2AOperator.val();
-                                let operatorCount = 1;
-                                const fields = selFields.comparator;
-                                const fieldsLength = fields.length;
-                                for (let index = 0; index < fieldsLength; index++) {
-                                    const el = fields[index];
-                                    if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
-                                        break;
-                                    }
-                                }
-                                if (operatorCount > 1) {
-                                    $('#dialog-row-cond2B').show();
-                                } else {
-                                    $('#dialog-row-cond2B').hide();
-                                }
-
-                            }
-                        }
-                        $dialogCond2BOperand.change();
-                        _dialogGenHelpText();
-                    });
-                    $dialogCond2LogOperator.change(() => { $dialogCond2AOperand.change(); });
-                    $dialogCond2AOperator.change(() => { $dialogCond2AOperand.change(); });
-
                     $dialogPayload.change(() => {
                         const plVType = $dialogPayload.typedInput('type');
                         if (plVType === types.Undefined.value) {
@@ -1438,11 +1948,11 @@
                             kind:       'getOutDataData',
                             config:     $nodeConfig.val(),
                             type:       plVType,
-                            value:      $('#dlg-ip-clktime-rule-payload').typedInput('value'),
-                            format:     $('#dlg-ip-clktime-rule-payloadTimeFormat').val(),
-                            offsetType: $('#dlg-ip-clktime-rule-payloadOffset').typedInput('type'),
-                            offset:     $('#dlg-ip-clktime-rule-payloadOffset').typedInput('value'),
-                            multiplier: $('#dlg-ip-clktime-rule-payloadOffsetMultiplier').val(),
+                            value:      $('#dlg-ip-btctl-rule-payload').typedInput('value'),
+                            format:     $('#dlg-ip-btctl-rule-payloadTimeFormat').val(),
+                            offsetType: $('#dlg-ip-btctl-rule-payloadOffset').typedInput('type'),
+                            offset:     $('#dlg-ip-btctl-rule-payloadOffset').typedInput('value'),
+                            multiplier: $('#dlg-ip-btctl-rule-payloadOffsetMultiplier').val(),
                             noOffsetError: true
                         });
                         _dialogGenHelpText();
@@ -1472,14 +1982,14 @@
                      * generates the help text of the dialog
                      */
                     function _dialogGenHelpText() {
-                        $('#dlg-txt-clktimctl-rule-descr').html('');
+                        $('#dlg-txt-btctl-rule-descr').html('');
                         if (dialogAddData.timeout) {
                             clearTimeout(dialogAddData.timeout);
                             dialogAddData.timeout = null;
                         }
                         dialogAddData.timeout = setTimeout(() => {
                             dialogAddData.timeout = null;
-                            $('#dlg-txt-clktimctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
+                            $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
                         },1000);
                     }
                     /**
@@ -1492,39 +2002,33 @@
                             const data = JSON.parse($dialogDataRow.data('ruleData'));
                             $dialogName.val(data.name);
                             dialogDataOnLoading = true;
-
-                            $dialogCondAOperator.val(data.validOperator || selFields.comparator[0].id);
-                            setTInputValue($dialogCondAOperand, data.validOperandAValue, data.validOperandAType);
-                            setTInputValue($dialogCondBOperand, data.validOperandBValue, data.validOperandBType);
-
-                            $dialogCond2LogOperator.val(data.valid2LogOperator || 0);
-                            $dialogCond2AOperator.val(data.valid2Operator || selFields.comparator[0].id);
-                            setTInputValue($dialogCond2AOperand, data.valid2OperandAValue, data.valid2OperandAType);
-                            setTInputValue($dialogCond2BOperand, data.valid2OperandBValue, data.valid2OperandBType);
-
-                            $dialogTimeRegOperator.val(data.timeOp || 0);
-                            $dialogTimeRegMultiplier.val(data.multiplier || 60000);
-                            setTInputValue($dialogTimeRegInput, data.timeValue, data.timeType);
-                            setTInputValue($dialogTimeRegOffset, data.offsetValue, data.offsetType);
-
-                            initCheckboxesBlock('#dlg-ip-clktime-rule-timeDays', data.timeDays);
-                            initCheckboxesBlock('#dlg-ip-clktime-rule-timeMonths', data.timeMonths);
-                            $dialogTimeLimitOnlyEvenDays.attr('checked', data.timeOnlyEvenDays);
-                            $dialogTimeLimitOnlyOddDays.attr('checked', data.timeOnlyOddDays);
-
-                            if (data.timeDateEnd || data.timeDateStart) {
+                            $dialogConditionContainer.editableList('empty');
+                            for (let i = 0; i < data.conditions.length; i++) {
+                                $dialogConditionContainer.editableList('addItem', data.conditions[i]);
+                            }
+                            if (data.time) {
+                                $dialogTimeRegOperator.val(data.time.operator);
+                                $dialogTimeRegMultiplier.val(data.time.multiplier);
+                                setTInputValue($dialogTimeRegInput, data.time.value, data.time.type);
+                                setTInputValue($dialogTimeRegOffset, data.time.offset, data.time.offsetType);
+                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', data.time.days);
+                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', data.time.months);
+                                $dialogTimeLimitOnlyEvenDays.attr('checked', data.time.onlyEvenDays);
+                                $dialogTimeLimitOnlyOddDays.attr('checked', data.time.onlyOddDays);
+                                $dialogTimeLimitOnlyEvenWeeks.attr('checked', data.time.onlyEvenWeeks);
+                                $dialogTimeLimitOnlyOddWeeks.attr('checked', data.time.onlyOddWeeks);
                                 const year = (new Date()).getFullYear();
                                 let dStart, dEnd;
-                                if (data.timeDateStart) {
-                                    dStart = new Date(data.timeDateStart);
+                                if (data.time.dateStart) {
+                                    dStart = new Date(data.time.dateStart);
                                     dStart.setHours(0, 0, 0, 1);
                                     dStart.setFullYear(year);
                                 } else {
                                     dStart = new Date(year, 0, 1, 0, 0, 0, 1);
                                 }
 
-                                if (data.timeDateEnd) {
-                                    dEnd = new Date(data.timeDateEnd);
+                                if (data.time.dateEnd) {
+                                    dEnd = new Date(data.time.dateEnd);
                                     dEnd.setHours(23, 59, 59, 999);
                                     dEnd.setFullYear(year);
                                 } else {
@@ -1535,42 +2039,66 @@
                                     dEnd.setFullYear(year + 1);
                                 }
                                 const pad = (n, z = 2) => ('00' + n).slice(-z);
-                                if (data.timeDateStart) {
+                                if (data.time.dateStart) {
                                     $dialogTimeLimitDateStart.val(dStart.getFullYear() + '-' + pad(dStart.getMonth() + 1) + '-' + pad(dStart.getDate()));
                                 }
-                                if (data.timeDateEnd) {
+                                if (data.time.dateEnd) {
                                     $dialogTimeLimitDateEnd.val(dEnd.getFullYear() + '-' + pad(dEnd.getMonth() + 1) + '-' + pad(dEnd.getDate()));
                                 }
                                 $dialogTimeLimitDateStart.change();
                                 $dialogTimeLimitDateEnd.change();
-                            }
-
-                            $dialogTimeMinMultiplier.val(data.multiplierMin || 60000);
-                            setTInputValue($dialogTimeMinInput, data.timeMinValue, data.timeMinType);
-                            setTInputValue($dialogTimeMinOffset, data.offsetMinValue, data.offsetMinType);
-
-                            $dialogTimeMaxMultiplier.val(data.multiplierMax || 60000);
-                            setTInputValue($dialogTimeMaxInput, data.timeMaxValue, data.timeMaxType);
-                            setTInputValue($dialogTimeMaxOffset, data.offsetMaxValue, data.offsetMaxType);
-
-                            $dialogPayloadMultiplier.val(data.payloadOffsetMultiplier || 60000);
-                            setTInputValue($dialogPayload, data.payloadValue, data.payloadType);
-                            setTInputValue($dialogPayloadOffset, data.payloadOffsetValue, data.payloadOffsetType);
-                            const valueNum = Number(data.payloadFormat);
-                            if (isNaN(valueNum)) {
-                                $dialogPayloadTimeFormatsel.val(99);
-                                $dialogPayloadTimeFormat.val(data.payloadFormat);
                             } else {
-                                $dialogPayloadTimeFormatsel.val(valueNum);
+                                $dialogTimeRegOperator.val(0);
+                                $dialogTimeRegMultiplier.val(60000);
+                                setTInputValue($dialogTimeRegInput, '', types.Undefined.value);
+                                setTInputValue($dialogTimeRegOffset, 1, types.Undefined.value);
+                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', '*');
+                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', '*');
+                                $dialogTimeLimitOnlyEvenDays.attr('checked', false);
+                                $dialogTimeLimitOnlyOddDays.attr('checked', false);
+                                $dialogTimeLimitOnlyEvenWeeks.attr('checked', false);
+                                $dialogTimeLimitOnlyOddWeeks.attr('checked', false);
+                                $dialogTimeLimitDateStart.val('');
+                                $dialogTimeLimitDateEnd.val('');
                             }
-                            $dialogTopic.val(data.topic);
+                            if (data.timeMin) {
+                                $dialogTimeMinMultiplier.val(data.timeMin.multiplier || 60000);
+                                setTInputValue($dialogTimeMinInput, data.timeMin.value, data.timeMin.type);
+                                setTInputValue($dialogTimeMinOffset, data.offset, data.offsetType);
+                            } else {
+                                setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
+                                setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
+                                $dialogTimeMinMultiplier.val(60000);
+                            }
+                            if (data.timeMax) {
+                                $dialogTimeMaxMultiplier.val(data.timeMax.multiplier || 60000);
+                                setTInputValue($dialogTimeMaxInput, data.timeMax.value, data.timeMax.type);
+                                setTInputValue($dialogTimeMaxOffset, data.offset, data.offsetType);
+                            } else {
+                                setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
+                                setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
+                                $dialogTimeMaxMultiplier.val(60000);
+                            }
+                            if (data.payload) {
+                                $dialogPayloadMultiplier.val(data.payload.multiplier || 60000);
+                                setTInputValue($dialogPayload, data.payload.value, data.payload.type);
+                                setTInputValue($dialogPayloadOffset, data.payload.offset, data.payload.offsetType);
+                                const valueNum = Number(data.payload.format);
+                                if (isNaN(valueNum)) {
+                                    $dialogPayloadTimeFormatsel.val(99);
+                                    $dialogPayloadTimeFormat.val(data.payload.format);
+                                } else {
+                                    $dialogPayloadTimeFormatsel.val(valueNum);
+                                }
+                            } else {
+                                $dialogPayloadMultiplier.val(60000);
+                            }
+                            $dialogTopic.val(data.topic || '');
                             $dialogImportance.val(data.importance || 0);
-                            $dialogResetOverwrite.attr('checked', data.resetOverwrite);
+                            $dialogResetOverwrite.attr('checked', data.resetOverwrite || false);
 
                             _dialogGenHelpText();
-
                             dialogDataOnLoading = false;
-                            $dialogCondAOperand.change();
                             $dialogTimeRegInput.change();
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
@@ -1587,104 +2115,133 @@
                         const result = {
                             index: dialogDataIndex,
                             name:$dialogName.val(),
-                            isValid:true,
-                            valid:{},
-
-                            timeValue: $dialogTimeRegInput.typedInput('value'),
-                            timeType: $dialogTimeRegInput.typedInput('type'),
-                            timeOp: parseInt($dialogTimeRegOperator.val()),
-                            timeOpText: $dialogTimeRegOperator.find('option:selected').text(),
-                            offsetValue: $dialogTimeRegOffset.typedInput('value'),
-                            offsetType: $dialogTimeRegOffset.typedInput('type'),
-                            multiplier: parseInt($dialogTimeRegMultiplier.val()),
-                            timeDays: getCheckboxesStr($('#dlg-ip-clktime-rule-timeDays input[type=checkbox]:checked'), 7),
-                            timeMonths: getCheckboxesStr($('#dlg-ip-clktime-rule-timeMonths input[type=checkbox]:checked'), 12),
-                            timeOnlyEvenDays: $dialogTimeLimitOnlyEvenDays.is(':checked'),
-                            timeOnlyOddDays: $dialogTimeLimitOnlyOddDays.is(':checked'),
-                            timeDateStart: $dialogTimeLimitDateStart.val(),
-                            timeDateEnd: $dialogTimeLimitDateEnd.val(),
-
-                            timeMinValue: $dialogTimeMinInput.typedInput('value'),
-                            timeMinType: $dialogTimeMinInput.typedInput('type'),
-                            offsetMinValue: $dialogTimeMinOffset.typedInput('value'),
-                            offsetMinType: $dialogTimeMinOffset.typedInput('type'),
-                            multiplierMin: parseInt($dialogTimeMinMultiplier.val()),
-
-                            timeMaxValue: $dialogTimeMaxInput.typedInput('value'),
-                            timeMaxType: $dialogTimeMaxInput.typedInput('type'),
-                            offsetMaxValue: $dialogTimeMaxOffset.typedInput('value'),
-                            offsetMaxType: $dialogTimeMaxOffset.typedInput('type'),
-                            multiplierMax:  parseInt($dialogTimeMaxMultiplier.val()),
-
-                            payloadValue: $dialogPayload.typedInput('value'),
-                            payloadType: $dialogPayload.typedInput('type'),
-                            payloadOffsetValue: $dialogPayloadOffset.typedInput('value'),
-                            payloadOffsetType: $dialogPayloadOffset.typedInput('type'),
-                            payloadOffsetMultiplier: parseInt($dialogPayloadMultiplier.val()),
-                            payloadFormat: $dialogPayloadTimeFormat.val(),
+                            version: ruleVersion,
+                            isValid: true,
+                            valid:{
+                                conditions : []
+                            },
+                            conditions: [],
+                            payload: {
+                                type        : $dialogPayload.typedInput('type'),
+                                value       : $dialogPayload.typedInput('value'),
+                                offsetType  : $dialogPayloadOffset.typedInput('type'),
+                                offset      : $dialogPayloadOffset.typedInput('value'),
+                                multiplier  : parseInt($dialogPayloadMultiplier.val()),
+                                format      : $dialogPayloadTimeFormat.val()
+                            },
                             topic: $dialogTopic.val(),
                             importance: parseInt($dialogImportance.val()),
-                            resetOverwrite: $dialogResetOverwrite.is(':checked'),
-
-                            validOperandAValue: $dialogCondAOperand.typedInput('value'),
-                            validOperandAType: $dialogCondAOperand.typedInput('type'),
-                            validOperator: $dialogCondAOperator.val(),
-                            validOperatorText: $dialogCondAOperator.find('option:selected').text(),
-                            validOperandBValue: $dialogCondBOperand.typedInput('value'),
-                            validOperandBType: $dialogCondBOperand.typedInput('type'),
-
-                            valid2LogOperator: parseInt($dialogCond2LogOperator.val()),
-                            valid2LogOperatorText: $dialogCond2LogOperator.find('option:selected').text(),
-                            valid2OperandAValue: $dialogCond2AOperand.typedInput('value'),
-                            valid2OperandAType: $dialogCond2AOperand.typedInput('type'),
-                            valid2Operator: $dialogCond2AOperator.val(),
-                            valid2OperatorText: $dialogCond2AOperator.find('option:selected').text(),
-                            valid2OperandBValue: $dialogCond2BOperand.typedInput('value'),
-                            valid2OperandBType: $dialogCond2BOperand.typedInput('type')
+                            resetOverwrite: $dialogResetOverwrite.is(':checked')
                         };
-                        result.valid.validTimeReg = $dialogTimeRegInput.typedInput('validate');
-                        if (result.valid.validTimeReg && result.timeType !== 'none') {
-                            result.valid.validTimeReg = $dialogTimeRegOffset.typedInput('validate') &&
-                                result.multiplier &&
-                                $dialogTimeMinInput.typedInput('validate') &&
-                                $dialogTimeMaxInput.typedInput('validate');
-                            if (result.valid.validTimeReg && result.timeMinType !== 'none') {
-                                result.valid.validTimeReg = $dialogTimeMinOffset.typedInput('validate') &&
-                                    result.multiplierMin;
+                        try {
+                            const setval = (param, name, val) => { if (val) param[name] = val; };
+                            $dialogConditionContainer.editableList('items').each(function(_i) {
+                                const $cond = $(this);
+                                const p = {
+                                    condition       : Number($cond.find('.dlg-ip-btctl-rule-condLogOperator').val()),
+                                    conditionText   : $cond.find('.dlg-ip-btctl-rule-condLogOperator option:selected').text(),
+                                    valueType       : $cond.find('.dlg-ip-btctl-rule-condOperand').typedInput('type'),
+                                    value           : $cond.find('.dlg-ip-btctl-rule-condOperand').typedInput('value'),
+                                    operator        : $cond.find('.dlg-ip-btctl-rule-condOperator').val(),
+                                    operatorText    : $cond.find('.dlg-ip-btctl-rule-condOperator option:selected').text(),
+                                    thresholdType   : $cond.find('.dlg-ip-btctl-rule-condThreshold').typedInput('type'),
+                                    threshold       : $cond.find('.dlg-ip-btctl-rule-condThreshold').typedInput('value')
+                                };
+                                if (p.thresholdType === 'num' && p.threshold === '') {
+                                    p.threshold = 0;
+                                }
+                                if (_i === 0) {
+                                    delete p.condition;
+                                    delete p.conditionText;
+                                }
+                                result.conditions.push(p);
+                                const isCValid = {
+                                    index       : _i,
+                                    value       : $cond.find('.dlg-ip-btctl-rule-condOperand').typedInput('validate'),
+                                    threshold   : $cond.find('.dlg-ip-btctl-rule-condThreshold').typedInput('validate')
+                                };
+                                result.valid.conditions.push(isCValid);
+                                result.isValid = result.isValid && isCValid.value && isCValid.threshold;
+                            });
+                            const timeType = $dialogTimeRegInput.typedInput('type');
+                            result.valid.time = $dialogTimeRegInput.typedInput('validate');
+                            if (timeType !== 'none') {
+                                result.time = {
+                                    type            : timeType,
+                                    value           : $dialogTimeRegInput.typedInput('value'),
+                                    operator        : parseInt($dialogTimeRegOperator.val()),
+                                    operatorText    : $dialogTimeRegOperator.find('option:selected').text(),
+                                    offsetType      : $dialogTimeRegOffset.typedInput('type'),
+                                    offset          : $dialogTimeRegOffset.typedInput('value'),
+                                    multiplier      : parseInt($dialogTimeRegMultiplier.val()),
+                                    days            : getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'),7),
+                                    months          : getCheckboxesStr($('#dlg-ip-btctl-rule-timeMonths input[type=checkbox]:checked'), 12)
+                                };
+                                setval(result.time,'onlyEvenDays', $dialogTimeLimitOnlyEvenDays.is(':checked'));
+                                setval(result.time,'onlyOddDays', $dialogTimeLimitOnlyOddDays.is(':checked'));
+                                setval(result.time,'onlyEvenWeeks', $dialogTimeLimitOnlyEvenWeeks.is(':checked'));
+                                setval(result.time,'onlyOddWeeks', $dialogTimeLimitOnlyOddWeeks.is(':checked'));
+                                setval(result.time,'dateStart', $dialogTimeLimitDateStart.val());
+                                setval(result.time,'dateEnd', $dialogTimeLimitDateEnd.val());
+
+                                result.valid.time = result.valid.time && $dialogTimeRegOffset.typedInput('validate') && result.time.multiplier;
+                                if (result.time.onlyEvenDays && result.time.onlyOddDays) {
+                                    delete result.time.onlyEvenDays;
+                                    delete result.time.onlyOddDays;
+                                }
+                                if (result.time.onlyEvenWeeks && result.time.onlyOddWeeks) {
+                                    delete result.time.onlyEvenWeeks;
+                                    delete result.time.onlyOddWeeks;
+                                }
+                                if (!result.time.days || !result.time.months) {
+                                    result.valid.time = false;
+                                }
+                                const minType = $dialogTimeMinInput.typedInput('type');
+                                result.valid.timeMin = $dialogTimeMinInput.typedInput('validate');
+                                if (minType !== 'none') {
+                                    result.timeMin = {
+                                        type        : minType,
+                                        value       : $dialogTimeMinInput.typedInput('value'),
+                                        offsetType  : $dialogTimeMinOffset.typedInput('type'),
+                                        offset      : $dialogTimeMinOffset.typedInput('value'),
+                                        multiplier  : parseInt($dialogTimeMinMultiplier.val())
+                                    };
+                                    result.valid.timeMin = result.valid.timeMin &&
+                                        $dialogTimeMinOffset.typedInput('validate') &&
+                                        result.timeMin.multiplier;
+                                }
+                                const maxType = $dialogTimeMaxInput.typedInput('type');
+                                result.valid.timeMax = $dialogTimeMaxInput.typedInput('validate');
+                                if (maxType !== 'none') {
+                                    result.timeMax = {
+                                        type        : maxType,
+                                        value       : $dialogTimeMaxInput.typedInput('value'),
+                                        offsetType  : $dialogTimeMaxOffset.typedInput('type'),
+                                        offset      : $dialogTimeMaxOffset.typedInput('value'),
+                                        multiplier  :  parseInt($dialogTimeMaxMultiplier.val())
+                                    };
+                                    result.valid.timeMax =result.valid.timeMax &&
+                                        result.timeMax.multiplier;
+                                }
+                                result.isValid = result.isValid && result.valid.time && result.valid.timeMin && result.valid.timeMax;
                             }
-                            if (result.valid.validTimeReg && result.timeMaxType !== 'none') {
-                                result.valid.validTimeReg = $dialogTimeMaxOffset.typedInput('validate') &&
-                                    result.multiplierMax;
+                            result.valid.payload = $dialogPayload.typedInput('validate');
+                            if (result.valid.payload && result.payload.type !== 'none') {
+                                result.valid.payload = $dialogPayloadOffset.typedInput('validate') &&
+                                            !isNaN(result.payload.multiplier);
                             }
-                            if (result.timeOnlyEvenDays && result.timeOnlyOddDays) {
-                                result.valid.validTimeReg = false;
-                            }
-                            if (!result.timeDays || !result.timeMonths) {
-                                result.valid.validTimeReg = false;
-                            }
+                            result.isValid = result.isValid && result.valid.payload;
+                        } catch (err) {
+                            console.log(err.message); // eslint-disable-line no-console
+                            console.log(err.stack); // eslint-disable-line no-console
+                            result.isValid = false;
+                            result.valid.error = err.message;
                         }
-                        result.isValid = result.valid.validTimeReg;
-                        result.valid.validPayload = $dialogPayload.typedInput('validate');
-                        if (result.valid.validPayload && result.payloadType !== 'none') {
-                            result.valid.validPayload = $dialogPayloadOffset.typedInput('validate') &&
-                                        !isNaN(result.payloadOffsetMultiplier);
-                        }
-                        result.isValid = result.isValid && result.valid.validPayload;
-                        result.valid.validOperand1A = $dialogCondAOperand.typedInput('validate');
-                        if (result.validOperandAType !== 'none') {
-                            result.valid.validOperand1B = $dialogCondBOperand.typedInput('validate');
-                            result.isValid = result.isValid && result.valid.validOperand1B;
-                            if (result.valid2LogOperator) {
-                                result.valid.validOperand2A = $dialogCond2AOperand.typedInput('validate');
-                                result.valid.validOperand2B = $dialogCond2BOperand.typedInput('validate');
-                                result.isValid = result.isValid && result.valid.validOperand2A && result.valid.validOperand2B;
-                            }
-                        }
-                        result.isValid = result.isValid && result.valid.validOperand1A;
                         if (!result.isValid) {
                             console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
+                        } else {
+                            delete result.valid; // if valid, not needed
                         }
-
                         return result;
                     }
                     /**
@@ -1696,7 +2253,7 @@
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
                         $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
-                        resizeContainer();
+                        resizeRuleContainerCheck();
                     }
 
                     /**
@@ -1709,7 +2266,7 @@
                             const data = JSON.parse($dialogDataRow.data('ruleData'));
                             const nm = parseInt(data.name.match(/[0-9]+(?!.*[0-9])/), 10);
                             if (nm) {
-                                data.name = data.name.replace(/[0-9]+(?!.*[0-9])/, nm+1);
+                                data.name = data.name.replace(/[0-9]+(?!.*[0-9])/, nm + 1);
                             } else {
                                 data.name += ' - copy 1';
                             }
@@ -1718,9 +2275,11 @@
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
-                            $dialogName.val(err.message);
+                            // $dialogName.val(err.message);
                         }
+                        resizeRuleContainerCheck();
                     }
+                    resizeRuleContainerCheck();
                     // #endregion dialogload & save
                     // #endregion dialog
                 }; // setup
@@ -1742,16 +2301,13 @@
             },
             oneditsave() {
                 const node = this;
-                const $rules = $('#node-input-rule-container').editableList('items');
                 node.rules = [];
-                if ($rules) {
-                    $rules.each(function (_i) {
-                        const rule = $(this);
-                        const data = JSON.parse(rule.data('ruleData'));
-                        data.index= _i;
-                        node.rules.push(data);
-                    });
-                }
+                $('#node-input-rule-container').editableList('items').each(function (_i) {
+                    const $rule = $(this);
+                    const data = JSON.parse($rule.data('ruleData'));
+                    data.index= _i;
+                    node.rules.push(data);
+                });
 
                 const overwriteExpire = parseFloat($('#time-control-overwriteExpire').val());
                 if (isNaN(overwriteExpire) || overwriteExpire === '' || overwriteExpire === 0) {
@@ -1787,6 +2343,27 @@
                 }
 
                 $('#dialog-edit-rule').dialog('destroy').remove();
+
+                const results = $('#node-input-result-container').editableList('items');
+                node.results = [];
+                results.each(function (_i) {
+                    const prop = $(this);
+                    const p = {
+                        p: prop.find('.node-input-prop-result-name').typedInput('value'),
+                        pt: prop.find('.node-input-prop-result-name').typedInput('type'),
+                        v: prop.find('.node-input-prop-result-value').typedInput('value'),
+                        vt: prop.find('.node-input-prop-result-value').typedInput('type')
+                    };
+                    p.f = (p.fS !== 99 ? p.fS : p.fI);
+                    if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {
+                        p.pt = 'msgPayload';
+                    } else if (p.p === 'topic' && (!p.pt || p.pt === 'msg')) {
+                        p.pt = 'msgTopic';
+                    } else if (p.p === 'value' && (!p.pt || p.pt === 'msg')) {
+                        p.pt = 'msgValue';
+                    }
+                    node.results.push(p);
+                });
             },
             oneditcancel() {
                 $('#dialog-edit-rule').dialog('destroy').remove();
@@ -1799,7 +2376,7 @@
 
 <script type="text/html" data-template-name="clock-timer">
     <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span>
     </div>
     <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -1808,12 +2385,14 @@
     <hr>
     <!-- time ######################################################################## -->
     <div class="is-to-show-initially">
-        <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span></span>
+        <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span>
         <div class="form-row node-input-rule-container-row row-full-width">
             <ol id="node-input-rule-container"></ol>
             <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.btnAdd"></span></button> &nbsp;
             <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="clock-timer.label.btnClear"></span></button> &nbsp;
             <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="clock-timer.label.btnSort"></span></button>
+            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="clock-timer.label.btnExport"></span></button>
+            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="clock-timer.label.btnImport"></span></button>
         </div>
     </div>
     <div class="form-row block-noindent is-to-show-initially">
@@ -1843,7 +2422,7 @@
     <hr>
     <!-- overwrite ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span></span>
+        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span>
     </div>
     <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]clock-timer.placeholder.overwriteExpire">
         <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.overwriteExpire"></span></label>
@@ -1854,17 +2433,18 @@
             <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
             <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
         </select>
-        <input type="hidden" id="node-input-overwriteExpire">
+        <input type="hidden" id="node-input-overwriteExpire"/>
     </div>
     <hr>
+    <!-- sun ######################################################################## -->
     <!-- Enhanced ######################################################################## -->
-    <div class="form-row block-noindent" data-i18n="[title]clock-timer.placeholder.outputs">
-        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="clock-timer.label.outputs"></span></label>
-        <select id="node-input-outputs" class="row-full-width">
-            <option value="1" data-i18n="clock-timer.label.singleOutput"></option>
-            <option value="2" data-i18n="clock-timer.label.splitOutput"></option>
-        </select>
+    <div>
+        <label for="node-input-result-container-row"><i class="fa fa-list"></i> <span data-i18n="clock-timer.label.resultContainer"></span></label>
+        <div class="form-row node-input-result-container-row">
+            <ol id="node-input-result-container"></ol>
+        </div>
     </div>
+    <hr>
     <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.autoTrigger">
         <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
         <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
@@ -1876,7 +2456,7 @@
                 <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
                 <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
             </select>
-            <input type="hidden" id="node-input-autoTriggerTime">
+            <input type="hidden" id="node-input-autoTriggerTime"/>
         </span>
     </div>
     <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.startDelay2">
@@ -1888,7 +2468,7 @@
                 <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
                 <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
             </select>
-            <input type="hidden" id="node-input-startDelayTime">
+            <input type="hidden" id="node-input-startDelayTime"/>
         </span>
     </div>
     <hr>
@@ -1896,6 +2476,11 @@
     <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
+    </div>
+    <div class="form-row block-noindent" data-i18n="[title]clock-timer.label.addId">
+        <label for="node-input-addId"><i class="icon-tag"></i> <span data-i18n="clock-timer.label.addId"></span></label>
+        <input type="text" id="node-input-addId" class="row-full-width" data-i18n="[placeholder]clock-timer.placeholder.addId"/>
+        <input type="hidden" id="node-input-addIdType"/>
     </div>
     <div class="form-tips is-to-show-initially">
         <span data-i18n="[html]clock-timer.tips.documentation" style="word-wrap:break-word;"></span>
@@ -1908,81 +2493,58 @@
 
     <div id="dialog-edit-rule" class="red-ui-editor" title="Edit Rule">
         <div class="dialog-row">
-            <label for="dlg-ip-clktime-rule-name"><i class="fa fa-tag"></i> <span data-i18n="clock-timer.label.name"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-name" class="ipalone" data-i18n="[placeholder]clock-timer.placeholder.name">
+            <label for="dlg-ip-btctl-rule-name"><i class="fa fa-tag"></i> <span data-i18n="clock-timer.label.name"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-name" class="ipalone" data-i18n="[placeholder]clock-timer.placeholder.name">
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0" id="dialog-row-condA">
-            <label for="dlg-ip-clktime-rule-condAOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-condAOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
-            <select id="dlg-ip-clktime-rule-condAOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
-            </select>
-        </div>
-        <div class="dialog-row block-indent1" id="dialog-row-condB">
-            <label for="dlg-ip-clktime-rule-condBOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-clktime-rule-condBOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
-        </div>
-        <div class="dialog-row block-indent1" id="dialog-row-cond2LogOperator">
-            <label for="dlg-ip-clktime-rule-cond2LogOperator"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleAndOr"></span></label>
-            <select id="dlg-ip-clktime-rule-cond2LogOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
-            </select>
-        </div>
-        <div class="dialog-row block-indent1" id="dialog-row-cond2A">
-            <label for="dlg-ip-clktime-rule-cond2AOperand"><i class="fa fa-puzzle-piece"></i> <span data-i18n="clock-timer.label.ruleCondition"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-cond2AOperand" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
-            <select id="dlg-ip-clktime-rule-cond2AOperator" class="ipadd dlg-ip-clktime-rule-condOperator" >
-            </select>
-        </div>
-        <div class="dialog-row block-indent2" id="dialog-row-cond2B">
-            <label for="dlg-ip-clktime-rule-cond2BOperand"><i class="fa fa-ellipsis-h"></i> <span data-i18n="clock-timer.label.ruleConditionThreshold"></span></label>
-            <input id="dlg-ip-clktime-rule-cond2BOperand" class="ipMain" type="text" data-i18n="[placeholder]clock-timer.placeholder.condoperand">
+        <div class="dialog-row pt-0 node-dialog-condition-container-row">
+            <span><i class="fa fa-puzzle-piece"></i> <span id="dlg-ip-btctl-rule-condition-text"></span></span>
+            <ol id="dlg-ip-btctl-rule-condition-container"></ol>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-timeReg">
-            <label for="dlg-ip-clktime-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.time"></span></label>
-            <select id="dlg-ip-clktime-rule-timeReg-operator" class="ipadd dlg-ip-clktime-rule-timeReg-operator" >
+            <label for="dlg-ip-btctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.time"></span></label>
+            <select id="dlg-ip-btctl-rule-timeReg-operator" class="ipadd dlg-ip-btctl-rule-timeReg-operator" >
             </select>
-            <input type="text" id="dlg-ip-clktime-rule-timeReg" class="ipMain dlg-ip-clktime-rule-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <input type="text" id="dlg-ip-btctl-rule-timeReg" class="ipMain dlg-ip-btctl-rule-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeReg">
-            <label for="dlg-ip-clktime-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-offset-timeReg"class="ipMain dlg-ip-clktime-rule-offset-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktime-rule-multiplier-timeReg" class="ipadd dlg-ip-clktime-rule-multiplier-timeReg" >
+            <label for="dlg-ip-btctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeReg"class="ipMain dlg-ip-btctl-rule-offset-timeReg" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-btctl-rule-multiplier-timeReg" class="ipadd dlg-ip-btctl-rule-multiplier-timeReg" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-clktime-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
-            <!-- select id="dlg-ip-clktime-rule-timeMax-operator" class="ipadd dlg-ip-clktime-rule-timeMax-operator" >
-            </select -->
-            <input type="text" id="dlg-ip-clktime-rule-timeMin" class="ipMain dlg-ip-clktime-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeMin" class="ipMain dlg-ip-btctl-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
-            <label for="dlg-ip-clktime-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-offset-timeMin"class="ipMain dlg-ip-clktime-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktime-rule-multiplier-timeMin" class="ipadd dlg-ip-clktime-rule-multiplier-timeMin" >
+            <label for="dlg-ip-btctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeMin"class="ipMain dlg-ip-btctl-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-btctl-rule-multiplier-timeMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeMin" >
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-clktime-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-timeMax" class="ipMain dlg-ip-clktime-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeMax" class="ipMain dlg-ip-btctl-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
-            <label for="dlg-ip-clktime-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-offset-timeMax"class="ipMain dlg-ip-clktime-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-clktime-rule-multiplier-timeMax" class="ipadd dlg-ip-clktime-rule-multiplier-timeMax" >
+            <label for="dlg-ip-btctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeMax"class="ipMain dlg-ip-btctl-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
+            <select  id="dlg-ip-btctl-rule-multiplier-timeMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeMax" >
             </select>
         </div>
         <div class="dialog-row dialog-row-timeLimits-ph is-to-show-initially" id="dialog-row-timeConstraintsPlaceholder">
-            <div class="dlg-ip-clktime-rule-timecontraintctrl" id="dialog-row-timeConstraints-show">
+            <div class="dlg-ip-btctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-show">
                 <button class="dialog-element-clickable" data-i18n="clock-timer.label.timeconstraintshow"></button>
             </div>
         </div>
         <div class="dialog-row dialog-row-timeLimits is-initial-hidden" id="dialog-row-timeConstraints">
-            <div class="dlg-ip-clktime-rule-timecontraintctrl" id="dialog-row-timeConstraints-hide">
+            <div class="dlg-ip-btctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-hide">
                 <button class="dialog-element-clickable" data-i18n="clock-timer.label.timeconstrainthide"></button>
             </div>
-            <div id="dlg-ip-clktime-rule-timeDays" class="dlg-ip-clktime-rule-days"  data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.validForDays"></div>
+            <div id="dlg-ip-btctl-rule-timeDays" class="dlg-ip-btctl-rule-days"  data-i18n="[title]clock-timer.placeholder.ruleTimeDays">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDays"></div>
                 <div style="display:inline-block;">
                     <div>
                         <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.8"></span></label>
@@ -1995,17 +2557,19 @@
                     </div>
                 </div>
             </div>
-            <div class="dlg-ip-clktime-rule-limits" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.specialDays"></div>
+            <div class="dlg-ip-btctl-rule-limits" style="margin-top:5px;border-top: 1px solid #000;">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
                 <div style="display:inline-block;">
                     <div>
-                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeOnlyEvenDays"/> <span data-i18n="clock-timer.label.onlyEven"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-clktime-rule-timeOnlyOddDays"/> <span data-i18n="clock-timer.label.onlyOdd"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                     </div>
                 </div>
             </div>
-            <div id="dlg-ip-clktime-rule-timeMonths" class="dlg-ip-clktime-rule-months" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="clock-timer.label.validForMonths"></div>
+            <div id="dlg-ip-btctl-rule-timeMonths" class="dlg-ip-btctl-rule-months" style="margin-top:5px;border-top: 1px solid #000;">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForMonths"></div>
                 <div style="display:inline-block;">
                     <div>
                         <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
@@ -2024,46 +2588,51 @@
                 </div>
             </div>
 
-            <div id="dlg-ip-clktime-rule-timeDateLimit" class="dlg-ip-clktime-rule-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
-                <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="clock-timer.label.validForDates"></span></div>
+            <div id="dlg-ip-btctl-rule-timeDateLimit" class="dlg-ip-btctl-rule-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
+                <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDates"></span></div>
                 <div style="display:inline-block;">
-                    <input type="date" id="dlg-ip-clktime-rule-timedatelimit-start" class="ipMain dlg-ip-clktime-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.start" min="2000-01-01" max="2000-12-31">
-                    <input type="date" id="dlg-ip-clktime-rule-timedatelimit-end" class="ipMain dlg-ip-clktime-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.end" min="2000-01-01" max="2000-12-31">
+                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-start" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.start" min="2000-01-01" max="2000-12-31">
+                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-end" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.end" min="2000-01-01" max="2000-12-31">
                 </div>
             </div>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-payload" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
-            <label for="dlg-ip-clktime-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
-            <input type="hidden" id="dlg-ip-clktime-rule-payloadType">
+            <label for="dlg-ip-btctl-rule-payload"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-payload" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
+            <input type="hidden" id="dlg-ip-btctl-rule-payloadType">
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-payloadOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
-            <label for="dlg-ip-clktime-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
-            <input id="dlg-ip-clktime-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"/>
-            <input type="hidden" id="dlg-ip-clktime-rule-payloadOffsetType">
-            <select id="dlg-ip-clktime-rule-payloadOffsetMultiplier" class="node-input-multiplier ipadd"></select>
+            <label for="dlg-ip-btctl-rule-payloadOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
+            <input id="dlg-ip-btctl-rule-payloadOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset"/>
+            <input type="hidden" id="dlg-ip-btctl-rule-payloadOffsetType">
+            <select id="dlg-ip-btctl-rule-payloadOffsetMultiplier" class="node-input-multiplier ipadd"></select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-payloadTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
-            <label for="dlg-ip-clktime-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
-            <select id="dlg-ip-clktime-rule-payloadTimeFormatsel" class="ipMain">
+            <label for="dlg-ip-btctl-rule-payloadTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
+            <select id="dlg-ip-btctl-rule-payloadTimeFormatsel" class="ipMain">
             </select>
-            <input type="text" id="dlg-ip-clktime-rule-payloadTimeFormat" class="ipadd" />
+            <input type="text" id="dlg-ip-btctl-rule-payloadTimeFormat" class="ipadd" />
         </div>
         <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-clktime-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
-            <input type="checkbox" id="dlg-ip-clktime-rule-resetOverwrite" style="width: auto;">
+            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
+            <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;">
             <span data-i18n="clock-timer.label.ruleResetOverwrite"></span>
         </div>
-        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]node-red:common.label.topic" data-i18n="[titleOrg]clock-timer.placeholder.ruleTopic">
-            <label for="dlg-ip-clktime-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-            <input type="text" id="dlg-ip-clktime-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
-            <input type="text" id="dlg-ip-clktime-rule-importance" class="ipadd" data-i18n="[placeholder]clock-timer.placeholder.ruleImportance"/>
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
+            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
+            <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
+            <span data-i18n="clock-timer.label.ruleResetOverwrite"></span>
+        </div>
+        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]clock-timer.placeholder.ruleTopic">
+            <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
+            <input type="text" id="dlg-ip-btctl-rule-importance" class="ipadd" data-i18n="[placeholder]clock-timer.placeholder.ruleImportance"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-descr">
-            <label for="dlg-txt-clktimctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
-            <div id="dlg-txt-clktimctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
+            <label for="dlg-txt-btctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
+            <div id="dlg-txt-btctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
     </div>
 </script>
@@ -2095,13 +2664,13 @@
     .block-indent1 {
         float: left;
         min-height: 1px;
-        margin-left: 10px;
+        margin-left: 2%; /* 10px; */
         width: 98%
     }
     .block-indent1-noadd {
         float: left;
         min-height: 1px;
-        margin-left: 10px;
+        margin-left: 2%; /* 10px; */
         width: 98%
     }
     .input-error {
@@ -2112,7 +2681,7 @@
     .block-indent2 {
         float: left;
         min-height: 1px;
-        margin-left: 20px;
+        margin-left: 4%; /* 20px; */
         width: 96%
     }
     .block-indent2-noadd {
@@ -2179,7 +2748,8 @@
         margin-bottom: 5px;
     }
     .ui-dialog-rdg .ui-dialog-content-rdg {
-        padding: 25px 25px 10px 25px !important;
+        padding: 10px 20px 10px 20px !important;
+        width: 94% !important;
     }
     .dialog-row label {
         display: inline-block;
@@ -2241,21 +2811,24 @@
         vertical-align:top;
         margin-right:5px;
     }
-    .dlg-ip-clktime-rule-timecontraintctrl,
-    .dlg-ip-clktime-rule-days,
-    .dlg-ip-clktime-rule-limits,
-    .dlg-ip-clktime-rule-months,
-    .dlg-ip-clktime-rule-datelimit {
+    .dlg-ip-btctl-rule-condcontainer {
+        margin-left: 25%;
+    }
+    .dlg-ip-btctl-rule-timecontraintctrl,
+    .dlg-ip-btctl-rule-days,
+    .dlg-ip-btctl-rule-limits,
+    .dlg-ip-btctl-rule-months,
+    .dlg-ip-btctl-rule-datelimit {
         margin-top: 5px;
         margin-left: 30%;
     }
-    .dlg-ip-clktime-rule-days label,
-    .dlg-ip-clktime-rule-months label {
+    .dlg-ip-btctl-rule-days label,
+    .dlg-ip-btctl-rule-months label {
         max-width: 55px;
     }
-    .dlg-ip-clktime-rule-days label,
-    .dlg-ip-clktime-rule-limits label,
-    .dlg-ip-clktime-rule-months label {
+    .dlg-ip-btctl-rule-days label,
+    .dlg-ip-btctl-rule-limits label,
+    .dlg-ip-btctl-rule-months label {
         -webkit-user-select: none;
         -khtml-user-select: none;
         -moz-user-select: none;
@@ -2264,27 +2837,26 @@
         vertical-align: baseline;
         width: 110px !important;
     }
-    .dlg-ip-clktime-rule-days input,
-    .dlg-ip-clktime-rule-limits input,
-    .dlg-ip-clktime-rule-months input,
-    .dlg-ip-clktime-rule-datelimit input {
+    .dlg-ip-btctl-rule-days input,
+    .dlg-ip-btctl-rule-limits input,
+    .dlg-ip-btctl-rule-months input,
+    .dlg-ip-btctl-rule-datelimit input {
         width: auto;
         vertical-align: baseline;
     }
-    .dlg-ip-clktime-rule-timedatelimit {
+    .dlg-ip-btctl-rule-timedatelimit {
         min-width: 140px;
     }
     .clock-timer-rule-mainblock {
         margin-right: 28px;
     }
     .clock-timer-rule-name-span {
-        /* font-weight: bolder; */
-        width: 26%; /* width: 120px; */
+        width: 30%; /* width: 120px; */
         float: left;
     }
     .clock-timer-rule-description-span {
         font-size: 10px;
-        margin-left: 30%; /* margin-left: 122px; */
+        margin-left: 30%;
         margin-right: 5px;
     }
     .clock-timer-rule-finalspan {

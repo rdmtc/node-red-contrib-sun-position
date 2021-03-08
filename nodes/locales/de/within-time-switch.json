@@ -26,11 +26,6 @@
             "lastMsgOnEndOutTxt": "Zum nächsten Ende wird die letzte Nachricht welche innerhalb der Zeit angekommen ist ausgesendet",
             "compareTime":"Vergleichs Basis",
             "showEnhSettings":"Erweiterte Einstellungen",
-            "validForDays":"gültig für Tage",
-            "validForMonths":"gültig für Monate",
-			"specialDays":"spezielle Tage",
-			"onlyEvenDays":"nur gerade",
-            "onlyOddDays":"nur ungerade",
             "timeRestrictions":"Zeit begrenzen",
             "internally":"👇 ist hier definiert"
         },
@@ -62,7 +57,9 @@
             "invalid-month": "Monat ist nicht gewählt.",
             "invalid-daterange": "Tag ist im nicht erlaubten Zeitraum.",
             "only-odd-day": "Kein ungerader Tag!",
-            "only-even-day": "Kein gerader Tag"
+            "only-even-day": "Kein gerader Tag!",
+            "only-odd-week": "Keine ungerade Woche!",
+            "only-even-week": "Keine gerade Woche!"
         }
     }
 }

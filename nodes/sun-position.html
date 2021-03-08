@@ -334,7 +334,6 @@
                         resizeItem: resizeRule,
                         sortItems(rules) {
                             const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                            rules = $('#node-input-rule-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 2);
                                 const data = $(this).data('data');

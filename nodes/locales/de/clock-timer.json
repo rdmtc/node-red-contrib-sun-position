@@ -3,16 +3,11 @@
 		"label": {
 			"clock-timer": "Zeitschaltuhr",
 			"clock-timer-palette": "Zeitschaltuhr",
-			"output1": "payload basierend auf Regel",
 			"output2": "status Objekt",
 			"payloadDefault": "payload",
 			"payloadDefaultOffset": "Offset",
 			"payloadDefaultFormat": "Format",
 			"overwriteExpire": "verfällt",
-			"ruleCondition": "nur wenn",
-			"ruleConditionThreshold": "Schwelle",
-			"ruleAndOr": "und/oder",
-			"ruleCondNone": "N/A",
 			"ruleCondAnd": "und",
 			"ruleCondOr": "oder",
 			"ruleTimeFrom": "↧ von",
@@ -33,31 +28,23 @@
 			"time": "Zeit",
 			"name": "name",
 			"showEnhSettings": "Erweiterte Einstellungen",
-			"outputs": "Ausgänge",
 			"offset": "Zeit offset",
 			"offset-timeMin": "früheste (min) offset",
 			"offset-timeMax": "späteste (max) offset",
-			"singleOutput": "einzeln (1)",
-			"splitOutput": "doppelt (2)",
 			"btnAdd": "hinzufügen",
 			"btnSort": "sortieren",
 			"btnClear": "leeren",
+			"btnExport": "",
+			"btnImport": "",
 			"dialogtitle": "Regel bearbeiten",
 			"autoTrigger": "automatisch triggern",
 			"autoTrigger2": "dynamisch aber max aller",
 			"startDelay": "Ausgabe bei Start verzögern",
 			"timeconstraintshow": "zeige zusätzliche Zeitbeschränkungen",
 			"timeconstrainthide": "verberge zusätzliche Zeitbeschränkungen",
-			"validForDays": "gültige Tage",
-			"validForMonths": "gültige Monate",
-			"validForDates":"Gültigkeitsdauer (Jahr wird ignoriert)",
-			"specialDays": "spezielle tage",
-			"onlyEven": "nur gerade",
-			"onlyOdd": "nur ungerade",
-			"onlyEvenDays": "nur gerade Tage",
-			"onlyOddDays": "nur ungerade Tage",
 			"editRule": "Regel editieren",
-			"duplicateRule": "Regel duplizieren"
+			"duplicateRule": "Regel duplizieren",
+			"addId": "zus. ID"
 		},
 		"placeholder": {
 			"payloadDefault": "payload if no other used",
@@ -70,7 +57,8 @@
 			"btnAdd": "neue leere Regel hinzufügen",
 			"btnSort": "alle Regeln sortieren, Achtung dies kann das Verhalten ändern!",
 			"btnClear": "alle Regeln entfernen",
-			"condoperand": "operand",
+			"btnExport": "Alle Regeln in die Zwischenablage kopieren.",
+			"btnImport": "Regeln aus der Zwischenablage einfügen (anfügen an vorhandene).",
 			"time": "Zeit",
 			"offset": "Zeit offset",
 			"level": "Behanghöhe",
@@ -83,12 +71,14 @@
 			"startDelay": "0 - aus",
 			"startDelay2": "verzögert die Ausgabe auf dem ersten Ausgang um die angegebene Zeit. Auf 0 setzen zum abschalten.",
 			"start":"tt.mm",
-			"end":"tt.mm"
+			"end":"tt.mm",
+			"addId": "zusätzliche ID"
 		},
 		"text": {
 			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
 			"payloadDefault":"Wenn keine Regel zutrifft, wird der folgende payload gesendet.",
-			"overwrite": "manuelles Überschreiben der Rollladenposition"
+			"overwrite": "manuelles Überschreiben der Rollladenposition",
+			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>"
 		},
 		"tips": {
 			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/clock-timer\">Dokumentation und Beispiele</a>"
@@ -116,14 +106,6 @@
 			"ruleMin": "__org__ [min rule __number__]",
 			"ruleMax": "__org__ [max rule __number__]",
 			"startDelay": "verzögerter Start"
-		},
-		"errors": {
-			"warning": "Warnung: __message__",
-			"internal": "Fehler: __message__",
-			"error-time": "Fehler bei Ermittlung der Zeit: __message__",
-			"getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" skipping time",
-			"usingTempValue": "Wert von __type__.__value__ kann nicht ermitteln werden und es wird der gespeicherte Wert \"__usedValue__\" verwendet!",
-			"notEvaluableProperty": "kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!"
 		}
 	}
 }

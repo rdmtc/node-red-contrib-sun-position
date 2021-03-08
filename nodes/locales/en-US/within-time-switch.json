@@ -31,11 +31,6 @@
             "msgtime":"msg.time",
             "msgvalue":"msg.value",
             "showEnhSettings":"Enhanced settings",
-            "validForDays":"valid days",
-			"validForMonths":"valid months",
-			"specialDays":"special days",
-			"onlyEvenDays":"only even",
-            "onlyOddDays":"only odd",
             "timeRestrictions":"limit time",
             "internally":"👇 is defined here"
         },
@@ -67,7 +62,9 @@
             "invalid-month": "Month is not selected.",
             "invalid-daterange": "Day is not in valid range.",
             "only-odd-day": "Not an odd Day!",
-            "only-even-day": "Not an even Day!"
+            "only-even-day": "Not an even Day!",
+            "only-odd-week": "Not an odd Week!",
+            "only-even-week": "Not an even Week!"
         }
     }
 }

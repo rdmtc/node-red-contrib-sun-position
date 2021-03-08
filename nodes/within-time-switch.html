@@ -100,6 +100,14 @@
                     value: false,
                     required: true
                 },
+                timeOnlyOddWeeks: {
+                    value: false,
+                    required: true
+                },
+                timeOnlyEvenWeeks: {
+                    value: false,
+                    required: true
+                },
                 timeMonths: {
                     value: '*',
                     required: true
@@ -547,8 +555,6 @@
                             types.SunInSky,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -580,17 +586,17 @@
                                 propCompare.attr('disabled', false);
                                 $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
                                 const condOp = propCompare.val();
-                                let operatorCount = 1;
+                                let operandCount = 1;
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
+                                        operandCount = el.operandCount;
                                         break;
                                     }
                                 }
-                                if (operatorCount > 1) {
+                                if (operandCount > 1) {
                                     $('.row-propertyStartThreshold').show(); // condOpB
                                 } else {
                                     $('.row-propertyStartThreshold').hide(); // condOpB
@@ -687,8 +693,6 @@
                             types.SunInSky,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -721,17 +725,17 @@
                                 propCompare.attr('disabled', false);
                                 $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
                                 const condOp = propCompare.val();
-                                let operatorCount = 1;
+                                let operandCount = 1;
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
+                                        operandCount = el.operandCount;
                                         break;
                                     }
                                 }
-                                if (operatorCount > 1) {
+                                if (operandCount > 1) {
                                     $('.row-propertyEndThreshold').show(); // condOpB
                                 } else {
                                     $('.row-propertyEndThreshold').hide(); // condOpB
@@ -914,7 +918,7 @@
     </div>
     <div class="form-row node-input-row-timeLimits  is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.timeLimits">
         <div id="within-time-switch-timeDays" class="within-time-switch-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDays"></div>
             <div style="display:inline-block;">
                 <div>
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.8"></span></label>
@@ -928,16 +932,18 @@
             </div>
         </div>
         <div class="within-time-switch-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.specialDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="within-time-switch.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="within-time-switch.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox' checked id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>
         <div id="within-time-switch-timeMonths" class="within-time-switch-months" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForMonths"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForMonths"></div>
             <div style="display:inline-block;">
                 <div>
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
@@ -956,7 +962,7 @@
             </div>
         </div>
         <div id="within-time-switch-timeDateLimit" class="within-time-switch-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="blind-control.label.validForDates"></span></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDates"></span></div>
             <div style="display:inline-block;">
                 <input type="date" id="node-input-timedatestart" class="ipMain within-time-switch-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.start" min="2000-01-01" max="2000-12-31">
                 <input type="date" id="node-input-timedateend" class="ipMain within-time-switch-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.end" min="2000-01-01" max="2000-12-31">

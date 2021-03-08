@@ -110,25 +110,25 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             { id: 'compare', label: 'compare' },
             { id: 'enhanced', label: 'enhanced' }
         ], comparator: [
-            { id: 'true', group: 'simple', label: 'true', operatorCount: 1 },
-            { id: 'false', group: 'simple', label: 'false', operatorCount: 1 },
-            { id: 'null', group: 'simple', label: 'null', operatorCount: 1 },
-            { id: 'nnull', group: 'simple', label: 'not null', operatorCount: 1 },
-            { id: 'empty', group: 'simple', label: 'empty', operatorCount: 1 },
-            { id: 'nempty', group: 'simple', label: 'not empty', operatorCount: 1 },
-            { id: 'true_expr', group: 'enhanced', label: 'true_expr', operatorCount: 1 },
-            { id: 'false_expr', group: 'enhanced', label: 'false_expr', operatorCount: 1 },
-            { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operatorCount: 1 },
-            { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operatorCount: 1 },
-            { id: 'equal', group: 'compare', label: 'equal', operatorCount: 2 },
-            { id: 'nequal', group: 'compare', label: 'not equal', operatorCount: 2 },
-            { id: 'lt', group: 'compare', label: 'less than', operatorCount: 2 },
-            { id: 'lte', group: 'compare', label: 'less than or equal', operatorCount: 2 },
-            { id: 'gt', group: 'compare', label: 'greater than', operatorCount: 2 },
-            { id: 'gte', group: 'compare', label: 'greater than or equal', operatorCount: 2 },
-            { id: 'contain', group: 'enhanced', label: 'contain', operatorCount: 2 },
-            { id: 'containSome', group: 'enhanced', label: 'containSome', operatorCount: 2 },
-            { id: 'containEvery', group: 'enhanced', label: 'containEvery', operatorCount: 2 }
+            { id: 'true', group: 'simple', label: 'true', operandCount: 1 },
+            { id: 'false', group: 'simple', label: 'false', operandCount: 1 },
+            { id: 'null', group: 'simple', label: 'null', operandCount: 1 },
+            { id: 'nnull', group: 'simple', label: 'not null', operandCount: 1 },
+            { id: 'empty', group: 'simple', label: 'empty', operandCount: 1 },
+            { id: 'nempty', group: 'simple', label: 'not empty', operandCount: 1 },
+            { id: 'true_expr', group: 'enhanced', label: 'true_expr', operandCount: 1 },
+            { id: 'false_expr', group: 'enhanced', label: 'false_expr', operandCount: 1 },
+            { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operandCount: 1 },
+            { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operandCount: 1 },
+            { id: 'equal', group: 'compare', label: 'equal', operandCount: 2 },
+            { id: 'nequal', group: 'compare', label: 'not equal', operandCount: 2 },
+            { id: 'lt', group: 'compare', label: 'less than', operandCount: 2 },
+            { id: 'lte', group: 'compare', label: 'less than or equal', operandCount: 2 },
+            { id: 'gt', group: 'compare', label: 'greater than', operandCount: 2 },
+            { id: 'gte', group: 'compare', label: 'greater than or equal', operandCount: 2 },
+            { id: 'contain', group: 'enhanced', label: 'contain', operandCount: 2 },
+            { id: 'containSome', group: 'enhanced', label: 'containSome', operandCount: 2 },
+            { id: 'containEvery', group: 'enhanced', label: 'containEvery', operandCount: 2 }
         ]
     };
 }
@@ -222,6 +222,16 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
             hasValue: true,
             validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
+        },
+        nodeId: {
+            value: 'nodeId',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.nodeId','node ID'),
+            hasValue: false
+        },
+        nodeName: {
+            value: 'nodeName',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.nodeName','node name'),
+            hasValue: false
         },
         TimeEntered: {
             value: 'entered',
@@ -399,11 +409,41 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
             hasValue: false
         },
+        numAzimuth: {
+            value: 'numAzimuth',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numAzimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
+            hasValue: true,
+            validate(v) {
+                const n = parseFloat(v);
+                return (RED.validators.number()(v) && (n >= -360) && (n <= 720));
+            }
+        },
+        numAzimuthRad: {
+            value: 'numAzimuth',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numAzimuthRad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
+            hasValue: true,
+            validate(v) {
+                const n = parseFloat(v);
+                return (RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
+            }
+        },
         SunElevation: {
             value: 'pdsCalcElevation',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation','Elevation'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
+        },
+        numAltitude: {
+            value: 'numAltitude',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numAltitude'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
+            hasValue: true,
+            validate(v) {
+                const n = parseFloat(v);
+                return (RED.validators.number()(v) && (n >= -90) && (n <= 90));
+            }
         },
         SunAzimuthRad: {
             value: 'pdsCalcAzimuthRad',
@@ -411,9 +451,19 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
             hasValue: false
         },
+        numAltitudeRad: {
+            value: 'numAltitudeRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numAltitudeRad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
+            hasValue: true,
+            validate(v) {
+                const n = parseFloat(v);
+                return (RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
+            }
+        },
         SunElevationRad: {
             value: 'pdsCalcElevationRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad','Elevation'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
         },
@@ -780,8 +830,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     const $inputField = $('#node-input-' + data.valueProp);
     const $typeField = $('#node-input-' + data.typeProp);
     let type='';
-    if (typeof node[data.typeProp] === 'undefined' ||
-        node[data.typeProp] === null) {
+    if (typeof node[data.typeProp] === 'undefined' || node[data.typeProp] === null) {
         if (typeof data.defaultType !== 'undefined') {
             type = data.defaultType;
             node[data.typeProp] = type;
@@ -791,8 +840,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
         type = node[data.typeProp];
         $typeField.val(type);
     }
-    if (typeof node[data.valueProp] === 'undefined' ||
-        node[data.valueProp] === null) {
+    if (typeof node[data.valueProp] === 'undefined' || node[data.valueProp] === null) {
         if (typeof data.defaultValue !== 'undefined') {
             node[data.valueProp] = data.defaultValue;
             $inputField.val(data.defaultValue);
@@ -907,9 +955,10 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
  * @param {string} forEl - name of the element to what the label is
  * @param {string} [symb] - class name of the symbol e.g. 'fa fa-clock'
  * @param {string} [text] - text of the label
+ * @param {string} [width] - width of the label
  * @returns {jQuery} jQuery selector of the new label
  */
-function addLabel(parent, forEl, symb, text) { // eslint-disable-line no-unused-vars
+function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-unused-vars
     const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(parent);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
@@ -918,9 +967,11 @@ function addLabel(parent, forEl, symb, text) { // eslint-disable-line no-unused-
         const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;">' + text + '</span>');
         lbl.append(span);
         // lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
-        lbl.attr('style', 'margin-left: 5px; width:auto;');
+        width = width || 'auto';
+        lbl.attr('style', 'margin-left: 5px; width:' + width + ';');
     } else {
-        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:20px');
+        width = width || '20px';
+        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:' + width + ';');
     }
     return lbl;
 }
@@ -1067,36 +1118,37 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     // console.log('[IN getBackendData] ',data);  // eslint-disable-line
-    let res = '';
+    const res = {
+        value:'',
+        useful: false
+    };
     if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'bin') {
-        res = data.type;
-    } else if ( data.type === 'bool') {
-        res = data.value;
+        res.value = data.type;
+    } else if ( data.type === 'bool' || data.type === 'num' || data.type === 'str' || data.type === 'numAzimuth' || data.type === 'numAltitude') {
+        res.value = String(data.value);
+        res.useful = true;
     } else if (data.type === 'msg' || data.type === 'env') {
-        res = data.type + '.' + data.value;
+        res.value = data.type + '.' + data.value;
     } else if (data.type === 'msgPayload') {
-        res = 'msg.payload';
+        res.value = 'msg.payload';
     } else if (data.type === 'msgTopic') {
-        res = 'msg.topic';
+        res.value = 'msg.topic';
     } else if (data.type === 'PlT') {
-        res = 'msg.payload if msg.topic contains "' + data.value + '"';
+        res.value = 'msg.payload if msg.topic contains "' + data.value + '"';
     } else if (data.type === 'msgTs') {
-        res = 'msg.ts';
+        res.value = 'msg.ts';
     } else if (data.type === 'msgLC') {
-        res = 'msg.lc';
+        res.value = 'msg.lc';
     } else if (data.type === 'msgValue') {
-        res = 'msg.value';
+        res.value = 'msg.value';
     } else if (data.timeDays === '') {
-        res = 'No valid days given! Please check settings!';
+        res.value = 'No valid days given! Please check settings!';
     } else if (data.timeMonths === '') {
-        res = 'No valid month given! Please check settings!';
+        res.value = 'No valid month given! Please check settings!';
     } else {
         const url = 'sun-position/data?' + jQuery.param( data );
         $.getJSON(url, result);
         return;
-    }
-    if (data.kind === 'getTimeData') {
-        result({ value: res});
     }
     result(res);
 }
@@ -1135,7 +1187,6 @@ function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
     }
     return ((add) ? add : '');
 }
-
 
 /**
  * get the value for the day checkbox array

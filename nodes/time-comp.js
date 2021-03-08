@@ -71,7 +71,9 @@ module.exports = function (RED) {
                 days        : prop.days,
                 months      : prop.months,
                 onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays
+                onlyOddDays : prop.onlyOddDays,
+                onlyEvenWeeks: prop.onlyEvenWeeks,
+                onlyOddWeeks : prop.onlyOddWeeks
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {

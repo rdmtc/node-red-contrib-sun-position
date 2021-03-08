@@ -16,16 +16,16 @@ module.exports = {
     prepareRules,
     getRuleTimeData,
     validPosition,
+    compareRules,
     initializeCtrl
 };
 
-const cRuleNoTime = -1;
 const cRuleUntil = 0;
 const cRuleFrom = 1;
 const cRuleAbsolute = 0;
-const cRuleNone = 0;
-const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
+// const cRuleNone = 0;
+// const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
+// const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
 const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
 let RED = null;
@@ -93,11 +93,11 @@ function posOverwriteReset(node) {
 /**
 * setup the expiring of n override or update an existing expiring
 * @param {*} node node data
-* @param {Date} dNow the current timestamp
+* @param {ITimeObject} oNow the *current* date Object
 * @param {number} dExpire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
 */
-function setExpiringOverwrite(node, dNow, dExpire, reason) {
-    node.debug(`setExpiringOverwrite dNow=${dNow}, dExpire=${dExpire}, reason=${reason}`);
+function setExpiringOverwrite(node, oNow, dExpire, reason) {
+    node.debug(`setExpiringOverwrite dExpire=${dExpire}, reason=${reason}`);
     if (node.timeOutObj) {
         clearTimeout(node.timeOutObj);
         node.timeOutObj = null;
@@ -115,7 +115,7 @@ function setExpiringOverwrite(node, dNow, dExpire, reason) {
         deleteExpireProp(node);
         return;
     }
-    node.nodeData.overwrite.expireTs = (dNow.getTime() + dExpire);
+    node.nodeData.overwrite.expireTs = (oNow.nowNr + dExpire);
     node.nodeData.overwrite.expireDate = new Date(node.nodeData.overwrite.expireTs);
     node.nodeData.overwrite.expireDateISO = node.nodeData.overwrite.expireDate.toISOString();
     node.nodeData.overwrite.expireDateUTC = node.nodeData.overwrite.expireDate.toUTCString();
@@ -134,12 +134,12 @@ function setExpiringOverwrite(node, dNow, dExpire, reason) {
 * check if an override can be reset
 * @param {*} node node data
 * @param {*} msg message object
-* @param {*} dNow current timestamp
+* @param {ITimeObject} oNow the *current* date Object
 */
-function checkOverrideReset(node, msg, dNow, isSignificant) {
+function checkOverrideReset(node, msg, oNow, isSignificant) {
     if (node.nodeData.overwrite &&
        node.nodeData.overwrite.expires &&
-       (node.nodeData.overwrite.expireTs < dNow.getTime())) {
+       (node.nodeData.overwrite.expireTs < oNow.nowNr)) {
         node.log(`Overwrite is expired (trigger)`);
         posOverwriteReset(node);
     }
@@ -191,43 +191,44 @@ function setOverwriteReason(node) {
  * @param {*} msg the message object
  * @param {*} tempData the temporary storage object
  */
-function prepareRules(node, msg, tempData) {
+function prepareRules(node, msg, tempData, dNow) {
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
         if (rule.conditional) {
             rule.conditon = {
                 result : false
             };
-            for (let i = 0; i < rule.conditonData.length; i++) {
-                const el = rule.conditonData[i];
-                if (rule.conditon.result === true && el.condition.value === cRuleLogOperatorOr) {
+            for (let i = 0; i < rule.conditions.length; i++) {
+                const el = rule.conditions[i];
+                if (rule.conditon.result === true && el.condition === cRuleLogOperatorOr) {
                     break; // not nessesary, becaue already tue
-                } else if (rule.conditon.result === false && el.condition.value === cRuleLogOperatorAnd) {
+                } else if (rule.conditon.result === false && el.condition === cRuleLogOperatorAnd) {
                     break; // should never bekome true
                 }
-                delete el.operandValue;
-                delete el.thresholdValue;
-                if (el.operand.type === 'sunControlMode') {
-                    el.result = (node.sunData && (node.sunData.mode === el.operand.value));
+                delete el.valueWorth;
+                delete el.thresholdWorth;
+                if (el.valueType === 'sunControlMode') {
+                    el.result = (node.sunData && (node.sunData.mode === el.value));
                 } else {
                     el.result = node.positionConfig.comparePropValue(node, msg,
                         {
-                            value: el.operand.value,
-                            type: el.operand.type,
+                            value: el.value,
+                            type: el.valueType,
+                            expr: el.valueExpr,
                             callback: (result, _obj) => { // opCallback
-                                el.operandValue = _obj.value;
+                                el.valueWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
                             }
                         },
-                        el.operator.value,
+                        el.operator,
                         {
-                            value: el.threshold.value,
-                            type: el.threshold.type,
+                            value: el.threshold,
+                            type: el.thresholdType,
                             callback: (result, _obj) => { // opCallback
-                                el.thresholdValue = _obj.value;
+                                el.thresholdWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
                             }
-                        }
+                        }, false, dNow
                     );
                 }
                 rule.conditon = {
@@ -236,9 +237,9 @@ function prepareRules(node, msg, tempData) {
                     text : el.text,
                     textShort : el.textShort
                 };
-                if (typeof el.thresholdValue !== 'undefined') {
-                    rule.conditon.text += ' ' + el.thresholdValue;
-                    rule.conditon.textShort += ' ' + hlp.clipStrLength(el.thresholdValue, 10);
+                if (typeof el.thresholdWorth !== 'undefined') {
+                    rule.conditon.text += ' ' + el.thresholdWorth;
+                    rule.conditon.textShort += ' ' + hlp.clipStrLength(el.thresholdWorth, 10);
                 }
             }
         }
@@ -253,15 +254,8 @@ function prepareRules(node, msg, tempData) {
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, dNow) {
-    rule.timeData = node.positionConfig.getTimeProp(node, msg, {
-        type: rule.timeType,
-        value : rule.timeValue,
-        offsetType : rule.offsetType,
-        offset : rule.offsetValue,
-        multiplier : rule.multiplier,
-        next : false,
-        dNow
-    });
+    rule.time.dNow = dNow;
+    rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time);
     if (rule.timeData.error) {
         hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
         return -1;
@@ -271,16 +265,9 @@ function getRuleTimeData(node, msg, rule, dNow) {
     rule.timeData.source = 'Default';
     rule.timeData.ts = rule.timeData.value.getTime();
     rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
-    if (rule.timeMinType !== 'none') {
-        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, {
-            type: rule.timeMinType,
-            value: rule.timeMinValue,
-            offsetType: rule.offsetMinType,
-            offset: rule.offsetMinValue,
-            multiplier: rule.multiplierMin,
-            next: false,
-            dNow
-        });
+    if (rule.timeMin) {
+        rule.timeMin.dNow = dNow;
+        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
         const numMin = rule.timeDataMin.value.getTime();
         rule.timeDataMin.source = 'Min';
         if (rule.timeDataMin.error) {
@@ -297,16 +284,9 @@ function getRuleTimeData(node, msg, rule, dNow) {
             }
         }
     }
-    if (rule.timeMaxType !== 'none') {
-        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, {
-            type: rule.timeMaxType,
-            value: rule.timeMaxValue,
-            offsetType: rule.offsetMaxType,
-            offset: rule.offsetMaxValue,
-            multiplier: rule.multiplierMax,
-            next: false,
-            dNow
-        });
+    if (rule.timeMax) {
+        rule.timeMax.dNow = dNow;
+        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
         const numMax = rule.timeDataMax.value.getTime();
         rule.timeDataMax.source = 'Max';
         if (rule.timeDataMax.error) {
@@ -326,6 +306,92 @@ function getRuleTimeData(node, msg, rule, dNow) {
     return rule.timeData.ts;
 }
 
+/*************************************************************************************************************************/
+/**
+* Timestamp compare function
+* @name ICompareTimeStamp
+* @function
+* @param {number} timeStamp The timestamp which should be compared
+* @returns {Boolean} return true if if the timestamp is valid, otherwise false
+*/
+
+/**
+* support timeData
+* @name ITimeObject Data
+* @param {Date} dNow
+* @param {number} nowNr
+* @param {number} dayNr
+* @param {number} monthNr
+* @param {number} dateNr
+* @param {number} yearNr
+* @param {number} dayId
+*/
+
+/**
+ * function to check a rule
+ * @param {Object} node the node object
+ * @param {Object} msg the message object
+ * @param {Object} rule a rule object to test
+ * @param {ICompareTimeStamp} cmp a function to compare two timestamps.
+ * @param {ITimeObject} data Now time object
+ * @returns {Object|null} returns the rule if rule is valid, otherwhise null
+ */
+function compareRules(node, msg, rule, cmp, data) {
+    // node.debug('fktCheck rule ' + util.inspect(rule, {colors:true, compact:10}));
+    if (rule.conditional) {
+        try {
+            if (!rule.conditon.result) {
+                return null;
+            }
+        } catch (err) {
+            node.warn(RED._('node-red-contrib-sun-position/position-config:errors.getPropertyData', err));
+            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            return null;
+        }
+    }
+    if (!rule.time) {
+        return rule;
+    }
+    if (rule.time.days && !rule.time.days.includes(data.dayNr)) {
+        return null;
+    }
+    if (rule.time.months && !rule.time.months.includes(data.monthNr)) {
+        return null;
+    }
+    if (rule.time.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+        return null;
+    }
+    if (rule.time.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+        return null;
+    }
+    if (rule.time.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+        return null;
+    }
+    if (rule.time.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+        return null;
+    }
+    if (rule.time.dateStart || rule.time.dateEnd) {
+        rule.time.dateStart.setFullYear(data.yearNr);
+        rule.time.dateEnd.setFullYear(data.yearNr);
+        if (rule.time.dateEnd > rule.time.dateStart) {
+            // in the current year
+            if (data.dNow < rule.time.dateStart || data.dNow > rule.time.dateEnd) {
+                return null;
+            }
+        } else {
+            // switch between year from end to start
+            if (data.dNow < rule.time.dateStart && data.dNow > rule.time.dateEnd) {
+                return null;
+            }
+        }
+    }
+    const num = getRuleTimeData(node, msg, rule, data.dNow);
+    // node.debug(`pos=${rule.pos} type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+    if (data.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
+        return rule;
+    }
+    return null;
+}
 /*************************************************************************************************************************/
 /**
  * check if a level has a valid value
@@ -417,6 +483,26 @@ function initializeCtrl(REDLib, node, config) {
         return type + '.' + value;
     };
 
+    node.results = [];
+    config.results.forEach(prop => {
+        const propNew = {
+            outType     : prop.pt,
+            outValue    : prop.p,
+            type        : prop.vt,
+            value       : prop.v
+        };
+
+        if (this.positionConfig && propNew.type === 'jsonata') {
+            try {
+                propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
+            } catch (err) {
+                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
+                propNew.expr = null;
+            }
+        }
+        node.results.push(propNew);
+    });
+
     // Prepare Rules
     node.rules.count = node.rules.data.length;
     node.rules.lastUntil = node.rules.count -1;
@@ -428,167 +514,246 @@ function initializeCtrl(REDLib, node, config) {
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
         rule.pos = i + 1;
-        rule.name = rule.name || 'rule ' + rule.pos;
-        rule.resetOverwrite = (rule.resetOverwrite === true || rule.resetOverwrite === 'true') ? true : false;
-        rule.importance = Number(rule.importance) || 0;
-        node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
-        node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
-        rule.timeOp = Number(rule.timeOp) || cRuleUntil;
-        rule.levelOp = Number(rule.levelOp) || cRuleAbsolute;
-        if (rule.levelOp === 3) { // cRuleMinReset = 3; // ⭳✋ reset minimum
-            rule.levelOp = cRuleMinOversteer;
-            rule.levelType = 'levelND';
-            rule.levelValue = '';
-        } else if (rule.levelOp === 4) { // cRuleMaxReset = 4; // ⭱️✋ reset maximum
-            rule.levelOp = cRuleMaxOversteer;
-            rule.levelType = 'levelND';
-            rule.levelValue = '';
+        // Backward compatibility
+        if (!rule.conditions) {
+            rule.conditions = [];
+            if (rule.validOperandAType && rule.validOperandAType !==  'none') {
+                rule.conditions.push({
+                    condition       : cRuleLogOperatorOr,
+                    conditionText    : '',
+                    value           : rule.validOperandAValue,
+                    valueType       : rule.validOperandAType,
+                    operator        : rule.validOperator,
+                    operatorText     : rule.validOperatorText,
+                    threshold       : rule.validOperandBValue,
+                    thresholdType   : (rule.validOperandBType || 'num')
+                });
+                const conditionValue = parseInt(rule.valid2LogOperator);
+                if (conditionValue > 0 && rule.valid2OperandAType) {
+                    rule.conditions.push({
+                        condition       : conditionValue,
+                        conditionText    : rule.valid2LogOperatorText,
+                        value           : rule.valid2OperandAValue,
+                        valueType       : (rule.valid2OperandAType || 'msg'),
+                        operator        : rule.valid2Operator,
+                        operatorText     : rule.valid2OperatorText,
+                        threshold       : rule.valid2OperandBValue,
+                        thresholdType   : (rule.valid2OperandBType || 'num')
+                    });
+                }
+            }
+
+            delete rule.validOperandAValue;
+            delete rule.validOperandAType;
+            delete rule.validOperator;
+            delete rule.validOperatorText;
+            delete rule.validOperandBValue;
+            delete rule.validOperandBType;
+            delete rule.valid2LogOperator;
+            delete rule.valid2LogOperatorText;
+            delete rule.valid2OperandAValue;
+            delete rule.valid2OperandAType;
+            delete rule.valid2Operator;
+            delete rule.valid2OperatorText;
+            delete rule.valid2OperandBValue;
+            delete rule.valid2OperandBType;
         }
-
-        rule.timeLimited = (rule.timeType && (rule.timeType !== 'none'));
-
-        if (!rule.timeLimited) {
-            rule.timeOp = cRuleNoTime;
+        if(rule.timeType) {
+            if (!rule.time && rule.timeType !== 'none') {
+                rule.time = {
+                    type            : rule.timeType,
+                    value           : (rule.timeValue || ''),
+                    operator        : (parseInt(rule.timeOp) || cRuleUntil),
+                    offsetType      : (rule.offsetType || 'none'),
+                    offset          : (rule.offsetValue || 1),
+                    multiplier      : (parseInt(rule.multiplier) || 60000),
+                    days            : (rule.timeDays || '*'),
+                    months          : (rule.timeMonths || '*')
+                };
+                if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays;
+                if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays;
+                if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart;
+                if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
+                if (rule.timeOpText) rule.time.operatorText = rule.timeOpText;
+                if (rule.timeMinType) {
+                    if (!rule.timeMin && rule.timeMinType !== 'none') {
+                        rule.timeMin = {
+                            type            : rule.timeMinType,
+                            value           : (rule.timeMinValue || ''),
+                            offsetType      : (rule.offsetMinType || 'none'),
+                            offset          : (rule.offsetMinValue || 1),
+                            multiplier      : (parseInt(rule.multiplierMin) || 60000)
+                        };
+                    }
+                }
+                if (rule.timeMaxType) {
+                    if (!rule.timeMax && rule.timeMaxType !== 'none') {
+                        rule.timeMax = {
+                            type            : rule.timeMaxType,
+                            value           : (rule.timeMaxValue || ''),
+                            offsetType      : (rule.offsetMaxType || 'none'),
+                            offset          : (rule.offsetMaxValue || 1),
+                            multiplier      : (parseInt(rule.multiplierMax) || 60000)
+                        };
+                    }
+                }
+            }
+            delete rule.timeType;
+            delete rule.timeValue;
+            delete rule.timeOp;
             delete rule.offsetType;
+            delete rule.offsetValue;
             delete rule.multiplier;
-
-            delete rule.timeMinType;
-            delete rule.timeMinValue;
-            delete rule.offsetMinType;
-            delete rule.multiplierMin;
-
-            delete rule.timeMaxType;
-            delete rule.timeMaxValue;
-            delete rule.offsetMaxType;
-            delete rule.multiplierMax;
-
             delete rule.timeDays;
             delete rule.timeMonths;
             delete rule.timeOnlyOddDays;
             delete rule.timeOnlyEvenDays;
             delete rule.timeDateStart;
             delete rule.timeDateEnd;
-        } else {
-            rule.offsetType = rule.offsetType || 'none';
-            rule.multiplier = rule.multiplier || 60000;
-
-            rule.timeMinType = rule.timeMinType || 'none';
-            rule.timeMinValue = (rule.timeMinValue || '');
-            rule.offsetMinType = rule.offsetMinType || 'none';
-            rule.multiplierMin = rule.multiplierMin || 60000;
-
-            rule.timeMaxType = rule.timeMaxType || 'none';
-            rule.timeMaxValue = (rule.timeMaxValue || '');
-            rule.offsetMaxType = rule.offsetMaxType || 'none';
-            rule.multiplierMax = rule.multiplierMax || 60000;
-
-            node.rules.firstTimeLimited = Math.min(i,node.rules.firstTimeLimited);
-            if (rule.timeOp === cRuleUntil) {
+            delete rule.timeOpText;
+            delete rule.timeMinType;
+            delete rule.timeMinValue;
+            delete rule.offsetMinType;
+            delete rule.offsetMinValue;
+            delete rule.multiplierMin;
+            delete rule.timeMinOp;
+            delete rule.timeMaxType;
+            delete rule.timeMaxValue;
+            delete rule.offsetMaxType;
+            delete rule.offsetMaxValue;
+            delete rule.multiplierMax;
+            delete rule.timeMaxOp;
+        }
+        if (rule.levelType) {
+            if (!rule.level) {
+                rule.level = {
+                    type            : (rule.levelType || 'levelFixed'),
+                    value           : (rule.levelValue || 'closed (min)'),
+                    operator        : (parseInt(rule.levelOp) || cRuleAbsolute),
+                    operatorText    : rule.levelOpText || RED._('blind-control.label.ruleLevelAbs')
+                };
+            }
+            if (!rule.slat) {
+                rule.slat = {
+                    type            : 'str',
+                    value           : ''
+                };
+            }
+            if ((rule.level.operator === 3) || (rule.level.operator === 4)) { // 3 -> ⭳✋ reset minimum; 4 -> ⭱️✋ reset maximum
+                rule.level.operator.type = 'levelND';
+                rule.level.operator.value = '';
+                rule.level.operator = rule.level.operator - 2;
+            }
+            delete rule.levelType;
+            delete rule.levelValue;
+            delete rule.levelOp;
+            delete rule.levelOpText;
+        }
+        if (rule.payloadType) {
+            if (!rule.payload && rule.payloadType !== 'none') {
+                rule.payload = {
+                    type            : rule.payloadType,
+                    value           : (rule.payloadValue || ''),
+                    offsetType      : (rule.payloadOffsetType || 'none'),
+                    offset          : (rule.payloadOffsetValue || '1'),
+                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || 60000),
+                    format          : (parseInt(rule.payloadFormat) || 99)
+                };
+            }
+            delete rule.payloadType;
+            delete rule.payloadValue;
+            delete rule.payloadOffsetType;
+            delete rule.payloadOffsetValue;
+            delete rule.payloadOffsetMultiplier;
+            delete rule.payloadFormat;
+        }
+        /// check generic rule settings
+        rule.name = rule.name || 'rule ' + rule.pos;
+        rule.resetOverwrite = (rule.resetOverwrite === true || rule.resetOverwrite === 'true') ? true : false;
+        if (rule.payload || (rule.level && (rule.level.operator === cRuleAbsolute))) {
+            rule.importance = Number(rule.importance) || 0;
+            node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
+            node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
+        }
+        /// readout timesettings
+        if (rule.time) {
+            rule.time.next = false;
+            if (rule.timeMax) { rule.timeMax.next = false; }
+            if (rule.timeMin) { rule.timeMin.next = false; }
+            node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
+            if (rule.time.operator === cRuleUntil) {
                 node.rules.lastUntil = i;
             }
-            if (rule.timeOp === cRuleFrom) {
+            if (rule.time.operator === cRuleFrom) {
                 node.rules.firstFrom = Math.min(i,node.rules.firstFrom);
             }
-
-            if (!rule.timeDays || rule.timeDays === '*') {
-                rule.timeDays = null;
+            if (!rule.time.days || rule.time.days === '*') {
+                delete rule.time.days;
             } else {
-                rule.timeDays = rule.timeDays.split(',');
-                rule.timeDays = rule.timeDays.map( e => parseInt(e) );
+                rule.time.days = rule.time.days.split(',');
+                rule.time.days = rule.time.days.map( e => parseInt(e) );
             }
-
-            if (!rule.timeMonths || rule.timeMonths === '*') {
-                rule.timeMonths = null;
+            if (!rule.time.months || rule.time.months === '*') {
+                delete rule.time.months;
             } else {
-                rule.timeMonths = rule.timeMonths.split(',');
-                rule.timeMonths = rule.timeMonths.map( e => parseInt(e) );
+                rule.time.months = rule.time.months.split(',');
+                rule.time.months = rule.time.months.map( e => parseInt(e) );
             }
-
-            if (rule.timeOnlyOddDays && rule.timeOnlyEvenDays) {
-                rule.timeOnlyOddDays = false;
-                rule.timeOnlyEvenDays = false;
+            if (rule.time.onlyOddDays && rule.time.onlyEvenDays) {
+                delete rule.time.onlyOddDays;
+                delete rule.time.onlyEvenDays;
             }
-
-            rule.timeDateStart = rule.timeDateStart || '';
-            rule.timeDateEnd = rule.timeDateEnd || '';
-            if (rule.timeDateStart || rule.timeDateEnd) {
-                if (rule.timeDateStart) {
-                    rule.timeDateStart = new Date(rule.timeDateStart);
-                    rule.timeDateStart.setHours(0, 0, 0, 1);
+            if (rule.time.onlyOddWeeks && rule.time.onlyEvenWeeks) {
+                delete rule.time.onlyOddWeeks;
+                delete rule.time.onlyEvenWeeks;
+            }
+            if (rule.time.dateStart || rule.time.dateEnd) {
+                if (rule.time.dateStart) {
+                    rule.time.dateStart = new Date(rule.time.dateStart);
+                    rule.time.dateStart.setHours(0, 0, 0, 1);
                 } else {
-                    rule.timeDateStart = new Date(2000,0,1,0, 0, 0, 1);
+                    rule.time.dateStart = new Date(2000,0,1,0, 0, 0, 1);
                 }
-
-                if (rule.timeDateEnd) {
-                    rule.timeDateEnd = new Date(rule.timeDateEnd);
-                    rule.timeDateEnd.setHours(23, 59, 59, 999);
+                if (rule.time.dateEnd) {
+                    rule.time.dateEnd = new Date(rule.time.dateEnd);
+                    rule.time.dateEnd.setHours(23, 59, 59, 999);
                 } else {
-                    rule.timeDateEnd = new Date(2000,11,31, 23, 59, 59, 999);
+                    rule.time.dateEnd = new Date(2000,11,31, 23, 59, 59, 999);
                 }
             }
         }
-
-        rule.conditonData = [];
-        const setCondObj = (pretext, defLgOp) => {
-            const operandAType = rule[pretext+'OperandAType'];
-            const conditionValue = Number(rule[pretext+'LogOperator']) || defLgOp;
-            if (operandAType !== 'none' && conditionValue !== cRuleNone) {
-                const operandAValue = rule[pretext+'OperandAValue'];
-                const operandBType = rule[pretext+'OperandBType'];
-                const operandBValue = rule[pretext+'OperandBValue'];
-                const el =  {
-                    result: false,
-                    operandName: getName(operandAType, operandAValue),
-                    thresholdName: getName(operandBType, operandBValue),
-                    operand: {
-                        type:operandAType,
-                        value:operandAValue
-                    },
-                    threshold: {
-                        type:operandBType,
-                        value:operandBValue
-                    },
-                    operator: {
-                        value : rule[pretext+'Operator'],
-                        text : rule[pretext+'OperatorText'],
-                        description: RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule[pretext+'Operator'])
-                    },
-                    condition:  {
-                        value : conditionValue,
-                        text : rule[pretext+'LogOperatorText']
-                    }
-                };
-                if (operandAType === 'sunControlMode') {
-                    if (operandAValue === 'off' || operandAValue.charAt(0) === '0') {
-                        el.operand.value = 0;
-                    } else if (operandAValue === 'maximize' || operandAValue.charAt(0) === '1') {
-                        el.operand.value = 1;
-                    } else {
-                        el.operand.value = 2;
-                    }
+        rule.conditions.forEach(cond => {
+            cond.operatorDescription = RED._('node-red-contrib-sun-position/position-config:common.comparatorDescription.' + rule[cond.operator]);
+            if (cond.valueType === 'sunControlMode') {
+                if (cond.value === 'off' || cond.value.charAt(0) === '0') {
+                    cond.value = 0;
+                } else if (cond.value === 'maximize' || cond.value.charAt(0) === '1') {
+                    cond.value = 1;
+                } else {
+                    cond.value = 2;
                 }
-                if (el.operandName.length > 25) {
-                    el.operandNameShort = getNameShort(operandAType, operandAValue);
+            } else if (node.positionConfig && cond.valueType === 'jsonata') {
+                try {
+                    cond.valueExpr = node.positionConfig.getJSONataExpression(node, cond.value);
+                } catch (err) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                    cond.valueExpr = null;
                 }
-                if (el.thresholdName.length > 25) {
-                    el.thresholdNameShort = getNameShort(operandBType, operandBValue);
-                }
-                el.text = el.operandName + ' ' + el.operator.text;
-                el.textShort = (el.operandNameShort || el.operandName) + ' ' + el.operator.text;
-                rule.conditonData.push(el);
             }
-            delete rule[pretext+'OperandAType'];
-            delete rule[pretext+'OperandAValue'];
-            delete rule[pretext+'OperandBType'];
-            delete rule[pretext+'OperandBValue'];
-            delete rule[pretext+'Operator'];
-            delete rule[pretext+'OperatorText'];
-            delete rule[pretext+'LogOperator'];
-            delete rule[pretext+'LogOperatorText'];
-        };
-        setCondObj('valid', cRuleLogOperatorOr);
-        setCondObj('valid2', cRuleNone);
-        rule.conditional = rule.conditonData.length > 0;
+
+            cond.valueName = getName(cond.valueType, cond.value);
+            if (cond.valueName.length > 25) {
+                cond.valueNameShort = getNameShort(cond.valueType, cond.value);
+            }
+            cond.thresholdName = getName(cond.thresholdType, cond.threshold);
+            if (cond.thresholdName.length > 25) {
+                cond.thresholdNameShort = getNameShort(cond.thresholdType, cond.threshold);
+            }
+            cond.text = cond.valueName + ' ' + cond.operatorText;
+            cond.textShort = (cond.valueNameShort || cond.valueName) + ' ' + cond.operatorText;
+            cond.result = false;
+        });
+        rule.conditional = rule.conditions.length > 0;
     }
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {

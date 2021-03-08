@@ -77,9 +77,7 @@
                             f: 0,
                             next: false,
                             days: '*',
-                            months: '*',
-                            onlyEvenDays: false,
-                            onlyOddDays: false
+                            months: '*'
                         }
                     ]
                 },
@@ -248,8 +246,8 @@
                     function resizeRuleContainer() {
                         const editorRow = $('.node-input-rule-container-row ol');
                         const height =  editorRow.outerHeight(true);
-                        const rows = $('#node-input-rule-container').editableList('items');
-                        if (rows.size() > 0) {
+                        const rowCount = $('#node-input-rule-container').editableList('length');
+                        if (rowCount > 0) {
                             $('#node-input-rule-container').editableList('height', height + 40);
                         } else {
                             $('#node-input-rule-container').editableList('height', 20);
@@ -448,7 +446,6 @@
                             resizeRuleContainer();
                         },
                         sortItems(rules) {
-                            rules = $('#node-input-rule-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 1);
                             });
@@ -467,14 +464,12 @@
                     }
                     // #endregion rule-container
                     // #region result-container
-                    /**
-                    * resizes result container
-                    */
+                    /** resizes result container */
                     function resizeResultContainer() {
                         const editorRow = $('.node-input-result-container-row ol');
                         const height = editorRow.outerHeight(true);
-                        const rows = $('#node-input-result-container').editableList('items');
-                        if (rows.size() > 0) {
+                        const rowCount = $('#node-input-result-container').editableList('length');
+                        if (rowCount > 0) {
                             $('#node-input-result-container').editableList('height', height + 40);
                         } else {
                             $('#node-input-result-container').editableList('height', 20);
@@ -502,9 +497,7 @@
                                     f: 0,
                                     next: false,
                                     days: '*',
-                                    months: '*',
-                                    onlyEvenDays: false,
-                                    onlyOddDays: false
+                                    months: '*'
                                 };
                             }
 
@@ -588,7 +581,9 @@
                                         types.WeekOfYearEven,
                                         types.DayOfYear,
                                         types.DayOfYearEven,
-                                        types.numPercent
+                                        types.numPercent,
+                                        types.nodeId,
+                                        types.nodeName
                                     ]
                                 });
                             setTInputValue($propertyValue, prop.v, prop.vt);
@@ -690,7 +685,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialDays'));
+                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
 
                             const $divSpecLimits = $('<div/>', {
                                 class: 'node-input-prop-result-speciallimits',
@@ -705,7 +700,7 @@
                                 .appendTo($divSpecLimits2);
                             const $cbOnlyEvenDays = $('<input/>', {
                                 type: 'checkbox',
-                                class: 'node-input-prop-result-OnlyEvenDays',
+                                class: 'node-input-prop-result-onlyEvenDays',
                                 style: 'width: auto;'
                             }).appendTo($lblSL1);
                             $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays')).appendTo($lblSL1);
@@ -724,6 +719,31 @@
                             $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays')).appendTo($lblSL2);
                             $cbOnlyOddDays.prop('checked', (prop.onlyOddDays === 'true' || prop.onlyOddDays === true));
 
+                            const $lblSL3 = $('<label/>', {
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks')
+                            })
+                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
+                                .appendTo($divSpecLimits2);
+                            const $cbOnlyEvenWeeks = $('<input/>', {
+                                type: 'checkbox',
+                                class: 'node-input-prop-result-onlyEvenWeeks',
+                                style: 'width: auto;'
+                            }).appendTo($lblSL3);
+                            $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks')).appendTo($lblSL1);
+                            $cbOnlyEvenWeeks.prop('checked', (prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true));
+
+                            const $lblSL4 = $('<label/>', {
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks')
+                            })
+                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
+                                .appendTo($divSpecLimits2);
+                            const $cbOnlyOddWeeks = $('<input/>', {
+                                type: 'checkbox',
+                                class: 'node-input-prop-result-onlyOddWeeks',
+                                style: 'width: auto;'
+                            }).appendTo($lblSL4);
+                            $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks')).appendTo($lblSL2);
+                            $cbOnlyOddWeeks.prop('checked', (prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true));
                             // row4 - 3 - Month selection
                             const $divMnMonth = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
@@ -813,6 +833,8 @@
                                         months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
                                         onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
                                         onlyEvenDays:   $cbOnlyOddDays.is(':checked'),
+                                        onlyOddWeeks:    $cbOnlyEvenWeeks.is(':checked'),
+                                        onlyEvenWeeks:   $cbOnlyOddWeeks.is(':checked'),
                                         noOffsetError:  true
                                     });
                                 }
@@ -836,7 +858,6 @@
                             resizeResultContainer();
                         },
                         sortItems(rules) {
-                            rules = $('#node-input-result-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 1);
                             });
@@ -861,9 +882,7 @@
                                 f       : node.result1Format ? node.result1Format : 0,
                                 next    : false,
                                 days    : '*',
-                                months  : '*',
-                                onlyEvenDays: false,
-                                onlyOddDays : false
+                                months  : '*'
                             });
                         }
                     }
@@ -962,7 +981,9 @@
                         days: getCheckboxesStr(prop.find('#node-input-prop-result-Days input[type=checkbox]:checked'), 7),
                         months: getCheckboxesStr(prop.find('#node-input-prop-result-Months input[type=checkbox]:checked'), 12),
                         onlyEvenDays: prop.find('.node-input-prop-result-onlyEvenDays').is(':checked'),
-                        onlyOddDays: prop.find('.node-input-prop-result-onlyOddDays').is(':checked')
+                        onlyOddDays: prop.find('.node-input-prop-result-onlyOddDays').is(':checked'),
+                        onlyEvenWeeks: prop.find('.node-input-prop-result-onlyEvenWeeks').is(':checked'),
+                        onlyOddWeeks: prop.find('.node-input-prop-result-onlyOddWeeks').is(':checked')
                     };
                     p.f = (p.fS !== 99 ? p.fS : p.fI);
                     if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {
@@ -983,16 +1004,16 @@
             oneditresize(_size) {
                 try {
                     const height1 = $('.node-input-rule-container-row ol').outerHeight(true);
-                    const rows1 = $('#node-input-rule-container').editableList('items');
-                    if (rows1.size() > 0) {
+                    const rowCount1 = $('#node-input-rule-container').editableList('length');
+                    if (rowCount1 > 0) {
                         $('#node-input-rule-container').editableList('height', height1 + 40);
                     } else {
                         $('#node-input-rule-container').editableList('height', 20);
                     }
 
                     const height2 = $('.node-input-result-container-row ol').outerHeight(true);
-                    const rows2 = $('#node-input-result-container').editableList('items');
-                    if (rows2.size() > 0) {
+                    const rowCount2 = $('#node-input-result-container').editableList('length');
+                    if (rowCount2 > 0) {
                         $('#node-input-result-container').editableList('height', height2 + 40);
                     } else {
                         $('#node-input-result-container').editableList('height', 20);

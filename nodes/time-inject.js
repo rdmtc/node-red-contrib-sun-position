@@ -62,7 +62,9 @@ module.exports = function (RED) {
                 days : config.timeDays,
                 months : config.timeMonths,
                 onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays
+                onlyEvenDays: config.timeOnlyEvenDays,
+                onlyEvenWeeks: config.timeOnlyEvenWeeks,
+                onlyOddWeeks : config.timeOnlyOddWeeks
             };
 
             if (!this.timeStartData.offsetType) {
@@ -77,6 +79,10 @@ module.exports = function (RED) {
             if (this.timeStartData.onlyEvenDays && this.timeStartData.onlyOddDays) {
                 this.timeStartData.onlyEvenDays = false;
                 this.timeStartData.onlyOddDays = false;
+            }
+            if (this.timeStartData.onlyEvenWeeks && this.timeStartData.onlyOddWeeks) {
+                this.timeStartData.onlyEvenWeeks = false;
+                this.timeStartData.onlyOddWeeks = false;
             }
             if (config.propertyType && config.propertyType !== 'none' && config.timeAltType && config.timeAltType !== 'none') {
                 this.property = {
@@ -113,7 +119,9 @@ module.exports = function (RED) {
                     days : config.timeAltDays,
                     months : config.timeAltMonths,
                     onlyOddDays: config.timeAltOnlyOddDays,
-                    onlyEvenDays: config.timeAltOnlyEvenDays
+                    onlyEvenDays: config.timeAltOnlyEvenDays,
+                    onlyEvenWeeks: config.timeAltOnlyEvenWeeks,
+                    onlyOddWeeks : config.timeAltOnlyOddWeeks
                 };
                 if (!this.timeStartAltData.offsetType) { this.timeStartAltData.offsetType = ((this.timeStartAltData.offset === 0) ? 'none' : 'num'); }
 
@@ -126,6 +134,10 @@ module.exports = function (RED) {
                 if (this.timeStartAltData.onlyEvenDays && this.timeStartAltData.onlyOddDays) {
                     this.timeStartAltData.onlyEvenDays = false;
                     this.timeStartAltData.onlyOddDays = false;
+                }
+                if (this.timeStartAltData.onlyEvenWeeks && this.timeStartAltData.onlyOddWeeks) {
+                    this.timeStartAltData.onlyEvenWeeks = false;
+                    this.timeStartAltData.onlyOddWeeks = false;
                 }
             } // timeAlt
         } // timeStartData
@@ -141,7 +153,9 @@ module.exports = function (RED) {
                 days : config.timeDays,
                 months : config.timeMonths,
                 onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays
+                onlyEvenDays: config.timeOnlyEvenDays,
+                onlyEvenWeeks: config.timeOnlyEvenWeeks,
+                onlyOddWeeks : config.timeOnlyOddWeeks
             };
             if (!this.timeEndData.offsetType) {
                 this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');
@@ -155,6 +169,10 @@ module.exports = function (RED) {
             if (this.timeEndData.onlyEvenDays && this.timeEndData.onlyOddDays) {
                 this.timeEndData.onlyEvenDays = false;
                 this.timeEndData.onlyOddDays = false;
+            }
+            if (this.timeEndData.onlyEvenWeeks && this.timeEndData.onlyOddWeeks) {
+                this.timeEndData.onlyEvenWeeks = false;
+                this.timeEndData.onlyOddWeeks = false;
             }
         } // timeEndData
 
@@ -308,7 +326,9 @@ module.exports = function (RED) {
                 days        : prop.days,
                 months      : prop.months,
                 onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays
+                onlyOddDays : prop.onlyOddDays,
+                onlyEvenWeeks: prop.onlyEvenWeeks,
+                onlyOddWeeks : prop.onlyOddWeeks
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {
@@ -331,6 +351,20 @@ module.exports = function (RED) {
         this.nextStartTime = null;
         this.nextStartTimeAlt = null;
         this.nextEndTime = null;
+
+        if (config.once) {
+            if (config.onceDelay > 2147483) {
+                this.onceDelay = 2147483;
+            } else {
+                this.onceDelay = config.onceDelay || 0.1;
+            }
+        }
+        if (config.timedatestart) {
+            node.timedatestart = new Date(config.timedatestart);
+        }
+        if (config.timedateend) {
+            node.timedateend = new Date(config.timedateend);
+        }
         const node = this;
 
         /**
@@ -359,19 +393,19 @@ module.exports = function (RED) {
                 value: null,
                 valid : true
             };
-            if (config.timedatestart || config.timedateend) {
+            if (node.timedatestart || node.timedateend) {
                 const year = dNow.getFullYear();
                 if (node.cacheYear !== year) {
                     node.cacheYear = year;
-                    if (config.timedatestart) {
-                        node.cacheStart = new Date(config.timedatestart);
+                    if (node.timedatestart) {
+                        node.cacheStart = new Date(node.timedatestart);
                         node.cacheStart.setFullYear(year);
                         node.cacheStart.setHours(0, 0, 0, 0);
                     } else {
                         node.cacheStart = new Date(year, 0, 0, 0, 0, 0, 1);
                     }
-                    if (config.timedateend) {
-                        node.cacheEnd = new Date(config.timedateend);
+                    if (node.timedateend) {
+                        node.cacheEnd = new Date(node.timedateend);
                         node.cacheEnd.setFullYear(year);
                         node.cacheEnd.setHours(23, 59, 59, 999);
                     } else {
@@ -599,7 +633,7 @@ module.exports = function (RED) {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             const dNow = new Date();
             for (let i = 0; i < node.props.length; i++) {
-                // node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
                 const res = node.positionConfig.getOutDataProp(this, msg, node.props[i], dNow);
                 if (res === null || (typeof res === 'undefined')) {
                     this.error('Could not evaluate ' + node.props[i].type + '.' + node.props[i].value + '. - Maybe settings outdated (open and save again)!');
@@ -608,7 +642,7 @@ module.exports = function (RED) {
                 } else {
                     node.positionConfig.setMessageProp(this, msg, node.props[i].outType, node.props[i].outValue, res);
                 }
-                // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+                node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
             msg._srcid = node.id;
             msg._ts = dNow.valueOf();
@@ -878,9 +912,7 @@ module.exports = function (RED) {
                     node.doCreateStartTimeout(node);
                 }
                 send(node.prepOutMsg(msg));
-                if (msg.payload === null || (typeof msg.payload === 'undefined')) {
-                    done('could not evaluate ' + config.payloadType + '.' + config.payload);
-                } else if (msg.payload.error) {
+                if (msg.payload && msg.payload.error) {
                     done('could not getting payload: ' + msg.payload.error);
                 } else {
                     done();
@@ -909,14 +941,11 @@ module.exports = function (RED) {
                 });
                 return;
             }
-            if (config.once) {
-                if (config.onceDelay > 2147483) {
-                    config.onceDelay = 2147483;
-                }
+            if (node.onceDelay) {
                 node.status({
                     fill: 'yellow',
                     shape: 'ring',
-                    text: RED._('time-inject.message.onceDelay', { seconds: (config.onceDelay || 0.1)})
+                    text: RED._('time-inject.message.onceDelay', { seconds: (node.onceDelay)})
                 });
                 node.onceTimeout = setTimeout(() => {
                     try {
@@ -930,7 +959,7 @@ module.exports = function (RED) {
                             text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
-                }, (config.onceDelay || 0.1) * 1000);
+                }, node.onceDelay * 1000);
                 return;
             }
             node.status({});

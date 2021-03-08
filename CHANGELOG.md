@@ -15,6 +15,34 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+#### 2.0.0: enhancement
+
+Warning: This Version could break existing flows. Please check your configuration!
+
+- general
+  - added only even and only odd weeks
+
+
+- time-inject
+  - fixed error if only flow/global context is set
+
+- blind-control + clock-time
+  - nodes have now always 2 outputs - may breaks existing flows!
+    - First output is configurable.
+  - redesigned rule conditions, now unlimited conditions could be defined
+  - additional nodeID which will be also in the output (if set will override nodeId)
+    - added as rule condition operator - usable in subFlows
+  - No more messages are sent at the first output if the rule has changed but the payload (level/slat) has remained the same.
+    - A message will be sent if the topic has changed.
+
+- blind-control only
+  - redesigned oversteer, now unlimited oversteer can defined
+  - oversteer can be defined only valid for special mode
+  - removed minimum altitude settings
+    - for functionality the downward compatibility is given by automatic adoption of the setting as new first oversteer, which has the same effect.
+    - no longer specific output of the reason (instead of "below the minimum elevation angle" will output "oversteer 1")
+  - window settings as typedInput, which allow to use from flow, global context or environment - node can better used in a subFlow
+
 #### 1.2.4: maintenance + critical bugfix
 
 - time-span
