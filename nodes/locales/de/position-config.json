@@ -74,7 +74,10 @@
             "level":"Rollladenposition",
             "slat":"Lamellenposition",
             "topic":"topic",
-            "ctrlObj":"Status object"
+            "ctrlObj":"Status object",
+            "between":"zwischen",
+            "and": "und",
+			"or": "oder"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",

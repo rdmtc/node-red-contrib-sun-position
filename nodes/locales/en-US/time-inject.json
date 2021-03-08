@@ -19,8 +19,6 @@
             "onceDelay": "seconds",
             "fewDays": "few days",
             "fewMonths": "few months",
-            "between":"between",
-            "and":"and",
             "interval-amount":"fixed number between time",
             "count":"Count"
         },

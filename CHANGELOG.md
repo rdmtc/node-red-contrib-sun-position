@@ -22,11 +22,11 @@ Warning: This Version could break existing flows. Please check your configuratio
 - general
   - added only even and only odd weeks
 
-
 - time-inject
   - fixed error if only flow/global context is set
 
 - blind-control + clock-time
+  - added possibility to copy rules to clipboard and paste rules from clipboard
   - nodes have now always 2 outputs - may breaks existing flows!
     - First output is configurable.
   - redesigned rule conditions, now unlimited conditions could be defined

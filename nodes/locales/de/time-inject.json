@@ -18,7 +18,6 @@
             "onceDelay": "Sekunden",
             "fewDays": "ein paar Tage",
             "fewMonths": "ein paar Monate",
-            "between":"zwischen",
             "and":"und",
             "interval-amount":"feste Anzahl zwischen den Zeitpunkten",
             "count":"Anzahl"

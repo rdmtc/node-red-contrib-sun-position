@@ -114,7 +114,10 @@
                 }
                 // #endregion time settings
             },
-            outputLabels() {
+            outputLabels(index) {
+                if (index > 0) {
+                    return this._('clock-timer.label.output' + (index + 1));
+                }
                 const types = {
                     msgPayload : 'msg.payload',
                     msgTopic   : 'msg.topic',
@@ -194,7 +197,7 @@
                         lab += propType;
                     }
                 }
-                return [lab, this._('clock-timer.label.output2')];
+                return lab || '?';
             },
             label() {
                 let suffix = '';
@@ -223,6 +226,7 @@
 
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
+                node.dialogAddData = {};
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
                     // #region initialize
@@ -334,6 +338,7 @@
                         valueProp: 'payloadDefault',
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
+                        defaultValue: '',
                         types: [
                             types.Undefined,
                             'str',
@@ -535,7 +540,7 @@
                         const length = (enh) ? 60 : 30;
                         try {
                             if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && (typeof data.valid === 'undefined' || Object.keys(data.valid).length === 0))) {
-                                result += '<div>⚠️ The rule is out of date, but should work normally regardless. If possible, please open the rule, save and re-deploy the node. This updates the data structures.</div>';
+                                result += '<div>✎ Please edit this rule.</div>';
                             } else if (!data.isValid) {
                                 result += '<div>⚠️ Rule is invalid and needs to be changed!!</div>';
                                 if (data.valid && Object.keys(data.valid).length > 0) {
@@ -569,17 +574,17 @@
                                             result += ' ';
                                             result += ttext;
                                             if (enh && enh.cond && enh.cond[i] && enh.cond[i].operand) {
-                                                result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<kbd>' + enh.cond[i].operand + '</kbd>';
-                                                result += ' ' + cond.operatorText;
-                                                if(enh.cond[i].thersold) {
-                                                    result += ' <i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<kbd>' + enh.cond[i].thersold + '</kbd>';
+                                                result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.cond[i].operand + '</code>';
+                                                result += ' ' + cond.operatorText + '&nbsp;<code>';
+                                                if(enh.cond[i].threshold) {
+                                                    result += enh.cond[i].threshold;
                                                 } else {
                                                     result += ttext;
                                                 }
-                                                result += ']</span>';
+                                                result += '</code>]</span>';
                                             }
                                         } else if (enh && enh.cond && enh.cond[i] && enh.cond[i].operand) {
-                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;is&nbsp;<kbd>' + enh.cond[i].operand + '</kbd>]</span>';
+                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;is&nbsp;<code>' + enh.cond[i].operand + '</code>]</span>';
                                         }
                                     }
                                 }
@@ -597,7 +602,7 @@
                                     result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.time.type, data.time.value, null, length) + '</var>';
                                     result += _getOffsetText(node, data.time.offsetType, data.time.offset, data.time.multiplier);
                                     if (enh && enh.timeReg && enh.timeReg.text) {
-                                        result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeReg.text + '</kbd>';
+                                        result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeReg.text + '</code>]</span>';
                                     }
 
                                     if (data.timeMin && data.timeMin.type && data.timeMin.type !== 'none') {
@@ -608,7 +613,7 @@
                                         result += '</var>';
                                         result += _getOffsetText(node, data.timeMin.offsetType, data.timeMin.offset, data.timeMin.multiplier);
                                         if (enh && enh.timeMin && enh.timeMin.text) {
-                                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMin.text + '</kbd>';
+                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeMin.text + '</code>]</span>';
                                         }
                                         result += '</div>';
                                     }
@@ -620,13 +625,13 @@
                                         result += '</var>';
                                         result += _getOffsetText(node, data.timeMax.offsetType, data.timeMax.offset, data.timeMax.multiplier);
                                         if (enh && enh.timeMax && enh.timeMax.text) {
-                                            result += ' <i class="fa fa-hand-o-right indent-enh-text" aria-hidden="true"></i>&nbsp;<kbd>' + enh.timeMax.text + '</kbd>';
+                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeMax.text + '</code>]</span>';
                                         }
                                         result += '</div>';
                                     }
                                     if ((data.time.days && data.time.days !== '*') || data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
                                         result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeDays');
+                                        result += node._('clock-timer.label.ruleTimeLimit');
                                         result += '</span> <var>';
                                         const resultArr = [];
                                         if (data.time.days && data.time.days !== '*') {
@@ -669,8 +674,7 @@
                                         if (data.time.onlyOddWeeks) {
                                             resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'));
                                         }
-
-                                        result += resultArr.join(' <b>and</b> ');
+                                        result += resultArr.join(' <b>' + node._('node-red-contrib-sun-position/position-config:common.label.and') + '</b> ');
                                         result += '</var></div>';
                                     }
 
@@ -779,11 +783,12 @@
                             console.log(ex); // eslint-disable-line
                         }
                     }
-                    let resizeRuleContainerTOB = null;
+
                     const resizeRuleContainerCheck = () => {
-                        if (resizeRuleContainerTOB) { clearTimeout(resizeRuleContainerTOB); }
-                        resizeRuleContainerTOB = setTimeout(() => {
-                            resizeRuleContainerTOB = null;
+                        if (node.dialogAddData.resizeRuleContainerTO) { clearTimeout(node.dialogAddData.resizeRuleContainerTO); }
+                        node.dialogAddData.resizeRuleContainerTO = setTimeout(() => {
+                            delete node.dialogAddData.resizeRuleContainerTO;
+                            $('#node-input-sunControlMode').change();
                             resizeRuleContainer();
                         }, 1000);
                     };
@@ -925,6 +930,15 @@
                                 delete data.payloadOffsetValue;
                                 delete data.payloadOffsetMultiplier;
                                 delete data.payloadFormat;
+                            } else if (!data.payload) {
+                                data.payload = {
+                                    type            : types.Undefined.value,
+                                    value           : '',
+                                    offsetType      : types.Undefined.value,
+                                    offset          : '1',
+                                    multiplier      : 60000,
+                                    format          : 99
+                                };
                             }
                             if (!data.description || !data.version || data.version !== ruleVersion) {
                                 data.description = getRuleDescription(node, selFields, data);
@@ -1058,10 +1072,16 @@
                                 try {
                                     const rules = JSON.parse(clipText);
                                     console.log('import from clipboard', rules); // eslint-disable-line no-console
-                                    for (let i = 0; i < rules.length; i++) {
-                                        const rule = rules[i];
-                                        // rule.index = i;
-                                        $('#node-input-rule-container').editableList('addItem', rule);
+                                    if (Array.isArray(rules)) {
+                                        for (let i = 0; i < rules.length; i++) {
+                                            const rule = rules[i];
+                                            if (typeof rule.description === 'string' &&
+                                                typeof rule.name === 'string' &&
+                                                rule.version) {
+                                                // rule.index = i;
+                                                $('#node-input-rule-container').editableList('addItem', rule);
+                                            }
+                                        }
                                     }
                                     resizeRuleContainerCheck();
                                 } catch (err) {
@@ -1080,6 +1100,7 @@
                             // rule.index = i;
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
+                        resizeRuleContainerCheck();
                     }
                     // #endregion rules
                     // #region result-container
@@ -1089,7 +1110,7 @@
                         const height = editorRow.outerHeight(true);
                         const rowCount = $('#node-input-result-container').editableList('length');
                         if (rowCount > 0) {
-                            $('#node-input-result-container').editableList('height', height + 40);
+                            $('#node-input-result-container').editableList('height', height + 30);
                         } else {
                             $('#node-input-result-container').editableList('height', 20);
                         }
@@ -1290,18 +1311,15 @@
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
-                    const dialogAddData = {};
                     // #region dialogConditions
                     const $dialogConditionContainer = $dialog.find('#dlg-ip-btctl-rule-condition-container');
-                    /**
-                     * resizes a rule container
-                     */
+                    /** resizes a rule container */
                     function resizeConditionContainer() {
                         const editorRow = $('.dlg-ip-btctl-rule-condition-container-row ol');
                         const height =  editorRow.outerHeight(true);
                         const rowCount = $('#node-input-rule-container').editableList('length');
                         if (rowCount > 0) {
-                            $dialogConditionContainer.editableList('height', height + 40);
+                            $dialogConditionContainer.editableList('height', height + 30);
                         } else {
                             $dialogConditionContainer.editableList('height', 0);
                         }
@@ -1339,8 +1357,8 @@
                                 .css('width', '90px')
                                 .css('margin-bottom', '0px')
                                 .appendTo($row1);
-                            $dialogCondLogOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleCondOr')));
-                            $dialogCondLogOperator.append($('<option></option>').val(2).text(node._('clock-timer.label.ruleCondAnd')));
+                            $dialogCondLogOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:common.label.or')));
+                            $dialogCondLogOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:common.label.and')));
                             $dialogCondLogOperator.val(data.condition || 1);
 
                             const $dialogCondOperand = $('<input/>', {
@@ -1429,11 +1447,12 @@
                                 }
                                 getBackendData(d => {
                                     if (d.value && d.value !== 'none' && d.useful) {
-                                        addProps(dialogAddData, ['cond', containerIndex, 'operand'], d.value);
+                                        if (propType === types.SunAzimuth.value || types.SunElevation.value) { d.value = d.value.toFixed(3); }
+                                        addProps(node.dialogAddData, ['cond', containerIndex, 'operand'], d.value);
                                         $dialogCondOperand.attr('title', d.value);
                                         $row1.attr('title', d.value);
                                     } else {
-                                        addProps(dialogAddData, ['cond', containerIndex, 'operand'], '');
+                                        addProps(node.dialogAddData, ['cond', containerIndex, 'operand'], '');
                                         $dialogCondOperand.attr('title', '');
                                         $row1.attr('title', '');
                                     }
@@ -1459,24 +1478,23 @@
                             });
                             $dialogCondThreshold.change(() => {
                                 const propType = $dialogCondOperand.typedInput('type');
+                                const thresholdValueType = $dialogCondThreshold.typedInput('type');
                                 if (propType === types.SunAzimuth.value) {
-                                    const thersoldValueType = $dialogCondThreshold.typedInput('type');
-                                    if (thersoldValueType.indexOf('num') >=0) {
+                                    if (thresholdValueType.indexOf('num') >=0) {
                                         $dialogCondThreshold.typedInput('type', types.numAzimuth.value);
                                     }
                                 } else if (propType === types.SunElevation.value) {
-                                    const thersoldValueType = $dialogCondThreshold.typedInput('type');
-                                    if (thersoldValueType.indexOf('num') >=0) {
+                                    if (thresholdValueType.indexOf('num') >=0) {
                                         $dialogCondThreshold.typedInput('type', types.numAltitude.value);
                                     }
                                 }
                                 getBackendData(d => {
                                     if (d.value && d.value !== 'none' && d.useful) {
-                                        addProps(dialogAddData, ['cond', containerIndex, 'threshold'], d.value);
+                                        addProps(node.dialogAddData, ['cond', containerIndex, 'threshold'], d.value);
                                         $dialogCondThreshold.attr('title', d.value);
                                         $row2.attr('title', d.value);
                                     } else {
-                                        addProps(dialogAddData, ['cond', containerIndex, 'threshold'], '');
+                                        addProps(node.dialogAddData, ['cond', containerIndex, 'threshold'], '');
                                         $dialogCondThreshold.attr('title', '');
                                         $row2.attr('title', '');
                                     }
@@ -1485,7 +1503,7 @@
                                     nodeId:         node.id,
                                     kind:           'getOutDataData',
                                     config:         $nodeConfig.val(),
-                                    type:           $dialogCondThreshold.typedInput('type'),
+                                    type:           thresholdValueType,
                                     value:          $dialogCondThreshold.typedInput('value'),
                                     noOffsetError:  true
                                 });
@@ -1709,13 +1727,13 @@
                         if (dialogDataOnLoading) { return; }
                         const opType = $dialogTimeRegInput.typedInput('type');
                         if (opType === types.Undefined.value) {
-                            dialogAddData.timeReg = {
+                            node.dialogAddData.timeReg = {
                                 ts : 0,
                                 data : null,
                                 text : 'N/A'
                             };
-                            $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
-                            $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
+                            $('#dialog-row-timeReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
                             $dialogTimeRegOperator.hide();
                             $('#dialog-row-offset-timeReg').hide();
                             $('#dialog-row-timeReg').attr('title', opType);
@@ -1762,20 +1780,20 @@
                         getBackendData(d => {
                             if (d.value && d.value !== 'none') {
                                 const dv = new Date(d.value);
-                                dialogAddData.timeReg = {
+                                node.dialogAddData.timeReg = {
                                     ts : dv.getTime(),
                                     data : d,
                                     text : bdDateToTime(dv)
                                 };
                             } else {
-                                dialogAddData.timeReg = {
+                                node.dialogAddData.timeReg = {
                                     ts : 0,
                                     data : null,
                                     text : bdDateToTime(d)
                                 };
                             }
-                            $('#dialog-row-timeReg').attr('title', dialogAddData.timeReg.text);
-                            $dialogTimeRegInput.attr('timedata', dialogAddData.timeReg.ts);
+                            $('#dialog-row-timeReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
                             _dialogGenHelpText();
                         }, {
                             nodeId:         node.id,
@@ -1800,13 +1818,13 @@
                             const opType = $dialogTimeMinInput.typedInput('type');
                             if (opType === types.Undefined.value) {
                                 $('#dialog-row-offset-timeMin').hide();
-                                dialogAddData.timeMin = {
+                                node.dialogAddData.timeMin = {
                                     ts : 0,
                                     data : null,
                                     text : 'N/A'
                                 };
-                                $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
-                                $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
+                                $('#dialog-row-timeMin').attr('title', node.dialogAddData.timeMin.text);
+                                $dialogTimeMinInput.attr('timedata', node.dialogAddData.timeMin.ts);
                                 _dialogGenHelpText();
                                 return;
                             } else if (opType === types.TimeEntered.value ||
@@ -1819,20 +1837,20 @@
                             getBackendData(d => {
                                 if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
-                                    dialogAddData.timeMin = {
+                                    node.dialogAddData.timeMin = {
                                         ts : dv.getTime(),
                                         data : d,
                                         text : bdDateToTime(dv)
                                     };
                                 } else {
-                                    dialogAddData.timeMin = {
+                                    node.dialogAddData.timeMin = {
                                         ts : 0,
                                         data : null,
                                         text : bdDateToTime(d)
                                     };
                                 }
-                                $('#dialog-row-timeMin').attr('title', dialogAddData.timeMin.text);
-                                $dialogTimeMinInput.attr('timedata', dialogAddData.timeMin.ts);
+                                $('#dialog-row-timeMin').attr('title', node.dialogAddData.timeMin.text);
+                                $dialogTimeMinInput.attr('timedata', node.dialogAddData.timeMin.ts);
                                 _dialogGenHelpText();
                             }, {
                                 nodeId:         node.id,
@@ -1856,13 +1874,13 @@
                             const opType = $dialogTimeMaxInput.typedInput('type');
                             if (opType === types.Undefined.value) {
                                 $('#dialog-row-offset-timeMax').hide();
-                                dialogAddData.timeMax = {
+                                node.dialogAddData.timeMax = {
                                     ts : 0,
                                     data : null,
                                     text : 'N/A'
                                 };
-                                $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
-                                $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
+                                $('#dialog-row-timeMax').attr('title', node.dialogAddData.timeMax.text);
+                                $dialogTimeMaxInput.attr('timedata', node.dialogAddData.timeMax.ts);
                                 _dialogGenHelpText();
                                 return;
                             } else if (opType === types.TimeEntered.value ||
@@ -1875,20 +1893,20 @@
                             getBackendData(d => {
                                 if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
-                                    dialogAddData.timeMax = {
+                                    node.dialogAddData.timeMax = {
                                         ts : dv.getTime(),
                                         data : d,
                                         text : bdDateToTime(dv)
                                     };
                                 } else {
-                                    dialogAddData.timeMax = {
+                                    node.dialogAddData.timeMax = {
                                         ts : 0,
                                         data : null,
                                         text : bdDateToTime(d)
                                     };
                                 }
-                                $('#dialog-row-timeMax').attr('title', dialogAddData.timeMax.text);
-                                $dialogTimeMaxInput.attr('timedata', dialogAddData.timeMax.ts);
+                                $('#dialog-row-timeMax').attr('title', node.dialogAddData.timeMax.text);
+                                $dialogTimeMaxInput.attr('timedata', node.dialogAddData.timeMax.ts);
                                 _dialogGenHelpText();
                             }, {
                                 nodeId:         node.id,
@@ -1904,12 +1922,9 @@
                         }
                     });
                     $('.dialog-row-timeLimits :input').change(() => {
-                        if (dialogAddData.timeout2) {
-                            clearTimeout(dialogAddData.timeout2);
-                            dialogAddData.timeout2 = null;
-                        }
-                        dialogAddData.timeout2 = setTimeout(() => {
-                            dialogAddData.timeout2 = null;
+                        if (node.dialogAddData.timeout2) { clearTimeout(node.dialogAddData.timeout2); }
+                        node.dialogAddData.timeout2 = setTimeout(() => {
+                            delete node.dialogAddData.timeout2;
                             $dialogTimeRegInput.change();
                         },1000);
                     });
@@ -1978,23 +1993,16 @@
                     // #endregion dialogChange
                     // #region dialogload & save
 
-                    /**
-                     * generates the help text of the dialog
-                     */
+                    /** generates the help text of the dialog */
                     function _dialogGenHelpText() {
                         $('#dlg-txt-btctl-rule-descr').html('');
-                        if (dialogAddData.timeout) {
-                            clearTimeout(dialogAddData.timeout);
-                            dialogAddData.timeout = null;
-                        }
-                        dialogAddData.timeout = setTimeout(() => {
-                            dialogAddData.timeout = null;
-                            $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), dialogAddData));
+                        if (node.dialogAddData.timeout) { clearTimeout(node.dialogAddData.timeout); }
+                        node.dialogAddData.timeout = setTimeout(() => {
+                            delete node.dialogAddData.timeout;
+                            $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), node.dialogAddData));
                         },1000);
                     }
-                    /**
-                     * load the data from the rule
-                     */
+                    /** load the data from the rule */
                     function _dialogLoadData(containerIndex, $containerRow) {
                         try {
                             $dialogDataRow = $containerRow;
@@ -2013,10 +2021,10 @@
                                 setTInputValue($dialogTimeRegOffset, data.time.offset, data.time.offsetType);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', data.time.days);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', data.time.months);
-                                $dialogTimeLimitOnlyEvenDays.attr('checked', data.time.onlyEvenDays);
-                                $dialogTimeLimitOnlyOddDays.attr('checked', data.time.onlyOddDays);
-                                $dialogTimeLimitOnlyEvenWeeks.attr('checked', data.time.onlyEvenWeeks);
-                                $dialogTimeLimitOnlyOddWeeks.attr('checked', data.time.onlyOddWeeks);
+                                $dialogTimeLimitOnlyEvenDays.prop('checked', !!data.time.onlyEvenDays);
+                                $dialogTimeLimitOnlyOddDays.prop('checked', !!data.time.onlyOddDays);
+                                $dialogTimeLimitOnlyEvenWeeks.prop('checked', !!data.time.onlyEvenWeeks);
+                                $dialogTimeLimitOnlyOddWeeks.prop('checked', !!data.time.onlyOddWeeks);
                                 const year = (new Date()).getFullYear();
                                 let dStart, dEnd;
                                 if (data.time.dateStart) {
@@ -2054,10 +2062,10 @@
                                 setTInputValue($dialogTimeRegOffset, 1, types.Undefined.value);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', '*');
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', '*');
-                                $dialogTimeLimitOnlyEvenDays.attr('checked', false);
-                                $dialogTimeLimitOnlyOddDays.attr('checked', false);
-                                $dialogTimeLimitOnlyEvenWeeks.attr('checked', false);
-                                $dialogTimeLimitOnlyOddWeeks.attr('checked', false);
+                                $dialogTimeLimitOnlyEvenDays.prop('checked', false);
+                                $dialogTimeLimitOnlyOddDays.prop('checked', false);
+                                $dialogTimeLimitOnlyEvenWeeks.prop('checked', false);
+                                $dialogTimeLimitOnlyOddWeeks.prop('checked', false);
                                 $dialogTimeLimitDateStart.val('');
                                 $dialogTimeLimitDateEnd.val('');
                             }
@@ -2095,7 +2103,7 @@
                             }
                             $dialogTopic.val(data.topic || '');
                             $dialogImportance.val(data.importance || 0);
-                            $dialogResetOverwrite.attr('checked', data.resetOverwrite || false);
+                            $dialogResetOverwrite.prop('checked', !!data.resetOverwrite);
 
                             _dialogGenHelpText();
                             dialogDataOnLoading = false;
@@ -2129,9 +2137,9 @@
                                 multiplier  : parseInt($dialogPayloadMultiplier.val()),
                                 format      : $dialogPayloadTimeFormat.val()
                             },
-                            topic: $dialogTopic.val(),
-                            importance: parseInt($dialogImportance.val()),
-                            resetOverwrite: $dialogResetOverwrite.is(':checked')
+                            topic           : $dialogTopic.val(),
+                            importance      : parseInt($dialogImportance.val()),
+                            resetOverwrite  : $dialogResetOverwrite.is(':checked')
                         };
                         try {
                             const setval = (param, name, val) => { if (val) param[name] = val; };

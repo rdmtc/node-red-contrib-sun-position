@@ -21,7 +21,10 @@
             "onlyEvenDays":"only even days",
             "onlyOddDays":"only odd days",
             "onlyEvenWeeks":"only even weeks",
-            "onlyOddWeeks":"only odd weeks"
+            "onlyOddWeeks":"only odd weeks",
+            "between":"between",
+            "and": "and",
+            "or": "or"
         },
         "types": {
             "unlimited":"no limitation",
