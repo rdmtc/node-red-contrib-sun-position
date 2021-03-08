@@ -734,7 +734,7 @@ module.exports = function (RED) {
          * @param {*} data Data object to set to the property
          */
         setMessageProp(_srcNode, msg, type, value, data) {
-            _srcNode.debug(`setMessageProp type=${type} value=${value} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`setMessageProp type=${type} value=${value} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (type === 'msgPayload') {
                 msg.payload = data;
             } else if (type === 'msgTopic') {
@@ -749,7 +749,6 @@ module.exports = function (RED) {
                 RED.util.setMessageProperty(msg, value, data, true);
             } else if ((type === 'flow' || type === 'global')) {
                 const contextKey = RED.util.parseContextStore(value.trim());
-                _srcNode.debug(`setMessageProp contextKey=${util.inspect(contextKey, { colors: true, compact: 10, breakLength: Infinity })}`);
                 _srcNode.context()[type].set(contextKey.key, data, contextKey.store);
             }
         }

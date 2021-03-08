@@ -1186,7 +1186,6 @@ module.exports = function (RED) {
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
                         let resultObj = null;
-                        node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
                         if (prop.type === 'topic') {
                             resultObj = topic;
                         } else if (prop.type === 'level') {
@@ -1198,7 +1197,6 @@ module.exports = function (RED) {
                         } else {
                             resultObj = this.getPropValue(this, msg, prop, false, oNow.dNow, replaceAttrs);
                         }
-                        node.debug(`prepOutMsg-${i} resultObj=${util.inspect(resultObj, { colors: true, compact: 10, breakLength: Infinity })}`);
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
                                 this.error('error on getting result: "' + resultObj.error + '"');
@@ -1206,7 +1204,7 @@ module.exports = function (RED) {
                                 node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
                             }
                         }
-                        node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+                        // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                     }
                     send([msg, { topic, payload: blindCtrl }]);
                 } else {
