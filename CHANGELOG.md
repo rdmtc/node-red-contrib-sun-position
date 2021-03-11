@@ -23,7 +23,7 @@ Warning: This Version could break existing flows. Please check your configuratio
   - added only even and only odd weeks
 
 - time-inject
-  - fixed error if only flow/global context is set
+  - fixed error if only flow/global context is set #252
 
 - blind-control + clock-time
   - added possibility to copy rules to clipboard and paste rules from clipboard

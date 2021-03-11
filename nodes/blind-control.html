@@ -1291,6 +1291,7 @@
                     const $btnAdd = $('#node-button-add');
                     $btnAdd.click(() => {
                         $('#node-input-rule-container').editableList('addItem', {});
+                        resizeRuleContainerCheck();
                     });
 
                     const $btnClear = $('#node-button-clear');
@@ -1573,7 +1574,7 @@
                             $oversteerMode.append($('<option></option>').val(0).text(node._('blind-control.label.sunControlNoMatter')));
                             $oversteerMode.append($('<option></option>').val(1).text(node._('blind-control.label.sunControlRestrictOnly')));
                             $oversteerMode.append($('<option></option>').val(2).text(node._('blind-control.label.sunControlMaximizeOnly')));
-                            $oversteerMode.val(data.mode || '0');
+                            $oversteerMode.val(data.mode || 0);
                             // row3 - BlindPos
                             addLabel($row3, 'node-input-oversteer-blindPos', 'fa fa-angle-down', node._('blind-control.label.oversteerBlindPos'), '140px');
 
@@ -1698,8 +1699,10 @@
                             });
                         },
                         // resizeItem: resizeRule,
+                        addButton: false,
                         sortable: true,
                         removable: true,
+                        scrollOnAdd: true,
                         removeItem: resizeOversteerContainer
                     }); // oversteer-container
 
@@ -1784,6 +1787,77 @@
                         $('#node-input-oversteer-container').editableList('addItem', node.oversteers[i]);
                     }
                     resizeOversteerContainer();
+
+                    // #region oversteer Button
+                    const $btnOversteerAdd = $('#node-oversteer-button-add');
+                    $btnOversteerAdd.click(() => {
+                        $('#node-input-oversteer-container').editableList('addItem', {});
+                        resizeOversteerContainer();
+                    });
+
+                    const $btnOversteerClear = $('#node-oversteer-button-clear');
+                    $btnOversteerClear.click(() => {
+                        $('#node-input-oversteer-container').editableList('empty');
+                        resizeOversteerContainer();
+                    });
+                    const $btnOversteerExport = $('#node-oversteer-button-export');
+                    $btnOversteerExport.click(() => {
+                        const exprules = [];
+                        $('#node-input-oversteer-container').editableList('items').each(function(_i) {
+                            const $rule = $(this);
+                            const p = {
+                                mode            : parseInt($rule.find('.node-input-oversteer-mode').val()),
+                                valueType       : $rule.find('.node-input-oversteer-value').typedInput('type'),
+                                value           : $rule.find('.node-input-oversteer-value').typedInput('value'),
+                                operator        : $rule.find('.node-input-oversteer-compare').val(),
+                                operatorText    : $rule.find('.node-input-oversteer-compare option:selected').text(),
+                                thresholdType   : $rule.find('.node-input-oversteer-threshold').typedInput('type'),
+                                threshold       : $rule.find('.node-input-oversteer-threshold').typedInput('value'),
+                                blindPos        : {
+                                    type        : $rule.find('.node-input-oversteer-blindPos').typedInput('type'),
+                                    value       : $rule.find('.node-input-oversteer-blindPos').typedInput('value')
+                                },
+                                slatPos         : {
+                                    type        : $rule.find('.node-input-oversteer-slatPos').typedInput('type'),
+                                    value       : $rule.find('.node-input-oversteer-slatPos').typedInput('value')
+                                }
+                            };
+                            if (p.thresholdType === 'num' && p.threshold === '') {
+                                p.threshold = 0;
+                            }
+                            exprules.push(p);
+                        });
+                        console.log('export to clipboard', exprules); // eslint-disable-line no-console
+                        navigator.clipboard.writeText(JSON.stringify(exprules, null, '\t'));
+                    });
+
+                    const $btnOversteerImport = $('#node-oversteer-button-import');
+                    $btnOversteerImport.click(() => {
+                        navigator.clipboard.readText().then(
+                            clipText => {
+                                try {
+                                    const rules = JSON.parse(clipText);
+                                    console.log('import from clipboard', rules); // eslint-disable-line no-console
+                                    if (Array.isArray(rules)) {
+                                        for (let i = 0; i < rules.length; i++) {
+                                            const rule = rules[i];
+                                            if (typeof rule.mode === 'number' &&
+                                                typeof rule.valueType === 'string' &&
+                                                rule.blindPos && rule.slatPos && rule.blindPos.type && rule.slatPos.type) {
+                                                // rule.index = i;
+                                                $('#node-input-oversteer-container').editableList('addItem', rule);
+                                            }
+                                        }
+                                    }
+                                    resizeOversteerContainer();
+                                } catch (err) {
+                                    console.log(err.message); // eslint-disable-line no-console
+                                    console.log(err.stack); // eslint-disable-line no-console
+                                    alert(`Clipboard Data has wrong Format! (${err.message})`);
+                                }
+                            });
+                    });
+                    // #endregion oversteer Button
                     // #endregion oversteering
                     // #region result-container
                     /** resizes result container */
@@ -3001,6 +3075,7 @@
                 $('#node-input-oversteer-container').editableList('items').each(function(_i) {
                     const $rule = $(this);
                     const p = {
+                        mode            : parseInt($rule.find('.node-input-oversteer-mode').val()),
                         valueType       : $rule.find('.node-input-oversteer-value').typedInput('type'),
                         value           : $rule.find('.node-input-oversteer-value').typedInput('value'),
                         operator        : $rule.find('.node-input-oversteer-compare').val(),
@@ -3223,6 +3298,10 @@
     </div>
     <div class="form-row form-row-sunControlActive node-input-oversteer-container-row">
         <ol id="node-input-oversteer-container"></ol>
+        <button type="button" id="node-oversteer-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
+        <button type="button" id="node-oversteer-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
+        <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="blind-control.label.btnExport"></span></button>
+        <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="blind-control.label.btnImport"></span></button>
     </div>
     <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
         <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>

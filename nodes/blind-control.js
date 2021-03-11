@@ -98,7 +98,7 @@ module.exports = function (RED) {
         node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
         try {
             node.oversteer.isChecked = true;
-            return node.oversteers.find(el => node.positionConfig.comparePropValue(node, msg,
+            return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && node.positionConfig.comparePropValue(node, msg,
                 {
                     value: el.value,
                     type: el.valueType,
@@ -114,7 +114,7 @@ module.exports = function (RED) {
                     callback: (result, _obj) => {
                         return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
                     }
-                }, false, oNow.dNow));
+                }, false, oNow.dNow)));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
