@@ -542,7 +542,7 @@ module.exports = function (RED) {
                     }
                     break;
                 default:
-                    node.debug('initialize - default');
+                    // node.debug('initialize - default');
                     node.doSetStatus(node, 'green');
                     if (doEmit) {
                         node.emit('input', {
@@ -560,7 +560,7 @@ module.exports = function (RED) {
             if (!node.timeEndData) {
                 return null;
             }
-            node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.timeOutEndObj) {
                 clearTimeout(node.timeOutEndObj);
                 node.timeOutEndObj = null;
@@ -633,7 +633,7 @@ module.exports = function (RED) {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             const dNow = new Date();
             for (let i = 0; i < node.props.length; i++) {
-                node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                // node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
                 const res = node.positionConfig.getOutDataProp(this, msg, node.props[i], dNow);
                 if (res === null || (typeof res === 'undefined')) {
                     this.error('Could not evaluate ' + node.props[i].type + '.' + node.props[i].value + '. - Maybe settings outdated (open and save again)!');
@@ -642,7 +642,7 @@ module.exports = function (RED) {
                 } else {
                     node.positionConfig.setMessageProp(this, msg, node.props[i].outType, node.props[i].outValue, res);
                 }
-                node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
+                // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
             msg._srcid = node.id;
             msg._ts = dNow.valueOf();
@@ -689,7 +689,7 @@ module.exports = function (RED) {
          * @returns {object} state or error
          */
         node.doCreateStartTimeout = node => {
-            node.debug(`doCreateStartTimeout node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateStartTimeout node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.injType === tInj.none ||
                 node.injType === tInj.interval) {
                 return;
@@ -724,7 +724,7 @@ module.exports = function (RED) {
             node.timeStartData.now = new Date();
             const startLimit = node.getTimeLimitation(node.timeStartData.now);
             if (startLimit.valid) {
-                node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+                // node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
                 const nextStartTimeData = node.positionConfig.getTimeProp(node, {}, node.timeStartData);
                 if (nextStartTimeData.error) {
                     node.debug('node.nextStartTimeData=' + util.inspect(nextStartTimeData, { colors: true, compact: 10, breakLength: Infinity }));
@@ -737,12 +737,12 @@ module.exports = function (RED) {
 
                 if (node.timeStartAltData) {
                     node.timeStartAltData.now = node.timeStartData.now;
-                    node.debug(`node.timeStartAltData=${util.inspect(node.timeStartAltData, { colors: true, compact: 10, breakLength: Infinity })}`);
+                    // node.debug(`node.timeStartAltData=${util.inspect(node.timeStartAltData, { colors: true, compact: 10, breakLength: Infinity })}`);
                     const nextTimeAltData = node.positionConfig.getTimeProp(node, {}, node.timeStartAltData);
 
                     if (nextTimeAltData.error) {
                         isFixedTime = false;
-                        node.debug('nextTimeAltData=' + util.inspect(nextTimeAltData, { colors: true, compact: 10, breakLength: Infinity }));
+                        // node.debug('nextTimeAltData=' + util.inspect(nextTimeAltData, { colors: true, compact: 10, breakLength: Infinity }));
                         hlp.handleError(node, nextTimeAltData.error, null, 'could not evaluate alternate time');
                         return;
                     }

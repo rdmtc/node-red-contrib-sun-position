@@ -444,7 +444,7 @@ function validPosition(node, level, allowRound) {
  * initializes the node
  */
 function initializeCtrl(REDLib, node, config) {
-    node.debug('initialize ' + node.name + ' [' + node.id + ']');
+    node.debug(`initialize ${ node.name || node.id}`);
     RED = REDLib;
 
     const getName = (type, value) => {
