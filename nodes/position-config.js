@@ -18,7 +18,8 @@ const moonPhases = [{
     emoji: '🌚',
     code: ':new_moon_with_face:',
     name: 'New Moon',
-    weight: 1
+    weight: 1,
+    css: 'wi-moon-new'
 },
 {
     pos: 1,
@@ -26,7 +27,8 @@ const moonPhases = [{
     emoji: '🌒',
     code: ':waxing_crescent_moon:',
     name: 'Waxing Crescent',
-    weight: 6.3825
+    weight: 6.3825,
+    css: 'wi-moon-wax-cres'
 },
 {
     pos: 2,
@@ -34,7 +36,8 @@ const moonPhases = [{
     emoji: '🌓',
     code: ':first_quarter_moon:',
     name: 'First Quarter',
-    weight: 1
+    weight: 1,
+    css: 'wi-moon-first-quart'
 },
 {
     pos: 3,
@@ -42,7 +45,8 @@ const moonPhases = [{
     emoji: '🌔',
     code: ':waxing_gibbous_moon:',
     name: 'Waxing Gibbous',
-    weight: 6.3825
+    weight: 6.3825,
+    css: 'wi-moon-wax-gibb'
 },
 {
     pos: 4,
@@ -50,7 +54,8 @@ const moonPhases = [{
     emoji: '🌝',
     code: ':full_moon_with_face:',
     name: 'Full Moon',
-    weight: 1
+    weight: 1,
+    css: 'wi-moon-full'
 },
 {
     pos: 5,
@@ -58,7 +63,8 @@ const moonPhases = [{
     emoji: '🌖',
     code: ':waning_gibbous_moon:',
     name: 'Waning Gibbous',
-    weight: 6.3825
+    weight: 6.3825,
+    css: 'wi-moon-wan-gibb'
 },
 {
     pos: 6,
@@ -66,7 +72,8 @@ const moonPhases = [{
     emoji: '🌗',
     code: ':last_quarter_moon:',
     name: 'Last Quarter',
-    weight: 1
+    weight: 1,
+    css: 'wi-moon-third-quart'
 },
 {
     pos: 7,
@@ -74,7 +81,8 @@ const moonPhases = [{
     emoji: '🌘',
     code: ':waning_crescent_moon:',
     name: 'Waning Crescent',
-    weight: 6.3825
+    weight: 6.3825,
+    css: 'wi-moon-wan-cres'
 }];
 
 module.exports = function (RED) {

@@ -21,6 +21,7 @@ Warning: This Version could break existing flows. Please check your configuratio
 
 - general
   - added only even and only odd weeks
+  - added css property to moonPhases object an using css from [here](https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md)
 
 - time-inject
   - fixed error if only flow/global context is set #252
