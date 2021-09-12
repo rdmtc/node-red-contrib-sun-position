@@ -20,7 +20,9 @@
             "fewMonths": "ein paar Monate",
             "and":"und",
             "interval-amount":"feste Anzahl zwischen den Zeitpunkten",
-            "count":"Anzahl"
+            "interval-fromStart":"Interval von festem Zeitpunkt",
+            "count":"Anzahl",
+            "intervalStart":"beginnend von"
         },
         "placeholder": {
             "position": "Position",

@@ -743,11 +743,12 @@
                                 style: 'style="display:inline-block;'
                             }).appendTo($divSpecLimit);
                             const $divSpecLimits2 = $('<div/>').appendTo($divSpecLimits);
+                            const $divSpecLimits3 = $('<div/>').appendTo($divSpecLimits);
 
                             const $lblSL1 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
                                 .appendTo($divSpecLimits2);
                             const $cbOnlyEvenDays = $('<input/>', {
                                 type: 'checkbox',
@@ -758,9 +759,9 @@
                             $cbOnlyEvenDays.prop('checked', (prop.onlyEvenDays === 'true' || prop.onlyEvenDays === true));
 
                             const $lblSL2 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
                                 .appendTo($divSpecLimits2);
                             const $cbOnlyOddDays = $('<input/>', {
                                 type: 'checkbox',
@@ -771,10 +772,10 @@
                             $cbOnlyOddDays.prop('checked', (prop.onlyOddDays === 'true' || prop.onlyOddDays === true));
 
                             const $lblSL3 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
-                                .appendTo($divSpecLimits2);
+                                .appendTo($divSpecLimits3);
                             const $cbOnlyEvenWeeks = $('<input/>', {
                                 type: 'checkbox',
                                 class: 'node-input-prop-result-onlyEvenWeeks',
@@ -784,10 +785,10 @@
                             $cbOnlyEvenWeeks.prop('checked', (prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true));
 
                             const $lblSL4 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
-                                .appendTo($divSpecLimits2);
+                                .appendTo($divSpecLimits3);
                             const $cbOnlyOddWeeks = $('<input/>', {
                                 type: 'checkbox',
                                 class: 'node-input-prop-result-onlyOddWeeks',
@@ -795,7 +796,6 @@
                             }).appendTo($lblSL4);
                             $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks')).appendTo($lblSL2);
                             $cbOnlyOddWeeks.prop('checked', (prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true));
-
                             // row4 - 3 - Month selection
                             const $divMnMonth = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
@@ -815,7 +815,7 @@
                                     title: node._('node-red-contrib-sun-position/position-config:common.months.' + m)
                                 })
                                     .css('width', 'calc(16% - 6px)') // (100% / 7 = 14%) - (30 px / 7 = 6px)
-                                    .appendTo((m > 5) ? $divMonths2 : $divMonths3);
+                                    .appendTo((m > 5) ? $divMonths3 : $divMonths2);
                                 const $cb = $('<input/>', {
                                     type: 'checkbox',
                                     class: 'node-input-prop-result-month-' + m,
@@ -1034,8 +1034,8 @@
                         fT: prop.find('.node-input-prop-result-FormatSel option:selected').text(),
                         fI: prop.find('.node-input-prop-result-FormatIp').val(),
                         next: prop.find('.node-input-prop-result-Next').is(':checked'),
-                        days: getCheckboxesStr(prop.find('#node-input-prop-result-Days input[type=checkbox]:checked'), 7),
-                        months: getCheckboxesStr(prop.find('#node-input-prop-result-Months input[type=checkbox]:checked'), 12),
+                        days: getCheckboxesStr(prop.find('.node-input-prop-result-days input[type=checkbox]:checked'), 7),
+                        months: getCheckboxesStr(prop.find('.node-input-prop-result-months input[type=checkbox]:checked'), 12),
                         onlyEvenDays: prop.find('.node-input-prop-result-onlyEvenDays').is(':checked'),
                         onlyOddDays: prop.find('.node-input-prop-result-onlyOddDays').is(':checked'),
                         onlyEvenWeeks: prop.find('.node-input-prop-result-onlyEvenWeeks').is(':checked'),

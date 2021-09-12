@@ -20,7 +20,9 @@
             "fewDays": "few days",
             "fewMonths": "few months",
             "interval-amount":"fixed number between time",
-            "count":"Count"
+            "interval-fromStart":"Interval from defined start",
+            "count":"Count",
+            "fromStart":"start from"
         },
         "placeholder": {
             "position": "Position",
@@ -29,6 +31,8 @@
             "property": "Property",
             "propertyThreshold": "Threshold",
             "payload": "payload data of the send message",
+            "intervalCount":"",
+            "intervalStart":"",
             "time": "time for inject",
             "timeOffset": "offset of time",
             "timeAlt": "alternate time",

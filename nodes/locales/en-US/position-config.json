@@ -3,6 +3,7 @@
         "label": {
             "positionConfig": "configuration",
             "infoText":"The configuration must be created and deployed for the settings page to work properly.",
+            "loadingInfo":"loading data...",
             "binary": "binary",
             "json": "json",
             "jsonata": "json expr.",
@@ -328,6 +329,14 @@
             "contain": "contain",
             "containSome": "containSome",
             "containEvery": "containEvery"
+        },
+        "units": {
+            "ms": "ms",
+            "sec": "s",
+            "min": "min",
+            "hour": "h",
+            "day": "days",
+            "week": "weeks"
         }
     },
     "ruleCtrl": {

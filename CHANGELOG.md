@@ -25,6 +25,12 @@ Warning: This Version could break existing flows. Please check your configuratio
 
 - time-inject
   - fixed error if only flow/global context is set #252
+  - fixed missing interval multiplier
+  - added possibility for inject special values from config menu like default inject node
+  - reworked simple interval (only simple interval)
+    - added start timestamp
+    - added selection for interval of days and weeks #313
+    - added possibility to setup interval greater than 24.9 days (2147483647 - 32bit integer limit of NodeJs)
 
 - blind-control + clock-time
   - added possibility to copy rules to clipboard and paste rules from clipboard
