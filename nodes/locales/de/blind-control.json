@@ -129,7 +129,7 @@
 			"blindLevelDefault": "Wenn keine Regel zutrifft, wird die aktuelle Rollladenposition genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
 			"overwrite": "manuelles Überschreiben der Rollladenposition",
 			"sunControlNotActive": "Nur Regelbasiert",
-			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden.",
+			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der heir eingestellte Modus der maximal wählbare Modus. Der über eine nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",
 			"windowAzimuth": "Darstellung der Ausrichtung des Fensters zum geografischen Norden (in Grad), wenn die Sonne in das Fenster fällt (Sonnenrichtung/Azimuth).",
 			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters",
 			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Sonnenwinkel oder Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.). Hiermit kann auch eine minimale oder maximaler Höhenwinkel definiert werden, wenn Berge/Gebäude, etc das Fenster verdecken.",

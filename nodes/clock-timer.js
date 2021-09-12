@@ -92,6 +92,7 @@ module.exports = function (RED) {
                 node.nodeData.overwrite.importance = nImportance;
             }
             node.nodeData.overwrite.active = true;
+            node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
         } else if (node.nodeData.overwrite.active) {
             node.debug(`overwrite active, check of nImportance=${nImportance} or nExpire=${nExpire}`);
             if (Number.isFinite(nExpire)) {
@@ -103,6 +104,7 @@ module.exports = function (RED) {
                 // set to new importance
                 node.nodeData.overwrite.importance = nImportance;
             }
+            node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
         }
         // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}; expire=${nExpire}`);
         return ctrlLib.setOverwriteReason(node);
@@ -300,9 +302,8 @@ module.exports = function (RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : config.autoTriggerTime || 20 * 60000 // 20min
+                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000 // 20min
             };
-            node.autoTriggerObj = null;
         }
 
         node.nowarn = {};
@@ -325,12 +326,12 @@ module.exports = function (RED) {
             addId: config.addId,
             addIdType: config.addIdType||'none',
             /** The override settings */
-            overwrite: {
+            overwrite: node.context().get('overwrite', node.storeName) || {
                 active: false,
-                expireDuration: parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN)),
                 importance: 0
             }
         };
+        node.nodeData.overwrite.expireDuration = parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN));
 
         node.rules = {
             data: config.rules || []
@@ -406,7 +407,7 @@ module.exports = function (RED) {
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseFloat(msg.payload) || node.autoTrigger.defaultTime;
+                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime;
                             break;
                         case 'setStoreName':
                             node.storeName = msg.payload || node.storeName;
@@ -542,13 +543,14 @@ module.exports = function (RED) {
                 node.previousData.usedRule = ruleId;
                 node.context().set('cacheData', tempData, node.storeName);
                 if (node.autoTrigger) {
-                    node.debug('------------- autoTrigger ---------------- ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
+                    node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
                         clearTimeout(node.autoTriggerObj);
-                        node.autoTriggerObj = null;
+                        delete node.autoTriggerObj;
                     }
                     node.autoTriggerObj = setTimeout(() => {
                         clearTimeout(node.autoTriggerObj);
+                        delete node.autoTriggerObj;
                         node.emit('input', {
                             topic: 'autoTrigger/triggerOnly',
                             payload: 'triggerOnly',
@@ -573,7 +575,7 @@ module.exports = function (RED) {
         this.on('close', () => {
             if (node.autoTriggerObj) {
                 clearTimeout(node.autoTriggerObj);
-                node.autoTriggerObj = null;
+                delete node.autoTriggerObj;
             }
             // tidy up any state
         });

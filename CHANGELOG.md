@@ -41,6 +41,9 @@ Warning: This Version could break existing flows. Please check your configuratio
     - added as rule condition operator - usable in subFlows
   - No more messages are sent at the first output if the rule has changed but the payload (level/slat) has remained the same.
     - A message will be sent if the topic has changed.
+  - overwrite will be written to node context and restored on recreation - allows overwrite be stable on deploy #300
+  - blind-control: per message set mode will be written to node context and to thus this will be stable on deploy
+    - needs to delete values of context on change
 
 - blind-control only
   - redesigned oversteer, now unlimited oversteer can defined

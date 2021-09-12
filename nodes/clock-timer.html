@@ -1004,6 +1004,7 @@
                     const $btnAdd = $('#node-button-add');
                     $btnAdd.click(() => {
                         $('#node-input-rule-container').editableList('addItem', {});
+                        resizeRuleContainerCheck();
                     });
 
                     const $btnClear = $('#node-button-clear');
@@ -1058,7 +1059,8 @@
                         $('#node-input-rule-container').editableList('items').each(function (_i) {
                             const rule = $(this);
                             const data = JSON.parse(rule.data('ruleData'));
-                            data.index= _i;
+                            delete data.description; // will causte trouble
+                            data.index = _i;
                             rules.push(data);
                         });
                         console.log('export to clipboard', rules); // eslint-disable-line no-console
@@ -1075,10 +1077,8 @@
                                     if (Array.isArray(rules)) {
                                         for (let i = 0; i < rules.length; i++) {
                                             const rule = rules[i];
-                                            if (typeof rule.description === 'string' &&
-                                                typeof rule.name === 'string' &&
+                                            if (typeof rule.name === 'string' &&
                                                 rule.version) {
-                                                // rule.index = i;
                                                 $('#node-input-rule-container').editableList('addItem', rule);
                                             }
                                         }

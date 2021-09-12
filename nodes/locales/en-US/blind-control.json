@@ -131,7 +131,7 @@
 			"blindLevelDefault": "if no rule matches the following position will be used, On sun light restriction this is the blind level wenn sun is not in the window.",
 			"overwrite": "manual overwrite of the blind position",
 			"sunControlNotActive": "Only rule control",
-			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.",
+			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.<br><br>The mode can be changed with an incomming message. Then this is the maximum possible mode which can selected. The value of the incomming message will be stored in the node's context and will persists a deploy.",
 			"windowAzimuth": "representing the orientation of the window to geographical north (in degrees) when the sun falls into the window (sun azimuth).",
 			"windowPos": "window settings, measurement from the floor to bottom and top of the window covered by the blind",
 			"oversteer": "allows to oversteer the position depending on the sun under defined condition such as elevation, weather (for example sky covered by clouds, lighting, ...) This can also be used to define a minimum or maximum elevation angle if mountains / buildings, etc. cover the window.",

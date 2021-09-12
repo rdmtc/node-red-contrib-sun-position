@@ -1346,7 +1346,8 @@
                         $('#node-input-rule-container').editableList('items').each(function (_i) {
                             const rule = $(this);
                             const data = JSON.parse(rule.data('ruleData'));
-                            data.index= _i;
+                            delete data.description; // will causte trouble
+                            data.index = _i;
                             rules.push(data);
                         });
                         console.log('export to clipboard', rules); // eslint-disable-line no-console
@@ -1363,10 +1364,8 @@
                                     if (Array.isArray(rules)) {
                                         for (let i = 0; i < rules.length; i++) {
                                             const rule = rules[i];
-                                            if (typeof rule.description === 'string' &&
-                                                typeof rule.name === 'string' &&
+                                            if (typeof rule.name === 'string' &&
                                                 rule.version) {
-                                                // rule.index = i;
                                                 $('#node-input-rule-container').editableList('addItem', rule);
                                             }
                                         }
@@ -3201,7 +3200,6 @@
     <hr>
     <!-- sun ######################################################################## -->
     <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span>
         <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.sunControlMode">
