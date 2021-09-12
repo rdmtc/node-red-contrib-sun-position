@@ -102,7 +102,7 @@ function getSelectFields() { // eslint-disable-line no-unused-vars
             {id: 60000, group: 'default', label: 'minutes'},
             {id: 3600000, group: 'default', label: 'hours'},
             {id: 86400000, group: 'default', label: 'days'},
-            // {id: 604800000, group: 'other', label: 'weeks'}, //maximum is 2147483647
+            {id: 604800000, group: 'other', label: 'weeks'}, // maximum is 2147483647 - 24 Tage!
             {id: -1, group: 'other', label: 'month'},
             {id: -2, group: 'other', label: 'year'}
         ], comparatorGroups: [
@@ -1117,7 +1117,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    // console.log('[IN getBackendData] ',data);  // eslint-disable-line
+    // console.log('[IN getBackendData] ',data);
     const res = {
         value:'',
         useful: false

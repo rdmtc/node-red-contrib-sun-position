@@ -216,12 +216,12 @@ module.exports = function (RED) {
             let result;
             const dayId = hlp.getDayId(dNow); // this._getUTCDayId(dNow);
             if (latitude && longitude) {
-                result = Object.assign({},sunCalc.getSunTimes(dNow.valueOf(), latitude, longitude)[value]);
+                result = Object.assign({},sunCalc.getSunTimes(dNow.getTime(), latitude, longitude)[value]);
             } else {
                 latitude = this.latitude;
                 longitude = this.longitude;
                 this._sunTimesCheck(); // refresh if needed, get dayId
-                // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} dNow=${dNow} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })} today=${util.inspect(today, { colors: true, compact: 10, breakLength: Infinity })}`);
+                // this.debug(`getSunTimeByName value=${value} offset=${offset} multiplier=${multiplier} dNow=${dNow} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })}`);
                 if (dayId === this.cache.sunTimesToday.dayId) {
                     result = Object.assign({}, this.cache.sunTimesToday.times[value]); // needed for a object copy
                 } else if (dayId === this.cache.sunTimesTomorrow.dayId) {
@@ -231,14 +231,14 @@ module.exports = function (RED) {
                 } else if (dayId === this.cache.sunTimesAdd2.dayId) {
                     result = Object.assign({},this.cache.sunTimesAdd2.times[value]); // needed for a object copy
                 } else {
-                    this.debug('sun-time not in cache - calc time');
+                    // this.debug('sun-time not in cache - calc time');
                     this.cache.sunTimesAdd2 = {
                         dayId: this.cache.sunTimesAdd1.dayId,
                         times: this.cache.sunTimesAdd1.times
                     };
                     this.cache.sunTimesAdd1 = {
                         dayId,
-                        times : sunCalc.getSunTimes(dNow.valueOf(), latitude, longitude)
+                        times : sunCalc.getSunTimes(dNow.getTime(), latitude, longitude)
                     };
                     result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
                 }
@@ -250,14 +250,13 @@ module.exports = function (RED) {
                     result = Object.assign({}, this.cache.sunTimesTomorrow.times[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
-                const datebase = new Date(dNow);
+                const dateBase = new Date(dNow);
                 while (result.value.getTime() <= dNow.getTime()) {
-                    datebase.setUTCDate(datebase.getUTCDate() + 1);
-                    result = Object.assign(result, sunCalc.getSunTimes(datebase.valueOf(), latitude, longitude)[value]);
+                    dateBase.setUTCDate(dateBase.getUTCDate() + 1);
+                    result = Object.assign(result, sunCalc.getSunTimes(dateBase.getTime(), latitude, longitude)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
             }
-
             const r = hlp.limitDate(limit, result.value);
             if (r.error) {
                 result.error = r.error;
@@ -1609,7 +1608,6 @@ module.exports = function (RED) {
     });
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
-        // console.log('RED.httpAdmin.get', req.query.config);
         if (req.query.config && req.query.config !== '_ADD_') {
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
@@ -1639,6 +1637,8 @@ module.exports = function (RED) {
                     res.status(400).send(JSON.stringify(obj, Object.getOwnPropertyNames(obj)));
                 }
             } catch(err) {
+                console.log('RED.httpAdmin.get data ERR'); // eslint-disable-line no-console
+                console.log(err); // eslint-disable-line no-console
                 obj.value = NaN;
                 obj.useful = false;
                 obj.error = err.message;
