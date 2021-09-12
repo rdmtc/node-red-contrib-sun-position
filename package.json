@@ -107,10 +107,10 @@
     }
   },
   "devDependencies": {
-    "eslint": "^7.21.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-html": "^6.1.2",
-    "eslint-plugin-jsdoc": "^32.2.0",
-    "eslint-plugin-json": "^2.1.2",
+    "eslint-plugin-jsdoc": "^36.1.0",
+    "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-node": "^11.1.0"
   },
   "disabledSettings": {
