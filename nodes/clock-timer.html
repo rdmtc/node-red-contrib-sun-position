@@ -355,6 +355,7 @@
                             'bin',
                             'env',
                             'jsonata',
+                            types.randomNumber,
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
@@ -422,7 +423,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.payloadDefaultOffset === 0 || node.payloadDefaultOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env'],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumberCached],
                         onChange(_type, _value) {
                             const type = $('#node-input-payloadDefaultOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1182,6 +1183,7 @@
                                         'flow',
                                         'global',
                                         'jsonata',
+                                        types.randomNumber,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -1553,7 +1555,7 @@
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1579,7 +1581,7 @@
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1605,7 +1607,7 @@
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1665,6 +1667,7 @@
                             'bin',
                             'env',
                             'jsonata',
+                            types.randomNumber,
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
@@ -1695,7 +1698,7 @@
                     const $dialogPayloadOffset = $dialog.find('#dlg-ip-btctl-rule-payloadOffset');
                     $dialogPayloadOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => { $dialogPayload.change(); });
                     $dialogPayloadOffset.typedInput('width', '40%');
 

@@ -14,6 +14,8 @@ const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
 const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
 const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
+const cWinterMode = 1;
+const cSummerMode = 2;
 /******************************************************************************************/
 /**
  * get the absolute level from percentage level
@@ -322,10 +324,9 @@ module.exports = function (RED) {
             }
         }
 
-        const winterMode = 1;
         // const summerMode = 2;
         if (!sunPosition.InWindow) {
-            if (node.sunData.mode === winterMode) {
+            if (node.sunData.mode === cWinterMode) {
                 node.level.current = node.nodeData.levelMin;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
@@ -360,7 +361,7 @@ module.exports = function (RED) {
             sunPosition.oversteerAll = node.oversteers;
         }
 
-        if (node.sunData.mode === winterMode) {
+        if (node.sunData.mode === cWinterMode) {
             node.level.current = node.nodeData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current);
             node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
@@ -940,8 +941,14 @@ module.exports = function (RED) {
             } else if (code === 1 || code === 8) {
                 fill = 'green'; // not in window or oversteerExceeded
             }
+            let modeSign = '';
+            if (node.sunData.mode === cWinterMode) {
+                modeSign = '❆ ';
+            } else if (node.sunData.mode === cSummerMode) {
+                modeSign = '☀ ';
+            }
 
-            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + node.reason.state;
+            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + modeSign + node.reason.state;
             node.status({
                 fill,
                 shape,

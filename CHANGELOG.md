@@ -22,6 +22,8 @@ Warning: This Version could break existing flows. Please check your configuratio
 - general
   - added only even and only odd weeks
   - added css property to moonPhases object an using css from [here](https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md)
+  - for offset values of a random number a cached value will be used which will be only generated once per day. #302
+  - selection of random number is available in more places
 
 - time-inject
   - fixed error if only flow/global context is set #252
@@ -42,8 +44,6 @@ Warning: This Version could break existing flows. Please check your configuratio
   - No more messages are sent at the first output if the rule has changed but the payload (level/slat) has remained the same.
     - A message will be sent if the topic has changed.
   - overwrite will be written to node context and restored on recreation - allows overwrite be stable on deploy #300
-  - blind-control: per message set mode will be written to node context and to thus this will be stable on deploy
-    - needs to delete values of context on change
 
 - blind-control only
   - redesigned oversteer, now unlimited oversteer can defined
@@ -52,6 +52,10 @@ Warning: This Version could break existing flows. Please check your configuratio
     - for functionality the downward compatibility is given by automatic adoption of the setting as new first oversteer, which has the same effect.
     - no longer specific output of the reason (instead of "below the minimum elevation angle" will output "oversteer 1")
   - window settings as typedInput, which allow to use from flow, global context or environment - node can better used in a subFlow
+  - per message set mode will be written to node context and to thus this will be stable on deploy
+    - needs to delete values of context on change
+  - current mode will no longer part of the node label/name, it will be displayed in the node state #321
+
 
 #### 1.2.4: maintenance + critical bugfix
 

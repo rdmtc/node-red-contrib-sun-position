@@ -266,7 +266,7 @@
                         valueProp: 'operand1Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand1Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -357,7 +357,7 @@
                         valueProp: 'operand2Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand2Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -646,7 +646,7 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached]
                                 });
                             setTInputValue($offset, prop.o, prop.oT);
 
@@ -666,7 +666,7 @@
                                 valueProp: 'result1Offset',
                                 width: 'calc(100% - 265px)',
                                 defaultType: types.Undefined.value,
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
                                 onChange(_type, _value) {
                                     const type = $('#node-input-result1Offset').typedInput('type');
                                     if (type === types.Undefined.value) {

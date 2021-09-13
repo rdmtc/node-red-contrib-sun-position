@@ -226,7 +226,7 @@
                         valueProp: 'inputOffset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
                         onChange(_type, _value) {
                             const type = $('#node-input-inputOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -372,7 +372,7 @@
                                 value: (data.offsetValue || '')
                             }).appendTo($row3).typedInput({
                                 default: (data.offsetType || types.Undefined.value),
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global']
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', types.randomNumberCached]
                             });
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-rule-multiplier',
@@ -615,7 +615,7 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached]
                                 });
                             setTInputValue($offset, prop.o,  prop.oT);
 

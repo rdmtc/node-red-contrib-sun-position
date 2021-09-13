@@ -1102,12 +1102,19 @@ module.exports = function (RED) {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
+            } else if (data.type === 'randomNumCached') {
+                data.value = parseFloat(data.value);
+                if (!_srcNode.randomNumberCache || _srcNode.randomNumberCache.day !== dNow.getDate()) {
+                    _srcNode.randomNumberCache = {
+                        day : dNow.getDate()
+                    };
+                }
+                if (isNaN(_srcNode.randomNumberCache[data.value])) {
+                    _srcNode.randomNumberCache[data.value] = Math.random() * ((data.value || 60) + 1);
+                }
+                return _srcNode.randomNumberCache[data.value];
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
-                /*
-                if (data.value < 0) {
-                    return (Math.random() * Math.abs(data.value || 60));
-                } */
                 return Math.random() * ((data.value || 60) + 1);
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {

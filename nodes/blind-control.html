@@ -409,15 +409,11 @@
                 return lab || '?';
             },
             label() {
-                let suffix = '';
+                const suffix = '';
+                /*
                 if (this.rules && (this.rules.length >0)) {
                     suffix += '⏲';
-                }
-                if (Number(this.sunControlMode) === 2) {
-                    suffix += '☀';
-                } else if (Number(this.sunControlMode) === 1) {
-                    suffix += '☃';
-                }
+                } */
                 if (this.name) {
                     return this.name+' '+suffix;
                 }
@@ -649,7 +645,8 @@
                             'json',
                             'bin',
                             'env',
-                            'jsonata'
+                            'jsonata',
+                            types.randomNumberCached
                         ]
                     });
 
@@ -1611,7 +1608,8 @@
                                         'json',
                                         'bin',
                                         'env',
-                                        'jsonata'
+                                        'jsonata',
+                                        types.randomNumberCached
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
@@ -1938,6 +1936,7 @@
                                         'flow',
                                         'global',
                                         'jsonata',
+                                        types.randomNumber,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -2310,7 +2309,7 @@
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2336,7 +2335,7 @@
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2362,7 +2361,7 @@
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2452,7 +2451,8 @@
                             'json',
                             'bin',
                             'env',
-                            'jsonata'
+                            'jsonata',
+                            types.randomNumberCached
                         ]
                     });
                     $dialogSlat.typedInput('width', '50%');
