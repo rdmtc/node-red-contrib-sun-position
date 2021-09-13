@@ -2759,7 +2759,7 @@
                             if (data.timeMin) {
                                 $dialogTimeMinMultiplier.val(data.timeMin.multiplier || 60000);
                                 setTInputValue($dialogTimeMinInput, data.timeMin.value, data.timeMin.type);
-                                setTInputValue($dialogTimeMinOffset, data.offset, data.offsetType);
+                                setTInputValue($dialogTimeMinOffset, data.timeMin.offset, data.timeMin.offsetType);
                             } else {
                                 setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
                                 setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
@@ -2768,7 +2768,7 @@
                             if (data.timeMax) {
                                 $dialogTimeMaxMultiplier.val(data.timeMax.multiplier || 60000);
                                 setTInputValue($dialogTimeMaxInput, data.timeMax.value, data.timeMax.type);
-                                setTInputValue($dialogTimeMaxOffset, data.offset, data.offsetType);
+                                setTInputValue($dialogTimeMaxOffset, data.timeMax.offset, data.timeMax.offsetType);
                             } else {
                                 setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
                                 setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
