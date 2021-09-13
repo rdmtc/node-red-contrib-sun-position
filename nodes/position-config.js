@@ -118,7 +118,8 @@ module.exports = function (RED) {
                     sunTimesAdd1: {},
                     sunTimesAdd2: {},
                     moonTimesToday: {},
-                    moonTimesTomorrow: {}
+                    moonTimesTomorrow: {},
+                    moonTimes2Days: {}
                 };
 
                 if (isNaN(this.tzOffset) || this.tzOffset > 99 || this.tzOffset < -99) {
@@ -513,23 +514,25 @@ module.exports = function (RED) {
         */
         getMoonTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude) {
             const result = {};
-            const datebase = new Date(dNow);
+            const dateBase = new Date(dNow);
             const dayId = hlp.getDayId(dNow); // this._getUTCDayId(dNow);
             if (latitude && longitude) {
-                result.value = sunCalc.getMoonTimes(dNow.valueOf(), latitude, longitude)[value];
+                result.value = sunCalc.getMoonTimes(dNow.getTime(), latitude, longitude)[value];
             } else {
                 latitude = this.latitude;
                 longitude = this.longitude;
 
                 this._moonTimesCheck(); // refresh if needed, get dayId
-                // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} next=${next} days=${days} dNow=${dNow} dayId=${dayId} today=${today}`);
+                // this.debug(`getMoonTimeByName value=${value} offset=${offset} multiplier=${multiplier} dNow=${dNow} dayId=${dayId} limit=${util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity })}`);
 
                 if (dayId === this.cache.moonTimesToday.dayId) {
                     result.value = this.cache.moonTimesToday.times[value]; // needed for a object copy
                 } else if (dayId === this.cache.moonTimesTomorrow.dayId) {
                     result.value = this.cache.moonTimesTomorrow.times[value]; // needed for a object copy
+                } else if (dayId === this.cache.moonTimes2Days.dayId) {
+                    result.value = this.cache.moonTimes2Days.times[value]; // needed for a object copy
                 } else {
-                    result.value = sunCalc.getMoonTimes(dNow.valueOf(), this.latitude, this.longitude)[value]; // needed for a object copy
+                    result.value = sunCalc.getMoonTimes(dNow.getTime(), this.latitude, this.longitude)[value]; // needed for a object copy
                 }
             }
             if (hlp.isValidDate(result.value)) {
@@ -538,22 +541,24 @@ module.exports = function (RED) {
                     if (dayId === this.cache.moonTimesToday.dayId) {
                         result.value = this.cache.moonTimesTomorrow.times[value];
                         result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
+                    } else if (dayId === this.cache.moonTimesTomorrow.dayId) {
+                        result.value = this.cache.moonTimes2Days.times[value];
+                        result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                     }
                     while (hlp.isValidDate(result.value) && result.value.getTime() <= dNow.getTime()) {
-                        datebase.setUTCDate(datebase.getUTCDate() + 1);
-                        result.value = sunCalc.getMoonTimes(datebase.valueOf(), latitude, longitude)[value];
+                        dateBase.setUTCDate(dateBase.getUTCDate() + 1);
+                        result.value = sunCalc.getMoonTimes(dateBase.getTime(), latitude, longitude)[value];
                         result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                     }
                 }
             }
-
             while (!hlp.isValidDate(result.value)) {
-                datebase.setUTCDate(datebase.getUTCDate() + 1);
-                result.value = sunCalc.getMoonTimes(datebase.valueOf(), latitude, longitude)[value];
+                dateBase.setUTCDate(dateBase.getUTCDate() + 1);
+                result.value = sunCalc.getMoonTimes(dateBase.getTime(), latitude, longitude)[value];
             }
             result.value = new Date(result.value.getTime());
 
-            const r = hlp.limitDate(limit, result);
+            const r = hlp.limitDate(limit, result.value);
             if (r.error) {
                 result.error = r.error;
             } else {
@@ -683,7 +688,7 @@ module.exports = function (RED) {
          * @returns {*} output Data
          */
         getOutDataProp(_srcNode, msg, data, dNow, noError, replaceObject) {
-            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
+            _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
             dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
 
             let result = null;
@@ -703,6 +708,7 @@ module.exports = function (RED) {
                 } else if (data.type === 'pdmTime') { // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError, dNow);
                     result = this.getMoonTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
+                    _srcNode.debug(`getMoonTimeByName data=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 }
                 if (result && result.value && !result.error) {
                     return hlp.getFormattedDateOut(result.value, data.format, (this.tzOffset === 0), this.tzOffset);
@@ -1467,12 +1473,18 @@ module.exports = function (RED) {
             const dayId = hlp.getDayId(date);
             if (cacheEnabled && dayId === this.cache.moonTimesToday.dayId) {
                 result.times = this.cache.moonTimesToday.times;
+                result.timesNext = this.cache.moonTimesTomorrow.times;
                 result.positionAtRise = this.cache.moonTimesToday.positionAtRise;
                 result.positionAtSet = this.cache.moonTimesToday.positionAtSet;
             } else if (cacheEnabled && dayId === this.cache.moonTimesTomorrow.dayId) {
                 result.times = this.cache.moonTimesTomorrow.times;
+                result.timesNext = this.cache.moonTimes2Days.times;
                 result.positionAtRise = this.cache.moonTimesTomorrow.positionAtRise;
                 result.positionAtSet = this.cache.moonTimesTomorrow.positionAtSet;
+            } else if (cacheEnabled && dayId === this.cache.moonTimes2Days.dayId) {
+                result.times = this.cache.moonTimes2Days.times;
+                result.positionAtRise = this.cache.moonTimes2Days.positionAtRise;
+                result.positionAtSet = this.cache.moonTimes2Days.positionAtSet;
             } else {
                 result.times = sunCalc.getMoonTimes(date.valueOf(), specLatitude, specLongitude);
             }
@@ -1577,15 +1589,19 @@ module.exports = function (RED) {
             this._checkCoordinates();
 
             if (this.cache.moonTimesToday.dayId === (dayId + 1)) {
+                this.cache.moonTimesTomorrow.dayId = this.cache.moonTimes2Days.dayId;
+                this.cache.moonTimesTomorrow.times = this.cache.moonTimes2Days.times;
                 this.cache.moonTimesToday.dayId = this.cache.moonTimesTomorrow.dayId;
                 this.cache.moonTimesToday.times = this.cache.moonTimesTomorrow.times;
-                this.cache.moonTimesTomorrow = {};
+                this.cache.moonTimes2Days = {};
             } else {
                 this.cache.moonTimesToday.dayId = dayId;
                 this.cache.moonTimesToday.times = sunCalc.getMoonTimes(todayValue, this.latitude, this.longitude);
+                this.cache.moonTimesTomorrow.times = sunCalc.getMoonTimes(todayValue + dayMs, this.latitude, this.longitude);
+                this.cache.moonTimesTomorrow.dayId = (dayId + 1);
             }
-            this.cache.moonTimesTomorrow.times = sunCalc.getMoonTimes(todayValue + dayMs, this.latitude, this.longitude);
-            this.cache.moonTimesTomorrow.dayId = (dayId + 1);
+            this.cache.moonTimes2Days.times = sunCalc.getMoonTimes(todayValue + dayMs + dayMs, this.latitude, this.longitude);
+            this.cache.moonTimes2Days.dayId = (dayId + 2);
         }
 
         _moonTimesCheck(force) {

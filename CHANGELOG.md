@@ -57,6 +57,9 @@ Warning: This Version could break existing flows. Please check your configuratio
   - current mode will no longer part of the node label/name, it will be displayed in the node state #321
 
 
+- moon-position
+  - moon times will now be has additional property `timesNext` with the values for the times of the next day #307
+
 #### 1.2.4: maintenance + critical bugfix
 
 - time-span
