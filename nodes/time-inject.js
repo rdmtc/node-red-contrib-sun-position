@@ -22,7 +22,7 @@ module.exports = function (RED) {
          * @returns {object} the nw property object
          */
         function prepareProps(node, props) {
-            let outProps = [];
+            const outProps = [];
             props.forEach( prop => {
                 const propNew = {
                     outType     : prop.pt,
@@ -637,7 +637,7 @@ module.exports = function (RED) {
             }
         };
 
-        node.getTimeUnit = (mstime) => {
+        node.getTimeUnit = mstime => {
             if (mstime === 604800000) {
                 return RED._('node-red-contrib-sun-position/position-config:common.units.week');
             } else if (mstime === 86400000) {
@@ -650,7 +650,7 @@ module.exports = function (RED) {
                 return RED._('node-red-contrib-sun-position/position-config:common.units.sec');
             }
             return RED._('node-red-contrib-sun-position/position-config:common.units.ms');
-        }
+        };
 
         /**
          * Recalculate the Interval
@@ -659,10 +659,10 @@ module.exports = function (RED) {
             node.getIntervalTime();
             clearInterval(node.intervalObj);
             const dNow = (new Date()).valueOf();
-            let diff = Math.abs(dNow - node.intervalStart.valueOf());
-            let ivCount = Math.trunc(diff / node.intervalTime) + 1;
-            let tsStart = node.intervalStart.valueOf() + (node.intervalTime * ivCount); //Start Timestamp
-            let millisec = tsStart - dNow;
+            const diff = Math.abs(dNow - node.intervalStart.valueOf());
+            const ivCount = Math.trunc(diff / node.intervalTime) + 1;
+            const tsStart = node.intervalStart.valueOf() + (node.intervalTime * ivCount); // Start Timestamp
+            const millisec = tsStart - dNow;
             node.debug(`createNextInterval start=${node.intervalStart}; interval=${node.intervalTime}; diff=${diff}; ivCount=${ivCount}; tsStart=${tsStart}; millisec=${millisec}`);
 
             if (millisec > 2147483647) {
@@ -680,11 +680,11 @@ module.exports = function (RED) {
                     node.intervalObj = setInterval(() => {
                         node.send(node.prepOutMsg({ type: 'interval' }));
                     }, node.intervalTime);
-                    if (node.intervalTime > 43200000) { //12h
+                    if (node.intervalTime > 43200000) { // 12h
                         node.status({
                             text: '↻' + (node.intervalTime / 3600000).toFixed(1) + 'h'
                         });
-                    } else if (node.intervalTime > 3600000) { //1h
+                    } else if (node.intervalTime > 3600000) { // 1h
                         node.status({
                             text: '↻' + (node.intervalTime / 60000).toFixed(2) + 'min'
                         });
@@ -695,7 +695,7 @@ module.exports = function (RED) {
                         /*
                         node.status({
                             text: '↻' + Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10 + 's'
-                        });*/
+                        }); */
                     }
                 } else {
                     node.createNextInterval();
@@ -1107,9 +1107,6 @@ module.exports = function (RED) {
     };
 
     RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req, res) => {
-        console.log('RED.httpAdmin.post');
-        console.log(req.params);
-        console.log(req.body);
         const node = RED.nodes.getNode(req.params.id);
         if (node !== null && typeof node !== 'undefined') {
             try {
