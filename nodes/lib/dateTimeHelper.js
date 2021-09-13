@@ -1353,7 +1353,12 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     }
     format = format || 0;
     if (date.value) { date = date.value; }
-    if (!(date instanceof Date)) { date = Date(date); }
+    if (!(date instanceof Date)) {
+        date = Date(date);
+        if (!isValidDate(date)) {
+            throw new Error(`given Date is not a valid Date!!`);
+        }
+    }
 
     if (isNaN(format)) {
         return _dateFormat(date, String(format), utc, timeZoneOffset);
