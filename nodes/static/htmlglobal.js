@@ -303,7 +303,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         randomNumberCached: {
             value: 'randomNumCached:',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumberCached','randomNumberCached'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             validate: RED.validators.number()

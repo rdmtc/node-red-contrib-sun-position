@@ -42,6 +42,7 @@
             "timesunnow": "next sun time",
             "timemoon":"moon time",
             "randomNumber":"random number",
+            "randomNumberCached":"random number (once a day)",
             "numPercent":"number in percent %",
             "suncalc":"sun calculation",
             "suninsky":"sun in the sky (percent)",

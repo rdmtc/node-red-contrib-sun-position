@@ -545,7 +545,10 @@
                                 .typedInput({
                                     default: 'input',
                                     types: [
-                                        { value: 'input', label: 'Input value', hasValue: false },
+                                        { value: 'input', label: node._('time-comp.typeLabel.input'), hasValue: false },
+                                        'str',
+                                        'num',
+                                        'bool',
                                         'date',
                                         types.DateSpecific,
                                         types.TimeEntered,
@@ -554,9 +557,6 @@
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
-                                        'str',
-                                        'num',
-                                        'bool',
                                         'json',
                                         'bin',
                                         'env',
@@ -582,6 +582,8 @@
                                         types.DayOfYear,
                                         types.DayOfYearEven,
                                         types.numPercent,
+                                        types.randomNumber,
+                                        types.randomNumberCached,
                                         types.nodeId,
                                         types.nodeName
                                     ]

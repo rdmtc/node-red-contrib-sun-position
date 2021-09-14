@@ -17,6 +17,11 @@
             "result1Format": "output format",
             "result1Offset": "Offset"
         },
+        "typeLabel":{
+            "timespan": "timespan between Inputs",
+            "operand1": "Input 1 value",
+            "operand2": "Input 2 value"
+        },
         "placeholder": {
             "operand": "Input",
             "operandFormat": "parse format",

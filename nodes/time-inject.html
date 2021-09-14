@@ -817,6 +817,9 @@
                                 .typedInput({
                                     default: 'str',
                                     types: [
+                                        'str',
+                                        'num',
+                                        'bool',
                                         'date',
                                         types.DateSpecific,
                                         types.TimeEntered,
@@ -825,16 +828,12 @@
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
-                                        'str',
-                                        'num',
-                                        'bool',
                                         'json',
                                         'bin',
                                         'env',
                                         'flow',
                                         'global',
                                         'jsonata',
-                                        types.randomNumber,
                                         types.SunCalc,
                                         types.SunInSky,
                                         types.MoonCalc,
@@ -853,6 +852,8 @@
                                         types.DayOfYear,
                                         types.DayOfYearEven,
                                         types.numPercent,
+                                        types.randomNumber,
+                                        types.randomNumberCached,
                                         types.nodeId,
                                         types.nodeName
                                     ]
