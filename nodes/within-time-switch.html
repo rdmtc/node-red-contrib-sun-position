@@ -263,6 +263,22 @@
                         ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                     }
                 },
+                withinTimeValue: {
+                    value: 'true',
+                    required: true,
+                    validate: RED.validators.typedInput('withinTimeValueType')
+                },
+                withinTimeValueType: {
+                    value: 'input'
+                },
+                outOfTimeValue: {
+                    value: 'false',
+                    required: true,
+                    validate: RED.validators.typedInput('outOfTimeValueType')
+                },
+                outOfTimeValueType: {
+                    value: 'input'
+                },
                 tsCompare: {
                     value: '0'
                 }
@@ -814,6 +830,94 @@
                         }
                     });
                     // #endregion timeAltEnd
+                    // #region Output Values
+                    setupTInput(node, {
+                        typeProp: 'withinTimeValueType',
+                        valueProp: 'withinTimeValue',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'input',
+                        defaultValue: 'true' ,
+                        types: [
+                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            'str',
+                            'num',
+                            'bool',
+                            'date',
+                            'json',
+                            'bin',
+                            'env',
+                            'msg',
+                            'flow',
+                            'global',
+                            'jsonata',
+                            types.numPercent,
+                            types.randomNumber,
+                            types.randomNumberCached,
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven,
+                            types.nodeId,
+                            types.nodeName
+                        ]
+                    });
+                    setupTInput(node, {
+                        typeProp: 'outOfTimeValueType',
+                        valueProp: 'outOfTimeValue',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'input',
+                        defaultValue: 'true' ,
+                        types: [
+                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            'str',
+                            'num',
+                            'bool',
+                            'date',
+                            'json',
+                            'bin',
+                            'env',
+                            'msg',
+                            'flow',
+                            'global',
+                            'jsonata',
+                            types.numPercent,
+                            types.randomNumber,
+                            types.randomNumberCached,
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven,
+                            types.nodeId,
+                            types.nodeName
+                        ]
+                    });
+                    // #endregion Output Values
                     // #region Enhanced settings
                     initializeValue(node, 'tsCompare', 0);
                     const chkVal = (name, val) => {
@@ -1016,6 +1120,18 @@
         <input id="node-input-endOffsetAlt" data-i18n="[placeholder]within-time-switch.placeholder.endOffsetAlt"/>
         <input type="hidden" id="node-input-endOffsetAltType">
         <select id="node-input-endOffsetAltMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]within-time-switch.tips.outputValue"></div>
+    <div class="form-row row-withinTimeValue">
+        <label for="node-input-withinTimeValue"><i class="fa fa-hourglass-half"></i> <span data-i18n="within-time-switch.label.withinTimeValue"></span></label>
+        <input type="text" id="node-input-withinTimeValue">
+        <input type="hidden" id="node-input-withinTimeValueType">
+    </div>
+    <div class="form-row row-outOfTimeValue">
+        <label for="node-input-outOfTimeValue"><i class="fa fa-hourglass-end"></i> <span data-i18n="within-time-switch.label.outOfTimeValue"></span></label>
+        <input type="text" id="node-input-outOfTimeValue">
+        <input type="hidden" id="node-input-outOfTimeValueType">
     </div>
     <hr>
     <div class="form-row is-to-show-initially">

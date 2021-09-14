@@ -32,7 +32,12 @@
             "msgvalue":"msg.value",
             "showEnhSettings":"Enhanced settings",
             "timeRestrictions":"limit time",
-            "internally":"👇 is defined here"
+            "internally":"👇 is defined here",
+            "withinTimeValue": "in time payload",
+            "outOfTimeValue": "out of time payload"
+        },
+        "typeLabel":{
+            "input": "msg.payload of the input message"
         },
         "placeholder": {
             "propertyStart": "Property for alternate start time",
@@ -51,7 +56,8 @@
         },
         "tips": {
             "addTimes": "Here can be defined alternate times for start/end. If the given property is true the alternate start/end times will be used instead the normal ones. This can be used to have different start/end times for holidays or other special days.",
-            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/within-time\">Documentation and examples</a>"
+            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/within-time\">Documentation and examples</a>",
+            "outputValue":"Here can be defined the payload of the output 1 if the input message arrived within time or the payload of the message of output 2 if the message arrives out of the time."
         },
        "errors": {
             "error-start-time": "Error get start time: __message__",

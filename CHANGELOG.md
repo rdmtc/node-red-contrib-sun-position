@@ -34,6 +34,12 @@ Warning: This Version could break existing flows. Please check your configuratio
     - added selection for interval of days and weeks #313
     - added possibility to setup interval greater than 24.9 days (2147483647 - 32bit integer limit of NodeJs)
 
+- within-time-switch
+  - configurable `msg.payload` of the outgoing message #292
+
+- moon-position
+  - moon times will now be has additional property `timesNext` with the values for the times of the next day #307
+
 - blind-control + clock-time
   - added possibility to copy rules to clipboard and paste rules from clipboard
   - nodes have now always 2 outputs - may breaks existing flows!
@@ -55,10 +61,6 @@ Warning: This Version could break existing flows. Please check your configuratio
   - per message set mode will be written to node context and to thus this will be stable on deploy
     - needs to delete values of context on change
   - current mode will no longer part of the node label/name, it will be displayed in the node state #321
-
-
-- moon-position
-  - moon times will now be has additional property `timesNext` with the values for the times of the next day #307
 
 #### 1.2.4: maintenance + critical bugfix
 

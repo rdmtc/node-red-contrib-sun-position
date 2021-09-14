@@ -410,6 +410,14 @@ module.exports = function (RED) {
                 this.timeMonths = this.timeMonths.map( e => parseInt(e) );
             }
         }
+        this.withinTimeValue = {
+            value       : config.withinTimeValue ? config.withinTimeValue : 'true',
+            type        : config.withinTimeValueType ? config.withinTimeValueType : 'input'
+        };
+        this.outOfTimeValue = {
+            value       : config.outOfTimeValue ? config.outOfTimeValue : 'false',
+            type        : config.outOfTimeValueType ? config.outOfTimeValueType : 'input'
+        };
 
         this.timeOutObj = null;
         this.lastMsgObj = null;
@@ -429,30 +437,42 @@ module.exports = function (RED) {
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
-                const now = getIntDate(config.tsCompare, msg, node);
-                const result = calcWithinTimes(this, msg, now);
+                const dNow = getIntDate(config.tsCompare, msg, node);
+                const result = calcWithinTimes(this, msg, dNow);
 
                 if (result.valid && result.start.value && result.end.value) {
                     msg.withinTimeStart = result.start;
                     msg.withinTimeEnd = result.end;
                     msg.withinTimeStart.id = hlp.getTimeNumberUTC(result.start.value);
                     msg.withinTimeEnd.id = hlp.getTimeNumberUTC(result.end.value);
-                    const cmpNow = hlp.getTimeNumberUTC(now);
+                    const cmpNow = hlp.getTimeNumberUTC(dNow);
                     setstate(node, result);
                     if (msg.withinTimeStart.id < msg.withinTimeEnd.id) {
                         if (cmpNow >= msg.withinTimeStart.id && cmpNow < msg.withinTimeEnd.id) {
                             msg.withinTime = true;
                             this.debug('in time [1] - send msg to first output ' + result.startSuffix +
-                                node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
-                            send([msg, null]); // this.send([msg, null]);
+                                node.positionConfig.toDateTimeString(dNow) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
+                            if (node.withinTimeValue.type === 'input') {
+                                send([msg, null]); // within time
+                            } else {
+                                const resultMsg = RED.util.cloneMessage(msg);
+                                resultMsg.payload = node.positionConfig.getOutDataProp(node, msg, node.withinTimeValue, dNow);
+                                send([resultMsg, null]); // within time
+                            }
                             done();
                             return null;
                         }
                     } else if (!(cmpNow >= msg.withinTimeEnd.id && cmpNow < msg.withinTimeStart.id)) {
                         msg.withinTime = true;
                         this.debug('in time [2] - send msg to first output ' + result.startSuffix +
-                            node.positionConfig.toDateTimeString(now) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
-                        send([msg, null]); // this.send([msg, null]);
+                            node.positionConfig.toDateTimeString(dNow) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
+                        if (node.withinTimeValue.type === 'input') {
+                            send([msg, null]); // within time
+                        } else {
+                            const resultMsg = RED.util.cloneMessage(msg);
+                            resultMsg.payload = node.positionConfig.getOutDataProp(node, msg, node.withinTimeValue, dNow);
+                            send([resultMsg, null]); // within time
+                        }
                         done();
                         return null;
                     }
@@ -460,8 +480,14 @@ module.exports = function (RED) {
                     setstate(node, result);
                 }
                 msg.withinTime = false;
-                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(now) + result.endSuffix);
-                send([null, msg]); // this.send([null, msg]);
+                this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(dNow) + result.endSuffix);
+                if (node.outOfTimeValue.type === 'input') {
+                    send([null, msg]); // out of time
+                } else {
+                    const resultMsg = RED.util.cloneMessage(msg);
+                    resultMsg.payload = node.positionConfig.getOutDataProp(node, msg, node.outOfTimeValue, dNow);
+                    send([null, resultMsg]); // out of time
+                }
                 done();
                 return null;
             } catch (err) {

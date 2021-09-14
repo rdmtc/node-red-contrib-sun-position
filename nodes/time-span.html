@@ -557,9 +557,9 @@
                                 .typedInput({
                                     default: 'timespan',
                                     types: [
-                                        { value: 'timespan', label: 'timespan between Inputs', hasValue: false },
-                                        { value: 'operand1', label: 'Input 1 value', hasValue: false },
-                                        { value: 'operand2', label: 'Input 2 value', hasValue: false },
+                                        { value: 'timespan', label: node._('time-span.typeLabel.timespan'), hasValue: false },
+                                        { value: 'operand1', label: node._('time-span.typeLabel.operand1'), hasValue: false },
+                                        { value: 'operand2', label: node._('time-span.typeLabel.operand2'), hasValue: false },
                                         'date',
                                         types.DateSpecific,
                                         types.TimeEntered,
@@ -596,6 +596,8 @@
                                         types.DayOfYear,
                                         types.DayOfYearEven,
                                         types.numPercent,
+                                        types.randomNumber,
+                                        types.randomNumberCached,
                                         types.nodeId,
                                         types.nodeName
                                     ]
