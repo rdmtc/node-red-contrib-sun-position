@@ -22,6 +22,8 @@ If a Node has a warning sign on the label like this one:
 ![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
 This is not an error, it hides only that the node needs to be opened, saved and deployed to fix the label.
 
+⚠ Nodes that were created or saved with a version 2.0.0 or later do not work in versions prior 2.0.0 of the package.
+
 ## Table of contents
 
 - [node-red-contrib-sun-position for NodeRED](#node-red-contrib-sun-position-for-nodered)

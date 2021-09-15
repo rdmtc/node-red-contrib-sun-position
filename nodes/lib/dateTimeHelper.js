@@ -1400,7 +1400,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
                 return convertDateTimeZone(date, timeZoneOffset).toLocaleDateString();
             }
             return date.toLocaleDateString();
-        case 5: // timeformat_ISO
+        case 5: // timeparse_ISO8601
             return date.toISOString();
         case 6: // timeformat_ms
             return date.getTime() - (new Date()).getTime();
@@ -1985,7 +1985,10 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 res = new Date(Number(date));
                 break;
             case 1: // timeparse_ECMA262
-                res = Date.parse(date);
+                res = new Date(Date.parse(date));
+                break;
+            case 6: // timeparse_ISO8601
+                res = isoStringToDate(date);
                 break;
             case 2: // various - try different Formats, prefer day first like d/M/y (e.g. European format)
                 res = tryparse(date, false);

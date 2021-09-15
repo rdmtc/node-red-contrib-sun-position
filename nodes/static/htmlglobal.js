@@ -6,129 +6,130 @@
 function getSelectFields() { // eslint-disable-line no-unused-vars
     return {
         operatorsGroups: [
-            {id: 'default', label: 'compare Timestamp'},
-            { id: 'other', label: 'always'}
+            { id: 'default', label: 'compare Timestamp', i18n: 'common.operatorsGroups.0'},
+            { id: 'other', label: 'always', i18n: 'common.operatorsGroups.1'}
         ],
         operators: [
-            {id: 1, group: 'default', label: '==', text: 'equal'},
-            {id: 2, group: 'default', label: '!=', text: 'unequal'},
-            {id: 3, group: 'default', label: '>', text: 'greater'},
-            {id: 4, group: 'default', label: '>=', text: 'greater or equal'},
-            {id: 5, group: 'default', label: '<', text: 'lesser'},
-            {id: 6, group: 'default', label: '<=', text: 'lesser or equal'},
-            {id: 99, group: 'other', label: 'otherwise', text: 'otherwise'}
+            {id: 1, group: 'default', label: '==', text: 'equal', i18n: 'common.operators.0'},
+            {id: 2, group: 'default', label: '!=', text: 'unequal', i18n: 'common.operators.1'},
+            {id: 3, group: 'default', label: '>', text: 'greater', i18n: 'common.operators.2'},
+            {id: 4, group: 'default', label: '>=', text: 'greater or equal', i18n: 'common.operators.3'},
+            {id: 5, group: 'default', label: '<', text: 'lesser', i18n: 'common.operators.4'},
+            {id: 6, group: 'default', label: '<=', text: 'lesser or equal', i18n: 'common.operators.5'},
+            {id: 99, group: 'other', label: 'otherwise', text: 'otherwise', i18n: 'common.operators.6'}
         ], operatorTypesGroups: [
-            {id: 'default', label: 'include into compare'},
-            {id: 'spec', label: 'special'}
+            {id: 'default', label: 'include into compare', i18n: 'common.operatorTypesGroups.0'},
+            {id: 'spec', label: 'special', i18n: 'common.operatorTypesGroups.1'}
         ], operatorTypes: [
-            {id: 11, group: 'default', label: 'Milliseconds'},
-            {id: 12, group: 'default', label: 'Seconds'},
-            {id: 13, group: 'default', label: 'Minutes'},
-            {id: 14, group: 'default', label: 'Hours'},
-            {id: 15, group: 'default', label: 'Day of Month'},
-            {id: 16, group: 'default', label: 'Month'},
-            {id: 17, group: 'default', label: 'Year'},
-            {id: 18, group: 'spec', label: 'Day of Week'}
+            {id: 11, group: 'default', label: 'Milliseconds', i18n: 'common.operatorTypes.0'},
+            {id: 12, group: 'default', label: 'Seconds', i18n: 'common.operatorTypes.1'},
+            {id: 13, group: 'default', label: 'Minutes', i18n: 'common.operatorTypes.2'},
+            {id: 14, group: 'default', label: 'Hours', i18n: 'common.operatorTypes.3'},
+            {id: 15, group: 'default', label: 'Day of Month', i18n: 'common.operatorTypes.4'},
+            {id: 16, group: 'default', label: 'Month', i18n: 'common.operatorTypes.5'},
+            {id: 17, group: 'default', label: 'Year', i18n: 'common.operatorTypes.6'},
+            {id: 18, group: 'spec', label: 'Day of Week', i18n: 'common.operatorTypes.7'}
         ], outputTSFormatsGroups: [
-            {id: 'time', label: 'timestamp (number)'},
-            {id: 'timeRounded', label: 'timestamp rounded (number)'},
-            {id: 'string', label: 'Text'}
+            {id: 'time', label: 'timestamp (number)', i18n: 'common.outputTSFormatsGroups.0'},
+            {id: 'timeRounded', label: 'timestamp rounded (number)', i18n: 'common.outputTSFormatsGroups.1'},
+            {id: 'string', label: 'Text', i18n: 'common.outputTSFormatsGroups.2'}
         ], outputTSFormats: [
-            {id: 0, group: 'time', name: 'ms', label: 'milliseconds'},
-            {id: 1, group: 'time', name: 'sec', label: 'seconds'},
-            {id: 2, group: 'time', name: 'min', label: 'minutes'},
-            {id: 3, group: 'time', name: 'hour', label: 'hours'},
-            {id: 4, group: 'time', name: 'days', label: 'days'},
-            {id: 5, group: 'time', name: 'weeks', label: 'weeks'},
-            {id: 6, group: 'time', name: 'month', label: 'month'},
-            {id: 7, group: 'time', name: 'years', label: 'years'},
-            {id: 11, group: 'timeRounded', name: 'sec', label: 'seconds'},
-            {id: 12, group: 'timeRounded', name: 'min', label: 'minutes'},
-            {id: 13, group: 'timeRounded', name: 'hour', label: 'hours'},
-            {id: 14, group: 'timeRounded', name: 'days', label: 'days'},
-            {id: 15, group: 'timeRounded', name: 'weeks', label: 'weeks'},
-            {id: 16, group: 'timeRounded', name: 'month', label: 'month'},
-            {id: 17, group: 'timeRounded', name: 'years', label: 'years'},
-            {id: 99, group: 'string', name: 'Other', label: 'Other'}
+            {id: 0, group: 'time', name: 'ms', label: 'milliseconds', i18n: 'common.outputTSFormats.0'},
+            {id: 1, group: 'time', name: 'sec', label: 'seconds', i18n: 'common.outputTSFormats.1'},
+            {id: 2, group: 'time', name: 'min', label: 'minutes', i18n: 'common.outputTSFormats.2'},
+            {id: 3, group: 'time', name: 'hour', label: 'hours', i18n: 'common.outputTSFormats.3'},
+            {id: 4, group: 'time', name: 'days', label: 'days', i18n: 'common.outputTSFormats.4'},
+            {id: 5, group: 'time', name: 'weeks', label: 'weeks', i18n: 'common.outputTSFormats.5'},
+            {id: 6, group: 'time', name: 'month', label: 'month', i18n: 'common.outputTSFormats.6'},
+            {id: 7, group: 'time', name: 'years', label: 'years', i18n: 'common.outputTSFormats.7'},
+            {id: 11, group: 'timeRounded', name: 'sec', label: 'seconds', i18n: 'common.outputTSFormats.8'},
+            {id: 12, group: 'timeRounded', name: 'min', label: 'minutes', i18n: 'common.outputTSFormats.9'},
+            {id: 13, group: 'timeRounded', name: 'hour', label: 'hours', i18n: 'common.outputTSFormats.10'},
+            {id: 14, group: 'timeRounded', name: 'days', label: 'days', i18n: 'common.outputTSFormats.11'},
+            {id: 15, group: 'timeRounded', name: 'weeks', label: 'weeks', i18n: 'common.outputTSFormats.12'},
+            {id: 16, group: 'timeRounded', name: 'month', label: 'month', i18n: 'common.outputTSFormats.13'},
+            {id: 17, group: 'timeRounded', name: 'years', label: 'years', i18n: 'common.outputTSFormats.14'},
+            {id: 99, group: 'string', name: 'Other', label: 'Other', i18n: 'common.outputTSFormats.15'}
         ], outputFormatsGroups: [
-            {id: 'number', label: 'Number'},
-            {id: 'string', label: 'Text (string)'},
-            {id: 'time', label: 'time (number) since emit'},
-            {id: 'dayOfWeek', label: 'day of week'},
-            {id: 'dayOfYear', label: 'day of year'},
-            {id: 'WeekOfYear', label: 'week of year'},
-            {id: 'other', label: 'Other'}
+            {id: 'number', label: 'Number', i18n: 'common.outputFormatsGroups.0'},
+            {id: 'string', label: 'Text (string)', i18n: 'common.outputFormatsGroups.1'},
+            {id: 'time', label: 'time (number) since emit', i18n: 'common.outputFormatsGroups.2'},
+            {id: 'dayOfWeek', label: 'day of week', i18n: 'common.outputFormatsGroups.3'},
+            {id: 'dayOfYear', label: 'day of year', i18n: 'common.outputFormatsGroups.4'},
+            {id: 'WeekOfYear', label: 'week of year', i18n: 'common.outputFormatsGroups.5'},
+            {id: 'other', label: 'Other', i18n: 'common.outputFormatsGroups.6'}
         ], outputFormats: [
-            {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp'},
-            {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS'},
-            {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS'},
-            {id: 1, group: 'string', name: 'UTC', label: 'UTC date and time' },
-            {id: 2, group: 'string', name: 'local', label: 'local date and time'},
-            {id: 3, group: 'string', name: 'localTime', label: 'local time'},
-            {id: 12, group: 'string', name: 'localDate', label: 'local date'},
-            {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time'},
-            {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone' },
-            {id: 6, group: 'time', name: 'ms', label: 'milliseconds'},
-            {id: 7, group: 'time', name: 'sec', label: 'seconds'},
-            {id: 8, group: 'time', name: 'min', label: 'minutes'},
-            {id: 9, group: 'time', name: 'hour', label: 'hours'},
-            {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.'},
-            {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.'},
-            {id: 19, group: 'WeekOfYear', name: 'week number', label: 'Number of week e.g. 22'},
-            {id: 20, group: 'WeekOfYear', name: 'is week even', label: 'Boolean if week is even'},
-            {id: 21, group: 'dayOfYear', name: 'day number', label: 'Number of day e.g. 365'},
-            {id: 22, group: 'dayOfYear', name: 'is day even', label: 'Boolean if day is even'},
-            {id: -1, group: 'other', name: 'object', label: 'as object'},
-            {id: 99, group: 'other', name: 'free definition', label: 'Other'}
+            {id: 0, group: 'number', name: 'UNIX', label: 'milliseconds UNIX timestamp', i18n: 'common.outputFormats.0'},
+            {id: 10, group: 'number', name: 'YYYYMMDDHHMMSS', label: 'YYYYMMDDHHMMSS', i18n: 'common.outputFormats.1'},
+            {id: 11, group: 'number', name: 'YYYYMMDD_HHMMSS', label: 'YYYYMMDD.HHMMSS', i18n: 'common.outputFormats.2'},
+            {id: 1, group: 'string', name: 'UTC', label: 'UTC date and time', i18n: 'common.outputFormats.3'},
+            {id: 2, group: 'string', name: 'local', label: 'local date and time', i18n: 'common.outputFormats.4'},
+            {id: 3, group: 'string', name: 'localTime', label: 'local time', i18n: 'common.outputFormats.5'},
+            {id: 12, group: 'string', name: 'localDate', label: 'local date', i18n: 'common.outputFormats.6'},
+            {id: 5, group: 'string', name: 'ISO', label: 'ISO date and time', i18n: 'common.outputFormats.7'},
+            {id: 18, group: 'string', name: 'ISO-2', label: 'ISO date and time of local timezone', i18n: 'common.outputFormats.8'},
+            {id: 6, group: 'time', name: 'ms', label: 'milliseconds', i18n: 'common.outputFormats.9'},
+            {id: 7, group: 'time', name: 'sec', label: 'seconds', i18n: 'common.outputFormats.10'},
+            {id: 8, group: 'time', name: 'min', label: 'minutes', i18n: 'common.outputFormats.11'},
+            {id: 9, group: 'time', name: 'hour', label: 'hours', i18n: 'common.outputFormats.12'},
+            {id: 16, group: 'dayOfWeek', name: 'Day Name', label: 'Day Name, e.g. Monday, 22.12.', i18n: 'common.outputFormats.13'},
+            {id: 17, group: 'dayOfWeek', name: 'Day', label: 'Day in relative, e.g. Today, 22.12.', i18n: 'common.outputFormats.14'},
+            {id: 19, group: 'WeekOfYear', name: 'week number', label: 'Number of week e.g. 22', i18n: 'common.outputFormats.15'},
+            {id: 20, group: 'WeekOfYear', name: 'is week even', label: 'Boolean if week is even', i18n: 'common.outputFormats.16'},
+            {id: 21, group: 'dayOfYear', name: 'day number', label: 'Number of day e.g. 365', i18n: 'common.outputFormats.17'},
+            {id: 22, group: 'dayOfYear', name: 'is day even', label: 'Boolean if day is even', i18n: 'common.outputFormats.18'},
+            {id: -1, group: 'other', name: 'object', label: 'as object', i18n: 'common.outputFormats.19'},
+            {id: 99, group: 'other', name: 'free definition', label: 'Other', i18n: 'common.outputFormats.20'}
         ], parseFormatsGroups: [
-            {id: 'number', label: 'Number'},
-            {id: 'string', label: 'Text (string)'},
-            {id: 'other', label: 'Other'}
+            {id: 'number', label: 'Number', i18n: 'common.parseFormatsGroups.0'},
+            {id: 'string', label: 'Text (string)', i18n: 'common.parseFormatsGroups.1'},
+            {id: 'other', label: 'Other', i18n: 'common.parseFormatsGroups.2'}
         ], parseFormats: [
-            {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx'},
-            {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JSON Date representation'},
-            {id: 2, group: 'string', label: 'try different text Formats, prefer day first like d/M/y (e.g. European format)', add: 'will try different formats, prefer European formats'},
-            {id: 3, group: 'string', label: 'try different text Formats, prefer month first like M/d/y (e.g. American format)', add: 'will try different formats, prefer American formats'},
-            {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx'},
-            {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx'},
-            {id: 98, group: 'other', label: 'various - try different Formats (object, number, text)', add: 'xxx'},
-            {id: 99, group: 'other', label: 'text - free definition', add: 'xxx'}
+            {id: 0, group: 'number', label: 'milliseconds UNIX timestamp', add: 'xxx', i18n: 'common.parseFormats.0'},
+            {id: 1, group: 'string', label: 'ECMA-262', add: 'standard JS Date representation', i18n: 'common.parseFormats.1'},
+            {id: 6, group: 'string', label: 'ISO 8601', add: 'YYYY-MM-TTTHH:MM:SS.sssZ , YYYY-MM-TTTHH:MM:SS+HH:MM or YYYY-MM-TTTHH:MM:SS-HH:MM', i18n: 'common.parseFormats.2'},
+            {id: 2, group: 'string', label: 'try different text Formats, prefer day first like d/M/y (e.g. European format)', add: 'will try different formats, prefer European formats', i18n: 'common.parseFormats.3'},
+            {id: 3, group: 'string', label: 'try different text Formats, prefer month first like M/d/y (e.g. American format)', add: 'will try different formats, prefer American formats', i18n: 'common.parseFormats.4'},
+            {id: 4, group: 'number', label: 'YYYYMMDDHHMMSS', add: 'xxx', i18n: 'common.parseFormats.5'},
+            {id: 5, group: 'number', label: 'YYYYMMDD.HHMMSS', add: 'xxx', i18n: 'common.parseFormats.6'},
+            {id: 98, group: 'other', label: 'various - try different Formats (object, number, text)', add: 'xxx', i18n: 'common.parseFormats.7'},
+            {id: 99, group: 'other', label: 'text - free definition', add: 'xxx', i18n: 'common.parseFormats.8'}
         ], multiplierGroups: [
-            {id: 'default', label: 'Standard'},
-            {id: 'other', label: 'Special'}
+            {id: 'default', label: 'Standard', i18n: 'common.multiplierGroups.0'},
+            {id: 'other', label: 'Special', i18n: 'common.multiplierGroups.1'}
         ], multiplier: [
-            {id: 1, group: 'default', label: 'milliseconds'},
-            {id: 1000, group: 'default', label: 'seconds'},
-            {id: 60000, group: 'default', label: 'minutes'},
-            {id: 3600000, group: 'default', label: 'hours'},
-            {id: 86400000, group: 'default', label: 'days'},
-            {id: 604800000, group: 'other', label: 'weeks'}, // maximum is 2147483647 - 24 Tage!
-            {id: -1, group: 'other', label: 'month'},
-            {id: -2, group: 'other', label: 'year'}
+            {id: 1, group: 'default', label: 'milliseconds', i18n: 'common.multiplier.0'},
+            {id: 1000, group: 'default', label: 'seconds', i18n: 'common.multiplier.1'},
+            {id: 60000, group: 'default', label: 'minutes', i18n: 'common.multiplier.2'},
+            {id: 3600000, group: 'default', label: 'hours', i18n: 'common.multiplier.3'},
+            {id: 86400000, group: 'default', label: 'days', i18n: 'common.multiplier.4'},
+            {id: 604800000, group: 'other', label: 'weeks', i18n: 'common.multiplier.5'}, // maximum is 2147483647 - 24 Tage!
+            {id: -1, group: 'other', label: 'month', i18n: 'common.multiplier.6'},
+            {id: -2, group: 'other', label: 'year', i18n: 'common.multiplier.7'}
         ], comparatorGroups: [
-            { id: 'simple', label: 'simple' },
-            { id: 'compare', label: 'compare' },
-            { id: 'enhanced', label: 'enhanced' }
+            { id: 'simple', label: 'simple', i18n: 'common.comparatorGroups.0' },
+            { id: 'compare', label: 'compare', i18n: 'common.comparatorGroups.1' },
+            { id: 'enhanced', label: 'enhanced', i18n: 'common.comparatorGroups.2' }
         ], comparator: [
-            { id: 'true', group: 'simple', label: 'true', operandCount: 1 },
-            { id: 'false', group: 'simple', label: 'false', operandCount: 1 },
-            { id: 'null', group: 'simple', label: 'null', operandCount: 1 },
-            { id: 'nnull', group: 'simple', label: 'not null', operandCount: 1 },
-            { id: 'empty', group: 'simple', label: 'empty', operandCount: 1 },
-            { id: 'nempty', group: 'simple', label: 'not empty', operandCount: 1 },
-            { id: 'true_expr', group: 'enhanced', label: 'true_expr', operandCount: 1 },
-            { id: 'false_expr', group: 'enhanced', label: 'false_expr', operandCount: 1 },
-            { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operandCount: 1 },
-            { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operandCount: 1 },
-            { id: 'equal', group: 'compare', label: 'equal', operandCount: 2 },
-            { id: 'nequal', group: 'compare', label: 'not equal', operandCount: 2 },
-            { id: 'lt', group: 'compare', label: 'less than', operandCount: 2 },
-            { id: 'lte', group: 'compare', label: 'less than or equal', operandCount: 2 },
-            { id: 'gt', group: 'compare', label: 'greater than', operandCount: 2 },
-            { id: 'gte', group: 'compare', label: 'greater than or equal', operandCount: 2 },
-            { id: 'contain', group: 'enhanced', label: 'contain', operandCount: 2 },
-            { id: 'containSome', group: 'enhanced', label: 'containSome', operandCount: 2 },
-            { id: 'containEvery', group: 'enhanced', label: 'containEvery', operandCount: 2 }
+            { id: 'true', group: 'simple', label: 'true', operandCount: 1, i18n: 'common.comparator.0' },
+            { id: 'false', group: 'simple', label: 'false', operandCount: 1, i18n: 'common.comparator.1' },
+            { id: 'null', group: 'simple', label: 'null', operandCount: 1, i18n: 'common.comparator.2' },
+            { id: 'nnull', group: 'simple', label: 'not null', operandCount: 1, i18n: 'common.comparator.3' },
+            { id: 'empty', group: 'simple', label: 'empty', operandCount: 1, i18n: 'common.comparator.4' },
+            { id: 'nempty', group: 'simple', label: 'not empty', operandCount: 1, i18n: 'common.comparator.5' },
+            { id: 'true_expr', group: 'enhanced', label: 'true_expr', operandCount: 1, i18n: 'common.comparator.6' },
+            { id: 'false_expr', group: 'enhanced', label: 'false_expr', operandCount: 1, i18n: 'common.comparator.7' },
+            { id: 'ntrue_expr', group: 'enhanced', label: 'not true_expr', operandCount: 1, i18n: 'common.comparator.8'},
+            { id: 'nfalse_expr', group: 'enhanced', label: 'not false_expr', operandCount: 1, i18n: 'common.comparator.9' },
+            { id: 'equal', group: 'compare', label: 'equal', operandCount: 2, i18n: 'common.comparator.10' },
+            { id: 'nequal', group: 'compare', label: 'not equal', operandCount: 2, i18n: 'common.comparator.11' },
+            { id: 'lt', group: 'compare', label: 'less than', operandCount: 2, i18n: 'common.comparator.12' },
+            { id: 'lte', group: 'compare', label: 'less than or equal', operandCount: 2, i18n: 'common.comparator.13' },
+            { id: 'gt', group: 'compare', label: 'greater than', operandCount: 2, i18n: 'common.comparator.14' },
+            { id: 'gte', group: 'compare', label: 'greater than or equal', operandCount: 2, i18n: 'common.comparator.15' },
+            { id: 'contain', group: 'enhanced', label: 'contain', operandCount: 2, i18n: 'common.comparator.16' },
+            { id: 'containSome', group: 'enhanced', label: 'containSome', operandCount: 2, i18n: 'common.comparator.17' },
+            { id: 'containEvery', group: 'enhanced', label: 'containEvery', operandCount: 2, i18n: 'common.comparator.18' }
         ]
     };
 }
@@ -800,15 +801,15 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
-        const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:common.' + elementName + 'Groups.' + gIndex)}).appendTo(parent);
+        const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:' + groups[gIndex].i18n)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (filter) {
                     if (filter(elements[eIndex])) {
-                        group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                        group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:' + elements[eIndex].i18n)).attr('addText', elements[eIndex].add));
                     }
                 } else {
-                    group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:common.' + elementName + '.' + eIndex)).attr('addText', elements[eIndex].add));
+                    group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:' + elements[eIndex].i18n)).attr('addText', elements[eIndex].add));
                 }
             }
         }

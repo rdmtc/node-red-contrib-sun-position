@@ -221,7 +221,8 @@
         ],
         "parseFormats": [
             "Millisekunden UNIX-Zeit",
-            "ECMA-262 - JSON Date",
+            "ECMA-262 - simple JSON Date",
+            "ISO8601",
             "try different text Formats, prefer day first like d/M/y",
             "try different text Formats, prefer month first like M/d/y",
             "YYYYMMDDHHMMSS",
