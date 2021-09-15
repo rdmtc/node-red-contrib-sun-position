@@ -16,6 +16,7 @@ const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
 const cWinterMode = 1;
 const cSummerMode = 2;
+const cMinimizeMode = 3;
 /******************************************************************************************/
 /**
  * get the absolute level from percentage level
@@ -334,7 +335,16 @@ module.exports = function (RED) {
                 node.previousData.last.sunLevel = node.level.current;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMin');
-                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWin');
+                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWinMin');
+            } else if (node.sunData.mode === cMinimizeMode) {
+                node.level.current = node.nodeData.levelMax;
+                node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.topic = node.sunData.topic;
+                node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+                node.previousData.last.sunLevel = node.level.current;
+                node.reason.code = 13;
+                node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMax');
+                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWinMax');
             } else {
                 node.reason.code = 8;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWin');
@@ -370,6 +380,16 @@ module.exports = function (RED) {
             node.reason.code = 12;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunInWinMax');
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunInWinMax');
+            return sunPosition;
+        } else if (node.sunData.mode === cMinimizeMode) {
+            node.level.current = node.nodeData.levelMin;
+            node.level.currentInverse = getInversePos_(node, node.level.current);
+            node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+            node.level.topic = node.sunData.topic;
+            node.previousData.last.sunLevel = node.level.current;
+            node.reason.code = 12;
+            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunInWinMin');
+            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunInWinMin');
             return sunPosition;
         }
 
@@ -946,6 +966,8 @@ module.exports = function (RED) {
                 modeSign = '❆ ';
             } else if (node.sunData.mode === cSummerMode) {
                 modeSign = '☀ ';
+            } else if (node.sunData.mode === cMinimizeMode) {
+                modeSign = '🕶 ';
             }
 
             node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + modeSign + node.reason.state;

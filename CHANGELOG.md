@@ -87,6 +87,7 @@ This can be also used to go back to an older Version.
 - blind-control only
   - renamed `msg.resetOnSameValue` to `msg.resetOnSameAsLastValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
   - added slat position #250
+  - in opposite to the mode `maximize sunlight (⛄ Winter)` added the `minimize sunlight (🕶️)` mode #284
 
 ### 1.2.3:  BugFix
 

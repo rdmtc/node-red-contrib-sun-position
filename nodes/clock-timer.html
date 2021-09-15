@@ -798,7 +798,6 @@
                         if (node.dialogAddData.resizeRuleContainerTO) { clearTimeout(node.dialogAddData.resizeRuleContainerTO); }
                         node.dialogAddData.resizeRuleContainerTO = setTimeout(() => {
                             delete node.dialogAddData.resizeRuleContainerTO;
-                            $('#node-input-sunControlMode').change();
                             resizeRuleContainer();
                         }, 1000);
                     };
@@ -1435,8 +1434,7 @@
                                 // if (dialogDataOnLoading) { return; }
                                 const propType = $dialogCondOperand.typedInput('type');
                                 if (propType === types.PhaseMoon.value ||
-                                        propType === types.MsgPayloadByTopic.value ||
-                                        propType === types.SunControlModeType.value) {
+                                        propType === types.MsgPayloadByTopic.value) {
                                     $dialogCondOperator.val(selFields.comparator[0].id); // only true is valid
                                     $dialogCondOperator.attr('disabled', true);
                                     $dialogCondOperator.hide();

@@ -506,6 +506,9 @@
                         }, {
                             value: '2-restrict',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlRestrict')
+                        }, {
+                            value: '3-minimize',
+                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMinimize')
                         }]
                     };
                     types.OutputLevel = {
@@ -1582,6 +1585,7 @@
                             $oversteerMode.append($('<option></option>').val(0).text(node._('blind-control.label.sunControlNoMatter')));
                             $oversteerMode.append($('<option></option>').val(1).text(node._('blind-control.label.sunControlRestrictOnly')));
                             $oversteerMode.append($('<option></option>').val(2).text(node._('blind-control.label.sunControlMaximizeOnly')));
+                            $oversteerMode.append($('<option></option>').val(2).text(node._('blind-control.label.sunControlMinimizeOnly')));
                             $oversteerMode.val(data.mode || 0);
                             // row3 - BlindPos
                             addLabel($row3, 'node-input-oversteer-blindPos', 'fa fa-angle-down', node._('blind-control.label.oversteerBlindPos'), '140px');
@@ -3225,6 +3229,7 @@
             <option value="0" data-i18n="[html]blind-control.label.sunControlOff"></option>
             <option value="1" data-i18n="[html]blind-control.label.sunControlMaximize"></option>
             <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
+            <option value="3" data-i18n="[html]blind-control.label.sunControlMinimize"></option>
         </select>
     </div>
     <div class="form-row form-row-sunControlRestriction block-noindent">
