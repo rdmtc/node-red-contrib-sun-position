@@ -687,7 +687,7 @@ module.exports = function (RED) {
          * @param {Object} [replaceObject] an object if in the result parameters should be replaced
          * @returns {*} output Data
          */
-        getOutDataProp(_srcNode, msg, data, dNow, noError, replaceObject) {
+        getOutDataProp(_srcNode, msg, data, dNow, noError) {
             _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
             dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
 
@@ -735,7 +735,7 @@ module.exports = function (RED) {
                 return null;
             }
             // _srcNode.debug(`getOutDataProp OUT data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })} tzOffset=${this.tzOffset} result=${util.inspect(result, { colors: true, compact: 10, breakLength: Infinity })}`);
-            return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value }, noError, dNow, replaceObject);
+            return this.getPropValue(_srcNode, msg, { type: data.type, value: data.value }, noError, dNow);
         }
         /*******************************************************************************************************/
         /**
@@ -1067,10 +1067,9 @@ module.exports = function (RED) {
          * @param {propValueType} data - data object with more information
          * @param {boolean} [noError] - true if no error shoudl be given in GUI
          * @param {Date} [dNow] base Date to use for Date time functions
-         * @param {Object} [replaceObject] an object if in the result parameters should be replaced
          * @returns {*} value of the type input, return of the callback function if defined or __null__ if value could not resolved
         */
-        getPropValue(_srcNode, msg, data, noError, dNow, replaceObject) {
+        getPropValue(_srcNode, msg, data, noError, dNow) {
             // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             let result = null;
             if (typeof data.type === 'undefined' || data.type === null || data.type === '') {
@@ -1086,7 +1085,7 @@ module.exports = function (RED) {
                 result = hlp.angleNorm(Number(data.value));
             } else if (data.type === 'numAzimuthRad' || data.type === 'numAltitudeRad') {
                 data = hlp.angleNormRad(Number(data.value));
-            } else if (data.type === 'str') {
+            } else if (data.type === 'str' || data.type === 'strPlaceholder') {
                 result = ''+data.value;
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
@@ -1182,9 +1181,6 @@ module.exports = function (RED) {
                 } catch (err) {
                     _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
-            }
-            if (replaceObject && typeof result === 'string') {
-                result = hlp.topicReplace(result, replaceObject);
             }
             if (typeof data.callback === 'function') {
                 // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);

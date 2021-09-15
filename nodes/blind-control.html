@@ -409,19 +409,14 @@
                 return lab || '?';
             },
             label() {
-                const suffix = '';
-                /*
-                if (this.rules && (this.rules.length >0)) {
-                    suffix += '⏲';
-                } */
                 if (this.name) {
-                    return this.name+' '+suffix;
+                    return this.name;
                 }
                 const result = this._('blind-control.label.blind-control');
                 if (this.topic && (this.topic.length + result.length <= 32)) {
-                    return this.topic + ':' + result+' '+suffix;
+                    return this.topic + ':' + result;
                 }
-                return result+' '+suffix;
+                return result;
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
@@ -516,6 +511,11 @@
                     types.OutputLevel = {
                         value: 'level',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.level'),
+                        hasValue: false
+                    };
+                    types.OutputLevelInverse = {
+                        value: 'levelInverse',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.levelInverse'),
                         hasValue: false
                     };
                     types.OutputSlat = {
@@ -651,15 +651,6 @@
                     });
 
                     setupTInput(node, {
-                        typeProp: 'addIdType',
-                        valueProp: 'addId',
-                        width: 'calc(100% - 110px)',
-                        defaultType: node.addIdType || (node.addId ? 'str' : types.Undefined.value),
-                        defaultValue: '',
-                        types: [types.Undefined, 'str', types.MsgPayload, types.MsgTopic, types.MsgPayloadByTopic, types.MsgValue, 'msg', 'flow', 'global', 'env']
-                    });
-
-                    setupTInput(node, {
                         typeProp: 'sunFloorLengthType',
                         valueProp: 'sunFloorLength',
                         width: 'calc(100% - 110px)',
@@ -702,6 +693,15 @@
                         defaultType: types.numAzimuth.value,
                         defaultValue: '',
                         types: [types.numAzimuth, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
+                    });
+
+                    setupTInput(node, {
+                        typeProp: 'addIdType',
+                        valueProp: 'addId',
+                        width: 'calc(100% - 110px)',
+                        defaultType: node.addIdType || (node.addId ? 'str' : types.Undefined.value),
+                        defaultValue: '',
+                        types: [types.Undefined, 'str', 'flow', 'global', 'env'] // types.MsgPayload, types.MsgTopic, types.MsgPayloadByTopic, types.MsgValue, 'msg',
                     });
                     // #endregion blind
                     // #region rules
@@ -801,9 +801,13 @@
                         const length = (enh) ? 60 : 30;
                         try {
                             if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && (typeof data.valid === 'undefined' || Object.keys(data.valid).length === 0))) {
-                                result += '<div>✎ Please edit this rule.</div>';
+                                result += '<div>';
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.outDated');
+                                result += '</div>';
                             } else if (!data.isValid) {
-                                result += '<div>⚠️ Rule is invalid and needs to be changed!!</div>';
+                                result += '<div>';
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.isInValid');
+                                result += '</div>';
                                 if (data.valid && Object.keys(data.valid).length > 0) {
                                     result += '<div><pre>';
                                     result += JSON.stringify(data.valid, null, '\t');
@@ -870,7 +874,7 @@
 
                                     if (data.timeMin && data.timeMin.type && data.timeMin.type !== 'none') {
                                         result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                                        result += node._('blind-control.label.ruleTimeMin');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin');
                                         result += '</span> <var>';
                                         result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMin.type, data.timeMin.value, null, length);
                                         result += '</var>';
@@ -882,7 +886,7 @@
                                     }
                                     if (data.timeMax && data.timeMax.type && data.timeMax.type !== 'none') {
                                         result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                                        result += node._('blind-control.label.ruleTimeMax');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax');
                                         result += '</span> <var>';
                                         result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMax.type, data.timeMax.value, null, length);
                                         result += '</var>';
@@ -892,39 +896,47 @@
                                         }
                                         result += '</div>';
                                     }
-                                    if ((data.time.days && data.time.days !== '*') || data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                    if (data.time.days && data.time.days !== '*') {
                                         result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('blind-control.label.ruleTimeLimit');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeDays');
                                         result += '</span> <var>';
-                                        const resultArr = [];
-                                        if (data.time.days && data.time.days !== '*') {
-                                            const daysarr = data.time.days.split(',');
-                                            if (daysarr.length === 1) {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
-                                            } else if (data.time.days === '5,6,0') {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
-                                                    node._('node-red-contrib-sun-position/position-config:common.days.7'));
-                                            } else if (daysarr.length === 2) {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
-                                                    node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
+                                        const daysarr = data.time.days.split(',');
+                                        if (daysarr.length === 1) {
+                                            result += (node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
+                                        } else if (data.time.days === '5,6,0') {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
+                                            result += '-';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                        } else if (daysarr.length === 2) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                            result += ' ';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.label.and');
+                                            result += ' ';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                        } else {
+                                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                            let isok = true;
+                                            let elF = parseInt(daysarr[0]);
+                                            daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                                            for (let index = 1; index < daysarr.length; index++) {
+                                                const element = parseInt(daysarr[index]);
+                                                isok = isok && (element === elF+1);
+                                                elF = element;
+                                                daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
+                                            }
+                                            if (isok) {
+                                                result += (daysarr[0] + '-' + daysarr[daysarr.length-1]);
                                             } else {
-                                                daysarr.sort((a, b) => parseInt(a) - parseInt(b));
-                                                let isok = true;
-                                                let elF = parseInt(daysarr[0]);
-                                                daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
-                                                for (let index = 1; index < daysarr.length; index++) {
-                                                    const element = parseInt(daysarr[index]);
-                                                    isok = isok && (element === elF+1);
-                                                    elF = element;
-                                                    daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
-                                                }
-                                                if (isok) {
-                                                    resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
-                                                } else {
-                                                    resultArr.push(daysarr.join(','));
-                                                }
+                                                result += (daysarr.join(','));
                                             }
                                         }
+                                        result += '</var></div>';
+                                    }
+                                    if (data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                        result += '<div class="indent-time-special"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimit');
+                                        result += '</span> <var>';
+                                        const resultArr = [];
                                         if (data.time.onlyEvenDays) {
                                             resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'));
                                         }
@@ -940,10 +952,9 @@
                                         result += resultArr.join(' <b>' + node._('node-red-contrib-sun-position/position-config:common.label.and') + '</b> ');
                                         result += '</var></div>';
                                     }
-
                                     if (data.time.months && data.time.months !== '*') {
                                         result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('blind-control.label.ruleTimeMonths');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMonths');
                                         result += '</span> <var>';
                                         const montharr = data.time.months.split(',');
                                         if (montharr.length === 2) {
@@ -976,7 +987,7 @@
 
                                     if (data.time.dateStart || data.time.dateEnd) {
                                         result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('blind-control.label.ruleTimeLimitStart');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitStart');
                                         result += '</span> <var>';
                                         if (enh) {
                                             const year = (new Date()).getFullYear();
@@ -985,7 +996,7 @@
                                             result += (getDateShort(data.time.dateStart) || '01-01');
                                         }
                                         result += '</var> <span> ';
-                                        result += node._('blind-control.label.ruleTimeLimitEnd');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitEnd');
                                         result += '</span> <var>';
                                         if (enh) {
                                             const year = (new Date()).getFullYear();
@@ -1002,15 +1013,15 @@
                             if (data.level && typeof data.level.type !== 'undefined') {
                                 if (data.level.type === 'levelND') {
                                     if (data.level.operator === 1) {
-                                        result += node._('blind-control.label.ruleLevelResetMin');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMin');
                                     } else if (data.level.operator === 2) {
-                                        result += node._('blind-control.label.ruleLevelResetMax');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMax');
                                     } else {
-                                        result += node._('blind-control.label.ruleLevelND');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                                     }
                                 } else {
                                     result += '<div class="indent-level-text"> <i class="fa fa-angle-down" aria-hidden="true"></i><span>';
-                                    result += node._('blind-control.label.ruleBlindLevel');
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevel');
                                     result += ': </span> ';
                                     result += data.level.operatorText;
                                     result += ' <var>';
@@ -1020,14 +1031,14 @@
                                 if (data.level.operator <= 0 || data.levelType === 'levelND') {
                                     if (data.slat.type !== 'none') {
                                         result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
-                                        result += node._('blind-control.label.ruleSlat');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat');
                                         result += ': </span> <var>';
                                         result += RED.nodes.getType('position-config').getValueLabel(node, data.slat.type, data.slat.value, null, length);
                                         result += '</var>';
                                     }
                                     if (data.topic) {
                                         result += '<div class="indent-topic-text"> <i class="fa fa-tasks" aria-hidden="true"></i><span>';
-                                        result += node._('blind-control.label.ruleTopic');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTopic');
                                         result += ': </span> <var>';
                                         result += data.topic;
                                         result += '</var>';
@@ -1035,12 +1046,12 @@
                                     }
                                     if (data.resetOverwrite) {
                                         result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-thumbs-o-down" aria-hidden="true"></i><span>';
-                                        result += node._('blind-control.label.ruleResetOverwrite');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite');
                                         result += '</span> </div>';
                                     }
                                 }
                             } else {
-                                result += node._('blind-control.label.ruleLevelND');
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                             }
                             result += '</div>';
                         } catch (err) {
@@ -1082,6 +1093,7 @@
                                 data.version = ruleVersion;
                             }
                             data.index = containerIndex;
+                            data.importance = 0;
                             if (!data.conditions) {
                                 data.valid = {};
                                 data.conditions = [];
@@ -1200,7 +1212,7 @@
                                         type            : (data.levelType || types.LevelFix.value),
                                         value           : (data.levelValue || 'closed (min)'),
                                         operator        : (parseInt(data.levelOp) || 0),
-                                        operatorText    : data.levelOpText || node._('blind-control.label.ruleLevelAbs')
+                                        operatorText    : data.levelOpText || node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
                                     };
                                 }
                                 if ((data.level.operator === 3) || (data.level.operator === 4)) {
@@ -1249,11 +1261,11 @@
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
                             const $btnEdit = $('<a />', {
                                 class: 'red-ui-button red-ui-button-small blind-rule-editBtn',
-                                title: node._('blind-control.label.editRule')
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.editRule')
                             }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
                             const $btnCpy = $('<a />', {
                                 class: 'red-ui-button red-ui-button-small blind-rule-duplicateBtn',
-                                title: node._('blind-control.label.duplicateRule')
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.duplicateRule')
                             }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
                             $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
@@ -1922,11 +1934,13 @@
                                     default: 'input',
                                     types: [
                                         types.OutputLevel,
+                                        types.OutputLevelInverse,
                                         types.OutputSlat,
                                         types.OutputTopic,
                                         types.OutputCtrlObj,
                                         'date',
                                         'str',
+                                        types.strPlaceholder,
                                         'num',
                                         'bool',
                                         'json',
@@ -2289,12 +2303,11 @@
                         }
                     }); // condition-container
                     $dialog.find('#dlg-ip-btctl-rule-condition-text').html(node._('blind-control.text.ruleCondition'));
-
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleTimeFrom')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
 
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
@@ -2394,11 +2407,13 @@
                         const year = (new Date()).getFullYear();
                         $dialogTimeLimitDateEnd.attr('min', year + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '01-01'));
                         $dialogTimeLimitDateEnd.attr('max', (year + 1) + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '12-31'));
+                        _dialogGenHelpText();
                     });
                     $dialogTimeLimitDateEnd.change(() => {
                         const year = (new Date()).getFullYear();
                         $dialogTimeLimitDateStart.attr('min', year + '-01-01');
                         $dialogTimeLimitDateStart.attr('max', $dialogTimeLimitDateEnd.val() || (year + '-12-31'));
+                        _dialogGenHelpText();
                     });
                     // #endregion dialogTimeLimit
                     // #region dialogLevel
@@ -2415,12 +2430,12 @@
                             'env',
                             'jsonata'
                         ]
-                    });
+                    }).change(() => { _dialogGenHelpText(); });
                     $dialogLevel.typedInput('width', '40%');
                     const $dialogLevelOperator = $dialog.find('#dlg-ip-btctl-rule-level-operator');
-                    $dialogLevelOperator.append($('<option></option>').val(0).text(node._('blind-control.label.ruleLevelAbs')));
-                    $dialogLevelOperator.append($('<option></option>').val(1).text(node._('blind-control.label.ruleLevelMin')));
-                    $dialogLevelOperator.append($('<option></option>').val(2).text(node._('blind-control.label.ruleLevelMax')));
+                    $dialogLevelOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
+                    $dialogLevelOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMin')));
+                    $dialogLevelOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
                     $dialogLevelOperator.change(() => {
                         if (parseInt($dialogLevelOperator.val()) <= 0) {
                             $('#dialog-row-slatPos').show();
@@ -2454,7 +2469,7 @@
                             'jsonata',
                             types.randomNumberCached
                         ]
-                    });
+                    }).change(() => { _dialogGenHelpText(); });
                     $dialogSlat.typedInput('width', '50%');
                     // #endregion dialogSlat
                     // #region default topic + importance
@@ -2613,6 +2628,7 @@
                                 noOffsetError:  true
                             });
                         }
+                        _dialogGenHelpText();
                     });
 
                     $dialogTimeMaxInput.change(() => {
@@ -2669,6 +2685,7 @@
                                 noOffsetError:  true
                             });
                         }
+                        _dialogGenHelpText();
                     });
                     $('.dialog-row-timeLimits :input').change(() => {
                         if (node.dialogAddData.timeout2) { clearTimeout(node.dialogAddData.timeout2); }
@@ -3157,11 +3174,11 @@
         <span><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span>
         <div class="form-row node-input-rule-container-row row-full-width">
             <ol id="node-input-rule-container"></ol>
-            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
-            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
-            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="blind-control.label.btnSort"></span></button>
-            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="blind-control.label.btnExport"></span></button>
-            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="blind-control.label.btnImport"></span></button>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
+            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
         </div>
     </div>
     <div class="form-row block-noindent is-to-show-initially">
@@ -3296,10 +3313,10 @@
     </div>
     <div class="form-row form-row-sunControlActive node-input-oversteer-container-row">
         <ol id="node-input-oversteer-container"></ol>
-        <button type="button" id="node-oversteer-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.btnAdd"></span></button> &nbsp;
-        <button type="button" id="node-oversteer-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="blind-control.label.btnClear"></span></button> &nbsp;
-        <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="blind-control.label.btnExport"></span></button>
-        <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="blind-control.label.btnImport"></span></button>
+        <button type="button" id="node-oversteer-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
+        <button type="button" id="node-oversteer-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
+        <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+        <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
     </div>
     <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
         <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
@@ -3386,7 +3403,7 @@
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMin"></span></label>
+            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin"></span></label>
             <input type="text" id="dlg-ip-btctl-rule-timeMin" class="ipMain dlg-ip-btctl-rule-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
@@ -3396,7 +3413,7 @@
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="blind-control.label.ruleTimeMax"></span></label>
+            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax"></span></label>
             <input type="text" id="dlg-ip-btctl-rule-timeMax" class="ipMain dlg-ip-btctl-rule-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
@@ -3469,19 +3486,19 @@
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-level">
-            <label for="dlg-ip-btctl-rule-level"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.ruleBlindLevel" ></span></label>
+            <label for="dlg-ip-btctl-rule-level"><i class="fa fa-angle-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevel" ></span></label>
             <input type="text" id="dlg-ip-btctl-rule-level" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.level"/>
             <select id="dlg-ip-btctl-rule-level-operator" class="ipadd dlg-ip-btctl-rule-level-operator" >
             </select>
         </div>
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-slatPos">
-            <label for="dlg-ip-btctl-rule-slatPos"><i class="fa fa-slack"></i> <span data-i18n="blind-control.label.ruleSlat" ></span></label>
+            <label for="dlg-ip-btctl-rule-slatPos"><i class="fa fa-slack"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat" ></span></label>
             <input type="text" id="dlg-ip-btctl-rule-slatPos" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.slat"/>
         </div>
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="blind-control.label.ruleOverwrite"></span></label>
+            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
-            <span data-i18n="blind-control.label.ruleResetOverwrite"></span>
+            <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite"></span>
         </div>
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
             <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
@@ -3490,7 +3507,7 @@
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-descr">
-            <label class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="blind-control.label.ruleDescription" ></span></label>
+            <label for="dlg-txt-btctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleDescription" ></span></label>
             <div id="dlg-txt-btctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
     </div>

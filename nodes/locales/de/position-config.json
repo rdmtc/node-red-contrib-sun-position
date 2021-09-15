@@ -20,7 +20,10 @@
             "onlyEvenDays":"nur gerade Tage",
             "onlyOddDays":"nur ungerade Tage",
             "onlyEvenWeeks":"nur gerade Wochen",
-            "onlyOddWeeks":"nur ungerade Wochen"
+            "onlyOddWeeks":"nur ungerade Wochen",
+            "between":"zwischen",
+            "and": "und",
+			"or": "oder"
         },
         "types": {
             "unlimited": "keine Limitierung",
@@ -73,12 +76,11 @@
 			"sunControlMaximize": "Sonnenlicht maximieren (⛄ Winter)",
             "payload":"payload",
             "level":"Rollladenposition",
+            "levelInverse":"Rollladenposition invers",
             "slat":"Lamellenposition",
             "topic":"topic",
             "ctrlObj":"Status object",
-            "between":"zwischen",
-            "and": "und",
-			"or": "oder"
+            "strPlaceholder": "string mit Platzhatern"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",
@@ -314,9 +316,54 @@
             "contain": "enthält",
             "containSome": "enthält irgendeins",
             "containEvery": "enthält alle"
+        },
+        "units": {
+            "ms": "ms",
+            "sec": "s",
+            "min": "min",
+            "hour": "h",
+            "day": "Tag",
+            "days": "Tage",
+            "week": "Woche",
+            "weeks": "Wochen"
         }
     },
     "ruleCtrl": {
+        "label": {
+            "outDated": "✎ Bitte editieren Sie diese Regel.",
+            "isInValid": "⚠️ Diese Regel ist ungültig und muss geändert werden!!",
+			"ruleTimeMax": "spätestens (max)",
+			"ruleTimeMin": "frühestens (min)",
+            "ruleTimeLimit": "limitiert",
+			"ruleTimeLimitStart": "nur von",
+			"ruleTimeLimitEnd": "bis",
+			"ruleTimeDays": "nur an folgenden Tagen",
+			"ruleTimeMonths": "nur an folgenden Monaten",
+			"ruleTopic": "Topic",
+			"ruleSlat": "Lamellenposition",
+			"rulePayload": "Payload:",
+			"rulePayloadND": "Kein Payload",
+			"ruleResetOverwrite": "manuelle Überschreibung verfällt wenn die Regel aktiv wird",
+			"ruleDescription": "Beschreibung",
+			"ruleBlindLevel": "Rollladenposition",
+            "ruleOverwrite": "überschreiben",
+			"ruleImportance":"Wichtung der Regel",
+			"ruleLevelAbs": "↕  Absolut",
+			"ruleLevelMin": "⭳❗  Minimum (übersteuernd)",
+			"ruleLevelMax": "⭱️❗  Maximum (übersteuernd)",
+			"ruleLevelResetMin": "⭳✋ Minimum zurücksetzen",
+			"ruleLevelResetMax": "⭱️✋ Maximum zurücksetzen",
+			"ruleLevelND": "standard level (e.g. sun control)",
+			"editRule": "Regel editieren",
+			"duplicateRule": "Regel duplizieren",
+			"ruleTimeFrom": "↧ von",
+			"ruleTimeUntil": "↥ bis",
+			"btnAdd": "hinzufügen",
+			"btnSort": "sortieren",
+			"btnClear": "leeren",
+			"btnExport": "",
+			"btnImport": ""
+        },
         "reasons": {
 			"overwriteNoExpire": "manuell überschrieben (Wichtigkeit __importance__), kein Verfall",
 			"overwriteExpire": "manuell überschrieben (Wichtigkeit __importance__), verfällt __dateISO__",

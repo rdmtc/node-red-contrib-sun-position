@@ -200,18 +200,14 @@
                 return lab || '?';
             },
             label() {
-                let suffix = '';
-                if (this.rules && (this.rules.length >0)) {
-                    suffix += '⏲';
-                }
                 if (this.name) {
-                    return this.name+' '+suffix;
+                    return this.name;
                 }
                 const result = this._('clock-timer.label.clock-timer');
                 if (this.topic && (this.topic.length + result.length <= 32)) {
-                    return this.topic + ':' + result+' '+suffix;
+                    return this.topic + ':' + result;
                 }
-                return result+' '+suffix;
+                return result;
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
@@ -441,7 +437,7 @@
                         width: 'calc(100% - 110px)',
                         defaultType: node.addIdType || (node.addId ? 'str' : types.Undefined.value),
                         defaultValue: '',
-                        types: [types.Undefined, 'str', 'flow', 'global', 'env']
+                        types: [types.Undefined, 'str', 'flow', 'global', 'env'] // types.MsgPayload, types.MsgTopic, types.MsgPayloadByTopic, types.MsgValue, 'msg',
                     });
                     // #endregion payloadDefault
                     // #region rules
@@ -541,9 +537,13 @@
                         const length = (enh) ? 60 : 30;
                         try {
                             if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && (typeof data.valid === 'undefined' || Object.keys(data.valid).length === 0))) {
-                                result += '<div>✎ Please edit this rule.</div>';
+                                result += '<div>';
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.outDated');
+                                result += '</div>';
                             } else if (!data.isValid) {
-                                result += '<div>⚠️ Rule is invalid and needs to be changed!!</div>';
+                                result += '<div>';
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.isInValid');
+                                result += '</div>';
                                 if (data.valid && Object.keys(data.valid).length > 0) {
                                     result += '<div><pre>';
                                     result += JSON.stringify(data.valid, null, '\t');
@@ -608,7 +608,7 @@
 
                                     if (data.timeMin && data.timeMin.type && data.timeMin.type !== 'none') {
                                         result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeMin');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin');
                                         result += '</span> <var>';
                                         result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMin.type, data.timeMin.value, null, length);
                                         result += '</var>';
@@ -620,7 +620,7 @@
                                     }
                                     if (data.timeMax && data.timeMax.type && data.timeMax.type !== 'none') {
                                         result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeMax');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax');
                                         result += '</span> <var>';
                                         result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMax.type, data.timeMax.value, null, length);
                                         result += '</var>';
@@ -630,39 +630,47 @@
                                         }
                                         result += '</div>';
                                     }
-                                    if ((data.time.days && data.time.days !== '*') || data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                    if (data.time.days && data.time.days !== '*') {
                                         result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeLimit');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeDays');
                                         result += '</span> <var>';
-                                        const resultArr = [];
-                                        if (data.time.days && data.time.days !== '*') {
-                                            const daysarr = data.time.days.split(',');
-                                            if (daysarr.length === 1) {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
-                                            } else if (data.time.days === '5,6,0') {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.12') + '-' +
-                                                    node._('node-red-contrib-sun-position/position-config:common.days.7'));
-                                            } else if (daysarr.length === 2) {
-                                                resultArr.push(node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)) + ',' +
-                                                    node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7)));
+                                        const daysarr = data.time.days.split(',');
+                                        if (daysarr.length === 1) {
+                                            result += (node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
+                                        } else if (data.time.days === '5,6,0') {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
+                                            result += '-';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                        } else if (daysarr.length === 2) {
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                            result += ' ';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.label.and');
+                                            result += ' ';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                        } else {
+                                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                            let isok = true;
+                                            let elF = parseInt(daysarr[0]);
+                                            daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                                            for (let index = 1; index < daysarr.length; index++) {
+                                                const element = parseInt(daysarr[index]);
+                                                isok = isok && (element === elF+1);
+                                                elF = element;
+                                                daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
+                                            }
+                                            if (isok) {
+                                                result += (daysarr[0] + '-' + daysarr[daysarr.length-1]);
                                             } else {
-                                                daysarr.sort((a, b) => parseInt(a) - parseInt(b));
-                                                let isok = true;
-                                                let elF = parseInt(daysarr[0]);
-                                                daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
-                                                for (let index = 1; index < daysarr.length; index++) {
-                                                    const element = parseInt(daysarr[index]);
-                                                    isok = isok && (element === elF+1);
-                                                    elF = element;
-                                                    daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
-                                                }
-                                                if (isok) {
-                                                    resultArr.push(daysarr[0] + '-' + daysarr[daysarr.length-1]);
-                                                } else {
-                                                    resultArr.push(daysarr.join(','));
-                                                }
+                                                result += (daysarr.join(','));
                                             }
                                         }
+                                        result += '</var></div>';
+                                    }
+                                    if (data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                        result += '<div class="indent-time-special"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimit');
+                                        result += '</span> <var>';
+                                        const resultArr = [];
                                         if (data.time.onlyEvenDays) {
                                             resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'));
                                         }
@@ -678,15 +686,16 @@
                                         result += resultArr.join(' <b>' + node._('node-red-contrib-sun-position/position-config:common.label.and') + '</b> ');
                                         result += '</var></div>';
                                     }
-
                                     if (data.time.months && data.time.months !== '*') {
                                         result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeMonths');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMonths');
                                         result += '</span> <var>';
                                         const montharr = data.time.months.split(',');
                                         if (montharr.length === 2) {
                                             result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                                            result += ',';
+                                            result += ' ';
+                                            result += node._('node-red-contrib-sun-position/position-config:common.label.and');
+                                            result += ' ';
                                             result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
                                         } else if (montharr.length === 1) {
                                             result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
@@ -714,7 +723,7 @@
 
                                     if (data.time.dateStart || data.time.dateEnd) {
                                         result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('clock-timer.label.ruleTimeLimitStart');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitStart');
                                         result += '</span> <var>';
                                         if (enh) {
                                             const year = (new Date()).getFullYear();
@@ -723,7 +732,7 @@
                                             result += (getDateShort(data.time.dateStart) || '01-01');
                                         }
                                         result += '</var> <span> ';
-                                        result += node._('clock-timer.label.ruleTimeLimitEnd');
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitEnd');
                                         result += '</span> <var>';
                                         if (enh) {
                                             const year = (new Date()).getFullYear();
@@ -739,7 +748,7 @@
                             result += '<div>';
                             if (data.payload && data.payload.type && data.payload.type !== 'none') {
                                 result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                                result += node._('clock-timer.label.rulePayload');
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.rulePayload');
                                 result += '</span> <var>';
                                 result += RED.nodes.getType('position-config').getValueLabel(node, data.payload.type, data.payload.value, null, length);
                                 result += '</var>';
@@ -747,7 +756,7 @@
                                 result += '</div>';
                                 if (data.topic) {
                                     result += '<div class="indent-topic-text"> <i class="fa fa-tasks" aria-hidden="true"></i><span>';
-                                    result += node._('clock-timer.label.ruleTopic');
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTopic');
                                     result += '</span> <var>';
                                     result += data.topic;
                                     result += '</var>';
@@ -755,11 +764,11 @@
                                 }
                                 if (data.resetOverwrite) {
                                     result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-thumbs-o-down" aria-hidden="true"></i><span>';
-                                    result += node._('clock-timer.label.ruleResetOverwrite');
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite');
                                     result += '</span> </div>';
                                 }
                             } else {
-                                result += node._('clock-timer.label.rulePayloadND');
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.rulePayloadND');
                             }
                             result += '</div>';
                         } catch (err) {
@@ -966,11 +975,11 @@
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
                             const $btnEdit = $('<a />', {
                                 class: 'red-ui-button red-ui-button-small clock-timer-rule-editBtn',
-                                title: node._('clock-timer.label.editRule')
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.editRule')
                             }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
                             const $btnCpy = $('<a />', {
                                 class: 'red-ui-button red-ui-button-small clock-timer-rule-duplicateBtn',
-                                title: node._('clock-timer.label.duplicateRule')
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.duplicateRule')
                             }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
                             $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
@@ -1174,6 +1183,7 @@
                                         types.OutputCtrlObj,
                                         'date',
                                         'str',
+                                        types.strPlaceholder,
                                         'num',
                                         'bool',
                                         'json',
@@ -1539,8 +1549,8 @@
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('clock-timer.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('clock-timer.label.ruleTimeFrom')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
 
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
@@ -2106,7 +2116,7 @@
                             }
                             $dialogTopic.val(data.topic || '');
                             $dialogImportance.val(data.importance || 0);
-                            $dialogResetOverwrite.prop('checked', !!data.resetOverwrite);
+                            $dialogResetOverwrite.prop('checked', (!!data.resetOverwrite));
 
                             _dialogGenHelpText();
                             dialogDataOnLoading = false;
@@ -2399,11 +2409,11 @@
         <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span>
         <div class="form-row node-input-rule-container-row row-full-width">
             <ol id="node-input-rule-container"></ol>
-            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.btnAdd"></span></button> &nbsp;
-            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="clock-timer.label.btnClear"></span></button> &nbsp;
-            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="clock-timer.label.btnSort"></span></button>
-            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="clock-timer.label.btnExport"></span></button>
-            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="clock-timer.label.btnImport"></span></button>
+            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
+            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
+            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
+            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
         </div>
     </div>
     <div class="form-row block-noindent is-to-show-initially">
@@ -2510,7 +2520,9 @@
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0 node-dialog-condition-container-row">
             <span><i class="fa fa-puzzle-piece"></i> <span id="dlg-ip-btctl-rule-condition-text"></span></span>
-            <ol id="dlg-ip-btctl-rule-condition-container"></ol>
+            <div class="dlg-ip-btctl-rule-condcontainer">
+                <ol id="dlg-ip-btctl-rule-condition-container"></ol>
+            </div>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-timeReg">
@@ -2526,23 +2538,23 @@
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMin"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-timeMin" class="ipMain dlg-ip-btctl-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
+            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeMin" class="ipMain dlg-ip-btctl-rule-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.time"/>
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
             <label for="dlg-ip-btctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMin"></span></label>
             <input type="text" id="dlg-ip-btctl-rule-offset-timeMin"class="ipMain dlg-ip-btctl-rule-offset-timeMin" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-btctl-rule-multiplier-timeMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeMin" >
+            <select  id="dlg-ip-btctl-rule-multiplier-timeMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeMin">
             </select>
         </div>
         <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="clock-timer.label.ruleTimeMax"></span></label>
+            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax"></span></label>
             <input type="text" id="dlg-ip-btctl-rule-timeMax" class="ipMain dlg-ip-btctl-rule-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.time">
         </div>
         <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
             <label for="dlg-ip-btctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="clock-timer.label.offset-timeMax"></span></label>
             <input type="text" id="dlg-ip-btctl-rule-offset-timeMax"class="ipMain dlg-ip-btctl-rule-offset-timeMax" value="" data-i18n="[placeholder]clock-timer.placeholder.offset">
-            <select  id="dlg-ip-btctl-rule-multiplier-timeMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeMax" >
+            <select  id="dlg-ip-btctl-rule-multiplier-timeMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeMax">
             </select>
         </div>
         <div class="dialog-row dialog-row-timeLimits-ph is-to-show-initially" id="dialog-row-timeConstraintsPlaceholder">
@@ -2602,8 +2614,8 @@
             <div id="dlg-ip-btctl-rule-timeDateLimit" class="dlg-ip-btctl-rule-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
                 <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDates"></span></div>
                 <div style="display:inline-block;">
-                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-start" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.start" min="2000-01-01" max="2000-12-31">
-                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-end" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.end" min="2000-01-01" max="2000-12-31">
+                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-start" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.start" min="2000-01-01" max="2000-12-31"/>
+                    <input type="date" id="dlg-ip-btctl-rule-timedatelimit-end" class="ipMain dlg-ip-btctl-rule-timedatelimit" value="" data-i18n="[placeholder]clock-timer.placeholder.end" min="2000-01-01" max="2000-12-31"/>
                 </div>
             </div>
         </div>
@@ -2626,14 +2638,9 @@
             <input type="text" id="dlg-ip-btctl-rule-payloadTimeFormat" class="ipadd" />
         </div>
         <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
-            <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;">
-            <span data-i18n="clock-timer.label.ruleResetOverwrite"></span>
-        </div>
-        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
-            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="clock-timer.label.ruleOverwrite"></span></label>
+            <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
-            <span data-i18n="clock-timer.label.ruleResetOverwrite"></span>
+            <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite"></span>
         </div>
         <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]clock-timer.placeholder.ruleTopic">
             <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
@@ -2642,7 +2649,7 @@
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-descr">
-            <label for="dlg-txt-btctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="clock-timer.label.ruleDescription" ></span></label>
+            <label for="dlg-txt-btctl-rule-descr" class="pb-1"><i class="fa fa-commenting-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleDescription" ></span></label>
             <div id="dlg-txt-btctl-rule-descr" class="pl-3" style="word-wrap:break-word;"></div>
         </div>
     </div>

@@ -78,9 +78,11 @@
 			"sunControlMaximize": "maximize sunlight (⛄ Winter)",
             "payload":"payload",
             "level":"blind level",
+            "levelInverse":"blind level inverse",
             "slat":"blind slat",
             "topic":"topic",
-            "ctrlObj":"status object"
+            "ctrlObj":"status object",
+            "strPlaceholder": "string with placeholder"
         },
         "typeOptions": {
             "moonRise": "moon rise",
@@ -337,11 +339,48 @@
             "sec": "s",
             "min": "min",
             "hour": "h",
-            "day": "days",
-            "week": "weeks"
+            "day": "day",
+            "days": "days",
+            "week": "week",
+            "weeks": "weeks"
         }
     },
     "ruleCtrl": {
+        "label": {
+            "outDated": "✎ Please edit this rule.",
+            "isInValid": "⚠️ Rule is invalid and needs to be changed!!",
+            "ruleTimeMin": "at the earliest (min)",
+            "ruleTimeMax": "no later than (max)",
+            "ruleTimeLimit": "limited",
+			"ruleTimeLimitStart": "only from",
+			"ruleTimeLimitEnd": "to",
+			"ruleTimeMonths": "only on month",
+			"ruleTimeDays": "only on day",
+			"ruleTopic": "Topic",
+			"ruleSlat": "Slat",
+			"rulePayload": "Payload: ",
+			"rulePayloadND": "No Payload",
+			"ruleResetOverwrite": "overwrite expire when rule gets active",
+			"ruleDescription": "Description",
+			"ruleBlindLevel": "blind position",
+			"ruleOverwrite": "overwrite",
+			"ruleImportance":"Overwrite Importance",
+			"ruleLevelAbs": "↕ absolute",
+			"ruleLevelMin": "⭳❗ minimum (oversteer)",
+			"ruleLevelMax": "⭱️❗ maximum (oversteer)",
+			"ruleLevelResetMin": "⭳✋ reset minimum",
+			"ruleLevelResetMax": "⭱️✋ reset maximum",
+			"ruleLevelND": "use default level (e.g. sun control)",
+			"editRule": "edit the rule",
+			"duplicateRule": "duplicate the rule",
+			"ruleTimeFrom": "↧ from",
+			"ruleTimeUntil": "↥ until",
+			"btnAdd": "add",
+			"btnSort": "sort",
+			"btnClear": "clear",
+			"btnExport": "",
+			"btnImport": ""
+        },
         "reasons": {
 			"overwriteNoExpire": "position is overwritten with importance __importance__",
 			"overwriteExpire": "position is overwritten with importance __importance__, will expire __dateISO__",

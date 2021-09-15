@@ -944,7 +944,7 @@ function limitDate(limit, d) {
         }
     }
 
-    if (limit.onlyEvenDays == true || limit.onlyOddDays == 'true') { // eslint-disable-line eqeqeq
+    if ((limit.onlyEvenDays == true || limit.onlyEvenDays == 'true') && limit.onlyOddDays != true && limit.onlyOddDays != 'true') { // eslint-disable-line eqeqeq
         let time = d.getDate();
         while ((time % 2 !== 0)) {
             // odd
@@ -953,7 +953,7 @@ function limitDate(limit, d) {
             hasChanged = true;
         }
     }
-    if (limit.onlyOddDays == true || limit.onlyOddDays == 'true') { // eslint-disable-line eqeqeq
+    if ((limit.onlyOddDays == true || limit.onlyOddDays == 'true') && limit.onlyEvenDays != true && limit.onlyEvenDays != 'true') { // eslint-disable-line eqeqeq
         let time = d.getDate();
         while((time % 2 === 0)) {
             // even
@@ -962,7 +962,7 @@ function limitDate(limit, d) {
             hasChanged = true;
         }
     }
-    if (limit.onlyEvenWeeks == true || limit.onlyEvenWeeks == 'true') { // eslint-disable-line eqeqeq
+    if ((limit.onlyEvenWeeks == true || limit.onlyEvenWeeks == 'true') && limit.onlyOddWeeks != true && limit.onlyOddWeeks != 'true') { // eslint-disable-line eqeqeq
         let week = getWeekOfYear(d);
         while (week[1] % 2 !== 0) {
             // odd
@@ -971,7 +971,7 @@ function limitDate(limit, d) {
             hasChanged = true;
         }
     }
-    if (limit.onlyOddWeeks == true || limit.onlyOddWeeks == 'true' ) { // eslint-disable-line eqeqeq
+    if ((limit.onlyOddWeeks == true || limit.onlyOddWeeks == 'true' ) && limit.onlyEvenWeeks != true && limit.onlyEvenWeeks != 'true') { // eslint-disable-line eqeqeq
         let week = getWeekOfYear(d);
         while(week[1] % 2 === 0) {
             // even

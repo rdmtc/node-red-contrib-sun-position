@@ -534,8 +534,8 @@ module.exports = function (RED) {
                     conditional: ruleSelMin.conditional,
                     timeLimited: (!!ruleSelMin.time),
                     conditon: ruleSelMin.conditon,
-                    time: ruleSelMin.timeData,
-                    slat: node.positionConfig.getPropValue(node, msg, ruleSelMin.slat, false, oNow.dNow)
+                    time: ruleSelMin.timeData
+                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMin.slat, false, oNow.dNow)
                     // importance: ruleSelMin.importance,
                     // resetOverwrite: ruleSelMin.resetOverwrite,
                     // topic : ruleSelMin.topic
@@ -555,8 +555,8 @@ module.exports = function (RED) {
                     conditional: ruleSelMax.conditional,
                     timeLimited: (!!ruleSelMax.time),
                     conditon: ruleSelMax.conditon,
-                    time: ruleSelMax.timeData,
-                    slat: node.positionConfig.getPropValue(node, msg, ruleSelMax.slat, false, oNow.dNow)
+                    time: ruleSelMax.timeData
+                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMax.slat, false, oNow.dNow)
                     // importance: ruleSelMax.importance,
                     // resetOverwrite: ruleSelMax.resetOverwrite,
                     // topic : ruleSelMax.topic
@@ -1150,6 +1150,7 @@ module.exports = function (RED) {
                     });
                 }
 
+                blindCtrl.slat = node.level.slat;
                 if (node.levelReverse) {
                     blindCtrl.level = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
                     blindCtrl.levelInverse = isNaN(node.level.current) ? node.previousData.level : node.level.current;
@@ -1171,7 +1172,7 @@ module.exports = function (RED) {
                     id: blindCtrl.id,
                     level: blindCtrl.level,
                     levelInverse: blindCtrl.levelInverse,
-                    slat: blindCtrl.slat,
+                    slat: node.level.slat,
                     code: node.reason.code,
                     state: node.reason.state,
                     description: node.reason.description,
@@ -1198,12 +1199,16 @@ module.exports = function (RED) {
                             resultObj = topic;
                         } else if (prop.type === 'level') {
                             resultObj = blindCtrl.level;
+                        } else if (prop.type === 'levelInverse') {
+                            resultObj = blindCtrl.levelInverse;
                         } else if (prop.type === 'slat') {
-                            resultObj = blindCtrl.slat;
+                            resultObj = node.level.slat;
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = blindCtrl;
+                        } else if (prop.type === 'strPlaceholder') {
+                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = this.getPropValue(this, msg, prop, false, oNow.dNow, replaceAttrs);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {

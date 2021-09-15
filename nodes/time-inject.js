@@ -637,19 +637,25 @@ module.exports = function (RED) {
             }
         };
 
-        node.getTimeUnit = mstime => {
+        node.getIntervalText = (mstime, val) => {
             if (mstime === 604800000) {
-                return RED._('node-red-contrib-sun-position/position-config:common.units.week');
+                if (val === 1) {
+                    return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.week');
+                }
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.weeks');
             } else if (mstime === 86400000) {
-                return RED._('node-red-contrib-sun-position/position-config:common.units.day');
+                if (val === 1) {
+                    return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.day');
+                }
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.days');
             } else if (mstime === 3600000) {
-                return RED._('node-red-contrib-sun-position/position-config:common.units.hour');
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.hour');
             } else if (mstime === 60000) {
-                return RED._('node-red-contrib-sun-position/position-config:common.units.min');
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.min');
             } else if (mstime === 1000) {
-                return RED._('node-red-contrib-sun-position/position-config:common.units.sec');
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.sec');
             }
-            return RED._('node-red-contrib-sun-position/position-config:common.units.ms');
+            return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.ms');
         };
 
         /**
@@ -690,7 +696,7 @@ module.exports = function (RED) {
                         });
                     } else {
                         node.status({
-                            text: ' ↻' + node.intervalOrgVal + node.intervalOrgUnit
+                            text: ' ↻' + node.intervalText
                         });
                         /*
                         node.status({
@@ -703,7 +709,7 @@ module.exports = function (RED) {
                 node.send(node.prepOutMsg({ type: 'interval' }));
             }, millisec);
             node.status({
-                text: node.positionConfig.toTimeString(new Date(tsStart)) + ' ↻' + node.intervalOrgVal + node.intervalOrgUnit
+                text: node.positionConfig.toTimeString(new Date(tsStart)) + ' ↻' + node.intervalText
             });
         };
 
@@ -745,8 +751,7 @@ module.exports = function (RED) {
             if (node.intervalTime <= 0) {
                 throw new Error('Interval wrong!');
             } else {
-                node.intervalOrgVal = node.intervalTime;
-                node.intervalOrgUnit = node.getTimeUnit(node.intervalCountMultiplier);
+                node.intervalText = node.getIntervalText(node.intervalCountMultiplier, node.intervalTime);
                 if (node.intervalCountMultiplier > 0) {
                     node.intervalTime = Math.floor(node.intervalTime * node.intervalCountMultiplier);
                 }

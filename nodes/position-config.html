@@ -299,6 +299,7 @@
                         return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
                     case 'string':
                     case 'str':
+                    case 'strPlaceholder':
                     case 'dayOfMonth':
                         if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
                         return '"' + RED.nodes.getType('position-config').clipValueLength(v, l) + '"' + suffix;

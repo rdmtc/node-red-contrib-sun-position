@@ -217,6 +217,11 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypePayloadByTopic.svg',
             hasValue: true
         },
+        strPlaceholder: {
+            value: 'strPlaceholder',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.strPlaceholder'),
+            hasValue: false
+        },
         numPercent: {
             value: 'numPct',
             label: node._('node-red-contrib-sun-position/position-config:common.types.numPercent'),

@@ -525,8 +525,10 @@ module.exports = function (RED) {
                             resultObj = node.payload.current;
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = timeCtrl;
+                        } else if (prop.type === 'strPlaceholder') {
+                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = this.getPropValue(this, msg, prop, false, oNow.dNow, replaceAttrs);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow, replaceAttrs);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {

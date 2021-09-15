@@ -633,7 +633,7 @@ function initializeCtrl(REDLib, node, config) {
                     type            : (rule.levelType || 'levelFixed'),
                     value           : (rule.levelValue || 'closed (min)'),
                     operator        : (parseInt(rule.levelOp) || cRuleAbsolute),
-                    operatorText    : rule.levelOpText || RED._('blind-control.label.ruleLevelAbs')
+                    operatorText    : rule.levelOpText || RED._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
                 };
             }
             if (!rule.slat) {
