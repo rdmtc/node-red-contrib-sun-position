@@ -88,6 +88,7 @@ This can be also used to go back to an older Version.
   - renamed `msg.resetOnSameValue` to `msg.resetOnSameAsLastValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
   - added slat position #250
   - in opposite to the mode `maximize sunlight (⛄ Winter)` added the `minimize sunlight (🕶️)` mode #284
+  - added option to setup a rule which prevents the node to send anything out #280
 
 ### 1.2.3:  BugFix
 
