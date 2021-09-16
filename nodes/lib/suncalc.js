@@ -710,7 +710,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         };
     };
 
-    SunCalc.getNextMoonPhases = function (dateValue, countNext) {
+    SunCalc.getNextMoonPhases = function (dateValue) {
         // calculates the difference in ms between the sirst fullMoon 2000 and given Date
         const diffBase = dateValue - firstNewMoon2000;
         // Calculate modulus to drop completed cycles
