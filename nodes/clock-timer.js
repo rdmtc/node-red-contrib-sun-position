@@ -499,7 +499,6 @@ module.exports = function (RED) {
                     state: node.reason.state,
                     description: node.reason.description,
                     rule: ruleId,
-                    newtopic: topic,
                     topic: msg.topic,
                     payload: msg.payload
                 };

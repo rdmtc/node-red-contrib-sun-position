@@ -1211,7 +1211,6 @@ module.exports = function (RED) {
                     description: node.reason.description,
                     rule: ruleId,
                     mode: node.context().get('mode', node.storeName) || node.sunData.mode,
-                    newtopic: topic,
                     topic: msg.topic,
                     payload: msg.payload
                 };
