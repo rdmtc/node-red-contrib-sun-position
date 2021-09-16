@@ -13,7 +13,6 @@ const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 // (function() {
 /*******************************************************************************************************/
 const moonPhases = [{
-    pos: 0,
     id: 'newMoon',
     emoji: '🌚',
     code: ':new_moon_with_face:',
@@ -22,7 +21,6 @@ const moonPhases = [{
     css: 'wi-moon-new'
 },
 {
-    pos: 1,
     id: 'waxingCrescentMoon',
     emoji: '🌒',
     code: ':waxing_crescent_moon:',
@@ -31,7 +29,6 @@ const moonPhases = [{
     css: 'wi-moon-wax-cres'
 },
 {
-    pos: 2,
     id: 'firstQuarterMoon',
     emoji: '🌓',
     code: ':first_quarter_moon:',
@@ -40,7 +37,6 @@ const moonPhases = [{
     css: 'wi-moon-first-quart'
 },
 {
-    pos: 3,
     id: 'waxingGibbousMoon',
     emoji: '🌔',
     code: ':waxing_gibbous_moon:',
@@ -49,7 +45,6 @@ const moonPhases = [{
     css: 'wi-moon-wax-gibb'
 },
 {
-    pos: 4,
     id: 'fullMoon',
     emoji: '🌝',
     code: ':full_moon_with_face:',
@@ -58,7 +53,6 @@ const moonPhases = [{
     css: 'wi-moon-full'
 },
 {
-    pos: 5,
     id: 'waningGibbousMoon',
     emoji: '🌖',
     code: ':waning_gibbous_moon:',
@@ -67,16 +61,14 @@ const moonPhases = [{
     css: 'wi-moon-wan-gibb'
 },
 {
-    pos: 6,
-    id: 'lastQuarterMoon',
+    id: 'thirdQuarterMoon',
     emoji: '🌗',
     code: ':last_quarter_moon:',
-    name: 'Last Quarter',
+    name: 'third Quarter',
     weight: 1,
     css: 'wi-moon-third-quart'
 },
 {
-    pos: 7,
     id: 'waningCrescentMoon',
     emoji: '🌘',
     code: ':waning_crescent_moon:',
@@ -1054,6 +1046,9 @@ module.exports = function (RED) {
             expr.registerFunction('getMoonIllumination', date => {
                 return this.getMoonIllumination(date);
             }, '<(osn)?:(ol)>');
+            expr.registerFunction('getNextMoonPhases', date => {
+                return this.getNextMoonPhases(date);
+            }, '<(osn)?:(ol)>');
             expr.registerFunction('getMoonPhase', date => {
                 return this.getMoonPhase(date);
             }, '<(osn)?:(ol)>');
@@ -1382,37 +1377,27 @@ module.exports = function (RED) {
 
             const moonIllum = sunCalc.getMoonIllumination(date.valueOf());
             const result = Object.assign({}, moonIllum);
-
-            if (moonIllum.phase < 0.01) {
-                // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
-                result.phase = moonPhases[0];
-            } else if (moonIllum.phase < 0.25) {
-                // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw. zunehmende Sichel(0° < Phasenwinkel < 90°),
-                result.phase = moonPhases[1];
-            } else if (moonIllum.phase < 0.26) {
-                // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
-                result.phase = moonPhases[2];
-            } else if (moonIllum.phase < 0.50) {
-                // 0.25 - 0.5   Waxing Gibbous      -   zweites Viertel(90° < Phasenwinkel < 180°),
-                result.phase = moonPhases[3];
-            } else if (moonIllum.phase < 0.51) {
-                // 0.5	        Full Moon           -   Vollmond(Phasenwinkel = 180°),
-                result.phase = moonPhases[4];
-            } else if (moonIllum.phase <= 0.75) {
-                // 0.5 - 0.75    Waning Gibbous     -   drittes Viertel (180° < Phasenwinkel < 270°),
-                result.phase = moonPhases[5];
-            } else if (moonIllum.phase < 0.76) {
-                // 0.75	        Last Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
-                result.phase = moonPhases[6];
-            } else {
-                // Waning Crescent                  -   letztes Viertel bzw. abnehmende Sichel(Phasenwinkel > 270°).
-                result.phase = moonPhases[7];
-            }
+            const phasePercent = moonIllum.phase;
+            result.phasePercent = phasePercent;
+            result.phase = moonPhases[moonIllum.phaseNumber];
             result.phase.nameAlt = RED._('common.typeOptions.' + result.phase.id);
-            result.phase.value = moonIllum.phase;
-            result.phase.angle = (this.angleType === 'rad') ? (moonIllum.phase * 360) / (180 / Math.PI) : moonIllum.phase * 360;
+            result.phase.value = phasePercent;
+            result.phase.angle = (this.angleType === 'rad') ? (moonIllum.angle * 360) / (180 / Math.PI) : moonIllum.angle * 360;
 
             return result;
+        }
+
+        getNextMoonPhases(date) {
+            if (!hlp.isValidDate(date)) {
+                const dto = new Date(date);
+                if (hlp.isValidDate(dto)) {
+                    date = dto;
+                } else {
+                    date = new Date();
+                }
+            }
+
+            return sunCalc.getNextMoonPhases(date.valueOf());
         }
 
         getMoonCalc(date, calcTimes, moonInSky, specLatitude, specLongitude) {
@@ -1460,6 +1445,7 @@ module.exports = function (RED) {
                     angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
                     fraction: moonIllum.fraction,
                     phase: moonIllum.phase,
+                    nextPhase: sunCalc.getNextMoonPhases(date.valueOf()),
                     zenithAngle: (this.angleType === 'deg') ? 180 / Math.PI * (moonIllum.angle - moonPos.parallacticAngle) : moonIllum.angle - moonPos.parallacticAngle
                 }
             };

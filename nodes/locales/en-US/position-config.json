@@ -130,7 +130,7 @@
             "waxingGibbousMoon": "Waxing Gibbous 🌔",
             "fullMoon": "Full Moon 🌝",
             "waningGibbousMoon": "Waning Gibbous 🌖",
-            "lastQuarterMoon": "Last Quarter 🌗",
+            "thirdQuarterMoon": "Third Quarter 🌗",
             "waningCrescentMoon": "Waning Crescent 🌘",
             "PlTRes":"msg.payload if msg.topic contains \"__topic__\""
         },

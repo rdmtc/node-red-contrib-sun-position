@@ -34,6 +34,7 @@ module.exports = {
     convertDateTimeZone,
     isValidDate,
     isoStringToDate,
+    roundToHour,
     normalizeDate,
     limitDate,
     getTimeOfText,
@@ -805,7 +806,17 @@ const parseDate = dateString => {
     const hrOffset = offsetMult * (+b[7] || 0);
     const minOffset = offsetMult * (+b[8] || 0);
     return new Date(Date.UTC(+b[0], +b[1] - 1, +b[2], +b[3] + hrOffset, +b[4] + minOffset, +b[5], +b[6] || 0));
-}; /*
+}; */
+
+/**
+ * Round a date to the nearest full Hour
+ * @param {DATE} date Date to round
+ * @returns {DATE} Date round to next full Hour
+ */
+function roundToHour(date) {
+    const p = 60 * 60 * 1000; // milliseconds in an hour
+    return new Date(Math.round(date.getTime() / p ) * p);
+}
 
 /*******************************************************************************************************/
 /**

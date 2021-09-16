@@ -24,6 +24,9 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const J1970 = 2440587.5;
     const J2000 = 2451545;
 
+    const lunarDaysMs = 2551442778; // The duration in days of a lunar cycle is 29.53058770576
+    const firstNewMoon2000 = 947178840000; // first newMoon in the year 2000 2000-01-06 18:14
+
     /**
      * convert date from Julian calendar
      * @param {number} day nmber in julian calendar to convert
@@ -695,12 +698,86 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
         const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
             cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
+        const phase = 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI;
 
         return {
             fraction: (1 + cos(inc)) / 2,
-            phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
-            angle
+            phase,
+            phaseTest: 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
+            phaseNumber: SunCalc.getMoonPhase(phase),
+            angle,
+            angleDegrees: 180 / Math.PI * angle
         };
+    };
+
+    SunCalc.getNextMoonPhases = function (dateValue, countNext) {
+        // calculates the difference in ms between the sirst fullMoon 2000 and given Date
+        const diffBase = dateValue - firstNewMoon2000;
+        // Calculate modulus to drop completed cycles
+        let cycleModMs = diffBase % lunarDaysMs;
+        // If negative number (date before new moon 2000) add lunarDaysMs
+        if ( cycleModMs < 0 ) { cycleModMs += lunarDaysMs; }
+        const nextNewMoon = (lunarDaysMs - cycleModMs) + dateValue;
+        let nextFullMoon = ((lunarDaysMs/2) - cycleModMs) + dateValue;
+        if (nextFullMoon < dateValue) { nextFullMoon += lunarDaysMs; }
+        const quater = (lunarDaysMs/4);
+        let nextFirstQuarter = (quater - cycleModMs) + dateValue;
+        if (nextFirstQuarter < dateValue) { nextFirstQuarter += lunarDaysMs; }
+        let nextThirdQuarter = (lunarDaysMs - quater - cycleModMs) + dateValue;
+        if (nextThirdQuarter < dateValue) { nextThirdQuarter += lunarDaysMs; }
+        // Calculate the fraction of the moon cycle
+        // const currentfrac = cycleModMs / lunarDaysMs;
+        const next = Math.min(nextNewMoon,nextFirstQuarter,nextFullMoon,nextThirdQuarter);
+        return {
+            next : {
+                value: next,
+                date: (new Date(next)).toISOString(),
+                type: (next === nextNewMoon) ? 'newMoon' : ((next === nextFirstQuarter) ? 'firstQuarter' : ((next === nextFullMoon) ? 'fullMoon' : 'thirdQuarter'))
+            },
+            newMoon: {
+                value: nextNewMoon,
+                date: (new Date(nextNewMoon)).toISOString()
+            },
+            fullMoon: {
+                value: nextFullMoon,
+                date: (new Date(nextFullMoon)).toISOString()
+            },
+            firstQuarter: {
+                value: nextFirstQuarter,
+                date: (new Date(nextFirstQuarter)).toISOString()
+            },
+            thirdQuarter: {
+                value: nextThirdQuarter,
+                date: (new Date(nextThirdQuarter)).toISOString()
+            }
+        };
+    };
+
+    SunCalc.getMoonPhase = function (phasePercent) {
+        if (phasePercent > 0.976 || phasePercent < 0.024) {
+            // 0            New Moon            -   Neumond(Phasenwinkel = 0°)
+            return 0;
+        } else if (phasePercent < 0.226) {
+            // 0 - 0.25     Waxing Crescent     -   erstes Viertel bzw. zunehmende Sichel(0° < Phasenwinkel < 90°),
+            return 1;
+        } else if (phasePercent < 0.274) {
+            // 0.25	        First Quarter       -   zunehmender Halbmond(astronomisch: erstes Viertel, Phasenwinkel = 90°),
+            return 2;
+        } else if (phasePercent < 0.476) {
+            // 0.25 - 0.5   Waxing Gibbous      -   zweites Viertel(90° < Phasenwinkel < 180°),
+            return 3;
+        } else if (phasePercent < 0.524) {
+            // 0.5	        Full Moon           -   Vollmond(Phasenwinkel = 180°),
+            return 4;
+        } else if (phasePercent < 0.726) {
+            // 0.5 - 0.75    Waning Gibbous     -   drittes Viertel (180° < Phasenwinkel < 270°),
+            return 5;
+        } else if (phasePercent < 0.774) {
+            // 0.75	        Third Quarter        -   abnehmender Halbmond(astronomisch: letztes Viertel, Phasenwinkel = 270°),
+            return 6;
+        }
+        // Waning Crescent                  -   letztes Viertel bzw. abnehmende Sichel(Phasenwinkel > 270°).
+        return 7;
     };
 
     /**

@@ -26,6 +26,7 @@ This can be also used to go back to an older Version.
   - added css property to moonPhases object an using css from [here](https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md)
   - for offset values of a random number a cached value will be used which will be only generated once per day. #302
   - selection of random number is available in more places
+  - allow negative altitudePercent #259
 
 - time-inject
   - fixed error if only flow/global context is set #252
@@ -41,6 +42,7 @@ This can be also used to go back to an older Version.
 
 - moon-position
   - moon times will now be has additional property `timesNext` with the values for the times of the next day #307
+  - added next moon phase date time #296
 
 - blind-control + clock-time
   - added possibility to copy rules to clipboard and paste rules from clipboard
@@ -52,17 +54,47 @@ This can be also used to go back to an older Version.
   - No more messages are sent at the first output if the rule has changed but the payload (level/slat) has remained the same.
     - A message will be sent if the topic has changed.
   - overwrite will be written to node context and restored on recreation - allows overwrite be stable on deploy #300
-
-- blind-control only
-  - redesigned oversteer, now unlimited oversteer can defined
-  - oversteer can be defined only valid for special mode
-  - removed minimum altitude settings
-    - for functionality the downward compatibility is given by automatic adoption of the setting as new first oversteer, which has the same effect.
-    - no longer specific output of the reason (instead of "below the minimum elevation angle" will output "oversteer 1")
-  - window settings as typedInput, which allow to use from flow, global context or environment - node can better used in a subFlow
-  - per message set mode will be written to node context and to thus this will be stable on deploy
-    - needs to delete values of context on change
-  - current mode will no longer part of the node label/name, it will be displayed in the node state #321
+  - No longer configuration of number of outputs. Node will always have two outputs
+    - The message send to the first output will no longer be send on rule change, only on level/payload changes.
+    - The message on the first output is fully configurable.
+    - A property can be setup to be a string with placeholders. (The same placeholders can be used for the topic.):
+      - blind-control
+        - `%name%` - name of the node
+        - `%id%` - ID of the node
+        - `%level%` - level
+        - `%levelInverse%` - level, but inverse
+        - `%slat%` slat position
+        - `%code%` - node.reason.code,
+        - `%state%` - node.reason.state,
+        - `%description%` - node.reason.description,
+        - `%rule%` - ID of the active rule (if rule was active)
+        - `%mode%` - current mode
+        - `%topic%` - `msg.topic` of the incoming (trigger) message (if available)
+        - `%payload%` - `msg.payload` of the incoming (trigger) message (if available)
+      - clock-timer
+        - `%name%` - name of the node
+        - `%id%` - ID of the node
+        - `%code%` - node.reason.code
+        - `%state%` - node.reason.state
+        - `%description%` - node.reason.description
+        - `%rule%` - ID of the active rule (if rule was active)
+        - `%topic%` - `msg.topic` of the incoming (trigger) message (if available)
+        - `%payload%` - `msg.payload` of the incoming (trigger) message (if available)
+  - The name of the node (or the id if no name is given in the config) can be configured in the output message - #238
+    - this information will be send as `msg.payload.name` to the second output
+  - ID of the node can be send
+    - this information will be send as `msg.payload.id` to the second output if two outputs are configured
+  - blind-control only changes
+    - redesigned oversteer, now unlimited oversteer can defined
+    - oversteer can be defined only valid for special mode
+    - removed minimum altitude settings
+      - for functionality the downward compatibility is given by automatic adoption of the setting as new first oversteer, which has the same effect.
+      - no longer specific output of the reason (instead of "below the minimum elevation angle" will output "oversteer 1")
+    - window settings as typedInput, which allow to use from flow, global context or environment - node can better used in a subFlow
+    - per message set mode will be written to node context and to thus this will be stable on deploy
+      - needs to delete values of context on change
+    - current mode will no longer part of the node label/name, it will be displayed in the node state #321
+    - added option to setup a rule which prevents the node to send anything out #280
 
 - *time compare and change* + *time span*
   - fixed parsing of ECMA-262 (simplified ISO8601) Format times (e.g. 2021-05-17T08:45:00.000Z) #250
@@ -82,13 +114,12 @@ This can be also used to go back to an older Version.
     - `msg.blindCtrl.name` / `msg.timeCtrl.name` which is the name of the node (or the id if no name is given in the config) - #238
       - this information will be send as `msg.payload.name` to the second output if two outputs are configured
     - `msg.blindCtrl.id` / `msg.timeCtrl.id` which is the id of the node
-      - this information will be send as `msg.payload.id` to the second output if two outputs are configured
+    - this information will be send as `msg.payload.id` to the second output if two outputs are configured
 
 - blind-control only
   - renamed `msg.resetOnSameValue` to `msg.resetOnSameAsLastValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
   - added slat position #250
   - in opposite to the mode `maximize sunlight (⛄ Winter)` added the `minimize sunlight (🕶️)` mode #284
-  - added option to setup a rule which prevents the node to send anything out #280
 
 ### 1.2.3:  BugFix
 
