@@ -12,6 +12,7 @@ const cRuleFrom = 1;
 const cRuleAbsolute = 0;
 const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
 const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
+const cRuleOff = 9;
 const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
 const cWinterMode = 1;
@@ -596,6 +597,9 @@ module.exports = function (RED) {
             }
         };
         if (ruleSel) {
+            if (ruleSel.level.operator === cRuleOff) {
+                return null;
+            }
             if (node.autoTrigger) {
                 if (ruleSel.time && ruleSel.timeData.ts > oNow.nowNr) {
                     node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
@@ -663,6 +667,8 @@ module.exports = function (RED) {
         }
         livingRuleData.active = false;
         livingRuleData.id = -1;
+        livingRuleData.importance = 0;
+        livingRuleData.resetOverwrite = false;
         livingRuleData.level = node.nodeData.levelDefault;
         livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
         livingRuleData.topic = node.nodeData.topic;
@@ -1102,6 +1108,11 @@ module.exports = function (RED) {
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
                     blindCtrl.rule = checkRules(node, msg, oNow, tempData);
+                    if (blindCtrl.rule === null) {
+                        // rule set the controller off
+                        done();
+                        return null;
+                    }
                     node.previousData.last.ruleId = blindCtrl.rule.id;
                     node.previousData.last.ruleLevel = blindCtrl.rule.level;
                     node.previousData.last.ruleTopic = blindCtrl.rule.topic;
@@ -1194,7 +1205,7 @@ module.exports = function (RED) {
                     id: blindCtrl.id,
                     level: blindCtrl.level,
                     levelInverse: blindCtrl.levelInverse,
-                    slat: node.level.slat,
+                    slat: blindCtrl.slat,
                     code: node.reason.code,
                     state: node.reason.state,
                     description: node.reason.description,
@@ -1207,13 +1218,11 @@ module.exports = function (RED) {
                 if (topic) {
                     topic = hlp.topicReplace(topic, replaceAttrs);
                 }
-
                 if ((!isNaN(node.level.current)) &&
-                    (!isNaN(node.reason.code)) &&
                     ((node.level.current !== node.previousData.level) ||
-                    (node.reason.code !== node.previousData.reasonCode) ||
                     (node.level.slat !== node.previousData.slat) ||
                     (node.level.topic !== node.previousData.topic))) {
+                    const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
                         let resultObj = null;
@@ -1236,14 +1245,13 @@ module.exports = function (RED) {
                             if (resultObj.error) {
                                 this.error('error on getting result: "' + resultObj.error + '"');
                             } else {
-                                node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                                node.positionConfig.setMessageProp(this, msgOut, prop.outType, prop.outValue, resultObj);
                             }
                         }
-                        // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                     }
-                    send([msg, { topic, payload: blindCtrl }]);
+                    send([msgOut, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
                 } else {
-                    send([null, { topic, payload: blindCtrl }]);
+                    send([null, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
                 }
                 node.previousData.usedRule = ruleId;
                 node.context().set('cacheData', tempData, node.storeName);

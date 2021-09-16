@@ -1019,6 +1019,8 @@
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMin');
                                     } else if (data.level.operator === 2) {
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMax');
+                                    } else if (data.level.operator === 9) {
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff');
                                     } else {
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                                     }
@@ -2440,12 +2442,20 @@
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
+                    $dialogLevelOperator.append($('<option></option>').val(9).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff')));
                     $dialogLevelOperator.change(() => {
                         if (parseInt($dialogLevelOperator.val()) <= 0) {
+                            $dialogLevel.typedInput('hide');
                             $('#dialog-row-slatPos').show();
                             $('#dialog-row-resetOverwrite').show();
                             $('#dialog-row-topic').show();
+                        } else if (parseInt($dialogLevelOperator.val()) === 9) {
+                            $dialogLevel.typedInput('hide');
+                            $('#dialog-row-slatPos').hide();
+                            $('#dialog-row-resetOverwrite').hide();
+                            $('#dialog-row-topic').hide();
                         } else {
+                            $dialogLevel.typedInput('show');
                             $('#dialog-row-slatPos').hide();
                             $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
@@ -2856,6 +2866,10 @@
                                 result.importance = parseInt($dialogImportance.val());
                                 result.resetOverwrite = $dialogResetOverwrite.is(':checked');
                             }
+                            if (result.level.operator === 9) {
+                                result.level.type = types.LevelND.value;
+                                result.level.value = '';
+                            }
 
                             $dialogConditionContainer.editableList('items').each(function(_i) {
                                 const $cond = $(this);
@@ -2947,7 +2961,7 @@
                                 }
                                 result.isValid = result.isValid && result.valid.time && result.valid.timeMin && result.valid.timeMax;
                             }
-                            result.valid.level = $dialogLevel.typedInput('validate');
+                            result.valid.level = (result.level.operator === 9) || $dialogLevel.typedInput('validate');
                             result.valid.slat = $dialogSlat.typedInput('validate');
                             result.isValid = result.isValid && result.valid.level && result.valid.slat;
                         } catch (err) {

@@ -371,6 +371,7 @@
 			"ruleLevelMax": "⭱️❗ maximum (oversteer)",
 			"ruleLevelResetMin": "⭳✋ reset minimum",
 			"ruleLevelResetMax": "⭱️✋ reset maximum",
+            "ruleOff": "✋ send nothing",
 			"ruleLevelND": "use default level (e.g. sun control)",
 			"editRule": "edit the rule",
 			"duplicateRule": "duplicate the rule",

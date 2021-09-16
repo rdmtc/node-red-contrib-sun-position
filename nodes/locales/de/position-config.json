@@ -354,6 +354,7 @@
 			"ruleLevelMax": "⭱️❗  Maximum (übersteuernd)",
 			"ruleLevelResetMin": "⭳✋ Minimum zurücksetzen",
 			"ruleLevelResetMax": "⭱️✋ Maximum zurücksetzen",
+            "ruleOff": "✋ nichts senden",
 			"ruleLevelND": "standard level (e.g. sun control)",
 			"editRule": "Regel editieren",
 			"duplicateRule": "Regel duplizieren",

@@ -510,12 +510,10 @@ module.exports = function (RED) {
                 if ((typeof node.payload.current !== 'undefined') &&
                     (node.payload.current !== 'none') &&
                     (node.payload.current !== null) &&
-                    !isNaN(node.reason.code) &&
-                    ((node.reason.code !== node.previousData.reasonCode) ||
-                    (node.payload.topic !== node.previousData.topic) ||
+                    ((node.payload.topic !== node.previousData.topic) ||
                     (typeof node.payload.current !== node.previousData.payloadType) ||
                     ((typeof node.previousData.payloadValue  !== 'undefined') && (node.previousData.payloadValue !== node.payload.current))) ) {
-
+                    const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
                         let resultObj = null;
@@ -528,17 +526,17 @@ module.exports = function (RED) {
                         } else if (prop.type === 'strPlaceholder') {
                             resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow, replaceAttrs);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
                                 this.error('error on getting result: "' + resultObj.error + '"');
                             } else {
-                                node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                                node.positionConfig.setMessageProp(this, msgOut, prop.outType, prop.outValue, resultObj);
                             }
                         }
                     }
-                    send([msg, { topic, payload: timeCtrl, payloadOut: node.payload.current }]);
+                    send([msgOut, { topic, payload: timeCtrl, payloadOut: node.payload.current }]);
                 } else {
                     send([null, { topic, payload: timeCtrl }]);
                 }
