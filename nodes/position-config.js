@@ -1349,11 +1349,12 @@ module.exports = function (RED) {
             }
 
             if (result.positionAtSolarNoon && result.times.solarNoon.valid) {
-                if (result.altitudeDegrees > 0) {
+                result.altitudePercent = (result.altitudeDegrees / result.positionAtSolarNoon.altitudeDegrees) * 100;
+                /* if (result.altitudeDegrees > 0) { - allow negative altitudePercent #259
                     result.altitudePercent = (result.altitudeDegrees / result.positionAtSolarNoon.altitudeDegrees) * 100;
                 } else {
                     result.altitudePercent = 0;
-                }
+                } */
             }
 
             if (cacheEnabled) {
