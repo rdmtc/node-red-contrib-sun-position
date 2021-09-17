@@ -2437,7 +2437,7 @@
                             'env',
                             'jsonata'
                         ]
-                    }).change(() => { _dialogGenHelpText(); });
+                    }).change(() => { $dialogLevelOperator.change(); });
                     $dialogLevel.typedInput('width', '40%');
                     const $dialogLevelOperator = $dialog.find('#dlg-ip-btctl-rule-level-operator');
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
@@ -2445,18 +2445,28 @@
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
                     $dialogLevelOperator.append($('<option></option>').val(9).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff')));
                     $dialogLevelOperator.change(() => {
-                        if (parseInt($dialogLevelOperator.val()) <= 0) {
-                            $dialogLevel.typedInput('hide');
+                        const type =  $dialogLevel.typedInput('type');
+                        if (type === types.LevelND.value) {
+                            $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.hide();
+                            $('#dialog-row-slatPos').show();
+                            $('#dialog-row-resetOverwrite').show();
+                            $('#dialog-row-topic').show();
+                        } else if (parseInt($dialogLevelOperator.val()) <= 0) {
+                            $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').show();
                             $('#dialog-row-resetOverwrite').show();
                             $('#dialog-row-topic').show();
                         } else if (parseInt($dialogLevelOperator.val()) === 9) {
                             $dialogLevel.typedInput('hide');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
                             $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
                         } else {
                             $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
                             $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
@@ -2809,8 +2819,6 @@
                             if (data.level) {
                                 $dialogLevelOperator.val(data.level.operator || 0);
                                 setTInputValue($dialogLevel, data.level.value, data.level.type);
-                                // $dialogLevel.typedInput('value',data.level.value);
-                                // $dialogLevel.typedInput('type',data.level.type);
                             } else {
                                 $dialogLevelOperator.val(0);
                                 setTInputValue($dialogLevel, 'closed (min)', types.LevelFix.value);
@@ -2862,14 +2870,19 @@
                         };
                         try {
                             const setval = (param, name, val) => { if (val) param[name] = val; };
-                            if (result.level.operator <= 0) {
+                            if (result.level.type === types.LevelND.value) {
+                                result.level.operator = 0;
+                                result.level.operatorText = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs');
+                            } else if (result.level.operator <= 0) {
                                 result.topic = $dialogTopic.val();
                                 result.importance = parseInt($dialogImportance.val());
                                 result.resetOverwrite = $dialogResetOverwrite.is(':checked');
-                            }
-                            if (result.level.operator === 9) {
-                                result.level.type = types.LevelND.value;
-                                result.level.value = '';
+                            } else if (result.level.operator === 9) {
+                                delete result.level.type;
+                                delete result.level.value;
+                                delete result.slat;
+                                // result.level.type = types.LevelFix.value;
+                                // result.level.value = '';
                             }
 
                             $dialogConditionContainer.editableList('items').each(function(_i) {
