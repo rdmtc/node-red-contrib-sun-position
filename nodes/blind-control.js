@@ -16,8 +16,8 @@ const cRuleOff = 9;
 const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
 const cWinterMode = 1;
-const cSummerMode = 2;
 const cMinimizeMode = 3;
+const cSummerMode = 16;
 const cRuleDefault = -1;
 /******************************************************************************************/
 /**
@@ -359,35 +359,13 @@ module.exports = function (RED) {
             const res = checkOversteer(node, msg, tempData, oNow);
             if (res) {
                 node.level.current = getBlindPosFromTI(node, undefined, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
+                node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.dNow);
-
-                const delta = Math.abs(node.previousData.level - node.level.current);
-                if ((node.smoothTime > 0) && (node.sunData.changeAgain > oNow.nowNr)) {
-                    node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
-                    node.reason.code = 11;
-                    node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.smooth', { pos: getRealLevel_(node).toString()});
-                    node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.smooth', { pos: getRealLevel_(node).toString()});
-                    node.level.current = node.previousData.level;
-                    node.level.currentInverse = node.previousData.levelInverse;
-                    node.level.slat = node.previousData.slat;
-                    node.level.topic = node.previousData.topic;
-                } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.nodeData.levelBottom) && (node.level.current < node.nodeData.levelTop)) {
-                    node.reason.code = 14;
-                    node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
-                    node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
-                    node.level.current = node.previousData.level;
-                    node.level.currentInverse = node.previousData.levelInverse;
-                    node.level.slat = node.previousData.slat;
-                    node.level.topic = node.previousData.topic;
-                } else {
-                    node.level.currentInverse = getInversePos_(node, node.level.current);
-                    node.level.topic = node.oversteer.topic;
-                    node.previousData.last.sunLevel = node.level.current;
-                    node.sunData.changeAgain = oNow.nowNr + node.smoothTime;
-                    node.reason.code = 10;
-                    node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer', { pos: res.pos+1 });
-                    node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.oversteer', { pos: res.pos+1 });
-                }
+                node.level.topic = node.oversteer.topic;
+                node.previousData.last.sunLevel = node.level.current;
+                node.reason.code = 10;
+                node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer', { pos: res.pos+1 });
+                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.oversteer', { pos: res.pos+1 });
                 sunPosition.oversteer = res;
                 sunPosition.oversteerAll = node.oversteers;
                 return sunPosition;
@@ -787,6 +765,7 @@ module.exports = function (RED) {
             },
             changeAgain: 0
         };
+        if (node.sunData.mode === 2) { node.sunData.mode = cSummerMode; } // backwards compatibility
         node.sunData.modeMax = node.sunData.mode;
         node.windowSettings = {
             /** The top of the window */
