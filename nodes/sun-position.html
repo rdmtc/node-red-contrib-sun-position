@@ -189,7 +189,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-startOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -227,7 +227,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-endOffset').typedInput('type');
                             if (type === types.Undefined.value) {

@@ -307,9 +307,9 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate: RED.validators.number()
         },
-        randomNumberCached: {
-            value: 'randomNumCached:',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumberCached','randomNumberCached'),
+        randmNumCachedDay: {
+            value: 'randmNumCachedDay ',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedDay','randmNumCachedDay'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             validate: RED.validators.number()
@@ -888,13 +888,17 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
  * @param {*} type type to set
  */
 function setTInputValue($field, value, type) { // eslint-disable-line no-unused-vars
-    if (type === 'flow' || type === 'global') {
-        $field.typedInput('type', 'env'); // env haben alle, bug fix
-        $field.typedInput('value', checkDeprecatedValues(type, value));
-        $field.typedInput('type', type);
-    } else {
-        $field.typedInput('type', type);
-        $field.typedInput('value', checkDeprecatedValues(type, value));
+    try {
+        if (type === 'flow' || type === 'global') {
+            $field.typedInput('type', 'env'); // env haben alle, bug fix
+            $field.typedInput('value', checkDeprecatedValues(type, value));
+            $field.typedInput('type', type);
+        } else {
+            $field.typedInput('type', type);
+            $field.typedInput('value', checkDeprecatedValues(type, value));
+        }
+    } catch (err) {
+        console.log('error setting type input', value, type, err);
     }
 }
 
@@ -1131,39 +1135,43 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
     // console.log('[IN getBackendData] ',data);
-    const res = {
-        value:'',
-        useful: false
-    };
-    if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'bin') {
-        res.value = data.type;
-    } else if ( data.type === 'bool' || data.type === 'num' || data.type === 'str' || data.type === 'numAzimuth' || data.type === 'numAltitude') {
-        res.value = String(data.value);
-        res.useful = true;
-    } else if (data.type === 'msg' || data.type === 'env') {
-        res.value = data.type + '.' + data.value;
-    } else if (data.type === 'msgPayload') {
-        res.value = 'msg.payload';
-    } else if (data.type === 'msgTopic') {
-        res.value = 'msg.topic';
-    } else if (data.type === 'PlT') {
-        res.value = 'msg.payload if msg.topic contains "' + data.value + '"';
-    } else if (data.type === 'msgTs') {
-        res.value = 'msg.ts';
-    } else if (data.type === 'msgLC') {
-        res.value = 'msg.lc';
-    } else if (data.type === 'msgValue') {
-        res.value = 'msg.value';
-    } else if (data.timeDays === '') {
-        res.value = 'No valid days given! Please check settings!';
-    } else if (data.timeMonths === '') {
-        res.value = 'No valid month given! Please check settings!';
-    } else {
-        const url = 'sun-position/data?' + jQuery.param( data );
-        $.getJSON(url, result);
-        return;
+    try {
+        const res = {
+            value:'',
+            useful: false
+        };
+        if (!data || data.type === 'none' || data.type === '' || data.type === 'json' || data.type === 'bin') {
+            res.value = data.type;
+        } else if ( data.type === 'bool' || data.type === 'num' || data.type === 'str' || data.type === 'numAzimuth' || data.type === 'numAltitude') {
+            res.value = String(data.value);
+            res.useful = true;
+        } else if (data.type === 'msg' || data.type === 'env') {
+            res.value = data.type + '.' + data.value;
+        } else if (data.type === 'msgPayload') {
+            res.value = 'msg.payload';
+        } else if (data.type === 'msgTopic') {
+            res.value = 'msg.topic';
+        } else if (data.type === 'PlT') {
+            res.value = 'msg.payload if msg.topic contains "' + data.value + '"';
+        } else if (data.type === 'msgTs') {
+            res.value = 'msg.ts';
+        } else if (data.type === 'msgLC') {
+            res.value = 'msg.lc';
+        } else if (data.type === 'msgValue') {
+            res.value = 'msg.value';
+        } else if (data.timeDays === '') {
+            res.value = 'No valid days given! Please check settings!';
+        } else if (data.timeMonths === '') {
+            res.value = 'No valid month given! Please check settings!';
+        } else {
+            const url = 'sun-position/data?' + jQuery.param( data );
+            $.getJSON(url, result);
+            return;
+        }
+        result(res);
+    } catch (err) {
+        console.log('can not get data from Server',err);
     }
-    result(res);
 }
 
 

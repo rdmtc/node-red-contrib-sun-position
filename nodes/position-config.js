@@ -125,7 +125,7 @@ module.exports = function (RED) {
                     this.tzOffset = null;
                     // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
                 }
-                this.debug(`initialize latitude=${this.latitude} longitude=${this.longitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
+                // this.debug(`initialize latitude=${this.latitude} longitude=${this.longitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
@@ -601,6 +601,31 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
+         * get a property value from a type input in Node-Red
+         * @param {*} _srcNode - source node information
+         * @param {propValueType} data - data object with more information
+         * @param {Date} [dNow] base Date to use for Date time functions
+         * @returns {number} random number
+        */
+        getCachedRandomNumber(_srcNode, data, dNow) {
+            data.value = parseFloat(data.value)
+            let cache = _srcNode.context().get('randomNumberCache');
+            if (!hlp.isValidDate(dNow)) {
+                dNow = new Date();
+            }
+            if (!cache || cache.day !== dNow.getDate()) {
+                cache = {
+                    day : dNow.getDate(),
+                    week: hlp.getWeekOfYear(dNow)
+                };
+            }
+            if (isNaN(cache['d_' + data.value])) {
+                cache['d_' + data.value] = Math.random() * ((data.value || 60) + 1);
+            }
+            return cache['d_' + data.value];
+        }
+
+        /**
          * get a float value from a type input in Node-Red
          * @param {*} _srcNode - source node information
          * @param {*} msg - message object
@@ -680,7 +705,7 @@ module.exports = function (RED) {
          * @returns {*} output Data
          */
         getOutDataProp(_srcNode, msg, data, dNow, noError) {
-            _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
+            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
             dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
 
             let result = null;
@@ -1099,17 +1124,8 @@ module.exports = function (RED) {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
-            } else if (data.type === 'randomNumCached') {
-                data.value = parseFloat(data.value);
-                if (!_srcNode.randomNumberCache || _srcNode.randomNumberCache.day !== dNow.getDate()) {
-                    _srcNode.randomNumberCache = {
-                        day : dNow.getDate()
-                    };
-                }
-                if (isNaN(_srcNode.randomNumberCache[data.value])) {
-                    _srcNode.randomNumberCache[data.value] = Math.random() * ((data.value || 60) + 1);
-                }
-                return _srcNode.randomNumberCache[data.value];
+            } else if (data.type === 'randmNumCachedDay ') {
+                return getCachedRandomNumber(_srcNode, data, dNow);
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
                 return Math.random() * ((data.value || 60) + 1);
@@ -1171,7 +1187,7 @@ module.exports = function (RED) {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
                 } catch (err) {
-                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    _srcNode.info(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
             if (typeof data.callback === 'function') {

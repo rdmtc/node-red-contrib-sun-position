@@ -649,7 +649,8 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randomNumberCached
+                            types.randomNumber,
+                            types.randmNumCachedDay
                         ]
                     });
 
@@ -1627,7 +1628,7 @@
                                         'bin',
                                         'env',
                                         'jsonata',
-                                        types.randomNumberCached
+                                        types.randmNumCachedDay
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
@@ -2328,7 +2329,7 @@
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2354,7 +2355,7 @@
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2380,7 +2381,7 @@
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2481,7 +2482,7 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randomNumberCached
+                            types.randmNumCachedDay
                         ]
                     }).change(() => { _dialogGenHelpText(); });
                     $dialogSlat.typedInput('width', '50%');
