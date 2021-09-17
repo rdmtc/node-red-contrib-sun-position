@@ -275,7 +275,7 @@ module.exports = function (RED) {
             }
             node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
         }
-        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}; expire=${nExpire};  newPos=${newPos}``);
+        // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}; expire=${nExpire};  newPos=${newPos}`);
         return ctrlLib.setOverwriteReason(node);
     }
 
@@ -1117,8 +1117,9 @@ module.exports = function (RED) {
                     node.previousData.last.ruleLevel = blindCtrl.rule.level;
                     node.previousData.last.ruleTopic = blindCtrl.rule.topic;
 
-                    node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}`);
+                    // node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}, blindCtrl.rule.resetOverwrite=${blindCtrl.rule.resetOverwrite}, blindCtrl.rule.id=${blindCtrl.rule.id}, node.previousData.usedRule=${node.previousData.usedRule}`);
                     if (overwrite && blindCtrl.rule.resetOverwrite && blindCtrl.rule.id !== node.previousData.usedRule) {
+                        node.debug(`Overwrite expired caused by rule rule=${blindCtrl.rule.id}, previousRule=${node.previousData.usedRule}`);
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
@@ -1252,7 +1253,9 @@ module.exports = function (RED) {
                 } else {
                     send([null, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
                 }
-                node.previousData.usedRule = ruleId;
+                if (ruleId >=0) {
+                    node.previousData.usedRule = ruleId;
+                }
                 node.context().set('cacheData', tempData, node.storeName);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);

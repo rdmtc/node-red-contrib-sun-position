@@ -361,7 +361,7 @@
 			"ruleSlat": "Slat",
 			"rulePayload": "Payload: ",
 			"rulePayloadND": "No Payload",
-			"ruleResetOverwrite": "overwrite expire when rule gets active",
+			"ruleResetOverwrite": "overwrite should expire when rule gets active",
 			"ruleDescription": "Description",
 			"ruleBlindLevel": "blind position",
 			"ruleOverwrite": "overwrite",
