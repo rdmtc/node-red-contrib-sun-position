@@ -410,7 +410,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startOffset').typedInput('type');
@@ -540,7 +540,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endOffset').typedInput('type');
@@ -678,7 +678,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffsetAlt === 0 || node.startOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startOffsetAlt').typedInput('type');
@@ -817,7 +817,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffsetAlt === 0 || node.endOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endOffsetAlt').typedInput('type');
@@ -852,7 +852,7 @@
                             'jsonata',
                             types.numPercent,
                             types.randomNumber,
-                            types.randomNumberCached,
+                            types.randmNumCachedDay,
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,
@@ -895,7 +895,7 @@
                             'jsonata',
                             types.numPercent,
                             types.randomNumber,
-                            types.randomNumberCached,
+                            types.randmNumCachedDay,
                             types.SunCalc,
                             types.SunInSky,
                             types.MoonCalc,

@@ -526,12 +526,12 @@ module.exports = function (RED) {
                             type: 'once/startup'
                         }); // will create timeout
                     }
-                    node.debug('initialize - absolute Intervall');
+                    // node.debug('initialize - absolute Intervall');
                     node.send(node.prepOutMsg({ type: 'interval-start' }));
                     node.createNextInterval();
                     break;
                 case tInj.timer:
-                    node.debug('initialize - timer');
+                    // node.debug('initialize - timer');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
@@ -542,7 +542,7 @@ module.exports = function (RED) {
                     break;
                 case tInj.intervalBtwStartEnd:
                 case tInj.intervalAmount:
-                    node.debug('initialize - Intervall timer/amount/fromStart');
+                    // node.debug('initialize - Intervall timer/amount/fromStart');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
@@ -879,24 +879,24 @@ module.exports = function (RED) {
                     // there is a limitation of nodejs that the maximum setTimeout time
                     // should not more then 2147483647 ms (24.8 days).
                     millisec = Math.min((millisec - 129600000), 2147483646);
-                    node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
+                    // node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                     node.timeOutStartObj = setTimeout(() => {
                         node.doRecalcStartTimeOut();
                     }, millisec); // 1,5 days before
                     fill = 'blue';
                 } else if (this.injType === tInj.intervalBtwStartEnd) {
-                    node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else if (this.injType === tInj.intervalAmount) {
-                    node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     const millisecEnd = node.getMillisecEnd(node);
                     node.intervalTime = Math.floor((millisecEnd - millisec) / node.IntervalCountMax);
                     node.IntervalCountCurrent = 0;
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else { // this.injType === tInj.timer
-                    node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(() => {
                         // node.debug(`timeOutStartObj isAlt=${isAlt} isAltFirst=${node.timeStartData.isAltFirst}`);
 
@@ -999,7 +999,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.debug('--------- time-inject - input (type=' + msg.type + ')');
+                // node.debug('--------- time-inject - input (type=' + msg.type + ')');
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }

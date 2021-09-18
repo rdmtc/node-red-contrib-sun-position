@@ -266,7 +266,7 @@
                         valueProp: 'operand1Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand1Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -357,7 +357,7 @@
                         valueProp: 'operand2Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand2Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -597,7 +597,7 @@
                                         types.DayOfYearEven,
                                         types.numPercent,
                                         types.randomNumber,
-                                        types.randomNumberCached,
+                                        types.randmNumCachedDay,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -648,7 +648,7 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
                                 });
                             setTInputValue($offset, prop.o, prop.oT);
 
@@ -668,7 +668,7 @@
                                 valueProp: 'result1Offset',
                                 width: 'calc(100% - 265px)',
                                 defaultType: types.Undefined.value,
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randmNumCachedDay],
                                 onChange(_type, _value) {
                                     const type = $('#node-input-result1Offset').typedInput('type');
                                     if (type === types.Undefined.value) {

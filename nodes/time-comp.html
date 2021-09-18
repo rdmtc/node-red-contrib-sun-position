@@ -226,7 +226,7 @@
                         valueProp: 'inputOffset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-inputOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -372,7 +372,7 @@
                                 value: (data.offsetValue || '')
                             }).appendTo($row3).typedInput({
                                 default: (data.offsetType || types.Undefined.value),
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', types.randomNumberCached]
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', types.randmNumCachedDay]
                             });
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-rule-multiplier',
@@ -583,7 +583,7 @@
                                         types.DayOfYearEven,
                                         types.numPercent,
                                         types.randomNumber,
-                                        types.randomNumberCached,
+                                        types.randmNumCachedDay,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -617,7 +617,7 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumberCached]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
                                 });
                             setTInputValue($offset, prop.o,  prop.oT);
 

@@ -125,7 +125,7 @@ module.exports = function (RED) {
                     this.tzOffset = null;
                     // this.debug('no tzOffset defined (tzDST=' + this.tzDST + ')');
                 }
-                this.debug(`initialize latitude=${this.latitude} longitude=${this.longitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
+                // this.debug(`initialize latitude=${this.latitude} longitude=${this.longitude} tzOffset=${this.tzOffset} tzDST=${this.tzDST}`);
 
                 this.stateTimeFormat = config.stateTimeFormat || '3';
                 this.stateDateFormat = config.stateDateFormat || '12';
@@ -601,6 +601,31 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
+         * get a property value from a type input in Node-Red
+         * @param {*} _srcNode - source node information
+         * @param {propValueType} data - data object with more information
+         * @param {Date} [dNow] base Date to use for Date time functions
+         * @returns {number} random number
+        */
+        getCachedRandomNumber(_srcNode, data, dNow) {
+            data.value = parseFloat(data.value)
+            let cache = _srcNode.context().get('randomNumberCache');
+            if (!hlp.isValidDate(dNow)) {
+                dNow = new Date();
+            }
+            if (!cache || cache.day !== dNow.getDate()) {
+                cache = {
+                    day : dNow.getDate(),
+                    week: hlp.getWeekOfYear(dNow)
+                };
+            }
+            if (isNaN(cache['d_' + data.value])) {
+                cache['d_' + data.value] = Math.random() * ((data.value || 60) + 1);
+            }
+            return cache['d_' + data.value];
+        }
+
+        /**
          * get a float value from a type input in Node-Red
          * @param {*} _srcNode - source node information
          * @param {*} msg - message object
@@ -680,7 +705,7 @@ module.exports = function (RED) {
          * @returns {*} output Data
          */
         getOutDataProp(_srcNode, msg, data, dNow, noError) {
-            _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
+            // _srcNode.debug(`getOutDataProp IN data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }) } tzOffset=${this.tzOffset} dNow=${dNow}`);
             dNow = dNow || ((hlp.isValidDate(data.now)) ? new Date(data.now) : new Date());
 
             let result = null;
@@ -1046,9 +1071,6 @@ module.exports = function (RED) {
             expr.registerFunction('getMoonIllumination', date => {
                 return this.getMoonIllumination(date);
             }, '<(osn)?:(ol)>');
-            expr.registerFunction('getNextMoonPhases', date => {
-                return this.getNextMoonPhases(date);
-            }, '<(osn)?:(ol)>');
             expr.registerFunction('getMoonPhase', date => {
                 return this.getMoonPhase(date);
             }, '<(osn)?:(ol)>');
@@ -1102,17 +1124,8 @@ module.exports = function (RED) {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
-            } else if (data.type === 'randomNumCached') {
-                data.value = parseFloat(data.value);
-                if (!_srcNode.randomNumberCache || _srcNode.randomNumberCache.day !== dNow.getDate()) {
-                    _srcNode.randomNumberCache = {
-                        day : dNow.getDate()
-                    };
-                }
-                if (isNaN(_srcNode.randomNumberCache[data.value])) {
-                    _srcNode.randomNumberCache[data.value] = Math.random() * ((data.value || 60) + 1);
-                }
-                return _srcNode.randomNumberCache[data.value];
+            } else if (data.type === 'randmNumCachedDay ') {
+                return getCachedRandomNumber(_srcNode, data, dNow);
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
                 return Math.random() * ((data.value || 60) + 1);
@@ -1147,8 +1160,8 @@ module.exports = function (RED) {
             } else if (data.type === 'pdmPhase') {
                 result = this.getMoonPhase(dNow);
             } else if (data.type === 'pdmPhaseCheck') {
-                const pahse = this.getMoonPhase(dNow);
-                result = (pahse === data.value);
+                const phase = this.getMoonPhase(dNow);
+                result = (phase === data.value);
             } else if (data.type === 'entered' || data.type === 'dateEntered') {
                 result = hlp.getDateOfText(String(data.value), true, (this.tzOffset === 0), this.tzOffset);
             } else if (data.type === 'pdbIsDST') {
@@ -1174,7 +1187,7 @@ module.exports = function (RED) {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
                 } catch (err) {
-                    _srcNode.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    _srcNode.info(util.inspect(err, Object.getOwnPropertyNames(err)));
                 }
             }
             if (typeof data.callback === 'function') {
@@ -1375,29 +1388,26 @@ module.exports = function (RED) {
                 }
             }
 
-            const moonIllum = sunCalc.getMoonIllumination(date.valueOf());
-            const result = Object.assign({}, moonIllum);
-            const phasePercent = moonIllum.phase;
-            result.phasePercent = phasePercent;
-            result.phase = moonPhases[moonIllum.phaseNumber];
-            result.phase.nameAlt = RED._('common.typeOptions.' + result.phase.id);
-            result.phase.value = phasePercent;
-            result.phase.angle = (this.angleType === 'rad') ? (moonIllum.angle * 360) / (180 / Math.PI) : moonIllum.angle * 360;
-
-            return result;
-        }
-
-        getNextMoonPhases(date) {
-            if (!hlp.isValidDate(date)) {
-                const dto = new Date(date);
-                if (hlp.isValidDate(dto)) {
-                    date = dto;
-                } else {
-                    date = new Date();
-                }
+            const dayIdReq = hlp.getDayId(date);
+            const dayIdNow = hlp.getDayId(new Date());
+            if (this.moonIlluminationToday && dayIdNow === dayIdReq && dayIdNow === this.moonIlluDayId) {
+                return Object.assign({}, this.moonIlluminationToday); // needed for a object copy
             }
 
-            return sunCalc.getNextMoonPhases(date.valueOf());
+            let result = sunCalc.getMoonIllumination(date.valueOf());
+            result.phase.nameAlt = RED._('common.typeOptions.' + result.phase.id);
+            // result.phase.angle = (this.angleType === 'rad') ? (moonIllum.angle * 360) / (180 / Math.PI) : moonIllum.angle * 360;
+            // angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
+
+            if (dayIdNow !== this.moonIlluDayId && dayIdNow === dayIdReq) {
+                this.moonIlluminationToday = Object.assign({}, result);
+                this.moonIlluDayId = dayIdNow;
+            }
+            return result;
+        }
+        
+        getMoonPhase(date) {
+            return this.getMoonIllumination(date, false).phase;
         }
 
         getMoonCalc(date, calcTimes, moonInSky, specLatitude, specLongitude) {
@@ -1419,7 +1429,6 @@ module.exports = function (RED) {
             specLongitude = specLongitude || this.longitude;
 
             const moonPos = sunCalc.getMoonPosition(date.valueOf(), specLatitude, specLongitude);
-            const moonIllum = this.getMoonIllumination(date.valueOf());
 
             const result = {
                 ts: date.getTime(),
@@ -1441,14 +1450,9 @@ module.exports = function (RED) {
                 azimuthRadians:     moonPos.azimuth,
                 distance:           moonPos.distance,
                 parallacticAngle:   (this.angleType === 'deg') ? moonPos.parallacticAngleDegrees : moonPos.parallacticAngle,
-                illumination: {
-                    angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
-                    fraction: moonIllum.fraction,
-                    phase: moonIllum.phase,
-                    nextPhase: sunCalc.getNextMoonPhases(date.valueOf()),
-                    zenithAngle: (this.angleType === 'deg') ? 180 / Math.PI * (moonIllum.angle - moonPos.parallacticAngle) : moonIllum.angle - moonPos.parallacticAngle
-                }
+                illumination:       this.getMoonIllumination(date.valueOf())
             };
+            result.illumination.zenithAngle = (this.angleType === 'deg') ? 180 / Math.PI * (result.illumination.angle - moonPos.parallacticAngle) : result.illumination.angle - moonPos.parallacticAngle;
 
             if (!calcTimes) { return result; }
 
@@ -1496,35 +1500,6 @@ module.exports = function (RED) {
                 }
             }
 
-            return result;
-        }
-
-        getMoonPhase(date) {
-            let result;
-            const dNow = new Date();
-            if (!hlp.isValidDate(date)) {
-                const dto = new Date(date);
-                if (hlp.isValidDate(dto)) {
-                    date = dto;
-                } else {
-                    date = dNow;
-                }
-            }
-
-            const dayIdReq = hlp.getDayId(date);
-            const dayIdNow = hlp.getDayId(dNow);
-
-            if (dayIdReq === dayIdNow) {
-                if (dayIdNow !== this.moonIlluDayId) {
-                    this.moonIlluminationToday = this.getMoonIllumination(date, false);
-                    this.moonIlluDayId = dayIdNow;
-                }
-                result = Object.assign({}, this.moonIlluminationToday.phase); // needed for a object copy
-            } else {
-                result = Object.assign({},this.getMoonIllumination(date, false).phase); // needed for a object copy
-            }
-
-            // this.debug('getMoonPhase result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
             return result;
         }
         /**************************************************************************************************************/

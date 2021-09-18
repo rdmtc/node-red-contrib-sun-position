@@ -2,6 +2,10 @@
 
 <script type="text/javascript">
     (function() {
+        const cModeOff = 0;
+        const cModeMaximize = 1;
+        const cModeMinimize = 3;
+        const cModeSunPosition = 16;
         /**
          * get a value
          * @param {*} node - the node representation
@@ -174,7 +178,8 @@
                     required: true,
                     validate(v) {
                         const n = Number(v);
-                        return (RED.validators.number()(v) && (n >= 0) && (n <= 2));
+                        return (RED.validators.number()(v) &&
+                                ((n === cModeOff) || (n === cModeMinimize) || (n === cModeMaximize) || (n === cModeSunPosition)));
                     }
                 },
                 sunFloorLengthType: {
@@ -184,7 +189,10 @@
                     value: '',
                     required: false,
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 1) ||
+                        const mode = Number(getVal(this, 'sunControlMode'));
+                        return (mode === cModeOff) ||
+                                (mode === cModeMaximize) ||
+                                (mode === cModeMinimize) ||
                                 RED.validators.typedInput('sunFloorLengthType')(v);
                     }
                 },
@@ -194,9 +202,12 @@
                     validate(v) {
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
-                        return ((Number(getVal(this, 'sunControlMode')) <= 1) ||
+                        const mode = Number(getVal(this, 'sunControlMode'));
+                        return (mode === cModeOff) ||
+                                (mode === cModeMaximize) ||
+                                (mode === cModeMinimize) ||
                                 (v === '') ||
-                                (n <= mm.max) &&
+                                ((n <= mm.max) &&
                                 (n >= mm.min) &&
                                 (n >= parseFloat(getVal(this, 'blindIncrement'))) );
                     }
@@ -204,7 +215,7 @@
                 blindPosMin: {
                     value: 'closed (min)',
                     validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('blindPosMinType')(v));
                     }
                 },
@@ -214,7 +225,7 @@
                 blindPosMax: {
                     value: 'open (max)',
                     validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('blindPosMaxType')(v));
                     }
                 },
@@ -232,7 +243,7 @@
                     value: '',
                     validate(v) {
                         const n = parseFloat(v);
-                        return ((Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 (v === '') ||
                                 (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
@@ -249,7 +260,7 @@
                 windowTop: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -259,7 +270,7 @@
                 windowBottom: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -269,7 +280,7 @@
                 windowAzimuthStart: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('windowAzimuthStartType')(v);
                     }
                 },
@@ -279,7 +290,7 @@
                 windowAzimuthEnd: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) <= 0) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
                                 RED.validators.typedInput('windowAzimuthEndType')(v);
                     }
                 },
@@ -429,7 +440,11 @@
                 }, 300);
                 $('.rdg-ui-btn').button();
 
-                this.sunControlMode = this.sunControlMode || 0;
+                this.sunControlMode = this.sunControlMode || cModeOff;
+                if (this.sunControlMode === 2 || this.sunControlMode === '2') {
+                    this.sunControlMode = cModeSunPosition;
+                }
+
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
                 node.dialogAddData = {};
@@ -498,17 +513,17 @@
                         label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMode','moon phase'),
                         icon: 'icons/node-red-contrib-sun-position/inputTypeSunControl.svg',
                         options: [{
-                            value: '0-off',
+                            value: cModeOff + '-off',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlOff')
                         }, {
-                            value: '1-maximize',
+                            value: cModeMaximize + '-maximize',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMaximize')
                         }, {
-                            value: '2-restrict',
-                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlRestrict')
-                        }, {
-                            value: '3-minimize',
+                            value: cModeMinimize + '-minimize',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMinimize')
+                        }, {
+                            value: cModeSunPosition + '-restrict',
+                            label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlRestrict')
                         }]
                     };
                     types.OutputLevel = {
@@ -649,7 +664,8 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randomNumberCached
+                            types.randomNumber,
+                            types.randmNumCachedDay
                         ]
                     });
 
@@ -1407,20 +1423,29 @@
                     // #region sun
                     $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
                         const val= Number($('#node-input-sunControlMode').val());
-                        if (val === 2) {
+                        if (val === cModeSunPosition) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').show();
                             $('.form-row-sunControlMaximization').hide();
+                            $('.form-row-sunControlMinimization').hide();
                             resizeOversteerContainer();
-                        } else if (val === 1) {
+                        } else if (val === cModeMaximize ) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').show();
+                            $('.form-row-sunControlMinimization').hide();
+                            resizeOversteerContainer();
+                        } else if (val === cModeMinimize) {
+                            $('.form-row-sunControlActive').show();
+                            $('.form-row-sunControlRestriction').hide();
+                            $('.form-row-sunControlMaximization').hide();
+                            $('.form-row-sunControlMinimization').show();
                             resizeOversteerContainer();
                         } else {
                             $('.form-row-sunControlActive').hide();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').hide();
+                            $('.form-row-sunControlMinimization').hide();
                             $('.row-oversteerTopic').hide();
                         }
                     });
@@ -1478,7 +1503,7 @@
                         const rowCount = $container.editableList('length');
                         if (rowCount > 0) {
                             $container.editableList('height', height + 40);
-                            if (Number($('#node-input-sunControlMode').val()) <= 0) {
+                            if (Number($('#node-input-sunControlMode').val()) <= cModeOff) {
                                 $('.row-oversteerTopic').hide();
                             } else {
                                 $('.row-oversteerTopic').show();
@@ -1627,7 +1652,7 @@
                                         'bin',
                                         'env',
                                         'jsonata',
-                                        types.randomNumberCached
+                                        types.randmNumCachedDay
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
@@ -2328,7 +2353,7 @@
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2354,7 +2379,7 @@
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2380,7 +2405,7 @@
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumberCached]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -2436,7 +2461,7 @@
                             'env',
                             'jsonata'
                         ]
-                    }).change(() => { _dialogGenHelpText(); });
+                    }).change(() => { $dialogLevelOperator.change(); });
                     $dialogLevel.typedInput('width', '40%');
                     const $dialogLevelOperator = $dialog.find('#dlg-ip-btctl-rule-level-operator');
                     $dialogLevelOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
@@ -2444,18 +2469,28 @@
                     $dialogLevelOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
                     $dialogLevelOperator.append($('<option></option>').val(9).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff')));
                     $dialogLevelOperator.change(() => {
-                        if (parseInt($dialogLevelOperator.val()) <= 0) {
-                            $dialogLevel.typedInput('hide');
+                        const type =  $dialogLevel.typedInput('type');
+                        if (type === types.LevelND.value) {
+                            $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.hide();
+                            $('#dialog-row-slatPos').show();
+                            $('#dialog-row-resetOverwrite').show();
+                            $('#dialog-row-topic').show();
+                        } else if (parseInt($dialogLevelOperator.val()) <= 0) {
+                            $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').show();
                             $('#dialog-row-resetOverwrite').show();
                             $('#dialog-row-topic').show();
                         } else if (parseInt($dialogLevelOperator.val()) === 9) {
                             $dialogLevel.typedInput('hide');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
                             $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
                         } else {
                             $dialogLevel.typedInput('show');
+                            $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
                             $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
@@ -2481,7 +2516,7 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randomNumberCached
+                            types.randmNumCachedDay
                         ]
                     }).change(() => { _dialogGenHelpText(); });
                     $dialogSlat.typedInput('width', '50%');
@@ -2808,8 +2843,6 @@
                             if (data.level) {
                                 $dialogLevelOperator.val(data.level.operator || 0);
                                 setTInputValue($dialogLevel, data.level.value, data.level.type);
-                                // $dialogLevel.typedInput('value',data.level.value);
-                                // $dialogLevel.typedInput('type',data.level.type);
                             } else {
                                 $dialogLevelOperator.val(0);
                                 setTInputValue($dialogLevel, 'closed (min)', types.LevelFix.value);
@@ -2861,14 +2894,19 @@
                         };
                         try {
                             const setval = (param, name, val) => { if (val) param[name] = val; };
-                            if (result.level.operator <= 0) {
+                            if (result.level.type === types.LevelND.value) {
+                                result.level.operator = 0;
+                                result.level.operatorText = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs');
+                            } else if (result.level.operator <= 0) {
                                 result.topic = $dialogTopic.val();
                                 result.importance = parseInt($dialogImportance.val());
                                 result.resetOverwrite = $dialogResetOverwrite.is(':checked');
-                            }
-                            if (result.level.operator === 9) {
-                                result.level.type = types.LevelND.value;
-                                result.level.value = '';
+                            } else if (result.level.operator === 9) {
+                                delete result.level.type;
+                                delete result.level.value;
+                                delete result.slat;
+                                // result.level.type = types.LevelFix.value;
+                                // result.level.value = '';
                             }
 
                             $dialogConditionContainer.editableList('items').each(function(_i) {
@@ -3242,8 +3280,8 @@
         <select id="node-input-sunControlMode" class="row-full-width">
             <option value="0" data-i18n="[html]blind-control.label.sunControlOff"></option>
             <option value="1" data-i18n="[html]blind-control.label.sunControlMaximize"></option>
-            <option value="2" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
             <option value="3" data-i18n="[html]blind-control.label.sunControlMinimize"></option>
+            <option value="16" data-i18n="[html]blind-control.label.sunControlRestrict"></option>
         </select>
     </div>
     <div class="form-row form-row-sunControlRestriction block-noindent">
@@ -3251,6 +3289,9 @@
     </div>
     <div class="form-row form-row-sunControlMaximization block-noindent">
         <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row form-row-sunControlMinimization block-noindent">
+        <span data-i18n="[html]blind-control.text.sunControlMinimization" class="row-full-width" style="word-wrap:break-word;"></span>
     </div>
     <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.sunTopic">
         <label for="node-input-sunTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.sunTopic"></span></label>
@@ -3558,6 +3599,7 @@
     .form-row-sunControlActive { display:none }
     .form-row-sunControlRestriction { display:none }
     .form-row-sunControlMaximization { display:none }
+    .form-row-sunControlMinimization { display:none }
     .form-tips { width: 90% }
     .block-indent1 {
         float: left;
