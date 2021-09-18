@@ -41,7 +41,7 @@ module.exports = function (RED) {
                 return new Date();
         }
         node.debug('compare time to ' + id + ' = "' + value + '"');
-        const dto = new Date(msg.ts);
+        const dto = new Date(value);
         if (hlp.isValidDate(dto)) {
             return dto;
         }
