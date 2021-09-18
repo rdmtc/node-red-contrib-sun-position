@@ -29,7 +29,7 @@
                     type: 'position-config',
                     required: true
                 },
-                autoTrigger: { value: false },
+                autoTrigger: { value: true },
                 autoTriggerTime: {
                     value: 1200000,
                     validate(v) {
@@ -214,6 +214,33 @@
             },
             paletteLabel() { return this._('clock-timer.label.clock-timer-palette'); },
             oneditprepare() {
+                /** resizes a rule container */
+                function resizeRuleContainer() {
+                    try {
+                        const editorRow = $('.node-input-rule-container-row ol');
+                        const height = editorRow.outerHeight(true);
+                        const rowCount = $('#node-input-rule-container').editableList('length');
+                        if (rowCount > 0) {
+                            // $('#node-input-rule-container').editableList('height', height + 40);
+                            $('#node-input-rule-container').css('min-height', height + 'px');
+                        } else {
+                            // $('#node-input-rule-container').editableList('height', 20);
+                            $('#node-input-rule-container').css('min-height', '40px');
+                        }
+                    } catch (ex) {
+                        console.log(ex); // eslint-disable-line
+                    }
+                }
+
+                /** resizes the rule container */
+                function resizeRuleContainerCheck(node) {
+                    if (node.dialogAddData.resizeRuleContainerTO) { clearTimeout(node.dialogAddData.resizeRuleContainerTO); }
+                    node.dialogAddData.resizeRuleContainerTO = setTimeout(() => {
+                        delete node.dialogAddData.resizeRuleContainerTO;
+                        resizeRuleContainer();
+                    }, 600);
+                }
+
                 setTimeout(() => {
                     $('.is-to-show-initially').show();
                     $('.is-to-hide-initially').hide();
@@ -222,6 +249,18 @@
 
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
+
+                const tabs = RED.tabs.create({
+                    id: 'node-config-clock-timer-tabs',
+                    onchange(tab) {
+                        $('#node-config-clock-timer-tabs-content').children().hide();
+                        $('#' + tab.id).show();
+                        resizeRuleContainerCheck(node);
+                    },
+                    scrollable: true,
+                    collapsible: true
+                });
+
                 node.dialogAddData = {};
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
@@ -757,7 +796,7 @@
                                 if (data.topic) {
                                     result += '<div class="indent-topic-text"> <i class="fa fa-tasks" aria-hidden="true"></i><span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTopic');
-                                    result += '</span> <var>';
+                                    result += ': </span> <var>';
                                     result += data.topic;
                                     result += '</var>';
                                     result += '</div>';
@@ -778,29 +817,7 @@
                         }
                         return result;
                     }
-                    /** resizes a rule container */
-                    function resizeRuleContainer() {
-                        try {
-                            const editorRow = $('.node-input-rule-container-row ol');
-                            const height = editorRow.outerHeight(true);
-                            const rowCount = $('#node-input-rule-container').editableList('length');
-                            if (rowCount > 0) {
-                                $('#node-input-rule-container').editableList('height', height + 40);
-                            } else {
-                                $('#node-input-rule-container').editableList('height', 20);
-                            }
-                        } catch (ex) {
-                            console.log(ex); // eslint-disable-line
-                        }
-                    }
 
-                    const resizeRuleContainerCheck = () => {
-                        if (node.dialogAddData.resizeRuleContainerTO) { clearTimeout(node.dialogAddData.resizeRuleContainerTO); }
-                        node.dialogAddData.resizeRuleContainerTO = setTimeout(() => {
-                            delete node.dialogAddData.resizeRuleContainerTO;
-                            resizeRuleContainer();
-                        }, 1000);
-                    };
                     $('#node-input-rule-container').css('min-height', '40px').css('min-width', '300px').editableList({
                         addItem($containerRow, containerIndex, data) {
                             if (data === {}) {
@@ -986,7 +1003,7 @@
                             $btnCpy.click(() => {
                                 _dialogDuplicateRule(containerIndex, $containerRow);
                             });
-                            resizeRuleContainerCheck();
+                            resizeRuleContainerCheck(node);
                         },
                         addButton: false,
                         sortable: true,
@@ -998,7 +1015,7 @@
                                 const data = $(this).data('data');
                                 data.index = i;
                             });
-                            resizeRuleContainerCheck();
+                            resizeRuleContainerCheck(node);
                         },
                         sortItems(rules) {
                             rules.each(function(i) {
@@ -1013,13 +1030,13 @@
                     const $btnAdd = $('#node-button-add');
                     $btnAdd.click(() => {
                         $('#node-input-rule-container').editableList('addItem', {});
-                        resizeRuleContainerCheck();
+                        resizeRuleContainerCheck(node);
                     });
 
                     const $btnClear = $('#node-button-clear');
                     $btnClear.click(() => {
                         $('#node-input-rule-container').editableList('empty');
-                        resizeRuleContainerCheck();
+                        resizeRuleContainerCheck(node);
                     });
 
                     const $btnSort = $('#node-button-sort');
@@ -1092,7 +1109,7 @@
                                             }
                                         }
                                     }
-                                    resizeRuleContainerCheck();
+                                    resizeRuleContainerCheck(node);
                                 } catch (err) {
                                     console.log(err.message); // eslint-disable-line no-console
                                     console.log(err.stack); // eslint-disable-line no-console
@@ -1109,7 +1126,7 @@
                             // rule.index = i;
                             $('#node-input-rule-container').editableList('addItem', rule);
                         }
-                        resizeRuleContainerCheck();
+                        resizeRuleContainerCheck(node);
                     }
                     // #endregion rules
                     // #region result-container
@@ -1119,9 +1136,11 @@
                         const height = editorRow.outerHeight(true);
                         const rowCount = $('#node-input-result-container').editableList('length');
                         if (rowCount > 0) {
-                            $('#node-input-result-container').editableList('height', height + 30);
+                            // $('#node-input-result-container').editableList('height', height + 30);
+                            $('#node-input-result-container').css('min-height', height + 'px');
                         } else {
-                            $('#node-input-result-container').editableList('height', 20);
+                            // $('#node-input-result-container').editableList('height', 20);
+                            $('#node-input-result-container').css('min-height', '20px');
                         }
                     }
 
@@ -1648,11 +1667,13 @@
                         const year = (new Date()).getFullYear();
                         $dialogTimeLimitDateEnd.attr('min', year + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '01-01'));
                         $dialogTimeLimitDateEnd.attr('max', (year + 1) + '-' + (getDateShort($dialogTimeLimitDateStart.val()) || '12-31'));
+                        _dialogGenHelpText();
                     });
                     $dialogTimeLimitDateEnd.change(() => {
                         const year = (new Date()).getFullYear();
                         $dialogTimeLimitDateStart.attr('min', year + '-01-01');
                         $dialogTimeLimitDateStart.attr('max', $dialogTimeLimitDateEnd.val() || (year + '-12-31'));
+                        _dialogGenHelpText();
                     });
                     // #endregion dialogTimeLimit
                     // #region dialogPayload
@@ -1875,6 +1896,7 @@
                                 noOffsetError:  true
                             });
                         }
+                        _dialogGenHelpText();
                     });
 
                     $dialogTimeMaxInput.change(() => {
@@ -1931,6 +1953,7 @@
                                 noOffsetError:  true
                             });
                         }
+                        _dialogGenHelpText();
                     });
                     $('.dialog-row-timeLimits :input').change(() => {
                         if (node.dialogAddData.timeout2) { clearTimeout(node.dialogAddData.timeout2); }
@@ -2272,7 +2295,7 @@
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
                         $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
-                        resizeRuleContainerCheck();
+                        resizeRuleContainerCheck(node);
                     }
 
                     /**
@@ -2296,11 +2319,11 @@
                             console.log(err.stack); // eslint-disable-line no-console
                             // $dialogName.val(err.message);
                         }
-                        resizeRuleContainerCheck();
+                        resizeRuleContainerCheck(node);
                     }
-                    resizeRuleContainerCheck();
                     // #endregion dialogload & save
                     // #endregion dialog
+                    resizeRuleContainerCheck(node);
                 }; // setup
                 $.getScript('sun-position/js/htmlglobal.js')
                     .done((_data, _textStatus,  _bmvfj) => {
@@ -2311,6 +2334,45 @@
                             console.log(err); // eslint-disable-line
                             console.log(err.stack); // eslint-disable-line
                         }
+
+                        tabs.addTab({
+                            id: 'clock-timer-tab-general',
+                            label: this._('clock-timer.tabs-label.general'),
+                            name: this._('clock-timer.tabs-label.general'),
+                            iconClass: 'fa Example of tags fa-tags'
+                        });
+                        $nodeConfig.change(() => {
+                            if ($nodeConfig.val() === '_ADD_') {
+                                if (tabs.count() > 1){
+                                    tabs.removeTab('blind-control-tab-default');
+                                    tabs.removeTab('blind-control-tab-time');
+                                    tabs.removeTab('blind-control-tab-output');
+                                }
+                            } else if (tabs.count() <= 1) {
+                                tabs.addTab({
+                                    id: 'clock-timer-tab-default',
+                                    label: this._('clock-timer.tabs-label.default'),
+                                    name: this._('clock-timer.tabs-label.default'),
+                                    iconClass: 'fa fa-sliders'
+                                });
+
+                                tabs.addTab({
+                                    id: 'clock-timer-tab-time',
+                                    label: this._('clock-timer.tabs-label.time'),
+                                    name: this._('clock-timer.tabs-label.time'),
+                                    iconClass: 'fa fa-clock-o'
+                                });
+
+                                tabs.addTab({
+                                    id: 'clock-timer-tab-output',
+                                    label: this._('clock-timer.tabs-label.output'),
+                                    name: this._('clock-timer.tabs-label.output'),
+                                    iconClass: 'fa fa-sign-out'
+                                });
+                            }
+                            setTimeout(() => { tabs.resize(); }, 0);
+                        });
+                        $nodeConfig.change();
                     })
                     .fail((jqxhr, settings, exception) => {
                         console.log("failed to load htmlglobal.js"); // eslint-disable-line
@@ -2389,121 +2451,140 @@
             },
             oneditdelete() {
                 $('#dialog-edit-rule').dialog('destroy').remove();
+            },
+            oneditresize() {
+                const height =  $('#node-config-clock-timer-tabs-content').parent().innerHeight();
+                $('#node-config-clock-timer-tabs-content').height(height - 25);
             }
         });
     })();</script>
 
 <script type="text/html" data-template-name="clock-timer">
-    <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span>
+    <div class="form-row">
+        <ul style="min-width: 400px; margin-bottom: 20px;" id="node-config-clock-timer-tabs"></ul>
     </div>
-    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
-        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
-        <input type="text" class="row-full-width" id="node-input-positionConfig">
-    </div>
-    <hr>
-    <!-- time ######################################################################## -->
-    <div class="is-to-show-initially">
-        <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span>
-        <div class="form-row node-input-rule-container-row row-full-width">
-            <ol id="node-input-rule-container"></ol>
-            <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
-            <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
-            <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
-            <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
-            <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+    <div id="node-config-clock-timer-tabs-content" style="min-height:150px;overflow-y: auto;overflow-x: hidden;">
+        <div id="clock-timer-tab-general" style="display:none">
+            <div class="form-row block-noindent is-to-show-initially">
+                <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span>
+            </div>
+            <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+                <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+                <input type="text" class="row-full-width" id="node-input-positionConfig">
+            </div>
+            <hr>
+            <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
+            </div>
+            <div class="form-row block-noindent" data-i18n="[title]clock-timer.label.addId">
+                <label for="node-input-addId"><i class="icon-tag"></i> <span data-i18n="clock-timer.label.addId"></span></label>
+                <input type="text" id="node-input-addId" class="row-full-width" data-i18n="[placeholder]clock-timer.placeholder.addId"/>
+                <input type="hidden" id="node-input-addIdType"/>
+            </div>
+            <div class="form-tips is-to-show-initially">
+                <span data-i18n="[html]clock-timer.tips.documentation" style="word-wrap:break-word;"></span>
+            </div>
+        </div>
+        <div id="clock-timer-tab-default" style="display:none">
+            <!-- default ######################################################################## -->
+            <div class="form-row block-noindent is-to-show-initially">
+                <span data-i18n="[html]clock-timer.text.payloadDefault" class="row-full-width"></span>
+            </div>
+            <div class="form-row block-noindent is-to-show-initially" id="node-input-payloadDefault-div" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
+                <label for="node-input-payloadDefault"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
+                <input type="text" id="node-input-payloadDefault" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
+                <input type="hidden" id="node-input-payloadDefaultType">
+            </div>
+            <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
+                <label for="node-input-payloadDefaultOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
+                <input id="node-input-payloadDefaultOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset">
+                <input type="hidden" id="node-input-payloadDefaultOffsetType">
+                <select id="node-input-payloadDefaultOffsetMultiplier" class="node-input-multiplier"></select>
+            </div>
+            <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
+                <label for="node-input-payloadDefaultTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
+                <select id="node-input-payloadDefaultTimeFormatsel">
+                </select>
+                <input type="text" id="node-input-payloadDefaultTimeFormat">
+            </div>
+            <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
+                <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+                <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+            </div>
+            <hr>
+            <!-- overwrite ######################################################################## -->
+            <div class="form-row block-noindent is-to-show-initially">
+                <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span>
+            </div>
+            <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]clock-timer.placeholder.overwriteExpire">
+                <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.overwriteExpire"></span></label>
+                <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]clock-timer.placeholder.overwriteExpire" value=""/>
+                <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
+                    <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+                    <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                    <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                    <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
+                </select>
+                <input type="hidden" id="node-input-overwriteExpire"/>
+            </div>
+        </div>
+        <div id="clock-timer-tab-time" style="display:none">
+            <!-- time ######################################################################## -->
+            <div class="is-to-show-initially">
+                <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span>
+                <div class="form-row node-input-rule-container-row row-full-width">
+                    <ol id="node-input-rule-container"></ol>
+                    <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
+                    <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
+                    <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
+                    <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+                    <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+                </div>
+            </div>
+        </div>
+        <div id="clock-timer-tab-output" style="display:none">
+            <!-- Output ######################################################################## -->
+            <div>
+                <label for="node-input-result-container-row"><i class="fa fa-list"></i> <span data-i18n="clock-timer.label.resultContainer"></span></label>
+                <div class="form-row node-input-result-container-row">
+                    <ol id="node-input-result-container"></ol>
+                </div>
+            </div>
+            <hr>
+            <!-- Enhanced ######################################################################## -->
+            <div class="form-row block-noindent">
+                <span><i class="fa fa-cogs"></i> <span data-i18n="[html]clock-timer.text.enhanced"></span></span>
+            </div>
+            <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.autoTrigger">
+                <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
+                <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
+                <span id="time-control-autoTriggerTime-edit" class="is-initial-hidden">
+                    <span data-i18n="clock-timer.label.autoTrigger2"></span>
+                    <input type="text" class="spinner-time" id="time-control-autoTriggerTime" data-i18n="[placeholder]clock-timer.placeholder.autoTriggerTime" value=""/>
+                    <select id="time-control-autoTriggerTime-multiplier" class="node-input-multiplier">
+                        <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                        <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                        <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
+                    </select>
+                    <input type="hidden" id="node-input-autoTriggerTime"/>
+                </span>
+            </div>
+            <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.startDelay2">
+                <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> <span data-i18n="clock-timer.label.startDelay"></span></label>
+                <span id="time-control-startDelayTime-edit">
+                    <input type="text" class="spinner-time" id="time-control-startDelayTime" data-i18n="[placeholder]clock-timer.placeholder.startDelay" value=""/>
+                    <select id="time-control-startDelayTime-multiplier" class="node-input-multiplier">
+                        <option value="1" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.0"></option>
+                        <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+                        <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                    </select>
+                    <input type="hidden" id="node-input-startDelayTime"/>
+                </span>
+            </div>
         </div>
     </div>
-    <div class="form-row block-noindent is-to-show-initially">
-        <span data-i18n="[html]clock-timer.text.payloadDefault" class="row-full-width"></span>
-    </div>
-    <div class="form-row block-noindent is-to-show-initially" id="node-input-payloadDefault-div" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
-        <label for="node-input-payloadDefault"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
-        <input type="text" id="node-input-payloadDefault" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
-        <input type="hidden" id="node-input-payloadDefaultType">
-    </div>
-    <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
-        <label for="node-input-payloadDefaultOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
-        <input id="node-input-payloadDefaultOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset">
-        <input type="hidden" id="node-input-payloadDefaultOffsetType">
-        <select id="node-input-payloadDefaultOffsetMultiplier" class="node-input-multiplier"></select>
-    </div>
-    <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
-        <label for="node-input-payloadDefaultTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
-        <select id="node-input-payloadDefaultTimeFormatsel">
-        </select>
-        <input type="text" id="node-input-payloadDefaultTimeFormat">
-    </div>
-    <div class="form-row block-noindent time-topic" data-i18n="[title]node-red:common.label.topic">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
-    </div>
-    <hr>
-    <!-- overwrite ######################################################################## -->
-    <div class="form-row block-noindent is-to-show-initially">
-        <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span>
-    </div>
-    <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]clock-timer.placeholder.overwriteExpire">
-        <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.overwriteExpire"></span></label>
-        <input type="text" class="spinner-time" id="time-control-overwriteExpire" data-i18n="[placeholder]clock-timer.placeholder.overwriteExpire" value=""/>
-        <select id="time-control-overwriteExpire-multiplier" class="node-input-multiplier">
-            <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-            <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-            <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
-        </select>
-        <input type="hidden" id="node-input-overwriteExpire"/>
-    </div>
-    <hr>
-    <!-- sun ######################################################################## -->
-    <!-- Enhanced ######################################################################## -->
-    <div>
-        <label for="node-input-result-container-row"><i class="fa fa-list"></i> <span data-i18n="clock-timer.label.resultContainer"></span></label>
-        <div class="form-row node-input-result-container-row">
-            <ol id="node-input-result-container"></ol>
-        </div>
-    </div>
-    <hr>
-    <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.autoTrigger">
-        <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
-        <input type="checkbox" id="node-input-autoTrigger" style="width: auto;">
-        <span id="time-control-autoTriggerTime-edit" class="is-initial-hidden">
-            <span data-i18n="clock-timer.label.autoTrigger2"></span>
-            <input type="text" class="spinner-time" id="time-control-autoTriggerTime" data-i18n="[placeholder]clock-timer.placeholder.autoTriggerTime" value=""/>
-            <select id="time-control-autoTriggerTime-multiplier" class="node-input-multiplier">
-                <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-                <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-                <option value="86400000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.4"></option>
-            </select>
-            <input type="hidden" id="node-input-autoTriggerTime"/>
-        </span>
-    </div>
-    <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.startDelay2">
-        <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> <span data-i18n="clock-timer.label.startDelay"></span></label>
-        <span id="time-control-startDelayTime-edit">
-            <input type="text" class="spinner-time" id="time-control-startDelayTime" data-i18n="[placeholder]clock-timer.placeholder.startDelay" value=""/>
-            <select id="time-control-startDelayTime-multiplier" class="node-input-multiplier">
-                <option value="1" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.0"></option>
-                <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-                <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-            </select>
-            <input type="hidden" id="node-input-startDelayTime"/>
-        </span>
-    </div>
-    <hr>
     <!-- End ######################################################################## -->
-    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" class="row-full-width" data-i18n="[placeholder]node-red:common.label.name"/>
-    </div>
-    <div class="form-row block-noindent" data-i18n="[title]clock-timer.label.addId">
-        <label for="node-input-addId"><i class="icon-tag"></i> <span data-i18n="clock-timer.label.addId"></span></label>
-        <input type="text" id="node-input-addId" class="row-full-width" data-i18n="[placeholder]clock-timer.placeholder.addId"/>
-        <input type="hidden" id="node-input-addIdType"/>
-    </div>
-    <div class="form-tips is-to-show-initially">
-        <span data-i18n="[html]clock-timer.tips.documentation" style="word-wrap:break-word;"></span>
-    </div>
 
     <!-- DIALOG ######################################################################## -->
     <div id="dialog-select-context" class="red-ui-editor" title="Select Channel and Datapoint">

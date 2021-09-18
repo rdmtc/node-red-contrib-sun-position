@@ -42,7 +42,7 @@
 			"offset-timeMax": "latest (max) offset",
 			"dialogtitle": "Edit Rule",
 			"autoTrigger": "auto trigger",
-			"autoTrigger2": "dynamic, but max every",
+			"autoTrigger2": "dynamic, but at least every",
 			"startDelay": "delay output on start",
 			"timeconstraintshow": "show additional time constraints",
 			"timeconstrainthide": "hide additional time constraints",
@@ -72,7 +72,6 @@
 			"smoothTime": "(opt) prevents changes due to sun in the given time",
 			"name": "Name",
 			"expiryperiod": "120",
-			"outputs": "number of outputs",
 			"btnAdd": "add new empty rule",
 			"btnSort": "sort all rules, Attention this can change the behavior!",
 			"btnClear": "removes all rules from list",
@@ -97,10 +96,18 @@
 			"end":"tt.mm",
 			"addId": "additional ID"
 		},
+		"tabs-label": {
+			"general":"Name and config",
+			"blind":"Blind settings",
+			"default":"default and overwrite",
+			"time":"Time control",
+			"sun-control":"sun control",
+			"output":"Output and other"
+		},
 		"text": {
 			"blind": "blind settings",
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
-			"blindLevelDefault": "if no rule matches the following position will be used, On sun light restriction this is the blind level wenn sun is not in the window.",
+			"blindLevelDefault": "if no other settings matches (rule or sun-control) the following default settings for level, slat and the topic will be used. On sun light restriction this is the blind level wenn sun is not in the window.",
 			"overwrite": "manual overwrite of the blind position",
 			"sunControlNotActive": "Only rule control",
 			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.<br><br>The mode can be changed with an incomming message. Then this is the maximum possible mode which can selected. The value of the incomming message will be stored in the node's context and will persists a deploy.",
@@ -112,7 +119,8 @@
 			"sunControlRestriction": "If no rule or override matches, the node calculates the appropriate blind position to restrict the amount of direct sunlight entering the room.",
 			"sunCtrlLoF": "The limit to what extent direct sunlight is to be allowed into the room through the window, defined as a length on the floor.",
 			"sunCtrlRestrict": "Limit the frequency of changes by time and/or delta",
-			"ruleCondition": "Condition under which this rule is observed.<br/><small>There is no operator precedence! The combination of several conditions with <kbd>AND</kbd> or <kbd>OR</kbd> only means the respective condition to the preceding ones. The evaluation is canceled as soon as the expression results in true.</small>"
+			"ruleCondition": "Condition under which this rule is observed.<br/><small>There is no operator precedence! The combination of several conditions with <kbd>AND</kbd> or <kbd>OR</kbd> only means the respective condition to the preceding ones. The evaluation is canceled as soon as the expression results in true.</small>",
+			"enhanced":"advanced settings"
 		},
 		"typeOptions": {
 			"100": "open (max)",
@@ -129,7 +137,7 @@
 			"rule": "rule object (if rule is active)"
 		},
 		"tips": {
-			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/blind-control\">Documentation and examples</a>"
+			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/blind-control\" target=\"_blank\">Documentation and examples</a>"
 		},
 		"errors": {
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",

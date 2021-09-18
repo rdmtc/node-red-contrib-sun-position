@@ -16,7 +16,7 @@
 			"offset-timeMax": "latest (max) offset",
 			"dialogtitle": "Edit Rule",
 			"autoTrigger": "auto trigger",
-			"autoTrigger2": "dynamic, but max every",
+			"autoTrigger2": "dynamic, but at least every",
 			"startDelay": "delay output on start",
 			"timeconstraintshow": "show additional time constraints",
 			"timeconstrainthide": "hide additional time constraints",
@@ -43,17 +43,25 @@
 			"ruleTimeDays": "select days wherefore it should be valid",
 			"ruleTimeMonths": "select months wherefore it should be valid",
 			"autoTrigger": "automatic triggers new calculation of the rule in a dynamic changing time interval",
+			"autoTriggerTime": "10",
 			"startDelay": "0 - off",
 			"startDelay2": "delay any output to the first (or only) output on start (Node-Red start, Deplay, ...). Set to 0 to deactivate.",
 			"start":"tt.mm",
 			"end":"tt.mm",
 			"addId": "additional ID"
 		},
+		"tabs-label": {
+			"general":"Name and config",
+			"default":"Default and Ooverwrite",
+			"time":"Time control",
+			"output":"Output and other"
+		},
 		"text": {
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
 			"payloadDefault": "if no rule matches the following payload will be used.",
 			"overwrite": "manual overwrite of the rule payload",
-			"ruleCondition": "Condition under which this rule is observed.<br/><small>There is no operator precedence! The combination of several conditions with <kbd>AND</kbd> or <kbd>OR</kbd> only means the respective condition to the preceding ones. The evaluation is canceled as soon as the expression results in true.</small>"
+			"ruleCondition": "Condition under which this rule is observed.<br/><small>There is no operator precedence! The combination of several conditions with <kbd>AND</kbd> or <kbd>OR</kbd> only means the respective condition to the preceding ones. The evaluation is canceled as soon as the expression results in true.</small>",
+			"enhanced":"advanced settings"
 		},
 		"tips": {
 			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/clock-timer\">Documentation and examples</a>"

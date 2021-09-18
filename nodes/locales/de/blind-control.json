@@ -42,7 +42,7 @@
 			"offset-timeMax": "späteste (max) offset",
 			"dialogtitle": "Regel bearbeiten",
 			"autoTrigger": "automatisch triggern",
-			"autoTrigger2": "dynamisch aber max aller",
+			"autoTrigger2": "dynamisch aber mind. aller",
 			"startDelay": "Ausgabe bei Start verzögern",
 			"timeconstraintshow": "zeige zusätzliche Zeitbeschränkungen",
 			"timeconstrainthide": "verberge zusätzliche Zeitbeschränkungen",
@@ -96,10 +96,18 @@
 			"end":"tt.mm",
 			"addId": "zusätzliche ID"
 		},
+		"tabs-label": {
+			"general":"Name und Konfiguration",
+			"blind":"Rollladen Einstellungen",
+			"default":"default und Überschreiben",
+			"time":"Zeitsteuerung",
+			"sun-control":"Sonnensteuerung",
+			"output":"Ausgabe und anderes"
+		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
-			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
-			"blindLevelDefault": "Wenn keine Regel zutrifft, wird die aktuelle Rollladenposition genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
+			"time": "Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
+			"blindLevelDefault": "Wenn keine andere Vorgabe (Regel, Sonnensteuerung) zutrifft, wird diese Rollladenposition, Lamelleneinstellung und Topis genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
 			"overwrite": "manuelles Überschreiben der Rollladenposition",
 			"sunControlNotActive": "Nur Regelbasiert",
 			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der heir eingestellte Modus der maximal wählbare Modus. Der über eine nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",
@@ -111,7 +119,8 @@
 			"sunControlRestriction": "Wenn keine Regel oder Überschreiben (Override) zutrifft, berechnet der Knoten die entsprechende Blindposition, um die Menge des direkten Sonnenlichts, das in den Raum fällt, zu begrenzen.",
 			"sunCtrlLoF": "Definition inwieweit direktes Sonnenlicht durch das Fenster in den Raum gelangen darf (als Länge auf dem Boden).",
 			"sunCtrlRestrict": "Begrenzen Sie die Häufigkeit von Änderungen nach Zeit und / oder Änderungsgröße (Delta).",
-			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>"
+			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>",
+			"enhanced":"erweiterte Einstellungen"
 		},
 		"typeOptions": {
 			"100": "offen (max)",
@@ -122,6 +131,10 @@
 			"25": "25%",
 			"10": "10%",
 			"0": "geschlossen (min)"
+		},
+		"ctrlObj": {
+			"full": "komplettes Objekt",
+			"rule": "Regel Objekt (wenn eine Regel aktiv wurde)"
 		},
 		"tips": {
 			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/blind-control\">Dokumentation und Beispiele</a>"
