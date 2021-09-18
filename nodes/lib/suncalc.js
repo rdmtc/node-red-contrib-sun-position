@@ -633,13 +633,13 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             throw new Error('longitude missing');
         }
         if (degree) {
-            nazimuth = nazimuth * rad;
+            nazimuth = (nazimuth-180) * rad;
         }
         const lw = rad * -lng;
         const phi = rad * lat;
 
         let dateValue = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).valueOf();
-        let addval = (dayMs / 2);
+        let addval = dayMs; // / 2);
         dateValue += addval;
 
         while (addval > 200) {

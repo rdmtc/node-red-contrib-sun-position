@@ -12,70 +12,6 @@ const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
 
 // (function() {
 /*******************************************************************************************************/
-const moonPhases = [{
-    id: 'newMoon',
-    emoji: '🌚',
-    code: ':new_moon_with_face:',
-    name: 'New Moon',
-    weight: 1,
-    css: 'wi-moon-new'
-},
-{
-    id: 'waxingCrescentMoon',
-    emoji: '🌒',
-    code: ':waxing_crescent_moon:',
-    name: 'Waxing Crescent',
-    weight: 6.3825,
-    css: 'wi-moon-wax-cres'
-},
-{
-    id: 'firstQuarterMoon',
-    emoji: '🌓',
-    code: ':first_quarter_moon:',
-    name: 'First Quarter',
-    weight: 1,
-    css: 'wi-moon-first-quart'
-},
-{
-    id: 'waxingGibbousMoon',
-    emoji: '🌔',
-    code: ':waxing_gibbous_moon:',
-    name: 'Waxing Gibbous',
-    weight: 6.3825,
-    css: 'wi-moon-wax-gibb'
-},
-{
-    id: 'fullMoon',
-    emoji: '🌝',
-    code: ':full_moon_with_face:',
-    name: 'Full Moon',
-    weight: 1,
-    css: 'wi-moon-full'
-},
-{
-    id: 'waningGibbousMoon',
-    emoji: '🌖',
-    code: ':waning_gibbous_moon:',
-    name: 'Waning Gibbous',
-    weight: 6.3825,
-    css: 'wi-moon-wan-gibb'
-},
-{
-    id: 'thirdQuarterMoon',
-    emoji: '🌗',
-    code: ':last_quarter_moon:',
-    name: 'third Quarter',
-    weight: 1,
-    css: 'wi-moon-third-quart'
-},
-{
-    id: 'waningCrescentMoon',
-    emoji: '🌘',
-    code: ':waning_crescent_moon:',
-    name: 'Waning Crescent',
-    weight: 6.3825,
-    css: 'wi-moon-wan-cres'
-}];
 
 module.exports = function (RED) {
     'use strict';
@@ -608,7 +544,7 @@ module.exports = function (RED) {
          * @returns {number} random number
         */
         getCachedRandomNumber(_srcNode, data, dNow) {
-            data.value = parseFloat(data.value)
+            data.value = parseFloat(data.value);
             let cache = _srcNode.context().get('randomNumberCache');
             if (!hlp.isValidDate(dNow)) {
                 dNow = new Date();
@@ -1125,7 +1061,7 @@ module.exports = function (RED) {
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'randmNumCachedDay ') {
-                return getCachedRandomNumber(_srcNode, data, dNow);
+                return this.getCachedRandomNumber(_srcNode, data, dNow);
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
                 return Math.random() * ((data.value || 60) + 1);
@@ -1394,7 +1330,7 @@ module.exports = function (RED) {
                 return Object.assign({}, this.moonIlluminationToday); // needed for a object copy
             }
 
-            let result = sunCalc.getMoonIllumination(date.valueOf());
+            const result = sunCalc.getMoonIllumination(date.valueOf());
             result.phase.nameAlt = RED._('common.typeOptions.' + result.phase.id);
             // result.phase.angle = (this.angleType === 'rad') ? (moonIllum.angle * 360) / (180 / Math.PI) : moonIllum.angle * 360;
             // angle: (this.angleType === 'deg') ? 180 / Math.PI * moonIllum.angle : moonIllum.angle,
@@ -1405,7 +1341,7 @@ module.exports = function (RED) {
             }
             return result;
         }
-        
+
         getMoonPhase(date) {
             return this.getMoonIllumination(date, false).phase;
         }
