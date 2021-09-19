@@ -22,6 +22,7 @@ module.exports = function (RED) {
          * @returns {object} the nw property object
          */
         function prepareProps(node, props) {
+            // node.debug('prepareProps ' + util.inspect(props, { colors: true, compact: 10, breakLength: Infinity }));
             const outProps = [];
             props.forEach( prop => {
                 const propNew = {
@@ -725,6 +726,7 @@ module.exports = function (RED) {
                 props = prepareProps(node, msg.__user_inject_props__.props);
             }
             delete msg.__user_inject_props__;
+            // node.debug(`prepOutMsg props=${util.inspect(props, { colors: true, compact: 10, breakLength: Infinity })}`);
 
             for (let i = 0; i < props.length; i++) {
                 // node.debug(`prepOutMsg-${i} props[${i}]=${util.inspect(props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -999,7 +1001,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                // node.debug('--------- time-inject - input (type=' + msg.type + ')');
+                node.debug('--------- time-inject - input msg='+ util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
