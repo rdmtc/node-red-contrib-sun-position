@@ -1000,6 +1000,7 @@ function limitDate(limit, d) {
  * @param {string} t text representation of a time
  * @param {Date} [date] bade Date object for parsing the time, now will be used if not defined
  * @param {boolean} [utc] define if the time should be in utc
+ * @param {number} [timeZoneOffset] define a time zone offset if required
  * @return {Date|null} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date, utc, timeZoneOffset) {
@@ -1054,8 +1055,9 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
 /**
  * parses a string which contains a date or only a time to a Date object
  * @param {any} dt number or text which contains a date or a time
- * @return {Date} the parsed date object, throws an error if can not parsed
+ * @param {boolean} preferMonthFirst if true, Dates with moth first should be preferd, otherwise month last (european)
  * @param {boolean} [utc] define if the time should be in utc
+ * @return {Date} the parsed date object, throws an error if can not parsed
  */
 function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     // console.debug('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line

@@ -110,6 +110,8 @@ module.exports = function (RED) {
          * @property {string} [months] months for which should be calculated the sun time
          * @property {boolean} [onlyOddDays] - if true only odd days will be used
          * @property {boolean} [onlyEvenDays] - if true only even days will be used
+         * @property {boolean} [onlyOddWeeks] - if true only odd weeks will be used
+         * @property {boolean} [onlyEvenWeeks] - if true only even weeks will be used
          */
         // * @property {string} [meteoSeason] -only valid meteorological season
         // * @property {string} [astroSeason] -only valid astronomical season
@@ -947,11 +949,13 @@ module.exports = function (RED) {
             expr.registerFunction('parseTimeString', (text, date, utc, timeZoneOffset) => {
                 return hlp.getTimeOfText(text, date, utc, timeZoneOffset);
             }, '<s(osn)?b?n?:o>');
+            expr.registerFunction('isoStringToDate', text => {
+                return hlp.isoStringToDate(text);
+            }, '<s:o>');
             expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
                 return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
             }, '<xb?n?b?:o>');
-
-            expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow) => {
+            expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow, latitude, longitude, next, days, month, onlyOddDays, onlyEvenDays, onlyOddWeeks, onlyEvenWeeks) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
                     if (hlp.isValidDate(dNow)) {
@@ -960,8 +964,17 @@ module.exports = function (RED) {
                         dNow = new Date();
                     }
                 }
-                return this.getSunTimeByName(dNow, value, offset, multiplier).value;
-            }, '<sn?n?(osn)?:(ol)>');
+                const limit = {
+                    next,
+                    days: (Array.isArray(days)) ? days : '*',
+                    month: (Array.isArray(month)) ? month : '*',
+                    onlyOddDays,
+                    onlyEvenDays,
+                    onlyOddWeeks,
+                    onlyEvenWeeks
+                };
+                return this.getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude).value;
+            }, '<sn?n?(osn)?n?n?b?a?a?b?b?b?b?:(ol)>');
             expr.registerFunction('getSunTimePrevNext', dNow => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
