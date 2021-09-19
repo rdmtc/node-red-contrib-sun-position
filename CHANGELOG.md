@@ -1,6 +1,6 @@
 # node-red-contrib-sun-position
 
-# Installation
+## Installation
 
 Install of a specific Version in Node-Red:
  - change to the installation directory of Node-Red
@@ -15,7 +15,92 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
-#### 1.2.4: maintenance + critical bugfix
+### 2.0.0: enhancement
+
+⚠ Warning: This Version could break existing flows. Please check your configuration!
+
+🛑 Nodes that were created or saved with this version do not work in older versions of the package. This affects the export / import of flows and when switching to an older version. It is therefore **essential** to create a **backup** before upgrading to this version!
+
+- general
+  - added only even and only odd weeks
+  - added css property to moonPhases object an using css from [here](https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md)
+  - for offset values of a random number a cached value will be used which will be only generated once per day. #302
+  - selection of random number is available in more places
+  - allow negative altitudePercent #259
+
+- time-inject
+  - fixed error if only flow/global context is set #252
+  - fixed missing interval multiplier
+  - added possibility for inject special values from config menu like default inject node
+  - reworked simple interval (only simple interval)
+    - added start timestamp
+    - added selection for interval of days and weeks #313
+    - added possibility to setup interval greater than 24.9 days (2147483647 - 32bit integer limit of NodeJs)
+
+- within-time-switch
+  - configurable `msg.payload` of the outgoing message #292
+
+- moon-position
+  - moon times will now be has additional property `timesNext` with the values for the times of the next day #307
+  - added next moon phase date time #296
+
+- blind-control + clock-time
+  - added possibility to copy rules to clipboard and paste rules from clipboard
+  - nodes have now always 2 outputs - may breaks existing flows!
+    - First output is configurable.
+  - redesigned rule conditions, now unlimited conditions could be defined
+  - additional nodeID which will be also in the output (if set will override nodeId)
+    - added as rule condition operator - usable in subFlows
+  - No more messages are sent at the first output if the rule has changed but the payload (level/slat) has remained the same.
+    - A message will be sent if the topic has changed.
+  - overwrite will be written to node context and restored on recreation - allows overwrite be stable on deploy #300
+  - No longer configuration of number of outputs. Node will always have two outputs
+    - The message send to the first output will no longer be send on rule change, only on level/payload changes.
+    - The message on the first output is fully configurable.
+    - A property can be setup to be a string with placeholders. (The same placeholders can be used for the topic.):
+      - blind-control
+        - `%name%` - name of the node
+        - `%id%` - ID of the node
+        - `%level%` - level
+        - `%levelInverse%` - level, but inverse
+        - `%slat%` slat position
+        - `%code%` - node.reason.code,
+        - `%state%` - node.reason.state,
+        - `%description%` - node.reason.description,
+        - `%rule%` - ID of the active rule (if rule was active)
+        - `%mode%` - current mode
+        - `%topic%` - `msg.topic` of the incoming (trigger) message (if available)
+        - `%payload%` - `msg.payload` of the incoming (trigger) message (if available)
+      - clock-timer
+        - `%name%` - name of the node
+        - `%id%` - ID of the node
+        - `%code%` - node.reason.code
+        - `%state%` - node.reason.state
+        - `%description%` - node.reason.description
+        - `%rule%` - ID of the active rule (if rule was active)
+        - `%topic%` - `msg.topic` of the incoming (trigger) message (if available)
+        - `%payload%` - `msg.payload` of the incoming (trigger) message (if available)
+  - The name of the node (or the id if no name is given in the config) can be configured in the output message - #238
+    - this information will be send as `msg.payload.name` to the second output
+  - ID of the node can be send
+    - this information will be send as `msg.payload.id` to the second output if two outputs are configured
+  - blind-control only changes
+    - redesigned oversteer, now unlimited oversteer can defined
+    - oversteer can be defined only valid for special mode
+    - removed minimum altitude settings
+      - for functionality the downward compatibility is given by automatic adoption of the setting as new first oversteer, which has the same effect.
+      - no longer specific output of the reason (instead of "below the minimum elevation angle" will output "oversteer 1")
+    - window settings as typedInput, which allow to use from flow, global context or environment - node can better used in a subFlow
+    - per message set mode will be written to node context and to thus this will be stable on deploy
+      - needs to delete values of context on change
+    - current mode will no longer part of the node label/name, it will be displayed in the node state #321
+    - added option to setup a rule which prevents the node to send anything out #280
+
+- *time compare and change* + *time span*
+  - fixed parsing of ECMA-262 (simplified ISO8601) Format times (e.g. 2021-05-17T08:45:00.000Z) #250
+  - added parsing of full ISO8601 Format (e.g 2019-01-18T00:00:00.000Z, 2019-01-17T17:00:00.000-07:00, 2019-01-18T07:00:00.000+07:00)
+
+### 1.2.4: maintenance + critical bugfix
 
 - time-span
   - fixed bug that second operand displayed wrong in config!
@@ -29,17 +114,19 @@ This can be also used to go back to an older Version.
     - `msg.blindCtrl.name` / `msg.timeCtrl.name` which is the name of the node (or the id if no name is given in the config) - #238
       - this information will be send as `msg.payload.name` to the second output if two outputs are configured
     - `msg.blindCtrl.id` / `msg.timeCtrl.id` which is the id of the node
-      - this information will be send as `msg.payload.id` to the second output if two outputs are configured
+    - this information will be send as `msg.payload.id` to the second output if two outputs are configured
 
 - blind-control only
   - renamed `msg.resetOnSameValue` to `msg.resetOnSameAsLastValue` parameter to reset existing overwrite if `msg.payload` equals to position (`node.previousData.level`) (#223)
+  - added slat position #250
+  - in opposite to the mode `maximize sunlight (⛄ Winter)` added the `minimize sunlight (🕶️)` mode #284
 
-#### 1.2.3:  BugFix
+### 1.2.3:  BugFix
 
 - within-time-switch
   - fix bug that time limitations does not work #236 upstream of #192)
 
-#### 1.2.2:  BugFix
+### 1.2.2:  BugFix
 
 - general
   - internal object property `sunset` renamed to `sunsetEnd` and `sunrise` to `sunriseStart` (#213). This leads into problems with backward compatibilities. In any select box where `sunset` or `sunrise` is selected, it needs to reselect the right time.
@@ -48,7 +135,7 @@ This can be also used to go back to an older Version.
   - fix that note settings overwrite by message and payload does not working #233
   - fix bug with missing function #223
 
-#### 1.2.1:  rework
+### 1.2.1:  rework
 
 - general
   - changed several links to documentation #151
@@ -78,7 +165,7 @@ This can be also used to go back to an older Version.
 - within-time-switch
   - allows to have setup the time limitation also by msg, flow, global or env variable. #192
 
-#### 1.1.8:  small enhancement
+### 1.1.8:  small enhancement
 
 - time inject
   - allow to have a given number of timer events between two times #188
@@ -87,7 +174,7 @@ This can be also used to go back to an older Version.
 - blind-control + clock-time
   - allow to change general node settings with incoming message #184
 
-#### 1.1.7:  BugFix
+### 1.1.7:  BugFix
 
 - general
   - replaced some png type graphics with svg
@@ -103,17 +190,17 @@ This can be also used to go back to an older Version.
 - clock-time
   - fix that overrides with value false or 0 does not work #186
 
-#### 1.1.6:  BugFix
+### 1.1.6:  BugFix
 
 - general
   - reworked JSONATA (preparation is now done on node creation)
 
-#### 1.1.5:  BugFix
+### 1.1.5:  BugFix
 
 - general
   - fixed JSONATA are working
 
-#### 1.1.4:  BugFix
+### 1.1.4:  BugFix
 
 - general
   - for a property compare implemented `contain`, `containSome` and `comtainAll` #158
@@ -140,18 +227,18 @@ This can be also used to go back to an older Version.
 - blind-control + clock-time
   - first implementation of allow override expire by rules #173 (not fully tested)
 
-#### 1.1.3:  maintenance
+### 1.1.3:  maintenance
 
 only documentation changes
 
 - moved contents of the readme to the wiki
 
-#### 1.1.2:  BugFix
+### 1.1.2:  BugFix
 
 - blind-control + clock-time
   - fixed Error `Cannot read property 'timeType' of undefined` #152
 
-#### 1.1.1:  BugFix + maintenance
+### 1.1.1:  BugFix + maintenance
 
 - blind-control + clock-time
   - fixed missing topic from rules #150
@@ -162,7 +249,7 @@ only documentation changes
   - for any simple time input added possibility to add time as format `HH:MM UTC` or `HH:MM:SS UTC` to force UTC Format
   - added time calculation by azimuth and elevation (is not fully tested) #148
 
-#### 1.1.0:  mayor release
+### 1.1.0:  mayor release
 
 - time-inject
   - added possibility for interval inject #135
@@ -185,7 +272,7 @@ only documentation changes
 I a Node has a warning sign on the label the node needs to be opened, saved and deployed to fix the label:
 ![warning sign](https://user-images.githubusercontent.com/12692680/81336350-7977f980-90a9-11ea-8d14-fa412b83fe45.png)
 
-#### 1.0.17:  small enhancement
+### 1.0.17:  small enhancement
 
 - inspired by #132 added for a property the possibility to control by
   - is DST (Daylight saving)
@@ -195,7 +282,7 @@ I a Node has a warning sign on the label the node needs to be opened, saved and 
   - is day of the year even
 With this for example the time-inject could distinguish between using standard or alternate time if Daylight saving or the week of the year is less or below a number.
 
-#### 1.0.16:  BugFix
+### 1.0.16:  BugFix
 
 - general
   - fix #119
@@ -207,7 +294,7 @@ With this for example the time-inject could distinguish between using standard o
   - fixed problem that an override can not set as not expiring
   - fixed state text and level output if level-value of -1 is used
 
-#### 1.0.15:  BugFix + maintenance
+### 1.0.15:  BugFix + maintenance
 
 - blind-control + clock-time
   - fixed not visible offset field in rule edit for sun/moon times
@@ -215,12 +302,12 @@ With this for example the time-inject could distinguish between using standard o
 - time-Inject, within-time
   - enhanced refresh for tooltip on offset or multiplier change
 
-#### 1.0.14:  BugFix
+### 1.0.14:  BugFix
 
 - blind-control + clock-time
   - fixed bug for day of the week (String/integer format)
 
-#### 1.0.13:  BugFix
+### 1.0.13:  BugFix
 
 - time-inject
   - fix not visible time input field
@@ -235,9 +322,9 @@ With this for example the time-inject could distinguish between using standard o
 - general
   - i18N
 
-#### 1.0.12:  BugFix + enhancement
+### 1.0.12:  BugFix + enhancement
 
-##### fixes
+#### fixes
 
 - general
   - BugFix: Allow 0 as value for any time input, mainly for time-compare or time-span node, but affects potentially all nodes.
@@ -245,17 +332,17 @@ With this for example the time-inject could distinguish between using standard o
   - BugFix: node error output for time input if time can not be evaluated has missing original message.
   - prepared new Node interval-inject (not finished, not available) - is the same as standard node-red inject node for intervals with start and end of interval able to use sun-times.
 
-##### enhancements
+#### enhancements
 
 - Blind-control allows now granular settings of topic
 - documentation enhanced for clock-timer and general
 
-#### 1.0.11:  enhancement
+### 1.0.11:  enhancement
 
 - blind-control + clock-time + time-inject + within-time
   - implement #92 additional date restriction
 
-#### 1.0.10:  bug fix
+### 1.0.10:  bug fix
 
 - general
   - next try for #102
@@ -263,7 +350,7 @@ With this for example the time-inject could distinguish between using standard o
 - sun-position + moon-position
   - implements #81 - now it is possible to have `msg.latitude` and `msg.longitude` (or `msg.lat` and `msg.lon`) to override settings in configuration node. The configuration Node still needs to be configured properly.
 
-#### 1.0.9:  bug fix
+### 1.0.9:  bug fix
 
 - general
   - fixed #102 again - massive changes in the library with cleanup lot of functions
@@ -280,7 +367,7 @@ With this for example the time-inject could distinguish between using standard o
     - if payload is of type `string`, `number` or `boolean` and value of the payload has changed
       - changes on `arrays`, `objects` will not detected
 
-#### 1.0.8:  bug fix
+### 1.0.8:  bug fix
 
 - time-inject
   - fixes that time inject will do a recalculation every 1 ms (Problem can only occurs if the time constraints are used.) #106
@@ -289,7 +376,7 @@ With this for example the time-inject could distinguish between using standard o
   - documentation
   - i18n
 
-#### 1.0.7:  bug fix
+### 1.0.7:  bug fix
 
 - general
   - added additional caching of sun times calculation to reduce calculation load
@@ -298,7 +385,7 @@ With this for example the time-inject could distinguish between using standard o
   - fixed start delay setting causing no output at all
   - i18n, spelling, documentation
 
-#### 1.0.6:  bug fix
+### 1.0.6:  bug fix
 
 - general
   - fixed #102 - nodes calculate wrong sun times
@@ -309,12 +396,12 @@ With this for example the time-inject could distinguish between using standard o
 - blind-control + clock-time
   - first implementation of #92 (needs more test)
 
-#### 1.0.5:  bug fix
+### 1.0.5:  bug fix
 
 - blind-control + clock-time
   - add start delay setting where a time can be defined where no output
 
-#### 1.0.4:  bug fix
+### 1.0.4:  bug fix
 
 - within-time-switch
   - fixed error day selection #100
@@ -324,12 +411,12 @@ With this for example the time-inject could distinguish between using standard o
 - moon-position
   - added `lastUpdateStr` to payload to get the original calculation base time
 
-#### 1.0.3:  bug fix
+### 1.0.3:  bug fix
 
 - blind-control
   - fixed maximum rules #96
 
-#### 1.0.2:  bug fix
+### 1.0.2:  bug fix
 
 - time-comp
   - fixed #93
@@ -338,12 +425,12 @@ With this for example the time-inject could distinguish between using standard o
   - added random offset (not fully tested) #90
   - Improve display of days of the week and months (first try) #91
 
-#### 1.0.1:  bug fix
+### 1.0.1:  bug fix
 
 - time-inject
   - fix downward compatibility for older node settings
 
-#### 1.0.0: mayor release
+### 1.0.0: mayor release
 
 - new Node: clock-time
   - This is a simplified blind-control node, with only time rules and any payload.
@@ -370,17 +457,17 @@ With this for example the time-inject could distinguish between using standard o
   - The Version starting with 1... will show that this node is tested and working with Node-Red above 1...
   - After this release, no major changes are planned in the next time and the node is for the time being feature complete. This fits a version number 1.. better than 0..
 
-#### 0.5.3 + 0.5.4: BugFix
+### 0.5.3 + 0.5.4: BugFix
 
 - general
   - fix for #68
 
-#### 0.5.2: BugFix
+### 0.5.2: BugFix
 
 - general
   - fix for error on getting tooltip #69
 
-#### 0.5.1: BugFix and Maintenance Release
+### 0.5.1: BugFix and Maintenance Release
 
 - general
   - fix for week number calculation when in daylight saving #65
@@ -396,7 +483,7 @@ With this for example the time-inject could distinguish between using standard o
   - change logic of rule execution: From rules within Until rules will now considered.
     - change should have no affect if rule setup is equal to the examples, that time restricted rules separated in first only until and afterwards only from rules
 
-#### 0.5.0: mayor release for blind control
+### 0.5.0: mayor release for blind control
 
 - configuration
   - switched latitude and longitude and added openstreetmap link/map for the position to prevent issues caused by latitude and longitude (maybe cause of #55)
@@ -428,11 +515,11 @@ With this for example the time-inject could distinguish between using standard o
     - allows to define more scenarios
     - allows to reduce amount of needed rules.
 
-#### 0.4.10: critical bug fix
+### 0.4.10: critical bug fix
 
 - fixed bug #57 with the code prepared for Node-Red 1.0. The recommend way for be backward compatible doesn't work. This is [also](https://discourse.nodered.org/t/knowing-when-a-node-is-done-new-node-api/15737/9) confirmed by @knolleary.
 
-#### 0.4.9: small enhancement
+### 0.4.9: small enhancement
 
 - implemented #52 as height of the sun in the sky in percent (0~100 with 100% being at solarnoon and 0% being completely down) - altithudePercent
 - fixed bug for #53, no longer send blind position in override mode
@@ -440,18 +527,18 @@ With this for example the time-inject could distinguish between using standard o
 - more changes for node-red 1.0 (https://nodered.org/blog/2019/09/20/node-done)
 - added node-red 0.19.0 as required version
 
-#### 0.4.8: Maintenance Release
+### 0.4.8: Maintenance Release
 
 - update dependencies
 
-#### 0.4.7: BugFix Release
+### 0.4.7: BugFix Release
 
 - fix problems
   - if time tooltip has wrong format
   - if not initialized
   - on exception get backend data
 
-#### 0.4.6: Maintenance Release
+### 0.4.6: Maintenance Release
 
 - time-comp
   - fixed css for multiselect in node-red Beta
@@ -460,7 +547,7 @@ With this for example the time-inject could distinguish between using standard o
   - added tooltip for time select fields
 - enhanced readme and added links to changelog #43
 
-#### 0.4.5: Maintenance Release
+### 0.4.5: Maintenance Release
 
 - time-compare
   - node added option "otherwise"
@@ -471,13 +558,13 @@ With this for example the time-inject could distinguish between using standard o
   - fixed wrong entry in type edit
 - fixed exception on empty date in offset calculation
 
-#### 0.4.4: Maintenance Release
+### 0.4.4: Maintenance Release
 
 - all previous changes
 - enhanced Documentation
 - redesigned minimum and maximum rule level types again
 
-#### 0.4.4-beta: Maintenance Release
+### 0.4.4-beta: Maintenance Release
 
 - fixed critical problem in sun - calculating Julian cycle which leads into wrong sun times if it is calculated at certain times
   - [#37](https://github.com/rdmtc/node-red-contrib-sun-position/issues/37)
@@ -508,15 +595,15 @@ With this for example the time-inject could distinguish between using standard o
 - optimized access to backend services
 - changed lot of UTC time compare problems [#34](https://github.com/rdmtc/node-red-contrib-sun-position/issues/34)
 
-#### 0.4.3: Maintenance Release
+### 0.4.3: Maintenance Release
 
 - Version was unpublished due to critical Bugs
 
-#### 0.4.1 / 0.4.2: Maintenance Release
+### 0.4.1 / 0.4.2: Maintenance Release
 
 - Version was unpublished due to critical Bugs
 
-#### 0.4.0: Maintenance Release
+### 0.4.0: Maintenance Release
 
 - i18N for type-input options
 - time inject
@@ -528,20 +615,20 @@ With this for example the time-inject could distinguish between using standard o
   - enhanced documentation
 - start of changelog
 
-#### 0.3.4: Maintenance Release
+### 0.3.4: Maintenance Release
 
 - blind control
   - added additional oversteer settings (oversteer2)
   - enhanced documentation
 - fixed links in documentation
 
-#### 0.3.3: Maintenance Release
+### 0.3.3: Maintenance Release
 
 - preparations for node-red 1.0
 - fixed UTC time compare problem in blind-control
 - enhanced config for own state time output format
 
-#### 0.3.2: Maintenance Release
+### 0.3.2: Maintenance Release
 
 - prepared for own timezone settings
 - added configuration for own state time output format

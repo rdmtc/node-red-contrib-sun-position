@@ -12,6 +12,8 @@ module.exports = {
     XAND,
     pad2,
     pad,
+    angleNorm,
+    angleNormRad,
     clipStrLength,
     countDecimals,
     handleError,
@@ -31,7 +33,10 @@ module.exports = {
     calcMonthOffset,
     convertDateTimeZone,
     isValidDate,
+    isoStringToDate,
+    roundToHour,
     normalizeDate,
+    limitDate,
     getTimeOfText,
     getDateOfText,
     getDayOfYear,
@@ -44,7 +49,8 @@ module.exports = {
     getFormattedDateOut,
     parseDateFromFormat,
     topicReplace,
-    getNowTimeStamp
+    getNowTimeStamp,
+    getNowObject
 };
 
 /*******************************************************************************************************/
@@ -52,8 +58,27 @@ module.exports = {
     var date = new Date(this.valueOf());
     date.setUTCDate(date.getUTCDate() + days);
     return date;
-} */
+}
 
+// Returns the ISO week of the date.
+Date.prototype.getWeek = function() {
+    const date = new Date(this.getTime());
+    date.setHours(0, 0, 0, 0);
+    // Thursday in current week decides the year.
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    // January 4 is always in week 1.
+    const week1 = new Date(date.getFullYear(), 0, 4);
+    // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                          - 3 + (week1.getDay() + 6) % 7) / 7);
+};
+
+// Returns the four-digit year corresponding to the ISO week of the date.
+Date.prototype.getWeekYear = function() {
+    const date = new Date(this.getTime());
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    return date.getFullYear();
+}; */
 /*******************************************************************************************************/
 /* simple functions                                                                                    */
 /*******************************************************************************************************/
@@ -113,6 +138,35 @@ function XAND(a, b) {
  */
 function countDecimals(value) {
     return value === value>> 0 ? 0 : value.toString().split('.')[1].length || 0;
+}
+
+/**
+ * normalizes an angle
+ * @param {number} angle to normalize
+ */
+function angleNorm(angle) {
+    while (angle < 0) {
+        angle += 360;
+    }
+    while (angle > 360) {
+        angle -= 360;
+    }
+    return angle;
+}
+
+/**
+ * normalizes an angle
+ * @param {number} angle to normalize
+ */
+function angleNormRad(angle) {
+    const dr = (2 * Math.PI);
+    while (angle < 0) {
+        angle += dr;
+    }
+    while (angle > dr) {
+        angle -= dr;
+    }
+    return angle;
 }
 /*******************************************************************************************************/
 /**
@@ -186,7 +240,7 @@ function handleError(node, messageText, err, stateText) {
         /* eslint-disable no-console */
         console.error(messageText);
         console.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-        console.trace();
+        console.trace(); // eslint-disable-line
         /* eslint-enable no-console */
     }
 }
@@ -395,6 +449,39 @@ function getNowTimeStamp(node, msg) {
     }
     node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
     return new Date();
+}
+
+
+/**
+* support timeData
+* @name ITimeObject Data
+* @param {Date} dNow
+* @param {number} nowNr
+* @param {number} dayNr
+* @param {number} monthNr
+* @param {number} dateNr
+* @param {number} yearNr
+* @param {number} dayId
+*/
+
+/**
+* the definition of the time to compare
+* @param {*} node the current node object
+* @param {*} msg the message object
+* @returns {ITimeObject} Date object of given Date or now
+*/
+function getNowObject(node, msg) {
+    const dNow = getNowTimeStamp(node, msg);
+    return {
+        dNow,
+        nowNr   : dNow.getTime(),
+        dayNr   : dNow.getDay(),
+        dateNr  : dNow.getDate(),
+        weekNr  : getWeekOfYear(dNow),
+        monthNr : dNow.getMonth(),
+        yearNr  : dNow.getFullYear(),
+        dayId   : getDayId(dNow)
+    };
 }
 /*******************************************************************************************************/
 /* date-time functions                                                                                 */
@@ -639,6 +726,98 @@ function isValidDate(d) {
     return d instanceof Date && !isNaN(d);
     // d !== 'Invalid Date' && !isNaN(d)
 }
+
+/**
+ * Parse an ISO date string (i.e. "2019-01-18T00:00:00.000Z",
+ * "2019-01-17T17:00:00.000-07:00", or "2019-01-18T07:00:00.000+07:00",
+ * which are the same time) and return a JavaScript Date object with the
+ * value represented by the string.
+ * @param {string} isoString - a ISO 8601 format string
+ * @returns {Date} returns Date represtntation of the string
+ */
+function isoStringToDate( isoString ) {
+
+    // Split the string into an array based on the digit groups.
+    const dateParts = isoString.split( /\D+/ );
+
+    // Set up a date object with the current time.
+    const returnDate = new Date();
+
+    // Manually parse the parts of the string and set each part for the
+    // date. Note: Using the UTC versions of these functions is necessary
+    // because we're manually adjusting for time zones stored in the
+    // string.
+    returnDate.setUTCFullYear( parseInt( dateParts[ 0 ] ) );
+
+    // The month numbers are one "off" from what normal humans would expect
+    // because January == 0.
+    returnDate.setUTCMonth( parseInt( dateParts[ 1 ] - 1 ) );
+    returnDate.setUTCDate( parseInt( dateParts[ 2 ] ) );
+
+    // Set the time parts of the date object.
+    returnDate.setUTCHours( parseInt( dateParts[ 3 ] ) );
+    returnDate.setUTCMinutes( parseInt( dateParts[ 4 ] ) );
+    returnDate.setUTCSeconds( parseInt( dateParts[ 5 ] ) );
+    returnDate.setUTCMilliseconds( parseInt( dateParts[ 6 ] ) );
+
+    // Track the number of hours we need to adjust the date by based
+    // on the timezone.
+    let timezoneOffsetHours = 0;
+
+    // If there's a value for either the hours or minutes offset.
+    if ( dateParts[ 7 ] || dateParts[ 8 ] ) {
+
+        // Track the number of minutes we need to adjust the date by
+        // based on the timezone.
+        let timezoneOffsetMinutes = 0;
+
+        // If there's a value for the minutes offset.
+        if ( dateParts[ 8 ] ) {
+
+            // Convert the minutes value into an hours value.
+            timezoneOffsetMinutes = parseInt( dateParts[ 8 ] ) / 60;
+        }
+
+        // Add the hours and minutes values to get the total offset in
+        // hours.
+        timezoneOffsetHours = parseInt( dateParts[ 7 ] ) + timezoneOffsetMinutes;
+
+        // If the sign for the timezone is a plus to indicate the
+        // timezone is ahead of UTC time.
+        if ( isoString.substr( -6, 1 ) === '+' ) {
+
+            // Make the offset negative since the hours will need to be
+            // subtracted from the date.
+            timezoneOffsetHours *= -1;
+        }
+    }
+
+    // Get the current hours for the date and add the offset to get the
+    // correct time adjusted for timezone.
+    returnDate.setHours( returnDate.getHours() + timezoneOffsetHours );
+
+    // Return the Date object calculated from the string.
+    return returnDate;
+}
+/* like previous isoStringToDate, but smaller
+const parseDate = dateString => {
+    const b = dateString.split(/\D+/);
+    const offsetMult = dateString.indexOf('+') !== -1 ? -1 : 1;
+    const hrOffset = offsetMult * (+b[7] || 0);
+    const minOffset = offsetMult * (+b[8] || 0);
+    return new Date(Date.UTC(+b[0], +b[1] - 1, +b[2], +b[3] + hrOffset, +b[4] + minOffset, +b[5], +b[6] || 0));
+}; */
+
+/**
+ * Round a date to the nearest full Hour
+ * @param {DATE} date Date to round
+ * @returns {DATE} Date round to next full Hour
+ */
+function roundToHour(date) {
+    const p = 60 * 60 * 1000; // milliseconds in an hour
+    return new Date(Math.round(date.getTime() / p ) * p);
+}
+
 /*******************************************************************************************************/
 /**
  * adds an offset to a given Date object (Warning: No copy of Date Object will be created and original Date Object could be changed!!)
@@ -713,6 +892,8 @@ function calcMonthOffset(months, monthstart) {
  * @property {string} [months] months for which should be calculated the sun time
  * @property {boolean} [onlyOddDays] - if true only odd days will be used
  * @property {boolean} [onlyEvenDays] - if true only even days will be used
+ * @property {boolean} [onlyOddWeeks] - if true only odd weeks will be used
+ * @property {boolean} [onlyEvenWeeks] - if true only even weeks will be used
  */
 
 /**
@@ -738,35 +919,79 @@ function normalizeDate(d, offset, multiplier, limit) {
             d.setDate(d.getDate() + 1);
         }
     }
+    const r = limitDate(limit, d);
+    if (r.hasChanged) {
+        return r.date;
+    }
+    return d;
+}
+
+/**
+ * calculates limitation of a date
+ * @param {limitationsObj} limit limitation object
+ * @param {Date} date Date to check
+ * @returns [date, hasChanged, error]
+ */
+function limitDate(limit, d) {
+    let hasChanged = false;
+    let error = '';
     if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
         const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
+            hasChanged = true;
+        } else if (dayx < 0) {
+            error = 'No valid day of week found!';
         }
     }
+
     if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
         const monthx = calcMonthOffset(limit.months, d.getMonth());
         if (monthx > 0) {
             d.setMonth(d.getMonth() + monthx);
+            hasChanged = true;
+        } else if (monthx < 0) {
+            error = 'No valid month found!';
         }
     }
-    if (limit.onlyEvenDays) {
+
+    if (isTrue(limit.onlyEvenDays) && !isTrue(limit.onlyOddDays)) { // eslint-disable-line eqeqeq
         let time = d.getDate();
         while ((time % 2 !== 0)) {
             // odd
             d.setDate(d.getDate() + 1);
             time = d.getDate();
+            hasChanged = true;
         }
     }
-    if (limit.onlyOddDays) {
+    if (isTrue(limit.onlyOddDays) && !isTrue(limit.onlyEvenDays)) { // eslint-disable-line eqeqeq
         let time = d.getDate();
         while((time % 2 === 0)) {
             // even
             d.setDate(d.getDate() + 1);
             time = d.getDate();
+            hasChanged = true;
         }
     }
-    return d;
+    if (isTrue(limit.onlyEvenWeeks) && !isTrue(limit.onlyOddWeeks)) { // eslint-disable-line eqeqeq
+        let week = getWeekOfYear(d);
+        while (week[1] % 2 !== 0) {
+            // odd
+            d.setDate(d.getDate() + 1);
+            week = getWeekOfYear(d);
+            hasChanged = true;
+        }
+    }
+    if (isTrue(limit.onlyOddWeeks) && !isTrue(limit.onlyEvenWeeks)) { // eslint-disable-line eqeqeq
+        let week = getWeekOfYear(d);
+        while(week[1] % 2 === 0) {
+            // even
+            d.setDate(d.getDate() + 1);
+            week = getWeekOfYear(d);
+            hasChanged = true;
+        }
+    }
+    return {date:d, hasChanged, error};
 }
 
 /*******************************************************************************************************/
@@ -1139,7 +1364,12 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     }
     format = format || 0;
     if (date.value) { date = date.value; }
-    if (!(date instanceof Date)) { date = Date(date); }
+    if (!(date instanceof Date)) {
+        date = Date(date);
+        if (!isValidDate(date)) {
+            throw new Error(`given Date is not a valid Date!!`);
+        }
+    }
 
     if (isNaN(format)) {
         return _dateFormat(date, String(format), utc, timeZoneOffset);
@@ -1181,7 +1411,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
                 return convertDateTimeZone(date, timeZoneOffset).toLocaleDateString();
             }
             return date.toLocaleDateString();
-        case 5: // timeformat_ISO
+        case 5: // timeparse_ISO8601
             return date.toISOString();
         case 6: // timeformat_ms
             return date.getTime() - (new Date()).getTime();
@@ -1766,7 +1996,10 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 res = new Date(Number(date));
                 break;
             case 1: // timeparse_ECMA262
-                res = Date.parse(date);
+                res = new Date(Date.parse(date));
+                break;
+            case 6: // timeparse_ISO8601
+                res = isoStringToDate(date);
                 break;
             case 2: // various - try different Formats, prefer day first like d/M/y (e.g. European format)
                 res = tryparse(date, false);

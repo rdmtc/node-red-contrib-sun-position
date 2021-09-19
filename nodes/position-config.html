@@ -269,6 +269,8 @@
                 }
 
                 switch (t) {
+                    case 'none':
+                        return '';
                     case 'levelFixed': {
                         if (!v) {
                             return '?%';
@@ -297,6 +299,7 @@
                         return node._('node-red-contrib-sun-position/position-config:common.label.timestamp') + '+' + suffix;
                     case 'string':
                     case 'str':
+                    case 'strPlaceholder':
                     case 'dayOfMonth':
                         if (v === '') { return node._('node-red-contrib-sun-position/position-config:common.label.blank') + suffix; }
                         return '"' + RED.nodes.getType('position-config').clipValueLength(v, l) + '"' + suffix;
@@ -407,6 +410,10 @@
                         return node._('node-red-contrib-sun-position/position-config:common.label.suntimeObj') + suffix;
                     case 'numPct':
                         return String(v).replace('%','').trim() + '%' + suffix;
+                    case 'nodeId':
+                        return node._('node-red-contrib-sun-position/position-config:common.types.nodeId') + suffix;
+                    case 'nodeName':
+                        return node._('node-red-contrib-sun-position/position-config:common.types.nodeName') + suffix;
                     case 'PlT':
                         return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: RED.nodes.getType('position-config').clipValueLength(v, l), suffix} );
                     case 'msgPayload':

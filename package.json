@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "1.2.4",
+  "version": "2.0.0-beta-6",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -42,7 +42,11 @@
     "calculate",
     "redmatic",
     "blind",
-    "blind-control"
+    "blind-control",
+    "home+automation",
+    "cover",
+    "roller",
+    "shutter"
   ],
   "main": "none",
   "engines": {
@@ -103,8 +107,8 @@
     }
   },
   "devDependencies": {
-    "eslint": "^7.20.0",
-    "eslint-plugin-html": "^6.1.1",
+    "eslint": "^7.32.0",
+    "eslint-plugin-html": "^6.1.2",
     "eslint-plugin-jsdoc": "^36.1.0",
     "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-node": "^11.1.0"

@@ -14,6 +14,9 @@
             "result1Format": "output format",
             "result1Offset": "Offset"
         },
+        "typeLabel":{
+            "input": "Input value"
+        },
         "placeholder": {
             "property": "Property",
             "input": "Input",

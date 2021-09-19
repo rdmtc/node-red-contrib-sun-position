@@ -2,8 +2,6 @@
     "sun-position": {
         "label": {
             "azimuthpos":"azimuth Position",
-            "between":"between",
-            "and":"and",
             "start": "Start",
             "startOffset":"Start Offset",
             "end": "End",

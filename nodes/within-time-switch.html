@@ -100,6 +100,14 @@
                     value: false,
                     required: true
                 },
+                timeOnlyOddWeeks: {
+                    value: false,
+                    required: true
+                },
+                timeOnlyEvenWeeks: {
+                    value: false,
+                    required: true
+                },
                 timeMonths: {
                     value: '*',
                     required: true
@@ -255,6 +263,22 @@
                         ($('#node-input-endTimeAlt').typedInput('type') === 'none');
                     }
                 },
+                withinTimeValue: {
+                    value: 'true',
+                    required: true,
+                    validate: RED.validators.typedInput('withinTimeValueType')
+                },
+                withinTimeValueType: {
+                    value: 'input'
+                },
+                outOfTimeValue: {
+                    value: 'false',
+                    required: true,
+                    validate: RED.validators.typedInput('outOfTimeValueType')
+                },
+                outOfTimeValueType: {
+                    value: 'input'
+                },
                 tsCompare: {
                     value: '0'
                 }
@@ -334,6 +358,14 @@
                     }
                     // #endregion initialize
                     // #region timeStart
+                    if ($('#node-input-timeOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeOnlyEvenWeeks').prop('checked',false);
+                    }
                     initializeValue(node, 'timeDays', '*');
                     initializeValue(node, 'timeMonths', '*');
                     initCheckboxesBlock('#within-time-switch-timeDays', node.timeDays);
@@ -386,7 +418,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startOffset').typedInput('type');
@@ -516,7 +548,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endOffset').typedInput('type');
@@ -547,8 +579,6 @@
                             types.SunInSky,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -580,17 +610,17 @@
                                 propCompare.attr('disabled', false);
                                 $('#node-input-propertyStart').typedInput('width', 'calc(100% - 220px)');
                                 const condOp = propCompare.val();
-                                let operatorCount = 1;
+                                let operandCount = 1;
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
+                                        operandCount = el.operandCount;
                                         break;
                                     }
                                 }
-                                if (operatorCount > 1) {
+                                if (operandCount > 1) {
                                     $('.row-propertyStartThreshold').show(); // condOpB
                                 } else {
                                     $('.row-propertyStartThreshold').hide(); // condOpB
@@ -656,7 +686,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffsetAlt === 0 || node.startOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-startOffsetAlt').typedInput('type');
@@ -687,8 +717,6 @@
                             types.SunInSky,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -721,17 +749,17 @@
                                 propCompare.attr('disabled', false);
                                 $('#node-input-propertyEnd').typedInput('width', 'calc(100% - 220px)');
                                 const condOp = propCompare.val();
-                                let operatorCount = 1;
+                                let operandCount = 1;
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for (let index = 0; index < fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
+                                        operandCount = el.operandCount;
                                         break;
                                     }
                                 }
-                                if (operatorCount > 1) {
+                                if (operandCount > 1) {
                                     $('.row-propertyEndThreshold').show(); // condOpB
                                 } else {
                                     $('.row-propertyEndThreshold').hide(); // condOpB
@@ -797,7 +825,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffsetAlt === 0 || node.endOffsetAlt === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             if ( onInit) { return; }
                             const type = $('#node-input-endOffsetAlt').typedInput('type');
@@ -810,6 +838,94 @@
                         }
                     });
                     // #endregion timeAltEnd
+                    // #region Output Values
+                    setupTInput(node, {
+                        typeProp: 'withinTimeValueType',
+                        valueProp: 'withinTimeValue',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'input',
+                        defaultValue: 'true' ,
+                        types: [
+                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            'str',
+                            'num',
+                            'bool',
+                            'date',
+                            'json',
+                            'bin',
+                            'env',
+                            'msg',
+                            'flow',
+                            'global',
+                            'jsonata',
+                            types.numPercent,
+                            types.randomNumber,
+                            types.randmNumCachedDay,
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven,
+                            types.nodeId,
+                            types.nodeName
+                        ]
+                    });
+                    setupTInput(node, {
+                        typeProp: 'outOfTimeValueType',
+                        valueProp: 'outOfTimeValue',
+                        width: 'calc(100% - 110px)',
+                        defaultType: 'input',
+                        defaultValue: 'true' ,
+                        types: [
+                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            'str',
+                            'num',
+                            'bool',
+                            'date',
+                            'json',
+                            'bin',
+                            'env',
+                            'msg',
+                            'flow',
+                            'global',
+                            'jsonata',
+                            types.numPercent,
+                            types.randomNumber,
+                            types.randmNumCachedDay,
+                            types.SunCalc,
+                            types.SunInSky,
+                            types.MoonCalc,
+                            types.MoonPhase,
+                            types.SunAzimuth,
+                            types.SunElevation,
+                            types.SunAzimuthRad,
+                            types.SunElevationRad,
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByElevation,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationRad,
+                            types.isDST,
+                            types.WeekOfYear,
+                            types.WeekOfYearEven,
+                            types.DayOfYear,
+                            types.DayOfYearEven,
+                            types.nodeId,
+                            types.nodeName
+                        ]
+                    });
+                    // #endregion Output Values
                     // #region Enhanced settings
                     initializeValue(node, 'tsCompare', 0);
                     const chkVal = (name, val) => {
@@ -914,7 +1030,7 @@
     </div>
     <div class="form-row node-input-row-timeLimits  is-initial-hidden" data-i18n="[title]within-time-switch.placeholder.timeLimits">
         <div id="within-time-switch-timeDays" class="within-time-switch-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDays"></div>
             <div style="display:inline-block;">
                 <div>
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.days.1"><input type='checkbox' checked value='1'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.days.8"></span></label>
@@ -928,16 +1044,18 @@
             </div>
         </div>
         <div class="within-time-switch-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.specialDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="within-time-switch.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="within-time-switch.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>
         <div id="within-time-switch-timeMonths" class="within-time-switch-months" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="within-time-switch.label.validForMonths"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.validForMonths"></div>
             <div style="display:inline-block;">
                 <div>
                     <label data-i18n="[title]node-red-contrib-sun-position/position-config:common.months.0"><input type='checkbox' checked value='0'/> <span data-i18n="node-red-contrib-sun-position/position-config:common.months.12"></span></label>
@@ -956,7 +1074,7 @@
             </div>
         </div>
         <div id="within-time-switch-timeDateLimit" class="within-time-switch-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="blind-control.label.validForDates"></span></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDates"></span></div>
             <div style="display:inline-block;">
                 <input type="date" id="node-input-timedatestart" class="ipMain within-time-switch-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.start" min="2000-01-01" max="2000-12-31">
                 <input type="date" id="node-input-timedateend" class="ipMain within-time-switch-timedatelimit" value="" data-i18n="[placeholder]blind-control.placeholder.end" min="2000-01-01" max="2000-12-31">
@@ -1010,6 +1128,18 @@
         <input id="node-input-endOffsetAlt" data-i18n="[placeholder]within-time-switch.placeholder.endOffsetAlt"/>
         <input type="hidden" id="node-input-endOffsetAltType">
         <select id="node-input-endOffsetAltMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]within-time-switch.tips.outputValue"></div>
+    <div class="form-row row-withinTimeValue">
+        <label for="node-input-withinTimeValue"><i class="fa fa-hourglass-half"></i> <span data-i18n="within-time-switch.label.withinTimeValue"></span></label>
+        <input type="text" id="node-input-withinTimeValue">
+        <input type="hidden" id="node-input-withinTimeValueType">
+    </div>
+    <div class="form-row row-outOfTimeValue">
+        <label for="node-input-outOfTimeValue"><i class="fa fa-hourglass-end"></i> <span data-i18n="within-time-switch.label.outOfTimeValue"></span></label>
+        <input type="text" id="node-input-outOfTimeValue">
+        <input type="hidden" id="node-input-outOfTimeValueType">
     </div>
     <hr>
     <div class="form-row is-to-show-initially">

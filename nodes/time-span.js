@@ -3,6 +3,9 @@
  *********************************************/
 'use strict';
 const util = require('util');
+const path = require('path');
+
+const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
 const perSecond = 1000;
 const perMinute = 60000;
@@ -325,11 +328,13 @@ module.exports = function (RED) {
                 offset          : prop.o,
                 multiplier      : prop.oM,
                 outTSFormat     : prop.fTs,
-                next            : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                next            : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
                 days            : prop.days,
                 months          : prop.months,
                 onlyEvenDays    : prop.onlyEvenDays,
-                onlyOddDays     : prop.onlyOddDays
+                onlyOddDays     : prop.onlyOddDays,
+                onlyEvenWeeks   : prop.onlyEvenWeeks,
+                onlyOddWeeks    : prop.onlyOddWeeks
             };
 
             if (this.positionConfig && propNew.type === 'jsonata') {

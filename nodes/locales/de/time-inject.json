@@ -16,18 +16,13 @@
             "once": "zusätzlich",
             "onstart": "Inject bei start ",
             "onceDelay": "Sekunden",
-			"validForDays":"gültig für Tage",
-            "validForMonths":"gültig für Monate",
-            "validForDates":"Gültigkeitsdauer (Jahr wird ignoriert)",
-			"specialDays":"spezielle Tage",
-			"onlyEvenDays":"nur gerade",
-            "onlyOddDays":"nur ungerade",
             "fewDays": "ein paar Tage",
             "fewMonths": "ein paar Monate",
-            "between":"zwischen",
             "and":"und",
             "interval-amount":"feste Anzahl zwischen den Zeitpunkten",
-            "count":"Anzahl"
+            "interval-fromStart":"Interval von festem Zeitpunkt",
+            "count":"Anzahl",
+            "intervalStart":"beginnend von"
         },
         "placeholder": {
             "position": "Position",

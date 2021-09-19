@@ -18,11 +18,106 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const atan = Math.atan2;
     const acos = Math.acos;
     const rad = Math.PI / 180;
+    const degr = 180 / Math.PI;
 
     // date/time constants and conversions
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
     const J1970 = 2440587.5;
     const J2000 = 2451545;
+
+    const lunarDaysMs = 2551442778; // The duration in days of a lunar cycle is 29.53058770576
+    const firstNewMoon2000 = 947178840000; // first newMoon in the year 2000 2000-01-06 18:14
+
+    const fractionOfTheMoonCycle = [{
+        from: 0,
+        to: 0.033863193308711,
+        id: 'newMoon',
+        emoji: '🌚',
+        code: ':new_moon_with_face:',
+        name: 'New Moon',
+        weight: 1,
+        css: 'wi-moon-new'
+    },
+    {
+        from: 0.033863193308711,
+        to: 0.216136806691289,
+        id: 'waxingCrescentMoon',
+        emoji: '🌒',
+        code: ':waxing_crescent_moon:',
+        name: 'Waxing Crescent',
+        weight: 6.3825,
+        css: 'wi-moon-wax-cres'
+    },
+    {
+        from: 0.216136806691289,
+        to: 0.283863193308711,
+        id: 'firstQuarterMoon',
+        emoji: '🌓',
+        code: ':first_quarter_moon:',
+        name: 'First Quarter',
+        weight: 1,
+        css: 'wi-moon-first-quart'
+    },
+    {
+        from: 0.283863193308711,
+        to: 0.466136806691289,
+        id: 'waxingGibbousMoon',
+        emoji: '🌔',
+        code: ':waxing_gibbous_moon:',
+        name: 'Waxing Gibbous',
+        weight: 6.3825,
+        css: 'wi-moon-wax-gibb'
+    },
+    {
+        from: 0.466136806691289,
+        to: 0.533863193308711,
+        id: 'fullMoon',
+        emoji: '🌝',
+        code: ':full_moon_with_face:',
+        name: 'Full Moon',
+        weight: 1,
+        css: 'wi-moon-full'
+    },
+    {
+        from: 0.533863193308711,
+        to: 0.716136806691289,
+        id: 'waningGibbousMoon',
+        emoji: '🌖',
+        code: ':waning_gibbous_moon:',
+        name: 'Waning Gibbous',
+        weight: 6.3825,
+        css: 'wi-moon-wan-gibb'
+    },
+    {
+        from: 0.716136806691289,
+        to: 0.783863193308711,
+        id: 'thirdQuarterMoon',
+        emoji: '🌗',
+        code: ':last_quarter_moon:',
+        name: 'third Quarter',
+        weight: 1,
+        css: 'wi-moon-third-quart'
+    },
+    {
+        from: 0.783863193308711,
+        to: 0.966136806691289,
+        id: 'waningCrescentMoon',
+        emoji: '🌘',
+        code: ':waning_crescent_moon:',
+        name: 'Waning Crescent',
+        weight: 6.3825,
+        css: 'wi-moon-wan-cres'
+    },
+    {
+        from: 0.966136806691289,
+        to: 1,
+        id: 'newMoon',
+        emoji: '🌚',
+        code: ':new_moon_with_face:',
+        name: 'New Moon',
+        weight: 1,
+        css: 'wi-moon-new'
+    }];
 
     /**
      * convert date from Julian calendar
@@ -71,10 +166,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @param {number} H - siderealTime
     * @param {number} phi - PI constant
     * @param {number} dec - The declination of the sun
-    * @returns {number}
+    * @returns {number} azimuth in rad
     */
-    function azimuth(H, phi, dec) {
-        return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
+    function azimuthCalc(H, phi, dec) {
+        return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)) + Math.PI;
     }
 
     /**
@@ -84,7 +179,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @param {number} dec - The declination of the sun
     * @returns {number}
     */
-    function altitude(H, phi, dec) {
+    function altitudeCalc(H, phi, dec) {
         return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
     }
 
@@ -188,17 +283,17 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const d = toDays(dateValue);
         const c = sunCoords(d);
         const H = siderealTime(d, lw) - c.ra;
-        const azimuthr = azimuth(H, phi, c.dec);
-        const altituder = altitude(H, phi, c.dec);
+        const azimuth = azimuthCalc(H, phi, c.dec);
+        const altitude = altitudeCalc(H, phi, c.dec);
         // console.log(`getPosition date=${date}, M=${H}, L=${H}, c=${JSON.stringify(c)}, d=${d}, lw=${lw}, phi=${phi}`);
 
         return {
-            azimuth: azimuthr,
-            altitude: altituder,
-            zenith: (90*Math.PI/180) - altituder,
-            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
-            altitudeDegrees: 180 / Math.PI * altituder,
-            zenithDegrees: 90 - (180 / Math.PI * altituder),
+            azimuth,
+            altitude,
+            zenith: (90*Math.PI/180) - altitude,
+            azimuthDegrees: degr * azimuth,
+            altitudeDegrees: degr * altitude,
+            zenithDegrees: 90 - (degr * altitude),
             declination: c.dec
         };
     };
@@ -545,7 +640,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const phi = rad * lat;
 
         let dateValue = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).valueOf();
-        let addval = (dayMs / 2);
+        let addval = dayMs; // / 2);
         dateValue += addval;
 
         while (addval > 200) {
@@ -553,7 +648,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             const d = toDays(dateValue);
             const c = sunCoords(d);
             const H = siderealTime(d, lw) - c.ra;
-            const nazim = azimuth(H, phi, c.dec);
+            const nazim = azimuthCalc(H, phi, c.dec);
 
             addval /= 2;
             if (nazim < nazimuth) {
@@ -564,43 +659,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         return new Date(Math.floor(dateValue));
     };
-
-    /* SunCalc.getSunDate2 = function (year, month, day, nazimuth, lat, lng) {
-    if (isNaN(nazimuth)) {
-        throw new Error('azimuth missing');
-    }
-    if (isNaN(lat)) {
-        throw new Error('latitude missing');
-    }
-    if (isNaN(lng)) {
-        throw new Error('longitude missing');
-    }
-    const lw = rad * -lng;
-    const phi = rad * lat;
-
-    let dateValue = new Date(year, month, day, 0, 0, 0).valueOf();
-    let d = ((dateValue / dayMs) + J1970) - J2000;
-
-    console.log(new Date(d));
-    let addval = (dayMs / 2);
-    d += addval;
-
-    while (addval > 200) {
-        const c = sunCoords(d);
-        const H = siderealTime(d, lw) - c.ra;
-        const nazi = azimuth(H, phi, c.dec);
-        console.log(d, addval, nazi, nazimuth);
-
-        addval /= 2;
-        if (nazi < nazimuth) {
-            d += addval;
-        } else {
-            d -= addval;
-        }
-    }
-    dateValue = (((d + J2000) - J1970) * dateValue);
-    return new Date(Math.floor(dateValue));
-}; */
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
@@ -652,30 +710,61 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const d = toDays(dateValue);
         const c = moonCoords(d);
         const H = siderealTime(d, lw) - c.ra;
-        let h = altitude(H, phi, c.dec);
+        let altitude = altitudeCalc(H, phi, c.dec);
+        altitude += astroRefraction(altitude); // altitude correction for refraction
+
         // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
-        h += astroRefraction(h); // altitude correction for refraction
-
-        const azimuthr = azimuth(H, phi, c.dec);
+        const azimuth = azimuthCalc(H, phi, c.dec);
 
         return {
-            azimuth: azimuthr,
-            altitude: h,
-            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
-            altitudeDegrees: 180 / Math.PI * h,
+            azimuth,
+            altitude,
+            azimuthDegrees: degr * azimuth,
+            altitudeDegrees: degr * altitude,
             distance: c.dist,
             parallacticAngle: pa,
-            parallacticAngleDegrees: 180 / Math.PI * pa
+            parallacticAngleDegrees: degr * pa
         };
     };
 
     /**
+    * @typedef {Object} dateData
+    * @property {string} date - The Date as a ISO String YYYY-MM-TTTHH:MM:SS.mmmmZ
+    * @property {number} value - The Date as the milliseconds since 1.1.1970 0:00 UTC
+    */
+
+    /**
+    * @typedef {Object} phaseObj
+    * @property {number} from - The phase start
+    * @property {number} to - The phase end
+    * @property {string} id - id of the phase
+    * @property {string} emoji - unicode symbol of the phase
+    * @property {string} name - name of the phase
+    * @property {string} id - phase name
+    * @property {number} weight - weight of the phase
+    * @property {string} css - a css value of the phase
+    */
+
+    /**
+    * @typedef {Object} nextmoonillum
+    * @property {number} fraction - The fraction of the moon
+    * @property {string} date - The Date as a ISO String YYYY-MM-TTTHH:MM:SS.mmmmZ of the next phase
+    * @property {number} value - The Date as the milliseconds since 1.1.1970 0:00 UTC of the next phase
+    * @property {string} type - The name of the next phase [newMoon, fullMoon, firstQuarter, thirdQuarter]
+    * @property {dateData} newMoon - Date of the next new moon
+    * @property {dateData} fullMoon - Date of the next full moon
+    * @property {dateData} firstQuarter - Date of the next first quater of the moon
+    * @property {dateData} thirdQuarter - Date of the next third/last quater of the moon
+    */
+
+    /**
     * @typedef {Object} moonillumination
     * @property {number} fraction - The fraction of the moon
-    * @property {number} phase - The phase of the moon
-    * @property {number} angle - The angle of the moon
+    * @property {phaseObj} phase - The phase of the moon
+    * @property {number} phaseValue - The phase of the moon in the current cycle
+    * @property {nextmoonillum} next - object containing information about the next phases of the moon
     */
 
     /**
@@ -695,11 +784,61 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
         const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
             cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
+        const phaseValue = 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI;
+
+        // calculates the difference in ms between the sirst fullMoon 2000 and given Date
+        const diffBase = dateValue - firstNewMoon2000;
+        // Calculate modulus to drop completed cycles
+        let cycleModMs = diffBase % lunarDaysMs;
+        // If negative number (date before new moon 2000) add lunarDaysMs
+        if ( cycleModMs < 0 ) { cycleModMs += lunarDaysMs; }
+        const nextNewMoon = (lunarDaysMs - cycleModMs) + dateValue;
+        let nextFullMoon = ((lunarDaysMs/2) - cycleModMs) + dateValue;
+        if (nextFullMoon < dateValue) { nextFullMoon += lunarDaysMs; }
+        const quater = (lunarDaysMs/4);
+        let nextFirstQuarter = (quater - cycleModMs) + dateValue;
+        if (nextFirstQuarter < dateValue) { nextFirstQuarter += lunarDaysMs; }
+        let nextThirdQuarter = (lunarDaysMs - quater - cycleModMs) + dateValue;
+        if (nextThirdQuarter < dateValue) { nextThirdQuarter += lunarDaysMs; }
+        // Calculate the fraction of the moon cycle
+        // const currentfrac = cycleModMs / lunarDaysMs;
+        const next = Math.min(nextNewMoon, nextFirstQuarter, nextFullMoon, nextThirdQuarter);
+        let phase = '';
+
+        for (let index = 0; index < fractionOfTheMoonCycle.length; index++) {
+            const element = fractionOfTheMoonCycle[index];
+            if ( (phaseValue >= element.from) && (phaseValue <= element.to) ) {
+                phase = element;
+                break;
+            }
+        }
 
         return {
             fraction: (1 + cos(inc)) / 2,
-            phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
-            angle
+            // fraction2: cycleModMs / lunarDaysMs,
+            phase,
+            phaseValue,
+            next : {
+                value: next,
+                date: (new Date(next)).toISOString(),
+                type: (next === nextNewMoon) ? 'newMoon' : ((next === nextFirstQuarter) ? 'firstQuarter' : ((next === nextFullMoon) ? 'fullMoon' : 'thirdQuarter')),
+                newMoon: {
+                    value: nextNewMoon,
+                    date: (new Date(nextNewMoon)).toISOString()
+                },
+                fullMoon: {
+                    value: nextFullMoon,
+                    date: (new Date(nextFullMoon)).toISOString()
+                },
+                firstQuarter: {
+                    value: nextFirstQuarter,
+                    date: (new Date(nextFirstQuarter)).toISOString()
+                },
+                thirdQuarter: {
+                    value: nextThirdQuarter,
+                    date: (new Date(nextThirdQuarter)).toISOString()
+                }
+            }
         };
     };
 

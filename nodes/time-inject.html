@@ -2,6 +2,126 @@
 
 <script type="text/javascript">
     (function() {
+        /**
+         * Retrieve editableList items (refactored for re-use in the form inject button)
+         */
+        function getProps(el, node) {
+            const result = {
+                props: [],
+                payloadLbl : '',
+                payloadType : '',
+                topicLbl : ''
+            };
+            const getPropTLbl = prop => {
+                if (prop) {
+                    if (prop.vt === 'dateSpecific') {
+                        if (prop.fS === 99) {
+                            return RED.nodes.getType('position-config').clipValueLength(prop.fI, 20);
+                        }
+                        return RED.nodes.getType('position-config').clipValueLength($.trim(prop.fT.split(',')[0]), 20);
+                    }
+                    return RED.nodes.getType('position-config').getValueLabel(node, prop.vt, prop.v, (prop.oT !== 'none') ? prop.o : null);
+                }
+                return '{}';
+            };
+            el.each(function(_i) {
+                const pElem = $(this);
+                const p = {
+                    p       : pElem.find('.node-input-prop-property-name').typedInput('value'),
+                    pt      : pElem.find('.node-input-prop-property-name').typedInput('type'),
+                    v       : pElem.find('.node-input-prop-property-value').typedInput('value'),
+                    vt      : pElem.find('.node-input-prop-property-value').typedInput('type'),
+                    o       : pElem.find('.node-input-prop-property-offset').typedInput('value'),
+                    oT      : pElem.find('.node-input-prop-property-offset').typedInput('type'),
+                    oM      : pElem.find('.node-input-prop-property-multiplier').val(),
+                    f       : '',
+                    fS      : Number(pElem.find('.node-input-prop-property-FormatSel').val()),
+                    fT      : pElem.find('.node-input-prop-property-FormatSel option:selected').text(),
+                    fI      : pElem.find('.node-input-prop-property-FormatIp').val(),
+                    next    : pElem.find('.node-input-prop-property-Next').is(':checked'),
+                    days    : getCheckboxesStr(pElem.find('.node-input-prop-property-days input[type=checkbox]:checked'), 7),
+                    months  : getCheckboxesStr(pElem.find('.node-input-prop-property-months input[type=checkbox]:checked'), 12),
+                    onlyOddDays     : pElem.find('.node-input-prop-property-onlyOddDays').is(':checked'),
+                    onlyEvenDays    : pElem.find('.node-input-prop-property-onlyEvenDays').is(':checked'),
+                    onlyOddWeeks     : pElem.find('.node-input-prop-property-onlyOddWeeks').is(':checked'),
+                    onlyEvenWeeks    : pElem.find('.node-input-prop-property-onlyEvenWeeks').is(':checked')
+                };
+                p.f = (p.fS !== 99 ? p.fS : p.fI);
+                if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {
+                    p.pt = 'msgPayload';
+                } else if (p.p === 'topic' && (!p.pt || p.pt === 'msg')) {
+                    p.pt = 'msgTopic';
+                } else if (p.p === 'ts' && (!p.pt || p.pt === 'msg')) {
+                    p.pt =  'msgTs';
+                } else if (p.p === 'lc' && (!p.pt || p.pt === 'msg')) {
+                    p.pt =  'msgLC';
+                } else if (p.p === 'value' && (!p.pt || p.pt === 'msg')) {
+                    p.pt = 'msgValue';
+                }
+                if (p.pt === 'msgPayload') {
+                    result.payloadLbl = getPropTLbl(p);
+                    result.payloadType = p.vt;
+                }
+                if (p.pt === 'msgTopic') {
+                    result.topicLbl = getPropTLbl(p).replace(/(^")|("↷?↶?$)|({}↷?↶?)/g, '').trim();
+                }
+                result.props.push(p);
+            });
+            let pos = 0;
+            while (result.payloadLbl === '' && el.length > pos) {
+                const p = el[pos];
+                if (p.pt !== 'msgTopic') {
+                    result.payloadLbl = RED.nodes.getType('position-config').getValueLabel(this, p.pt, p.p, null) + '=' + getPropTLbl(p);
+                }
+                pos++;
+            }
+            if (result.payloadLbl === '') {
+                result.payloadLbl = '$!{lblInject}!';
+            }
+            return result;
+        }
+
+        /**
+         * Perform inject, optionally sending a custom msg (refactored for re-use in the form inject button)
+         */
+        function doInject(node, customMsg) {
+            console.log('doInject', customMsg); // eslint-disable-line no-console
+            let payload = node.payload;
+            if ((node.payloadType === 'flow') ||
+                (node.payloadType === 'global')) {
+                const key = RED.utils.parseContextKey(payload);
+                payload = node.payloadType + '.' + key.key;
+            }
+
+            if (node.payloadType === 'str' || node.payloadType === 'string') { payload = '"' + node.payload + '"'; }
+
+            let label = node._def.label.call(node, customMsg?customMsg.__user_inject_props__:undefined);
+            if (label.length > 30) {
+                label = label.substring(0, 50) + '...';
+            }
+            label = label.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            $.ajax({
+                url: 'time-inject/' + node.id,
+                type: 'POST',
+                data: JSON.stringify(customMsg||{}),
+                // contentType: 'application/json; charset=utf-8',
+                success(_resp) {
+                    RED.notify(node._('node-red:inject.success',{ label }), { type:'success', id:'inject', timeout: 2000 });
+                },
+                error(jqXHR, textStatus, _errorThrown) {
+                    if (jqXHR.status === 404) {
+                        RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
+                    } else if (jqXHR.status === 500) {
+                        RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:inject.errors.failed')}),'error');
+                    } else if (jqXHR.status === 0) {
+                        RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.no-response')}),'error');
+                    } else {
+                        RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.unexpected',{status:jqXHR.status,message:textStatus})}),'error');
+                    }
+                }
+            });
+        }
+
         // category: 'time and astro',
         RED.nodes.registerType('time-inject', {
             category: 'common',
@@ -32,9 +152,7 @@
                             fI   : '', // input format
                             next : true,
                             days : '*',
-                            months: '*',
-                            onlyEvenDays: false,
-                            onlyOddDays: false
+                            months: '*'
                         },{
                             p    : '',
                             pt   : 'msgTopic',
@@ -48,9 +166,7 @@
                             fI   : '', // input format
                             next : false,
                             days : '*',
-                            months: '*',
-                            onlyEvenDays: false,
-                            onlyOddDays: false
+                            months: '*'
                         }
                     ]
                 },
@@ -82,6 +198,16 @@
                             (this.injectTypeSelect === 'time') ||
                             (this.injectTypeSelect === 'interval-amount') ||
                             RED.validators.number()(v)
+                        );
+                    }
+                },
+                intervalStart: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return (
+                            (this.injectTypeSelect !== 'interval') ||
+                            RED.validators.regex(/^\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$|^\d{2}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$/)(v)
                         );
                     }
                 },
@@ -184,6 +310,14 @@
                     value: false,
                     required: true
                 },
+                timeOnlyOddWeeks: {
+                    value: false,
+                    required: true
+                },
+                timeOnlyEvenWeeks: {
+                    value: false,
+                    required: true
+                },
                 timeMonths: {
                     value: '*',
                     required: true
@@ -273,6 +407,14 @@
                     required: true
                 },
                 timeAltOnlyEvenDays: {
+                    value: false,
+                    required: true
+                },
+                timeAltOnlyOddWeeks: {
+                    value: false,
+                    required: true
+                },
+                timeAltOnlyEvenWeeks: {
                     value: false,
                     required: true
                 },
@@ -438,9 +580,7 @@
                         f    : this.payloadTimeFormat ? this.payloadTimeFormat : 0,
                         next : true,
                         days : '*',
-                        months: '*',
-                        onlyEvenDays: false,
-                        onlyOddDays: false
+                        months: '*'
                     },{
                         p    : '',
                         pt   : types.MsgTopic.value,
@@ -452,9 +592,7 @@
                         f    : 0,
                         next : false,
                         days : '*',
-                        months: '*',
-                        onlyEvenDays: false,
-                        onlyOddDays: false
+                        months: '*'
                     }];
                 }
                 let lab = '';
@@ -481,23 +619,37 @@
                                 propType = 'invalid';
                             }
                         }
-                        lab += this._('inject.label.'+propType);
+                        lab += propType;
+                        // lab += this._('inject.label.'+propType);
                     }
                 }
-                return lab;
+                return lab || '?';
             },
-            label() {
+            label(customProps) {
+                const injTxt = this._('time-inject.label.time-inject');
                 let result = '';
                 if (!this.positionConfig || !this.nameInt || !this.injectTypeSelect) {
                     result += '⚠ ';
+                }
+                if (customProps && customProps.payloadLbl) {
+                    if (customProps.topicLbl && customProps.topicLbl.length + customProps.payloadLbl.length <= 45) {
+                        return result + customProps.topicLbl + ':' + customProps.payloadLbl.replace('$!{lblInject}!', injTxt);
+                    }
+                    return result + customProps.payloadLbl.replace('$!{lblInject}!', injTxt);
                 }
                 if (this.name) {
                     return result + this.name;
                 }
                 if (this.nameInt) {
-                    return result + this.nameInt.replace('$!{lblInject}!', this._('time-inject.label.time-inject'));
+                    if (this.topicLbl && this.topicLbl.length + this.nameInt.length <= 45) {
+                        return result + this.topicLbl + ':' + this.nameInt.replace('$!{lblInject}!', injTxt);
+                    }
+                    return result + this.nameInt.replace('$!{lblInject}!', injTxt);
                 }
-                return result + this._('time-inject.label.time-inject');
+                if (this.topicLbl) {
+                    return result + this.topicLbl + ':' + injTxt;
+                }
+                return result + injTxt;
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
@@ -506,12 +658,16 @@
             align: 'left',
             oneditprepare() {
                 setTimeout(() => {
-                    $('.is-to-show-initially').show();
-                    $('.is-to-hide-initially').hide();
+                    $('.is-to-show-initial').show();
+                    $('.is-to-hide-initial').hide();
                 }, 300);
                 const node = this;
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
+                    setTimeout(() => {
+                        $('.is-to-show-normally').show();
+                    }, 300);
+
                     /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr setTInputValue */
                     const types = getTypes(node);
                     const selFields = getSelectFields();
@@ -542,6 +698,22 @@
                         $field.on('change', onchange);
                         return mp;
                     }
+                    /**
+                     * Parse an ISO date string (i.e. "2019-01-18T00:00:00.000Z",
+                     * "2019-01-17T17:00:00.000-07:00", or "2019-01-18T07:00:00.000+07:00",
+                     * which are the same time) and return a JavaScript Date object with the
+                     * value represented by the string.
+                     * @param {string} dateString - ISO Date String
+                     * @returns {Date} Date object
+                     */
+                    function parseDate(dateString) {
+                        const b = dateString.split(/\D+/);
+                        const offsetMult = dateString.indexOf('+') !== -1 ? -1 : 1;
+                        const hrOffset = offsetMult * (+b[7] || 0);
+                        const minOffset = offsetMult * (+b[8] || 0);
+                        return new Date(Date.UTC(+b[0], +b[1] - 1, +b[2], +b[3] + hrOffset, +b[4] + minOffset, +b[5], +b[6] || 0));
+                    }
+
 
                     initializeValue(node, 'timeDays', '*');
                     initializeValue(node, 'timeAltDays', '*');
@@ -555,16 +727,28 @@
                     function resizeContainer() {
                         const editorRow = $('.node-input-property-container-row ol');
                         const height =  editorRow.outerHeight(true);
-                        const rows = $('#node-input-property-container').editableList('items');
-                        if (rows.size() > 0) {
+                        const rowCount = $('#node-input-property-container').editableList('length');
+                        if (rowCount > 0) {
                             $('#node-input-property-container').editableList('height', height + 40);
                         } else {
                             $('#node-input-property-container').editableList('height', 20);
                         }
                     }
 
+                    const $propList = $('#node-input-property-container').css('min-height', '40px').css('min-width', '420px');
 
-                    $('#node-input-property-container').css('min-height', '40px').css('min-width', '400px').editableList({
+                    $propList.editableList({
+                        buttons: [
+                            {
+                                id: 'node-time-inject-test-inject-button',
+                                label: node._('node-red:inject.injectNow'),
+                                click(_e) {
+                                    const props = getProps($propList.editableList('items'), node);
+                                    const m = {__user_inject_props__: props};
+                                    doInject(node, m);
+                                }
+                            }
+                        ],
                         addItem(containerRow, containerIndex, data) {
                             containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                             const $row1 = $('<div/>').appendTo(containerRow);
@@ -585,9 +769,7 @@
                                     f    : 0,
                                     next : true,
                                     days : '*',
-                                    months: '*',
-                                    onlyEvenDays: false,
-                                    onlyOddDays: false
+                                    months: '*'
                                 };
                             }
 
@@ -635,6 +817,9 @@
                                 .typedInput({
                                     default: 'str',
                                     types: [
+                                        'str',
+                                        'num',
+                                        'bool',
                                         'date',
                                         types.DateSpecific,
                                         types.TimeEntered,
@@ -643,9 +828,6 @@
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
-                                        'str',
-                                        'num',
-                                        'bool',
                                         'json',
                                         'bin',
                                         'env',
@@ -669,7 +851,11 @@
                                         types.WeekOfYearEven,
                                         types.DayOfYear,
                                         types.DayOfYearEven,
-                                        types.numPercent
+                                        types.numPercent,
+                                        types.randomNumber,
+                                        types.randmNumCachedDay,
+                                        types.nodeId,
+                                        types.nodeName
                                     ]
                                 });
                             setTInputValue($propertyValue, prop.v, prop.vt);
@@ -701,10 +887,9 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber]
+                                    types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
                                 });
                             setTInputValue($offset, prop.o, prop.oT);
-
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-prop-property-multiplier'
                             })
@@ -771,31 +956,32 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divSpecLimit, 'node-input-prop-property-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialDays'));
+                            addLabel($divSpecLimit, 'node-input-prop-property-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
 
                             const $divSpecLimits = $('<div/>', {
                                 class: 'node-input-prop-property-speciallimits',
                                 style: 'style="display:inline-block;'
                             }).appendTo($divSpecLimit);
                             const $divSpecLimits2 = $('<div/>').appendTo($divSpecLimits);
+                            const $divSpecLimits3 = $('<div/>').appendTo($divSpecLimits);
 
                             const $lblSL1 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
                                 .appendTo($divSpecLimits2);
                             const $cbOnlyEvenDays = $('<input/>', {
                                 type: 'checkbox',
-                                class: 'node-input-prop-property-OnlyEvenDays',
+                                class: 'node-input-prop-property-onlyEvenDays',
                                 style: 'width: auto;'
                             }).appendTo($lblSL1);
                             $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays')).appendTo($lblSL1);
                             $cbOnlyEvenDays.prop('checked', (prop.onlyEvenDays === 'true' || prop.onlyEvenDays === true));
 
                             const $lblSL2 = $('<label/>', {
-                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays')
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
                             })
-                                .css('width', 'calc(50% - 15x)') // (100% / 2) - (30 px / 2)
                                 .appendTo($divSpecLimits2);
                             const $cbOnlyOddDays = $('<input/>', {
                                 type: 'checkbox',
@@ -805,6 +991,31 @@
                             $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays')).appendTo($lblSL2);
                             $cbOnlyOddDays.prop('checked', (prop.onlyOddDays === 'true' || prop.onlyOddDays === true));
 
+                            const $lblSL3 = $('<label/>', {
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
+                            })
+                                .appendTo($divSpecLimits3);
+                            const $cbOnlyEvenWeeks = $('<input/>', {
+                                type: 'checkbox',
+                                class: 'node-input-prop-property-onlyEvenWeeks',
+                                style: 'width: auto;'
+                            }).appendTo($lblSL3);
+                            $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks')).appendTo($lblSL3);
+                            $cbOnlyEvenWeeks.prop('checked', (prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true));
+
+                            const $lblSL4 = $('<label/>', {
+                                title: node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'),
+                                style: 'width:calc(50% - 15px);'  // (100% / 2) - (30 px / 2)
+                            })
+                                .appendTo($divSpecLimits3);
+                            const $cbOnlyOddWeeks = $('<input/>', {
+                                type: 'checkbox',
+                                class: 'node-input-prop-property-onlyOddWeeks',
+                                style: 'width: auto;'
+                            }).appendTo($lblSL4);
+                            $('<span/>').text(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks')).appendTo($lblSL4);
+                            $cbOnlyOddWeeks.prop('checked', (prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true));
                             // row4 - 3 - Month selection
                             const $divMnMonth = $('<div/>', {
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
@@ -824,7 +1035,7 @@
                                     title: node._('node-red-contrib-sun-position/position-config:common.months.' + m)
                                 })
                                     .css('width', 'calc(16% - 6px)') // (100% / 7 = 14%) - (30 px / 7 = 6px)
-                                    .appendTo((m>5) ? $divMonths2 : $divMonths3);
+                                    .appendTo((m>5) ? $divMonths3 : $divMonths2);
                                 const $cb = $('<input/>', {
                                     type: 'checkbox',
                                     class: 'node-input-prop-property-month-' + m,
@@ -887,6 +1098,8 @@
                                     months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
                                     onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
                                     onlyEvenDays:   $cbOnlyOddDays.is(':checked'),
+                                    onlyOddWeeks:    $cbOnlyEvenWeeks.is(':checked'),
+                                    onlyEvenWeeks:   $cbOnlyOddWeeks.is(':checked'),
                                     noOffsetError:  true
                                 });
                                 resizeContainer();
@@ -908,7 +1121,6 @@
                             resizeContainer();
                         },
                         sortItems(rules) {
-                            rules = $('#node-input-property-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 1);
                             });
@@ -918,6 +1130,11 @@
                         removable: true,
                         removeItem: resizeContainer
                     });
+                    $('#node-time-inject-test-inject-button').css('float', 'right').css('margin-right', 'unset');
+
+                    if (RED.nodes.subflow(node.z)) {
+                        $('#node-time-inject-test-inject-button').attr('disabled', true);
+                    }
 
                     if (!node.props) {
                         node.props = [];
@@ -932,10 +1149,9 @@
                             f    : node.payloadTimeFormat ? node.payloadTimeFormat : 0,
                             next : true,
                             days : '*',
-                            months: '*',
-                            onlyEvenDays: false,
-                            onlyOddDays: false
+                            months: '*'
                         });
+
                         node.props.push({
                             p    : '',
                             pt   : types.MsgTopic.value,
@@ -947,12 +1163,10 @@
                             f    : 0,
                             next : false,
                             days : '*',
-                            months: '*',
-                            onlyEvenDays: false,
-                            onlyOddDays: false
+                            months: '*'
                         });
 
-                        if (node.addPayload1Type !== types.Undefined.value) {
+                        if (node.addPayload1Type && node.addPayload1Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload1,
                                 pt   : node.addPayload1Type,
@@ -964,12 +1178,10 @@
                                 f    : node.addPayload1Format ? node.addPayload1Format : 0,
                                 next : node.addPayload1Next,
                                 days : node.addPayload1Days ? node.addPayload1Days : '*',
-                                months: '*',
-                                onlyEvenDays: false,
-                                onlyOddDays: false
+                                months: '*'
                             });
                         }
-                        if (node.addPayload2Type !== types.Undefined.value) {
+                        if (node.addPayload2Type && node.addPayload2Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload2,
                                 pt   : node.addPayload2Type,
@@ -981,12 +1193,11 @@
                                 f    : node.addPayload2Format ? node.addPayload2Format : 0,
                                 next : node.addPayload2Next,
                                 days : node.addPayload2Days ? node.addPayload2Days : '*',
-                                months: '*',
-                                onlyEvenDays: false,
-                                onlyOddDays: false
+                                months: '*'
                             });
                         }
-                        if (node.addPayload3Type !== types.Undefined.value) {
+
+                        if (node.addPayload3Type && node.addPayload3Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload3,
                                 pt   : node.addPayload3Type,
@@ -998,16 +1209,14 @@
                                 f    : node.addPayload3Format ? node.addPayload3Format : 0,
                                 next : node.addPayload3Next,
                                 days : node.addPayload3Days ? node.addPayload3Days : '*',
-                                months: '*',
-                                onlyEvenDays: false,
-                                onlyOddDays: false
+                                months: '*'
                             });
                         }
                     }
 
                     for (let i = 0; i < node.props.length; i++) {
                         const prop = node.props[i];
-                        $('#node-input-property-container').editableList('addItem', prop);
+                        $propList.editableList('addItem', prop);
                     }
                     // #endregion property Container
                     // #region spinner
@@ -1049,10 +1258,16 @@
                         switch (id) {
                             case 'interval':
                                 $('.time-inject-row-interval').show();
+                                $('.time-inject-row-intervalFromStart').show();
+                                $('#node-input-intervalCountMultiplier').show();
+                                $("#node-input-intervalCountMultiplier option[value='86400000']").prop('disabled',false); // days
+                                $("#node-input-intervalCountMultiplier option[value='604800000']").prop('disabled',false); // weeks
                                 break;
                             case 'interval-time':
                                 $('.time-inject-row-intervalTime').show();
                                 $('#node-input-intervalCountMultiplier').show();
+                                $("#node-input-intervalCountMultiplier option[value='86400000']").prop('disabled',true); // days
+                                $("#node-input-intervalCountMultiplier option[value='604800000']").prop('disabled',true); // weeks
                                 $('#node-input-intervalCountLabel').text(node._('node-red:inject.every'));
                                 break;
                             case 'interval-amount':
@@ -1062,6 +1277,7 @@
                                 break;
                             case 'time':
                                 $('.time-inject-row-timeOnly').show();
+                                $('#node-input-intervalCountMultiplier').hide();
                                 break;
                             default:
                                 break;
@@ -1082,8 +1298,22 @@
                         defaultValue: 1,
                         types: ['num', 'env', 'flow', 'global']
                     }); // intervalCount
+
+                    const dNow = (node.intervalStart) ? parseDate(node.intervalStart) : new Date();
+                    dNow.setMinutes(dNow.getMinutes() - dNow.getTimezoneOffset());
+                    $('#node-myinput-intervalStart').val(dNow.toISOString().slice(0,16));
+                    // TODO: add intervalStart
                     // #endregion interval
                     // #region time
+                    if ($('#node-input-timeOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeOnlyEvenWeeks').prop('checked',false);
+                    }
+
                     setupTInput(node, {
                         typeProp: 'timeType',
                         valueProp: 'time',
@@ -1140,12 +1370,14 @@
                                 value:          $('#node-input-time').typedInput('value'),
                                 offsetType:     $('#node-input-offset').typedInput('type'),
                                 offset:         $('#node-input-offset').typedInput('value'),
-                                multiplier:     $('#node-input-offsetMultiplier').val(),
+                                multiplier:     parseInt($('#node-input-offsetMultiplier').val()),
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
-                                onlyOddDays:    $('#node-input-timeOnlyOddDays').val(),
-                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').val(),
+                                onlyOddDays:    $('#node-input-timeOnlyOddDays').prop('checked'),
+                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').prop('checked'),
+                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').prop('checked'),
+                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').prop('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1158,7 +1390,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1211,12 +1443,14 @@
                                 value:          $('#node-input-timeEnd').typedInput('value'),
                                 offsetType:     $('#node-input-timeEndOffset').typedInput('type'),
                                 offset:         $('#node-input-timeEndOffset').typedInput('value'),
-                                multiplier:     $('#node-input-timeEndOffsetMultiplier').val(),
+                                multiplier:     parseInt($('#node-input-timeEndOffsetMultiplier').val()),
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
-                                onlyOddDays:    $('#node-input-timeOnlyOddDays').val(),
-                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').val(),
+                                onlyOddDays:    $('#node-input-timeOnlyOddDays').prop('checked'),
+                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').prop('checked'),
+                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').prop('checked'),
+                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').prop('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1229,7 +1463,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.timeEndOffset === 0 || node.timeEndOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-timeEndOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1306,8 +1540,6 @@
                             types.SunInSky,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1342,18 +1574,18 @@
                                 $('#node-input-propertyCompare').attr('disabled', false);
                                 $('#node-input-property').typedInput('width', 'calc(100% - 220px)');
                                 const condOp = $('#node-input-propertyCompare').val();
-                                let operatorCount = 1;
+                                let operandCount = 1;
                                 const fields = selFields.comparator;
                                 const fieldsLength = fields.length;
                                 for(let index = 0; index<fieldsLength; index++) {
                                     const el = fields[index];
                                     if (el.id === condOp) {
-                                        operatorCount = el.operatorCount;
+                                        operandCount = el.operandCount;
                                         break;
                                     }
                                 }
 
-                                if (operatorCount > 1) {
+                                if (operandCount > 1) {
                                     $('.row-propertyThreshold').show(); // condOpB
                                 } else {
                                     $('.row-propertyThreshold').hide(); // condOpB
@@ -1383,6 +1615,14 @@
                     });
                     // #endregion property
                     // #region timeAlt
+                    if ($('#node-input-timeAltOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeAltOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeAltOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeAltOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeAltOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeAltOnlyEvenWeeks').prop('checked',false);
+                    }
                     setupTInput(node, {
                         typeProp: 'timeAltType',
                         valueProp: 'timeAlt',
@@ -1429,6 +1669,8 @@
                                     months:         getCheckboxesStr($('#time-inject-timeAltMonths input[type=checkbox]:checked'), 12),
                                     onlyOddDays:     $('#node-input-timeAltOnlyOddDays').val(),
                                     onlyEvenDays:    $('#node-input-timeAltOnlyEvenDays').val(),
+                                    onlyOddWeeks:    $('#node-input-timeAltOnlyOddWeeks').val(),
+                                    onlyEvenWeeks:   $('#node-input-timeAltOnlyEvenWeeks').val(),
                                     noOffsetError:  true
                                 });
                             }
@@ -1445,7 +1687,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-timeAltOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1459,6 +1701,9 @@
                     // #endregion timeAlt
                     // console.log('Loading done, trigegr changes');
                     $('#node-input-injectTypeSelect').change();
+                    setTimeout(() => {
+                        $('.hide-after-setup-loaded').hide();
+                    }, 300);
                 }; // setup
 
                 $.getScript('sun-position/js/htmlglobal.js')
@@ -1479,6 +1724,9 @@
             },
             oneditsave() {
                 const node = this;
+                const dvalue = $('#node-myinput-intervalStart').val();
+                const dIvStart = new Date(dvalue);
+                node.intervalStart = dIvStart.toISOString();
 
                 node.timeDays = getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7);
                 node.timeAltDays = getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7);
@@ -1523,84 +1771,16 @@
                 delete node.addPayload3Next;
                 delete node.addPayload3Days;
 
-                let payloadLbl = '';
-                let payloadType = '';
-                let topicLbl = '';
-                const getPropTLbl = prop => {
-                    if (prop) {
-                        if (prop.vt === 'dateSpecific') {
-                            if (prop.fS === 99) {
-                                return RED.nodes.getType('position-config').clipValueLength(prop.fI, 20);
-                            }
-                            return RED.nodes.getType('position-config').clipValueLength($.trim(prop.fT.split(',')[0]), 20);
-                        }
-                        return RED.nodes.getType('position-config').getValueLabel(this, prop.vt, prop.v, (prop.oT !== 'none') ? prop.o : null);
-                    }
-                    return '{}';
-                };
+                /* Gather the properties */
+                const items = $('#node-input-property-container').editableList('items');
+                const propData = getProps(items, node);
 
-                /* Gather the injected properties of the msg object */
-                const props = $('#node-input-property-container').editableList('items');
-                node.props= [];
-                props.each(function(_i) {
-                    const prop = $(this);
-                    const p = {
-                        p       : prop.find('.node-input-prop-property-name').typedInput('value'),
-                        pt      : prop.find('.node-input-prop-property-name').typedInput('type'),
-                        v       : prop.find('.node-input-prop-property-value').typedInput('value'),
-                        vt      : prop.find('.node-input-prop-property-value').typedInput('type'),
-                        o       : prop.find('.node-input-prop-property-offset').typedInput('value'),
-                        oT      : prop.find('.node-input-prop-property-offset').typedInput('type'),
-                        oM      : prop.find('.node-input-prop-property-multiplier').val(),
-                        f       : '',
-                        fS      : Number(prop.find('.node-input-prop-property-FormatSel').val()),
-                        fT      : prop.find('.node-input-prop-property-FormatSel option:selected').text(),
-                        fI      : prop.find('.node-input-prop-property-FormatIp').val(),
-                        next    : prop.find('.node-input-prop-property-Next').is(':checked'),
-                        days    : getCheckboxesStr(prop.find('#node-input-prop-property-Days input[type=checkbox]:checked'), 7),
-                        months  : getCheckboxesStr(prop.find('#node-input-prop-property-months input[type=checkbox]:checked'), 12),
-                        onlyOddDays     : prop.find('.node-input-prop-property-onlyOddDays').is(':checked'),
-                        onlyEvenDays    : prop.find('.node-input-prop-property-OnlyEvenDays').is(':checked')
-                    };
-                    p.f = (p.fS !== 99 ? p.fS : p.fI);
-                    if (p.p === 'payload' && (!p.pt || p.pt === 'msg')) {
-                        p.pt = 'msgPayload';
-                    } else if (p.p === 'topic' && (!p.pt || p.pt === 'msg')) {
-                        p.pt = 'msgTopic';
-                    } else if (p.p === 'ts' && (!p.pt || p.pt === 'msg')) {
-                        p.pt =  'msgTs';
-                    } else if (p.p === 'lc' && (!p.pt || p.pt === 'msg')) {
-                        p.pt =  'msgLC';
-                    } else if (p.p === 'value' && (!p.pt || p.pt === 'msg')) {
-                        p.pt = 'msgValue';
-                    }
-
-                    if (p.pt === 'msgPayload') {
-                        payloadLbl = getPropTLbl(p);
-                        payloadType = p.vt;
-                    }
-                    if (p.pt === 'msgTopic') {
-                        topicLbl = getPropTLbl(p).replace(/(^")|("↷?↶?$)|({}↷?↶?)/g, '').trim();
-                    }
-                    node.props.push(p);
-                });
-                let pos = 0;
-                while (payloadLbl === '' && node.props.length > pos) {
-                    const p = node.props[pos];
-                    if (p.pt !== 'msgTopic') {
-                        payloadLbl = RED.nodes.getType('position-config').getValueLabel(this, p.pt, p.p, null) + '=' + getPropTLbl(p);
-                    }
-                    pos++;
-                }
-                if (payloadLbl === '') {
-                    payloadLbl = '$!{lblInject}!';
-                }
-
+                node.props = propData.props;
+                node.topicLbl = propData.topicLbl;
                 this.nameInt = '';
                 if ($('#node-input-once').prop('checked')) {
                     this.nameInt += '¹';
                 }
-
                 const getTimeConstraints = () => {
                     let suffix = '';
                     if (this.timeDays && this.timeDays !== '*') {
@@ -1726,6 +1906,10 @@
                             res += 'min';
                         } else if (num === 3600000) {
                             res += 'h';
+                        } else if (num === 86400000) {
+                            res += 'd';
+                        } else if (num === 604800000) {
+                            res += 'w';
                         }
                     }
                     return res;
@@ -1734,10 +1918,9 @@
                 if ($('#node-input-injectTypeSelect').val() === 'none' ||
                     this.timeType === 'none' ||
                     this.timeType === '') {
-                    this.nameInt += payloadLbl;
+                    this.nameInt += propData.payloadLbl;
                 } else if ($('#node-input-injectTypeSelect').val() === 'interval') {
-                    this.nameInt += payloadLbl;
-                    this.nameInt += '';
+                    this.nameInt += propData.payloadLbl;
                     this.nameInt += getInterval();
                 } else if ($('#node-input-injectTypeSelect').val() === 'interval-time') {
                     this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
@@ -1750,9 +1933,8 @@
                         this.nameInt += ' =...';
                     } else {
                         this.nameInt += ' = ';
-                        this.nameInt += payloadLbl;
+                        this.nameInt += propData.payloadLbl;
                     }
-                    this.nameInt += '';
                     this.nameInt += getInterval();
                 } else if ($('#node-input-injectTypeSelect').val() === 'interval-amount') {
                     this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
@@ -1765,7 +1947,7 @@
                         this.nameInt += ' =...';
                     } else {
                         this.nameInt += ' = ';
-                        this.nameInt += payloadLbl;
+                        this.nameInt += propData.payloadLbl;
                     }
                     this.nameInt += ' ↻';
                     if ($('#node-input-intervalCount').typedInput('type') === 'num') {
@@ -1773,32 +1955,29 @@
                     }
                 } else {
                     this.nameInt += '⏲ ';
-                    if ($('#node-input-time').typedInput('type') === payloadType) {
+                    if ($('#node-input-time').typedInput('type') === propData.payloadType) {
                         this.nameInt += '...';
                         this.nameInt += getTimeConstraints();
                         this.nameInt += ' = ';
-                        this.nameInt += payloadLbl;
+                        this.nameInt += propData.payloadLbl;
                     } else {
-                        const timeTxt = getTimeId();
-                        if (timeTxt.length > 26) {
-                            this.nameInt += timeTxt + ' =...';
+                        const timeText = getTimeId();
+                        if (timeText.length > 26) {
+                            this.nameInt += timeText + ' =...';
                         } else {
-                            this.nameInt += timeTxt;
+                            this.nameInt += timeText;
                             this.nameInt += ' = ';
-                            this.nameInt += payloadLbl;
+                            this.nameInt += propData.payloadLbl;
                         }
                     }
-                }
-                if (topicLbl && topicLbl.length + this.nameInt.length <= 45) {
-                    this.nameInt = topicLbl + ':' + this.nameInt;
                 }
             },
             oneditresize(_size) {
                 try {
                     const editorRow = $('.node-input-property-container-row ol');
                     const height = editorRow.outerHeight(true);
-                    const rows = $('#node-input-property-container').editableList('items');
-                    if (rows.size() > 0) {
+                    const rowCount = $('#node-input-property-container').editableList('length');
+                    if (rowCount > 0) {
                         $('#node-input-property-container').editableList('height', height + 40);
                     } else {
                         $('#node-input-property-container').editableList('height', 20);
@@ -1815,36 +1994,7 @@
                     if (this.changed) {
                         return RED.notify(RED._('node-red:notification.warning', { message: RED._('node-red:notification.warnings.undeployedChanges') }), 'warning');
                     }
-
-                    let payload = this.payload;
-                    if ((this.payloadType === 'flow') ||
-                        (this.payloadType === 'global')) {
-                        const key = RED.utils.parseContextKey(payload);
-                        payload = this.payloadType + '.' + key.key;
-                    }
-
-                    if (this.payloadType === 'str' || this.payloadType === 'string') { payload = '"' + this.payload + '"'; }
-                    let label = this._def.label.call(this);
-                    label = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                    const node = this;
-                    $.ajax({
-                        url: 'time-inject/' + this.id,
-                        type: 'POST',
-                        success(_resp) {
-                            RED.notify(node._('node-red:inject.success',{label}),{type:'success',id:'inject'});
-                        },
-                        error(jqXHR, textStatus, _errorThrown) {
-                            if (jqXHR.status === 404) {
-                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.not-deployed')}),'error');
-                            } else if (jqXHR.status === 500) {
-                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:inject.errors.failed')}),'error');
-                            } else if (jqXHR.status === 0) {
-                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.no-response')}),'error');
-                            } else {
-                                RED.notify(node._('node-red:common.notification.error',{message:node._('node-red:common.notification.errors.unexpected',{status:jqXHR.status,message:textStatus})}),'error');
-                            }
-                        }
-                    });
+                    doInject(this);
                     return undefined;
                 }
             }
@@ -1852,8 +2002,11 @@
     })();</script>
 
 <script type="text/html" data-template-name="time-inject">
-    <div class="form-row block-noindent is-to-show-initially">
+    <div class="form-row block-noindent is-to-show-initial">
         <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
+    <div class="form-row block-noindent is-to-show-initial hide-after-setup-loaded">
+        <span><i class="fa fa-exclamation-triangle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.loadingInfo" class="row-full-width"></span></span></span>
     </div>
     <div class="form-row" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
         <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
@@ -1863,17 +2016,17 @@
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
-    <div class="form-row node-input-property-container-row">
+    <div class="form-row node-input-property-container-row is-to-show-normally">
         <ol id="node-input-property-container"></ol>
     </div>
-    <div class="form-row" id="node-once" data-i18n="[title]time-inject.placeholder.once">
+    <div class="form-row is-to-show-normally" id="node-once" data-i18n="[title]time-inject.placeholder.once">
         <label for="node-input-once"><i class="fa fa-play-circle"></i> <span data-i18n="time-inject.label.once"></span></label>
         <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
         <span data-i18n="time-inject.label.onstart"></span>&nbsp;
         <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:65px; height:28px;">&nbsp;
         <span data-i18n="time-inject.label.onceDelay"></span>
     </div>
-    <div class="form-row block-noindent">
+    <div class="form-row block-noindent is-to-show-normally">
         <label for=""><i class="fa fa-repeat"></i> <span data-i18n="node-red:inject.label.repeat"></span></label>
         <select id="node-input-injectTypeSelect" class="node-input-injectTypeSelect row-full-width">
             <option value="none" data-i18n="node-red:inject.none"></option>
@@ -1883,15 +2036,19 @@
             <option value="time" data-i18n="node-red:inject.time"></option>
         </select>
     </div>
-    <div class="form-row time-inject-row-all block-noindent time-inject-row-interval time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-interval">
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-interval time-inject-row-intervalFromStart time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-interval">
         <label for="node-input-intervalCount"><i class="fa fa-hourglass"></i> <span id="node-input-intervalCountLabel" data-i18n="node-red:inject.every"></span></label>
         <input id="node-input-intervalCount" class="time-inject-intervalCount" data-i18n="[placeholder]time-inject.placeholder.intervalCount"/>
         <input type="hidden" id="node-input-intervalCountType">
         <select id="node-input-intervalCountMultiplier" class="node-input-multiplier"></select>
     </div>
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-intervalFromStart is-initial-hidden" id="time-inject-row-interval-start">
+        <label for="node-myinput-intervalStart"><i class="fa fa-fa-hourglass-start"></i> <span id="node-myinput-intervalStartLabel" data-i18n="time-inject.label.intervalStart"></span></label>
+        <input type="datetime-local" id="node-myinput-intervalStart" class="time-inject-intervalStart" data-i18n="[placeholder]time-inject.placeholder.intervalStart"/>
+    </div>
 
     <div class="form-row time-inject-row-all time-inject-row-intervalTime is-initial-hidden ">
-        <span data-i18n="time-inject.label.between"></span>
+        <span data-i18n="node-red-contrib-sun-position/position-config:common.label.between"></span>
     </div>
 
     <div class="form-row time-inject-row-all block-noindent time-inject-row-timeStart time-inject-row-intervalTime time-inject-row-timeOnly is-initial-hidden" id="time-inject-row-timeStart"  data-i18n="[titleOrg]time-inject.placeholder.time">
@@ -1906,7 +2063,7 @@
         <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
     </div>
     <div class="form-row time-inject-row-all time-inject-row-intervalTime is-initial-hidden">
-        <span data-i18n="time-inject.label.and"></span>
+        <span data-i18n="node-red-contrib-sun-position/position-config:common.label.and"></span>
     </div>
     <div class="form-row time-inject-row-all block-noindent time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-timeEnd"  data-i18n="[titleOrg]time-inject.placeholder.timeEnd">
         <label for="node-input-timeEnd"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.timeEnd"></span></label>
@@ -1935,11 +2092,13 @@
             </div>
         </div>
         <div class="time-inject-limits" style="margin-top:5px-; border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox'  id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>
@@ -1963,7 +2122,7 @@
             </div>
         </div>
         <div id="time-inject-timeDateLimit" class="time-inject-datelimit" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="time-inject.label.validForDates"></span></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;"><i class="fa fa-calendar-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.validForDates"></span></div>
             <div style="display:inline-block;">
                 <input type="date" id="node-input-timedatestart" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]time-inject.placeholder.start" min="2000-01-01" max="2000-12-31">
                 <input type="date" id="node-input-timedateend" class="ipMain time-inject-timedatelimit" value="" data-i18n="[placeholder]time-inject.placeholder.end" min="2000-01-01" max="2000-12-31">
@@ -2013,11 +2172,13 @@
             </div>
         </div>
         <div class="time-inject-limits" style="margin-top:5px;border-top: 1px solid #000;">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialDays"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>
@@ -2048,7 +2209,7 @@
         <span data-i18n="time-inject.label.hours"></span>
     </div>
     <div class="form-tips time-inject-recalc is-initial-hidden" data-i18n="[html]time-inject.tips.recalc"></div>
-    <div class="form-tips is-to-show-initially">
+    <div class="form-tips is-to-show-initial">
         <span data-i18n="[html]time-inject.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
 </script>
@@ -2056,10 +2217,13 @@
     hr {
         width: 100%
     }
-    .is-to-show-initially {
+    .is-to-show-initial {
         display:none
     }
     .is-initial-hidden {
+        display:none
+    }
+    .is-to-show-normally {
         display:none
     }
     .form-tips {

@@ -68,8 +68,8 @@
 
                     const outputCount = $('#node-input-outputs').val('{}');
 
-                    const btwnLabel = node._('moon-position.label.between');
-                    const andLabel = node._('moon-position.label.and');
+                    const btwnLabel = node._('node-red-contrib-sun-position/position-config:common.label.between');
+                    const andLabel = node._('node-red-contrib-sun-position/position-config:common.label.and');
                     /**
                      * resizes a rule
                      * @param {jQuery} rule - the jQuery selector of the rule
@@ -160,7 +160,6 @@
                         resizeItem: resizeRule,
                         sortItems(rules) {
                             const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                            rules = $('#node-input-rule-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 2);
                                 const data = $(this).data('data');

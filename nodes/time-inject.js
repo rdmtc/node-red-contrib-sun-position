@@ -16,19 +16,59 @@ module.exports = function (RED) {
      * @param {*} config - configuration
      */
     function timeInjectNode(config) {
+        /**
+         * get the output properies
+         * @param {object} props - the property array
+         * @returns {object} the nw property object
+         */
+        function prepareProps(node, props) {
+            const outProps = [];
+            props.forEach( prop => {
+                const propNew = {
+                    outType     : prop.pt,
+                    outValue    : prop.p,
+                    type        : prop.vt,
+                    value       : prop.v,
+                    format      : prop.f,
+                    offsetType  : prop.oT,
+                    offset      : prop.o,
+                    multiplier  : prop.oM,
+                    next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next === true)) ? true : false,
+                    days        : prop.days,
+                    months      : prop.months,
+                    onlyEvenDays: prop.onlyEvenDays,
+                    onlyOddDays : prop.onlyOddDays,
+                    onlyEvenWeeks: prop.onlyEvenWeeks,
+                    onlyOddWeeks : prop.onlyOddWeeks
+                };
+
+                if (node.positionConfig && propNew.type === 'jsonata') {
+                    try {
+                        propNew.expr = node.positionConfig.getJSONataExpression(node, propNew.value);
+                    } catch (err) {
+                        node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                        propNew.expr = null;
+                    }
+                }
+                outProps.push(propNew);
+            });
+            return outProps;
+        }
+
         const tInj = {
             none : 0,
             timer : 1,
             interval : 2,
-            intervalTime : 4,
+            intervalBtwStartEnd : 4,
             intervalAmount : 5
         };
+        const intervalMax = 24*60*60*1000 * 3; // 3 Tage
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         if (config.injectTypeSelect === 'interval-time') {
-            this.injType = tInj.intervalTime;
+            this.injType = tInj.intervalBtwStartEnd;
         } else if (config.injectTypeSelect === 'interval') {
             this.injType = tInj.interval;
         } else if ((config.injectTypeSelect === 'time') && (config.timeType && config.timeType !== 'none')) {
@@ -41,7 +81,7 @@ module.exports = function (RED) {
         this.intervalCount = config.intervalCount ? config.intervalCount : 0;
 
         if (this.injType === tInj.interval ||
-            this.injType === tInj.intervalTime ||
+            this.injType === tInj.intervalBtwStartEnd ||
             this.injType === tInj.intervalAmount) {
             this.intervalCountType = (config.intervalCountType || 'num');
         } else {
@@ -49,7 +89,16 @@ module.exports = function (RED) {
         }
         this.intervalCountMultiplier = config.intervalCountMultiplier ? config.intervalCountMultiplier : 60000;
 
-        if (this.injType === tInj.intervalTime ||
+        if (this.injType === tInj.interval) {
+            if (config.intervalStart) {
+                this.intervalStart = hlp.isoStringToDate(config.intervalStart);
+                this.intervalStart.setMinutes(this.intervalStart.getMinutes() - this.intervalStart.getTimezoneOffset());
+            } else {
+                this.intervalStart = new Date();
+            }
+        }
+
+        if (this.injType === tInj.intervalBtwStartEnd ||
             this.injType === tInj.intervalAmount ||
             this.injType === tInj.timer) {
             this.timeStartData = {
@@ -57,12 +106,14 @@ module.exports = function (RED) {
                 value : config.time,
                 offsetType : config.offsetType,
                 offset : config.offset || config.timeOffset || 0,
-                multiplier : config.offsetMultiplier ? config.offsetMultiplier : (config.timeOffsetMultiplier ? config.timeOffsetMultiplier : 60),
+                multiplier : config.offsetMultiplier ? parseInt(config.offsetMultiplier) : (config.timeOffsetMultiplier ? parseInt(config.timeOffsetMultiplier) : 60),
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
-                onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays
+                onlyOddDays: hlp.isTrue(config.timeOnlyOddDays),
+                onlyEvenDays: hlp.isTrue(config.timeOnlyEvenDays),
+                onlyEvenWeeks: hlp.isTrue(config.timeOnlyEvenWeeks),
+                onlyOddWeeks : hlp.isTrue(config.timeOnlyOddWeeks)
             };
 
             if (!this.timeStartData.offsetType) {
@@ -77,6 +128,10 @@ module.exports = function (RED) {
             if (this.timeStartData.onlyEvenDays && this.timeStartData.onlyOddDays) {
                 this.timeStartData.onlyEvenDays = false;
                 this.timeStartData.onlyOddDays = false;
+            }
+            if (this.timeStartData.onlyEvenWeeks && this.timeStartData.onlyOddWeeks) {
+                this.timeStartData.onlyEvenWeeks = false;
+                this.timeStartData.onlyOddWeeks = false;
             }
             if (config.propertyType && config.propertyType !== 'none' && config.timeAltType && config.timeAltType !== 'none') {
                 this.property = {
@@ -108,12 +163,14 @@ module.exports = function (RED) {
                     value : config.timeAlt ? config.timeAlt : '',
                     offsetType : config.timeAltOffsetType,
                     offset : config.timeAltOffset ? config.timeAltOffset : 0,
-                    multiplier : config.timeAltOffsetMultiplier ? config.timeAltOffsetMultiplier : 60,
+                    multiplier : config.timeAltOffsetMultiplier ? parseInt(config.timeAltOffsetMultiplier) : 60,
                     next : true,
                     days : config.timeAltDays,
                     months : config.timeAltMonths,
-                    onlyOddDays: config.timeAltOnlyOddDays,
-                    onlyEvenDays: config.timeAltOnlyEvenDays
+                    onlyOddDays: hlp.isTrue(config.timeAltOnlyOddDays),
+                    onlyEvenDays: hlp.isTrue(config.timeAltOnlyEvenDays),
+                    onlyEvenWeeks: hlp.isTrue(config.timeAltOnlyEvenWeeks),
+                    onlyOddWeeks : hlp.isTrue(config.timeAltOnlyOddWeeks)
                 };
                 if (!this.timeStartAltData.offsetType) { this.timeStartAltData.offsetType = ((this.timeStartAltData.offset === 0) ? 'none' : 'num'); }
 
@@ -127,21 +184,27 @@ module.exports = function (RED) {
                     this.timeStartAltData.onlyEvenDays = false;
                     this.timeStartAltData.onlyOddDays = false;
                 }
+                if (this.timeStartAltData.onlyEvenWeeks && this.timeStartAltData.onlyOddWeeks) {
+                    this.timeStartAltData.onlyEvenWeeks = false;
+                    this.timeStartAltData.onlyOddWeeks = false;
+                }
             } // timeAlt
         } // timeStartData
 
-        if (this.injType === tInj.intervalTime ||this.injType === tInj.intervalAmount ) {
+        if (this.injType === tInj.intervalBtwStartEnd ||this.injType === tInj.intervalAmount ) {
             this.timeEndData = {
                 type: config.timeEndType,
                 value : config.timeEnd,
                 offsetType : config.timeEndOffsetType,
                 offset : config.timeEndOffset ? config.timeEndOffset : 0,
-                multiplier : config.timeEndOffsetMultiplier ? config.timeEndOffsetMultiplier : 60,
+                multiplier : config.timeEndOffsetMultiplier ? parseInt(config.timeEndOffsetMultiplier) : 60,
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
-                onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays
+                onlyOddDays: hlp.isTrue(config.timeOnlyOddDays),
+                onlyEvenDays: hlp.isTrue(config.timeOnlyEvenDays),
+                onlyEvenWeeks: hlp.isTrue(config.timeOnlyEvenWeeks),
+                onlyOddWeeks : hlp.isTrue(config.timeOnlyOddWeeks)
             };
             if (!this.timeEndData.offsetType) {
                 this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');
@@ -155,6 +218,10 @@ module.exports = function (RED) {
             if (this.timeEndData.onlyEvenDays && this.timeEndData.onlyOddDays) {
                 this.timeEndData.onlyEvenDays = false;
                 this.timeEndData.onlyOddDays = false;
+            }
+            if (this.timeEndData.onlyEvenWeeks && this.timeEndData.onlyOddWeeks) {
+                this.timeEndData.onlyEvenWeeks = false;
+                this.timeEndData.onlyOddWeeks = false;
             }
         } // timeEndData
 
@@ -293,34 +360,7 @@ module.exports = function (RED) {
             delete config.addPayload3Days;
         }
 
-        this.props = [];
-        config.props.forEach( prop => {
-            const propNew = {
-                outType     : prop.pt,
-                outValue    : prop.p,
-                type        : prop.vt,
-                value       : prop.v,
-                format      : prop.f,
-                offsetType  : prop.oT,
-                offset      : prop.o,
-                multiplier  : prop.oM,
-                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
-                days        : prop.days,
-                months      : prop.months,
-                onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays
-            };
-
-            if (this.positionConfig && propNew.type === 'jsonata') {
-                try {
-                    propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
-                } catch (err) {
-                    this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                    propNew.expr = null;
-                }
-            }
-            this.props.push(propNew);
-        });
+        this.props = prepareProps(this, config.props);
 
         this.recalcTime = (config.recalcTime || 2) * 3600000;
 
@@ -331,6 +371,20 @@ module.exports = function (RED) {
         this.nextStartTime = null;
         this.nextStartTimeAlt = null;
         this.nextEndTime = null;
+
+        if (config.once) {
+            if (config.onceDelay > 2147483) {
+                this.onceDelay = 2147483;
+            } else {
+                this.onceDelay = config.onceDelay || 0.1;
+            }
+        }
+        if (config.timedatestart) {
+            this.timedatestart = new Date(config.timedatestart);
+        }
+        if (config.timedateend) {
+            this.timedateend = new Date(config.timedateend);
+        }
         const node = this;
 
         /**
@@ -347,7 +401,6 @@ module.exports = function (RED) {
                     millisec += 86400000; // 24h
                 }
             }
-
             return millisec;
         };
 
@@ -359,19 +412,19 @@ module.exports = function (RED) {
                 value: null,
                 valid : true
             };
-            if (config.timedatestart || config.timedateend) {
+            if (node.timedatestart || node.timedateend) {
                 const year = dNow.getFullYear();
                 if (node.cacheYear !== year) {
                     node.cacheYear = year;
-                    if (config.timedatestart) {
-                        node.cacheStart = new Date(config.timedatestart);
+                    if (node.timedatestart) {
+                        node.cacheStart = new Date(node.timedatestart);
                         node.cacheStart.setFullYear(year);
                         node.cacheStart.setHours(0, 0, 0, 0);
                     } else {
                         node.cacheStart = new Date(year, 0, 0, 0, 0, 0, 1);
                     }
-                    if (config.timedateend) {
-                        node.cacheEnd = new Date(config.timedateend);
+                    if (node.timedateend) {
+                        node.cacheEnd = new Date(node.timedateend);
                         node.cacheEnd.setFullYear(year);
                         node.cacheEnd.setHours(23, 59, 59, 999);
                     } else {
@@ -453,7 +506,7 @@ module.exports = function (RED) {
             }
             node.debug(`initializeStartTimer - starting interval!!`);
 
-            if (this.injType === tInj.intervalTime) {
+            if (this.injType === tInj.intervalBtwStartEnd) {
                 node.getIntervalTime();
                 node.doStartInterval(); // starte Interval
             } else if (node.injType === tInj.intervalAmount) {
@@ -466,7 +519,6 @@ module.exports = function (RED) {
         };
 
         node.initialize = (node, doEmit) => {
-            node.debug(`initialize`);
             switch (node.injType) {
                 case tInj.interval:
                     if (doEmit) {
@@ -474,19 +526,12 @@ module.exports = function (RED) {
                             type: 'once/startup'
                         }); // will create timeout
                     }
-                    node.debug('initialize - absolute Intervall');
-                    node.getIntervalTime();
-                    clearInterval(node.intervalObj);
-                    node.status({
-                        text: '↻' + Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10 + 's'
-                    });
+                    // node.debug('initialize - absolute Intervall');
                     node.send(node.prepOutMsg({ type: 'interval-start' }));
-                    node.intervalObj = setInterval(() => {
-                        node.send(node.prepOutMsg({ type: 'interval' }));
-                    }, node.intervalTime);
+                    node.createNextInterval();
                     break;
                 case tInj.timer:
-                    node.debug('initialize - timer');
+                    // node.debug('initialize - timer');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
@@ -495,20 +540,20 @@ module.exports = function (RED) {
                         node.doCreateStartTimeout(node);
                     }
                     break;
-                case tInj.intervalTime:
+                case tInj.intervalBtwStartEnd:
                 case tInj.intervalAmount:
-                    node.debug('initialize - Intervall timer/amount');
+                    // node.debug('initialize - Intervall timer/amount/fromStart');
                     if (doEmit) {
                         node.emit('input', {
                             type: 'once/startup'
-                        });
+                        }); // will create timeout
                     }
                     if (!node.initializeStartTimer(node)) {
                         node.doCreateStartTimeout(node);
                     }
                     break;
                 default:
-                    node.debug('initialize - default');
+                    // node.debug('initialize - default');
                     node.doSetStatus(node, 'green');
                     if (doEmit) {
                         node.emit('input', {
@@ -526,7 +571,7 @@ module.exports = function (RED) {
             if (!node.timeEndData) {
                 return null;
             }
-            node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateEndTimeout node.timeEndData=${util.inspect(node.timeEndData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.timeOutEndObj) {
                 clearTimeout(node.timeOutEndObj);
                 node.timeOutEndObj = null;
@@ -592,21 +637,104 @@ module.exports = function (RED) {
             }
         };
 
+        node.getIntervalText = (mstime, val) => {
+            if (mstime === 604800000) {
+                if (val === 1) {
+                    return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.week');
+                }
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.weeks');
+            } else if (mstime === 86400000) {
+                if (val === 1) {
+                    return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.day');
+                }
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.days');
+            } else if (mstime === 3600000) {
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.hour');
+            } else if (mstime === 60000) {
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.min');
+            } else if (mstime === 1000) {
+                return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.sec');
+            }
+            return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.ms');
+        };
+
+        /**
+         * Recalculate the Interval
+         */
+        node.createNextInterval = () => {
+            node.getIntervalTime();
+            clearInterval(node.intervalObj);
+            const dNow = (new Date()).valueOf();
+            const diff = Math.abs(dNow - node.intervalStart.valueOf());
+            const ivCount = Math.trunc(diff / node.intervalTime) + 1;
+            const tsStart = node.intervalStart.valueOf() + (node.intervalTime * ivCount); // Start Timestamp
+            const millisec = tsStart - dNow;
+            node.debug(`createNextInterval start=${node.intervalStart}; interval=${node.intervalTime}; diff=${diff}; ivCount=${ivCount}; tsStart=${tsStart}; millisec=${millisec}`);
+
+            if (millisec > 2147483647) {
+                // there is a limitation of nodejs that the maximum setTimeout time
+                // should not more then 2147483647 ms (24.8 days).
+                node.timeOutStartObj = setTimeout(() => {
+                    node.createNextInterval();
+                }, 2147483647);
+                return;
+            }
+            node.timeOutStartObj = setTimeout(() => {
+                node.timeOutStartObj = null;
+                if (node.intervalTime < intervalMax) {
+                    node.debug(`interval is less than max=${intervalMax}ms, create absolute interval of ${node.intervalTime}ms`);
+                    node.intervalObj = setInterval(() => {
+                        node.send(node.prepOutMsg({ type: 'interval' }));
+                    }, node.intervalTime);
+                    if (node.intervalTime > 43200000) { // 12h
+                        node.status({
+                            text: '↻' + (node.intervalTime / 3600000).toFixed(1) + 'h'
+                        });
+                    } else if (node.intervalTime > 3600000) { // 1h
+                        node.status({
+                            text: '↻' + (node.intervalTime / 60000).toFixed(2) + 'min'
+                        });
+                    } else {
+                        node.status({
+                            text: ' ↻' + node.intervalText
+                        });
+                        /*
+                        node.status({
+                            text: '↻' + Math.round(((node.intervalTime / 1000) + Number.EPSILON) * 10) / 10 + 's'
+                        }); */
+                    }
+                } else {
+                    node.createNextInterval();
+                }
+                node.send(node.prepOutMsg({ type: 'interval' }));
+            }, millisec);
+            node.status({
+                text: node.positionConfig.toTimeString(new Date(tsStart)) + ' ↻' + node.intervalText
+            });
+        };
+
         /**
          * Prepaes a message object for sending
          */
         node.prepOutMsg = msg => {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             const dNow = new Date();
-            for (let i = 0; i < node.props.length; i++) {
-                // node.debug(`prepOutMsg-${i} node.props[${i}]=${util.inspect(node.props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
-                const res = node.positionConfig.getOutDataProp(this, msg, node.props[i], dNow);
+
+            let props = node.props;
+            if (msg.__user_inject_props__ && msg.__user_inject_props__.props && Array.isArray(msg.__user_inject_props__.props)) {
+                props = prepareProps(node, msg.__user_inject_props__.props);
+            }
+            delete msg.__user_inject_props__;
+
+            for (let i = 0; i < props.length; i++) {
+                // node.debug(`prepOutMsg-${i} props[${i}]=${util.inspect(props[i], { colors: true, compact: 10, breakLength: Infinity })}`);
+                const res = node.positionConfig.getOutDataProp(this, msg, props[i], dNow);
                 if (res === null || (typeof res === 'undefined')) {
-                    this.error('Could not evaluate ' + node.props[i].type + '.' + node.props[i].value + '. - Maybe settings outdated (open and save again)!');
+                    this.error('Could not evaluate ' + props[i].type + '.' + props[i].value + '. - Maybe settings outdated (open and save again)!');
                 } else if (res.error) {
                     this.error('Error on getting additional payload: "' + res.error + '"');
                 } else {
-                    node.positionConfig.setMessageProp(this, msg, node.props[i].outType, node.props[i].outValue, res);
+                    node.positionConfig.setMessageProp(this, msg, props[i].outType, props[i].outValue, res);
                 }
                 // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
@@ -623,6 +751,7 @@ module.exports = function (RED) {
             if (node.intervalTime <= 0) {
                 throw new Error('Interval wrong!');
             } else {
+                node.intervalText = node.getIntervalText(node.intervalCountMultiplier, node.intervalTime);
                 if (node.intervalCountMultiplier > 0) {
                     node.intervalTime = Math.floor(node.intervalTime * node.intervalCountMultiplier);
                 }
@@ -655,7 +784,7 @@ module.exports = function (RED) {
          * @returns {object} state or error
          */
         node.doCreateStartTimeout = node => {
-            node.debug(`doCreateStartTimeout node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`doCreateStartTimeout node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.injType === tInj.none ||
                 node.injType === tInj.interval) {
                 return;
@@ -670,7 +799,7 @@ module.exports = function (RED) {
             }
             delete node.intervalTime;
 
-            if (node.injType === tInj.intervalTime) {
+            if (node.injType === tInj.intervalBtwStartEnd) {
                 node.IntervalCountMax = 0;
                 node.getIntervalTime();
             }
@@ -690,7 +819,7 @@ module.exports = function (RED) {
             node.timeStartData.now = new Date();
             const startLimit = node.getTimeLimitation(node.timeStartData.now);
             if (startLimit.valid) {
-                node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
+                // node.debug(`node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
                 const nextStartTimeData = node.positionConfig.getTimeProp(node, {}, node.timeStartData);
                 if (nextStartTimeData.error) {
                     node.debug('node.nextStartTimeData=' + util.inspect(nextStartTimeData, { colors: true, compact: 10, breakLength: Infinity }));
@@ -703,12 +832,12 @@ module.exports = function (RED) {
 
                 if (node.timeStartAltData) {
                     node.timeStartAltData.now = node.timeStartData.now;
-                    node.debug(`node.timeStartAltData=${util.inspect(node.timeStartAltData, { colors: true, compact: 10, breakLength: Infinity })}`);
+                    // node.debug(`node.timeStartAltData=${util.inspect(node.timeStartAltData, { colors: true, compact: 10, breakLength: Infinity })}`);
                     const nextTimeAltData = node.positionConfig.getTimeProp(node, {}, node.timeStartAltData);
 
                     if (nextTimeAltData.error) {
                         isFixedTime = false;
-                        node.debug('nextTimeAltData=' + util.inspect(nextTimeAltData, { colors: true, compact: 10, breakLength: Infinity }));
+                        // node.debug('nextTimeAltData=' + util.inspect(nextTimeAltData, { colors: true, compact: 10, breakLength: Infinity }));
                         hlp.handleError(node, nextTimeAltData.error, null, 'could not evaluate alternate time');
                         return;
                     }
@@ -750,24 +879,24 @@ module.exports = function (RED) {
                     // there is a limitation of nodejs that the maximum setTimeout time
                     // should not more then 2147483647 ms (24.8 days).
                     millisec = Math.min((millisec - 129600000), 2147483646);
-                    node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
+                    // node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                     node.timeOutStartObj = setTimeout(() => {
                         node.doRecalcStartTimeOut();
                     }, millisec); // 1,5 days before
                     fill = 'blue';
-                } else if (this.injType === tInj.intervalTime) {
-                    node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                } else if (this.injType === tInj.intervalBtwStartEnd) {
+                    // node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else if (this.injType === tInj.intervalAmount) {
-                    node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     const millisecEnd = node.getMillisecEnd(node);
                     node.intervalTime = Math.floor((millisecEnd - millisec) / node.IntervalCountMax);
                     node.IntervalCountCurrent = 0;
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else { // this.injType === tInj.timer
-                    node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(() => {
                         // node.debug(`timeOutStartObj isAlt=${isAlt} isAltFirst=${node.timeStartData.isAltFirst}`);
 
@@ -870,7 +999,7 @@ module.exports = function (RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                node.debug('--------- time-inject - input (type=' + msg.type + ')');
+                // node.debug('--------- time-inject - input (type=' + msg.type + ')');
                 if (!node.positionConfig) {
                     throw new Error('configuration missing!');
                 }
@@ -878,9 +1007,7 @@ module.exports = function (RED) {
                     node.doCreateStartTimeout(node);
                 }
                 send(node.prepOutMsg(msg));
-                if (msg.payload === null || (typeof msg.payload === 'undefined')) {
-                    done('could not evaluate ' + config.payloadType + '.' + config.payload);
-                } else if (msg.payload.error) {
+                if (msg.payload && msg.payload.error) {
                     done('could not getting payload: ' + msg.payload.error);
                 } else {
                     done();
@@ -909,14 +1036,11 @@ module.exports = function (RED) {
                 });
                 return;
             }
-            if (config.once) {
-                if (config.onceDelay > 2147483) {
-                    config.onceDelay = 2147483;
-                }
+            if (node.onceDelay) {
                 node.status({
                     fill: 'yellow',
                     shape: 'ring',
-                    text: RED._('time-inject.message.onceDelay', { seconds: (config.onceDelay || 0.1)})
+                    text: RED._('time-inject.message.onceDelay', { seconds: (node.onceDelay)})
                 });
                 node.onceTimeout = setTimeout(() => {
                     try {
@@ -930,7 +1054,7 @@ module.exports = function (RED) {
                             text: RED._('node-red-contrib-sun-position/position-config:errors.error-title')
                         });
                     }
-                }, (config.onceDelay || 0.1) * 1000);
+                }, node.onceDelay * 1000);
                 return;
             }
             node.status({});
@@ -987,11 +1111,15 @@ module.exports = function (RED) {
         }
     };
 
-    RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req,res) => {
+    RED.httpAdmin.post('/time-inject/:id', RED.auth.needsPermission('time-inject.write'), (req, res) => {
         const node = RED.nodes.getNode(req.params.id);
         if (node !== null && typeof node !== 'undefined') {
             try {
-                node.receive();
+                if (req.body && req.body.__user_inject_props__) {
+                    node.receive(req.body);
+                } else {
+                    node.receive();
+                }
                 res.sendStatus(200);
             } catch(err) {
                 res.sendStatus(500);

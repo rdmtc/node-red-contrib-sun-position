@@ -189,7 +189,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.startOffset === 0 || node.startOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-startOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -227,7 +227,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.endOffset === 0 || node.endOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
                         onChange(_type, _value) {
                             const type = $('#node-input-endOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -241,8 +241,8 @@
                     // #endregion end
                     const outputCount = $('#node-input-outputs').val('{}');
 
-                    const btwnLabel = node._('sun-position.label.between');
-                    const andLabel = node._('sun-position.label.and');
+                    const btwnLabel = node._('node-red-contrib-sun-position/position-config:common.label.between');
+                    const andLabel = node._('node-red-contrib-sun-position/position-config:common.label.and');
                     /**
                      * resizes a rule
                      * @param {jQuery} rule - the jQuery selector of the rule
@@ -334,7 +334,6 @@
                         resizeItem: resizeRule,
                         sortItems(rules) {
                             const currentOutputs = JSON.parse(outputCount.val() || '{}');
-                            rules = $('#node-input-rule-container').editableList('items');
                             rules.each(function (i) {
                                 $(this).find('.node-input-rule-index').html(i + 2);
                                 const data = $(this).data('data');
