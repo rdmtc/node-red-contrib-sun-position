@@ -1151,6 +1151,7 @@
                             days : '*',
                             months: '*'
                         });
+
                         node.props.push({
                             p    : '',
                             pt   : types.MsgTopic.value,
@@ -1165,7 +1166,7 @@
                             months: '*'
                         });
 
-                        if (node.addPayload1Type !== types.Undefined.value) {
+                        if (node.addPayload1Type && node.addPayload1Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload1,
                                 pt   : node.addPayload1Type,
@@ -1180,7 +1181,7 @@
                                 months: '*'
                             });
                         }
-                        if (node.addPayload2Type !== types.Undefined.value) {
+                        if (node.addPayload2Type && node.addPayload2Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload2,
                                 pt   : node.addPayload2Type,
@@ -1195,7 +1196,8 @@
                                 months: '*'
                             });
                         }
-                        if (node.addPayload3Type !== types.Undefined.value) {
+
+                        if (node.addPayload3Type && node.addPayload3Type !== types.Undefined.value) {
                             node.props.push({
                                 p    : node.addPayload3,
                                 pt   : node.addPayload3Type,
@@ -1303,6 +1305,15 @@
                     // TODO: add intervalStart
                     // #endregion interval
                     // #region time
+                    if ($('#node-input-timeOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeOnlyEvenWeeks').prop('checked',false);
+                    }
+
                     setupTInput(node, {
                         typeProp: 'timeType',
                         valueProp: 'time',
@@ -1359,14 +1370,14 @@
                                 value:          $('#node-input-time').typedInput('value'),
                                 offsetType:     $('#node-input-offset').typedInput('type'),
                                 offset:         $('#node-input-offset').typedInput('value'),
-                                multiplier:     $('#node-input-offsetMultiplier').val(),
+                                multiplier:     parseInt($('#node-input-offsetMultiplier').val()),
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
-                                onlyOddDays:    $('#node-input-timeOnlyOddDays').val(),
-                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').val(),
-                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').val(),
-                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').val(),
+                                onlyOddDays:    $('#node-input-timeOnlyOddDays').prop('checked'),
+                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').prop('checked'),
+                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').prop('checked'),
+                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').prop('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1432,14 +1443,14 @@
                                 value:          $('#node-input-timeEnd').typedInput('value'),
                                 offsetType:     $('#node-input-timeEndOffset').typedInput('type'),
                                 offset:         $('#node-input-timeEndOffset').typedInput('value'),
-                                multiplier:     $('#node-input-timeEndOffsetMultiplier').val(),
+                                multiplier:     parseInt($('#node-input-timeEndOffsetMultiplier').val()),
                                 next:           1,
                                 days:           getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7),
                                 months:         getCheckboxesStr($('#time-inject-timeMonths input[type=checkbox]:checked'), 12),
-                                onlyOddDays:    $('#node-input-timeOnlyOddDays').val(),
-                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').val(),
-                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').val(),
-                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').val(),
+                                onlyOddDays:    $('#node-input-timeOnlyOddDays').prop('checked'),
+                                onlyEvenDays:   $('#node-input-timeOnlyEvenDays').prop('checked'),
+                                onlyOddWeeks:    $('#node-input-timeOnlyOddWeeks').prop('checked'),
+                                onlyEvenWeeks:   $('#node-input-timeOnlyEvenWeeks').prop('checked'),
                                 noOffsetError:  true
                             });
                         }
@@ -1604,6 +1615,14 @@
                     });
                     // #endregion property
                     // #region timeAlt
+                    if ($('#node-input-timeAltOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeAltOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeAltOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeAltOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeAltOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeAltOnlyEvenWeeks').prop('checked',false);
+                    }
                     setupTInput(node, {
                         typeProp: 'timeAltType',
                         valueProp: 'timeAlt',
@@ -2076,10 +2095,10 @@
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox'  id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>
@@ -2156,10 +2175,10 @@
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeAltOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeAltOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>

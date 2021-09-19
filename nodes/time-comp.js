@@ -67,7 +67,7 @@ module.exports = function (RED) {
                 offsetType  : prop.oT,
                 offset      : prop.o,
                 multiplier  : prop.oM,
-                next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
                 days        : prop.days,
                 months      : prop.months,
                 onlyEvenDays: prop.onlyEvenDays,

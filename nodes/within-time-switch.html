@@ -358,6 +358,14 @@
                     }
                     // #endregion initialize
                     // #region timeStart
+                    if ($('#node-input-timeOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
+                        $('#node-input-timeOnlyOddDays').prop('checked',false);
+                        $('#node-input-timeOnlyEvenDays').prop('checked',false);
+                    }
+                    if ($('#node-input-timeOnlyOddWeeks').prop('checked') && $('#node-input-timeOnlyEvenWeeks').prop('checked') ) {
+                        $('#node-input-timeOnlyOddWeeks').prop('checked',false);
+                        $('#node-input-timeOnlyEvenWeeks').prop('checked',false);
+                    }
                     initializeValue(node, 'timeDays', '*');
                     initializeValue(node, 'timeMonths', '*');
                     initCheckboxesBlock('#within-time-switch-timeDays', node.timeDays);
@@ -1039,10 +1047,10 @@
             <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
-                    <label><input type='checkbox' checked id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                    <label><input type='checkbox' id="node-input-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                 </div>
             </div>
         </div>

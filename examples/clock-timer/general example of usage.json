@@ -1,0 +1,602 @@
+[
+    {
+        "id": "f1d64eab81895d2b",
+        "type": "group",
+        "z": "c224c971b366d1da",
+        "name": "Example:",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "3f3293716c4f8301",
+            "167b914d151a857d",
+            "997ce213970084e9",
+            "5e7b768f194c5bc6",
+            "0f59d71d4dd0cb56",
+            "8ffb68d76055aaac",
+            "2d50318efe379232",
+            "e13eba02c1a4ec98",
+            "49de49f3ded869d9",
+            "0b803c3d45473e7a",
+            "be21d0a72d6b10cb",
+            "ef0d112b9189e10c",
+            "30c7f63aee8f5002",
+            "112c57d65540a173",
+            "8325a1a346d4e2e8",
+            "2d52a592a6afb4d3",
+            "2a3d2d9f8591d32e",
+            "aa8ef40f13d17a02"
+        ],
+        "x": 104,
+        "y": 2404,
+        "w": 1067,
+        "h": 427
+    },
+    {
+        "id": "3f3293716c4f8301",
+        "type": "function",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "30min 0.5sec",
+        "func": "\nconst minutesEachLoop = 30; // minutes to add\nconst loopCycle = 0.5; // seconds delay\nlet timeObj = context.get(\"timeObj\");\n\nif (timeObj && msg.topic.includes('stop')) {\n    clearInterval(timeObj);\n    context.set(\"timeObj\", null);\n    context.set(\"orgtopic\", null);\n    let d = new Date(context.get(\"date\"));\n    node.log(\"STOP    \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n    node.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ' + d.toISOString());\n    node.status({fill:\"red\",shape:\"ring\",text:\"stopped - \" + d.toLocaleTimeString()});\n    return null;\n} else if (!timeObj && msg.topic.includes('start')) {\n    context.set(\"message\", msg);\n    context.set(\"orgtopic\", msg.topic);\n    let d = new Date();\n    let num = Number(msg.payload);\n    if (isNaN(num) && num < 24) {\n        d.setHours(num);\n        d.setMinutes(0);\n    } else {\n        let dt = new Date(msg.payload);\n        if (dt instanceof Date && !isNaN(dt)) {\n            d = dt;\n        } else {\n            d.setHours(0);\n            d.setMinutes(0);\n        }\n    }\n    context.set(\"date\", d.getTime());\n    msg.tsISO = d.toISOString();\n    msg.ts = d.getTime();\n    msg.topic += ' ' + d.toLocaleTimeString();\n    node.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');\n    node.log(\"START   \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n    node.send(msg);\n\n    let timeObj = setInterval(function(){\n        let msg = context.get(\"message\");\n        let topic = context.get(\"orgtopic\");\n        let d = new Date(context.get(\"date\"));\n        //d.setHours(d.getHours()+1);\n        let dt = d.getDate();\n        let dm = d.getMonth();\n        d.setMinutes(d.getMinutes() + minutesEachLoop)\n        d.setDate(dt);\n        d.getMonth(dm);\n        context.set(\"date\", d.getTime());\n        msg.tsISO = d.toISOString();\n        msg.ts = d.getTime();\n        msg.topic = topic + ' ' + d.toLocaleTimeString();\n        node.status({fill:\"green\",shape:\"dot\",text:\"run - \" + d.toLocaleTimeString()});\n        node.log(\"sending \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\n        node.send(msg);\n\t}, (1000 * loopCycle));\n    context.set(\"timeObj\", timeObj);\n    node.status({fill:\"green\",shape:\"ring\",text:\"start - \" + d.toLocaleTimeString()});\n    return null;\n}\n\nlet d = new Date(context.get(\"date\"));\nif (!(d instanceof Date) || isNaN(d)) {\n    d = new Date();\n}\nd.setMinutes(d.getMinutes() + 1)\n//d.setHours(d.getHours()+1);\nmsg.tsISO = d.toISOString();\nmsg.ts = d.getTime();\nmsg.topic += ' ' + d.toLocaleTimeString();\nnode.status({fill:\"yellow\",shape:\"dot\",text:\"interposed - \" + d.toLocaleTimeString() + ' - ' + msg.payload});\nnode.log(\"sending interposed msg \" + d.toLocaleTimeString() + ' ####################################### payload='+msg.payload+' topic='+msg.topic);\nnode.send(msg);\nreturn null;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 550,
+        "y": 2520,
+        "wires": [
+            [
+                "aa8ef40f13d17a02"
+            ]
+        ]
+    },
+    {
+        "id": "167b914d151a857d",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "start/stop",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 255,
+        "y": 2475,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "997ce213970084e9",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "reset",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "resetOverwrite",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 230,
+        "y": 2565,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "5e7b768f194c5bc6",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "0%",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "levelOverwrite",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 230,
+        "y": 2605,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "0f59d71d4dd0cb56",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "60%",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "levelOverwrite",
+        "payload": "0.6",
+        "payloadType": "num",
+        "x": 230,
+        "y": 2650,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "8ffb68d76055aaac",
+        "type": "comment",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "manual overrides:",
+        "info": "",
+        "x": 225,
+        "y": 2520,
+        "wires": []
+    },
+    {
+        "id": "2d50318efe379232",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "90%, expire 2,5s",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"position\":0.9,\"expire\":2500}",
+        "payloadType": "json",
+        "x": 260,
+        "y": 2700,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "e13eba02c1a4ec98",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "30% importance 1",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"position\":0.3,\"importance\":1}",
+        "payloadType": "json",
+        "x": 240,
+        "y": 2745,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "49de49f3ded869d9",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "100% importance 1",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"importance\":1, \"position\":1}",
+        "payloadType": "json",
+        "x": 250,
+        "y": 2790,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "0b803c3d45473e7a",
+        "type": "debug",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "Output from Timer",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1035,
+        "y": 2520,
+        "wires": []
+    },
+    {
+        "id": "be21d0a72d6b10cb",
+        "type": "change",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "dayInfo.today.isWeekendOrHoliday",
+        "rules": [
+            {
+                "t": "set",
+                "p": "dayInfo.today.isWeekendOrHoliday",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 845,
+        "y": 2595,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ef0d112b9189e10c",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 575,
+        "y": 2595,
+        "wires": [
+            [
+                "be21d0a72d6b10cb"
+            ]
+        ]
+    },
+    {
+        "id": "30c7f63aee8f5002",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 575,
+        "y": 2640,
+        "wires": [
+            [
+                "be21d0a72d6b10cb"
+            ]
+        ]
+    },
+    {
+        "id": "112c57d65540a173",
+        "type": "change",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "dayInfo.tomorrow.isWeekendOrHoliday",
+        "rules": [
+            {
+                "t": "set",
+                "p": "dayInfo.tomorrow.isWeekendOrHoliday",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 855,
+        "y": 2685,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8325a1a346d4e2e8",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 575,
+        "y": 2685,
+        "wires": [
+            [
+                "112c57d65540a173"
+            ]
+        ]
+    },
+    {
+        "id": "2d52a592a6afb4d3",
+        "type": "inject",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 575,
+        "y": 2730,
+        "wires": [
+            [
+                "112c57d65540a173"
+            ]
+        ]
+    },
+    {
+        "id": "2a3d2d9f8591d32e",
+        "type": "link in",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "do_refreshBlind_state",
+        "links": [
+            "0f8e7810f9391d31",
+            "dba49bc7.8be158"
+        ],
+        "x": 450,
+        "y": 2445,
+        "wires": [
+            [
+                "3f3293716c4f8301"
+            ]
+        ]
+    },
+    {
+        "id": "aa8ef40f13d17a02",
+        "type": "clock-timer",
+        "z": "c224c971b366d1da",
+        "g": "f1d64eab81895d2b",
+        "name": "",
+        "topic": "",
+        "addIdType": "none",
+        "addId": "",
+        "positionConfig": "",
+        "autoTrigger": true,
+        "autoTriggerTime": 1200000,
+        "startDelayTime": 10000,
+        "storeName": "",
+        "results": [
+            {
+                "p": "",
+                "pt": "msgTopic",
+                "v": "",
+                "vt": "topic"
+            },
+            {
+                "p": "",
+                "pt": "msgPayload",
+                "v": "",
+                "vt": "payload"
+            },
+            {
+                "p": "timeCtrl",
+                "pt": "msg",
+                "v": "",
+                "vt": "ctrlObj"
+            }
+        ],
+        "overwriteExpire": "",
+        "rules": [
+            {
+                "index": 0,
+                "name": "",
+                "version": 3,
+                "isValid": true,
+                "conditions": [],
+                "payload": {
+                    "type": "bool",
+                    "value": "false",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "format": ""
+                },
+                "topic": "",
+                "importance": 0,
+                "resetOverwrite": false,
+                "time": {
+                    "type": "pdsTime",
+                    "value": "civilDawn",
+                    "operator": 0,
+                    "operatorText": "↥ bis",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "days": "*",
+                    "months": "*"
+                },
+                "timeMin": {
+                    "type": "entered",
+                    "value": "6:30",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000
+                },
+                "description": "<div><i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> ↥ bis <var>bürgerliche Morgendämmerung</var><div class=\"indent-time-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>frühestens (min)</span> <var>6:30</var></div></div><div><div class=\"indent-payload-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>Payload:</span> <var>false</var></div></div>"
+            },
+            {
+                "index": 1,
+                "name": "",
+                "version": 3,
+                "isValid": true,
+                "conditions": [
+                    {
+                        "valueType": "flow",
+                        "value": "dayInfo.today.isWeekendOrHoliday",
+                        "operator": "true",
+                        "operatorText": "ist true",
+                        "thresholdType": "str",
+                        "threshold": ""
+                    }
+                ],
+                "payload": {
+                    "type": "bool",
+                    "value": "false",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "format": ""
+                },
+                "topic": "",
+                "importance": 0,
+                "resetOverwrite": false,
+                "time": {
+                    "type": "pdsTime",
+                    "value": "civilDawn",
+                    "operator": 0,
+                    "operatorText": "↥ bis",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "days": "*",
+                    "months": "*"
+                },
+                "timeMin": {
+                    "type": "entered",
+                    "value": "7:25",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000
+                },
+                "description": "<div><i class=\"fa fa-code-fork\" aria-hidden=\"true\"></i> <var>flow....fo.today.isWeekendOrHoliday</var> ist true</div><div><i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> ↥ bis <var>bürgerliche Morgendämmerung</var><div class=\"indent-time-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>frühestens (min)</span> <var>7:25</var></div></div><div><div class=\"indent-payload-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>Payload:</span> <var>false</var></div></div>"
+            },
+            {
+                "index": 2,
+                "name": "",
+                "version": 3,
+                "isValid": true,
+                "conditions": [
+                    {
+                        "valueType": "flow",
+                        "value": "dayInfo.tomorrow.isWeekendOrHoliday",
+                        "operator": "false",
+                        "operatorText": "ist false",
+                        "thresholdType": "str",
+                        "threshold": ""
+                    }
+                ],
+                "payload": {
+                    "type": "bool",
+                    "value": "false",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "format": ""
+                },
+                "topic": "",
+                "importance": 0,
+                "resetOverwrite": false,
+                "time": {
+                    "type": "pdsTime",
+                    "value": "civilDusk",
+                    "operator": 1,
+                    "operatorText": "↧ von",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "days": "*",
+                    "months": "*"
+                },
+                "timeMax": {
+                    "type": "entered",
+                    "value": "21:25",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000
+                },
+                "description": "<div><i class=\"fa fa-code-fork\" aria-hidden=\"true\"></i> <var>flow....tomorrow.isWeekendOrHoliday</var> ist false</div><div><i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> ↧ von <var>bürgerliche Abenddämmerung</var><div class=\"indent-time-text\"><i class=\"fa fa-step-forward\" aria-hidden=\"true\"></i> <span>spätestens (max)</span> <var>21:25</var></div></div><div><div class=\"indent-payload-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>Payload:</span> <var>false</var></div></div>"
+            },
+            {
+                "index": 3,
+                "name": "",
+                "version": 3,
+                "isValid": true,
+                "conditions": [],
+                "payload": {
+                    "type": "bool",
+                    "value": "false",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "format": ""
+                },
+                "topic": "",
+                "importance": 0,
+                "resetOverwrite": false,
+                "time": {
+                    "type": "pdsTime",
+                    "value": "civilDusk",
+                    "operator": 1,
+                    "operatorText": "↧ von",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000,
+                    "days": "*",
+                    "months": "*"
+                },
+                "timeMax": {
+                    "type": "entered",
+                    "value": "23:15",
+                    "offsetType": "none",
+                    "offset": "1",
+                    "multiplier": 60000
+                },
+                "description": "<div><i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> ↧ von <var>bürgerliche Abenddämmerung</var><div class=\"indent-time-text\"><i class=\"fa fa-step-forward\" aria-hidden=\"true\"></i> <span>spätestens (max)</span> <var>23:15</var></div></div><div><div class=\"indent-payload-text\"><i class=\"fa fa-step-backward\" aria-hidden=\"true\"></i> <span>Payload:</span> <var>false</var></div></div>"
+            }
+        ],
+        "payloadDefault": "true",
+        "payloadDefaultType": "bool",
+        "payloadDefaultTimeFormat": 0,
+        "payloadDefaultOffset": 0,
+        "payloadDefaultOffsetType": "none",
+        "payloadDefaultOffsetMultiplier": 60000,
+        "x": 770,
+        "y": 2520,
+        "wires": [
+            [
+                "0b803c3d45473e7a"
+            ],
+            []
+        ]
+    }
+]

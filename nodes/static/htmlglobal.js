@@ -898,7 +898,7 @@ function setTInputValue($field, value, type) { // eslint-disable-line no-unused-
             $field.typedInput('value', checkDeprecatedValues(type, value));
         }
     } catch (err) {
-        console.log('error setting type input', value, type, err);
+        console.log('error setting type input', value, type, err); // eslint-disable-line no-console
     }
 }
 
@@ -1170,10 +1170,19 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
         }
         result(res);
     } catch (err) {
-        console.log('can not get data from Server',err);
+        console.log('can not get data from Server',err); // eslint-disable-line no-console
     }
 }
 
+/**
+ * returns **true** if the parameter value is a valid boolean value for **true**
+ * @param {*} val a parameter which should be checked if  it is a valid true boolean
+ * @returns {boolean} true if the parameter value is a valid boolean value for **true**
+ */
+function isTrue(val) {  // eslint-disable-line no-unused-vars
+    val = (val+'').toLowerCase();
+    return (['true', 'yes', 'on', 'ja'].includes(val) || (!isNaN(val) && (Number(val) > 0)));
+}
 
 /**
  * checks if a value is a valid Date object

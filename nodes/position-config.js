@@ -1105,11 +1105,11 @@ module.exports = function (RED) {
             } else if (data.type === 'pdnWeekOfYear') {
                 result = hlp.getWeekOfYear(dNow);
             } else if (data.type === 'pdbWeekOfYearEven') {
-                result = (hlp.getWeekOfYear(dNow) % 2 === 0);
+                result = (hlp.getWeekOfYear(dNow)[1] % 2 === 0);
             } else if (data.type === 'pdnDayOfYear') {
                 result = hlp.getDayOfYear(dNow);
             } else if (data.type === 'pdbDayOfYearEven') {
-                result = (hlp.getDayOfYear(dNow) % 2 === 0);
+                result = (hlp.getDayOfYear(dNow)[1] % 2 === 0);
             } else if (data.type === 'jsonata') {
                 try {
                     if (!data.expr) {

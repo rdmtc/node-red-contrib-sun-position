@@ -33,7 +33,7 @@ module.exports = function (RED) {
                     offsetType  : prop.oT,
                     offset      : prop.o,
                     multiplier  : prop.oM,
-                    next        : (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') ? true : false,
+                    next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next === true)) ? true : false,
                     days        : prop.days,
                     months      : prop.months,
                     onlyEvenDays: prop.onlyEvenDays,
@@ -106,14 +106,14 @@ module.exports = function (RED) {
                 value : config.time,
                 offsetType : config.offsetType,
                 offset : config.offset || config.timeOffset || 0,
-                multiplier : config.offsetMultiplier ? config.offsetMultiplier : (config.timeOffsetMultiplier ? config.timeOffsetMultiplier : 60),
+                multiplier : config.offsetMultiplier ? parseInt(config.offsetMultiplier) : (config.timeOffsetMultiplier ? parseInt(config.timeOffsetMultiplier) : 60),
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
-                onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays,
-                onlyEvenWeeks: config.timeOnlyEvenWeeks,
-                onlyOddWeeks : config.timeOnlyOddWeeks
+                onlyOddDays: hlp.isTrue(config.timeOnlyOddDays),
+                onlyEvenDays: hlp.isTrue(config.timeOnlyEvenDays),
+                onlyEvenWeeks: hlp.isTrue(config.timeOnlyEvenWeeks),
+                onlyOddWeeks : hlp.isTrue(config.timeOnlyOddWeeks)
             };
 
             if (!this.timeStartData.offsetType) {
@@ -163,14 +163,14 @@ module.exports = function (RED) {
                     value : config.timeAlt ? config.timeAlt : '',
                     offsetType : config.timeAltOffsetType,
                     offset : config.timeAltOffset ? config.timeAltOffset : 0,
-                    multiplier : config.timeAltOffsetMultiplier ? config.timeAltOffsetMultiplier : 60,
+                    multiplier : config.timeAltOffsetMultiplier ? parseInt(config.timeAltOffsetMultiplier) : 60,
                     next : true,
                     days : config.timeAltDays,
                     months : config.timeAltMonths,
-                    onlyOddDays: config.timeAltOnlyOddDays,
-                    onlyEvenDays: config.timeAltOnlyEvenDays,
-                    onlyEvenWeeks: config.timeAltOnlyEvenWeeks,
-                    onlyOddWeeks : config.timeAltOnlyOddWeeks
+                    onlyOddDays: hlp.isTrue(config.timeAltOnlyOddDays),
+                    onlyEvenDays: hlp.isTrue(config.timeAltOnlyEvenDays),
+                    onlyEvenWeeks: hlp.isTrue(config.timeAltOnlyEvenWeeks),
+                    onlyOddWeeks : hlp.isTrue(config.timeAltOnlyOddWeeks)
                 };
                 if (!this.timeStartAltData.offsetType) { this.timeStartAltData.offsetType = ((this.timeStartAltData.offset === 0) ? 'none' : 'num'); }
 
@@ -197,14 +197,14 @@ module.exports = function (RED) {
                 value : config.timeEnd,
                 offsetType : config.timeEndOffsetType,
                 offset : config.timeEndOffset ? config.timeEndOffset : 0,
-                multiplier : config.timeEndOffsetMultiplier ? config.timeEndOffsetMultiplier : 60,
+                multiplier : config.timeEndOffsetMultiplier ? parseInt(config.timeEndOffsetMultiplier) : 60,
                 next : true,
                 days : config.timeDays,
                 months : config.timeMonths,
-                onlyOddDays: config.timeOnlyOddDays,
-                onlyEvenDays: config.timeOnlyEvenDays,
-                onlyEvenWeeks: config.timeOnlyEvenWeeks,
-                onlyOddWeeks : config.timeOnlyOddWeeks
+                onlyOddDays: hlp.isTrue(config.timeOnlyOddDays),
+                onlyEvenDays: hlp.isTrue(config.timeOnlyEvenDays),
+                onlyEvenWeeks: hlp.isTrue(config.timeOnlyEvenWeeks),
+                onlyOddWeeks : hlp.isTrue(config.timeOnlyOddWeeks)
             };
             if (!this.timeEndData.offsetType) {
                 this.timeEndData.offsetType = ((this.timeEndData.offset === 0) ? 'none' : 'num');

@@ -333,6 +333,7 @@
         "label": {
             "outDated": "✎ Bitte editieren Sie diese Regel.",
             "isInValid": "⚠️ Diese Regel ist ungültig und muss geändert werden!!",
+            "ruleIsOutdated": "⚠️ Diese Regel ist ungültig und muss angepasst werden, da sie nicht mehr funktioniert!",
 			"ruleTimeMax": "spätestens (max)",
 			"ruleTimeMin": "frühestens (min)",
             "ruleTimeLimit": "limitiert",

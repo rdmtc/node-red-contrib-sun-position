@@ -869,6 +869,23 @@
                                 delete data.valid2OperandBValue;
                                 delete data.valid2OperandBType;
                             }
+                            if(data.timeBType) {
+                                if (data.timeBType === types.TimeSun.value || data.timeBType === types.TimeMoon.value) {
+                                    data.timeMinType = data.timeType;
+                                    data.timeMinValue = data.timeValue;
+                                    data.timeType = data.timeBType;
+                                    data.timeValue = data.timeBValue;
+                                } else {
+                                    data.timeMinType = data.timeBType;
+                                    data.timeMinValue = data.timeBValue;
+                                }
+                                delete data.timeBType;
+                                delete data.timeBValue;
+                                delete data.timeBOp;
+                                delete data.timeBOpText;
+                                data.isValid = false;
+                                data.description = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleIsOutdated');
+                            }
                             if(data.timeType) {
                                 if (!data.time && data.timeType !== types.Undefined.value) {
                                     data.time = {
@@ -1136,10 +1153,8 @@
                         const height = editorRow.outerHeight(true);
                         const rowCount = $('#node-input-result-container').editableList('length');
                         if (rowCount > 0) {
-                            // $('#node-input-result-container').editableList('height', height + 30);
                             $('#node-input-result-container').css('min-height', height + 'px');
                         } else {
-                            // $('#node-input-result-container').editableList('height', 20);
                             $('#node-input-result-container').css('min-height', '20px');
                         }
                     }
@@ -1177,6 +1192,8 @@
                                         types.MsgPayload,
                                         types.MsgTopic,
                                         types.MsgValue,
+                                        types.MsgTs,
+                                        types.MsgLc,
                                         'msg',
                                         'flow',
                                         'global'
@@ -1212,6 +1229,7 @@
                                         'global',
                                         'jsonata',
                                         types.randomNumber,
+                                        types.randmNumCachedDay,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -1444,7 +1462,17 @@
                                 .appendTo($row2)
                                 .typedInput({
                                     default: 'num',
-                                    types: ['num', 'str', 'bool', 'flow', 'global', 'env', types.numAzimuth, types.numAltitude]
+                                    types: [
+                                        'num',
+                                        types.numAzimuth,
+                                        types.numAltitude,
+                                        'str',
+                                        'bool',
+                                        'flow',
+                                        'global',
+                                        'env',
+                                        types.randmNumCachedDay
+                                    ]
                                 });
                             setTInputValue($dialogCondThreshold, data.threshold, data.thresholdType);
                             // changes
@@ -1562,7 +1590,6 @@
                         }
                     }); // condition-container
                     $('#dlg-ip-btctl-rule-condition-text').html(node._('clock-timer.text.ruleCondition'));
-
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
@@ -1572,7 +1599,19 @@
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
 
@@ -1582,7 +1621,16 @@
                     const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
                     $dialogTimeRegOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay
+                        ]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1598,7 +1646,19 @@
                     const $dialogTimeMinInput = $dialog.find('#dlg-ip-btctl-rule-timeMin');
                     $dialogTimeMinInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
 
@@ -1608,7 +1668,16 @@
                     const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
                     $dialogTimeMinOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay
+                        ]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1624,7 +1693,19 @@
                     const $dialogTimeMaxInput = $dialog.find('#dlg-ip-btctl-rule-timeMax');
                     $dialogTimeMaxInput.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'msg', 'flow', 'global', 'env', 'jsonata', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad]
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
 
@@ -1634,7 +1715,16 @@
                     const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
                     $dialogTimeMaxOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randmNumCachedDay]
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay
+                        ]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
@@ -1697,6 +1787,7 @@
                             'env',
                             'jsonata',
                             types.randomNumber,
+                            types.randmNumCachedDay,
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
@@ -2026,7 +2117,6 @@
                     });
                     // #endregion dialogChange
                     // #region dialogload & save
-
                     /** generates the help text of the dialog */
                     function _dialogGenHelpText() {
                         $('#dlg-txt-btctl-rule-descr').html('');
@@ -2055,6 +2145,14 @@
                                 setTInputValue($dialogTimeRegOffset, data.time.offset, data.time.offsetType);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', data.time.days);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', data.time.months);
+                                if (!!data.time.onlyEvenDays && !!data.time.onlyOddDays) {
+                                    data.time.onlyEvenDays = false;
+                                    data.time.onlyOddDays = false;
+                                }
+                                if (!!data.time.onlyEvenWeeks && !!data.time.onlyOddWeeks) {
+                                    data.time.onlyEvenWeeks = false;
+                                    data.time.onlyOddWeeks = false;
+                                }
                                 $dialogTimeLimitOnlyEvenDays.prop('checked', !!data.time.onlyEvenDays);
                                 $dialogTimeLimitOnlyOddDays.prop('checked', !!data.time.onlyOddDays);
                                 $dialogTimeLimitOnlyEvenWeeks.prop('checked', !!data.time.onlyEvenWeeks);
@@ -2117,8 +2215,8 @@
                                 setTInputValue($dialogTimeMaxInput, data.timeMax.value, data.timeMax.type);
                                 setTInputValue($dialogTimeMaxOffset, data.timeMax.offset, data.timeMax.offsetType);
                             } else {
-                                setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
-                                setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
+                                setTInputValue($dialogTimeMaxInput, '', types.Undefined.value);
+                                setTInputValue($dialogTimeMaxOffset, 1, types.Undefined.value);
                                 $dialogTimeMaxMultiplier.val(60000);
                             }
                             if (data.payload) {
@@ -2325,6 +2423,7 @@
                     // #endregion dialog
                     resizeRuleContainerCheck(node);
                 }; // setup
+
                 $.getScript('sun-position/js/htmlglobal.js')
                     .done((_data, _textStatus,  _bmvfj) => {
                         try {
@@ -2663,10 +2762,10 @@
                 <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red-contrib-sun-position/position-config:common.label.specialLimits"></div>
                 <div style="display:inline-block;">
                     <div>
-                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
-                        <label><input type='checkbox' checked id="dlg-ip-btctl-rule-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
+                        <label><input type='checkbox' id="dlg-ip-btctl-rule-timeOnlyEvenDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenDays"></span></label>
+                        <label><input type='checkbox' id="dlg-ip-btctl-rule-timeOnlyOddDays"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddDays"></span></label>
+                        <label><input type='checkbox' id="dlg-ip-btctl-rule-timeOnlyEvenWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks"></span></label>
+                        <label><input type='checkbox' id="dlg-ip-btctl-rule-timeOnlyOddWeeks"/> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks"></span></label>
                     </div>
                 </div>
             </div>

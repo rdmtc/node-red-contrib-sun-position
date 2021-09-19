@@ -350,6 +350,7 @@
         "label": {
             "outDated": "✎ Please edit this rule.",
             "isInValid": "⚠️ Rule is invalid and needs to be changed!!",
+            "ruleIsOutdated": "⚠️ This rule is invalid and has to be adjusted because it no longer works!",
             "ruleTimeMin": "at the earliest (min)",
             "ruleTimeMax": "no later than (max)",
             "ruleTimeLimit": "limited",

@@ -214,14 +214,14 @@ module.exports = function (RED) {
             return result;
         }
         if (node.timeOnlyOddWeeks) {
-            const weekNr = hlp.getWeekOfYear(dNow);
+            const weekNr = hlp.getWeekOfYear(dNow)[1];
             if (weekNr % 2 === 0) { // even
                 result.warn = RED._('within-time-switch.errors.only-odd-week');
                 return result;
             }
         }
         if (node.timeOnlyEvenWeeks) {
-            const weekNr = hlp.getWeekOfYear(dNow);
+            const weekNr = hlp.getWeekOfYear(dNow[1]);
             if (weekNr % 2 !== 0) { // odd
                 result.warn = RED._('within-time-switch.errors.only-even-week');
                 return result;
@@ -375,12 +375,18 @@ module.exports = function (RED) {
         }
 
         if (this.timeRestrictions.type === 'none') { // none means limitations would defined internal!
-            this.timeOnlyEvenDays = config.timeOnlyEvenDays;
-            this.timeOnlyOddDays = config.timeOnlyOddDays;
+            this.timeOnlyEvenDays = hlp.isTrue(config.timeOnlyEvenDays);
+            this.timeOnlyOddDays = hlp.isTrue(config.timeOnlyOddDays);
+            this.timeOnlyEvenWeeks = hlp.isTrue(config.timeOnlyEvenWeeks);
+            this.timeOnlyOddWeeks = hlp.isTrue(config.timeOnlyOddWeeks);
 
             if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
                 this.timeOnlyEvenDays = false;
                 this.timeOnlyOddDays = false;
+            }
+            if (this.timeOnlyEvenWeeks && this.timeOnlyOddWeeks) {
+                this.timeOnlyEvenWeeks = false;
+                this.timeOnlyOddWeeks = false;
             }
 
             if (typeof config.timedatestart !== undefined && config.timedatestart !== '') {

@@ -98,16 +98,15 @@
 		},
 		"tabs-label": {
 			"general":"Name and config",
-			"blind":"Blind settings",
-			"default":"default and overwrite",
-			"time":"Time control",
+			"default":"Default settings",
+			"time":"Time/Rule control",
 			"sun-control":"sun control",
 			"output":"Output and other"
 		},
 		"text": {
 			"blind": "blind settings",
 			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
-			"blindLevelDefault": "if no other settings matches (rule or sun-control) the following default settings for level, slat and the topic will be used. On sun light restriction this is the blind level wenn sun is not in the window.",
+			"blindLevelDefault": "if no other settings matches (timerule, rule or sun-control) the following default settings for level, slat and the topic will be used. On sun light restriction this is the blind level wenn sun is not in the window.",
 			"overwrite": "manual overwrite of the blind position",
 			"sunControlNotActive": "Only rule control",
 			"sunControlMode": "Instead of the default blind position there can be restricted the extent to which direct sunlight may shine into the room.<br><br>The mode can be changed with an incomming message. Then this is the maximum possible mode which can selected. The value of the incomming message will be stored in the node's context and will persists a deploy.",

@@ -98,16 +98,15 @@
 		},
 		"tabs-label": {
 			"general":"Name und Konfiguration",
-			"blind":"Rollladen Einstellungen",
-			"default":"default und Überschreiben",
-			"time":"Zeitsteuerung",
+			"default":"Default Einstellungen",
+			"time":"Zeit/Regelsteuerung",
 			"sun-control":"Sonnensteuerung",
 			"output":"Ausgabe und anderes"
 		},
 		"text": {
 			"blind": "Rollladen Einstellungen",
 			"time": "Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
-			"blindLevelDefault": "Wenn keine andere Vorgabe (Regel, Sonnensteuerung) zutrifft, wird diese Rollladenposition, Lamelleneinstellung und Topis genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
+			"blindLevelDefault": "Wenn keine andere Vorgabe (Zeitregel, Regel, Sonnensteuerung) zutrifft, wird diese Rollladenposition, Lamelleneinstellung und Topic genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
 			"overwrite": "manuelles Überschreiben der Rollladenposition",
 			"sunControlNotActive": "Nur Regelbasiert",
 			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der heir eingestellte Modus der maximal wählbare Modus. Der über eine nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",

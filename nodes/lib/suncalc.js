@@ -18,6 +18,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     const atan = Math.atan2;
     const acos = Math.acos;
     const rad = Math.PI / 180;
+    const degr = 180 / Math.PI;
 
     // date/time constants and conversions
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
@@ -165,10 +166,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @param {number} H - siderealTime
     * @param {number} phi - PI constant
     * @param {number} dec - The declination of the sun
-    * @returns {number}
+    * @returns {number} azimuth in rad
     */
-    function azimuth(H, phi, dec) {
-        return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
+    function azimuthCalc(H, phi, dec) {
+        return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)) + Math.PI;
     }
 
     /**
@@ -178,7 +179,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
     * @param {number} dec - The declination of the sun
     * @returns {number}
     */
-    function altitude(H, phi, dec) {
+    function altitudeCalc(H, phi, dec) {
         return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
     }
 
@@ -282,17 +283,17 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const d = toDays(dateValue);
         const c = sunCoords(d);
         const H = siderealTime(d, lw) - c.ra;
-        const azimuthr = azimuth(H, phi, c.dec);
-        const altituder = altitude(H, phi, c.dec);
+        const azimuth = azimuthCalc(H, phi, c.dec);
+        const altitude = altitudeCalc(H, phi, c.dec);
         // console.log(`getPosition date=${date}, M=${H}, L=${H}, c=${JSON.stringify(c)}, d=${d}, lw=${lw}, phi=${phi}`);
 
         return {
-            azimuth: azimuthr,
-            altitude: altituder,
-            zenith: (90*Math.PI/180) - altituder,
-            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
-            altitudeDegrees: 180 / Math.PI * altituder,
-            zenithDegrees: 90 - (180 / Math.PI * altituder),
+            azimuth,
+            altitude,
+            zenith: (90*Math.PI/180) - altitude,
+            azimuthDegrees: degr * azimuth,
+            altitudeDegrees: degr * altitude,
+            zenithDegrees: 90 - (degr * altitude),
             declination: c.dec
         };
     };
@@ -633,7 +634,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             throw new Error('longitude missing');
         }
         if (degree) {
-            nazimuth = (nazimuth-180) * rad;
+            nazimuth = nazimuth * rad;
         }
         const lw = rad * -lng;
         const phi = rad * lat;
@@ -647,7 +648,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             const d = toDays(dateValue);
             const c = sunCoords(d);
             const H = siderealTime(d, lw) - c.ra;
-            const nazim = azimuth(H, phi, c.dec);
+            const nazim = azimuthCalc(H, phi, c.dec);
 
             addval /= 2;
             if (nazim < nazimuth) {
@@ -658,43 +659,6 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         }
         return new Date(Math.floor(dateValue));
     };
-
-    /* SunCalc.getSunDate2 = function (year, month, day, nazimuth, lat, lng) {
-    if (isNaN(nazimuth)) {
-        throw new Error('azimuth missing');
-    }
-    if (isNaN(lat)) {
-        throw new Error('latitude missing');
-    }
-    if (isNaN(lng)) {
-        throw new Error('longitude missing');
-    }
-    const lw = rad * -lng;
-    const phi = rad * lat;
-
-    let dateValue = new Date(year, month, day, 0, 0, 0).valueOf();
-    let d = ((dateValue / dayMs) + J1970) - J2000;
-
-    console.log(new Date(d));
-    let addval = (dayMs / 2);
-    d += addval;
-
-    while (addval > 200) {
-        const c = sunCoords(d);
-        const H = siderealTime(d, lw) - c.ra;
-        const nazi = azimuth(H, phi, c.dec);
-        console.log(d, addval, nazi, nazimuth);
-
-        addval /= 2;
-        if (nazi < nazimuth) {
-            d += addval;
-        } else {
-            d -= addval;
-        }
-    }
-    dateValue = (((d + J2000) - J1970) * dateValue);
-    return new Date(Math.floor(dateValue));
-}; */
 
     // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
@@ -746,22 +710,22 @@ const util = require('util'); // eslint-disable-line no-unused-vars
         const d = toDays(dateValue);
         const c = moonCoords(d);
         const H = siderealTime(d, lw) - c.ra;
-        let h = altitude(H, phi, c.dec);
+        let altitude = altitudeCalc(H, phi, c.dec);
+        altitude += astroRefraction(altitude); // altitude correction for refraction
+
         // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
-        h += astroRefraction(h); // altitude correction for refraction
-
-        const azimuthr = azimuth(H, phi, c.dec);
+        const azimuth = azimuthCalc(H, phi, c.dec);
 
         return {
-            azimuth: azimuthr,
-            altitude: h,
-            azimuthDegrees: 180 + 180 / Math.PI * azimuthr,
-            altitudeDegrees: 180 / Math.PI * h,
+            azimuth,
+            altitude,
+            azimuthDegrees: degr * azimuth,
+            altitudeDegrees: degr * altitude,
             distance: c.dist,
             parallacticAngle: pa,
-            parallacticAngleDegrees: 180 / Math.PI * pa
+            parallacticAngleDegrees: degr * pa
         };
     };
 
