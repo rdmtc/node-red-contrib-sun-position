@@ -474,7 +474,9 @@ module.exports = function (RED) {
 
                     if (!overwrite || timeCtrl.rule.importance > node.nodeData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
-                        node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.dNow);
+                        if (timeCtrl.rule.payloadData) {
+                            node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.dNow);
+                        }
                         node.payload.topic = timeCtrl.rule.topic;
                         node.reason.code = timeCtrl.rule.code;
                         node.reason.state = timeCtrl.rule.state;
