@@ -958,7 +958,7 @@ module.exports = function (RED) {
             expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow, latitude, longitude, next, days, month, onlyOddDays, onlyEvenDays, onlyOddWeeks, onlyEvenWeeks) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
-                    if (hlp.isValidDate(dNow)) {
+                    if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
                         dNow = new Date();
@@ -978,7 +978,7 @@ module.exports = function (RED) {
             expr.registerFunction('getSunTimePrevNext', dNow => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
-                    if (hlp.isValidDate(dNow)) {
+                    if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
                         dNow = new Date();
@@ -989,7 +989,7 @@ module.exports = function (RED) {
             expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
-                    if (hlp.isValidDate(dNow)) {
+                    if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
                         dNow = new Date();
@@ -1000,7 +1000,7 @@ module.exports = function (RED) {
             expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow);
-                    if (hlp.isValidDate(dNow)) {
+                    if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
                         dNow = new Date();
