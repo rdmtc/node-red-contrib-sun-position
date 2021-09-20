@@ -73,7 +73,8 @@
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (RED.validators.number()(v) && (n >= 0) && (n < 0x7FFFFFFF));
-                    }
+                    },
+                    required: false
                 },
                 storeName:  { value: '' },
                 results: {
@@ -604,7 +605,7 @@
                     */
                     function setMultiplier(node, name, element, validate, defMultiplier, minMultiplier) {
                         const c = Number(node[name]);
-                        if (node[name] !== '' && !isNaN(c)) {
+                        if (node[name] !== '' && !isNaN(c) && c !== 0) {
                             let r = minMultiplier || 1000;
                             if (c % 86400000 === 0) {
                                 r = 86400000; // Days
@@ -2396,7 +2397,7 @@
                             _dialogGenHelpText();
                         }
                     }); // condition-container
-                    $dialog.find('#dlg-ip-btctl-rule-condition-text').html(node._('blind-control.text.ruleCondition'));
+                    $dialog.find('#dlg-ip-btctl-rule-condition-text').html(node._('node-red-contrib-sun-position/position-config:ruleCtrl.text.ruleCondition'));
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
@@ -3279,7 +3280,7 @@
                 }
 
                 const autoTriggerTime = parseFloat($('#blind-control-autoTriggerTime').val());
-                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime === 0) {
+                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime <= 0) {
                     $('#node-input-autoTriggerTime').val(20*60000);
                 } else {
                     let val = autoTriggerTime * parseFloat($('#blind-control-autoTriggerTime-multiplier').val());
@@ -3290,8 +3291,9 @@
                 }
 
                 const startDelayTime = parseFloat($('#blind-control-startDelayTime').val());
-                if (isNaN(startDelayTime) || startDelayTime === '' || startDelayTime === 0) {
+                if (isNaN(startDelayTime) || startDelayTime === '' || startDelayTime <= 0) {
                     $('#node-input-startDelayTime').val(0);
+                    $('#time-control-startDelayTime-multiplier').val(60000);
                 } else {
                     let val = startDelayTime * parseFloat($('#blind-control-startDelayTime-multiplier').val());
                     if (val < 0) {
@@ -3420,7 +3422,7 @@
         <div id="blind-control-tab-default" style="display:none">
             <!-- blind ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span><i class="fa fa-window-maximize"></i> <span data-i18n="[html]blind-control.text.blind" class="row-full-width"></span></span>
+                <span><i class="fa fa-window-maximize"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.blind" class="row-full-width"></span></span>
             </div>
             <div class="form-row block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindIncrement">
                 <label for="node-input-blindIncrement"><i class="fa fa-plus-circle"></i> <span data-i18n="blind-control.label.blindIncrement"></span></label>
@@ -3437,7 +3439,7 @@
             <hr>
             <!-- default ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span data-i18n="[html]blind-control.text.blindLevelDefault" class="row-full-width"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.blindLevelDefault" class="row-full-width"></span>
             </div>
             <div class="form-row block-noindent is-to-show-initially" data-i18n="[title]blind-control.placeholder.blindLevelDefault">
                 <label for="node-input-blindPosDefault"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelDefault"></span></label>
@@ -3456,7 +3458,7 @@
             <hr>
             <!-- overwrite ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]blind-control.text.overwrite" class="row-full-width"></span></span>
+                <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.overwriteBlind" class="row-full-width"></span></span>
             </div>
             <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]blind-control.placeholder.overwriteExpire">
                 <label for="blind-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.overwriteExpire"></span></label>
@@ -3473,7 +3475,7 @@
         <div id="blind-control-tab-time" style="display:none">
             <!-- time ######################################################################## -->
             <div class="is-to-show-initially">
-                <span><i class="fa fa-list"></i> <span data-i18n="[html]blind-control.text.time"></span></span>
+                <span><i class="fa fa-list"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.time"></span></span>
                 <div class="form-row node-input-rule-container-row row-full-width">
                     <ol id="node-input-rule-container"></ol>
                     <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
@@ -3487,7 +3489,7 @@
         <div id="blind-control-tab-sun-control" style="display:none">
             <!-- sun ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span data-i18n="[html]blind-control.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl..text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.sunControlMode">
                 <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>
@@ -3499,13 +3501,13 @@
                 </select>
             </div>
             <div class="form-row form-row-sunControlRestriction block-noindent">
-                <span data-i18n="[html]blind-control.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunControlRestriction" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlMaximization block-noindent">
-                <span data-i18n="[html]blind-control.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunControlMaximization" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlMinimization block-noindent">
-                <span data-i18n="[html]blind-control.text.sunControlMinimization" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunControlMinimization" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.sunTopic">
                 <label for="node-input-sunTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.sunTopic"></span></label>
@@ -3519,7 +3521,7 @@
             <hr class="form-row-sunControlActive" >
             <!-- window ######################################################################## -->
             <div class="form-row form-row-sunControlActive block-noindent">
-                <span data-i18n="[html]blind-control.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
                 <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
@@ -3532,7 +3534,7 @@
                 <input type="hidden" id="node-input-windowAzimuthEndType"/>
             </div>
             <div class="form-row form-row-sunControlRestriction block-noindent">
-                <span data-i18n="[html]blind-control.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowTop">
                 <label for="node-input-windowTop"><i class="fa fa-arrow-up"></i> <span data-i18n="blind-control.label.windowTop"></span></label>
@@ -3546,7 +3548,7 @@
             </div>
             <!-- sun-restriction ######################################################################## -->
             <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-                <span data-i18n="[html]blind-control.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunCtrlLoF" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunFloorLength">
                 <label for="node-input-sunFloorLength"><i class="fa fa-arrows-h"></i> <span data-i18n="blind-control.label.sunFloorLength"></span></label>
@@ -3554,7 +3556,7 @@
                 <input type="hidden" id="node-input-sunFloorLengthType"/>
             </div>
             <div class="form-row form-row-sunControlRestriction block-indent1-noadd">
-                <span data-i18n="[html]blind-control.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunCtrlRestrict" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1-noadd" data-i18n="[title]blind-control.placeholder.sunMinDelta">
                 <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
@@ -3583,7 +3585,7 @@
             <hr class="form-row-sunControlActive" >
             <!-- oversteering ######################################################################## -->
             <div class="form-row form-row-sunControlActive block-noindent">
-                <span data-i18n="[html]blind-control.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.oversteer" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row form-row-sunControlActive node-input-oversteer-container-row">
                 <ol id="node-input-oversteer-container"></ol>
@@ -3608,7 +3610,7 @@
             <hr>
             <!-- Enhanced ######################################################################## -->
             <div class="form-row block-noindent">
-                <span><i class="fa fa-cogs"></i> <span data-i18n="[html]blind-control.text.enhanced"></span></span>
+                <span><i class="fa fa-cogs"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.enhanced"></span></span>
             </div>
             <div class="form-row block-noindent spinner-Small" data-i18n="[title]blind-control.placeholder.autoTrigger">
                 <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.autoTrigger"></span></label>
@@ -3635,6 +3637,9 @@
                     </select>
                     <input type="hidden" id="node-input-startDelayTime"/>
                 </span>
+            </div>
+            <div class="form-row block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.startDelayTime"></span></span>
             </div>
         </div>
     </div>

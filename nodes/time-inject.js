@@ -475,7 +475,7 @@ module.exports = function (RED) {
                 node.debug(`initializeStartTimer - start time wrong ${ nextStartTimeData.error}`);
                 return false;
             }
-            let millisec = nextStartTimeData.value.valueOf() - nowTs;
+            let millisecStart = nextStartTimeData.value.valueOf() - nowTs;
 
             if (node.timeStartAltData) {
                 const initStartAltData = Object.assign({}, node.timeStartAltData);
@@ -484,13 +484,13 @@ module.exports = function (RED) {
 
                 if (!nextTimeAltData.error && hlp.isValidDate(nextTimeAltData.value)) {
                     const millisecAlt = nextTimeAltData.value.valueOf() - nowTs;
-                    if (millisecAlt < millisec) {
-                        millisec = millisecAlt;
+                    if (millisecAlt < millisecStart) {
+                        millisecStart = millisecAlt;
                     }
                 }
             }
-            if (millisec > 0 || !node.timeEndData) {
-                node.debug(`initializeStartTimer - start ${ millisec } in future or no end time`);
+            if (millisecStart > 0 || !node.timeEndData) {
+                node.debug(`initializeStartTimer - start ${ millisecStart } in future or no end time`);
                 return false;
             }
             const initEndTime = Object.assign({},node.timeEndData);
@@ -512,7 +512,7 @@ module.exports = function (RED) {
                 node.doStartInterval(); // starte Interval
             } else if (node.injType === tInj.intervalAmount) {
                 node.IntervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
-                node.intervalTime = Math.floor((millisecEnd - millisec) / node.IntervalCountMax);
+                node.intervalTime = Math.floor((millisecEnd - millisecStart) / node.IntervalCountMax);
                 node.IntervalCountCurrent = 0;
                 node.doStartInterval(); // starte Interval
             }
@@ -852,7 +852,12 @@ module.exports = function (RED) {
                     }
                 }
             } else {
-                hlp.handleError(this, startLimit.errorStatus);
+                this.debug(startLimit.errorStatus);
+                node.status({
+                    fill: 'red',
+                    shape: 'ring',
+                    text: startLimit.errorStatus
+                });
                 return;
             }
 
