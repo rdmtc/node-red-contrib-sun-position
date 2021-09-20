@@ -44,7 +44,8 @@
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (RED.validators.number()(v) && (n >= 0) && (n < 0x7FFFFFFF));
-                    }
+                    },
+                    required: false
                 },
                 storeName:  { value: '' },
                 results: {
@@ -319,7 +320,7 @@
                     */
                     function setMultiplier(node, name, element, validate, defMultiplier, minMultiplier) {
                         const c = Number(node[name]);
-                        if (node[name] !== '' && !isNaN(c)) {
+                        if (node[name] !== '' && !isNaN(c) && c !== 0) {
                             let r = minMultiplier || 1000;
                             if (c % 86400000 === 0) {
                                 r = 86400000; // Days
@@ -1589,7 +1590,7 @@
                             _dialogGenHelpText();
                         }
                     }); // condition-container
-                    $('#dlg-ip-btctl-rule-condition-text').html(node._('clock-timer.text.ruleCondition'));
+                    $('#dlg-ip-btctl-rule-condition-text').html(node._('node-red-contrib-sun-position/position-config:ruleCtrl.text.ruleCondition'));
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
@@ -2501,7 +2502,7 @@
                 }
 
                 const autoTriggerTime = parseFloat($('#time-control-autoTriggerTime').val());
-                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime === 0) {
+                if (isNaN(autoTriggerTime) || autoTriggerTime === '' || autoTriggerTime <= 0) {
                     $('#node-input-autoTriggerTime').val(20*60000);
                 } else {
                     let val = autoTriggerTime * parseFloat($('#time-control-autoTriggerTime-multiplier').val());
@@ -2512,8 +2513,9 @@
                 }
 
                 const startDelayTime = parseFloat($('#time-control-startDelayTime').val());
-                if (isNaN(startDelayTime) || startDelayTime === '' || startDelayTime === 0) {
+                if (isNaN(startDelayTime) || startDelayTime === '' || startDelayTime <= 0) {
                     $('#node-input-startDelayTime').val(0);
+                    $('#time-control-startDelayTime-multiplier').val(60000);
                 } else {
                     let val = startDelayTime * parseFloat($('#time-control-startDelayTime-multiplier').val());
                     if (val < 0) {
@@ -2588,7 +2590,7 @@
         <div id="clock-timer-tab-default" style="display:none">
             <!-- default ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span data-i18n="[html]clock-timer.text.payloadDefault" class="row-full-width"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.payloadDefault" class="row-full-width"></span>
             </div>
             <div class="form-row block-noindent is-to-show-initially" id="node-input-payloadDefault-div" data-i18n="[titleOrg]clock-timer.placeholder.payloadDefault">
                 <label for="node-input-payloadDefault"><i class="fa fa-envelope"></i> <span data-i18n="clock-timer.label.payloadDefault"></span></label>
@@ -2614,7 +2616,7 @@
             <hr>
             <!-- overwrite ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]clock-timer.text.overwrite" class="row-full-width"></span></span>
+                <span><i class="fa fa-hand-paper-o"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.overwriteTimer" class="row-full-width"></span></span>
             </div>
             <div class="form-row row-overwriteValue block-indent1" data-i18n="[titel]clock-timer.placeholder.overwriteExpire">
                 <label for="time-control-overwriteExpire"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.overwriteExpire"></span></label>
@@ -2631,7 +2633,7 @@
         <div id="clock-timer-tab-time" style="display:none">
             <!-- time ######################################################################## -->
             <div class="is-to-show-initially">
-                <span><i class="fa fa-list"></i> <span data-i18n="[html]clock-timer.text.time"></span></span>
+                <span><i class="fa fa-list"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.time"></span></span>
                 <div class="form-row node-input-rule-container-row row-full-width">
                     <ol id="node-input-rule-container"></ol>
                     <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]clock-timer.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
@@ -2653,7 +2655,7 @@
             <hr>
             <!-- Enhanced ######################################################################## -->
             <div class="form-row block-noindent">
-                <span><i class="fa fa-cogs"></i> <span data-i18n="[html]clock-timer.text.enhanced"></span></span>
+                <span><i class="fa fa-cogs"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.enhanced"></span></span>
             </div>
             <div class="form-row block-noindent spinner-Small" data-i18n="[title]clock-timer.placeholder.autoTrigger">
                 <label for="node-input-autoTrigger"><i class="fa fa-clock-o"></i> <span data-i18n="clock-timer.label.autoTrigger"></span></label>
@@ -2680,6 +2682,9 @@
                     </select>
                     <input type="hidden" id="node-input-startDelayTime"/>
                 </span>
+            </div>
+            <div class="form-row block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.startDelayTime"></span></span>
             </div>
         </div>
     </div>

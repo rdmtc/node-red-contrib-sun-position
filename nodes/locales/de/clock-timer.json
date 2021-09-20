@@ -55,13 +55,6 @@
 			"time":"Zeitsteuerung",
 			"output":"Ausgabe und anderes"
 		},
-		"text": {
-			"time": "Zeitsteuerung: Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
-			"payloadDefault":"Wenn keine Regel zutrifft, wird der folgende payload gesendet.",
-			"overwrite": "manuelles Überschreiben der Rollladenposition",
-			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>",
-			"enhanced":"erweiterte Einstellungen"
-		},
 		"tips": {
 			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/clock-timer\">Dokumentation und Beispiele</a>"
 		}

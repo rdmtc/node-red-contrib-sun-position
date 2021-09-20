@@ -670,6 +670,9 @@ function initializeCtrl(REDLib, node, config) {
             delete rule.payloadOffsetMultiplier;
             delete rule.payloadFormat;
         }
+        if (rule.payload && !('next' in rule)) {
+            rule.payload.next = true;
+        }
         /// check generic rule settings
         rule.name = rule.name || 'rule ' + rule.pos;
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
