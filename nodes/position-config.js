@@ -957,7 +957,7 @@ module.exports = function (RED) {
             }, '<xb?n?b?:o>');
             expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow, latitude, longitude, next, days, month, onlyOddDays, onlyEvenDays, onlyOddWeeks, onlyEvenWeeks) => {
                 if (!hlp.isValidDate(dNow)) {
-                    const dto = new Date(dNow);
+                    const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
@@ -977,7 +977,7 @@ module.exports = function (RED) {
             }, '<sn?n?(osn)?n?n?b?a?a?b?b?b?b?:(ol)>');
             expr.registerFunction('getSunTimePrevNext', dNow => {
                 if (!hlp.isValidDate(dNow)) {
-                    const dto = new Date(dNow);
+                    const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
@@ -988,7 +988,7 @@ module.exports = function (RED) {
             }, '<(osn)?:(ol)>');
             expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
-                    const dto = new Date(dNow);
+                    const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
@@ -999,7 +999,7 @@ module.exports = function (RED) {
             }, '<sn?n?>');
             expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
-                    const dto = new Date(dNow);
+                    const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
                         dNow = dto;
                     } else {
