@@ -455,9 +455,9 @@ module.exports = function (RED) {
         };
 
         node.initializeStartTimer = node => {
-            node.debug(`initializeStartTimer`);
+            // node.debug(`initializeStartTimer`);
             if (!node.timeStartData) {
-                node.debug('initializeStartTimer - no start time data');
+                // node.debug('initializeStartTimer - no start time data');
                 return false;
             }
 
@@ -465,14 +465,14 @@ module.exports = function (RED) {
             const nowTs = dNow.valueOf();
             const startLimit = node.getTimeLimitation(dNow);
             if (!startLimit.valid) {
-                node.debug('initializeStartTimer - start limited');
+                // node.debug('initializeStartTimer - start limited');
                 return false;
             }
             const initStartData = Object.assign({}, node.timeStartData);
             initStartData.next = false;
             const nextStartTimeData = node.positionConfig.getTimeProp(node, {}, initStartData);
             if (nextStartTimeData.error || !hlp.isValidDate(nextStartTimeData.value)) {
-                node.debug(`initializeStartTimer - start time wrong ${ nextStartTimeData.error}`);
+                // node.debug(`initializeStartTimer - start time wrong ${ nextStartTimeData.error}`);
                 return false;
             }
             let millisecStart = nextStartTimeData.value.valueOf() - nowTs;
@@ -490,19 +490,19 @@ module.exports = function (RED) {
                 }
             }
             if (millisecStart > 0 || !node.timeEndData) {
-                node.debug(`initializeStartTimer - start ${ millisecStart } in future or no end time`);
+                // node.debug(`initializeStartTimer - start ${ millisecStart } in future or no end time`);
                 return false;
             }
             const initEndTime = Object.assign({},node.timeEndData);
             initEndTime.next = false;
             const nextEndTimeData = node.positionConfig.getTimeProp(node, {}, initEndTime);
             if (nextEndTimeData.error || !hlp.isValidDate(nextEndTimeData.value)) {
-                node.debug(`initializeStartTimer - end time error ${ nextEndTimeData.error }`);
+                // node.debug(`initializeStartTimer - end time error ${ nextEndTimeData.error }`);
                 return false;
             }
             const millisecEnd = (nextEndTimeData.value.valueOf() - nowTs);
             if (millisecEnd < 0) {
-                node.debug(`initializeStartTimer - end time ${ millisecEnd } in past`);
+                // node.debug(`initializeStartTimer - end time ${ millisecEnd } in past`);
                 return false;
             }
             // node.debug(`initializeStartTimer - starting interval!!`);
@@ -670,7 +670,7 @@ module.exports = function (RED) {
             const ivCount = Math.trunc(diff / node.intervalTime) + 1;
             const tsStart = node.intervalStart.valueOf() + (node.intervalTime * ivCount); // Start Timestamp
             const millisec = tsStart - dNow;
-            node.debug(`createNextInterval start=${node.intervalStart}; interval=${node.intervalTime}; diff=${diff}; ivCount=${ivCount}; tsStart=${tsStart}; millisec=${millisec}`);
+            // node.debug(`createNextInterval start=${node.intervalStart}; interval=${node.intervalTime}; diff=${diff}; ivCount=${ivCount}; tsStart=${tsStart}; millisec=${millisec}`);
 
             if (millisec > 2147483647) {
                 // there is a limitation of nodejs that the maximum setTimeout time

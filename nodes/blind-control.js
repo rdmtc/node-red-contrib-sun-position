@@ -100,7 +100,7 @@ module.exports = function (RED) {
      * @param {ITimeObject} oNow the now Object
      */
     function checkOversteer(node, msg, tempData, oNow) {
-        node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
         try {
             node.oversteer.isChecked = true;
             return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && node.positionConfig.comparePropValue(node, msg,
