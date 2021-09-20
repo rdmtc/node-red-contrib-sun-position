@@ -56,13 +56,6 @@
 			"time":"Time control",
 			"output":"Output and other"
 		},
-		"text": {
-			"time": "Time control:Only rows will be evaluated, where property is <b>not used</b> or matches the selected value. <br><b>until</b>:The first matching line will used, where defined time is <b>not used</b> or greater than <b>now</b>.<br><b>from</b>:The last matching line will used, where defined time is <b>not used</b> or less than <b>now</b>.<br>",
-			"payloadDefault": "if no rule matches the following payload will be used.",
-			"overwrite": "manual overwrite of the rule payload",
-			"ruleCondition": "Condition under which this rule is observed.<br/><small>There is no operator precedence! The combination of several conditions with <kbd>AND</kbd> or <kbd>OR</kbd> only means the respective condition to the preceding ones. The evaluation is canceled as soon as the expression results in true.</small>",
-			"enhanced":"advanced settings"
-		},
 		"tips": {
 			"documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/clock-timer\">Documentation and examples</a>"
 		}

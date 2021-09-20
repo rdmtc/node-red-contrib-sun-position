@@ -412,6 +412,27 @@
 			"ruleMin": "__org__ [min rule __number__]",
 			"ruleMax": "__org__ [max rule __number__]",
 			"startDelay": "verzögerter Start [__date__]"
+		},
+        "text": {
+			"blind": "Rollladen Einstellungen",
+			"time": "Es werden nur Zeilen ausgewertet, bei denen die Eigenschaft <b>nicht verwendet</b> oder <em>true</em> ist. <br> <b>bis</b>: Die erste übereinstimmende Zeile wird verwendet, wobei die definierte Zeit <b>nicht verwendet</b> oder größer als <b>now</b> ist. <br> <b>von</b>: Die letzte übereinstimmende Zeile wird verwendet, wo die angegebene Zeit <b>nicht verwendet</b> oder weniger als <b>der aktuelle Zeitpunkt</b> ist. <br>",
+			"blindLevelDefault": "Wenn keine andere Vorgabe (Zeitregel, Regel, Sonnensteuerung) zutrifft, wird diese Rollladenposition, Lamelleneinstellung und Topic genutzt. Bei beschränkender Sonnen-Steuerung ist die die Rollladenposition, wenn die Sonne nicht in das Fenster scheint.",
+			"payloadDefault":"Wenn keine Regel zutrifft, wird der folgende payload gesendet.",
+			"overwriteBlind": "manuelles Überschreiben der Rollladenposition",
+			"overwriteTimer": "manuelles Überschreiben der Regel",
+			"sunControlNotActive": "Nur Regelbasiert",
+			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der heir eingestellte Modus der maximal wählbare Modus. Der über eine nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",
+			"windowAzimuth": "Darstellung der Ausrichtung des Fensters zum geografischen Norden (in Grad), wenn die Sonne in das Fenster fällt (Sonnenrichtung/Azimuth).",
+			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters",
+			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Sonnenwinkel oder Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.). Hiermit kann auch eine minimale oder maximaler Höhenwinkel definiert werden, wenn Berge/Gebäude, etc das Fenster verdecken.",
+			"sunControlMaximization": "<ul><li>Wenn keine Regel oder Überschreiben (Override) zutrifft,<ul><li>Wenn die Sonne <em>nicht</ em> in das Fenster scheint, wird die Rollladenhöhe die definierte <strong>Minimalposition</ strong> gesetzt. (Übersteuern wird ignoriert)</ li><li>Wenn sich die Sonne im Fenster befindet</ li><li>Wenn eine Übersteueruzng aufgesetzt ist und die bedingung zutrifft, wird der Behang auf die Höhe des Übersteuerns gesetzt.< / li><li>Andernfalls wird die Behanghöhe auf die definierte <strong>Maximalposition</ strong> gesetzt.</ li></ ul></ li></ ul>",
+			"sunControlMinimization": "<ul><li>Wenn keine Regel oder Überschreiben (Override) zutrifft,<ul><li>Wenn die Sonne <em>nicht</ em> in das Fenster scheint, wird die Rollladenhöhe die definierte <strong>Maximalposition</ strong> gesetzt. (Übersteuern wird ignoriert)</ li><li>Wenn sich die Sonne im Fenster befindet</ li><li>Wenn eine Übersteueruzng aufgesetzt ist und die bedingung zutrifft, wird der Behang auf die Höhe des Übersteuerns gesetzt.< / li><li>Andernfalls wird die Behanghöhe auf die definierte <strong>Minimalposition</ strong> gesetzt.</ li></ ul></ li></ ul>",
+			"sunControlRestriction": "Wenn keine Regel oder Überschreiben (Override) zutrifft, berechnet der Knoten die entsprechende Blindposition, um die Menge des direkten Sonnenlichts, das in den Raum fällt, zu begrenzen.",
+			"sunCtrlLoF": "Definition inwieweit direktes Sonnenlicht durch das Fenster in den Raum gelangen darf (als Länge auf dem Boden).",
+			"sunCtrlRestrict": "Begrenzen Sie die Häufigkeit von Änderungen nach Zeit und / oder Änderungsgröße (Delta).",
+			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>",
+			"enhanced":"erweiterte Einstellungen",
+            "startDelayTime":"Bei einem Wert von 0 wird die node nach einem Deploy oder Node-Red Start erst mit der nächsten eingehenden nachricht aktiviert und bis dahin auf keine Ereignise reagieren!"
 		}
     },
     "errors": {

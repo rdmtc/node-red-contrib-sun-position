@@ -213,7 +213,6 @@ module.exports = function (RED) {
             livingRuleData.conditional = ruleSel.conditional;
             livingRuleData.timeLimited = (!!ruleSel.time);
             livingRuleData.payloadData = ruleSel.payload;
-            livingRuleData.payloadData.next = true;
             const data = { number: ruleSel.pos, name: ruleSel.name };
             let name = 'rule';
             if (ruleSel.conditional) {
