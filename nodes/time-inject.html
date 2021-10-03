@@ -206,6 +206,8 @@
                     required: false,
                     validate(v) {
                         return (
+                            (v === '') ||
+                            (typeof v === 'undefined') ||
                             (this.injectTypeSelect !== 'interval') ||
                             RED.validators.regex(/^\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$|^\d{2}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$/)(v)
                         );
@@ -1299,10 +1301,16 @@
                         types: ['num', 'env', 'flow', 'global']
                     }); // intervalCount
 
-                    const dNow = (node.intervalStart) ? parseDate(node.intervalStart) : new Date();
-                    dNow.setMinutes(dNow.getMinutes() - dNow.getTimezoneOffset());
-                    $('#node-myinput-intervalStart').val(dNow.toISOString().slice(0,16));
-                    // TODO: add intervalStart
+                    if (node.intervalStart) {
+                        const d = parseDate(node.intervalStart);
+                        const dateTimeLocalValue = (new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()).slice(0, -1);
+                        $('#node-myinput-intervalStart').val(dateTimeLocalValue);
+                        const dMax = new Date();
+                        dMax.setFullYear(dMax.getFullYear() + 1);
+                        const dateTimeLocalValueMax = (new Date(dMax.getTime() - dMax.getTimezoneOffset() * 60000).toISOString()).slice(0, -1);
+                        $('#node-myinput-intervalStart').attr('max',dateTimeLocalValueMax);
+
+                    }
                     // #endregion interval
                     // #region time
                     if ($('#node-input-timeOnlyOddDays').prop('checked') && $('#node-input-timeOnlyEvenDays').prop('checked') ) {
@@ -1725,8 +1733,12 @@
             oneditsave() {
                 const node = this;
                 const dvalue = $('#node-myinput-intervalStart').val();
-                const dIvStart = new Date(dvalue);
-                node.intervalStart = dIvStart.toISOString();
+                if (dvalue) {
+                    const dIvStart = Date.parse(dvalue);
+                    node.intervalStart = dIvStart.toISOString();
+                } else {
+                    delete node.intervalStart;
+                }
 
                 node.timeDays = getCheckboxesStr($('#time-inject-timeDays input[type=checkbox]:checked'), 7);
                 node.timeAltDays = getCheckboxesStr($('#time-inject-timeAltDays input[type=checkbox]:checked'), 7);

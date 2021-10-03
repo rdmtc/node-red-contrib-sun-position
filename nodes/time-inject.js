@@ -93,7 +93,6 @@ module.exports = function (RED) {
         if (this.injType === tInj.interval) {
             if (config.intervalStart) {
                 this.intervalStart = hlp.isoStringToDate(config.intervalStart);
-                this.intervalStart.setMinutes(this.intervalStart.getMinutes() - this.intervalStart.getTimezoneOffset());
             } else {
                 this.intervalStart = new Date();
             }
