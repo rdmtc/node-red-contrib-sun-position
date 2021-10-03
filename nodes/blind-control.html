@@ -411,7 +411,7 @@
                                 if (propType === 'object' && Array.isArray(parsedProp)) {
                                     propType = 'Array';
                                 }
-                            } catch(e) {
+                            } catch (ex) {
                                 propType = 'invalid';
                             }
                         }
@@ -469,12 +469,6 @@
                 }, 300);
                 $('.rdg-ui-btn').button();
 
-                this.sunControlMode = this.sunControlMode || cModeOff;
-                if (this.sunControlMode === 2 || this.sunControlMode === '2') {
-                    this.sunControlMode = cModeSunPosition;
-                    $('#node-input-sunControlMode').val(cModeSunPosition);
-                }
-
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
 
@@ -488,6 +482,12 @@
                     scrollable: true,
                     collapsible: true
                 });
+
+                this.sunControlMode = this.sunControlMode || cModeOff;
+                if (this.sunControlMode === 2 || this.sunControlMode === '2') {
+                    this.sunControlMode = cModeSunPosition;
+                    $('#node-input-sunControlMode').val(cModeSunPosition);
+                }
 
                 node.dialogAddData = {};
                 const setup = function(node) {
@@ -2878,7 +2878,11 @@
                         if (node.dialogAddData.timeout) { clearTimeout(node.dialogAddData.timeout); }
                         node.dialogAddData.timeout = setTimeout(() => {
                             delete node.dialogAddData.timeout;
-                            $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), node.dialogAddData));
+                            try {
+                                $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), node.dialogAddData));
+                            } catch (err) {
+                                console.warn('_dialogGenHelpText - maybe too fast:', err.message); // eslint-disable-line no-console
+                            }
                         },1000);
                     }
                     /** load the data from the rule */
@@ -3203,10 +3207,10 @@
                             id: 'blind-control-tab-general',
                             label: this._('blind-control.tabs-label.general'),
                             name: this._('blind-control.tabs-label.general'),
-                            iconClass: 'fa Example of tags fa-tags'
+                            iconClass: 'fa fa-tags'
                         });
                         $nodeConfig.change(() => {
-                            if ($nodeConfig.val() === '_ADD_') {
+                            if ($nodeConfig.val() === '_ADD_' || $nodeConfig.val() === '') {
                                 if (tabs.count() > 1){
                                     tabs.removeTab('blind-control-tab-default');
                                     tabs.removeTab('blind-control-tab-time');
@@ -3220,7 +3224,6 @@
                                     name: this._('blind-control.tabs-label.default'),
                                     iconClass: 'fa fa-sliders'
                                     // icon
-                                    // iconClass
                                     // maximumTabWidth
                                     // pinned
                                     // action
@@ -3248,7 +3251,7 @@
                                     iconClass: 'fa fa-sign-out'
                                 });
                             }
-                            setTimeout(() => { tabs.resize(); },0);
+                            setTimeout(() => { tabs.resize(); }, 0);
                         });
                         $nodeConfig.change();
                     })
@@ -3489,7 +3492,7 @@
         <div id="blind-control-tab-sun-control" style="display:none">
             <!-- sun ######################################################################## -->
             <div class="form-row block-noindent is-to-show-initially">
-                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl..text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunControlMode" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
             <div class="form-row block-noindent" data-i18n="[title]blind-control.placeholder.sunControlMode">
                 <label for="node-input-sunControlMode"><i class="fa fa-play-circle"></i> <span data-i18n="blind-control.label.sunControlMode"></span></label>

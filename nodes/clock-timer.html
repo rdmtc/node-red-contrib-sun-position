@@ -2124,7 +2124,11 @@
                         if (node.dialogAddData.timeout) { clearTimeout(node.dialogAddData.timeout); }
                         node.dialogAddData.timeout = setTimeout(() => {
                             delete node.dialogAddData.timeout;
-                            $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), node.dialogAddData));
+                            try {
+                                $('#dlg-txt-btctl-rule-descr').html(getRuleDescription(node, selFields, _dialogGetData(), node.dialogAddData));
+                            } catch (err) {
+                                console.warn('_dialogGenHelpText - maybe too fast:', err.message); // eslint-disable-line no-console
+                            }
                         },1000);
                     }
                     /** load the data from the rule */
@@ -2439,14 +2443,14 @@
                             id: 'clock-timer-tab-general',
                             label: this._('clock-timer.tabs-label.general'),
                             name: this._('clock-timer.tabs-label.general'),
-                            iconClass: 'fa Example of tags fa-tags'
+                            iconClass: 'fa fa-tags'
                         });
                         $nodeConfig.change(() => {
-                            if ($nodeConfig.val() === '_ADD_') {
+                            if ($nodeConfig.val() === '_ADD_' || $nodeConfig.val() === '') {
                                 if (tabs.count() > 1){
-                                    tabs.removeTab('blind-control-tab-default');
-                                    tabs.removeTab('blind-control-tab-time');
-                                    tabs.removeTab('blind-control-tab-output');
+                                    tabs.removeTab('clock-timer-tab-default');
+                                    tabs.removeTab('clock-timer-tab-time');
+                                    tabs.removeTab('clock-timer-tab-output');
                                 }
                             } else if (tabs.count() <= 1) {
                                 tabs.addTab({

@@ -18,9 +18,7 @@
             "onceDelay": "Sekunden",
             "fewDays": "ein paar Tage",
             "fewMonths": "ein paar Monate",
-            "and":"und",
             "interval-amount":"feste Anzahl zwischen den Zeitpunkten",
-            "interval-fromStart":"Interval von festem Zeitpunkt",
             "count":"Anzahl",
             "intervalStart":"beginnend von"
         },
@@ -31,6 +29,7 @@
             "property": "Property",
             "propertyThreshold": "schwellwert",
             "payload": "payload der gesendeten Nachricht",
+            "intervalCount":"Anzahl",
             "time": "Zeitpunkt für das Senden der Nachricht",
             "timeOffset": "offset der Zeit",
             "timeAlt": "alternativer Zeitpunkt",
