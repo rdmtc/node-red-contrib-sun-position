@@ -31,6 +31,9 @@ This can be also used to go back to an older Version.
   - implement `resetOnSameAsLastValue` and `ignoreSameValue` #341
   - for payload value make a deep clone as this could be any object and perform an an object comparison
 
+- time-comp
+  - added next occurrence #339
+
 ### 2.0.0: enhancement
 
 ⚠ Warning: This Version could break existing flows. Please check your configuration!
