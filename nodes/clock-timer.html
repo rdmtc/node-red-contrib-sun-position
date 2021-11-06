@@ -2,6 +2,9 @@
 
 <script type="text/javascript">
     (function() {
+        const cNBC_RULE_TYPE_UNTIL = 0;
+        const cNBC_RULE_TYPE_FROM = 1;
+
         RED.nodes.registerType('clock-timer', {
             category: 'time and astro',
             color: '#FFCC66',
@@ -807,6 +810,13 @@
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite');
                                     result += '</span> </div>';
                                 }
+                                if (data.importance > 0) {
+                                    result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-hand-spock-o" aria-hidden="true"></i><span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance');
+                                    result += ' = </span><var>';
+                                    result += data.importance;
+                                    result += '</var></div>';
+                                }
                             } else {
                                 result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.rulePayloadND');
                             }
@@ -908,6 +918,7 @@
                                 delete data.timeType;
                                 delete data.timeValue;
                                 delete data.timeOp;
+                                delete data.timeOpText;
                                 delete data.offsetType;
                                 delete data.offsetValue;
                                 delete data.multiplier;
@@ -917,7 +928,6 @@
                                 delete data.timeOnlyEvenDays;
                                 delete data.timeDateStart;
                                 delete data.timeDateEnd;
-                                delete data.timeOpText;
                                 if (data.time && data.time.onlyEvenDays && data.time.onlyOddDays) {
                                     delete data.time.onlyEvenDays;
                                     delete data.time.onlyOddDays;
@@ -1594,8 +1604,8 @@
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_UNTIL).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_FROM).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
 
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
@@ -1767,6 +1777,18 @@
                         _dialogGenHelpText();
                     });
                     // #endregion dialogTimeLimit
+                    // #region overwrite + importance
+                    const $dialogImportance = $dialog.find('#dlg-ip-btctl-rule-importance');
+                    $dialogImportance.spinner({
+                        max: 1000,
+                        min: 0,
+                        step: 1,
+                        stop:(_e, _ui) => { _dialogGenHelpText(); }
+                    });
+                    $dialogImportance.change(() => { _dialogGenHelpText(); });
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-btctl-rule-resetOverwrite');
+                    $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
+                    // #endregion overwrite + importance
                     // #region dialogPayload
                     const $dialogPayload = $dialog.find('#dlg-ip-btctl-rule-payload');
                     $dialogPayload.typedInput({
@@ -1832,20 +1854,10 @@
                     appendOptions(node, $dialogPayloadTimeFormatsel, 'outputFormats');
                     autocomplete($dialogPayloadTimeFormat, 'dateOutFormat');
                     // #endregion dialogPayload
-                    // #region default topic + importance
-                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-btctl-rule-resetOverwrite');
-                    $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
-                    const $dialogImportance = $dialog.find('#dlg-ip-btctl-rule-importance');
-                    $dialogImportance.spinner({
-                        max: 1000,
-                        min: 0,
-                        step: 1,
-                        stop:(_e, _ui) => { _dialogGenHelpText(); }
-                    });
-                    $dialogImportance.change(() => { _dialogGenHelpText(); });
+                    // #region topic
                     const $dialogTopic = $dialog.find('#dlg-ip-btctl-rule-topic');
                     $dialogTopic.change(() => { _dialogGenHelpText(); });
-                    // #endregion default topic + importance
+                    // #endregion topic
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -2824,15 +2836,19 @@
             </select>
             <input type="text" id="dlg-ip-btctl-rule-payloadTimeFormat" class="ipadd" />
         </div>
+        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]clock-timer.placeholder.ruleTopic">
+            <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-topic" class="ipalone" data-i18n="[placeholder]node-red:common.label.topic"/>
+        </div>
+        <hr class="mt-1 mb-1 pt-0 pb-0" id="dialog-hr-overwrite">
         <div class="dialog-row pt-0" id="dialog-row-resetOverwrite" data-i18n="[title]clock-timer.placeholder.ruleResetOverwrite">
             <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
             <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite"></span>
         </div>
-        <div class="dialog-row pt-0" id="dialog-row-topic" data-i18n="[title]clock-timer.placeholder.ruleTopic">
-            <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
-            <input type="text" id="dlg-ip-btctl-rule-importance" class="ipadd" data-i18n="[placeholder]clock-timer.placeholder.ruleImportance"/>
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-importance" data-i18n="[title]clock-timer.placeholder.ruleImportance">
+            <label for="dlg-ip-btctl-rule-importance"><i class="fa fa-hand-spock-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-importance" class="ipMain" data-i18n="[placeholder]clock-timer.placeholder.ruleImportance"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-descr">
