@@ -4,14 +4,14 @@
 
 Install of a specific Version in Node-Red:
  - change to the installation directory of Node-Red
- - enter the command `npm install node-red-contrib-sun-position@1.2.3`
+ - enter the command `npm install node-red-contrib-sun-position@2.0.0`
 
 Install of a specific Version in Redmatic (on a Homematic):
 - logon per ssh
 - enter the commands in the order:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
-  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@1.2.3`
+  - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
 This can be also used to go back to an older Version.
 
@@ -19,7 +19,7 @@ This can be also used to go back to an older Version.
 
 ⚠ Warning: This Version could break existing flows. Please check your configuration!
 
-🛑 Nodes that were created or saved with this version do not work in older versions of the package. This affects the export / import of flows and when switching to an older version. It is therefore **essential** to create a **backup** before upgrading to this version!
+🛑 Nodes (especially blind, time-control nodes) that were created or saved with this version do not work in older versions of the package. This affects the export / import of flows and when switching to an older version. It is therefore **essential** to create a **backup** before upgrading to this version!
 
 - general
   - added only even and only odd weeks
