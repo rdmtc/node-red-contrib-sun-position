@@ -6,6 +6,8 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
+const clonedeep = require('lodash.clonedeep');
+const isEqual = require('lodash.isequal');
 
 const cRuleUntil = 0;
 const cRuleFrom = 1;
@@ -248,7 +250,7 @@ module.exports = function (RED) {
                     node.level.slat = msg.slat;
                 } else if (typeof msg.blindSlat !== undefined && msg.blindSlat !== null) {
                     node.level.slat = msg.blindSlat;
-                } else if (typeof msg.topic === 'string' && msg.topic.indexOf('slatOverwrite') >-1) {
+                } else if (typeof msg.topic === 'string' && msg.topic.includes('slatOverwrite')) {
                     node.level.slat = msg.payload;
                 } else {
                     node.level.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
@@ -1110,7 +1112,7 @@ module.exports = function (RED) {
                 if (!isNaN(node.level.current)) {
                     node.previousData.level = node.level.current;
                     node.previousData.levelInverse = node.level.currentInverse;
-                    node.previousData.slat = node.level.slat;
+                    node.previousData.slat = clonedeep(node.level.slat); // deep copy
                     node.previousData.topic = node.level.topic;
                     node.previousData.reasonCode = node.reason.code;
                     node.previousData.reasonState = node.reason.state;
@@ -1271,7 +1273,7 @@ module.exports = function (RED) {
                 }
                 if ((!isNaN(node.level.current)) &&
                     ((node.level.current !== node.previousData.level) ||
-                    (node.level.slat !== node.previousData.slat) ||
+                    (!isEqual(node.level.slat, node.previousData.slat)) ||
                     (node.level.topic !== node.previousData.topic))) {
                     const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
