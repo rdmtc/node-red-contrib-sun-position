@@ -956,6 +956,10 @@ const util = require('util'); // eslint-disable-line no-unused-vars
                 result.alwaysUp = false;
                 result.alwaysDown = true;
             }
+        } else if (rise && set) {
+            result.alwaysUp = false;
+            result.alwaysDown = false;
+            result.highest = new Date(hoursLater(dateValue, Math.min(rise, set) + (Math.abs(set - rise) / 2)));
         } else {
             result.alwaysUp = false;
             result.alwaysDown = false;

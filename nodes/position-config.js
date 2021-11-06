@@ -539,30 +539,62 @@ module.exports = function (RED) {
         }
         /*******************************************************************************************************/
         /**
-         * get a property value from a type input in Node-Red
+         * get the random number cache for a node
          * @param {*} _srcNode - source node information
-         * @param {propValueType} data - data object with more information
+         * @param {Date} [dNow] base Date to use for Date time functions
+         * @returns {*} random number cache
+        */
+        getNodeNumberCache(_srcNode, dNow) {
+            const cache = _srcNode.context().get('randomNumberCache') || {};
+            if (!cache.day || cache.day.v !== dNow.getDate()) {
+                cache.day = {
+                    v : dNow.getDate()
+                };
+                const w = hlp.getWeekOfYear(dNow);
+                if (cache.week !== w) {
+                    cache.week = {
+                        v : w
+                    };
+                }
+            }
+            return cache;
+        }
+        /**
+         * get a random number for a node cached per day
+         * @param {*} _srcNode - source node information
+         * @param {number} value - data object with more information
          * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {number} random number
         */
-        getCachedRandomNumber(_srcNode, data, dNow) {
-            data.value = parseFloat(data.value);
-            let cache = _srcNode.context().get('randomNumberCache');
-            if (!hlp.isValidDate(dNow)) {
-                dNow = new Date();
+        getCachedRandomDayNumber(_srcNode, value, dNow) {
+            if (isNaN(value)) {
+                return value;
             }
-            if (!cache || cache.day !== dNow.getDate()) {
-                cache = {
-                    day : dNow.getDate(),
-                    week: hlp.getWeekOfYear(dNow)
-                };
+            const cache = this.getNodeNumberCache(_srcNode, dNow);
+            if (isNaN(cache.d[value])) {
+                cache.d[value] = Math.random() * ((value || 60) + 1);
+                _srcNode.context().set('randomNumberCache', cache);
             }
-            if (isNaN(cache['d_' + data.value])) {
-                cache['d_' + data.value] = Math.random() * ((data.value || 60) + 1);
-            }
-            return cache['d_' + data.value];
+            return cache.d[value];
         }
-
+        /**
+         * get a random number for a node cached per week
+         * @param {*} _srcNode - source node information
+         * @param {number} value - data object with more information
+         * @param {Date} [dNow] base Date to use for Date time functions
+         * @returns {number} random number
+        */
+        getCachedRandomWeekNumber(_srcNode, value, dNow) {
+            if (isNaN(value)) {
+                return value;
+            }
+            const cache = this.getNodeNumberCache(_srcNode, dNow);
+            if (isNaN(cache.w[value])) {
+                cache.w[value] = Math.random() * ((value || 60) + 1);
+                _srcNode.context().set('randomNumberCache', cache);
+            }
+            return cache.w[value];
+        }
         /**
          * get a float value from a type input in Node-Red
          * @param {*} _srcNode - source node information
@@ -1074,7 +1106,11 @@ module.exports = function (RED) {
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'randmNumCachedDay ') {
-                return this.getCachedRandomNumber(_srcNode, data, dNow);
+                const rv = this.getCachedRandomDayNumber(_srcNode, parseFloat(data.value), dNow);
+                return (isNaN(rv) ? 0 : rv);
+            } else if (data.type === 'randmNumCachedWeek ') {
+                const rv = this.getCachedRandomWeekNumber(_srcNode, parseFloat(data.value), dNow);
+                return (isNaN(rv) ? 0 : rv);
             } else if (data.type === 'randomNum') {
                 data.value = parseFloat(data.value);
                 return Math.random() * ((data.value || 60) + 1);
@@ -1425,9 +1461,6 @@ module.exports = function (RED) {
                 result.times = sunCalc.getMoonTimes(date.valueOf(), specLatitude, specLongitude);
             }
 
-            if (cacheEnabled) {
-                this.cache.lastMoonCalc = result;
-            }
             if (moonInSky) {
                 if (!result.positionAtRise && result.times.rise) {
                     result.positionAtRise = sunCalc.getMoonPosition(result.times.rise.valueOf(), specLatitude, specLongitude);
@@ -1436,6 +1469,15 @@ module.exports = function (RED) {
                 if (!result.positionAtSet && result.times.set) {
                     result.positionAtSet = sunCalc.getMoonPosition(result.times.set.valueOf(), specLatitude, specLongitude);
                 }
+            }
+
+            if (result.times.highest) {
+                result.highestPosition = sunCalc.getMoonPosition(result.times.highest.valueOf(), specLatitude, specLongitude);
+                result.altitudePercent = (result.altitudeDegrees / result.highestPosition.altitudeDegrees) * 100;
+            }
+
+            if (cacheEnabled) {
+                this.cache.lastMoonCalc = result;
             }
 
             if (result.times.alwaysUp) {
