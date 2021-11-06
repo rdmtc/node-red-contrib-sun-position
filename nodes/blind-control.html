@@ -2,10 +2,21 @@
 
 <script type="text/javascript">
     (function() {
-        const cModeOff = 0;
-        const cModeMaximize = 1;
-        const cModeMinimize = 3;
-        const cModeSunPosition = 16;
+        const cNBC_MODE_OFF = 0;
+        const cNBC_MODE_MAXIMIZE = 1;
+        const cNBC_MODE_MINIMIZE = 3;
+        const cNBC_MODE_SUN_CONTROL = 16;
+        const cNBC_RULE_TYPE_UNTIL = 0;
+        const cNBC_RULE_TYPE_FROM = 1;
+        const cNBC_RULE_OP = {
+            levelAbsolute : 0,
+            levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+            levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+            slatOversteer : 5,
+            topicOversteer : 8,
+            off : 9
+        };
+
         /**
          * get a value
          * @param {*} node - the node representation
@@ -180,7 +191,7 @@
                     validate(v) {
                         const n = Number(v);
                         return (RED.validators.number()(v) &&
-                                ((n === cModeOff) || (n === cModeMinimize) || (n === cModeMaximize) || (n === cModeSunPosition)));
+                                ((n === cNBC_MODE_OFF) || (n === cNBC_MODE_MINIMIZE) || (n === cNBC_MODE_MAXIMIZE) || (n === cNBC_MODE_SUN_CONTROL)));
                     }
                 },
                 sunFloorLengthType: {
@@ -191,9 +202,9 @@
                     required: false,
                     validate(v) {
                         const mode = Number(getVal(this, 'sunControlMode'));
-                        return (mode === cModeOff) ||
-                                (mode === cModeMaximize) ||
-                                (mode === cModeMinimize) ||
+                        return (mode === cNBC_MODE_OFF) ||
+                                (mode === cNBC_MODE_MAXIMIZE) ||
+                                (mode === cNBC_MODE_MINIMIZE) ||
                                 RED.validators.typedInput('sunFloorLengthType')(v);
                     }
                 },
@@ -204,9 +215,9 @@
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
                         const mode = Number(getVal(this, 'sunControlMode'));
-                        return (mode === cModeOff) ||
-                                (mode === cModeMaximize) ||
-                                (mode === cModeMinimize) ||
+                        return (mode === cNBC_MODE_OFF) ||
+                                (mode === cNBC_MODE_MAXIMIZE) ||
+                                (mode === cNBC_MODE_MINIMIZE) ||
                                 (v === '') ||
                                 ((n <= mm.max) &&
                                 (n >= mm.min) &&
@@ -216,7 +227,7 @@
                 blindPosMin: {
                     value: 'closed (min)',
                     validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('blindPosMinType')(v));
                     }
                 },
@@ -226,7 +237,7 @@
                 blindPosMax: {
                     value: 'open (max)',
                     validate(v) {
-                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('blindPosMaxType')(v));
                     }
                 },
@@ -244,7 +255,7 @@
                     value: '',
                     validate(v) {
                         const n = parseFloat(v);
-                        return ((Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 (v === '') ||
                                 (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
@@ -261,7 +272,7 @@
                 windowTop: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -271,7 +282,7 @@
                 windowBottom: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -281,7 +292,7 @@
                 windowAzimuthStart: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('windowAzimuthStartType')(v);
                     }
                 },
@@ -291,7 +302,7 @@
                 windowAzimuthEnd: {
                     value: '',
                     validate(v) {
-                        return (Number(getVal(this, 'sunControlMode')) === cModeOff) ||
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 RED.validators.typedInput('windowAzimuthEndType')(v);
                     }
                 },
@@ -483,10 +494,10 @@
                     collapsible: true
                 });
 
-                this.sunControlMode = this.sunControlMode || cModeOff;
+                this.sunControlMode = this.sunControlMode || cNBC_MODE_OFF;
                 if (this.sunControlMode === 2 || this.sunControlMode === '2') {
-                    this.sunControlMode = cModeSunPosition;
-                    $('#node-input-sunControlMode').val(cModeSunPosition);
+                    this.sunControlMode = cNBC_MODE_SUN_CONTROL;
+                    $('#node-input-sunControlMode').val(cNBC_MODE_SUN_CONTROL);
                 }
 
                 node.dialogAddData = {};
@@ -555,16 +566,16 @@
                         label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMode','moon phase'),
                         icon: 'icons/node-red-contrib-sun-position/inputTypeSunControl.svg',
                         options: [{
-                            value: cModeOff + '-off',
+                            value: cNBC_MODE_OFF + '-off',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlOff')
                         }, {
-                            value: cModeMaximize + '-maximize',
+                            value: cNBC_MODE_MAXIMIZE + '-maximize',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMaximize')
                         }, {
-                            value: cModeMinimize + '-minimize',
+                            value: cNBC_MODE_MINIMIZE + '-minimize',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlMinimize')
                         }, {
-                            value: cModeSunPosition + '-restrict',
+                            value: cNBC_MODE_SUN_CONTROL + '-restrict',
                             label: node._('node-red-contrib-sun-position/position-config:common.types.sunControlRestrict')
                         }]
                     };
@@ -707,7 +718,8 @@
                             'env',
                             'jsonata',
                             types.randomNumber,
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     });
 
@@ -1073,27 +1085,19 @@
                                 }
                             }
                             result += '<div>';
-                            if (data.level && typeof data.level.type !== 'undefined') {
-                                if (data.level.type === types.LevelND.value) {
-                                    if (data.level.operator === 1) {
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMin');
-                                    } else if (data.level.operator === 2) {
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelResetMax');
-                                    } else if (data.level.operator === 9) {
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff');
+                            if (data.level) {
+                                if (data.level.operator <= cNBC_RULE_OP.levelAbsolute || data.levelType === types.LevelND.value) {
+                                    if (typeof data.level.type !== 'undefined' && data.level.type !== types.LevelND.value) {
+                                        result += '<div class="indent-level-text"> <i class="fa fa-angle-down" aria-hidden="true"></i><span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevel');
+                                        result += ': </span> ';
+                                        result += data.level.operatorText;
+                                        result += ' <var>';
+                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                        result += '</var></div>';
                                     } else {
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                                     }
-                                } else {
-                                    result += '<div class="indent-level-text"> <i class="fa fa-angle-down" aria-hidden="true"></i><span>';
-                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevel');
-                                    result += ': </span> ';
-                                    result += data.level.operatorText;
-                                    result += ' <var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
-                                    result += '</var></div>';
-                                }
-                                if (data.level.operator <= 0 || data.levelType === types.LevelND.value) {
                                     if (data.slat.type !== 'none') {
                                         result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat');
@@ -1114,9 +1118,57 @@
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite');
                                         result += '</span> </div>';
                                     }
+                                    if (data.importance > 0) {
+                                        result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-hand-spock-o" aria-hidden="true"></i><span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance');
+                                        result += ' = </span><var>';
+                                        result += data.importance;
+                                        result += '</var></div>';
+                                    }
+                                } else if (data.level.operator === cNBC_RULE_OP.levelMinOversteer) {
+                                    result += '<div class="indent-level-text"> <i class="fa fa-chevron-circle-down" aria-hidden="true"></i><span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevelMinimum');
+                                    result += ': </span><var>';
+                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                    result += '</var></div>';
+                                } else if (data.level.operator === cNBC_RULE_OP.levelMaxOversteer) {
+                                    result += '<div class="indent-level-text"> <i class="fa fa-chevron-circle-up" aria-hidden="true"></i><span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevelMaximum');
+                                    result += ': </span><var>';
+                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                    result += '</var></div>';
+                                } else if (data.level.operator === cNBC_RULE_OP.slatOversteer) {
+                                    result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlatOversteer');
+                                    result += ': </span><var>';
+                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.slat.type, data.slat.value, null, length);
+                                    result += '</var>';
+                                    if (data.importance > 0) {
+                                        result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-hand-spock-o" aria-hidden="true"></i><span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance');
+                                        result += ' = </span><var>';
+                                        result += data.importance;
+                                        result += '</var></div>';
+                                    }
+                                } else if (data.level.operator === cNBC_RULE_OP.topicOversteer) {
+                                    result += '<div class="indent-topic-text"> <i class="fa fa-tasks" aria-hidden="true"></i><span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTopicOversteer');
+                                    result += ': </span><var>';
+                                    result += (data.topic || '""');
+                                    result += '</var>';
+                                    result += '</div>';
+                                    if (data.importance > 0) {
+                                        result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-hand-spock-o" aria-hidden="true"></i><span>';
+                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance');
+                                        result += ' = </span><var>';
+                                        result += data.importance;
+                                        result += '</var></div>';
+                                    }
+                                } else if (data.level.operator === cNBC_RULE_OP.off) {
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff');
+                                } else {
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                                 }
-                            } else {
-                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                             }
                             result += '</div>';
                         } catch (err) {
@@ -1217,7 +1269,6 @@
                                 delete data.timeValue;
                                 delete data.timeOp;
                                 delete data.timeOpText;
-
                                 delete data.offsetType;
                                 delete data.offsetValue;
                                 delete data.multiplier;
@@ -1462,19 +1513,19 @@
                     // #region sun
                     $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
                         const val= Number($('#node-input-sunControlMode').val());
-                        if (val === cModeSunPosition) {
+                        if (val === cNBC_MODE_SUN_CONTROL) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').show();
                             $('.form-row-sunControlMaximization').hide();
                             $('.form-row-sunControlMinimization').hide();
                             resizeOversteerContainer();
-                        } else if (val === cModeMaximize ) {
+                        } else if (val === cNBC_MODE_MAXIMIZE ) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').show();
                             $('.form-row-sunControlMinimization').hide();
                             resizeOversteerContainer();
-                        } else if (val === cModeMinimize) {
+                        } else if (val === cNBC_MODE_MINIMIZE) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').hide();
@@ -1543,7 +1594,7 @@
                         if (rowCount > 0) {
                             // $container.editableList('height', height + 40);
                             $container.css('min-height', height + 'px');
-                            if (Number($('#node-input-sunControlMode').val()) <= cModeOff) {
+                            if (Number($('#node-input-sunControlMode').val()) <= cNBC_MODE_OFF) {
                                 $('.row-oversteerTopic').hide();
                             } else {
                                 $('.row-oversteerTopic').show();
@@ -1649,7 +1700,8 @@
                                         'flow',
                                         'global',
                                         'env',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($oversteerThreshold, data.threshold, data.thresholdType);
@@ -1703,7 +1755,8 @@
                                         'bin',
                                         'env',
                                         'jsonata',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
@@ -2036,6 +2089,7 @@
                                         'jsonata',
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -2278,7 +2332,8 @@
                                         'flow',
                                         'global',
                                         'env',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($dialogCondThreshold, data.threshold, data.thresholdType);
@@ -2401,8 +2456,8 @@
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_UNTIL).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
+                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_FROM).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
 
                     const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
                     $dialogTimeRegInput.typedInput({
@@ -2437,7 +2492,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
@@ -2484,7 +2540,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
@@ -2531,7 +2588,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
@@ -2574,6 +2632,18 @@
                         _dialogGenHelpText();
                     });
                     // #endregion dialogTimeLimit
+                    // #region overwrite + importance
+                    const $dialogImportance = $dialog.find('#dlg-ip-btctl-rule-importance');
+                    $dialogImportance.spinner({
+                        max: 1000,
+                        min: 0,
+                        step: 1,
+                        stop:(_e, _ui) => { _dialogGenHelpText(); }
+                    });
+                    $dialogImportance.change(() => { $dialogLevelOperator.change(); });
+                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-btctl-rule-resetOverwrite');
+                    $dialogResetOverwrite.change(() => {  $dialogLevelOperator.change(); });
+                    // #endregion overwrite + importance
                     // #region dialogLevel
                     const $dialogLevel = $dialog.find('#dlg-ip-btctl-rule-level');
                     $dialogLevel.typedInput({
@@ -2591,36 +2661,68 @@
                     }).change(() => { $dialogLevelOperator.change(); });
                     $dialogLevel.typedInput('width', '40%');
                     const $dialogLevelOperator = $dialog.find('#dlg-ip-btctl-rule-level-operator');
-                    $dialogLevelOperator.append($('<option></option>').val(0).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
-                    $dialogLevelOperator.append($('<option></option>').val(1).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMin')));
-                    $dialogLevelOperator.append($('<option></option>').val(2).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
-                    $dialogLevelOperator.append($('<option></option>').val(9).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelAbsolute      ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelMinOversteer  ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMin')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelMaxOversteer  ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.slatOversteer      ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlatOversteer')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.topicOversteer     ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTopicOversteer')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.off                ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOff')));
                     $dialogLevelOperator.change(() => {
                         const type =  $dialogLevel.typedInput('type');
                         if (type === types.LevelND.value) {
                             $dialogLevel.typedInput('show');
                             $dialogLevelOperator.hide();
                             $('#dialog-row-slatPos').show();
-                            $('#dialog-row-resetOverwrite').show();
                             $('#dialog-row-topic').show();
-                        } else if (parseInt($dialogLevelOperator.val()) <= 0) {
+                            $('#dialog-hr-overwrite').show();
+                            $('#dialog-row-resetOverwrite').show();
+                            $('#dialog-row-importance').show();
+                        } else if (parseInt($dialogLevelOperator.val()) <= 0) { // ruleLevelAbs
                             $dialogLevel.typedInput('show');
                             $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').show();
-                            $('#dialog-row-resetOverwrite').show();
                             $('#dialog-row-topic').show();
-                        } else if (parseInt($dialogLevelOperator.val()) === 9) {
+                            $('#dialog-hr-overwrite').show();
+                            $('#dialog-row-resetOverwrite').show();
+                            $('#dialog-row-importance').show();
+                        } else if (parseInt($dialogLevelOperator.val()) === 5) { // ruleSlatOversteer
+                            $dialogLevel.typedInput('hide');
+                            $dialogLevelOperator.show();
+                            $('#dialog-row-slatPos').show();
+                            $('#dialog-row-topic').hide();
+                            $('#dialog-hr-overwrite').show();
+                            $('#dialog-row-resetOverwrite').hide();
+                            // $dialogResetOverwrite.prop('checked', false);
+                            $('#dialog-row-importance').show();
+                        } else if (parseInt($dialogLevelOperator.val()) === 8) { // ruleTopicOversteer
                             $dialogLevel.typedInput('hide');
                             $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
+                            $('#dialog-row-topic').show();
+                            $('#dialog-hr-overwrite').show();
                             $('#dialog-row-resetOverwrite').hide();
+                            // $dialogResetOverwrite.prop('checked', false);
+                            $('#dialog-row-importance').show();
+                        } else if (parseInt($dialogLevelOperator.val()) === 9) { // ruleOff
+                            $dialogLevel.typedInput('hide');
+                            $dialogLevelOperator.show();
+                            $('#dialog-row-slatPos').hide();
                             $('#dialog-row-topic').hide();
-                        } else {
+                            $('#dialog-hr-overwrite').hide();
+                            $('#dialog-row-resetOverwrite').hide();
+                            // $dialogResetOverwrite.prop('checked', false);
+                            $('#dialog-row-importance').hide();
+                            // $dialogImportance.val(0);
+                        } else { // ruleLevelMin or ruleLevelMax
                             $dialogLevel.typedInput('show');
                             $dialogLevelOperator.show();
                             $('#dialog-row-slatPos').hide();
-                            $('#dialog-row-resetOverwrite').hide();
                             $('#dialog-row-topic').hide();
+                            $('#dialog-hr-overwrite').hide();
+                            $('#dialog-row-resetOverwrite').hide();
+                            $dialogResetOverwrite.prop('checked', false);
+                            $('#dialog-row-importance').hide();
+                            // $dialogImportance.val(0);
                         }
                         _dialogGenHelpText();
                     });
@@ -2643,25 +2745,16 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => { _dialogGenHelpText(); });
                     $dialogSlat.typedInput('width', '50%');
                     // #endregion dialogSlat
-                    // #region default topic + importance
-                    const $dialogResetOverwrite = $dialog.find('#dlg-ip-btctl-rule-resetOverwrite');
-                    $dialogResetOverwrite.change(() => { _dialogGenHelpText(); });
-                    const $dialogImportance = $dialog.find('#dlg-ip-btctl-rule-importance');
-                    $dialogImportance.spinner({
-                        max: 1000,
-                        min: 0,
-                        step: 1,
-                        stop:(_e, _ui) => { _dialogGenHelpText(); }
-                    });
-                    $dialogImportance.change(() => { _dialogGenHelpText(); });
+                    // #region topic
                     const $dialogTopic = $dialog.find('#dlg-ip-btctl-rule-topic');
                     $dialogTopic.change(() => { _dialogGenHelpText(); });
-                    // #endregion default topic + importance
+                    // #endregion topic
                     // #region dialogChange
                     $dialogTimeRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
@@ -3028,23 +3121,38 @@
                             slat: {
                                 type        : $dialogSlat.typedInput('type'),
                                 value       : $dialogSlat.typedInput('value')
-                            }
+                            },
+                            topic: $dialogTopic.val() || '',
+                            resetOverwrite: $dialogResetOverwrite.is(':checked'),
+                            importance: parseInt($dialogImportance.val())
                         };
                         try {
                             const setval = (param, name, val) => { if (val) param[name] = val; };
                             if (result.level.type === types.LevelND.value) {
                                 result.level.operator = 0;
                                 result.level.operatorText = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs');
-                            } else if (result.level.operator <= 0) {
-                                result.topic = $dialogTopic.val();
-                                result.importance = parseInt($dialogImportance.val());
-                                result.resetOverwrite = $dialogResetOverwrite.is(':checked');
-                            } else if (result.level.operator === 9) {
+                            } else if (result.level.operator === cNBC_RULE_OP.levelMinOversteer || result.level.operator === cNBC_RULE_OP.levelMaxOversteer ) {
+                                delete result.slat;
+                                delete result.topic;
+                                delete result.resetOverwrite;
+                                delete result.importance;
+                            } else if (result.level.operator === cNBC_RULE_OP.slatOversteer) {
+                                delete result.level.type;
+                                delete result.level.value;
+                                delete result.topic;
+                                delete result.resetOverwrite;
+                            } else if (result.level.operator === cNBC_RULE_OP.topicOversteer) {
                                 delete result.level.type;
                                 delete result.level.value;
                                 delete result.slat;
-                                // result.level.type = types.LevelFix.value;
-                                // result.level.value = '';
+                                delete result.resetOverwrite;
+                            } else if (result.level.operator === cNBC_RULE_OP.off) {
+                                delete result.level.type;
+                                delete result.level.value;
+                                delete result.slat;
+                                delete result.topic;
+                                delete result.resetOverwrite;
+                                delete result.importance;
                             }
 
                             $dialogConditionContainer.editableList('items').each(function(_i) {
@@ -3137,8 +3245,15 @@
                                 }
                                 result.isValid = result.isValid && result.valid.time && result.valid.timeMin && result.valid.timeMax;
                             }
-                            result.valid.level = (result.level.operator === 9) || $dialogLevel.typedInput('validate');
-                            result.valid.slat = $dialogSlat.typedInput('validate');
+                            result.valid.level = (result.level.operator === cNBC_RULE_OP.off) ||
+                                                 (result.level.operator === cNBC_RULE_OP.slatOversteer) ||
+                                                 (result.level.operator === cNBC_RULE_OP.topicOversteer) ||
+                                                 $dialogLevel.typedInput('validate');
+                            result.valid.slat = (result.level.operator === cNBC_RULE_OP.off) ||
+                                                (result.level.operator === cNBC_RULE_OP.topicOversteer) ||
+                                                (result.level.operator === cNBC_RULE_OP.levelMaxOversteer) ||
+                                                (result.level.operator === cNBC_RULE_OP.levelMinOversteer) ||
+                                                $dialogSlat.typedInput('validate');
                             result.isValid = result.isValid && result.valid.level && result.valid.slat;
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
@@ -3769,17 +3884,21 @@
         </div>
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-slatPos">
             <label for="dlg-ip-btctl-rule-slatPos"><i class="fa fa-slack"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat" ></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-slatPos" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.slat"/>
+            <input type="text" id="dlg-ip-btctl-rule-slatPos" class="ipalone" data-i18n="[placeholder]blind-control.placeholder.slat"/>
         </div>
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
+            <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-topic" class="ipalone" data-i18n="[placeholder]node-red:common.label.topic"/>
+        </div>
+        <hr class="mt-1 mb-1 pt-0 pb-0" id="dialog-hr-overwrite">
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
             <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
             <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleResetOverwrite"></span>
         </div>
-        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-topic" data-i18n="[title]blind-control.placeholder.ruleTopic">
-            <label for="dlg-ip-btctl-rule-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-topic" class="ipMain" data-i18n="[placeholder]node-red:common.label.topic"/>
-            <input type="text" id="dlg-ip-btctl-rule-importance" class="ipadd" data-i18n="[placeholder]blind-control.placeholder.ruleImportance"/>
+        <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-importance" data-i18n="[title]blind-control.placeholder.ruleImportance">
+            <label for="dlg-ip-btctl-rule-importance"><i class="fa fa-hand-spock-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleImportance"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-importance" class="ipMain" data-i18n="[placeholder]blind-control.placeholder.ruleImportance"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
         <div class="dialog-row pt-0" id="dialog-row-descr">

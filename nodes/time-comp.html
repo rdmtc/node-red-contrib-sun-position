@@ -36,6 +36,9 @@
                         return (v !== '');
                     }
                 },
+                inputNext: {
+                    value: false
+                },
                 inputOffset: {
                     value: 0,
                     required: true,
@@ -75,7 +78,7 @@
                             oT: 'none',
                             oM: 60000,
                             f: 0,
-                            next: false,
+                            next: true,
                             days: '*',
                             months: '*'
                         }
@@ -178,12 +181,16 @@
                             if (opType === types.DateSpecific.value ||
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
-                                opType === types.TimeSun.value ||
-                                opType === types.TimeMoon.value ||
                                 opType === types.DayOfMonth.value) {
+                                $('.time-row-inputNext').hide();
                                 $('.time-row-inputFormat').hide();
                                 $('.time-row-inputOffset').show();
-                            } else if (opType === 'msg' ||
+                            } else if ( opType === types.TimeSun.value ||
+                                        opType === types.TimeMoon.value) {
+                                $('.time-row-inputNext').show();
+                                $('.time-row-inputFormat').hide();
+                                $('.time-row-inputOffset').show();
+                            } else if ( opType === 'msg' ||
                                         opType === types.MsgPayload.value ||
                                         opType === types.MsgTs.value ||
                                         opType === 'flow' ||
@@ -191,9 +198,11 @@
                                         opType === 'str' ||
                                         opType === 'num' ||
                                         opType === 'env') {
+                                $('.time-row-inputNext').hide();
                                 $('.time-row-inputFormat').show();
                                 $('.time-row-inputOffset').show();
                             } else {
+                                $('.time-row-inputNext').hide();
                                 $('.time-row-inputFormat').hide();
                                 $('.time-row-inputOffset').hide();
                             }
@@ -207,6 +216,7 @@
                                 config:     $nodeConfig.val(),
                                 type:       opType,
                                 value:      $input.typedInput('value'),
+                                next:       $('#node-input-inputNext').is(':checked'),
                                 format:     $('#node-input-inputFormat').val(),
                                 offsetType: $('#node-input-inputOffset').typedInput('type'),
                                 offset:     $('#node-input-inputOffset').typedInput('value'),
@@ -226,7 +236,7 @@
                         valueProp: 'inputOffset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-inputOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -264,6 +274,7 @@
                         const $operand = rule.find('.node-input-rule-operand');
                         const $formatSel = rule.find('.node-input-rule-operandFormatSel');
                         const $formatIp = rule.find('.node-input-rule-operandFormatIp');
+                        // const $cbNext = rule.find('.node-input-rule-next');
                         const $offset = rule.find('.node-input-rule-offset');
                         const $multiplier = rule.find('.node-input-rule-multiplier');
                         const $property = rule.find('.node-input-rule-property');
@@ -290,12 +301,13 @@
                             // $formatIp.width(0);
                             $formatSel.width(formatWidth);
                         }
-
                         // row3
+                        // $cbNext
+                        // row4
                         const multiplierWidth = 125;
                         $multiplier.width(multiplierWidth);
                         $offset.typedInput('width', (newWidth - multiplierWidth - lblWidth - 40));
-                        // row4
+                        // row5
                         const lblwidth = $propertySpanLbl.width() + lblWidth;
                         $property.typedInput('width', (newWidth - lblwidth - 30));
                         $propertyLbl.width(lblwidth);
@@ -308,6 +320,7 @@
                             const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
                             const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
                             const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
+                            const $row5 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
                             // row1
                             // operator
                             const $operator = $('<select/>', {
@@ -362,32 +375,46 @@
                                 type: 'text'
                             }).appendTo($row2);
                             initCombobox(node, $formatSel, $formatIp, 'dateParseFormat', 'parseFormats', data.format, 20);
-
-                            // row3
-                            addLabel($row3, 'node-input-rule-offset', 'fa fa-plus');
+                            // row3 - 1 - Next selection
+                            const $divNext = $('<div/>').appendTo($row3);
+                            addLabel($divNext, 'node-input-rule-next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
+                            const $cbrNext = $('<input/>', {
+                                class: 'node-input-rule-next',
+                                type: 'checkbox',
+                                style: 'display:inline-block; width:15px; vertical-align:baseline;'
+                            })
+                                .css('width', 'calc(30% - 30px)')
+                                .appendTo($divNext);
+                            if (data.next === true || data.next === 'true') {
+                                $cbrNext.prop('checked', true);
+                            } else {
+                                $cbrNext.prop('checked', false);
+                            }
+                            // row4
+                            addLabel($row4, 'node-input-rule-offset', 'fa fa-plus');
                             const $offset = $('<input/>', {
                                 class: 'wg-offset-spinner node-input-rule-offset',
                                 id: 'node-input-rule-offset' + containerIndex,
                                 type: 'text',
                                 value: (data.offsetValue || '')
-                            }).appendTo($row3).typedInput({
+                            }).appendTo($row4).typedInput({
                                 default: (data.offsetType || types.Undefined.value),
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', types.randmNumCachedDay]
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', types.randmNumCachedDay, types.randmNumCachedWeek]
                             });
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-rule-multiplier',
                                 id: 'node-input-rule-multiplier' + containerIndex
-                            }).appendTo($row3);
+                            }).appendTo($row4);
                             appendOptions(node, $multiplier, 'multiplier');
                             $multiplier.val(data.multiplier || 60000);
-                            // row4
-                            addLabel($row4, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
+                            // row5
+                            addLabel($row5, 'node-input-rule-property', 'fa fa-puzzle-piece', node._('time-comp.label.onlyif'));
                             $('<input/>', {
                                 class: 'node-input-rule-property',
                                 id: 'node-input-rule-property' + containerIndex,
                                 type: 'text',
                                 value: (data.propertyValue || '')
-                            }).appendTo($row4).typedInput({
+                            }).appendTo($row5).typedInput({
                                 default: (data.propertyType || types.Unlimited.value),
                                 types: [types.Unlimited, 'msg', 'flow', 'global', 'env']
                             });
@@ -399,24 +426,32 @@
                                     $operandDiv.hide();
                                     operatorTypeField.hide();
                                     $row2.hide(); // format
-                                    $row3.hide(); // offset
-                                    $row4.show(); // limit
-
+                                    $row3.hide(); // next
+                                    $row4.hide(); // offset
+                                    $row5.show(); // limit
                                 } else {
                                     $operandDiv.show();
                                     operatorTypeField.show();
-                                    if (opType === types.TimeEntered.value || opType === types.DateEntered.value || opType === types.TimeSun.value || opType === types.TimeMoon.value || opType === types.DateSpecific.value) {
+                                    if (opType === types.TimeEntered.value || opType === types.DateEntered.value  || opType === types.DateSpecific.value) {
                                         $row2.hide(); // format
-                                        $row3.show(); // offset
-                                        $row4.show(); // limit
+                                        $row3.hide(); // next
+                                        $row4.show(); // offset
+                                        $row5.show(); // limit
+                                    } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value ) {
+                                        $row2.hide(); // format
+                                        $row3.show(); // next
+                                        $row4.show(); // offset
+                                        $row5.show(); // limit
                                     } else if (opType === 'msg' || opType === 'flow' || opType === 'global' || opType === 'str' || opType === 'num' || opType === 'env') {
                                         $row2.show(); // format
-                                        $row3.show(); // offset
-                                        $row4.show(); // limit
+                                        $row3.hide(); // next
+                                        $row4.show(); // offset
+                                        $row5.show(); // limit
                                     } else {
                                         $row2.hide(); // format
-                                        $row3.hide(); // offset
-                                        $row4.show(); // limit
+                                        $row3.hide(); // next
+                                        $row4.hide(); // offset
+                                        $row5.show(); // limit
                                     }
                                 }
                                 getBackendData(d => {
@@ -428,6 +463,7 @@
                                     type:       opType,
                                     value:      $operand.typedInput('value'),
                                     format:     $formatIp.val(),
+                                    next:       $cbrNext.is(':checked'),
                                     offsetType: $offset.typedInput('type'),
                                     offset:     $offset.typedInput('value'),
                                     multiplier: $multiplier.val(),
@@ -437,6 +473,7 @@
                             });
                             $operator.change(() => $operand.change());
                             $multiplier.change(() => $operand.change());
+                            $cbrNext.change(() => $operand.change());
                             $offset.change(() => $operand.change());
                             $formatSel.change(() => $operand.change());
                             $formatIp.change(() => $operand.change());
@@ -487,16 +524,16 @@
                             let prop = data;
                             if (!Object.prototype.hasOwnProperty.call(prop, 'p')) {
                                 prop = {
-                                    p: '',
-                                    pt: types.MsgPayload.value,
-                                    v: '',
-                                    vt: 'input',
-                                    o: '',
-                                    oT: types.Undefined.value,
-                                    oM: 60000,
-                                    f: 0,
-                                    next: false,
-                                    days: '*',
+                                    p    : '',
+                                    pt   : types.MsgPayload.value,
+                                    v    : '',
+                                    vt   : 'input',
+                                    o    : '',
+                                    oT   : types.Undefined.value,
+                                    oM   : 60000,
+                                    f    : 0,
+                                    next : true,
+                                    days : '*',
                                     months: '*'
                                 };
                             }
@@ -584,6 +621,7 @@
                                         types.numPercent,
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -617,9 +655,9 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek]
                                 });
-                            setTInputValue($offset, prop.o,  prop.oT);
+                            setTInputValue($offset, prop.o, prop.oT);
 
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-prop-result-multiplier'
@@ -632,7 +670,7 @@
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
                             const $divNext = $('<div/>').appendTo($row4);
-                            addLabel($divNext, 'node-input-prop-result-Next', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
+                            addLabel($divNext, 'node-input-prop-result-Next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
                             const $cbNext = $('<input/>', {
                                 class: 'node-input-prop-result-Next',
                                 type: 'checkbox',
@@ -640,7 +678,7 @@
                             })
                                 .css('width', 'calc(30% - 30px)')
                                 .appendTo($divNext);
-                            if (typeof prop.next === 'undefined' || prop.next === null || prop.next == true) { // eslint-disable-line eqeqeq
+                            if (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') {
                                 $cbNext.prop('checked', true);
                             } else {
                                 $cbNext.prop('checked', false);
@@ -650,7 +688,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnDays, 'node-input-prop-result-days', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
+                            addLabel($divMnDays, 'node-input-prop-result-days', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
 
                             const $divDays = $('<div/>', {
                                 class: 'node-input-prop-result-days',
@@ -687,7 +725,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
+                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
 
                             const $divSpecLimits = $('<div/>', {
                                 class: 'node-input-prop-result-speciallimits',
@@ -751,7 +789,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnMonth, 'node-input-prop-result-months', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
+                            addLabel($divMnMonth, 'node-input-prop-result-months', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
 
                             const $divMonths = $('<div/>', {
                                 class: 'node-input-prop-result-months',
@@ -796,10 +834,10 @@
                                     $row2.show(); // format
                                     $row3.show(); // offset
                                     $row4.show(); // next + days
-                                } else if (plVType === 'input' ||
-                                    plVType === types.DateEntered.value ||
-                                    plVType === types.DateSpecific.value ||
-                                    plVType === types.DayOfMonth.value) {
+                                } else if ( plVType === 'input' ||
+                                            plVType === types.DateEntered.value ||
+                                            plVType === types.DateSpecific.value ||
+                                            plVType === types.DayOfMonth.value) {
                                     $row2.show(); // format
                                     $row3.show(); // offset
                                     $row4.hide(); // next + days + month
@@ -842,7 +880,6 @@
                                 }
                                 resizeResultContainer();
                             });
-
                             $multiplier.change(() => $propertyValue.change());
                             $offset.change(() => {
                                 const type = $offset.typedInput('type');
@@ -901,7 +938,13 @@
 
                 $.getScript('sun-position/js/htmlglobal.js')
                     .done((_data, _textStatus, _jqxhr) => {
-                        setup(node);
+                        try {
+                            setup(node);
+                        } catch (err) {
+                            console.log("failed to setup editor"); // eslint-disable-line
+                            console.log(err); // eslint-disable-line
+                            console.log(err.stack); // eslint-disable-line
+                        }
                     })
                     .fail((jqxhr, settings, exception) => {
                         console.log("failed to load htmlglobal.js"); // eslint-disable-line
@@ -941,6 +984,7 @@
                         operandValue: rule.find('.node-input-rule-operand').typedInput('value'),
                         format: rule.find('.node-input-rule-operandFormatIp').val(),
                         formatSelection: rule.find('.node-input-rule-operandFormatSel').val(),
+                        next: rule.find('.node-input-rule-next').is(':checked'),
                         offsetType: rule.find('.node-input-rule-offset').typedInput('type'),
                         offsetValue: rule.find('.node-input-rule-offset').typedInput('value'),
                         multiplier: rule.find('.node-input-rule-multiplier').val(),
@@ -1041,6 +1085,11 @@
         <label for="node-input-input"><i class="fa fa-ellipsis-h"></i> <span data-i18n="time-comp.label.input"></span></label>
         <input type="text" id="node-input-input" data-i18n="[placeholder]time-comp.placeholder.input">
         <input type="hidden" id="node-input-inputType">
+    </div>
+    <div class="form-row block-indent1 time-row-inputNext is-initial-hidden" data-i18n="[titleOrg]time-comp.placeholder.nextOccurrence">
+        <label for="node-input-inputNext"><i class="fa fa-clock-o"></i></span></label>
+        <input type="checkbox" id="node-input-inputNext" data-i18n="[placeholder]time-comp.placeholder.nextOccurrence" style="width:15px;">
+        <label for="node-input-inputNext"> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.nextOccurrence"></span></label>
     </div>
     <div class="form-row block-indent1 time-row-inputFormat is-initial-hidden" data-i18n="[title]time-comp.placeholder.inputFormat">
         <label for="node-input-inputFormatsel"><i class="fa fa-sign-in"></i> <span data-i18n="time-comp.label.inputFormat"></span></label>

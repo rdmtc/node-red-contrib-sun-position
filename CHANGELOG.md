@@ -15,6 +15,25 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.1: enhancement
+
+- general
+  - implemented partly #338 + #308
+  - fixed randomNumber cached #302
+  - implemented randomNumber cached weekly
+
+- blind-control
+  - allow to setup a rule which will only overwrite slat #345 or topic
+  - enhanced overwrite possibilities for slat. Additional `msg.blindSlat` as message property allowed or if the topic contains __slatOverwrite __ the payload as slat position will be used - partly #346
+  - for slat value make a deep clone as this could be any object and an object comparison
+
+- clock-time
+  - implement `resetOnSameAsLastValue` and `ignoreSameValue` #341
+  - for payload value make a deep clone as this could be any object and perform an an object comparison
+
+- time-comp
+  - added next occurrence #339
+
 ### 2.0.0: enhancement
 
 ⚠ Warning: This Version could break existing flows. Please check your configuration!

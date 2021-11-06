@@ -266,7 +266,7 @@
                         valueProp: 'operand1Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand1Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -357,7 +357,7 @@
                         valueProp: 'operand2Offset',
                         width: 'calc(100% - 255px)',
                         defaultType: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-operand2Offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -598,6 +598,7 @@
                                         types.numPercent,
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -648,7 +649,7 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
+                                    types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek]
                                 });
                             setTInputValue($offset, prop.o, prop.oT);
 
@@ -668,7 +669,7 @@
                                 valueProp: 'result1Offset',
                                 width: 'calc(100% - 265px)',
                                 defaultType: types.Undefined.value,
-                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randmNumCachedDay],
+                                types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', types.randmNumCachedDay, types.randmNumCachedWeek],
                                 onChange(_type, _value) {
                                     const type = $('#node-input-result1Offset').typedInput('type');
                                     if (type === types.Undefined.value) {
@@ -683,7 +684,7 @@
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
                             const $divNext = $('<div/>').appendTo($row4);
-                            addLabel($divNext, 'node-input-prop-result-Next', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
+                            addLabel($divNext, 'node-input-prop-result-Next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
                             const $cbNext = $('<input/>', {
                                 class: 'node-input-prop-result-Next',
                                 type: 'checkbox',
@@ -701,7 +702,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnDays, 'node-input-prop-result-days', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
+                            addLabel($divMnDays, 'node-input-prop-result-days', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
 
                             const $divDays = $('<div/>', {
                                 class: 'node-input-prop-result-days',
@@ -738,7 +739,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
+                            addLabel($divSpecLimit, 'node-input-prop-result-speciallimits', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
 
                             const $divSpecLimits = $('<div/>', {
                                 class: 'node-input-prop-result-speciallimits',
@@ -803,7 +804,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnMonth, 'node-input-prop-result-months', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
+                            addLabel($divMnMonth, 'node-input-prop-result-months', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
 
                             const $divMonths = $('<div/>', {
                                 class: 'node-input-prop-result-months',

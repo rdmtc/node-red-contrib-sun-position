@@ -6,13 +6,19 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
+const clonedeep = require('lodash.clonedeep');
+const isEqual = require('lodash.isequal');
 
 const cRuleUntil = 0;
 const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cRuleOff = 9;
+const cRule = {
+    levelAbsolute : 0,
+    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+    slatOversteer : 5,
+    topicOversteer : 8,
+    off : 9
+};
 const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
 const cWinterMode = 1;
@@ -242,10 +248,13 @@ module.exports = function (RED) {
                 node.level.topic = msg.topic;
                 if (typeof msg.slat !== undefined && msg.slat !== null) {
                     node.level.slat = msg.slat;
+                } else if (typeof msg.blindSlat !== undefined && msg.blindSlat !== null) {
+                    node.level.slat = msg.blindSlat;
+                } else if (typeof msg.topic === 'string' && msg.topic.includes('slatOverwrite')) {
+                    node.level.slat = msg.payload;
                 } else {
                     node.level.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
                 }
-
             }
 
             if (Number.isFinite(nExpire) || (nImportance <= 0)) {
@@ -489,6 +498,8 @@ module.exports = function (RED) {
         // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
         let ruleSel = null;
+        let ruleSlatOvs = null;
+        let ruleTopicOvs = null;
         let ruleSelMin = null;
         let ruleSelMax = null;
         let ruleindex = -1;
@@ -506,9 +517,13 @@ module.exports = function (RED) {
             }
             if (res) {
                 // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (res.level.operator === cRuleMinOversteer) {
+                if (res.level.operator === cRule.slatOversteer) {
+                    ruleSlatOvs = res;
+                } else if (res.level.operator === cRule.topicOversteer) {
+                    ruleTopicOvs = res;
+                } else if (res.level.operator === cRule.levelMinOversteer) {
                     ruleSelMin = res;
-                } else if (res.level.operator === cRuleMaxOversteer) {
+                } else if (res.level.operator === cRule.levelMaxOversteer) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
@@ -529,9 +544,13 @@ module.exports = function (RED) {
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
                     // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (res.level.operator === cRuleMinOversteer) {
+                    if (res.level.operator === cRule.slatOversteer) {
+                        ruleSlatOvs = res;
+                    } else if (res.level.operator === cRule.topicOversteer) {
+                        ruleTopicOvs = res;
+                    } else if (res.level.operator === cRule.levelMinOversteer) {
                         ruleSelMin = res;
-                    } else if (res.level.operator === cRuleMaxOversteer) {
+                    } else if (res.level.operator === cRule.levelMaxOversteer) {
                         ruleSelMax = res;
                     } else {
                         ruleSel = res;
@@ -541,9 +560,33 @@ module.exports = function (RED) {
             }
         }
 
-        livingRuleData.hasMinimum = false;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
+        if (ruleTopicOvs) {
+            livingRuleData.topicOversteer = {
+                id: ruleTopicOvs.pos,
+                name: ruleTopicOvs.name,
+                conditional: ruleTopicOvs.conditional,
+                timeLimited: (!!ruleTopicOvs.time),
+                conditon: ruleTopicOvs.conditon,
+                time: ruleTopicOvs.timeData,
+                importance: ruleTopicOvs.importance,
+                topic : ruleTopicOvs.topic || ''
+            };
+        }
+        if (ruleSlatOvs) {
+            livingRuleData.slatOversteer = {
+                id: ruleSlatOvs.pos,
+                name: ruleSlatOvs.name,
+                conditional: ruleSlatOvs.conditional,
+                timeLimited: (!!ruleSlatOvs.time),
+                conditon: ruleSlatOvs.conditon,
+                time: ruleSlatOvs.timeData,
+                slat: node.positionConfig.getPropValue(node, msg, ruleSlatOvs.slat, false, oNow.dNow),
+                importance: ruleSlatOvs.importance
+            };
+        }
+        livingRuleData.hasMinimum = false;
         if (ruleSelMin) {
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.level.type, ruleSelMin.level.value, -1);
             // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
@@ -654,9 +697,9 @@ module.exports = function (RED) {
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
             // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
 
-            if (ruleSel.level.operator === cRuleOff) {
+            if (ruleSel.level.operator === cRule.off) {
                 livingRuleData.isOff = true;
-            } else if (ruleSel.level.operator === cRuleAbsolute) { // absolute rule
+            } else if (ruleSel.level.operator === cRule.levelAbsolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.level.type, ruleSel.level.value, -1);
                 livingRuleData.slat = node.positionConfig.getPropValue(node, msg, ruleSel.slat, false, oNow.dNow);
                 livingRuleData.active = (livingRuleData.level > -1);
@@ -1069,7 +1112,7 @@ module.exports = function (RED) {
                 if (!isNaN(node.level.current)) {
                     node.previousData.level = node.level.current;
                     node.previousData.levelInverse = node.level.currentInverse;
-                    node.previousData.slat = node.level.slat;
+                    node.previousData.slat = clonedeep(node.level.slat); // deep copy
                     node.previousData.topic = node.level.topic;
                     node.previousData.reasonCode = node.reason.code;
                     node.previousData.reasonState = node.reason.state;
@@ -1171,6 +1214,12 @@ module.exports = function (RED) {
                         node.previousData.last.level = node.level.current;
                         node.previousData.last.topic = node.level.topic;
                     }
+                    if (blindCtrl.rule.topicOversteer && (!overwrite || (blindCtrl.rule.topicOversteer.importance > node.nodeData.overwrite.importance))) {
+                        node.level.topic = blindCtrl.rule.topicOversteer.topic;
+                    }
+                    if (blindCtrl.rule.slatOversteer && (!overwrite || (blindCtrl.rule.slatOversteer.importance > node.nodeData.overwrite.importance))) {
+                        node.level.slat = blindCtrl.rule.slatOversteer.slat;
+                    }
                 }
 
                 if (node.oversteer.active && !node.oversteer.isChecked) {
@@ -1224,7 +1273,7 @@ module.exports = function (RED) {
                 }
                 if ((!isNaN(node.level.current)) &&
                     ((node.level.current !== node.previousData.level) ||
-                    (node.level.slat !== node.previousData.slat) ||
+                    (!isEqual(node.level.slat, node.previousData.slat)) ||
                     (node.level.topic !== node.previousData.topic))) {
                     const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {

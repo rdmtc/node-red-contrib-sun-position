@@ -20,6 +20,7 @@ module.exports = function (RED) {
         this.input = {
             type: config.inputType,
             value: config.input,
+            next: hlp.isTrue(config.inputNext),
             format: config.inputFormat,
             offsetType: config.inputOffsetType,
             offset: config.inputOffset,
@@ -184,6 +185,7 @@ module.exports = function (RED) {
                                     type: rule.operandType,
                                     value: rule.operandValue,
                                     format: rule.format,
+                                    next: rule.next,
                                     offsetType: 'num',
                                     offset: rule.offsetValue,
                                     multiplier: rule.multiplier

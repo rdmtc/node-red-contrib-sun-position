@@ -308,8 +308,15 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             validate: RED.validators.number()
         },
         randmNumCachedDay: {
-            value: 'randmNumCachedDay ',
+            value: 'randmNumCachedDay',
             label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedDay','randmNumCachedDay'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        randmNumCachedWeek: {
+            value: 'randmNumCachedWeek',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedWeek','randmNumCachedWeek'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             validate: RED.validators.number()
@@ -1134,7 +1141,7 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
  * @returns {*} object based on the request
  */
 function getBackendData(result, data) { // eslint-disable-line no-unused-vars
-    // console.log('[IN getBackendData] ',data);
+    // console.log('[IN getBackendData]',data);
     try {
         const res = {
             value:'',

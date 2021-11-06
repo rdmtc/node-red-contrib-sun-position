@@ -751,12 +751,12 @@
                                 }
                             }
                         ],
-                        addItem(containerRow, containerIndex, data) {
-                            containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
-                            const $row1 = $('<div/>').appendTo(containerRow);
-                            const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                            const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
-                            const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                        addItem($containerRow, containerIndex, data) {
+                            $containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
+                            const $row1 = $('<div/>').appendTo($containerRow);
+                            const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
+                            const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
+                            const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo($containerRow);
                             // row1 - Property / Type Selection
                             let prop = data;
                             if (!Object.prototype.hasOwnProperty.call(prop, 'p')) {
@@ -856,6 +856,7 @@
                                         types.numPercent,
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -889,13 +890,14 @@
                                 .appendTo($row3)
                                 .typedInput({
                                     default: (prop.oT ? prop.oT : types.Undefined.value),
-                                    types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay]
+                                    types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek]
                                 });
                             setTInputValue($offset, prop.o, prop.oT);
+
                             const $multiplier = $('<select/>', {
                                 class: 'node-input-prop-property-multiplier'
                             })
-                                .css('width','calc(30% - 30px)')
+                                .css('width', 'calc(30% - 30px)')
                                 .appendTo($row3);
                             appendOptions(node, $multiplier, 'multiplier');
                             $multiplier.val(prop.oM ? prop.oM: 60000);
@@ -903,7 +905,7 @@
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
                             const $divNext = $('<div/>').appendTo($row4);
-                            addLabel($divNext, 'node-input-prop-property-Next', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
+                            addLabel($divNext, 'node-input-prop-property-Next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
                             const $cbNext = $('<input/>', {
                                 class: 'node-input-prop-property-Next',
                                 type: 'checkbox',
@@ -921,7 +923,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnDays, 'node-input-prop-property-days', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
+                            addLabel($divMnDays, 'node-input-prop-property-days', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForDays'));
 
                             const $divDays = $('<div/>', {
                                 class: 'node-input-prop-property-days',
@@ -958,7 +960,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divSpecLimit, 'node-input-prop-property-speciallimits', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
+                            addLabel($divSpecLimit, 'node-input-prop-property-speciallimits', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.specialLimits'));
 
                             const $divSpecLimits = $('<div/>', {
                                 class: 'node-input-prop-property-speciallimits',
@@ -1023,7 +1025,7 @@
                                 style: 'margin-top:5px;border-top: 1px solid #000;margin-bottom: 0;'
                             }
                             ).appendTo($row4);
-                            addLabel($divMnMonth, 'node-input-prop-property-months', '"fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
+                            addLabel($divMnMonth, 'node-input-prop-property-months', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.validForMonths'));
 
                             const $divMonths = $('<div/>', {
                                 class: 'node-input-prop-property-months',
@@ -1084,7 +1086,7 @@
                                     $row4.hide(); // next + days + month
                                 }
                                 getBackendData(d => {
-                                    containerRow.attr('title', bdDateToTime(d));
+                                    $containerRow.attr('title', bdDateToTime(d));
                                 }, {
                                     nodeId:         node.id,
                                     kind:           'getOutDataData',
@@ -1398,7 +1400,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.offset === 0 || node.offset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-offset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1471,7 +1473,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.timeEndOffset === 0 || node.timeEndOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-timeEndOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1695,7 +1697,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.timeAltOffset === 0 || node.timeAltOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-timeAltOffset').typedInput('type');
                             if (type === types.Undefined.value) {

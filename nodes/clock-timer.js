@@ -6,18 +6,17 @@ const path = require('path');
 const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
+const clonedeep = require('lodash.clonedeep');
+const isEqual = require('lodash.isequal');
 
 const cRuleUntil = 0;
 const cRuleFrom = 1;
-// const cRuleAbsolute = 0;
+const cRuleDefault = -1;
 
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
     /******************************************************************************************/
-    /**
-
-
     /**
      * check if a manual overwrite should be set
      * @param {*} node node data
@@ -57,10 +56,16 @@ module.exports = function (RED) {
         let overrideTopic = undefined;
         if (typeof msg.payload !== 'undefined') {
             if (msg.topic && (msg.topic.includes('manual') ||
-                msg.topic.includes('overwrite'))) {
+                msg.topic.includes('overwrite') ||
+                (msg.topic.includes('Overwrite') && !msg.topic.includes('resetOverwrite')))) {
                 overrideData = msg.payload;
                 overrideTopic = msg.topic;
-            } else if (typeof msg.payload === 'object' && (msg.payload.value && (msg.payload.expires || msg.payload.importance || msg.payload.importance))) {
+            } else if (typeof msg.payload === 'object' &&
+                        (msg.payload.value && (msg.payload.expire ||
+                            msg.payload.importance ||
+                            msg.payload.resetOnSameAsLastValue ||
+                            msg.payload.ignoreSameValue ||
+                            msg.payload.overwrite === true))) {
                 overrideData = msg.payload.value;
                 overrideTopic = msg.topic;
             }
@@ -71,16 +76,25 @@ module.exports = function (RED) {
             nExpire = -1;
         }
         if (typeof overrideData !== 'undefined') {
-            node.debug(`needOverwrite importance=${nImportance} expire=${nExpire}`);
-            if (typeof overrideData !== 'undefined') {
-                node.debug(`overwrite overrideData=${overrideData}`);
-                node.payload.current = overrideData;
-                node.payload.topic = overrideTopic;
+            const rosalv = hlp.getMsgBoolValue(msg, 'resetOnSameAsLastValue');
+            const isv = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
+            node.debug(`needOverwrite importance=${nImportance} expire=${nExpire} resetOnSameAsLastValue=${rosalv} ignoreSameValue=${isv}`);
+
+            if (rosalv && isEqual(node.previousData.payloadValue, overrideData)) {
+                node.debug(`resetOnSameAsLastValue active, reset overwrite and exit overrideData=${overrideData}`);
+                ctrlLib.posOverwriteReset(node);
+                return ctrlLib.setOverwriteReason(node);
+            } else if (isv && isEqual(node.previousData.payloadValue, overrideData)) {
+                node.debug(`overwrite exit true (ignoreSameValue), overrideData=${overrideData}`);
+                return ctrlLib.setOverwriteReason(node);
             }
+            node.debug(`overwrite overrideData=${overrideData}`);
+            node.payload.current = overrideData;
+            node.payload.topic = overrideTopic;
 
             if (Number.isFinite(nExpire) || (nImportance <= 0)) {
                 // will set expiring if importance is 0 or if expire is explizit defined
-                node.debug(`set expiring - expire is explizit defined "${nExpire}"`);
+                node.debug(`set expiring - expire is explicit defined "${nExpire}"`);
                 ctrlLib.setExpiringOverwrite(node, oNow, nExpire, 'set expiring time by message');
             } else if ((!exactImportance && (node.nodeData.overwrite.importance < nImportance)) || (!node.nodeData.overwrite.expireTs)) {
                 // isSignificant
@@ -238,7 +252,7 @@ module.exports = function (RED) {
             return livingRuleData;
         }
         livingRuleData.active = false;
-        livingRuleData.id = -1;
+        livingRuleData.id = cRuleDefault;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.payloadData = {
@@ -278,6 +292,7 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
         const node = this;
+
         if (!Array.isArray(config.results)) {
             config.results = [{
                 p: '',
@@ -419,16 +434,11 @@ module.exports = function (RED) {
                 // initialize
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.storeName) || {};
-                node.previousData.payloadType = (typeof node.payload.current);
                 node.previousData.reasonCode = node.reason.code;
                 node.previousData.reasonState = node.reason.state;
                 node.previousData.reasonDescription = node.reason.description;
-                if (node.previousData.payloadType === 'string' ||
-                    node.previousData.payloadType === 'boolean' ||
-                    node.previousData.payloadType === 'number') {
-                    node.previousData.payloadValue = node.payload.current;
-                    node.previousData.payloadSimple = true;
-                }
+                node.previousData.payloadValue = clonedeep(node.payload.current);
+
                 node.reason.code = NaN;
                 const oNow = hlp.getNowObject(node, msg);
                 if (node.autoTrigger) {
@@ -511,8 +521,7 @@ module.exports = function (RED) {
                     (node.payload.current !== 'none') &&
                     (node.payload.current !== null) &&
                     ((node.payload.topic !== node.previousData.topic) ||
-                    (typeof node.payload.current !== node.previousData.payloadType) ||
-                    ((typeof node.previousData.payloadValue  !== 'undefined') && (node.previousData.payloadValue !== node.payload.current))) ) {
+                    ((typeof node.previousData.payloadValue  !== 'undefined') && (!isEqual(node.previousData.payloadValue, node.payload.current)))) ) {
                     const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
