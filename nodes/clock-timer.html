@@ -462,7 +462,7 @@
                         width: 'calc(100% - 255px)',
                         defaultType: (node.payloadDefaultOffset === 0 || node.payloadDefaultOffset === '') ? types.Undefined.value : 'num',
                         defaultValue: 0,
-                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay],
+                        types: [types.Undefined, 'num', 'flow', 'global', 'env', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek],
                         onChange(_type, _value) {
                             const type = $('#node-input-payloadDefaultOffset').typedInput('type');
                             if (type === types.Undefined.value) {
@@ -1241,6 +1241,7 @@
                                         'jsonata',
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -1482,7 +1483,8 @@
                                         'flow',
                                         'global',
                                         'env',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($dialogCondThreshold, data.threshold, data.thresholdType);
@@ -1640,7 +1642,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
@@ -1687,7 +1690,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
@@ -1734,7 +1738,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
@@ -1811,6 +1816,7 @@
                             'jsonata',
                             types.randomNumber,
                             types.randmNumCachedDay,
+                            types.randmNumCachedWeek,
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
@@ -1841,7 +1847,7 @@
                     const $dialogPayloadOffset = $dialog.find('#dlg-ip-btctl-rule-payloadOffset');
                     $dialogPayloadOffset.typedInput({
                         default: types.Undefined.value,
-                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber, types.randmNumCachedDay]
+                        types: [types.Undefined, 'num', 'msg', 'flow', 'global', 'env', 'jsonata', types.randomNumber, types.randmNumCachedDay, types.randmNumCachedWeek]
                     }).change(() => { $dialogPayload.change(); });
                     $dialogPayloadOffset.typedInput('width', '40%');
 

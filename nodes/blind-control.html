@@ -718,7 +718,8 @@
                             'env',
                             'jsonata',
                             types.randomNumber,
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     });
 
@@ -1699,7 +1700,8 @@
                                         'flow',
                                         'global',
                                         'env',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($oversteerThreshold, data.threshold, data.thresholdType);
@@ -1753,7 +1755,8 @@
                                         'bin',
                                         'env',
                                         'jsonata',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
@@ -2086,6 +2089,7 @@
                                         'jsonata',
                                         types.randomNumber,
                                         types.randmNumCachedDay,
+                                        types.randmNumCachedWeek,
                                         types.nodeId,
                                         types.nodeName
                                     ]
@@ -2328,7 +2332,8 @@
                                         'flow',
                                         'global',
                                         'env',
-                                        types.randmNumCachedDay
+                                        types.randmNumCachedDay,
+                                        types.randmNumCachedWeek
                                     ]
                                 });
                             setTInputValue($dialogCondThreshold, data.threshold, data.thresholdType);
@@ -2487,7 +2492,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeRegOffset.typedInput('type');
@@ -2534,7 +2540,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMinOffset.typedInput('type');
@@ -2581,7 +2588,8 @@
                             'global',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => {
                         const type = $dialogTimeMaxOffset.typedInput('type');
@@ -2737,7 +2745,8 @@
                             'bin',
                             'env',
                             'jsonata',
-                            types.randmNumCachedDay
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
                         ]
                     }).change(() => { _dialogGenHelpText(); });
                     $dialogSlat.typedInput('width', '50%');

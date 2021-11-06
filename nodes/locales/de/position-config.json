@@ -41,6 +41,7 @@
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "randomNumber":"zufällige Zahl (immer neu)",
             "randmNumCachedDay":"zufällig Zahl (täglich neu)",
+            "randmNumCachedWeek":"zufällig Zahl (wöchentlich neu)",
             "numPercent":"Nummer in Prozent %",
             "suncalc":"Sonnenstand berechnet",
             "suninsky":"Sonne am Himmel (Prozent)",
