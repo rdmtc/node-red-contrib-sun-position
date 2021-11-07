@@ -15,10 +15,12 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
-### 2.0.1: enhancement
+### 2.0.1: small fix + enhancement
 
 - general
   - allow to set context store in configuration node #351
+  - fixed randomNumber cached again #302 + #353
+  - selectable range for random number #352
 
 - blind-control + clock-time
   - allow to set context store, if not defined using settings from configuration node, otherwise default #351
