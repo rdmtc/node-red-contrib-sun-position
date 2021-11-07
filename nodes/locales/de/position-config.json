@@ -27,7 +27,10 @@
             "enabled": "aktiviert",
             "disabled": "deaktiviert",
             "cancel":"Abbrechen",
-            "ok":"Ok"
+            "ok":"Ok",
+            "randNum":"zufällig bis",
+            "randNumCachedDay":"zufällig (täglich) bis",
+            "randNumCachedWeek":"zufällig (wöchentlich) bis"
         },
         "types": {
             "unlimited": "keine Limitierung",

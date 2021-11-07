@@ -29,7 +29,10 @@
             "enabled": "enabled",
             "disabled": "disabled",
             "cancel":"Cancel",
-            "ok":"Ok"
+            "ok":"Ok",
+            "randNum":"random till",
+            "randNumCachedDay":"random (daily) till",
+            "randNumCachedWeek":"random (weekly) till"
         },
         "types": {
             "unlimited":"no limitation",

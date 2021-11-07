@@ -563,40 +563,52 @@ module.exports = function (RED) {
         /**
          * get a random number for a node cached per day
          * @param {*} _srcNode - source node information
-         * @param {number} value - data object with more information
+         * @param {number} limit1 - lower limit for random number
+         * @param {number} limit2 - upper limit for random number
          * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {number} random number
         */
-        getCachedRandomDayNumber(_srcNode, value, dNow) {
-            if (isNaN(value)) {
-                return value;
+        getCachedRandomDayNumber(_srcNode, limit1, limit2, dNow) {
+            // _srcNode.debug(`getCachedRandomDayNumber limit1=${String(limit1)} limit2=${String(limit2)} dNow=${dNow}`);
+            if (isNaN(limit1)) {
+                _srcNode.error(`the value for random number limit is wrong limit1=${String(limit1)} limit2=${String(limit2)}, using 60`);
+                limit1 = 60;
             }
+            const low = Math.min(limit1, isNaN(limit2) ? 0 : limit2);
+            const high = Math.max(limit1, isNaN(limit2) ? 0 : limit2);
+            const name = 'min_'+low+'_max_'+high;
             const store = _srcNode.contextStore || this.contextStore;
             const cache = this.getNodeNumberCache(_srcNode, dNow, store);
-            if (isNaN(cache.d[value])) {
-                cache.d[value] = Math.random() * ((value || 60) + 1);
+            if (isNaN(cache.day[name])) {
+                cache.day[name] = low + (Math.random() * (high - low));
                 _srcNode.context().set('randomNumberCache', cache, store);
             }
-            return cache.d[value];
+            return cache.day[name];
         }
         /**
-         * get a random number for a node cached per week
+         * get a random number for a node cached per day
          * @param {*} _srcNode - source node information
-         * @param {number} value - data object with more information
+         * @param {number} limit1 - lower limit for random number
+         * @param {number} limit2 - upper limit for random number
          * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {number} random number
         */
-        getCachedRandomWeekNumber(_srcNode, value, dNow) {
-            if (isNaN(value)) {
-                return value;
+        getCachedRandomWeekNumber(_srcNode, limit1, limit2, dNow) {
+            // _srcNode.debug(`getCachedRandomWeekNumber limit1=${limit1} limit2=${limit2} dNow=${dNow}`);
+            if (isNaN(limit1)) {
+                _srcNode.error(`the value for random number limit is wrong limit1=${limit1} limit2=${limit2}, using 60`);
+                limit1 = 60;
             }
+            const low = Math.min(limit1, isNaN(limit2) ? 0 : limit2);
+            const high = Math.max(limit1, isNaN(limit2) ? 0 : limit2);
+            const name = 'min_'+low+'_max_'+high;
             const store = _srcNode.contextStore || this.contextStore;
             const cache = this.getNodeNumberCache(_srcNode, dNow, store);
-            if (isNaN(cache.w[value])) {
-                cache.w[value] = Math.random() * ((value || 60) + 1);
+            if (isNaN(cache.week[name])) {
+                cache.week[name] = low + (Math.random() * (high - low));
                 _srcNode.context().set('randomNumberCache', cache, store);
             }
-            return cache.w[value];
+            return cache.week[name];
         }
         /**
          * get a float value from a type input in Node-Red
@@ -1108,15 +1120,25 @@ module.exports = function (RED) {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
-            } else if (data.type === 'randmNumCachedDay ') {
-                const rv = this.getCachedRandomDayNumber(_srcNode, parseFloat(data.value), dNow);
-                return (isNaN(rv) ? 0 : rv);
-            } else if (data.type === 'randmNumCachedWeek ') {
-                const rv = this.getCachedRandomWeekNumber(_srcNode, parseFloat(data.value), dNow);
-                return (isNaN(rv) ? 0 : rv);
+            } else if (data.type === 'randmNumCachedDay') {
+                const val = data.value.split(/((?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)/);
+                return this.getCachedRandomDayNumber(_srcNode, parseFloat(val[1]), parseFloat(val[3]), dNow);
+                // return (isNaN(rv) ? 0 : rv);
+            } else if (data.type === 'randmNumCachedWeek') {
+                const val = data.value.split(/((?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)/);
+                return this.getCachedRandomWeekNumber(_srcNode, parseFloat(val[1]), parseFloat(val[3]), dNow);
+                // return (isNaN(rv) ? 0 : rv);
             } else if (data.type === 'randomNum') {
-                data.value = parseFloat(data.value);
-                return Math.random() * ((data.value || 60) + 1);
+                const val = data.value.split(/((?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)/);
+                const limit1 = parseFloat(val[1]);
+                if (isNaN(limit1)) {
+                    _srcNode.error(`the value for random number limit is wrong "${data.value}", using 60`);
+                    return Math.random() * 60;
+                }
+                const limit2 = parseFloat(val[3]);
+                const low = Math.min(limit1, isNaN(limit2) ? 0 : limit2);
+                const range = Math.max(limit1, isNaN(limit2) ? 0 : limit2) - low;
+                return low + (Math.random() * range);
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {
                     result = msg.payload;
