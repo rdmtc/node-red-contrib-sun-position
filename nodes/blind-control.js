@@ -8,7 +8,6 @@ const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
 const util = require('util');
 const clonedeep = require('lodash.clonedeep');
 const isEqual = require('lodash.isequal');
-const { readFile } = require('fs');
 
 const cRuleUntil = 0;
 const cRuleFrom = 1;
