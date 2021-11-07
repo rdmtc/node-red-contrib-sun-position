@@ -50,7 +50,7 @@
                     },
                     required: false
                 },
-                storeName:  { value: '' },
+                contextStore: {value: ''},
                 results: {
                     value: [
                         {
@@ -254,6 +254,11 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
 
+                const $nodeInputContextStore = $('#node-config-input-contextStore');
+                RED.settings.context.stores.forEach(store => {
+                    $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
+                });
+
                 const tabs = RED.tabs.create({
                     id: 'node-config-clock-timer-tabs',
                     onchange(tab) {
@@ -425,14 +430,14 @@
                                 plVType === types.TimeSun.value ||
                                 plVType === types.TimeMoon.value ||
                                 plVType === types.DateSpecific.value) {
-                                $('.clock-timer-row-payloadDefaultTimeFormat').show();
-                                $('.clock-timer-row-payloadDefaultOffset').show();
+                                $('.rdgtimer-rule-row-payloadDefaultTimeFormat').show();
+                                $('.rdgtimer-rule-row-payloadDefaultOffset').show();
                             } else if (plVType ===  types.TimeSunNow.value) {
-                                $('.clock-timer-row-payloadDefaultTimeFormat').hide();
-                                $('.clock-timer-row-payloadDefaultOffset').show();
+                                $('.rdgtimer-rule-row-payloadDefaultTimeFormat').hide();
+                                $('.rdgtimer-rule-row-payloadDefaultOffset').show();
                             } else {
-                                $('.clock-timer-row-payloadDefaultTimeFormat').hide();
-                                $('.clock-timer-row-payloadDefaultOffset').hide();
+                                $('.rdgtimer-rule-row-payloadDefaultTimeFormat').hide();
+                                $('.rdgtimer-rule-row-payloadDefaultOffset').hide();
                             }
                             getBackendData(d => {
                                 const $div = $('#node-input-payloadDefault-div');
@@ -835,6 +840,7 @@
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
                                 data.version = ruleVersion;
+                                data.enabled = true;
                             }
                             data.index = containerIndex;
                             data.importance = 0;
@@ -1001,36 +1007,67 @@
                             $containerRow.data('ruleData', JSON.stringify(data));
                             $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
 
-                            const $row0 = $('<div/>').appendTo($containerRow);
+                            const $row0 = $('<div/>', {
+                                class: 'rdgtimer-rule-row'
+                            }).appendTo($containerRow);
                             const $div = $('<div/>', {
-                                class: 'clock-timer-rule-mainblock'
+                                class: 'rdgtimer-rule-mainblock'
                             }).appendTo($row0);
                             $('<span />', {
                                 id: 'rule-name-'+containerIndex,
-                                class: 'clock-timer-rule-name-span'
+                                class: 'rdgtimer-rule-name-span'
                             }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
                             $('<div />', {
                                 id: 'rule-description-'+containerIndex,
-                                class: 'clock-timer-rule-description-span'
+                                class: 'rdgtimer-rule-description-span'
                             }).append(data.description).appendTo( $div );
                             const finalspan1 = $('<span/>',{
-                                class:'clock-timer-rule-finalspan'
+                                class:'rdgtimer-rule-finalspan'
                             }).appendTo($row0);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
+
+                            const $ctrldiv = $('<div />', {
+                                class:'rdgtimer-rule-ctrl-div'
+                            }).appendTo( $row0 );
                             const $btnEdit = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small clock-timer-rule-editBtn',
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-editBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.editRule')
-                            }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
+                            }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($ctrldiv);
                             const $btnCpy = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small clock-timer-rule-duplicateBtn',
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-duplicateBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.duplicateRule')
-                            }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
+                            }).append('<i class= "fa fa-clone" ></i>').appendTo($ctrldiv);
+                            const $btnState = $('<a />', {
+                                id: 'rule-btn-state-'+containerIndex,
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-stateBtn',
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleState')
+                            }).append('<i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i>').appendTo($ctrldiv);
+
                             $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
                             });
                             $btnCpy.click(() => {
                                 _dialogDuplicateRule(containerIndex, $containerRow);
                             });
+                            $btnState.click(() => {
+                                const data = JSON.parse($containerRow.data('ruleData'));
+                                data.enabled = (data.enabled === false || data.enabled === 'false');
+                                $containerRow.data('ruleData', JSON.stringify(data));
+                                $btnState.trigger('setRuleEnabledState');
+                            });
+                            $btnState.bind('setRuleEnabledState',() => {
+                                const data = JSON.parse($containerRow.data('ruleData'));
+                                const en = !(data.enabled === false || data.enabled === 'false');
+                                $row0.toggleClass('rule-disabled', !en );
+                                if (en) {
+                                    $btnState.find('.fa-circle-thin').show();
+                                    $btnState.find('.fa-ban').hide();
+                                } else {
+                                    $btnState.find('.fa-circle-thin').hide();
+                                    $btnState.find('.fa-ban').show();
+                                }
+                            });
+                            $btnState.trigger('setRuleEnabledState');
                             resizeRuleContainerCheck(node);
                         },
                         addButton: false,
@@ -1352,18 +1389,43 @@
                             'ui-dialog-content': 'ui-dialog-content-rdg ',
                             'ui-dialog-titlebar': 'ui-dialog-titlebar-rdg'
                         },
-                        buttons: {
-                            Ok() {
-                                _dialogSaveData();
-                                $dialog.dialog( 'close' );
-                                $dialogDataRow = null;
-                                dialogDataIndex = -1;
+                        buttons: [
+                            {
+                                text: 'state',
+                                'class': 'dialog-stateBtn',
+                                'id': 'dlg-ip-btctl-rule-state',
+                                click() {
+                                    const $btn = $('#dialog-edit-rule').parent().find('#dlg-ip-btctl-rule-state');
+                                    const state = !($btn.attr('is_enabled') === false || $btn.attr('is_enabled') === 'false');
+                                    $btn.attr('is_enabled', !state);
+                                    $btn.trigger('setRuleEnabledState');
+                                }
                             },
-                            Cancel() {
-                                $dialog.dialog( 'close' );
-                                $dialogDataRow = null;
-                                dialogDataIndex = -1;
+                            {
+                                text: node._('node-red-contrib-sun-position/position-config:common.label.ok'),
+                                icons: { primary: 'ui-icon-check' },
+                                click() {
+                                    _dialogSaveData();
+                                    $dialog.dialog( 'close' );
+                                    $dialogDataRow = null;
+                                    dialogDataIndex = -1;
+                                }
+                            },
+                            {
+                                text: node._('node-red-contrib-sun-position/position-config:common.label.cancel'),
+                                icons: { primary: 'ui-icon-closethick' },
+                                click() {
+                                    $dialog.dialog( 'close' );
+                                    $dialogDataRow = null;
+                                    dialogDataIndex = -1;
+                                }
                             }
+                        ],
+                        dialogClass: 'overflow-fix',
+                        close() {
+                            $dialog.dialog( 'close' );
+                            $dialogDataRow = null;
+                            dialogDataIndex = -1;
                         }
                     });
 
@@ -1371,6 +1433,19 @@
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
+                    const $dialogRuleEnableBtn = $dialog.parent().find('#dlg-ip-btctl-rule-state');
+                    $dialogRuleEnableBtn.append('<i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i>');
+                    $dialogRuleEnableBtn.bind('setRuleEnabledState',() => {
+                        const state = !($dialogRuleEnableBtn.attr('is_enabled') === false || $dialogRuleEnableBtn.attr('is_enabled') === 'false');
+                        $dialog.toggleClass('rule-disabled', state );
+                        if (state) {
+                            $dialogRuleEnableBtn.text(' '+node._('node-red-contrib-sun-position/position-config:common.label.enabled'));
+                            $dialogRuleEnableBtn.prepend('<i class="fa fa-circle-thin"></i>');
+                        } else {
+                            $dialogRuleEnableBtn.text(' '+node._('node-red-contrib-sun-position/position-config:common.label.disabled'));
+                            $dialogRuleEnableBtn.prepend('<i class="fa fa-ban"></i>');
+                        }
+                    });
                     // #region dialogConditions
                     const $dialogConditionContainer = $dialog.find('#dlg-ip-btctl-rule-condition-container');
                     /** resizes a rule container */
@@ -1602,7 +1677,7 @@
                             _dialogGenHelpText();
                         }
                     }); // condition-container
-                    $('#dlg-ip-btctl-rule-condition-text').html(node._('node-red-contrib-sun-position/position-config:ruleCtrl.text.ruleCondition'));
+                    $dialog.find('#dlg-ip-btctl-rule-condition-text').html(node._('node-red-contrib-sun-position/position-config:ruleCtrl.text.ruleCondition'));
                     // #endregion dialogConditions
                     // #region dialogTimeReg
                     const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
@@ -2156,6 +2231,8 @@
                             dialogDataIndex = containerIndex;
                             const data = JSON.parse($dialogDataRow.data('ruleData'));
                             $dialogName.val(data.name);
+                            $dialogRuleEnableBtn.attr('is_enabled', data.enabled);
+                            $dialogRuleEnableBtn.trigger('setRuleEnabledState');
                             dialogDataOnLoading = true;
                             $dialogConditionContainer.editableList('empty');
                             for (let i = 0; i < data.conditions.length; i++) {
@@ -2279,6 +2356,7 @@
                             index: dialogDataIndex,
                             name:$dialogName.val(),
                             version: ruleVersion,
+                            enabled: !($dialogRuleEnableBtn.attr('is_enabled') === false || $dialogRuleEnableBtn.attr('is_enabled') === 'false'),
                             isValid: true,
                             valid:{
                                 conditions : []
@@ -2416,6 +2494,7 @@
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
                         $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
+                        $('#rule-btn-state-'+dialogDataIndex).trigger('setRuleEnabledState');
                         resizeRuleContainerCheck(node);
                     }
 
@@ -2619,13 +2698,13 @@
                 <input type="text" id="node-input-payloadDefault" data-i18n="[placeholder]clock-timer.placeholder.payloadDefault">
                 <input type="hidden" id="node-input-payloadDefaultType">
             </div>
-            <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
+            <div class="form-row block-indent1 is-initial-hidden rdgtimer-rule-row-payloadDefaultOffset" data-i18n="[title]clock-timer.placeholder.payloadDefaultOffset">
                 <label for="node-input-payloadDefaultOffset"><i class="fa fa-calculator"></i> <span data-i18n="clock-timer.label.payloadDefaultOffset"></span></label>
                 <input id="node-input-payloadDefaultOffset" data-i18n="[placeholder]clock-timer.placeholder.payloadDefaultOffset">
                 <input type="hidden" id="node-input-payloadDefaultOffsetType">
                 <select id="node-input-payloadDefaultOffsetMultiplier" class="node-input-multiplier"></select>
             </div>
-            <div class="form-row block-indent1 is-initial-hidden clock-timer-row-payloadDefaultTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
+            <div class="form-row block-indent1 is-initial-hidden rdgtimer-rule-row-payloadDefaultTimeFormat" data-i18n="[title]clock-timer.placeholder.payloadDefaultFormat">
                 <label for="node-input-payloadDefaultTimeFormatsel"><i class="fa fa-calendar"></i> <span data-i18n="clock-timer.label.payloadDefaultFormat"></span></label>
                 <select id="node-input-payloadDefaultTimeFormatsel">
                 </select>
@@ -2704,6 +2783,12 @@
                     </select>
                     <input type="hidden" id="node-input-startDelayTime"/>
                 </span>
+            </div>
+            <div class="form-row">
+                <label for="node-input-contextStore"><i class="icon-tag"></i> Context Store</label>
+                <select id="node-config-input-contextStore">
+                    <option value="">none</option>
+                </select>
             </div>
             <div class="form-row block-noindent">
                 <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.startDelayTime"></span></span>
@@ -3074,34 +3159,52 @@
     .dlg-ip-btctl-rule-timedatelimit {
         min-width: 140px;
     }
-    .clock-timer-rule-mainblock {
-        margin-right: 28px;
+    .rdgtimer-rule-mainblock {
+        margin-right: 16px; /*28px;*/
     }
-    .clock-timer-rule-name-span {
+    .rdgtimer-rule-name-span {
         width: 30%; /* width: 120px; */
         float: left;
     }
-    .clock-timer-rule-description-span {
+    .rdgtimer-rule-description-span {
         font-size: 10px;
         margin-left: 30%;
         margin-right: 5px;
     }
-    .clock-timer-rule-finalspan {
+    .rdgtimer-rule-finalspan {
         top: 50%;
         position: absolute;
-        right: 66px;
+        right: 28px;
         margin-top: -9px;
     }
-    .clock-timer-rule-editBtn,
-    .clock-timer-rule-duplicateBtn {
+    .rdgtimer-rule-ctrl-div {
+        display: none;
+        /* top: 50%; */
+        /* position: absolute; */
+        /* right: 66px; */
+        /* margin-top: -9px; */
+        /* float: left; */
+    }
+    .rdgtimer-rule-row:hover .rdgtimer-rule-ctrl-div {
+        display: block;
+    }
+    .rule-disabled {
+        color: lightgrey;
+    }
+    .rdgtimer-rule-editBtn,
+    .rdgtimer-rule-duplicateBtn,
+    .rdgtimer-rule-stateBtn {
         position: absolute;
-        right: 28px;
         margin-top: -9px !important;
+        top: 50%;
     }
-    .clock-timer-rule-editBtn {
-        top: 25%;
+    .rdgtimer-rule-editBtn {
+        right: 88px;
     }
-    .clock-timer-rule-duplicateBtn {
-        top: 70%;
+    .rdgtimer-rule-duplicateBtn {
+        right: 28px;
+    }
+    .rdgtimer-rule-stateBtn {
+        right: 58px;
     }
 </style>

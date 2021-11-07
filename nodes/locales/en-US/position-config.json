@@ -25,7 +25,14 @@
             "onlyOddWeeks":"only odd weeks",
             "between":"between",
             "and": "and",
-            "or": "or"
+            "or": "or",
+            "enabled": "enabled",
+            "disabled": "disabled",
+            "cancel":"Cancel",
+            "ok":"Ok",
+            "randNum":"random till",
+            "randNumCachedDay":"random (daily) till",
+            "randNumCachedWeek":"random (weekly) till"
         },
         "types": {
             "unlimited":"no limitation",
@@ -379,6 +386,7 @@
 			"ruleLevelND": "use default level (e.g. sun control)",
 			"editRule": "edit the rule",
 			"duplicateRule": "duplicate the rule",
+            "ruleState": "enables or disables the rule",
 			"ruleTimeFrom": "↧ from",
 			"ruleTimeUntil": "↥ until",
 			"btnAdd": "add",
