@@ -18,6 +18,16 @@ This can be also used to go back to an older Version.
 ### 2.0.1: enhancement
 
 - general
+  - allow to set context store in configuration node #351
+
+- blind-control + clock-time
+  - allow to set context store, if not defined using settings from configuration node, otherwise default #351
+  - readjusted rules UI, edit buttons only visible on mouse over
+  - allows to enable/disable rules #349
+
+### 2.0.1: small fix + enhancement
+
+- general
   - implemented partly #338 + #308
   - fixed randomNumber cached #302
   - implemented randomNumber cached weekly

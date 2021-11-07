@@ -126,6 +126,24 @@ module.exports = function (RED) {
 
     /******************************************************************************************/
     /**
+     * changes the rule settings
+     * @param {Object} node node data
+     * @param {number} [rulePos] the position of the rule which should be changed
+     * @param {string} [ruleName] the name of the rule which should be changed
+     * @param {Object} ruleData the properties of the rule which should be changed
+     */
+    function changeRules(node, rulePos, ruleName, ruleData) {
+        node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
+        for (let i = 0; i <= node.rules.count; ++i) {
+            const rule = node.rules[i];
+            if (((typeof rulePos !== 'undefined') && rule.pos === rulePos) ||
+                ((typeof ruleName !== 'undefined') && rule.name === ruleName)) {
+                node.rules[i] = Object.assign(node.rules[i], ruleData);
+            }
+        }
+    }
+    /******************************************************************************************/
+    /**
      * check all rules and determinate the active rule
      * @param {Object} node node data
      * @param {Object} msg the message object
@@ -144,6 +162,7 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
+            if (!rule.enabled) { continue; }
             // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (rule.time && rule.time.operator === cRuleFrom) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
@@ -167,6 +186,7 @@ module.exports = function (RED) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
+                if (!rule.enabled) { continue; }
                 // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
                 if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
@@ -426,6 +446,18 @@ module.exports = function (RED) {
                         case 'setCntextStore':
                             node.contextStore = msg.payload || node.contextStore;
                             break;
+                        case 'disableRule':
+                            changeRules(node, undefined, msg.payload, { enabled: false });
+                            break;
+                        case 'enableRule':
+                            changeRules(node, undefined, msg.payload, { enabled: true });
+                            break;
+                        case 'disableRuleByPos':
+                            changeRules(node, parseInt(msg.payload), undefined, { enabled: false });
+                            break;
+                        case 'enableRuleByPos':
+                            changeRules(node, parseInt(msg.payload), undefined, { enabled: true });
+                            break;
                         default:
                             break;
                     }
@@ -603,4 +635,24 @@ module.exports = function (RED) {
     }
 
     RED.nodes.registerType('clock-timer', clockTimerNode);
+
+    RED.httpAdmin.post('/clock-timer/:id', RED.auth.needsPermission('clock-timer.write'), (req, res) => {
+        const node = RED.nodes.getNode(req.params.id);
+        if (node !== null && typeof node !== 'undefined') {
+            try {
+                if (req.body && req.body.ruleData) {
+                    changeRules(node, req.body.rulePos, req.body.ruleName, req.body.ruleData);
+                }
+                res.sendStatus(200);
+            } catch(err) {
+                res.sendStatus(500);
+                node.error(RED._('node-red:inject.failed',{error:err.toString()}));
+            }
+        } else {
+            res.status(404).send(JSON.stringify({
+                error: 'can not find node "' +req.params.id+'" '+String(node)
+            }));
+            return;
+        }
+    });
 };

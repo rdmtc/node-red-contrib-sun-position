@@ -23,7 +23,11 @@
             "onlyOddWeeks":"nur ungerade Wochen",
             "between":"zwischen",
             "and": "und",
-			"or": "oder"
+			"or": "oder",
+            "enabled": "aktiviert",
+            "disabled": "deaktiviert",
+            "cancel":"Abbrechen",
+            "ok":"Ok"
         },
         "types": {
             "unlimited": "keine Limitierung",
@@ -362,6 +366,7 @@
 			"ruleLevelND": "standard level (e.g. sun control)",
 			"editRule": "Regel editieren",
 			"duplicateRule": "Regel duplizieren",
+            "ruleState": "aktiviert oder deaktiviert die Regel",
 			"ruleTimeFrom": "↧ von",
 			"ruleTimeUntil": "↥ bis",
 			"btnAdd": "hinzufügen",

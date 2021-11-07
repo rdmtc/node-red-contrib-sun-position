@@ -1360,63 +1360,41 @@
                             $containerRow.data('ruleData', JSON.stringify(data));
                             $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
 
-                            const $row0 = $('<div/>').appendTo($containerRow);
+                            const $row0 = $('<div/>', {
+                                class: 'rdgtimer-rule-row'
+                            }).appendTo($containerRow);
                             const $div = $('<div/>', {
-                                class: 'blind-rule-mainblock'
+                                class: 'rdgtimer-rule-mainblock'
                             }).appendTo($row0);
                             $('<span />', {
                                 id: 'rule-name-'+containerIndex,
-                                class: 'blind-rule-name-span'
+                                class: 'rdgtimer-rule-name-span'
                             }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
                             $('<div />', {
                                 id: 'rule-description-'+containerIndex,
-                                class: 'blind-rule-description-span'
+                                class: 'rdgtimer-rule-description-span'
                             }).append(data.description).appendTo( $div );
-
-                            const $sdiv = $('<div />', {
-                                class:'blind-rule-finalspan'
-                            }).appendTo( $row0 );
-
                             const finalspan1 = $('<span/>',{
-                                class:'blind-rule-finalspan-text'
-                            }).appendTo($sdiv);
+                                class:'rdgtimer-rule-finalspan'
+                            }).appendTo($row0);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
 
-                            // red-ui-info-outline-item red-ui-info-outline-item-flow red-ui-info-outline-item-disabled
-                            // red-ui-info-outline-item red-ui-info-outline-item-flow
-                            const $btnDEnable = $('<div />', {
-                                class: 'red-ui-info-outline-item-controls red-ui-info-outline-item-hover-controls blind-rule-enablebtn'
-                            }).appendTo($sdiv);
-                            /* const $btnEnable = $('<button />', {
-                                type: 'button',
-                                class: 'red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small'
-                            }).appendTo($btnDEnable);
-                            $btnEnable.append('<i class="fa fa-circle-thin" />','<i class="fa fa-ban" />'); */
-
-                            const $toggleButton = $('<button type="button" class="red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small"><i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i></button>')
-                                .appendTo($btnDEnable)
-                                .on('click', evt => {
-                                    evt.preventDefault();
-                                    evt.stopPropagation();
-                                });
-
-                            /* const $btnDEnable = $('<div />', {
-                                class: 'red-ui-info-outline-item-controls red-ui-info-outline-item-hover-controls'
-                            }).append('<button type="button" class="red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small" />')
-                                .append('<i class="fa fa-circle-thin" />','<i class="fa fa-ban" />').appendTo($sdiv); */
-
+                            const $ctrldiv = $('<div />', {
+                                class:'rdgtimer-rule-ctrl-div'
+                            }).appendTo( $row0 );
                             const $btnEdit = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small blind-rule-editBtn',
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-editBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.editRule')
-                            }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($row0);
+                            }).append('<i class= "fa fa-pencil-square-o" ></i>').appendTo($ctrldiv);
                             const $btnCpy = $('<a />', {
-                                class: 'red-ui-button red-ui-button-small blind-rule-duplicateBtn',
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-duplicateBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.duplicateRule')
-                            }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
-
-                            $btnDEnable.click(() => {
-                                $btnDEnable.toggleClass('red-ui-info-outline-item-disabled');
-                            });
+                            }).append('<i class= "fa fa-clone" ></i>').appendTo($ctrldiv);
+                            const $btnState = $('<a />', {
+                                id: 'rule-btn-state-'+containerIndex,
+                                class: 'red-ui-button red-ui-button-small rdgtimer-rule-stateBtn',
+                                title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleState')
+                            }).append('<i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i>').appendTo($ctrldiv);
 
                             $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
@@ -1424,6 +1402,25 @@
                             $btnCpy.click(() => {
                                 _dialogDuplicateRule(containerIndex, $containerRow);
                             });
+                            $btnState.click(() => {
+                                const data = JSON.parse($containerRow.data('ruleData'));
+                                data.enabled = (data.enabled === false || data.enabled === 'false');
+                                $containerRow.data('ruleData', JSON.stringify(data));
+                                $btnState.trigger('setRuleEnabledState');
+                            });
+                            $btnState.bind('setRuleEnabledState',() => {
+                                const data = JSON.parse($containerRow.data('ruleData'));
+                                const en = !(data.enabled === false || data.enabled === 'false');
+                                $row0.toggleClass('rule-disabled', !en );
+                                if (en) {
+                                    $btnState.find('.fa-circle-thin').show();
+                                    $btnState.find('.fa-ban').hide();
+                                } else {
+                                    $btnState.find('.fa-circle-thin').hide();
+                                    $btnState.find('.fa-ban').show();
+                                }
+                            });
+                            $btnState.trigger('setRuleEnabledState');
                             resizeRuleContainerCheck(node);
                         },
                         addButton: false,
@@ -2240,18 +2237,43 @@
                             'ui-dialog-content': 'ui-dialog-content-rdg ',
                             'ui-dialog-titlebar': 'ui-dialog-titlebar-rdg'
                         },
-                        buttons: {
-                            Ok() {
-                                _dialogSaveData();
-                                $dialog.dialog( 'close' );
-                                $dialogDataRow = null;
-                                dialogDataIndex = -1;
+                        buttons: [
+                            {
+                                text: 'state',
+                                'class': 'dialog-stateBtn',
+                                'id': 'dlg-ip-btctl-rule-state',
+                                click() {
+                                    const $btn = $('#dialog-edit-rule').parent().find('#dlg-ip-btctl-rule-state');
+                                    const state = !($btn.attr('is_enabled') === false || $btn.attr('is_enabled') === 'false');
+                                    $btn.attr('is_enabled', !state);
+                                    $btn.trigger('setRuleEnabledState');
+                                }
                             },
-                            Cancel() {
-                                $dialog.dialog( 'close' );
-                                $dialogDataRow = null;
-                                dialogDataIndex = -1;
+                            {
+                                text: node._('node-red-contrib-sun-position/position-config:common.label.ok'),
+                                icons: { primary: 'ui-icon-check' },
+                                click() {
+                                    _dialogSaveData();
+                                    $dialog.dialog( 'close' );
+                                    $dialogDataRow = null;
+                                    dialogDataIndex = -1;
+                                }
+                            },
+                            {
+                                text: node._('node-red-contrib-sun-position/position-config:common.label.cancel'),
+                                icons: { primary: 'ui-icon-closethick' },
+                                click() {
+                                    $dialog.dialog( 'close' );
+                                    $dialogDataRow = null;
+                                    dialogDataIndex = -1;
+                                }
                             }
+                        ],
+                        dialogClass: 'overflow-fix',
+                        close() {
+                            $dialog.dialog( 'close' );
+                            $dialogDataRow = null;
+                            dialogDataIndex = -1;
                         }
                     });
 
@@ -2259,6 +2281,19 @@
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
+                    const $dialogRuleEnableBtn = $dialog.parent().find('#dlg-ip-btctl-rule-state');
+                    $dialogRuleEnableBtn.append('<i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i>');
+                    $dialogRuleEnableBtn.bind('setRuleEnabledState',() => {
+                        const state = !($dialogRuleEnableBtn.attr('is_enabled') === false || $dialogRuleEnableBtn.attr('is_enabled') === 'false');
+                        $dialog.toggleClass('rule-disabled', state );
+                        if (state) {
+                            $dialogRuleEnableBtn.text(' '+node._('node-red-contrib-sun-position/position-config:common.label.enabled'));
+                            $dialogRuleEnableBtn.prepend('<i class="fa fa-circle-thin"></i>');
+                        } else {
+                            $dialogRuleEnableBtn.text(' '+node._('node-red-contrib-sun-position/position-config:common.label.disabled'));
+                            $dialogRuleEnableBtn.prepend('<i class="fa fa-ban"></i>');
+                        }
+                    });
                     // #region dialogConditions
                     const $dialogConditionContainer = $dialog.find('#dlg-ip-btctl-rule-condition-container');
                     /** resizes a rule container */
@@ -3025,6 +3060,8 @@
                             dialogDataIndex = containerIndex;
                             const data = JSON.parse($dialogDataRow.data('ruleData'));
                             $dialogName.val(data.name);
+                            $dialogRuleEnableBtn.attr('is_enabled', data.enabled);
+                            $dialogRuleEnableBtn.trigger('setRuleEnabledState');
                             dialogDataOnLoading = true;
                             $dialogConditionContainer.editableList('empty');
                             for (let i = 0; i < data.conditions.length; i++) {
@@ -3147,6 +3184,7 @@
                             index: dialogDataIndex,
                             name:$dialogName.val(),
                             version: ruleVersion,
+                            enabled: !($dialogRuleEnableBtn.attr('is_enabled') === false || $dialogRuleEnableBtn.attr('is_enabled') === 'false'),
                             isValid: true,
                             valid:{
                                 conditions : []
@@ -3317,6 +3355,7 @@
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
                         $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
+                        $('#rule-btn-state-'+dialogDataIndex).trigger('setRuleEnabledState');
                         resizeRuleContainerCheck(node);
                     }
 
@@ -4168,41 +4207,52 @@
     .dlg-ip-btctl-rule-timedatelimit {
         min-width: 140px;
     }
-    .blind-rule-mainblock {
+    .rdgtimer-rule-mainblock {
         margin-right: 28px;
     }
-    .blind-rule-name-span {
+    .rdgtimer-rule-name-span {
         width: 30%; /* width: 120px; */
         float: left;
     }
-    .blind-rule-description-span {
+    .rdgtimer-rule-description-span {
         font-size: 10px;
         margin-left: 30%;
         margin-right: 5px;
     }
-    .blind-rule-finalspan {
+    .rdgtimer-rule-finalspan {
         top: 50%;
         position: absolute;
-        right: 66px;
+        right: 28px;
         margin-top: -9px;
     }
-    .blind-rule-enablebtn {
+    .rdgtimer-rule-ctrl-div {
         display: none;
+        /* top: 50%; */
+        /* position: absolute; */
+        /* right: 66px; */
+        /* margin-top: -9px; */
+        /* float: left; */
     }
-    .blind-rule-finalspan:hover + .blind-rule-enablebtn {
+    .rdgtimer-rule-row:hover .rdgtimer-rule-ctrl-div {
         display: block;
     }
-
-    .blind-rule-editBtn,
-    .blind-rule-duplicateBtn {
+    .rule-disabled {
+        color: lightgrey;
+    }
+    .rdgtimer-rule-editBtn,
+    .rdgtimer-rule-duplicateBtn,
+    .rdgtimer-rule-stateBtn {
         position: absolute;
-        right: 28px;
         margin-top: -9px !important;
+        top: 50%;
     }
-    .blind-rule-editBtn {
-        top: 25%;
+    .rdgtimer-rule-editBtn {
+        right: 88px;
     }
-    .blind-rule-duplicateBtn {
-        top: 70%;
+    .rdgtimer-rule-duplicateBtn {
+        right: 28px;
+    }
+    .rdgtimer-rule-stateBtn {
+        right: 58px;
     }
 </style>
