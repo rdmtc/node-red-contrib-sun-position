@@ -33,6 +33,7 @@ module.exports = function (RED) {
                 this.angleType = config.angleType;
                 this.tzOffset = parseInt(config.timeZoneOffset || 99);
                 this.tzDST = parseInt(config.timeZoneDST || 0);
+                this.contextStore = config.contextStore;
 
                 this.cache = {
                     lastSunCalc: {
@@ -544,8 +545,8 @@ module.exports = function (RED) {
          * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {*} random number cache
         */
-        getNodeNumberCache(_srcNode, dNow) {
-            const cache = _srcNode.context().get('randomNumberCache') || {};
+        getNodeNumberCache(_srcNode, dNow, store) {
+            const cache = _srcNode.context().get('randomNumberCache', store) || {};
             if (!cache.day || cache.day.v !== dNow.getDate()) {
                 cache.day = {
                     v : dNow.getDate()
@@ -570,10 +571,11 @@ module.exports = function (RED) {
             if (isNaN(value)) {
                 return value;
             }
-            const cache = this.getNodeNumberCache(_srcNode, dNow);
+            const store = _srcNode.contextStore || this.contextStore;
+            const cache = this.getNodeNumberCache(_srcNode, dNow, store);
             if (isNaN(cache.d[value])) {
                 cache.d[value] = Math.random() * ((value || 60) + 1);
-                _srcNode.context().set('randomNumberCache', cache);
+                _srcNode.context().set('randomNumberCache', cache, store);
             }
             return cache.d[value];
         }
@@ -588,10 +590,11 @@ module.exports = function (RED) {
             if (isNaN(value)) {
                 return value;
             }
-            const cache = this.getNodeNumberCache(_srcNode, dNow);
+            const store = _srcNode.contextStore || this.contextStore;
+            const cache = this.getNodeNumberCache(_srcNode, dNow, store);
             if (isNaN(cache.w[value])) {
                 cache.w[value] = Math.random() * ((value || 60) + 1);
-                _srcNode.context().set('randomNumberCache', cache);
+                _srcNode.context().set('randomNumberCache', cache, store);
             }
             return cache.w[value];
         }

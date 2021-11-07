@@ -87,7 +87,7 @@
                     },
                     required: false
                 },
-                storeName:  { value: '' },
+                contextStore: {value: ''},
                 results: {
                     value: [
                         {
@@ -482,6 +482,11 @@
 
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
+
+                const $nodeInputContextStore = $('#node-config-input-contextStore');
+                RED.settings.context.stores.forEach(store => {
+                    $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
+                });
 
                 const tabs = RED.tabs.create({
                     id: 'node-config-blind-control-tabs',
@@ -1185,6 +1190,7 @@
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
                                 data.version = ruleVersion;
+                                data.enabled = true;
                             }
                             data.index = containerIndex;
                             data.importance = 0;
@@ -1366,10 +1372,39 @@
                                 id: 'rule-description-'+containerIndex,
                                 class: 'blind-rule-description-span'
                             }).append(data.description).appendTo( $div );
-                            const finalspan1 = $('<span/>',{
+
+                            const $sdiv = $('<div />', {
                                 class:'blind-rule-finalspan'
-                            }).appendTo($row0);
+                            }).appendTo( $row0 );
+
+                            const finalspan1 = $('<span/>',{
+                                class:'blind-rule-finalspan-text'
+                            }).appendTo($sdiv);
                             finalspan1.append('<span class="node-input-rule-index">'+(containerIndex+1)+'</span> ');
+
+                            // red-ui-info-outline-item red-ui-info-outline-item-flow red-ui-info-outline-item-disabled
+                            // red-ui-info-outline-item red-ui-info-outline-item-flow
+                            const $btnDEnable = $('<div />', {
+                                class: 'red-ui-info-outline-item-controls red-ui-info-outline-item-hover-controls blind-rule-enablebtn'
+                            }).appendTo($sdiv);
+                            /* const $btnEnable = $('<button />', {
+                                type: 'button',
+                                class: 'red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small'
+                            }).appendTo($btnDEnable);
+                            $btnEnable.append('<i class="fa fa-circle-thin" />','<i class="fa fa-ban" />'); */
+
+                            const $toggleButton = $('<button type="button" class="red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small"><i class="fa fa-circle-thin"></i><i class="fa fa-ban"></i></button>')
+                                .appendTo($btnDEnable)
+                                .on('click', evt => {
+                                    evt.preventDefault();
+                                    evt.stopPropagation();
+                                });
+
+                            /* const $btnDEnable = $('<div />', {
+                                class: 'red-ui-info-outline-item-controls red-ui-info-outline-item-hover-controls'
+                            }).append('<button type="button" class="red-ui-info-outline-item-control-disable red-ui-button red-ui-button-small" />')
+                                .append('<i class="fa fa-circle-thin" />','<i class="fa fa-ban" />').appendTo($sdiv); */
+
                             const $btnEdit = $('<a />', {
                                 class: 'red-ui-button red-ui-button-small blind-rule-editBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.editRule')
@@ -1378,6 +1413,11 @@
                                 class: 'red-ui-button red-ui-button-small blind-rule-duplicateBtn',
                                 title: node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.duplicateRule')
                             }).append('<i class= "fa fa-clone" ></i>').appendTo($row0);
+
+                            $btnDEnable.click(() => {
+                                $btnDEnable.toggleClass('red-ui-info-outline-item-disabled');
+                            });
+
                             $btnEdit.click(() => {
                                 _dialogLoadData(containerIndex, $containerRow);
                             });
@@ -3756,6 +3796,12 @@
                     <input type="hidden" id="node-input-startDelayTime"/>
                 </span>
             </div>
+            <div class="form-row">
+                <label for="node-input-contextStore"><i class="icon-tag"></i> Context Store</label>
+                <select id="node-config-input-contextStore">
+                    <option value="">none</option>
+                </select>
+            </div>
             <div class="form-row block-noindent">
                 <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.startDelayTime"></span></span>
             </div>
@@ -4140,6 +4186,13 @@
         right: 66px;
         margin-top: -9px;
     }
+    .blind-rule-enablebtn {
+        display: none;
+    }
+    .blind-rule-finalspan:hover + .blind-rule-enablebtn {
+        display: block;
+    }
+
     .blind-rule-editBtn,
     .blind-rule-duplicateBtn {
         position: absolute;

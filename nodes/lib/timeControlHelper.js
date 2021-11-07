@@ -88,7 +88,7 @@ function posOverwriteReset(node) {
     if (node.nodeData.overwrite.expireTs || node.nodeData.overwrite.expires) {
         deleteExpireProp(node);
     }
-    node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
+    node.context().set('overwrite', node.nodeData.overwrite, node.contextStore);
 }
 
 /**
@@ -114,7 +114,7 @@ function setExpiringOverwrite(node, oNow, dExpire, reason) {
         node.log(`Overwrite is set which never expire (${reason})`);
         node.debug(`expireNever expire=${dExpire}ms ${  typeof dExpire  } - isNaN=${  isNaN(dExpire)  } - finite=${  !isFinite(dExpire)  } - min=${  dExpire < 100}`);
         deleteExpireProp(node);
-        node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
+        node.context().set('overwrite', node.nodeData.overwrite, node.contextStore);
         return;
     }
     node.nodeData.overwrite.expireTs = (oNow.nowNr + dExpire);
@@ -130,7 +130,7 @@ function setExpiringOverwrite(node, oNow, dExpire, reason) {
         posOverwriteReset(node);
         node.emit('input', { payload: -1, topic: 'internal-triggerOnly-overwriteExpired', force: false });
     }, dExpire);
-    node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
+    node.context().set('overwrite', node.nodeData.overwrite, node.contextStore);
 }
 
 /**

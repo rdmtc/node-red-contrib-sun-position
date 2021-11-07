@@ -271,7 +271,7 @@ module.exports = function (RED) {
                 node.nodeData.overwrite.importance = nImportance;
             }
             node.nodeData.overwrite.active = true;
-            node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
+            node.context().set('overwrite', node.nodeData.overwrite, node.contextStore);
         } else if (node.nodeData.overwrite.active) {
             node.debug(`overwrite active, check of nImportance=${nImportance} or nExpire=${nExpire}`);
             if (Number.isFinite(nExpire)) {
@@ -283,7 +283,7 @@ module.exports = function (RED) {
                 // set to new importance
                 node.nodeData.overwrite.importance = nImportance;
             }
-            node.context().set('overwrite', node.nodeData.overwrite, node.storeName);
+            node.context().set('overwrite', node.nodeData.overwrite, node.contextStore);
         }
         // node.debug(`overwrite exit node.nodeData.overwrite.active=${node.nodeData.overwrite.active}; expire=${nExpire};  newPos=${newPos}`);
         return ctrlLib.setOverwriteReason(node);
@@ -790,7 +790,7 @@ module.exports = function (RED) {
         };
         // temporary node Data
         node.levelReverse = false;
-        node.storeName = config.storeName || '';
+        node.contextStore = config.contextStore || this.positionConfig.contextStore;
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
@@ -840,7 +840,7 @@ module.exports = function (RED) {
             addId: config.addId,
             addIdType: config.addIdType||'none',
             /** The override settings */
-            overwrite: node.context().get('overwrite', node.storeName) || {
+            overwrite: node.context().get('overwrite', node.contextStore) || {
                 active: false,
                 importance: 0
             }
@@ -982,7 +982,7 @@ module.exports = function (RED) {
             current: NaN, // unknown
             currentInverse: NaN
         };
-        node.previousData = node.context().get('previous', node.storeName) || {
+        node.previousData = node.context().get('previous', node.contextStore) || {
             level: NaN, // unknown
             reasonCode: -1,
             usedRule: NaN,
@@ -1055,7 +1055,7 @@ module.exports = function (RED) {
                 if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
                     node.debug(`set mode from ${node.sunData.mode} to ${newMode}`);
                     node.sunData.mode = newMode;
-                    node.context().set('mode', newMode, node.storeName);
+                    node.context().set('mode', newMode, node.contextStore);
                 }
 
                 if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
@@ -1092,8 +1092,8 @@ module.exports = function (RED) {
                         case 'setAutoTriggerTime':
                             node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime;
                             break;
-                        case 'setStoreName':
-                            node.storeName = msg.payload || node.storeName;
+                        case 'setContextStore':
+                            node.contextStore = msg.payload || node.contextStore;
                             break;
                         default:
                             break;
@@ -1108,7 +1108,7 @@ module.exports = function (RED) {
 
                 // initialize
                 node.nowarn = {};
-                const tempData = node.context().get('cacheData',node.storeName) || {};
+                const tempData = node.context().get('cacheData',node.contextStore) || {};
                 if (!isNaN(node.level.current)) {
                     node.previousData.level = node.level.current;
                     node.previousData.levelInverse = node.level.currentInverse;
@@ -1117,7 +1117,7 @@ module.exports = function (RED) {
                     node.previousData.reasonCode = node.reason.code;
                     node.previousData.reasonState = node.reason.state;
                     node.previousData.reasonDescription = node.reason.description;
-                    node.context().set('previous', node.previousData, node.storeName);
+                    node.context().set('previous', node.previousData, node.contextStore);
                 }
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
@@ -1157,7 +1157,7 @@ module.exports = function (RED) {
                     node.previousData.last.ruleId = blindCtrl.rule.id;
                     node.previousData.last.ruleLevel = blindCtrl.rule.level;
                     node.previousData.last.ruleTopic = blindCtrl.rule.topic;
-                    node.context().set('previous', node.previousData, node.storeName);
+                    node.context().set('previous', node.previousData, node.contextStore);
                     if (blindCtrl.rule.isOff === true) {
                         // rule set the controller off
                         done();
@@ -1264,7 +1264,7 @@ module.exports = function (RED) {
                     state: node.reason.state,
                     description: node.reason.description,
                     rule: ruleId,
-                    mode: node.context().get('mode', node.storeName) || node.sunData.mode,
+                    mode: node.context().get('mode', node.contextStore) || node.sunData.mode,
                     topic: msg.topic,
                     payload: msg.payload
                 };
@@ -1309,7 +1309,7 @@ module.exports = function (RED) {
                 if (isNaN(ruleId)) {
                     node.previousData.usedRule = ruleId;
                 }
-                node.context().set('cacheData', tempData, node.storeName);
+                node.context().set('cacheData', tempData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {

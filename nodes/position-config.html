@@ -62,7 +62,8 @@
                 },
                 stateDateFormat: {
                     value: 12 // 12 - date.toLocaleDateString()
-                }
+                },
+                contextStore: {value: ''}
             },
             label() {
                 return this.name || 'timeControl';
@@ -74,6 +75,12 @@
                 }, 300);
                 $('#node-config-map-row').hide();
                 const node = this;
+
+                const $nodeInputContextStore = $('#node-config-input-contextStore');
+                RED.settings.context.stores.forEach(store => {
+                    $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
+                });
+
                 let tsOffset = parseInt($('#node-config-input-timeZoneOffset').val());
                 if (isNaN(tsOffset) || tsOffset >= 99 || tsOffset <= -99) {
                     this.timeZoneOffset = 99;
@@ -597,6 +604,13 @@
         <label for="node-config-input-stateTimeFormatSel"><i class="fa fa-clock-o"></i> <span data-i18n="position-config.label.stateTimeFormat"></span></label>
         <select id="node-config-input-stateTimeFormatSel" data-i18n="[placeholder]position-config.placeholder.stateTimeFormat"></select>
         <input type="text" id="node-config-input-stateTimeFormat" data-i18n="[placeholder]position-config.placeholder.stateTimeFormat">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-contextStore"><i class="icon-tag"></i> Context Store</label>
+        <select id="node-config-input-contextStore">
+            <option value="">none</option>
+        </select>
     </div>
 
     <hr>
