@@ -675,7 +675,7 @@ function initializeCtrl(REDLib, node, config) {
         }
         /// check generic rule settings
         rule.name = rule.name || 'rule ' + rule.pos;
-        rule.enabled = (rule.enabled !== false || rule.enabled !== 'false');
+        rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
         if (rule.payload || (rule.level && (rule.level.operator === cRuleAbsolute))) {
             rule.importance = Number(rule.importance) || 0;

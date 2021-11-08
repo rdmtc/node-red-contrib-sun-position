@@ -558,8 +558,8 @@ module.exports = function (RED) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                if (!rule.enabled) { continue; }
                 // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                if (!rule.enabled) { continue; }
                 if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
