@@ -9,7 +9,7 @@
         const cNBC_RULE_TYPE_UNTIL = 0;
         const cNBC_RULE_TYPE_FROM = 1;
         const cNBC_RULE_OP = {
-            levelAbsolute : 0,
+            absolute : 0,
             levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
             levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
             slatOversteer : 5,
@@ -1091,7 +1091,7 @@
                             }
                             result += '<div>';
                             if (data.level) {
-                                if (data.level.operator <= cNBC_RULE_OP.levelAbsolute || data.levelType === types.LevelND.value) {
+                                if (data.level.operator <= cNBC_RULE_OP.absolute || data.levelType === types.LevelND.value) {
                                     if (typeof data.level.type !== 'undefined' && data.level.type !== types.LevelND.value) {
                                         result += '<div class="indent-level-text"> <i class="fa fa-angle-down" aria-hidden="true"></i><span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevel');
@@ -2736,7 +2736,7 @@
                     }).change(() => { $dialogLevelOperator.change(); });
                     $dialogLevel.typedInput('width', '40%');
                     const $dialogLevelOperator = $dialog.find('#dlg-ip-btctl-rule-level-operator');
-                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelAbsolute      ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
+                    $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.absolute           ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')));
                     $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelMinOversteer  ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMin')));
                     $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.levelMaxOversteer  ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelMax')));
                     $dialogLevelOperator.append($('<option></option>').val(cNBC_RULE_OP.slatOversteer      ).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlatOversteer')));

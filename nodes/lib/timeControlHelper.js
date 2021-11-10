@@ -7,6 +7,25 @@ const path = require('path');
 const util = require('util');
 const hlp = require( path.resolve( __dirname, './dateTimeHelper.js') );
 
+const cRuleTime = {
+    until: 0,
+    from: 1,
+    at: 2
+}
+const cRuleType = {
+    absolute : 0,
+    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+    slatOversteer : 5,
+    topicOversteer : 8,
+    off : 9
+};
+
+const cRuleDefault = -1;
+const cRuleLogOperatorAnd = 2;
+const cRuleLogOperatorOr = 1;
+
+
 module.exports = {
     evalTempData,
     posOverwriteReset,
@@ -17,19 +36,17 @@ module.exports = {
     getRuleTimeData,
     validPosition,
     compareRules,
-    initializeCtrl
+    checkRules,
+    initializeCtrl,
+    cRuleTime,
+    cRuleType,
+    cRuleDefault,
+    cRuleLogOperatorAnd,
+    cRuleLogOperatorOr
 };
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-// const cRuleNone = 0;
-// const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-// const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cRuleLogOperatorAnd = 2;
-const cRuleLogOperatorOr = 1;
 let RED = null;
-
+/******************************************************************************************/
 /**
  * evaluate temporary Data
  * @param {*} node   node Data
@@ -395,6 +412,138 @@ function compareRules(node, msg, rule, cmp, data) {
     }
     return null;
 }
+/******************************************************************************************/
+/**
+ * check all rules and determinate the active rule
+ * @param {Object} node node data
+ * @param {Object} msg the message object
+ * @param {ITimeObject} oNow the *current* date Object
+ * @param {Object} tempData the object storing the temporary caching data
+ * @returns the active rule or null
+ */
+function checkRules(node, msg, oNow, tempData) {
+    // node.debug('checkRules --------------------');
+    const livingRuleData = {};
+    prepareRules(node, msg, tempData, oNow.dNow);
+    // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+    const result = {
+        ruleindex : -1,
+        ruleSel : null
+    }
+
+    // node.debug('first loop count:' + node.rules.count + ' lastAt:' + node.rules.lastAt + ' lastuntil:' + node.rules.lastUntil);
+    if (node.rules.atCount > 0) {
+        for (let i = 0; i <= node.rules.lastAt; ++i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled) { continue; }
+            if (rule.time && rule.time.operator !== cRuleTime.at) { continue; }
+            // const res = fktCheck(rule, r => (r >= nowNr));
+            const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater than rule time
+            if (res) {
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === cRuleType.slatOversteer) {
+                    result.ruleSlatOvs = res;
+                } else if (res.level.operator === cRuleType.topicOversteer) {
+                    result.ruleTopicOvs = res;
+                } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                    result.ruleSelMin = res;
+                } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                    result.ruleSelMax = res;
+                } else {
+                    result.ruleSel = res;
+                    result.ruleindex = i;
+                }
+            } else if (rule.time) {
+                // break on the first at rule, where the time does not match
+                break;
+            }
+        }
+    }
+
+    if (!result.ruleSel) {
+        for (let i = 0; i <= node.rules.lastUntil; ++i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled) { continue; }
+            if (rule.time && rule.time.operator !== cRuleTime.until) { continue; }
+            // const res = fktCheck(rule, r => (r >= nowNr));
+            const res = compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow); // now is less time
+            if (res) {
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === cRuleType.slatOversteer) {
+                    result.ruleSlatOvs = res;
+                } else if (res.level.operator === cRuleType.topicOversteer) {
+                    result.ruleTopicOvs = res;
+                } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                    result.ruleSelMin = res;
+                } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                    result.ruleSelMax = res;
+                } else {
+                    result.ruleSel = res;
+                    result.ruleindex = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!result.ruleSel) {
+        for (let i = 0; i < node.rules.count; ++i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled) { continue; }
+            if (rule.time && rule.time.operator !== cRuleTime.from) { continue; }
+            // const res = fktCheck(rule, r => (r >= nowNr));
+            const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater than rule time
+            if (res) {
+                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === cRuleType.slatOversteer) {
+                    result.ruleSlatOvs = res;
+                } else if (res.level.operator === cRuleType.topicOversteer) {
+                    result.ruleTopicOvs = res;
+                } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                    result.ruleSelMin = res;
+                } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                    result.ruleSelMax = res;
+                } else {
+                    result.ruleSel = res;
+                    result.ruleindex = i;
+                }
+            } else if (rule.time) {
+                // break on the first at rule, where the time does not match
+                break;
+            }
+        }
+        // node.debug('--------- starting second loop ' + node.rules.count);
+        /*
+        for (let i = (node.rules.count - 1); i >= 0; --i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleTime.until) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled) { continue; }
+            if (rule.time && rule.time.operator !== cRuleTime.from) { continue; } // - From: timeOp === cRuleTime.from
+            const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater time
+            if (res) {
+                // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === cRuleType.slatOversteer) {
+                    result.ruleSlatOvs = res;
+                } else if (res.level.operator === cRuleType.topicOversteer) {
+                    result.ruleTopicOvs = res;
+                } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                    result.ruleSelMin = res;
+                } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                    result.ruleSelMax = res;
+                } else {
+                    result.ruleSel = res;
+                    break;
+                }
+            }
+        }
+        */
+    }
+
+    return result;
+}
 /*************************************************************************************************************************/
 /**
  * check if a level has a valid value
@@ -510,6 +659,8 @@ function initializeCtrl(REDLib, node, config) {
     node.rules.count = node.rules.data.length;
     node.rules.lastUntil = node.rules.count -1;
     node.rules.firstFrom = node.rules.lastUntil;
+    node.rules.lastAt = node.rules.count -1;
+    node.rules.atCount = 0;
     node.rules.firstTimeLimited = node.rules.count;
     node.rules.maxImportance = 0;
     node.rules.canResetOverwrite = false;
@@ -566,7 +717,7 @@ function initializeCtrl(REDLib, node, config) {
                 rule.time = {
                     type            : rule.timeType,
                     value           : (rule.timeValue || ''),
-                    operator        : (parseInt(rule.timeOp) || cRuleUntil),
+                    operator        : (parseInt(rule.timeOp) || cRuleTime.until),
                     offsetType      : (rule.offsetType || 'none'),
                     offset          : (rule.offsetValue || 1),
                     multiplier      : (parseInt(rule.multiplier) || 60000),
@@ -632,7 +783,7 @@ function initializeCtrl(REDLib, node, config) {
                 rule.level = {
                     type            : (rule.levelType || 'levelFixed'),
                     value           : (rule.levelValue || 'closed (min)'),
-                    operator        : (parseInt(rule.levelOp) || cRuleAbsolute),
+                    operator        : (parseInt(rule.levelOp) || cRuleType.absolute),
                     operatorText    : rule.levelOpText || RED._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
                 };
             }
@@ -677,7 +828,7 @@ function initializeCtrl(REDLib, node, config) {
         rule.name = rule.name || 'rule ' + rule.pos;
         rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
-        if (rule.payload || (rule.level && (rule.level.operator === cRuleAbsolute))) {
+        if (rule.payload || (rule.level && (rule.level.operator === cRuleType.absolute))) {
             rule.importance = Number(rule.importance) || 0;
             node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
             node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
@@ -688,10 +839,14 @@ function initializeCtrl(REDLib, node, config) {
             if (rule.timeMax) { rule.timeMax.next = false; }
             if (rule.timeMin) { rule.timeMin.next = false; }
             node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
-            if (rule.time.operator === cRuleUntil) {
+            if (rule.time.operator === cRuleTime.at) {
+                node.rules.atCount++;
+                node.rules.lastAt = i;
+            }
+            if (rule.time.operator === cRuleTime.until) {
                 node.rules.lastUntil = i;
             }
-            if (rule.time.operator === cRuleFrom) {
+            if (rule.time.operator === cRuleTime.from) {
                 node.rules.firstFrom = Math.min(i,node.rules.firstFrom);
             }
             if (!rule.time.days || rule.time.days === '*') {

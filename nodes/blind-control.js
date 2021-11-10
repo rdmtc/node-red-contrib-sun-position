@@ -9,22 +9,11 @@ const util = require('util');
 const clonedeep = require('lodash.clonedeep');
 const isEqual = require('lodash.isequal');
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRule = {
-    levelAbsolute : 0,
-    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
-    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
-    slatOversteer : 5,
-    topicOversteer : 8,
-    off : 9
-};
 const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
 const cautoTriggerTimeSun = 5 * 60000; // 5 min
 const cWinterMode = 1;
 const cMinimizeMode = 3;
 const cSummerMode = 16;
-const cRuleDefault = -1;
 /******************************************************************************************/
 /**
  * get the absolute level from percentage level
@@ -511,9 +500,8 @@ module.exports = function (RED) {
      */
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
-        const livingRuleData = {};
         ctrlLib.prepareRules(node, msg, tempData, oNow.dNow);
-        // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+        //node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
         let ruleSel = null;
         let ruleSlatOvs = null;
@@ -524,53 +512,53 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (!rule.enabled) { continue; }
-            if (rule.time && rule.time.operator === cRuleFrom) { continue; }
+            if (rule.time && rule.time.operator === ctrlLib.cRuleTime.from) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
             let res = null;
-            if (!rule.time || rule.time.operator === cRuleFrom) {
+            if (!rule.time || rule.time.operator === ctrlLib.cRuleTime.from) {
                 res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
             } else {
+                //node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== ctrlLib.cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
                 res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             }
             if (res) {
-                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                if (res.level.operator === cRule.slatOversteer) {
+                //node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === ctrlLib.cRuleType.slatOversteer) {
                     ruleSlatOvs = res;
-                } else if (res.level.operator === cRule.topicOversteer) {
+                } else if (res.level.operator === ctrlLib.cRuleType.topicOversteer) {
                     ruleTopicOvs = res;
-                } else if (res.level.operator === cRule.levelMinOversteer) {
+                } else if (res.level.operator === ctrlLib.cRuleType.levelMinOversteer) {
                     ruleSelMin = res;
-                } else if (res.level.operator === cRule.levelMaxOversteer) {
+                } else if (res.level.operator === ctrlLib.cRuleType.levelMaxOversteer) {
                     ruleSelMax = res;
                 } else {
                     ruleSel = res;
                     ruleindex = i;
-                    if (rule.time && rule.time.operator !== cRuleFrom) {
+                    if (rule.time && rule.time.operator !== ctrlLib.cRuleTime.from) {
                         break;
                     }
                 }
             }
         }
 
-        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === cRuleFrom) ) {
-            // node.debug('--------- starting second loop ' + node.rules.count);
+        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === ctrlLib.cRuleTime.from) ) {
+            //node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                //node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== ctrlLib.cRuleTime.until) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
                 if (!rule.enabled) { continue; }
-                if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                if (rule.time && rule.time.operator === ctrlLib.cRuleTime.until) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
-                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
-                    if (res.level.operator === cRule.slatOversteer) {
+                    //node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    if (res.level.operator === ctrlLib.cRuleType.slatOversteer) {
                         ruleSlatOvs = res;
-                    } else if (res.level.operator === cRule.topicOversteer) {
+                    } else if (res.level.operator === ctrlLib.cRuleType.topicOversteer) {
                         ruleTopicOvs = res;
-                    } else if (res.level.operator === cRule.levelMinOversteer) {
+                    } else if (res.level.operator === ctrlLib.cRuleType.levelMinOversteer) {
                         ruleSelMin = res;
-                    } else if (res.level.operator === cRule.levelMaxOversteer) {
+                    } else if (res.level.operator === ctrlLib.cRuleType.levelMaxOversteer) {
                         ruleSelMax = res;
                     } else {
                         ruleSel = res;
@@ -579,6 +567,37 @@ module.exports = function (RED) {
                 }
             }
         }
+
+        const rule = ctrlLib.checkRules(node, msg, oNow, tempData);
+        if (ruleSel != rule.ruleSel) {
+            node.error('not equal result ruleSel!');
+            node.debug('ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+        } else {
+            node.debug('same rule selected ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('same rule selected ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
+        }
+        if (ruleSlatOvs != rule.ruleSlatOvs) {
+            node.error('not equal result ruleSlatOvs!');
+            node.debug('ruleSlatOvs ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+        }
+        if (ruleTopicOvs != rule.ruleTopicOvs) {
+            node.error('not equal result ruleTopicOvs!');
+            node.debug('ruleTopicOvs ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+        }
+        if (ruleSelMin != rule.ruleSelMin) {
+            node.error('not equal result ruleSelMin!');
+            node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+        }
+        if (ruleSelMax != rule.ruleSelMax) {
+            node.error('not equal result ruleSelMax!');
+            node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+        }
+        const livingRuleData = {};
 
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
@@ -717,9 +736,9 @@ module.exports = function (RED) {
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
             // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
 
-            if (ruleSel.level.operator === cRule.off) {
+            if (ruleSel.level.operator === ctrlLib.cRuleType.off) {
                 livingRuleData.isOff = true;
-            } else if (ruleSel.level.operator === cRule.levelAbsolute) { // absolute rule
+            } else if (ruleSel.level.operator === ctrlLib.cRuleType.absolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.level.type, ruleSel.level.value, -1);
                 livingRuleData.slat = node.positionConfig.getPropValue(node, msg, ruleSel.slat, false, oNow.dNow);
                 livingRuleData.active = (livingRuleData.level > -1);
@@ -731,7 +750,7 @@ module.exports = function (RED) {
             return livingRuleData;
         }
         livingRuleData.active = false;
-        livingRuleData.id = cRuleDefault;
+        livingRuleData.id = ctrlLib.cRuleDefault;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.level = node.nodeData.levelDefault;
