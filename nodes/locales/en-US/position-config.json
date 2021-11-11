@@ -37,6 +37,8 @@
         "types": {
             "unlimited":"no limitation",
             "undefined":"not used",
+            "undefinedTimeFrom":"from midnight or previous rule",
+            "undefinedTimeUntil":"until midnight or the next rule",
             "datespecific":"timestamp enhanced",
             "nodeId":"node name",
             "nodeName":"node ID",
