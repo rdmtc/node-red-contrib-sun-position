@@ -545,6 +545,11 @@ module.exports = function (RED) {
                     topic = hlp.topicReplace(topic, replaceAttrs);
                 }
 
+                node.debug('output');
+                node.debug(util.inspect(node.previousData.payloadValue, Object.getOwnPropertyNames(err)));
+                node.debug(util.inspect(node.payload.current, Object.getOwnPropertyNames(err)));
+                node.debug(`topic alt=${node.payload.topic} 0 topic neu=${node.previousData.topic}`);
+                node.payload.current;
                 if ((typeof node.payload.current !== 'undefined') &&
                     (node.payload.current !== 'none') &&
                     (node.payload.current !== null) &&

@@ -9,6 +9,12 @@ const path = require('path');
 const util = require('util');
 const hlp = require( path.resolve( __dirname, './dateTimeHelper.js') );
 
+const cRuleTime = { // deprecated
+    until : 0,
+    from : 1
+};
+
+
 const cRuleType = {
     absolute : 0,
     levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
@@ -39,7 +45,8 @@ module.exports = {
     cRuleType,
     cRuleDefault,
     cRuleLogOperatorAnd,
-    cRuleLogOperatorOr
+    cRuleLogOperatorOr,
+    cRuleTime // deprecated
 };
 
 let RED = null;
@@ -268,10 +275,12 @@ function prepareRules(node, msg, tempData, dNow) {
  * @param {*} node node data
  * @param {*} msg the message object
  * @param {*} rule the rule data
+ * @param {string} timep rule type
+ * @param {number} dNow base timestamp
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, timep, dNow) {
-    rule.time.dNow = dNow;
+    rule.time[timep].dNow = dNow;
     rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
 
     if (rule.timeData.error) {
@@ -895,7 +904,7 @@ function initializeCtrl(REDLib, node, config) {
                     } else {
                         rule.time[id].dateEnd = new Date(2000,11,31, 23, 59, 59, 999);
                     }
-                }                
+                }
             };
             rule.time.next = false;
             node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
