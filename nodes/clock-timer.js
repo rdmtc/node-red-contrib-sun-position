@@ -436,7 +436,7 @@ module.exports = function (RED) {
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime;
+                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
                             break;
                         case 'setCntextStore':
                             node.contextStore = msg.payload || node.contextStore;

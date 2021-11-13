@@ -1110,14 +1110,14 @@ module.exports = function (RED) {
                             break;
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
-                            node.sunData.minDelta = getFloatValue(node.sunData.minDelta);
+                            node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
                             break;
                         case 'setSmoothTime':
-                            node.smoothTime = getFloatValue(node.smoothTime);
+                            node.smoothTime = parseFloat(msg.payload) || node.smoothTime; // payload of 0 makes no sense, use then default
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime;
+                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
                             break;
                         case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;
