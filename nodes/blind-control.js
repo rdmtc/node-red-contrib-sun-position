@@ -1079,20 +1079,27 @@ module.exports = function (RED) {
                 }
 
                 if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                    const getFloatValue = def => {
+                        const val = parseFloat(msg.payload);
+                        if (isNaN(val)) {
+                            return def;
+                        }
+                        return val;
+                    };
                     switch (msg.topic) {
                         /* Blind Settings */
                         case 'setBlindSettingsTop':
-                            node.nodeData.levelTop = parseFloat(msg.payload) || node.nodeData.levelTop;
+                            node.nodeData.levelTop = getFloatValue(node.nodeData.levelTop);
                             break;
                         case 'setBlindSettingsBottom':
-                            node.nodeData.levelBottom = parseFloat(msg.payload) || node.nodeData.levelBottom;
+                            node.nodeData.levelBottom = getFloatValue(node.nodeData.levelBottom);
                             break;
                         case 'setBlindSettingsIncrement':
-                            node.nodeData.increment = parseFloat(msg.payload) || node.nodeData.increment;
+                            node.nodeData.increment = getFloatValue(node.nodeData.increment);
                             break;
                         /* Default Settings */
                         case 'setBlindSettingsLevel':
-                            node.nodeData.levelDefault = parseFloat(msg.payload) || node.nodeData.levelDefault;
+                            node.nodeData.levelDefault = getFloatValue(node.nodeData.levelDefault);
                             break;
                         case 'setSettingsTopic':
                             node.nodeData.topic = msg.payload || node.nodeData.topic;
@@ -1103,14 +1110,14 @@ module.exports = function (RED) {
                             break;
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
-                            node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta;
+                            node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
                             break;
                         case 'setSmoothTime':
-                            node.smoothTime = parseFloat(msg.payload) || node.smoothTime;
+                            node.smoothTime = parseFloat(msg.payload) || node.smoothTime; // payload of 0 makes no sense, use then default
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime;
+                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
                             break;
                         case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;

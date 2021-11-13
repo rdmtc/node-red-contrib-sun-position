@@ -483,7 +483,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
 
-                const $nodeInputContextStore = $('#node-config-input-contextStore');
+                const $nodeInputContextStore = $('#node-input-contextStore');
                 RED.settings.context.stores.forEach(store => {
                     $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
                 });
@@ -3837,7 +3837,7 @@
             </div>
             <div class="form-row">
                 <label for="node-input-contextStore"><i class="icon-tag"></i> Context Store</label>
-                <select id="node-config-input-contextStore">
+                <select id="node-input-contextStore">
                     <option value="">none</option>
                 </select>
             </div>
