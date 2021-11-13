@@ -15,7 +15,7 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
-### 2.0.5: small fix + enhancement
+### 2.0.5: bug fixes
 
 - clock-time
   - fix of check if payload and topic has changed to prevent send output on not changed payload/topic to output 1 #360
