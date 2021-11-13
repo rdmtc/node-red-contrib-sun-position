@@ -15,7 +15,7 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
-### 2.0.3: small fix + enhancement
+### 2.0.5: small fix + enhancement
 
 - clock-time
   - fix of check if payload and topic has changed to prevent send output on not changed payload/topic to output 1 #360
@@ -24,6 +24,10 @@ This can be also used to go back to an older Version.
 - blind-control
   - fix of not changeable context store #358
   - fix of not working '0' value for `setBlindSettingsTop`, `setBlindSettingsBottom`, `setBlindSettingsIncrement` and `setBlindSettingsLevel` config overwrite possibility #359
+
+### 2.0.4: flow library fix
+
+- no changes, republished 2.0.3 because of node-red flow library missing data
 
 ### 2.0.3: small fix + enhancement
 
