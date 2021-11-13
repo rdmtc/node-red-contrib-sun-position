@@ -19,6 +19,10 @@ This can be also used to go back to an older Version.
 
 - clock-time
   - fix of check if payload and topic has changed to prevent send output on not changed payload/topic to output 1 #360
+  - fix of not changeable context store #358
+
+- blind-control
+  - fix of not changeable context store #358
 
 ### 2.0.3: small fix + enhancement
 
