@@ -24,7 +24,7 @@ module.exports = function (RED) {
      * @param {ITimeObject} oNow the *current* date Object
      * @returns {boolean} true if override is active, otherwise false
      */
-    function checkPosOverwrite(node, msg, oNow) {
+    function checkPosOverwrite(node, msg, oldValue, oNow) {
         // node.debug(`checkPosOverwrite act=${node.nodeData.overwrite.active} `);
         let isSignificant = false;
         const exactImportance = hlp.getMsgBoolValue(msg, ['exactImportance', 'exactSignificance', 'exactPriority', 'exactPrivilege']);
@@ -80,11 +80,11 @@ module.exports = function (RED) {
             const isv = hlp.getMsgBoolValue(msg, 'ignoreSameValue');
             node.debug(`needOverwrite importance=${nImportance} expire=${nExpire} resetOnSameAsLastValue=${rosalv} ignoreSameValue=${isv}`);
 
-            if (rosalv && isEqual(node.previousData.payloadValue, overrideData)) {
+            if (rosalv && isEqual(oldValue, overrideData)) {
                 node.debug(`resetOnSameAsLastValue active, reset overwrite and exit overrideData=${overrideData}`);
                 ctrlLib.posOverwriteReset(node);
                 return ctrlLib.setOverwriteReason(node);
-            } else if (isv && isEqual(node.previousData.payloadValue, overrideData)) {
+            } else if (isv && isEqual(oldValue, overrideData)) {
                 node.debug(`overwrite exit true (ignoreSameValue), overrideData=${overrideData}`);
                 return ctrlLib.setOverwriteReason(node);
             }
@@ -374,11 +374,6 @@ module.exports = function (RED) {
             current: undefined,
             topic: node.nodeData.topic
         };
-        node.previousData = {
-            reasonCode: -1,
-            usedRule: NaN,
-            last : {}
-        };
 
         /**
          * set the state of the node
@@ -466,10 +461,11 @@ module.exports = function (RED) {
                 // initialize
                 node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.contextStore) || {};
-                node.previousData.reasonCode = node.reason.code;
-                node.previousData.reasonState = node.reason.state;
-                node.previousData.reasonDescription = node.reason.description;
-                node.previousData.payloadValue = clonedeep(node.payload.current);
+                const previousData = node.context().get('lastData', node.contextStore) || {
+                    reasonCode: -1,
+                    usedRule: NaN,
+                    lastAuto : {}
+                };
 
                 node.reason.code = NaN;
                 const oNow = hlp.getNowObject(node, msg);
@@ -493,7 +489,7 @@ module.exports = function (RED) {
                     reason : node.reason,
                     timeClock : node.nodeData,
                     autoTrigger : node.autoTrigger,
-                    lastEvaluated: node.previousData.last,
+                    lastEvaluated: previousData.lastAuto,
                     name: node.name || node.id,
                     id: node.addId || node.id
                 };
@@ -501,15 +497,15 @@ module.exports = function (RED) {
                 let ruleId = -2;
 
                 // check for manual overwrite
-                let overwrite = checkPosOverwrite(node, msg, oNow);
+                let overwrite = checkPosOverwrite(node, msg, previousData.payload, oNow);
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
                     timeCtrl.rule = checkRules(node, msg, oNow, tempData);
-                    node.previousData.last.ruleId = timeCtrl.rule.id;
-                    node.previousData.last.ruleTopic = timeCtrl.rule.topic;
+                    previousData.lastAuto.ruleId = timeCtrl.rule.id;
+                    previousData.lastAuto.ruleTopic = timeCtrl.rule.topic;
 
                     node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
-                    if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== node.previousData.usedRule) {
+                    if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== previousData.usedRule) {
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
@@ -523,8 +519,8 @@ module.exports = function (RED) {
                         node.reason.code = timeCtrl.rule.code;
                         node.reason.state = timeCtrl.rule.state;
                         node.reason.description = timeCtrl.rule.description;
-                        node.previousData.last.payload = node.payload.current;
-                        node.previousData.last.topic = node.payload.topic;
+                        previousData.lastAuto.payload = clonedeep(node.payload.current);
+                        previousData.lastAuto.topic = node.payload.topic;
                     }
                 }
 
@@ -552,8 +548,8 @@ module.exports = function (RED) {
                 if ((typeof node.payload.current !== 'undefined') &&
                     (node.payload.current !== 'none') &&
                     (node.payload.current !== null) &&
-                    ((node.payload.topic !== node.previousData.topic) ||
-                    ((typeof node.previousData.payloadValue  !== 'undefined') && (!isEqual(node.previousData.payloadValue, node.payload.current)))) ) {
+                    !(isEqual(node.payload.topic, previousData.topic) &&
+                      isEqual(previousData.payload, node.payload.current))) {
                     const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
@@ -581,8 +577,15 @@ module.exports = function (RED) {
                 } else {
                     send([null, { topic, payload: timeCtrl }]);
                 }
-                node.previousData.usedRule = ruleId;
+
+                previousData.usedRule = ruleId;
+                previousData.payload = clonedeep(node.payload.current);
+                previousData.topic = node.payload.topic;
+                previousData.reasonCode = node.reason.code;
+                previousData.reasonState = node.reason.state;
+                previousData.reasonDescription = node.reason.description;
                 node.context().set('cacheData', tempData, node.contextStore);
+                node.context().set('lastData', previousData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {

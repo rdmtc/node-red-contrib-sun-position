@@ -17,6 +17,11 @@ This can be also used to go back to an older Version.
 
 ### 2.0.3: small fix + enhancement
 
+- clock-time
+  - fix of check if payload and topic has changed to prevent send output on not changed payload/topic to output 1 #360
+
+### 2.0.3: small fix + enhancement
+
 - general
   - allow to set context store in configuration node #351
   - fixed randomNumber cached again #302 + #353
