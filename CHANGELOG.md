@@ -23,6 +23,7 @@ This can be also used to go back to an older Version.
 
 - blind-control
   - fix of not changeable context store #358
+  - fix of not working '0' value for `setBlindSettingsTop`, `setBlindSettingsBottom`, `setBlindSettingsIncrement` and `setBlindSettingsLevel` config overwrite possibility #359
 
 ### 2.0.3: small fix + enhancement
 
