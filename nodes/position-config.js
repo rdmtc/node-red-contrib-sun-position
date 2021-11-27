@@ -750,7 +750,9 @@ module.exports = function (RED) {
          */
         setMessageProp(_srcNode, msg, type, value, data) {
             // _srcNode.debug(`setMessageProp type=${type} value=${value} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
-            if (type === 'msgPayload') {
+            if (type === 'msgInput') {
+                return;
+            } else if (type === 'msgPayload') {
                 msg.payload = data;
             } else if (type === 'msgTopic') {
                 msg.topic = data;

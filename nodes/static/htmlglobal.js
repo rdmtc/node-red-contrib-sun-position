@@ -183,7 +183,12 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         DateSpecific: {
             value: 'dateSpecific',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific','timestamp enhanced'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific'),
+            hasValue: false
+        },
+        MsgInput: {
+            value: 'msgInput',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.msgInput'),
             hasValue: false
         },
         MsgPayload: {

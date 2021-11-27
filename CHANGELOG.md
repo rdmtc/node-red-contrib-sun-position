@@ -15,6 +15,10 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.4: flow library fix
+
+- no changes, republished 2.0.3 because of node-red flow library missing data
+
 ### 2.0.3: small fix + enhancement
 
 - general

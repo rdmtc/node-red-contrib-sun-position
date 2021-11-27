@@ -39,6 +39,7 @@
             "undefined":"not used",
             "undefinedTimeFrom":"from midnight or previous rule",
             "undefinedTimeUntil":"until midnight or the next rule",
+            "msgInput": "input message",
             "datespecific":"timestamp enhanced",
             "nodeId":"node name",
             "nodeName":"node ID",

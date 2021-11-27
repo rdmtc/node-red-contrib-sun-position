@@ -418,12 +418,14 @@ module.exports = function (RED) {
         }
         this.withinTimeValue = {
             value       : config.withinTimeValue ? config.withinTimeValue : 'true',
-            type        : config.withinTimeValueType ? config.withinTimeValueType : 'input'
+            type        : config.withinTimeValueType ? config.withinTimeValueType : 'msgInput'
         };
+        if (this.withinTimeValue.type === 'input') { this.withinTimeValue.type = 'msgInput'; }
         this.outOfTimeValue = {
             value       : config.outOfTimeValue ? config.outOfTimeValue : 'false',
-            type        : config.outOfTimeValueType ? config.outOfTimeValueType : 'input'
+            type        : config.outOfTimeValueType ? config.outOfTimeValueType : 'msgInput'
         };
+        if (this.outOfTimeValueType.type === 'input') { this.outOfTimeValueType.type = 'msgInput'; }
 
         this.timeOutObj = null;
         this.lastMsgObj = null;
@@ -458,7 +460,7 @@ module.exports = function (RED) {
                             msg.withinTime = true;
                             this.debug('in time [1] - send msg to first output ' + result.startSuffix +
                                 node.positionConfig.toDateTimeString(dNow) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
-                            if (node.withinTimeValue.type === 'input') {
+                            if (node.withinTimeValue.type === 'msgInput') {
                                 send([msg, null]); // within time
                             } else {
                                 const resultMsg = RED.util.cloneMessage(msg);
@@ -472,7 +474,7 @@ module.exports = function (RED) {
                         msg.withinTime = true;
                         this.debug('in time [2] - send msg to first output ' + result.startSuffix +
                             node.positionConfig.toDateTimeString(dNow) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
-                        if (node.withinTimeValue.type === 'input') {
+                        if (node.withinTimeValue.type === 'msgInput') {
                             send([msg, null]); // within time
                         } else {
                             const resultMsg = RED.util.cloneMessage(msg);
@@ -487,7 +489,7 @@ module.exports = function (RED) {
                 }
                 msg.withinTime = false;
                 this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(dNow) + result.endSuffix);
-                if (node.outOfTimeValue.type === 'input') {
+                if (node.outOfTimeValue.type === 'msgInput') {
                     send([null, msg]); // out of time
                 } else {
                     const resultMsg = RED.util.cloneMessage(msg);
