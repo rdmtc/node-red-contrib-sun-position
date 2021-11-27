@@ -997,7 +997,7 @@ function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-
         lbl.append(span);
         // lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
         width = width || 'auto';
-        lbl.attr('style', 'margin-left: 5px; margin-right: 5px; width:' + width + ';');
+        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:' + width + ';');
     } else {
         width = width || '20px';
         lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:' + width + ';');

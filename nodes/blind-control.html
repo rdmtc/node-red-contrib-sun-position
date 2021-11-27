@@ -1723,13 +1723,13 @@
                             $oversteerCompare.val(data.operator || 'gte');
 
                             // row2 - Thersold
-                            addLabel($row2, 'node-input-oversteer-compare', 'fa fa-cloud', node._('blind-control.label.oversteerThreshold'));
+                            addLabel($row2, 'node-input-oversteer-compare', 'fa fa-cloud', node._('blind-control.label.oversteerThreshold'), '95px');
 
                             const $oversteerThreshold = $('<input/>', {
                                 class: 'node-input-oversteer-threshold',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 160px)')
+                                .css('width', 'calc(100% - 162px)')
                                 .appendTo($row2)
                                 .typedInput({
                                     default: 'num',
@@ -1766,7 +1766,7 @@
                                 class: 'node-input-oversteer-blindPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row3)
                                 .typedInput({
                                     default: types.LevelFix,
@@ -1779,7 +1779,7 @@
                                 class: 'node-input-oversteer-slatPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row4)
                                 .typedInput({
                                     default: 'num',
