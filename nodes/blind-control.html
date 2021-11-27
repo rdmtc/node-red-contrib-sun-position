@@ -1723,7 +1723,7 @@
                             $oversteerCompare.val(data.operator || 'gte');
 
                             // row2 - Thersold
-                            addLabel($row2, 'node-input-oversteer-compare', 'fa fa-cloud', node._('blind-control.label.oversteerThreshold'), '95px');
+                            addLabel($row2, 'node-input-oversteer-compare', 'fa fa-cloud', node._('blind-control.label.oversteerThreshold'));
 
                             const $oversteerThreshold = $('<input/>', {
                                 class: 'node-input-oversteer-threshold',
@@ -1804,7 +1804,7 @@
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
 
                             // row5 - SunInWindow
-                            addLabel($row5, 'node-input-oversteer-sunInWindow', 'fa fa-window-maximize', node._('blind-control.label.oversteerSunInWindow'), '255px');
+                            addLabel($row5, 'node-input-oversteer-sunInWindow', 'fa fa-window-maximize', node._('blind-control.label.oversteerSunInWindow'));
                             const $oversteerOnlySunInWindow = $('<input/>', {
                                 class: 'node-input-oversteer-sunInWindow',
                                 type: 'checkbox'

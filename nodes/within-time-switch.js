@@ -425,7 +425,7 @@ module.exports = function (RED) {
             value       : config.outOfTimeValue ? config.outOfTimeValue : 'false',
             type        : config.outOfTimeValueType ? config.outOfTimeValueType : 'msgInput'
         };
-        if (this.outOfTimeValueType.type === 'input') { this.outOfTimeValueType.type = 'msgInput'; }
+        if (this.outOfTimeValue.type === 'input') { this.outOfTimeValue.type = 'msgInput'; }
 
         this.timeOutObj = null;
         this.lastMsgObj = null;
