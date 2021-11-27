@@ -3,6 +3,8 @@
         "label": {
             "positionConfig": "Konfiguration",
             "binary": "binär",
+            "infoText":"Die Konfiguration muss erstellt und deployed werden damit die Einstellungen angezeigt werden können.",
+            "loadingInfo":"lade Daten...",
             "json": "json",
             "jsonata": "jsonata Ausdr.",
             "timestamp": "Zeitpunkt",
@@ -35,6 +37,7 @@
         "types": {
             "unlimited": "keine Limitierung",
             "undefined": "nicht verwendet",
+            "msgInput": "eingangs Nachricht",
             "datespecific": "Zeitpunkt (erweitert)",
             "nodeId":"Node Name",
             "nodeName":"Node ID",
@@ -89,7 +92,7 @@
             "slat":"Lamellenposition",
             "topic":"topic",
             "ctrlObj":"Status object",
-            "strPlaceholder": "string mit Platzhatern"
+            "strPlaceholder": "string mit Platzhaltern"
         },
         "typeOptions": {
             "moonRise": "Mondaufgang",

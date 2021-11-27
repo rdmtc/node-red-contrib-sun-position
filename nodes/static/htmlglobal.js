@@ -183,7 +183,12 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         },
         DateSpecific: {
             value: 'dateSpecific',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific','timestamp enhanced'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific'),
+            hasValue: false
+        },
+        MsgInput: {
+            value: 'msgInput',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.msgInput'),
             hasValue: false
         },
         MsgPayload: {
@@ -983,7 +988,7 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
  * @returns {jQuery} jQuery selector of the new label
  */
 function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-unused-vars
-    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto"/>').attr('for', forEl).appendTo(parent);
+    const lbl = $('<label class="' + forEl + '-lbl" style="width:auto;"/>').attr('for', forEl).appendTo(parent);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
     }
@@ -992,7 +997,7 @@ function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-
         lbl.append(span);
         // lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
         width = width || 'auto';
-        lbl.attr('style', 'margin-left: 5px; width:' + width + ';');
+        lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:' + width + ';');
     } else {
         width = width || '20px';
         lbl.attr('style', 'margin-left: 5px; margin-right: 2px; width:' + width + ';');

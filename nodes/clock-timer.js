@@ -545,7 +545,8 @@ module.exports = function (RED) {
                     topic = hlp.topicReplace(topic, replaceAttrs);
                 }
 
-                if ((typeof node.payload.current !== 'undefined') &&
+                if ((!node.startDelayTimeOut) &&
+                    (typeof node.payload.current !== 'undefined') &&
                     (node.payload.current !== 'none') &&
                     (node.payload.current !== null) &&
                     !(isEqual(node.payload.topic, previousData.topic) &&
@@ -620,6 +621,10 @@ module.exports = function (RED) {
             if (node.autoTriggerObj) {
                 clearTimeout(node.autoTriggerObj);
                 delete node.autoTriggerObj;
+            }
+            if (node.startDelayTimeOutObj) {
+                clearTimeout(node.startDelayTimeOutObj);
+                delete node.startDelayTimeOutObj;
             }
             // tidy up any state
         });

@@ -15,6 +15,20 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.6: bug fixes
+
+- time-inject fix for next property #364
+
+- within-time-switch fix error with output value #363
+
+- blind-control + clock-time
+  - reduced default startup delay to may 1s
+  - do output to first output on startup #369
+
+- blind-control
+  - implemented `setSunDataFloorLength` #367
+  - for an oversteer rule can now be configured if it should be active if the sun is in the window (default as previous) #362
+
 ### 2.0.5: bug fixes
 
 - clock-time

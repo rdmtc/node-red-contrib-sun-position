@@ -764,11 +764,12 @@ function initializeCtrl(REDLib, node, config) {
     }
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
-        let delay = parseFloat(config.startDelayTime) || (2000 + Math.floor(Math.random() * 8000)); // 2s - 10s
+        let delay = parseFloat(config.startDelayTime) || (300 + Math.floor(Math.random() * 700)); // default = 300ms - 1s
         delay = Math.min(delay, 2147483646);
         node.startDelayTimeOut = new Date(Date.now() + delay);
-        setTimeout(() => {
+        node.startDelayTimeOutObj = setTimeout(() => {
             delete node.startDelayTimeOut;
+            delete node.startDelayTimeOutObj;
             node.emit('input', {
                 topic: 'autoTrigger/triggerOnly/start',
                 payload: 'triggerOnly',

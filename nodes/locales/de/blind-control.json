@@ -35,6 +35,7 @@
 			"oversteerBlindPos": "Rollladenposition",
 			"oversteerSlatPos": "Lamellenposition",
 			"oversteerTopic":"Übersteuerungs topic",
+			"oversteerSunInWindow": "nur wenn die Sonne ins Fenster scheint",
 			"smoothTime": "glätten",
 			"showEnhSettings": "Erweiterte Einstellungen",
 			"offset": "Zeit offset",

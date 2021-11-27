@@ -105,27 +105,28 @@ module.exports = function (RED) {
      * @param {Object} tempData the temporary data holder object
      * @param {ITimeObject} oNow the now Object
      */
-    function checkOversteer(node, msg, tempData, oNow) {
+    function checkOversteer(node, msg, tempData, sunPosition, oNow) {
         // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
         try {
             node.oversteer.isChecked = true;
-            return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && node.positionConfig.comparePropValue(node, msg,
-                {
-                    value: el.value,
-                    type: el.valueType,
-                    expr: el.valueExpr,
-                    callback: (result, _obj) => {
-                        return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                    }
-                },
-                el.operator,
-                {
-                    value: el.threshold,
-                    type: el.thresholdType,
-                    callback: (result, _obj) => {
-                        return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                    }
-                }, false, oNow.dNow)));
+            return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && (!el.onlySunInWindow || sunPosition.InWindow) &&
+                node.positionConfig.comparePropValue(node, msg,
+                    {
+                        value: el.value,
+                        type: el.valueType,
+                        expr: el.valueExpr,
+                        callback: (result, _obj) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
+                        }
+                    },
+                    el.operator,
+                    {
+                        value: el.threshold,
+                        type: el.thresholdType,
+                        callback: (result, _obj) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
+                        }
+                    }, false, oNow.dNow)));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -336,6 +337,24 @@ module.exports = function (RED) {
             }
         }
 
+        if (node.oversteer.active) {
+            const res = checkOversteer(node, msg, tempData, sunPosition, oNow);
+            if (res) {
+                node.level.current = getBlindPosFromTI(node, undefined, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
+                node.level.currentInverse = getInversePos_(node, node.level.current);
+                node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.dNow);
+                node.level.topic = node.oversteer.topic;
+                node.previousData.last.sunLevel = node.level.current;
+                node.reason.code = 10;
+                node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer', { pos: res.pos+1 });
+                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.oversteer', { pos: res.pos+1 });
+                sunPosition.oversteer = res;
+                sunPosition.oversteerAll = node.oversteers;
+                return sunPosition;
+            }
+            sunPosition.oversteerAll = node.oversteers;
+        }
+
         // const summerMode = 2;
         if (!sunPosition.InWindow) {
             if (node.sunData.mode === cWinterMode) {
@@ -362,24 +381,6 @@ module.exports = function (RED) {
                 node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWin');
             }
             return sunPosition;
-        }
-
-        if (node.oversteer.active) {
-            const res = checkOversteer(node, msg, tempData, oNow);
-            if (res) {
-                node.level.current = getBlindPosFromTI(node, undefined, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
-                node.level.currentInverse = getInversePos_(node, node.level.current);
-                node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.dNow);
-                node.level.topic = node.oversteer.topic;
-                node.previousData.last.sunLevel = node.level.current;
-                node.reason.code = 10;
-                node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer', { pos: res.pos+1 });
-                node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.oversteer', { pos: res.pos+1 });
-                sunPosition.oversteer = res;
-                sunPosition.oversteerAll = node.oversteers;
-                return sunPosition;
-            }
-            sunPosition.oversteerAll = node.oversteers;
         }
 
         if (node.sunData.mode === cWinterMode) {
@@ -888,6 +889,7 @@ module.exports = function (RED) {
                     thresholdType   : 'num',
                     threshold       : config.sunMinAltitude,
                     mode            : 2,
+                    onlySunInWindow : true,
                     blindPos        : {
                         type        : config.blindPosDefaultType,
                         value       : config.blindPosDefault
@@ -907,6 +909,7 @@ module.exports = function (RED) {
                     threshold       : config.oversteerThreshold,
                     thresholdType   : config.oversteerThresholdType,
                     mode            : 0,
+                    onlySunInWindow : true,
                     blindPos        : {
                         type        : config.oversteerBlindPosType,
                         value       : config.oversteerBlindPos
@@ -924,6 +927,7 @@ module.exports = function (RED) {
                         threshold       : config.oversteer2Threshold,
                         thresholdType   : config.oversteer2ThresholdType,
                         mode            : 0,
+                        onlySunInWindow : true,
                         blindPos        : {
                             type        : config.oversteer2BlindPosType,
                             value       : config.oversteer2BlindPos
@@ -941,6 +945,7 @@ module.exports = function (RED) {
                             threshold       : config.oversteer3Threshold,
                             thresholdType   : config.oversteer3ThresholdType,
                             mode            : 0,
+                            onlySunInWindow : true,
                             blindPos        : {
                                 type        : config.oversteer3BlindPosType,
                                 value       : config.oversteer3BlindPos
@@ -979,6 +984,9 @@ module.exports = function (RED) {
         node.oversteers = config.oversteers;
         node.oversteers.forEach( (val, _index) => {
             val.pos = _index;
+            if (!Object.prototype.hasOwnProperty.call(val, 'onlySunInWindow')) {
+                val.onlySunInWindow = true;
+            }
             if (node.positionConfig && val.valueType === 'jsonata') {
                 try {
                     val.valueExpr = node.positionConfig.getJSONataExpression(node, val.value);
@@ -1108,6 +1116,14 @@ module.exports = function (RED) {
                         case 'setSunDataTopic':
                             node.sunData.topic = msg.payload || node.sunData.topic;
                             break;
+                        case 'setSunDataFloorLength': {
+                            const val = getFloatValue(node.sunData.floorLength);
+                            if (val !== node.sunData.floorLength) {
+                                node.sunData.floorLengthType = 'num';
+                                node.sunData.floorLength = val;
+                            }
+                            break;
+                        }
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
                             node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
@@ -1310,7 +1326,8 @@ module.exports = function (RED) {
                 if (topic) {
                     topic = hlp.topicReplace(topic, replaceAttrs);
                 }
-                if ((!isNaN(node.level.current)) &&
+                if ((!node.startDelayTimeOut) &&
+                    (!isNaN(node.level.current)) &&
                     ((node.level.current !== node.previousData.level) ||
                     (!isEqual(node.level.slat, node.previousData.slat)) ||
                     (node.level.topic !== node.previousData.topic))) {
@@ -1383,6 +1400,10 @@ module.exports = function (RED) {
             if (node.autoTriggerObj) {
                 clearTimeout(node.autoTriggerObj);
                 delete node.autoTriggerObj;
+            }
+            if (node.startDelayTimeOutObj) {
+                clearTimeout(node.startDelayTimeOutObj);
+                delete node.startDelayTimeOutObj;
             }
             // tidy up any state
         });

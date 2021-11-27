@@ -1654,6 +1654,7 @@
                                     thresholdType   : 'num',           // threshold type
                                     threshold       : '',              // threshold
                                     mode            : 0,
+                                    onlySunInWindow : true,
                                     blindPos        : {
                                         type        : 'levelFixed',
                                         value       : 'open (max)'
@@ -1664,12 +1665,16 @@
                                     }
                                 };
                             }
+                            if (!Object.prototype.hasOwnProperty.call(data, 'onlySunInWindow')) {
+                                data.onlySunInWindow = true;
+                            }
 
                             containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                             const $row1 = $('<div/>').appendTo(containerRow);
                             const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                            const $row5 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             // row1 - index + oversteerValue + Compare
                             $('<input/>',{
                                 type: 'hidden',
@@ -1724,7 +1729,7 @@
                                 class: 'node-input-oversteer-threshold',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 160px)')
+                                .css('width', 'calc(100% - 162px)')
                                 .appendTo($row2)
                                 .typedInput({
                                     default: 'num',
@@ -1761,7 +1766,7 @@
                                 class: 'node-input-oversteer-blindPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row3)
                                 .typedInput({
                                     default: types.LevelFix,
@@ -1774,7 +1779,7 @@
                                 class: 'node-input-oversteer-slatPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row4)
                                 .typedInput({
                                     default: 'num',
@@ -1797,6 +1802,18 @@
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
+
+                            // row5 - SunInWindow
+                            addLabel($row5, 'node-input-oversteer-sunInWindow', 'fa fa-window-maximize', node._('blind-control.label.oversteerSunInWindow'));
+                            const $oversteerOnlySunInWindow = $('<input/>', {
+                                class: 'node-input-oversteer-sunInWindow',
+                                type: 'checkbox'
+                            })
+                                .css('width', 'auto')
+                                .css('margin-left', '10px')
+                                .css('margin-top', '0')
+                                .appendTo($row5);
+                            $oversteerOnlySunInWindow.prop('checked', data.onlySunInWindow);
 
                             // changes
                             $oversteerValue.change(() => {
@@ -3540,6 +3557,7 @@
                         operatorText    : $rule.find('.node-input-oversteer-compare option:selected').text(),
                         thresholdType   : $rule.find('.node-input-oversteer-threshold').typedInput('type'),
                         threshold       : $rule.find('.node-input-oversteer-threshold').typedInput('value'),
+                        onlySunInWindow : $rule.find('.node-input-oversteer-sunInWindow').is(':checked'),
                         blindPos        : {
                             type        : $rule.find('.node-input-oversteer-blindPos').typedInput('type'),
                             value       : $rule.find('.node-input-oversteer-blindPos').typedInput('value')
@@ -3678,8 +3696,8 @@
                     <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
                     <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
                     <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
-                    <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
-                    <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+                    <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-files-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+                    <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-clipboard"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
                 </div>
             </div>
         </div>
@@ -3788,8 +3806,8 @@
                 <ol id="node-input-oversteer-container"></ol>
                 <button type="button" id="node-oversteer-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
                 <button type="button" id="node-oversteer-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
-                <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
-                <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+                <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-files-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+                <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-clipboard"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
             </div>
             <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
                 <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>

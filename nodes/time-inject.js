@@ -42,6 +42,14 @@ module.exports = function (RED) {
                     onlyEvenWeeks: prop.onlyEvenWeeks,
                     onlyOddWeeks : prop.onlyOddWeeks
                 };
+                if (propNew.type === 'dateEntered' ||
+                    propNew.type === 'dateSpecific' ||
+                    propNew.type === 'dayOfMonth') {
+                    propNew.next = false;
+                } else if (propNew.type === 'pdsTimeNow') {
+                    // next sun time
+                    propNew.next = true;
+                }
 
                 if (node.positionConfig && propNew.type === 'jsonata') {
                     try {
