@@ -35,6 +35,7 @@
 			"oversteerBlindPos": "blind position",
 			"oversteerSlatPos": "slat position",
 			"oversteerTopic":"oversteer topic",
+			"oversteerSunInWindow": "only when sun shines in the window",
 			"smoothTime": "smoothTime",
 			"showEnhSettings": "Enhanced settings",
 			"offset": "time offset",
