@@ -265,19 +265,21 @@
                 },
                 withinTimeValue: {
                     value: 'true',
-                    required: true,
+                    required: false,
                     validate: RED.validators.typedInput('withinTimeValueType')
                 },
                 withinTimeValueType: {
-                    value: 'input'
+                    value: 'msgInput',
+                    required: true
                 },
                 outOfTimeValue: {
                     value: 'false',
-                    required: true,
+                    required: false,
                     validate: RED.validators.typedInput('outOfTimeValueType')
                 },
                 outOfTimeValueType: {
-                    value: 'input'
+                    value: 'msgInput',
+                    required: true
                 },
                 tsCompare: {
                     value: '0'
@@ -839,14 +841,17 @@
                     });
                     // #endregion timeAltEnd
                     // #region Output Values
+                    if (node.withinTimeValueType === 'input') {
+                        node.withinTimeValueType = types.MsgInput.value;
+                    }
                     setupTInput(node, {
                         typeProp: 'withinTimeValueType',
                         valueProp: 'withinTimeValue',
                         width: 'calc(100% - 110px)',
-                        defaultType: 'input',
-                        defaultValue: 'true' ,
+                        defaultType: node.withinTimeValueType  || types.MsgInput.value,
+                        defaultValue: node.withinTimeValue,
                         types: [
-                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            types.MsgInput,
                             'str',
                             'num',
                             'bool',
@@ -883,14 +888,17 @@
                             types.nodeName
                         ]
                     });
+                    if (node.outOfTimeValueType === 'input') {
+                        node.outOfTimeValueType = types.MsgInput.value;
+                    }
                     setupTInput(node, {
                         typeProp: 'outOfTimeValueType',
                         valueProp: 'outOfTimeValue',
                         width: 'calc(100% - 110px)',
-                        defaultType: 'input',
-                        defaultValue: 'true' ,
+                        defaultType: node.outOfTimeValueType  || types.MsgInput.value,
+                        defaultValue: node.outOfTimeValue,
                         types: [
-                            { value: 'input', label: node._('within-time-switch.typeLabel.input'), hasValue: false },
+                            types.MsgInput,
                             'str',
                             'num',
                             'bool',
@@ -989,6 +997,9 @@
 
                 this.timeDays = getCheckboxesStr($('#within-time-switch-timeDays input[type=checkbox]:checked'), 7);
                 this.timeMonths = getCheckboxesStr($('#within-time-switch-timeMonths input[type=checkbox]:checked'), 12);
+
+                this.withinTimeValueType = $('#node-input-withinTimeValue').typedInput('type');
+                this.outOfTimeValueType = $('#node-input-outOfTimeValue').typedInput('type');
             }
         });
     })();</script>

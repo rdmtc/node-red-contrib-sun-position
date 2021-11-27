@@ -36,9 +36,6 @@
             "withinTimeValue": "in time payload",
             "outOfTimeValue": "out of time payload"
         },
-        "typeLabel":{
-            "input": "msg.payload of the input message"
-        },
         "placeholder": {
             "propertyStart": "Property for alternate start time",
             "propertyStartThreshold": "threshold",
