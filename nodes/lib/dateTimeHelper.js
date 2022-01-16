@@ -455,7 +455,7 @@ function getNowTimeStamp(node, msg) {
 /**
 * support timeData
 * @name ITimeObject Data
-* @param {Date} dNow
+* @param {Date} now
 * @param {number} nowNr
 * @param {number} dayNr
 * @param {number} monthNr
@@ -473,7 +473,7 @@ function getNowTimeStamp(node, msg) {
 function getNowObject(node, msg) {
     const dNow = getNowTimeStamp(node, msg);
     return {
-        dNow,
+        now     : dNow,
         nowNr   : dNow.getTime(),
         dayNr   : dNow.getDay(),
         dateNr  : dNow.getDate(),

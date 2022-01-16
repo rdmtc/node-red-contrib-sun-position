@@ -154,7 +154,7 @@ module.exports = function (RED) {
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
         const livingRuleData = {};
-        ctrlLib.prepareRules(node, msg, tempData, oNow.dNow);
+        ctrlLib.prepareRules(node, msg, tempData, oNow.now);
         // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
         let ruleSel = null;
@@ -483,7 +483,7 @@ module.exports = function (RED) {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                         }
-                    }, true, oNow.dNow);
+                    }, true, oNow.now);
                 }
                 const timeCtrl = {
                     reason : node.reason,
@@ -513,7 +513,7 @@ module.exports = function (RED) {
                     if (!overwrite || timeCtrl.rule.importance > node.nodeData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
                         if (timeCtrl.rule.payloadData) {
-                            node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.dNow);
+                            node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.now);
                         }
                         node.payload.topic = timeCtrl.rule.topic;
                         node.reason.code = timeCtrl.rule.code;
@@ -564,7 +564,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'strPlaceholder') {
                             resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {

@@ -15,11 +15,12 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
-### 2.0.7: bug fixes
+### 2.0.7: maintenance release
 
-- general
+- blind-control + clock-time
   - fixed blind-control example 3 and 4; clock-time example  #388
-
+    - the function node in the example can now simulate different days for testing at the same time on different days #389
+  - renamed external given time property from `.dNow` to `.now` to maintain consistency to other nodes
 
 ### 2.0.6: bug fixes
 

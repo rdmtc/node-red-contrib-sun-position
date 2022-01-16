@@ -126,7 +126,7 @@ module.exports = function (RED) {
                         callback: (result, _obj) => {
                             return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
                         }
-                    }, false, oNow.dNow)));
+                    }, false, oNow.now)));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
@@ -254,7 +254,7 @@ module.exports = function (RED) {
                 } else if (typeof msg.topic === 'string' && msg.topic.includes('slatOverwrite')) {
                     node.level.slat = msg.payload;
                 } else {
-                    node.level.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
+                    node.level.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.now);
                 }
             }
 
@@ -302,19 +302,19 @@ module.exports = function (RED) {
     function calcBlindSunPosition(node, msg, oNow, tempData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
-        const sunPosition = node.positionConfig.getSunCalc(oNow.dNow, false, false);
+        const sunPosition = node.positionConfig.getSunCalc(oNow.now, false, false);
         // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
 
         const azimuthStart = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthStartType, node.windowSettings.azimuthStart, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
                 tempData[_obj.type + '.' + _obj.value] = result;
             }
-        }, true, oNow.dNow);
+        }, true, oNow.now);
         const azimuthEnd = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthEndType, node.windowSettings.azimuthEnd, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
                 tempData[_obj.type + '.' + _obj.value] = result;
             }
-        }, true, oNow.dNow);
+        }, true, oNow.now);
 
         sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, azimuthStart, azimuthEnd);
         // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${azimuthStart} AzimuthEnd=${azimuthEnd}`);
@@ -342,7 +342,7 @@ module.exports = function (RED) {
             if (res) {
                 node.level.current = getBlindPosFromTI(node, undefined, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
                 node.level.currentInverse = getInversePos_(node, node.level.current);
-                node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.dNow);
+                node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.now);
                 node.level.topic = node.oversteer.topic;
                 node.previousData.last.sunLevel = node.level.current;
                 node.reason.code = 10;
@@ -361,7 +361,7 @@ module.exports = function (RED) {
                 node.level.current = node.nodeData.levelMin;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
-                node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+                node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
                 node.previousData.last.sunLevel = node.level.current;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMin');
@@ -370,7 +370,7 @@ module.exports = function (RED) {
                 node.level.current = node.nodeData.levelMax;
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
-                node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+                node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
                 node.previousData.last.sunLevel = node.level.current;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMax');
@@ -386,7 +386,7 @@ module.exports = function (RED) {
         if (node.sunData.mode === cWinterMode) {
             node.level.current = node.nodeData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current);
-            node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+            node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
             node.level.topic = node.sunData.topic;
             node.previousData.last.sunLevel = node.level.current;
             node.reason.code = 12;
@@ -396,7 +396,7 @@ module.exports = function (RED) {
         } else if (node.sunData.mode === cMinimizeMode) {
             node.level.current = node.nodeData.levelMin;
             node.level.currentInverse = getInversePos_(node, node.level.current);
-            node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+            node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
             node.level.topic = node.sunData.topic;
             node.previousData.last.sunLevel = node.level.current;
             node.reason.code = 12;
@@ -409,17 +409,17 @@ module.exports = function (RED) {
             if (result !== null && typeof result !== 'undefined') {
                 tempData[_obj.type + '.' + _obj.value] = result;
             }
-        }, true, oNow.dNow);
+        }, true, oNow.now);
         const wTop = node.positionConfig.getFloatProp(node, msg, node.windowSettings.topType, node.windowSettings.top, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
                 tempData[_obj.type + '.' + _obj.value] = result;
             }
-        }, true, oNow.dNow);
+        }, true, oNow.now);
         const wBottom = node.positionConfig.getFloatProp(node, msg, node.windowSettings.bottomType, node.windowSettings.bottom, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
                 tempData[_obj.type + '.' + _obj.value] = result;
             }
-        }, true, oNow.dNow);
+        }, true, oNow.now);
 
         const height = Math.tan(sunPosition.altitudeRadians) * floorLength;
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${floorLength}`);
@@ -433,7 +433,7 @@ module.exports = function (RED) {
             node.level.current = posPrcToAbs_(node, (height - wBottom) / (wTop - wBottom));
             node.level.currentInverse = getInversePos_(node, node.level.current);
         }
-        node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.dNow);
+        node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
         node.level.topic = node.sunData.topic;
 
         const delta = Math.abs(node.previousData.level - node.level.current);
@@ -460,7 +460,7 @@ module.exports = function (RED) {
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrl');
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunCtrl');
             node.sunData.changeAgain = oNow.nowNr + node.smoothTime;
-            // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} dNow=` + oNow.nowNr);
+            // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} nowNr=` + oNow.nowNr);
         }
         if (node.level.current < node.nodeData.levelMin)  {
             // min
@@ -513,7 +513,7 @@ module.exports = function (RED) {
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
         const livingRuleData = {};
-        ctrlLib.prepareRules(node, msg, tempData, oNow.dNow);
+        ctrlLib.prepareRules(node, msg, tempData, oNow.now);
         // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
         let ruleSel = null;
@@ -522,21 +522,21 @@ module.exports = function (RED) {
         let ruleSelMin = null;
         let ruleSelMax = null;
         let ruleindex = -1;
-        // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
+        // node.debug(`first loop count:${ node.rules.count } lastuntil:${ node.rules.lastUntil}`);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noFrom=${rule.time.operator !== cRuleFrom} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
             if (!rule.enabled) { continue; }
             if (rule.time && rule.time.operator === cRuleFrom) { continue; }
-            // const res = fktCheck(rule, r => (r >= nowNr));
-            let res = null;
+            const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
+            /*
             if (!rule.time || rule.time.operator === cRuleFrom) {
                 res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
             } else {
                 res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            }
+            } */
             if (res) {
-                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 if (res.level.operator === cRule.slatOversteer) {
                     ruleSlatOvs = res;
                 } else if (res.level.operator === cRule.topicOversteer) {
@@ -559,12 +559,12 @@ module.exports = function (RED) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
                 if (!rule.enabled) { continue; }
                 if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
-                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                     if (res.level.operator === cRule.slatOversteer) {
                         ruleSlatOvs = res;
                     } else if (res.level.operator === cRule.topicOversteer) {
@@ -603,7 +603,7 @@ module.exports = function (RED) {
                 timeLimited: (!!ruleSlatOvs.time),
                 conditon: ruleSlatOvs.conditon,
                 time: ruleSlatOvs.timeData,
-                slat: node.positionConfig.getPropValue(node, msg, ruleSlatOvs.slat, false, oNow.dNow),
+                slat: node.positionConfig.getPropValue(node, msg, ruleSlatOvs.slat, false, oNow.now),
                 importance: ruleSlatOvs.importance
             };
         }
@@ -621,7 +621,7 @@ module.exports = function (RED) {
                     timeLimited: (!!ruleSelMin.time),
                     conditon: ruleSelMin.conditon,
                     time: ruleSelMin.timeData
-                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMin.slat, false, oNow.dNow)
+                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMin.slat, false, oNow.now)
                     // importance: ruleSelMin.importance,
                     // resetOverwrite: ruleSelMin.resetOverwrite,
                     // topic : ruleSelMin.topic
@@ -642,7 +642,7 @@ module.exports = function (RED) {
                     timeLimited: (!!ruleSelMax.time),
                     conditon: ruleSelMax.conditon,
                     time: ruleSelMax.timeData
-                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMax.slat, false, oNow.dNow)
+                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMax.slat, false, oNow.now)
                     // importance: ruleSelMax.importance,
                     // resetOverwrite: ruleSelMax.resetOverwrite,
                     // topic : ruleSelMax.topic
@@ -716,18 +716,18 @@ module.exports = function (RED) {
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
-            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
 
             if (ruleSel.level.operator === cRule.off) {
                 livingRuleData.isOff = true;
             } else if (ruleSel.level.operator === cRule.levelAbsolute) { // absolute rule
                 livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.level.type, ruleSel.level.value, -1);
-                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, ruleSel.slat, false, oNow.dNow);
+                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, ruleSel.slat, false, oNow.now);
                 livingRuleData.active = (livingRuleData.level > -1);
             } else {
                 livingRuleData.active = false;
                 livingRuleData.level = node.nodeData.levelDefault;
-                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
+                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.now);
             }
             return livingRuleData;
         }
@@ -736,7 +736,7 @@ module.exports = function (RED) {
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.level = node.nodeData.levelDefault;
-        livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.dNow);
+        livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.now);
         livingRuleData.topic = node.nodeData.topic;
         livingRuleData.code = 1;
         livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.default');
@@ -1192,7 +1192,7 @@ module.exports = function (RED) {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                         }
-                    }, true, oNow.dNow);
+                    }, true, oNow.now);
                 }
                 const blindCtrl = {
                     reason : node.reason,
@@ -1288,7 +1288,7 @@ module.exports = function (RED) {
                                 }
                             },
                             operator: el.operator
-                        }, false, oNow.dNow);
+                        }, false, oNow.now);
                     });
                 }
 
@@ -1348,7 +1348,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'strPlaceholder') {
                             resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
