@@ -15,6 +15,12 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.7: bug fixes
+
+- general
+  - fixed blind-control example 3 and 4; clock-time example  #388
+
+
 ### 2.0.6: bug fixes
 
 - time-inject fix for next property #364
