@@ -22,6 +22,10 @@ This can be also used to go back to an older Version.
     - the function node in the example can now simulate different days for testing at the same time on different days #389
   - renamed external given time property from `.dNow` to `.now` to maintain consistency to other nodes
 
+- blind-control
+  - after expire of manual override with -1 force to send output #387
+  - add possibility to force output to first output when topic contains `forceOutput`
+
 ### 2.0.6: bug fixes
 
 - time-inject fix for next property #364

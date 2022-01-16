@@ -218,7 +218,7 @@ module.exports = function (RED) {
         }
         let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         let nExpire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
-        if (msg.topic && String(msg.topic).includes('noExpir')) {
+        if (String(msg.topic).includes('noExpir')) { // hlp.getMsgTopicContains(msg, 'noExpir')) {
             nExpire = -1;
         }
         if (!isNaN(newPos)) {
@@ -716,7 +716,7 @@ module.exports = function (RED) {
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
-            node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
 
             if (ruleSel.level.operator === cRule.off) {
                 livingRuleData.isOff = true;
@@ -1172,7 +1172,11 @@ module.exports = function (RED) {
                     node.previousData.reasonCode = node.reason.code;
                     node.previousData.reasonState = node.reason.state;
                     node.previousData.reasonDescription = node.reason.description;
-                    node.context().set('previous', node.previousData, node.contextStore);
+                    if (String(msg.topic).includes('forceOutput')) { // hlp.getMsgTopicContains(msg, 'forceOutput')) {
+                        node.previousData.forceNext = true;
+                    }
+                } else {
+                    node.previousData.forceNext = true;
                 }
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
@@ -1212,8 +1216,10 @@ module.exports = function (RED) {
                     node.previousData.last.ruleId = blindCtrl.rule.id;
                     node.previousData.last.ruleLevel = blindCtrl.rule.level;
                     node.previousData.last.ruleTopic = blindCtrl.rule.topic;
-                    node.context().set('previous', node.previousData, node.contextStore);
                     if (blindCtrl.rule.isOff === true) {
+                        node.previousData.forceNext = true;
+                        node.context().set('previous', node.previousData, node.contextStore);
+                        node.context().set('cacheData', tempData, node.contextStore);
                         // rule set the controller off
                         done();
                         return null;
@@ -1328,7 +1334,8 @@ module.exports = function (RED) {
                 }
                 if ((!node.startDelayTimeOut) &&
                     (!isNaN(node.level.current)) &&
-                    ((node.level.current !== node.previousData.level) ||
+                    (node.previousData.forceNext === true ||
+                    (node.level.current !== node.previousData.level) ||
                     (!isEqual(node.level.slat, node.previousData.slat)) ||
                     (node.level.topic !== node.previousData.topic))) {
                     const msgOut = {};
@@ -1359,12 +1366,14 @@ module.exports = function (RED) {
                         }
                     }
                     send([msgOut, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
+                    delete node.previousData.forceNext;
                 } else {
                     send([null, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
                 }
                 if (isNaN(ruleId)) {
                     node.previousData.usedRule = ruleId;
                 }
+                node.context().set('previous', node.previousData, node.contextStore);
                 node.context().set('cacheData', tempData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
