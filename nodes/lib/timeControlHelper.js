@@ -280,7 +280,7 @@ function prepareRules(node, msg, tempData, dNow) {
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, timep, dNow) {
-    rule.time[timep].dNow = dNow;
+    rule.time[timep].now = dNow;
     rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
 
     if (rule.timeData.error) {
@@ -291,9 +291,10 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
     }
     rule.timeData.source = 'Default';
     rule.timeData.ts = rule.timeData.value.getTime();
+    // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
     rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
     if (rule.timeMin) {
-        rule.timeMin.dNow = dNow;
+        rule.timeMin.now = dNow;
         rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
         const numMin = rule.timeDataMin.value.getTime();
         rule.timeDataMin.source = 'Min';
@@ -312,7 +313,7 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
         }
     }
     if (rule.timeMax) {
-        rule.timeMax.dNow = dNow;
+        rule.timeMax.now = dNow;
         rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
         const numMax = rule.timeDataMax.value.getTime();
         rule.timeDataMax.source = 'Max';
@@ -345,7 +346,7 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
 /**
 * support timeData
 * @name ITimeObject Data
-* @param {Date} dNow
+* @param {Date} now
 * @param {number} nowNr
 * @param {number} dayNr
 * @param {number} monthNr
@@ -364,10 +365,11 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
  * @returns {Object|null} returns the rule if rule is valid, otherwhise null
  */
 function compareRules(node, msg, rule, cmp, data) {
-    // node.debug('fktCheck rule ' + util.inspect(rule, {colors:true, compact:10}));
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) data=${util.inspect(rule, {colors:true, compact:10})}`);
     if (rule.conditional) {
         try {
             if (!rule.conditon.result) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) conditon does not match`);
                 return null;
             }
         } catch (err) {
@@ -381,21 +383,27 @@ function compareRules(node, msg, rule, cmp, data) {
     }
     if (rule.time.start) {
         if (rule.time.start.days && !rule.time.start.days.includes(data.dayNr)) {
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
             return null;
         }
         if (rule.time.start.months && !rule.time.start.months.includes(data.monthNr)) {
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
             return null;
         }
         if (rule.time.start.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
             return null;
         }
         if (rule.time.start.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
             return null;
         }
         if (rule.time.start.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
             return null;
         }
         if (rule.time.start.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
             return null;
         }
         if (rule.time.start.dateStart || rule.time.start.dateEnd) {
@@ -403,12 +411,14 @@ function compareRules(node, msg, rule, cmp, data) {
             rule.time.start.dateEnd.setFullYear(data.yearNr);
             if (rule.time.start.dateEnd > rule.time.start.dateStart) {
                 // in the current year
-                if (data.dNow < rule.time.start.dateStart || data.dNow > rule.time.start.dateEnd) {
+                if (data.now < rule.time.start.dateStart || data.now > rule.time.start.dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
                     return null;
                 }
             } else {
                 // switch between year from end to start
-                if (data.dNow < rule.time.start.dateStart && data.dNow > rule.time.start.dateEnd) {
+                if (data.now < rule.time.start.dateStart && data.now > rule.time.start.dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
                     return null;
                 }
             }
@@ -418,18 +428,23 @@ function compareRules(node, msg, rule, cmp, data) {
             return null;
         }
         if (rule.time.end.months && !rule.time.end.months.includes(data.monthNr)) {
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
             return null;
         }
         if (rule.time.end.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
             return null;
         }
         if (rule.time.end.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
             return null;
         }
         if (rule.time.end.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
             return null;
         }
         if (rule.time.end.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
             return null;
         }
         if (rule.time.end.dateStart || rule.time.end.dateEnd) {
@@ -437,12 +452,14 @@ function compareRules(node, msg, rule, cmp, data) {
             rule.time.end.dateEnd.setFullYear(data.yearNr);
             if (rule.time.end.dateEnd > rule.time.end.dateStart) {
                 // in the current year
-                if (data.dNow < rule.time.end.dateStart || data.dNow > rule.time.end.dateEnd) {
+                if (data.now < rule.time.end.dateStart || data.now > rule.time.end.dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
                     return null;
                 }
             } else {
                 // switch between year from end to start
-                if (data.dNow < rule.time.end.dateStart && data.dNow > rule.time.end.dateEnd) {
+                if (data.now < rule.time.end.dateStart && data.now > rule.time.end.dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
                     return null;
                 }
             }
@@ -450,11 +467,12 @@ function compareRules(node, msg, rule, cmp, data) {
     } else {
         return null;
     }
-    const num = getRuleTimeData(node, msg, rule, data.dNow);
-    // node.debug(`pos=${rule.pos} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+    const num = getRuleTimeData(node, msg, rule, data.now);
+    // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
     if (data.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
         return rule;
     }
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
     return null;
 }
 /******************************************************************************************/
@@ -960,11 +978,12 @@ function initializeCtrl(REDLib, node, config) {
     }
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
-        let delay = parseFloat(config.startDelayTime) || (2000 + Math.floor(Math.random() * 8000)); // 2s - 10s
+        let delay = parseFloat(config.startDelayTime) || (300 + Math.floor(Math.random() * 700)); // default = 300ms - 1s
         delay = Math.min(delay, 2147483646);
         node.startDelayTimeOut = new Date(Date.now() + delay);
-        setTimeout(() => {
+        node.startDelayTimeOutObj = setTimeout(() => {
             delete node.startDelayTimeOut;
+            delete node.startDelayTimeOutObj;
             node.emit('input', {
                 topic: 'autoTrigger/triggerOnly/start',
                 payload: 'triggerOnly',

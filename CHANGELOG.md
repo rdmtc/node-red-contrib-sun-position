@@ -15,6 +15,43 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.7: maintenance release
+
+- blind-control + clock-time
+  - fixed blind-control example 3 and 4; clock-time example  #388
+    - the function node in the example can now simulate different days for testing at the same time on different days #389
+  - renamed external given time property from `.dNow` to `.now` to maintain consistency to other nodes
+  - nodes can be completely disables and enabled by incoming message (topic must be `enableNode` and `disableNode`) #365
+
+- blind-control
+  - after expire of manual override with -1 force to send output #387
+  - add possibility to force output to first output when topic contains `forceOutput`
+  - add possibility to add offset for the open/close position of the blind in active sun control #371
+
+### 2.0.6: bug fixes
+
+- time-inject fix for next property #364
+
+- within-time-switch fix error with output value #363
+
+- blind-control + clock-time
+  - reduced default startup delay to may 1s
+  - do output to first output on startup #369
+
+- blind-control
+  - implemented `setSunDataFloorLength` #367
+  - for an oversteer rule can now be configured if it should be active if the sun is in the window (default as previous) #362
+
+### 2.0.5: bug fixes
+
+- clock-time
+  - fix of check if payload and topic has changed to prevent send output on not changed payload/topic to output 1 #360
+  - fix of not changeable context store #358
+
+- blind-control
+  - fix of not changeable context store #358
+  - fix of not working '0' value for `setBlindSettingsTop`, `setBlindSettingsBottom`, `setBlindSettingsIncrement` and `setBlindSettingsLevel` config overwrite possibility #359
+
 ### 2.0.4: flow library fix
 
 - no changes, republished 2.0.3 because of node-red flow library missing data

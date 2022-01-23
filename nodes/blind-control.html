@@ -244,6 +244,34 @@
                 blindPosMaxType: {
                     value: 'levelFixed'
                 },
+                blindOpenPosOffset: {
+                    value: 0.00,
+                    required: false,
+                    validate(v) {
+                        if (typeof v === 'undefined' || v === '') return true;
+                        const n = parseFloat(v);
+                        const mm = getMinMaxBlindPos(this);
+                        return n === 0.00 ||
+                            (RED.validators.number()(v) &&
+                            (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                            (n < mm.max) &&
+                            (n > mm.min));
+                    }
+                },
+                blindClosedPosOffset: {
+                    value: 0.00,
+                    required: false,
+                    validate(v) {
+                        if (typeof v === 'undefined' || v === '') return true;
+                        const n = parseFloat(v);
+                        const mm = getMinMaxBlindPos(this);
+                        return n === 0.00 ||
+                            (RED.validators.number()(v) &&
+                            (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                            (n < mm.max) &&
+                            (n > mm.min));
+                    }
+                },
                 sunSlat: {
                     value: '',
                     validate: RED.validators.typedInput('sunSlatType')
@@ -483,7 +511,7 @@
                 const $nodeConfig = $('#node-input-positionConfig');
                 const node = this;
 
-                const $nodeInputContextStore = $('#node-config-input-contextStore');
+                const $nodeInputContextStore = $('#node-input-contextStore');
                 RED.settings.context.stores.forEach(store => {
                     $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
                 });
@@ -1674,6 +1702,7 @@
                                     thresholdType   : 'num',           // threshold type
                                     threshold       : '',              // threshold
                                     mode            : 0,
+                                    onlySunInWindow : true,
                                     blindPos        : {
                                         type        : 'levelFixed',
                                         value       : 'open (max)'
@@ -1684,12 +1713,16 @@
                                     }
                                 };
                             }
+                            if (!Object.prototype.hasOwnProperty.call(data, 'onlySunInWindow')) {
+                                data.onlySunInWindow = true;
+                            }
 
                             containerRow.css({overflow: 'hidden', whiteSpace: 'nowrap'});
                             const $row1 = $('<div/>').appendTo(containerRow);
                             const $row2 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             const $row3 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             const $row4 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
+                            const $row5 = $('<div/>', {style: 'padding-top: 5px;'}).appendTo(containerRow);
                             // row1 - index + oversteerValue + Compare
                             $('<input/>',{
                                 type: 'hidden',
@@ -1744,7 +1777,7 @@
                                 class: 'node-input-oversteer-threshold',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 160px)')
+                                .css('width', 'calc(100% - 162px)')
                                 .appendTo($row2)
                                 .typedInput({
                                     default: 'num',
@@ -1781,7 +1814,7 @@
                                 class: 'node-input-oversteer-blindPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row3)
                                 .typedInput({
                                     default: types.LevelFix,
@@ -1794,7 +1827,7 @@
                                 class: 'node-input-oversteer-slatPos',
                                 type: 'text'
                             })
-                                .css('width', 'calc(100% - 145px)')
+                                .css('width', 'calc(100% - 147px)')
                                 .appendTo($row4)
                                 .typedInput({
                                     default: 'num',
@@ -1817,6 +1850,18 @@
                                     ]
                                 });
                             setTInputValue($oversteerSlatPos, data.slatPos.value, data.slatPos.type);
+
+                            // row5 - SunInWindow
+                            addLabel($row5, 'node-input-oversteer-sunInWindow', 'fa fa-window-maximize', node._('blind-control.label.oversteerSunInWindow'));
+                            const $oversteerOnlySunInWindow = $('<input/>', {
+                                class: 'node-input-oversteer-sunInWindow',
+                                type: 'checkbox'
+                            })
+                                .css('width', 'auto')
+                                .css('margin-left', '10px')
+                                .css('margin-top', '0')
+                                .appendTo($row5);
+                            $oversteerOnlySunInWindow.prop('checked', data.onlySunInWindow);
 
                             // changes
                             $oversteerValue.change(() => {
@@ -3976,6 +4021,7 @@
                         operatorText    : $rule.find('.node-input-oversteer-compare option:selected').text(),
                         thresholdType   : $rule.find('.node-input-oversteer-threshold').typedInput('type'),
                         threshold       : $rule.find('.node-input-oversteer-threshold').typedInput('value'),
+                        onlySunInWindow : $rule.find('.node-input-oversteer-sunInWindow').is(':checked'),
                         blindPos        : {
                             type        : $rule.find('.node-input-oversteer-blindPos').typedInput('type'),
                             value       : $rule.find('.node-input-oversteer-blindPos').typedInput('value')
@@ -4114,8 +4160,8 @@
                     <button type="button" id="node-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
                     <button type="button" id="node-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
                     <button type="button" id="node-button-sort" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnSort" style="margin-top: 4px;"><i class="fa fa-sort-amount-asc"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnSort"></span></button>
-                    <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
-                    <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+                    <button type="button" id="node-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-files-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+                    <button type="button" id="node-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-clipboard"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
                 </div>
             </div>
         </div>
@@ -4195,16 +4241,6 @@
                 <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
                 <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
             </div>
-            <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
-                <label for="blind-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-                <input type="text" class="spinner-time" id="blind-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-                <select id="blind-control-smoothTime-multiplier" class="node-input-multiplier">
-                    <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-                    <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-                    <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-                </select>
-                <input type="hidden" id="node-input-smoothTime"/>
-            </div>
             <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
                 <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
                 <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
@@ -4224,12 +4260,38 @@
                 <ol id="node-input-oversteer-container"></ol>
                 <button type="button" id="node-oversteer-button-add" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnAdd" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnAdd"></span></button> &nbsp;
                 <button type="button" id="node-oversteer-button-clear" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnClear" style="margin-top: 4px;"><i class="fa fa-eraser"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnClear"></span></button> &nbsp;
-                <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-download"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
-                <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-upload"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
+                <button type="button" id="node-oversteer-button-export" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnExport" style="margin-top: 4px;"><i class="fa fa-files-o"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnExport"></span></button>
+                <button type="button" id="node-oversteer-button-import" class="rdg-ui-btn red-ui-button red-ui-button-small" data-i18n="[title]blind-control.placeholder.btnImport" style="margin-top: 4px;"><i class="fa fa-clipboard"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.btnImport"></span></button>
             </div>
             <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
                 <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
                 <input type="text" id="node-input-oversteerTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+            </div>
+            <hr class="form-row-sunControlRestriction" >
+            <!-- advanced ########################################################################## -->
+            <div class="form-row form-row-sunControlRestriction block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunAdvanced" class="row-full-width" style="word-wrap:break-word;"></span>
+            </div>
+            <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
+                <label for="blind-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+                <input type="text" class="spinner-time" id="blind-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+                <select id="blind-control-smoothTime-multiplier" class="node-input-multiplier">
+                    <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+                    <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                    <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                </select>
+                <input type="hidden" id="node-input-smoothTime"/>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.blindPosOffset" class="row-full-width" style="word-wrap:break-word;"></span>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindOpenPosOffset">
+                <label for="node-input-blindOpenPosOffset"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPosOffset"></span></label>
+                <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPosOffset" data-i18n="[placeholder]blind-control.placeholder.blindOpenPosOffset"/>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindClosedPosOffset">
+                <label for="node-input-blindClosedPosOffset"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPosOffset"></span></label>
+                <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPosOffset" data-i18n="[placeholder]blind-control.placeholder.blindClosedPosOffset"/>
             </div>
         </div>
         <div id="blind-control-tab-output" style="display:none">
@@ -4273,7 +4335,7 @@
             </div>
             <div class="form-row">
                 <label for="node-input-contextStore"><i class="icon-tag"></i> Context Store</label>
-                <select id="node-config-input-contextStore">
+                <select id="node-input-contextStore">
                     <option value="">none</option>
                 </select>
             </div>
