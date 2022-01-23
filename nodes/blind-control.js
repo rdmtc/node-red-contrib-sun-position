@@ -847,7 +847,7 @@ module.exports = function (RED) {
             azimuthEndType: config.windowAzimuthEndType || 'num'
         };
         node.nodeData = {
-            isDisabled: false,
+            isDisabled: node.context().get('isDisabled', node.contextStore) || false,
             /** The Level of the window */
             levelTop: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
             levelBottom: Number(hlp.chkValueFilled(config.blindClosedPos, 0)),
@@ -1176,9 +1176,16 @@ module.exports = function (RED) {
                             break;
                         case 'enableNode':
                             node.nodeData.isDisabled = false;
+                            node.context().set('isDisabled', false, node.contextStore);
                             break;
                         case 'disableNode':
                             node.nodeData.isDisabled = true;
+                            node.context().set('isDisabled', true, node.contextStore);
+                            node.status({
+                                fill: 'grey',
+                                shape: 'dot',
+                                text: (typeof msg.payload === 'string') ? msg.payload : 'disabled'
+                            });
                             break;
                         default:
                             break;
