@@ -21,10 +21,12 @@ This can be also used to go back to an older Version.
   - fixed blind-control example 3 and 4; clock-time example  #388
     - the function node in the example can now simulate different days for testing at the same time on different days #389
   - renamed external given time property from `.dNow` to `.now` to maintain consistency to other nodes
+  - nodes can be completely disables and enabled by incoming message (topic must be `enableNode` and `disableNode`) #365
 
 - blind-control
   - after expire of manual override with -1 force to send output #387
   - add possibility to force output to first output when topic contains `forceOutput`
+  - add possibility to add offset for the open/close position of the blind in active sun control #371
 
 ### 2.0.6: bug fixes
 

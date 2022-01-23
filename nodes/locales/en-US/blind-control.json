@@ -11,6 +11,8 @@
 			"blindIncrement": "Increment",
 			"blindOpenPos": "open position (max)",
 			"blindClosedPos": "closed position (min)",
+			"blindOpenPosOffset": "open position offset",
+			"blindClosedPosOffset": "closed position offset",
 			"blindLevelDefault": "default position",
 			"slatPosDefault": "default slat",
 			"blindLevelMin": "min position",
@@ -58,6 +60,8 @@
 			"blindIncrement": "0.01 or 1",
 			"blindOpenPos": "100",
 			"blindClosedPos": "0",
+			"blindOpenPosOffset": "offset for the open position",
+			"blindClosedPosOffset": "offset for the closed position",
 			"blindLevelDefault": "blind position if no other used",
 			"slatPosDefault": "slat position if no other used",
 			"blindLevelMin": "minimum position if sun calculated position",
@@ -125,7 +129,9 @@
 			"invalid-blind-level": "Given Blind-Position __pos__ is not a valid Position!",
 			"getOversteerData": "error getting oversteer data: __message__",
 			"getBlindPosData": "error getting blind level: __message__",
-			"smoothTimeToolong": "The selected smooth is too long!!"
+			"smoothTimeToolong": "The selected smooth is too long!!",
+            "invalidOpenPosOffset":"Invalid value for blind open position offset for the sun control!",
+            "invalidClosedPosOffset":"Invalid value for blind closed position offset for the sun control!"
 		}
 	}
 }

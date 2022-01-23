@@ -430,7 +430,8 @@ module.exports = function (RED) {
             node.level.current = node.nodeData.levelTop;
             node.level.currentInverse = node.nodeData.levelBottom;
         } else {
-            node.level.current = posPrcToAbs_(node, (height - wBottom) / (wTop - wBottom));
+            const levelPercent = (height - wBottom) / (wTop - wBottom);
+            node.level.current = posRound_(node, ((node.nodeData.levelTopSun - node.nodeData.levelBottomSun) * levelPercent) + node.nodeData.levelBottomSun);
             node.level.currentInverse = getInversePos_(node, node.level.current);
         }
         node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
@@ -846,9 +847,12 @@ module.exports = function (RED) {
             azimuthEndType: config.windowAzimuthEndType || 'num'
         };
         node.nodeData = {
+            isDisabled: false,
             /** The Level of the window */
             levelTop: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
             levelBottom: Number(hlp.chkValueFilled(config.blindClosedPos, 0)),
+            levelTopOffset: Number(hlp.chkValueFilled(config.blindOpenPosOffset, 0)),
+            levelBottomOffset: Number(hlp.chkValueFilled(config.blindClosedPosOffset, 0)),
             increment: Number(hlp.chkValueFilled(config.blindIncrement, 1)),
             levelDefault: NaN,
             levelMin: NaN,
@@ -869,11 +873,28 @@ module.exports = function (RED) {
         node.nodeData.overwrite.expireDuration = parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN));
 
         if (node.nodeData.levelTop < node.nodeData.levelBottom) {
-            const tmp = node.nodeData.levelBottom;
+            let tmp = node.nodeData.levelBottom;
             node.nodeData.levelBottom = node.nodeData.levelTop;
             node.nodeData.levelTop = tmp;
+
+            tmp = node.nodeData.levelBottomOffset;
+            node.nodeData.levelBottomOffset = node.nodeData.levelTopOffset;
+            node.nodeData.levelTopOffset = tmp;
             node.levelReverse = true;
         }
+        node.nodeData.levelBottomSun = node.nodeData.levelBottom + node.nodeData.levelBottomOffset;
+        if (node.nodeData.levelBottomSun < node.nodeData.levelBottom || node.nodeData.levelBottomSun > node.nodeData.levelTop) {
+            node.nodeData.levelBottomSun = node.nodeData.levelBottom;
+            node.error(RED._('blind-control.errors.invalidOpenPosOffset'));
+        }
+
+        node.nodeData.levelTopSun = node.nodeData.levelTop - node.nodeData.levelTopOffset;
+        if (node.nodeData.levelTopSun < node.nodeData.levelBottom || node.nodeData.levelTopSun > node.nodeData.levelTop) {
+            node.nodeData.levelTopSun = node.nodeData.levelTop;
+            node.error(RED._('blind-control.errors.invalidClosedPosOffset'));
+        }
+        delete node.nodeData.levelBottomOffset;
+        delete node.nodeData.levelTopOffset;
 
         node.nodeData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.nodeData.levelTop);
         node.nodeData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.nodeData.levelBottom);
@@ -1086,7 +1107,10 @@ module.exports = function (RED) {
                     node.context().set('mode', newMode, node.contextStore);
                 }
 
-                if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                if (msg.topic && (typeof msg.topic === 'string') &&
+                    (msg.topic.startsWith('set') ||
+                    msg.topic.startsWith('disable') ||
+                    msg.topic.startsWith('enable'))) {
                     const getFloatValue = def => {
                         const val = parseFloat(msg.payload);
                         if (isNaN(val)) {
@@ -1150,6 +1174,12 @@ module.exports = function (RED) {
                         case 'enableRuleByPos':
                             changeRules(node, parseInt(msg.payload), undefined, { enabled: true });
                             break;
+                        case 'enableNode':
+                            node.nodeData.isDisabled = false;
+                            break;
+                        case 'disableNode':
+                            node.nodeData.isDisabled = true;
+                            break;
                         default:
                             break;
                     }
@@ -1159,6 +1189,10 @@ module.exports = function (RED) {
                         node.nodeData.levelTop = tmp;
                         node.levelReverse = true;
                     }
+                }
+                if (node.nodeData.isDisabled) {
+                    done();
+                    return null;
                 }
 
                 // initialize

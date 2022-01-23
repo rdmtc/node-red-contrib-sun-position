@@ -349,6 +349,7 @@ module.exports = function (RED) {
         // temporary node Data
         node.contextStore = config.contextStore || this.positionConfig.contextStore;
         node.nodeData = {
+            isDisabled: false,
             /** The Level of the window */
             payloadDefault: config.payloadDefault,
             payloadDefaultType: config.payloadDefaultType,
@@ -428,7 +429,10 @@ module.exports = function (RED) {
                 }
 
                 // allow to overwrite settings by incomming message
-                if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                if (msg.topic && (typeof msg.topic === 'string') &&
+                (msg.topic.startsWith('set') ||
+                msg.topic.startsWith('disable') ||
+                msg.topic.startsWith('enable'))) {
                     switch (msg.topic) {
                         /* Default Settings */
                         case 'setSettingsTopic':
@@ -438,7 +442,7 @@ module.exports = function (RED) {
                         case 'setAutoTriggerTime':
                             node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
                             break;
-                        case 'setCntextStore':
+                        case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;
                             break;
                         case 'disableRule':
@@ -453,9 +457,19 @@ module.exports = function (RED) {
                         case 'enableRuleByPos':
                             changeRules(node, parseInt(msg.payload), undefined, { enabled: true });
                             break;
+                        case 'enableNode':
+                            node.nodeData.isDisabled = false;
+                            break;
+                        case 'disableNode':
+                            node.nodeData.isDisabled = true;
+                            break;
                         default:
                             break;
                     }
+                }
+                if (node.nodeData.isDisabled) {
+                    done();
+                    return null;
                 }
 
                 // initialize
