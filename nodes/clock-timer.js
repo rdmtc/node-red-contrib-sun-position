@@ -462,6 +462,11 @@ module.exports = function (RED) {
                             break;
                         case 'disableNode':
                             node.nodeData.isDisabled = true;
+                            node.status({
+                                fill: 'grey',
+                                shape: 'dot',
+                                text: (typeof msg.payload === 'string') ? msg.payload : 'disabled'
+                            });
                             break;
                         default:
                             break;
