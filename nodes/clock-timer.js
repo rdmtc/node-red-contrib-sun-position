@@ -154,7 +154,7 @@ module.exports = function (RED) {
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
         const livingRuleData = {};
-        ctrlLib.prepareRules(node, msg, tempData, oNow.dNow);
+        ctrlLib.prepareRules(node, msg, tempData, oNow.now);
         // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
         let ruleSel = null;
@@ -349,6 +349,7 @@ module.exports = function (RED) {
         // temporary node Data
         node.contextStore = config.contextStore || this.positionConfig.contextStore;
         node.nodeData = {
+            isDisabled: false,
             /** The Level of the window */
             payloadDefault: config.payloadDefault,
             payloadDefaultType: config.payloadDefaultType,
@@ -428,7 +429,10 @@ module.exports = function (RED) {
                 }
 
                 // allow to overwrite settings by incomming message
-                if (msg.topic && (typeof msg.topic === 'string') && msg.topic.startsWith('set')) {
+                if (msg.topic && (typeof msg.topic === 'string') &&
+                (msg.topic.startsWith('set') ||
+                msg.topic.startsWith('disable') ||
+                msg.topic.startsWith('enable'))) {
                     switch (msg.topic) {
                         /* Default Settings */
                         case 'setSettingsTopic':
@@ -438,7 +442,7 @@ module.exports = function (RED) {
                         case 'setAutoTriggerTime':
                             node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
                             break;
-                        case 'setCntextStore':
+                        case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;
                             break;
                         case 'disableRule':
@@ -453,9 +457,19 @@ module.exports = function (RED) {
                         case 'enableRuleByPos':
                             changeRules(node, parseInt(msg.payload), undefined, { enabled: true });
                             break;
+                        case 'enableNode':
+                            node.nodeData.isDisabled = false;
+                            break;
+                        case 'disableNode':
+                            node.nodeData.isDisabled = true;
+                            break;
                         default:
                             break;
                     }
+                }
+                if (node.nodeData.isDisabled) {
+                    done();
+                    return null;
                 }
 
                 // initialize
@@ -483,7 +497,7 @@ module.exports = function (RED) {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                         }
-                    }, true, oNow.dNow);
+                    }, true, oNow.now);
                 }
                 const timeCtrl = {
                     reason : node.reason,
@@ -513,7 +527,7 @@ module.exports = function (RED) {
                     if (!overwrite || timeCtrl.rule.importance > node.nodeData.overwrite.importance) {
                         ruleId = timeCtrl.rule.id;
                         if (timeCtrl.rule.payloadData) {
-                            node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.dNow);
+                            node.payload.current = node.positionConfig.getOutDataProp(node, msg, timeCtrl.rule.payloadData, oNow.now);
                         }
                         node.payload.topic = timeCtrl.rule.topic;
                         node.reason.code = timeCtrl.rule.code;
@@ -564,7 +578,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'strPlaceholder') {
                             resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
                         } else {
-                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.dNow);
+                            resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {

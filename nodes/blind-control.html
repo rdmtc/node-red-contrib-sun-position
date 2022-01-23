@@ -244,6 +244,34 @@
                 blindPosMaxType: {
                     value: 'levelFixed'
                 },
+                blindOpenPosOffset: {
+                    value: 0.00,
+                    required: false,
+                    validate(v) {
+                        if (typeof v === 'undefined' || v === '') return true;
+                        const n = parseFloat(v);
+                        const mm = getMinMaxBlindPos(this);
+                        return n === 0.00 ||
+                            (RED.validators.number()(v) &&
+                            (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                            (n < mm.max) &&
+                            (n > mm.min));
+                    }
+                },
+                blindClosedPosOffset: {
+                    value: 0.00,
+                    required: false,
+                    validate(v) {
+                        if (typeof v === 'undefined' || v === '') return true;
+                        const n = parseFloat(v);
+                        const mm = getMinMaxBlindPos(this);
+                        return n === 0.00 ||
+                            (RED.validators.number()(v) &&
+                            (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
+                            (n < mm.max) &&
+                            (n > mm.min));
+                    }
+                },
                 sunSlat: {
                     value: '',
                     validate: RED.validators.typedInput('sunSlatType')
@@ -3777,16 +3805,6 @@
                 <label for="node-input-sunMinDelta"><i class="fa fa-star-half"></i> <span data-i18n="blind-control.label.sunMinDelta"></span></label>
                 <input type="text" class="spinner-level row-full-width" id="node-input-sunMinDelta" data-i18n="[placeholder]blind-control.placeholder.sunMinDelta"/>
             </div>
-            <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
-                <label for="blind-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
-                <input type="text" class="spinner-time" id="blind-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
-                <select id="blind-control-smoothTime-multiplier" class="node-input-multiplier">
-                    <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
-                    <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
-                    <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
-                </select>
-                <input type="hidden" id="node-input-smoothTime"/>
-            </div>
             <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindLevelMin">
                 <label for="node-input-blindPosMin"><i class="fa fa-angle-down"></i> <span data-i18n="blind-control.label.blindLevelMin"></span></label>
                 <input type="text" id="node-input-blindPosMin" class="row-full-width" data-i18n="[placeholder]blind-control.placeholder.blindLevelMin"/>
@@ -3812,6 +3830,32 @@
             <div class="form-row row-oversteerTopic block-noindent" data-i18n="[title]blind-control.placeholder.oversteerTopic">
                 <label for="node-input-oversteerTopic"><i class="fa fa-tasks"></i> <span data-i18n="blind-control.label.oversteerTopic"></span></label>
                 <input type="text" id="node-input-oversteerTopic" class="row-full-width" data-i18n="[placeholder]node-red:common.label.topic"/>
+            </div>
+            <hr class="form-row-sunControlRestriction" >
+            <!-- advanced ########################################################################## -->
+            <div class="form-row form-row-sunControlRestriction block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.sunAdvanced" class="row-full-width" style="word-wrap:break-word;"></span>
+            </div>
+            <div class="form-row form-row-sunControlRestriction is-initial-hidden block-indent1" data-i18n="[title]blind-control.placeholder.smoothTime">
+                <label for="blind-control-smoothTime"><i class="fa fa-calculator"></i> <span data-i18n="blind-control.label.smoothTime"></span></label>
+                <input type="text" class="spinner-time" id="blind-control-smoothTime" data-i18n="[placeholder]blind-control.placeholder.smoothTime" value=""/>
+                <select id="blind-control-smoothTime-multiplier" class="node-input-multiplier">
+                    <option value="1000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.1"></option>
+                    <option value="60000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.2"></option>
+                    <option value="3600000" data-i18n="node-red-contrib-sun-position/position-config:common.multiplier.3"></option>
+                </select>
+                <input type="hidden" id="node-input-smoothTime"/>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-noindent">
+                <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.blindPosOffset" class="row-full-width" style="word-wrap:break-word;"></span>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindOpenPosOffset">
+                <label for="node-input-blindOpenPosOffset"><i class="fa fa-chevron-circle-up"></i> <span data-i18n="blind-control.label.blindOpenPosOffset"></span></label>
+                <input type="text" class="spinner-level row-full-width" id="node-input-blindOpenPosOffset" data-i18n="[placeholder]blind-control.placeholder.blindOpenPosOffset"/>
+            </div>
+            <div class="form-row form-row-sunControlRestriction block-indent1-noadd" data-i18n="[title]blind-control.placeholder.blindClosedPosOffset">
+                <label for="node-input-blindClosedPosOffset"><i class="fa fa-chevron-circle-down"></i> <span data-i18n="blind-control.label.blindClosedPosOffset"></span></label>
+                <input type="text" class="spinner-level row-full-width" id="node-input-blindClosedPosOffset" data-i18n="[placeholder]blind-control.placeholder.blindClosedPosOffset"/>
             </div>
         </div>
         <div id="blind-control-tab-output" style="display:none">

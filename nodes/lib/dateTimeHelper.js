@@ -21,6 +21,7 @@ module.exports = {
     checkLimits,
     getMsgBoolValue,
     getMsgBoolValue2,
+    getMsgTopicContains,
     getMsgNumberValue,
     getMsgNumberValue2,
     getSpecialDayOfMonth,
@@ -455,7 +456,7 @@ function getNowTimeStamp(node, msg) {
 /**
 * support timeData
 * @name ITimeObject Data
-* @param {Date} dNow
+* @param {Date} now
 * @param {number} nowNr
 * @param {number} dayNr
 * @param {number} monthNr
@@ -473,7 +474,7 @@ function getNowTimeStamp(node, msg) {
 function getNowObject(node, msg) {
     const dNow = getNowTimeStamp(node, msg);
     return {
-        dNow,
+        now     : dNow,
         nowNr   : dNow.getTime(),
         dayNr   : dNow.getDay(),
         dateNr  : dNow.getDate(),
@@ -607,7 +608,7 @@ function getMsgNumberValue2(msg, ids, isFound, notFound) {
     return notFound;
 }
 /**
- * check the type of the message
+ * check if the msg or msg.property contains a property with value true or the topic contains the given name
  * @param {*} msg message
  * @param {*} name property name
  */
@@ -632,29 +633,11 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
             }
         }
     }
-    if (names && msg && msg.topic) {
-        if (!Array.isArray(names)) {
-            names = [names];
-        }
-        for (let i = 0; i < names.length; i++) {
-            if (String(msg.topic).includes(String(names[i]))) {
-                if (typeof isFound === 'function') {
-                    return isFound(true, msg.payload, msg.topic);
-                }
-                return true;
-            }
-        }
-    }
-    if (typeof notFound === 'function') {
-        return notFound(msg);
-    } else if (typeof notFound === 'undefined') {
-        return false;
-    }
-    return notFound;
+    return getMsgTopicContains(msg, names, isFound, notFound);
 }
 
 /**
- * check the type of the message
+ * check if the msg contains a property with value true (no payload check)
  * @param {*} msg message
  * @param {*} name property name
  */
@@ -670,6 +653,34 @@ function getMsgBoolValue2(msg, ids, isFound, notFound) {
                     return isFound(isTrue(msg[id]), msg[id], msg.topic);
                 }
                 return isTrue(msg[id]);
+            }
+        }
+    }
+    if (typeof notFound === 'function') {
+        return notFound(msg);
+    } else if (typeof notFound === 'undefined') {
+        return false;
+    }
+    return notFound;
+}
+
+/**
+ * check if thetopic contains one of the given names
+ * @param {*} msg message
+ * @param {*} name property name
+ */
+function getMsgTopicContains(msg, names, isFound, notFound) {
+    if (msg) { // && msg.topic
+        if (!Array.isArray(names)) {
+            names = [names];
+        }
+        const topic = String(msg.topic);
+        for (let i = 0; i < names.length; i++) {
+            if (topic.includes(String(names[i]))) {
+                if (typeof isFound === 'function') {
+                    return isFound(true, msg.payload, topic);
+                }
+                return true;
             }
         }
     }

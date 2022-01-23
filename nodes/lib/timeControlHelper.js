@@ -257,7 +257,7 @@ function prepareRules(node, msg, tempData, dNow) {
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, dNow) {
-    rule.time.dNow = dNow;
+    rule.time.now = dNow;
     rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time);
     if (rule.timeData.error) {
         hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
@@ -267,9 +267,10 @@ function getRuleTimeData(node, msg, rule, dNow) {
     }
     rule.timeData.source = 'Default';
     rule.timeData.ts = rule.timeData.value.getTime();
+    // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
     rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
     if (rule.timeMin) {
-        rule.timeMin.dNow = dNow;
+        rule.timeMin.now = dNow;
         rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
         const numMin = rule.timeDataMin.value.getTime();
         rule.timeDataMin.source = 'Min';
@@ -288,7 +289,7 @@ function getRuleTimeData(node, msg, rule, dNow) {
         }
     }
     if (rule.timeMax) {
-        rule.timeMax.dNow = dNow;
+        rule.timeMax.now = dNow;
         rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
         const numMax = rule.timeDataMax.value.getTime();
         rule.timeDataMax.source = 'Max';
@@ -321,7 +322,7 @@ function getRuleTimeData(node, msg, rule, dNow) {
 /**
 * support timeData
 * @name ITimeObject Data
-* @param {Date} dNow
+* @param {Date} now
 * @param {number} nowNr
 * @param {number} dayNr
 * @param {number} monthNr
@@ -340,10 +341,11 @@ function getRuleTimeData(node, msg, rule, dNow) {
  * @returns {Object|null} returns the rule if rule is valid, otherwhise null
  */
 function compareRules(node, msg, rule, cmp, data) {
-    // node.debug('fktCheck rule ' + util.inspect(rule, {colors:true, compact:10}));
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) data=${util.inspect(rule, {colors:true, compact:10})}`);
     if (rule.conditional) {
         try {
             if (!rule.conditon.result) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) conditon does not match`);
                 return null;
             }
         } catch (err) {
@@ -356,21 +358,27 @@ function compareRules(node, msg, rule, cmp, data) {
         return rule;
     }
     if (rule.time.days && !rule.time.days.includes(data.dayNr)) {
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
         return null;
     }
     if (rule.time.months && !rule.time.months.includes(data.monthNr)) {
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
         return null;
     }
     if (rule.time.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
         return null;
     }
     if (rule.time.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
         return null;
     }
     if (rule.time.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
         return null;
     }
     if (rule.time.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
         return null;
     }
     if (rule.time.dateStart || rule.time.dateEnd) {
@@ -378,21 +386,24 @@ function compareRules(node, msg, rule, cmp, data) {
         rule.time.dateEnd.setFullYear(data.yearNr);
         if (rule.time.dateEnd > rule.time.dateStart) {
             // in the current year
-            if (data.dNow < rule.time.dateStart || data.dNow > rule.time.dateEnd) {
+            if (data.now < rule.time.dateStart || data.now > rule.time.dateEnd) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
                 return null;
             }
         } else {
             // switch between year from end to start
-            if (data.dNow < rule.time.dateStart && data.dNow > rule.time.dateEnd) {
+            if (data.now < rule.time.dateStart && data.now > rule.time.dateEnd) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
                 return null;
             }
         }
     }
-    const num = getRuleTimeData(node, msg, rule, data.dNow);
-    // node.debug(`pos=${rule.pos} type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
+    const num = getRuleTimeData(node, msg, rule, data.now);
+    // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
     if (data.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
         return rule;
     }
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
     return null;
 }
 /*************************************************************************************************************************/
