@@ -502,7 +502,6 @@ module.exports = function (RED) {
      */
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
-        const livingRuleData = {};
         ctrlLib.prepareRules(node, msg, tempData, oNow.now);
         // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
 
@@ -517,7 +516,7 @@ module.exports = function (RED) {
             const rule = node.rules.data[i];
             // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noFrom=${rule.time.operator !== cRuleFrom} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
             if (!rule.enabled) { continue; }
-            if (rule.time && rule.time.operator === ctrlLib.cRuleTime.from) { continue; }
+            if (rule.time && !rule.time.start) { continue; }
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             /*
             if (!rule.time || rule.time.operator === ctrlLib.cRuleTime.from) {
@@ -547,12 +546,12 @@ module.exports = function (RED) {
         }
 
         if (!ruleSel || (ruleSel.time && ruleSel.time.operator === ctrlLib.cRuleTime.from) ) {
-            //node.debug('--------- starting second loop ' + node.rules.count);
+            // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
                 // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
                 if (!rule.enabled) { continue; }
-                if (rule.time && rule.time.operator === ctrlLib.cRuleTime.until) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
+                if (rule.time && !rule.time.end) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
                     // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
@@ -573,7 +572,7 @@ module.exports = function (RED) {
         }
 
         const rule = ctrlLib.checkRules(node, msg, oNow, tempData);
-        if (ruleSel != rule.ruleSel) {
+        if (ruleSel !== rule.ruleSel) {
             node.error('not equal result ruleSel!');
             node.debug('ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
@@ -581,22 +580,22 @@ module.exports = function (RED) {
             node.debug('same rule selected ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('same rule selected ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
         }
-        if (ruleSlatOvs != rule.ruleSlatOvs) {
+        if (ruleSlatOvs !== rule.ruleSlatOvs) {
             node.error('not equal result ruleSlatOvs!');
             node.debug('ruleSlatOvs ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
         }
-        if (ruleTopicOvs != rule.ruleTopicOvs) {
+        if (ruleTopicOvs !== rule.ruleTopicOvs) {
             node.error('not equal result ruleTopicOvs!');
             node.debug('ruleTopicOvs ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
         }
-        if (ruleSelMin != rule.ruleSelMin) {
+        if (ruleSelMin !== rule.ruleSelMin) {
             node.error('not equal result ruleSelMin!');
             node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
         }
-        if (ruleSelMax != rule.ruleSelMax) {
+        if (ruleSelMax !== rule.ruleSelMax) {
             node.error('not equal result ruleSelMax!');
             node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
             node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
@@ -675,12 +674,24 @@ module.exports = function (RED) {
             if (!rule.time) {
                 return;
             }
-            const num = ctrlLib.getRuleTimeData(node, msg, rule, oNow);
-            if (num > oNow.nowNr) {
-                node.debug('autoTrigger set to rule ' + rule.pos);
-                const diff = num - oNow.nowNr;
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                node.autoTrigger.type = 2; // next rule
+            if (rule.time.start) {
+                const numStart = ctrlLib.getRuleTimeData(node, msg, rule, 'start', oNow);
+                if (numStart > oNow.nowNr) {
+                    node.debug('autoTrigger set to rule ' + rule.pos + ' (start)');
+                    const diff = numStart - oNow.nowNr;
+                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                    node.autoTrigger.type = 2; // next rule
+                    return;
+                }
+            }
+            if (rule.time.end) {
+                const numEnd = ctrlLib.getRuleTimeData(node, msg, rule, 'end', oNow);
+                if (numEnd > oNow.nowNr) {
+                    node.debug('autoTrigger set to rule ' + rule.pos + ' (end)');
+                    const diff = numEnd - oNow.nowNr;
+                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
+                    node.autoTrigger.type = 2; // next rule
+                }
             }
         };
         if (ruleSel) {

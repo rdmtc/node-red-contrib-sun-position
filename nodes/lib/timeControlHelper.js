@@ -2,8 +2,6 @@
  * dateTimeHelper.js:
  *********************************************/
 'use strict';
-const { time } = require('console');
-const { endsWith } = require('lodash');
 const path = require('path');
 
 const util = require('util');
@@ -280,6 +278,9 @@ function prepareRules(node, msg, tempData, dNow) {
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, timep, dNow) {
+    if (!rule.time[timep]) {
+        return -1;
+    }
     rule.time[timep].now = dNow;
     rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
 
@@ -293,9 +294,9 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
     rule.timeData.ts = rule.timeData.value.getTime();
     // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
     rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
-    if (rule.timeMin) {
-        rule.timeMin.now = dNow;
-        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
+    if (rule.time[timep].min) {
+        rule.time[timep].min.now = dNow;
+        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
         const numMin = rule.timeDataMin.value.getTime();
         rule.timeDataMin.source = 'Min';
         if (rule.timeDataMin.error) {
@@ -312,9 +313,9 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
             }
         }
     }
-    if (rule.timeMax) {
-        rule.timeMax.now = dNow;
-        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
+    if (rule.time[timep].max) {
+        rule.time[timep].max.now = dNow;
+        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
         const numMax = rule.timeDataMax.value.getTime();
         rule.timeDataMax.source = 'Max';
         if (rule.timeDataMax.error) {
@@ -381,6 +382,9 @@ function compareRules(node, msg, rule, cmp, data) {
     if (!rule.time) {
         return rule;
     }
+    let numStart = Number.MIN_VALUE;
+    let numEnd = Number.MAX_VALUE;
+
     if (rule.time.start) {
         if (rule.time.start.days && !rule.time.start.days.includes(data.dayNr)) {
             node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
@@ -423,6 +427,7 @@ function compareRules(node, msg, rule, cmp, data) {
                 }
             }
         }
+        numStart = getRuleTimeData(node, msg, rule, 'start', data.now);
     } else if (rule.time.end) {
         if (rule.time.end.days && !rule.time.end.days.includes(data.dayNr)) {
             return null;
@@ -464,12 +469,17 @@ function compareRules(node, msg, rule, cmp, data) {
                 }
             }
         }
+        numEnd = getRuleTimeData(node, msg, rule, 'end', data.now);
     } else {
         return null;
     }
-    const num = getRuleTimeData(node, msg, rule, data.now);
+    if (numStart > numEnd) {
+        if (data.dayId === rule.timeData.dayId && numStart >=0 && numStart <= data.nowNr && numEnd > data.nowNr) {
+            return rule;
+        }
+    }
     // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-    if (data.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
+    if (data.dayId === rule.timeData.dayId && numStart >=0 && numStart <= data.nowNr && numEnd > data.nowNr) {
         return rule;
     }
     // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
@@ -486,7 +496,6 @@ function compareRules(node, msg, rule, cmp, data) {
  */
 function checkRules(node, msg, oNow, tempData) {
     // node.debug('checkRules --------------------');
-    const livingRuleData = {};
     prepareRules(node, msg, tempData, oNow.dNow);
     // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
     const result = {
