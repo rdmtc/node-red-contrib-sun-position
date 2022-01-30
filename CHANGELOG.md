@@ -15,6 +15,10 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.8: bug fixes
+
+ - general, but only used in blind-control + clock-time
+   - fixed string with placeholder output (string could not be entered)
 ### 2.0.7: maintenance release
 
 - blind-control + clock-time
