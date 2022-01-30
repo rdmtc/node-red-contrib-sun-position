@@ -41,6 +41,7 @@
             "datespecific":"timestamp enhanced",
             "nodeId":"node name",
             "nodeName":"node ID",
+            "nodePath":"node path",
             "timeentered":"time (next)",
             "dateentered":"date",
             "timepredefined":"fixed times",

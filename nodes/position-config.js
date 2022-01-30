@@ -1119,7 +1119,9 @@ module.exports = function (RED) {
             } else if (data.type === 'nodeId') {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
-                return _srcNode.name || _srcNode.id; // if empty fallback to node ID
+                return _srcNode.name || _srcNode._path || _srcNode.id; // if empty fallback to node ID
+            } else if (data.type === 'nodePath') {
+                return _srcNode._path || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'randmNumCachedDay') {
                 const val = data.value.split(/((?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)/);
                 return this.getCachedRandomDayNumber(_srcNode, parseFloat(val[1]), parseFloat(val[3]), dNow);
