@@ -394,7 +394,8 @@
                     env: 'Environment variable',
                     jsonata: 'result of jsonata expression',
                     nodeId: 'additional node ID',
-                    nodeName: this.name
+                    nodeName: this.name,
+                    nodePath: this._path || this.name
                 };
 
                 // if only payload and topic - display payload type
@@ -2173,7 +2174,8 @@
                                         types.randmNumCachedDay,
                                         types.randmNumCachedWeek,
                                         types.nodeId,
-                                        types.nodeName
+                                        types.nodeName,
+                                        types.nodePath
                                     ]
                                 });
                             setTInputValue($propertyValue, prop.v, prop.vt);
@@ -2418,7 +2420,8 @@
                                         types.DayOfYearEven,
                                         types.SunControlModeType,
                                         types.nodeId,
-                                        types.nodeName
+                                        types.nodeName,
+                                        types.nodePath
                                     ]
                                 });
                             setTInputValue($dialogCondOperand, data.value, data.valueType);
