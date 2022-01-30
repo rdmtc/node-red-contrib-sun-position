@@ -421,6 +421,8 @@
                         return node._('node-red-contrib-sun-position/position-config:common.types.nodeId') + suffix;
                     case 'nodeName':
                         return node._('node-red-contrib-sun-position/position-config:common.types.nodeName') + suffix;
+                    case 'nodePath':
+                        return node._('node-red-contrib-sun-position/position-config:common.types.nodePath') + suffix;
                     case 'PlT':
                         return node._('node-red-contrib-sun-position/position-config:common.typeOptions.PlTRes',{topic: RED.nodes.getType('position-config').clipValueLength(v, l), suffix} );
                     case 'msgPayload':

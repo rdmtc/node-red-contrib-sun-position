@@ -512,7 +512,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toDateTimeString(dt) {
-            return (this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
+            return (dt && this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
         }
 
         /**
@@ -521,7 +521,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toTimeString(dt) {
-            if (!this.tzOffset && this.stateTimeFormat === '3') {
+            if (dt && !this.tzOffset && this.stateTimeFormat === '3') {
                 return dt.toLocaleTimeString();
             }
             return hlp.getFormattedDateOut(dt, this.stateTimeFormat, (this.tzOffset === 0), this.tzOffset);
@@ -533,7 +533,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toDateString(dt) {
-            if (!this.tzOffset && this.stateDateFormat === '12') {
+            if (dt && !this.tzOffset && this.stateDateFormat === '12') {
                 return dt.toLocaleDateString();
             }
             return hlp.getFormattedDateOut(dt, this.stateDateFormat, (this.tzOffset === 0), this.tzOffset);
@@ -810,7 +810,9 @@ module.exports = function (RED) {
             if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('getTimeProp: Date parameter not given or date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
-                    result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
+                    result.error = 'internal error - time-type is not defined (type="' + String(data.type) + '" value="' + String(data.value) + '")';
+                    _srcNode.error(result.error);
+                    _srcNode.debug(util.inspect(data, {colors:true, compact:10}));
                 } else if (data.type === 'date') {
                     result.value = dNow;
                     if (this.tzOffset) {
@@ -1122,6 +1124,8 @@ module.exports = function (RED) {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode.id; // if empty fallback to node ID
+            } else if (data.type === 'nodePath') {
+                return _srcNode._path || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'randmNumCachedDay') {
                 const val = data.value.split(/((?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)/);
                 return this.getCachedRandomDayNumber(_srcNode, parseFloat(val[1]), parseFloat(val[3]), dNow);

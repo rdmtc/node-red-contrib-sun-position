@@ -244,6 +244,11 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.nodeName','node name'),
             hasValue: false
         },
+        nodePath: {
+            value: 'nodePath',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.nodePath','node name'),
+            hasValue: false
+        },
         TimeEntered: {
             value: 'entered',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),

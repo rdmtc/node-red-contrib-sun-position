@@ -236,9 +236,9 @@ module.exports = function (RED) {
                 node.level.current = newPos;
                 node.level.currentInverse = newPos;
                 node.level.topic = msg.topic;
-                if (typeof msg.slat !== undefined && msg.slat !== null) {
+                if (typeof msg.slat !== 'undefined' && msg.slat !== null) {
                     node.level.slat = msg.slat;
-                } else if (typeof msg.blindSlat !== undefined && msg.blindSlat !== null) {
+                } else if (typeof msg.blindSlat !== 'undefined' && msg.blindSlat !== null) {
                     node.level.slat = msg.blindSlat;
                 } else if (typeof msg.topic === 'string' && msg.topic.includes('slatOverwrite')) {
                     node.level.slat = msg.payload;
@@ -516,15 +516,8 @@ module.exports = function (RED) {
             const rule = node.rules.data[i];
             // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noFrom=${rule.time.operator !== cRuleFrom} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
             if (!rule.enabled) { continue; }
-            if (rule.time && !rule.time.start) { continue; }
+            if (rule.time && !rule.time.end) { continue; }
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            /*
-            if (!rule.time || rule.time.operator === ctrlLib.cRuleTime.from) {
-                res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
-            } else {
-                //node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== ctrlLib.cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-                res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            } */
             if (res) {
                 // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 if (res.level.operator === ctrlLib.cRuleType.slatOversteer) {
@@ -551,7 +544,7 @@ module.exports = function (RED) {
                 const rule = node.rules.data[i];
                 // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
                 if (!rule.enabled) { continue; }
-                if (rule.time && !rule.time.end) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
+                if (rule.time && !rule.time.start) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
                     // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
@@ -574,31 +567,32 @@ module.exports = function (RED) {
         const rule = ctrlLib.checkRules(node, msg, oNow, tempData);
         if (ruleSel !== rule.ruleSel) {
             node.error('not equal result ruleSel!');
-            node.debug('ruleSel ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('ruleOld ' + util.inspect(ruleSel, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleNew ' + util.inspect(rule, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         } else {
-            node.debug('same rule selected ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('same rule selected ' + util.inspect(ruleSel, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('same rule selected ');
+            // node.debug('same rule selected ' + util.inspect(rule, { colors: true, compact: 10, depth: 4,, maxStringLength: 1000 breakLength: Infinity }));
+            // node.debug('same rule selected ' + util.inspect(ruleSel, { colors: true, compact: 10, depth: 4,, maxStringLength: 1000 breakLength: Infinity }));
         }
-        if (ruleSlatOvs !== rule.ruleSlatOvs) {
+        if (ruleSlatOvs !== rule.ruleSlatOvs && (ctrlLib.isNullOrUndefined(ruleSlatOvs) !== ctrlLib.isNullOrUndefined(rule.ruleSlatOvs))) {
             node.error('not equal result ruleSlatOvs!');
-            node.debug('ruleSlatOvs ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('ruleSlatOvs ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule.ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
-        if (ruleTopicOvs !== rule.ruleTopicOvs) {
+        if (ruleTopicOvs !== rule.ruleTopicOvs && (ctrlLib.isNullOrUndefined(ruleTopicOvs) !== ctrlLib.isNullOrUndefined(rule.ruleTopicOvs))) {
             node.error('not equal result ruleTopicOvs!');
-            node.debug('ruleTopicOvs ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('ruleTopicOvs ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule.ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
-        if (ruleSelMin !== rule.ruleSelMin) {
+        if (ruleSelMin !== rule.ruleSelMin && (ctrlLib.isNullOrUndefined(ruleSelMin) !== ctrlLib.isNullOrUndefined(rule.ruleSelMin))) {
             node.error('not equal result ruleSelMin!');
-            node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule.ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
-        if (ruleSelMax !== rule.ruleSelMax) {
+        if (ruleSelMax !== rule.ruleSelMax && (ctrlLib.isNullOrUndefined(ruleSelMax) !== ctrlLib.isNullOrUndefined(rule.ruleSelMax))) {
             node.error('not equal result ruleSelMax!');
-            node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('rule ' + util.inspect(rule.ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
         const livingRuleData = {};
 
@@ -674,21 +668,30 @@ module.exports = function (RED) {
             if (!rule.time) {
                 return;
             }
+            rule.timeData = {
+                start:{
+                    ts: Number.MIN_VALUE
+                },
+                end:{
+                    ts: Number.MAX_VALUE
+                },
+                now: oNow
+            };
             if (rule.time.start) {
-                const numStart = ctrlLib.getRuleTimeData(node, msg, rule, 'start', oNow);
-                if (numStart > oNow.nowNr) {
+                ctrlLib.getRuleTimeData(node, msg, rule, 'start', oNow);
+                if (rule.timeData.start.ts > oNow.nowNr) {
                     node.debug('autoTrigger set to rule ' + rule.pos + ' (start)');
-                    const diff = numStart - oNow.nowNr;
+                    const diff = rule.timeData.start.ts - oNow.nowNr;
                     node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
                     node.autoTrigger.type = 2; // next rule
                     return;
                 }
             }
             if (rule.time.end) {
-                const numEnd = ctrlLib.getRuleTimeData(node, msg, rule, 'end', oNow);
-                if (numEnd > oNow.nowNr) {
+                ctrlLib.getRuleTimeData(node, msg, rule, 'end', oNow);
+                if (rule.timeData.end.ts > oNow.nowNr) {
                     node.debug('autoTrigger set to rule ' + rule.pos + ' (end)');
-                    const diff = numEnd - oNow.nowNr;
+                    const diff = rule.timeData.end.ts - oNow.nowNr;
                     node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
                     node.autoTrigger.type = 2; // next rule
                 }
@@ -736,15 +739,23 @@ module.exports = function (RED) {
                 data.textShort = ruleSel.conditon.textShort;
                 name = 'ruleCond';
             }
-            if (ruleSel.time) {
+            if (ruleSel.time && ruleSel.timeData) {
                 livingRuleData.time = ruleSel.timeData;
-                livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
-                livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
-                livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
-                livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
-                data.timeOp = ruleSel.time.operatorText;
-                data.timeLocal = livingRuleData.time.timeLocal;
-                data.time = livingRuleData.time.dateISO;
+                if (livingRuleData.time.start) {
+                    livingRuleData.time.start.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.start.value);
+                    livingRuleData.time.start.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.start.value);
+                    livingRuleData.time.start.dateISO= ruleSel.timeData.start.value.toISOString();
+                    livingRuleData.time.start.dateUTC= ruleSel.timeData.start.value.toUTCString();
+                }
+                if (livingRuleData.time.end) {
+                    livingRuleData.time.end.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.end.value);
+                    livingRuleData.time.end.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.end.value);
+                    livingRuleData.time.end.dateISO= ruleSel.timeData.end.value.toISOString();
+                    livingRuleData.time.end.dateUTC= ruleSel.timeData.end.value.toUTCString();
+                }
+                // data.timeOp = ruleSel.time.operatorText;
+                // data.timeLocal = livingRuleData.time.timeLocal;
+                // data.time = livingRuleData.time.dateISO;
                 name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
@@ -905,14 +916,17 @@ module.exports = function (RED) {
         node.nodeData.overwrite.expireDuration = parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN));
 
         if (node.nodeData.levelTop < node.nodeData.levelBottom) {
+            [node.nodeData.levelTop, node.nodeData.levelBottom] = [node.nodeData.levelBottom, node.nodeData.levelTop];
+            [node.nodeData.levelTopOffset, node.nodeData.levelBottomOffset] = [node.nodeData.levelBottomOffset, node.nodeData.levelTopOffset];
+            node.levelReverse = true;
+            /*
             let tmp = node.nodeData.levelBottom;
             node.nodeData.levelBottom = node.nodeData.levelTop;
             node.nodeData.levelTop = tmp;
-
             tmp = node.nodeData.levelBottomOffset;
             node.nodeData.levelBottomOffset = node.nodeData.levelTopOffset;
             node.nodeData.levelTopOffset = tmp;
-            node.levelReverse = true;
+            */
         }
         node.nodeData.levelBottomSun = node.nodeData.levelBottom + node.nodeData.levelBottomOffset;
         if (node.nodeData.levelBottomSun < node.nodeData.levelBottom || node.nodeData.levelBottomSun > node.nodeData.levelTop) {

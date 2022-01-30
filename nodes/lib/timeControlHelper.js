@@ -27,8 +27,14 @@ const cRuleLogOperatorAnd = 2;
 const cRuleLogOperatorOr = 1;
 const cNBC_RULE_TYPE_UNTIL = 0;
 const cNBC_RULE_TYPE_FROM = 1;
+const cNBC_RULE_EXEC = {
+    auto: 0,
+    first:1,
+    last:2
+};
 
 module.exports = {
+    isNullOrUndefined,
     evalTempData,
     posOverwriteReset,
     setExpiringOverwrite,
@@ -50,6 +56,15 @@ module.exports = {
 let RED = null;
 /******************************************************************************************/
 /**
+ * Returns true if the given object is null or undefined. Otherwise, returns false.
+ * @param {*} object    object to check
+ * @returns {boolean}   true if the given object is null or undefined. Otherwise, returns false.
+ */
+function isNullOrUndefined(object) {
+    return (object === null || typeof object === 'undefined'); // isNullOrUndefined(object)
+}
+
+/**
  * evaluate temporary Data
  * @param {*} node   node Data
  * @param {string} type  type of type input
@@ -60,7 +75,7 @@ let RED = null;
 function evalTempData(node, type, value, data, tempData) {
     // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
     const name = `${type}.${value}`;
-    if (data === null || typeof data === 'undefined') {
+    if (isNullOrUndefined(data)) {
         if (typeof tempData[name] !== 'undefined') {
             if (type !== 'PlT') {
                 node.log(RED._('node-red-contrib-sun-position/position-config:errors.usingTempValue', { type, value, usedValue: tempData[name] }));
@@ -216,6 +231,9 @@ function setOverwriteReason(node) {
 function prepareRules(node, msg, tempData, dNow) {
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
+        if (rule.time) {
+            delete rule.timeData;
+        }
         if (rule.conditional) {
             rule.conditon = {
                 result : false
@@ -270,69 +288,78 @@ function prepareRules(node, msg, tempData, dNow) {
 
 /**
  * get time constrainty of a rule
- * @param {*} node node data
- * @param {*} msg the message object
- * @param {*} rule the rule data
+ * @param {Object} node node data
+ * @param {Object} msg the message object
+ * @param {Object} rule the rule data
  * @param {string} timep rule type
  * @param {number} dNow base timestamp
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, timep, dNow) {
-    if (!rule.time[timep]) {
-        return -1;
+    if (!rule.time[timep] || rule.timeData[timep]) {
+        return;
     }
     rule.time[timep].now = dNow;
-    rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
 
-    if (rule.timeData.error) {
-        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
-        return -1;
-    } else if (!rule.timeData.value) {
+    rule.timeData[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
+
+    if (rule.timeData[timep].error) {
+        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData[timep].error }), undefined, rule.timeData[timep].error);
+        node.debug('rule data complete');
+        node.debug(util.inspect(rule, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
+        return;
+    } else if (!rule.timeData[timep].value) {
         throw new Error('Error can not calc time!');
     }
-    rule.timeData.source = 'Default';
-    rule.timeData.ts = rule.timeData.value.getTime();
-    // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
-    rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
+    rule.timeData[timep].source = 'Default';
+    rule.timeData[timep].ts = rule.timeData[timep].value.getTime();
+    // node.debug(`time=${rule.timeData[timep].value} -> ${new Date(rule.timeData[timep].value)}`);
     if (rule.time[timep].min) {
         rule.time[timep].min.now = dNow;
-        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
-        const numMin = rule.timeDataMin.value.getTime();
-        rule.timeDataMin.source = 'Min';
-        if (rule.timeDataMin.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
-        } else if (!rule.timeDataMin.value) {
+        if (!rule.timeDataMin) rule.timeDataMin = { start:{}, end:{} };
+        rule.timeDataMin[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
+        rule.timeDataMin[timep].ts = rule.timeDataMin[timep].value.getTime();
+        rule.timeDataMin[timep].source = 'Min';
+        if (rule.timeDataMin[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin[timep].error }), undefined, rule.timeDataAlt.error);
+        } else if (!rule.timeDataMin[timep].value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMin > rule.timeData.ts) {
-                const tmp = rule.timeData;
-                rule.timeData = rule.timeDataMin;
-                rule.timeDataMin = tmp;
-                rule.timeData.ts = numMin;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
+            if (rule.timeDataMin[timep].ts > rule.timeData[timep].ts) {
+                [rule.timeData[timep], rule.timeDataMin[timep]] = [rule.timeDataMin[timep], rule.timeData[timep]];
+                /*
+                const tmp = rule.timeData[timep];
+                rule.timeData[timep] = rule.timeDataMin[timep];
+                rule.timeDataMin[timep] = tmp;
+                // rule.timeData[timep].dayId = hlp.getDayId(rule.timeDataMin[timep].value);
+                */
             }
         }
     }
     if (rule.time[timep].max) {
         rule.time[timep].max.now = dNow;
-        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
-        const numMax = rule.timeDataMax.value.getTime();
-        rule.timeDataMax.source = 'Max';
-        if (rule.timeDataMax.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
-        } else if (!rule.timeDataMax.value) {
+        if (!rule.timeDataMax) rule.timeDataMax = { start:{}, end:{} };
+        rule.timeDataMax[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
+        rule.timeDataMax[timep].ts = rule.timeDataMax[timep].value.getTime();
+        rule.timeDataMax[timep].source = 'Max';
+        if (rule.timeDataMax[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax[timep].error }), undefined, rule.timeDataAlt.error);
+        } else if (!rule.timeDataMax[timep].value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMax < rule.timeData.ts) {
-                const tmp = rule.timeData;
-                rule.timeData = rule.timeDataMax;
-                rule.timeDataMax = tmp;
-                rule.timeData.ts = numMax;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
+            if (rule.timeDataMax[timep].ts < rule.timeData[timep].ts) {
+                [rule.timeData[timep], rule.timeDataMax[timep]] = [rule.timeDataMax[timep], rule.timeData[timep]];
+                /*
+                const tmp = rule.timeData[timep];
+                rule.timeData[timep] = rule.timeDataMax[timep];
+                rule.timeDataMax[timep] = tmp;
+                // rule.timeData[timep].dayId = hlp.getDayId(rule.timeDataMax[timep].value);
+                */
             }
         }
     }
-    return rule.timeData.ts;
+    rule.timeData[timep].dayId = hlp.getDayId(rule.timeData[timep].value);
+    return;
 }
 
 /*************************************************************************************************************************/
@@ -382,107 +409,92 @@ function compareRules(node, msg, rule, cmp, data) {
     if (!rule.time) {
         return rule;
     }
-    let numStart = Number.MIN_VALUE;
-    let numEnd = Number.MAX_VALUE;
 
-    if (rule.time.start) {
-        if (rule.time.start.days && !rule.time.start.days.includes(data.dayNr)) {
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
-            return null;
-        }
-        if (rule.time.start.months && !rule.time.start.months.includes(data.monthNr)) {
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
-            return null;
-        }
-        if (rule.time.start.onlyOddDays && (data.dateNr % 2 === 0)) { // even
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
-            return null;
-        }
-        if (rule.time.start.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
-            return null;
-        }
-        if (rule.time.start.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
-            return null;
-        }
-        if (rule.time.start.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
-            return null;
-        }
-        if (rule.time.start.dateStart || rule.time.start.dateEnd) {
-            rule.time.start.dateStart.setFullYear(data.yearNr);
-            rule.time.start.dateEnd.setFullYear(data.yearNr);
-            if (rule.time.start.dateEnd > rule.time.start.dateStart) {
-                // in the current year
-                if (data.now < rule.time.start.dateStart || data.now > rule.time.start.dateEnd) {
-                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
-                    return null;
-                }
-            } else {
-                // switch between year from end to start
-                if (data.now < rule.time.start.dateStart && data.now > rule.time.start.dateEnd) {
-                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
-                    return null;
-                }
-            }
-        }
-        numStart = getRuleTimeData(node, msg, rule, 'start', data.now);
-    } else if (rule.time.end) {
-        if (rule.time.end.days && !rule.time.end.days.includes(data.dayNr)) {
-            return null;
-        }
-        if (rule.time.end.months && !rule.time.end.months.includes(data.monthNr)) {
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
-            return null;
-        }
-        if (rule.time.end.onlyOddDays && (data.dateNr % 2 === 0)) { // even
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
-            return null;
-        }
-        if (rule.time.end.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
-            return null;
-        }
-        if (rule.time.end.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
-            return null;
-        }
-        if (rule.time.end.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
-            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
-            return null;
-        }
-        if (rule.time.end.dateStart || rule.time.end.dateEnd) {
-            rule.time.end.dateStart.setFullYear(data.yearNr);
-            rule.time.end.dateEnd.setFullYear(data.yearNr);
-            if (rule.time.end.dateEnd > rule.time.end.dateStart) {
-                // in the current year
-                if (data.now < rule.time.end.dateStart || data.now > rule.time.end.dateEnd) {
-                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
-                    return null;
-                }
-            } else {
-                // switch between year from end to start
-                if (data.now < rule.time.end.dateStart && data.now > rule.time.end.dateEnd) {
-                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
-                    return null;
-                }
-            }
-        }
-        numEnd = getRuleTimeData(node, msg, rule, 'end', data.now);
-    } else {
+    if (rule.time.days && !rule.time.days.includes(data.dayNr)) {
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
         return null;
     }
-    if (numStart > numEnd) {
-        if (data.dayId === rule.timeData.dayId && numStart >=0 && numStart <= data.nowNr && numEnd > data.nowNr) {
-            return rule;
+    if (rule.time.months && !rule.time.months.includes(data.monthNr)) {
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
+        return null;
+    }
+    if (rule.time.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
+        return null;
+    }
+    if (rule.time.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
+        return null;
+    }
+    if (rule.time.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
+        return null;
+    }
+    if (rule.time.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
+        return null;
+    }
+    if (rule.time.dateStart || rule.time.dateEnd) {
+        rule.time.dateStart.setFullYear(data.yearNr);
+        rule.time.dateEnd.setFullYear(data.yearNr);
+        if (rule.time.dateEnd > rule.time.dateStart) {
+            // in the current year
+            if (data.now < rule.time.dateStart || data.now > rule.time.dateEnd) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
+                return null;
+            }
+        } else {
+            // switch between year from end to start
+            if (data.now < rule.time.dateStart && data.now > rule.time.dateEnd) {
+                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
+                return null;
+            }
         }
     }
-    // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-    if (data.dayId === rule.timeData.dayId && numStart >=0 && numStart <= data.nowNr && numEnd > data.nowNr) {
+
+    rule.timeData = {
+        start:{
+            ts: Number.MIN_VALUE
+        },
+        end:{
+            ts: Number.MAX_VALUE
+        },
+        now: data.now
+    };
+
+    if (rule.time.start) {
+        getRuleTimeData(node, msg, rule, 'start', data.now, Number.MIN_VALUE);
+        if (rule.time.end) {
+            getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+            if (rule.timeData.start.ts > rule.timeData.end.ts) {
+                if (data.dayId === rule.timeData.start.dayId &&
+                    rule.timeData.start.ts <= data.nowNr) {
+                    return rule;
+                }
+                if (data.dayId === rule.timeData.end.dayId &&
+                    rule.timeData.end.ts > data.nowNr) {
+                    return rule;
+                }
+                return null;
+            }
+            if (data.dayId !== rule.timeData.end.dayId) {
+                return null;
+            }
+        }
+        if (data.dayId !== rule.timeData.start.dayId) {
+            return null;
+        }
+    } else if (rule.time.end) {
+        getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+        if (data.dayId !== rule.timeData.end.dayId) {
+            return null;
+        }
+    }
+    if (rule.timeData.start.ts <= data.nowNr &&
+        rule.timeData.end.ts > data.nowNr) {
         return rule;
     }
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData[timep].dayId} num=${num} cmp=${cmp(num)} invalid time`);
     return null;
 }
 /******************************************************************************************/
@@ -506,9 +518,7 @@ function checkRules(node, msg, oNow, tempData) {
     for (let i = 0; i <= node.rules.lastUntil; ++i) {
         const rule = node.rules.data[i];
         // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-        if (!rule.enabled) { continue; }
-        if (rule.time && !rule.time.end) { continue; }
-        // const res = fktCheck(rule, r => (r >= nowNr));
+        if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.last) { continue; }
         const res = compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow); // now is less time
         if (res) {
             // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
@@ -533,8 +543,7 @@ function checkRules(node, msg, oNow, tempData) {
         for (let i = (node.rules.count - 1); i >= 0; --i) {
             const rule = node.rules.data[i];
             // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (!rule.enabled) { continue; }
-            if (rule.time && !rule.time.start) { continue; }
+            if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.first) { continue; }
             const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater time
             if (res) {
                 // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
@@ -670,13 +679,16 @@ function initializeCtrl(REDLib, node, config) {
     // Prepare Rules
     node.rules.count = node.rules.data.length;
     node.rules.lastUntil = node.rules.count -1;
+    node.rules.firstFrom = node.rules.lastUntil;
     node.rules.firstTimeLimited = node.rules.count;
     node.rules.maxImportance = 0;
     node.rules.canResetOverwrite = false;
-
+    node.debug('all node.rules before convert');
+    node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
         rule.pos = i + 1;
+        rule.exec = rule.exec || cNBC_RULE_EXEC.auto;
         // Backward compatibility
         if (!rule.conditions) {
             rule.conditions = [];
@@ -755,13 +767,13 @@ function initializeCtrl(REDLib, node, config) {
                         multiplier      : (parseInt(rule.multiplierMax) || 60000)
                     };
                 }
-                if (rule.timeDays && rule.timeDays !== '*') rule.time[ttype].days = rule.timeDays;
-                if (rule.timeMonths && rule.timeMonths !== '*') rule.time[ttype].months = rule.timeMonths;
-                if (rule.timeOnlyOddDays) rule.time[ttype].onlyOddDays = rule.timeOnlyOddDays;
-                if (rule.timeOnlyEvenDays) rule.time[ttype].onlyEvenDays = rule.timeOnlyEvenDays;
-                if (rule.timeDateStart) rule.time[ttype].dateStart = rule.timeDateStart;
-                if (rule.timeDateEnd) rule.time[ttype].dateEnd = rule.timeDateEnd;
             }
+            if (rule.timeDays && rule.timeDays !== '*') rule.time.days = rule.timeDays;
+            if (rule.timeMonths && rule.timeMonths !== '*') rule.time.months = rule.timeMonths;
+            if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays;
+            if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays;
+            if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart;
+            if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
             delete rule.timeType;
             delete rule.timeValue;
             delete rule.timeOp;
@@ -788,53 +800,43 @@ function initializeCtrl(REDLib, node, config) {
             delete rule.multiplierMax;
             delete rule.timeMaxOp;
         }
-        if (rule.time && rule.time.operator) {
+        if (rule.time && (typeof rule.time.operator !== 'undefined')) {
             let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
             if (rule.time.operator === cNBC_RULE_TYPE_FROM) {
                 ttype = 'start';
             }
-            rule.time[ttype] = {
+            rule.time[ttype] = Object.assign({
                 type            : rule.time.type,
                 value           : rule.time.value,
                 offsetType      : rule.time.offsetType,
                 offset          : rule.time.offset,
                 multiplier      : rule.time.multiplier
-            };
+            }, rule.time[ttype]);
             if (rule.timeMin && rule.timeMin.type !== 'none' ) {
-                rule.time[ttype].min = {
+                rule.time[ttype].min = Object.assign({
                     type            : rule.timeMin.type,
                     value           : (rule.timeMin.value || ''),
                     offsetType      : (rule.timeMin.offsetType || 'none'),
                     offset          : (rule.timeMin.offset || 1),
                     multiplier      : (parseInt(rule.timeMin.multiplier) || 60000)
-                };
+                }, rule.time[ttype].min);
             }
             if (rule.timeMax && rule.timeMax.type !== 'none' ) {
-                rule.time[ttype].max = {
+                rule.time[ttype].max = Object.assign({
                     type            : rule.timeMax.type,
                     value           : (rule.timeMax.value || ''),
                     offsetType      : (rule.timeMax.offsetType || 'none'),
                     offset          : (rule.timeMax.offset || 1),
                     multiplier      : (parseInt(rule.timeMax.multiplier) || 60000)
-                };
+                }, rule.time[ttype].max);
             }
-            if (rule.time.days && rule.time.days !== '*') rule.time[ttype].days = rule.time.days;
-            if (rule.time.months && rule.time.months !== '*') rule.time[ttype].months = rule.time.months;
-            if (rule.time.onlyOddDays) rule.time[ttype].onlyOddDays = rule.time.onlyOddDays;
-            if (rule.time.onlyEvenDays) rule.time[ttype].onlyEvenDays = rule.time.onlyEvenDays;
-            if (rule.time.dateStart) rule.time[ttype].dateStart = rule.time.dateStart;
-            if (rule.time.dateEnd) rule.time[ttype].dateEnd = rule.time.dateEnd;
+            delete rule.time.operator;
+            delete rule.time.operatorText;
             delete rule.time.type;
             delete rule.time.value;
             delete rule.time.offsetType;
             delete rule.time.offset;
             delete rule.time.multiplier;
-            delete rule.time.days;
-            delete rule.time.months;
-            delete rule.time.onlyOddDays;
-            delete rule.time.onlyEvenDays;
-            delete rule.time.dateStart;
-            delete rule.time.dateEnd;
             delete rule.timeMin;
             delete rule.timeMax;
         }
@@ -884,6 +886,11 @@ function initializeCtrl(REDLib, node, config) {
         if (rule.payload && !('next' in rule)) {
             rule.payload.next = true;
         }
+        rule.execUse = cNBC_RULE_EXEC.first;
+        if (rule.exec === cNBC_RULE_EXEC.last || (rule.time && rule.time.start && !rule.time.end)) {
+            rule.execUse = cNBC_RULE_EXEC.last;
+        }
+
         /// check generic rule settings
         rule.name = rule.name || 'rule ' + rule.pos;
         rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
@@ -898,58 +905,50 @@ function initializeCtrl(REDLib, node, config) {
             const checkTimeR = id => {
                 if (rule.time[id].max) { rule.time[id].max.next = false; }
                 if (rule.time[id].min) { rule.time[id].min.next = false; }
-                if (!rule.time[id].days || rule.time[id].days === '*') {
-                    delete rule.time[id].days;
-                } else {
-                    rule.time[id].days = rule.time[id].days.split(',');
-                    rule.time[id].days = rule.time[id].days.map( e => parseInt(e) );
-                }
-                if (!rule.time[id].months || rule.time[id].months === '*') {
-                    delete rule.time[id].months;
-                } else {
-                    rule.time[id].months = rule.time[id].months.split(',');
-                    rule.time[id].months = rule.time[id].months.map( e => parseInt(e) );
-                }
-                if (rule.time[id].onlyOddDays && rule.time[id].onlyEvenDays) {
-                    delete rule.time[id].onlyOddDays;
-                    delete rule.time[id].onlyEvenDays;
-                }
-                if (rule.time[id].onlyOddWeeks && rule.time[id].onlyEvenWeeks) {
-                    delete rule.time[id].onlyOddWeeks;
-                    delete rule.time[id].onlyEvenWeeks;
-                }
-                if (rule.time[id].dateStart || rule.time[id].dateEnd) {
-                    if (rule.time[id].dateStart) {
-                        rule.time[id].dateStart = new Date(rule.time[id].dateStart);
-                        rule.time[id].dateStart.setHours(0, 0, 0, 1);
-                    } else {
-                        rule.time[id].dateStart = new Date(2000,0,1,0, 0, 0, 1);
-                    }
-                    if (rule.time[id].dateEnd) {
-                        rule.time[id].dateEnd = new Date(rule.time[id].dateEnd);
-                        rule.time[id].dateEnd.setHours(23, 59, 59, 999);
-                    } else {
-                        rule.time[id].dateEnd = new Date(2000,11,31, 23, 59, 59, 999);
-                    }
-                }
+                rule.time[id].next = false;
             };
-            rule.time.next = false;
             node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
             if (rule.time.start) { // cNBC_RULE_TYPE_FROM
+                node.rules.firstFrom = Math.min(i, node.rules.firstFrom);
                 checkTimeR('start');
             }
             if (rule.time.end) { // cNBC_RULE_TYPE_UNTIL
                 node.rules.lastUntil = i;
                 checkTimeR('end');
             }
-            if (rule.time.start && rule.time.end) {
-                // if both are defined, only use limitations on start
-                delete rule.time.end.days;
-                delete rule.time.end.months;
-                delete rule.time.end.onlyOddDays;
-                delete rule.time.end.onlyEvenDays;
-                delete rule.time.end.dateStart;
-                delete rule.time.end.dateEnd;
+            if (!rule.time.days || rule.time.days === '*') {
+                delete rule.time.days;
+            } else {
+                rule.time.days = rule.time.days.split(',');
+                rule.time.days = rule.time.days.map( e => parseInt(e) );
+            }
+            if (!rule.time.months || rule.time.months === '*') {
+                delete rule.time.months;
+            } else {
+                rule.time.months = rule.time.months.split(',');
+                rule.time.months = rule.time.months.map( e => parseInt(e) );
+            }
+            if (rule.time.onlyOddDays && rule.time.onlyEvenDays) {
+                delete rule.time.onlyOddDays;
+                delete rule.time.onlyEvenDays;
+            }
+            if (rule.time.onlyOddWeeks && rule.time.onlyEvenWeeks) {
+                delete rule.time.onlyOddWeeks;
+                delete rule.time.onlyEvenWeeks;
+            }
+            if (rule.time.dateStart || rule.time.dateEnd) {
+                if (rule.time.dateStart) {
+                    rule.time.dateStart = new Date(rule.time.dateStart);
+                    rule.time.dateStart.setHours(0, 0, 0, 1);
+                } else {
+                    rule.time.dateStart = new Date(2000,0,1,0, 0, 0, 1);
+                }
+                if (rule.time.dateEnd) {
+                    rule.time.dateEnd = new Date(rule.time.dateEnd);
+                    rule.time.dateEnd.setHours(23, 59, 59, 999);
+                } else {
+                    rule.time.dateEnd = new Date(2000,11,31, 23, 59, 59, 999);
+                }
             }
         }
         rule.conditions.forEach(cond => {
@@ -985,6 +984,8 @@ function initializeCtrl(REDLib, node, config) {
         });
         rule.conditional = rule.conditions.length > 0;
     }
+    node.debug('all node.rules after convert');
+    node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
         let delay = parseFloat(config.startDelayTime) || (300 + Math.floor(Math.random() * 700)); // default = 300ms - 1s
