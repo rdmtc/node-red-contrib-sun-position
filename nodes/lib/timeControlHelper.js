@@ -327,12 +327,6 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
         } else {
             if (rule.timeDataMin[timep].ts > rule.timeData[timep].ts) {
                 [rule.timeData[timep], rule.timeDataMin[timep]] = [rule.timeDataMin[timep], rule.timeData[timep]];
-                /*
-                const tmp = rule.timeData[timep];
-                rule.timeData[timep] = rule.timeDataMin[timep];
-                rule.timeDataMin[timep] = tmp;
-                // rule.timeData[timep].dayId = hlp.getDayId(rule.timeDataMin[timep].value);
-                */
             }
         }
     }
@@ -349,12 +343,6 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
         } else {
             if (rule.timeDataMax[timep].ts < rule.timeData[timep].ts) {
                 [rule.timeData[timep], rule.timeDataMax[timep]] = [rule.timeDataMax[timep], rule.timeData[timep]];
-                /*
-                const tmp = rule.timeData[timep];
-                rule.timeData[timep] = rule.timeDataMax[timep];
-                rule.timeDataMax[timep] = tmp;
-                // rule.timeData[timep].dayId = hlp.getDayId(rule.timeDataMax[timep].value);
-                */
             }
         }
     }
@@ -617,7 +605,7 @@ function validPosition(node, level, allowRound) {
  * initializes the node
  */
 function initializeCtrl(REDLib, node, config) {
-    node.debug(`initialize ${ node.name || node.id}`);
+    node.debug(`initialize ${ node.name || node._path || node.id}`);
     RED = REDLib;
 
     const getName = (type, value) => {

@@ -1109,14 +1109,8 @@ module.exports = function (RED) {
                     name: _srcNode.name,
                     id: _srcNode.id,
                     path: _srcNode._path || _srcNode.id,
-                    topic: msg.topic
+                    topic: ((!msg) ? '' : msg.topic)
                 };
-                if (typeof msg.payload === 'object') {
-                    replaceAttrs.payload = JSON.stringify(msg.payload);
-                    Object.assign(replaceAttrs,msg.payload);
-                } else {
-                    replaceAttrs.payload = msg.payload;
-                }
                 result = hlp.textReplace(''+data.value, replaceAttrs, RED, msg);
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
