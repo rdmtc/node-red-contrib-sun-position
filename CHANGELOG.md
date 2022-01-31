@@ -15,6 +15,15 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.9: maintenance release
+
+- general
+  - code cleanup
+  - added string with placeholder as property value for more nodes (time-input, time comp, within-time, time-compare)
+
+- clock-timer
+  - `isDisabled` now stored to context as already implemented in blind-control
+
 ### 2.0.8: bug fixes
 
 - general, but only used in blind-control + clock-time

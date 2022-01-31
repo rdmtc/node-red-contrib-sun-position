@@ -82,9 +82,7 @@ function formatTS(d1, d2, format) {
     let timeSpan = (d2.getTime() - d1.getTime());
     if (timeSpan < 0) {
         timeSpan = timeSpan * -1;
-        const dTmp = d1;
-        d1 = d2;
-        d2 = dTmp;
+        [d1, d2] = [d2, d1];
     }
 
     const tl = timeSpan;

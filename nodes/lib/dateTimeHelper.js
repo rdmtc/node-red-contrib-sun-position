@@ -176,7 +176,7 @@ function angleNormRad(angle) {
  * @returns {string} id of the given node
  */
 function getNodeId(node) {
-    return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + node.id + ']';
+    return '[' + node.type + ((node.name) ? '/' + node.name + ':' : ':') + (node._path || node.id) + ']';
 }
 /*******************************************************************************************************/
 /**

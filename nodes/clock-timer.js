@@ -93,7 +93,7 @@ module.exports = function (RED) {
             node.payload.topic = overrideTopic;
 
             if (Number.isFinite(nExpire) || (nImportance <= 0)) {
-                // will set expiring if importance is 0 or if expire is explizit defined
+                // will set expiring if importance is 0 or if expire is explicit defined
                 node.debug(`set expiring - expire is explicit defined "${nExpire}"`);
                 ctrlLib.setExpiringOverwrite(node, oNow, nExpire, 'set expiring time by message');
             } else if ((!exactImportance && (node.nodeData.overwrite.importance < nImportance)) || (!node.nodeData.overwrite.expireTs)) {
@@ -133,7 +133,7 @@ module.exports = function (RED) {
      * @param {Object} ruleData the properties of the rule which should be changed
      */
     function changeRules(node, rulePos, ruleName, ruleData) {
-        node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
+        // node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
         for (let i = 0; i <= node.rules.count; ++i) {
             const rule = node.rules[i];
             if (((typeof rulePos !== 'undefined') && rule.pos === rulePos) ||
@@ -173,7 +173,7 @@ module.exports = function (RED) {
                 res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             }
             if (res) {
-                // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 ruleSel = res;
                 ruleindex = i;
                 if (rule.time && rule.time.operator !== cRuleFrom) {
@@ -186,12 +186,12 @@ module.exports = function (RED) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
-                // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleUntil) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+                // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
                 if (!rule.enabled) { continue; }
                 if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
-                    // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                    // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                     ruleSel = res;
                     break;
                 }
@@ -255,7 +255,7 @@ module.exports = function (RED) {
                 data.textShort = ruleSel.conditon.textShort;
                 name = 'ruleCond';
             }
-            if (ruleSel.time) {
+            if (ruleSel.time && ruleSel.timeData) {
                 livingRuleData.time = ruleSel.timeData;
                 livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
                 livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
@@ -349,7 +349,7 @@ module.exports = function (RED) {
         // temporary node Data
         node.contextStore = config.contextStore || this.positionConfig.contextStore;
         node.nodeData = {
-            isDisabled: false,
+            isDisabled: node.context().get('isDisabled', node.contextStore) || false,
             /** The Level of the window */
             payloadDefault: config.payloadDefault,
             payloadDefaultType: config.payloadDefaultType,
@@ -459,9 +459,11 @@ module.exports = function (RED) {
                             break;
                         case 'enableNode':
                             node.nodeData.isDisabled = false;
+                            node.context().set('isDisabled', false, node.contextStore);
                             break;
                         case 'disableNode':
                             node.nodeData.isDisabled = true;
+                            node.context().set('isDisabled', true, node.contextStore);
                             node.status({
                                 fill: 'grey',
                                 shape: 'dot',
@@ -510,7 +512,9 @@ module.exports = function (RED) {
                     autoTrigger : node.autoTrigger,
                     lastEvaluated: previousData.lastAuto,
                     name: node.name || node.id,
-                    id: node.addId || node.id
+                    id: node.addId || node.id,
+                    srcId: node.id,
+                    path: node._path || node.id
                 };
 
                 let ruleId = -2;
@@ -525,6 +529,7 @@ module.exports = function (RED) {
 
                     node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, nodeData.overwrite.importance=${node.nodeData.overwrite.importance}`);
                     if (overwrite && timeCtrl.rule.resetOverwrite && timeCtrl.rule.id !== previousData.usedRule) {
+                        node.debug(`Overwrite expired caused by rule rule=${timeCtrl.rule.id}, previousRule=${previousData.usedRule}`);
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
@@ -553,6 +558,8 @@ module.exports = function (RED) {
                 const replaceAttrs = {
                     name: timeCtrl.name,
                     id: timeCtrl.id,
+                    srcId: timeCtrl.srcId,
+                    path: timeCtrl.path,
                     code: node.reason.code,
                     state: node.reason.state,
                     description: node.reason.description,

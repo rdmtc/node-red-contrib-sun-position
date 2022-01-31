@@ -247,9 +247,9 @@ module.exports = function (RED) {
                 node.level.current = newPos;
                 node.level.currentInverse = newPos;
                 node.level.topic = msg.topic;
-                if (typeof msg.slat !== undefined && msg.slat !== null) {
+                if (typeof msg.slat !== 'undefined' && msg.slat !== null) {
                     node.level.slat = msg.slat;
-                } else if (typeof msg.blindSlat !== undefined && msg.blindSlat !== null) {
+                } else if (typeof msg.blindSlat !== 'undefined' && msg.blindSlat !== null) {
                     node.level.slat = msg.blindSlat;
                 } else if (typeof msg.topic === 'string' && msg.topic.includes('slatOverwrite')) {
                     node.level.slat = msg.payload;
@@ -259,8 +259,8 @@ module.exports = function (RED) {
             }
 
             if (Number.isFinite(nExpire) || (nImportance <= 0)) {
-                // will set expiring if importance is 0 or if expire is explizit defined
-                node.debug(`set expiring - expire is explizit defined "${nExpire}"`);
+                // will set expiring if importance is 0 or if expire is explicit defined
+                node.debug(`set expiring - expire is explicit defined "${nExpire}"`);
                 ctrlLib.setExpiringOverwrite(node, oNow, nExpire, 'set expiring time by message');
             } else if ((!exactImportance && (node.nodeData.overwrite.importance < nImportance)) || (!node.nodeData.overwrite.expireTs)) {
                 // isSignificant
@@ -493,7 +493,7 @@ module.exports = function (RED) {
      * @param {Object} ruleData the properties of the rule which should be changed
      */
     function changeRules(node, rulePos, ruleName, ruleData) {
-        node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
+        // node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
         for (let i = 0; i <= node.rules.count; ++i) {
             const rule = node.rules[i];
             if (((typeof rulePos !== 'undefined') && rule.pos === rulePos) ||
@@ -530,12 +530,6 @@ module.exports = function (RED) {
             if (!rule.enabled) { continue; }
             if (rule.time && rule.time.operator === cRuleFrom) { continue; }
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            /*
-            if (!rule.time || rule.time.operator === cRuleFrom) {
-                res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
-            } else {
-                res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            } */
             if (res) {
                 // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 if (res.level.operator === cRule.slatOversteer) {
@@ -704,7 +698,7 @@ module.exports = function (RED) {
                 data.textShort = ruleSel.conditon.textShort;
                 name = 'ruleCond';
             }
-            if (ruleSel.time) {
+            if (ruleSel.time && ruleSel.timeData) {
                 livingRuleData.time = ruleSel.timeData;
                 livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
                 livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
@@ -873,13 +867,8 @@ module.exports = function (RED) {
         node.nodeData.overwrite.expireDuration = parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN));
 
         if (node.nodeData.levelTop < node.nodeData.levelBottom) {
-            let tmp = node.nodeData.levelBottom;
-            node.nodeData.levelBottom = node.nodeData.levelTop;
-            node.nodeData.levelTop = tmp;
-
-            tmp = node.nodeData.levelBottomOffset;
-            node.nodeData.levelBottomOffset = node.nodeData.levelTopOffset;
-            node.nodeData.levelTopOffset = tmp;
+            [node.nodeData.levelTop, node.nodeData.levelBottom] = [node.nodeData.levelBottom, node.nodeData.levelTop];
+            [node.nodeData.levelTopOffset, node.nodeData.levelBottomOffset] = [node.nodeData.levelBottomOffset, node.nodeData.levelTopOffset];
             node.levelReverse = true;
         }
         node.nodeData.levelBottomSun = node.nodeData.levelBottom + node.nodeData.levelBottomOffset;
@@ -1031,7 +1020,7 @@ module.exports = function (RED) {
             current: NaN, // unknown
             currentInverse: NaN
         };
-        node.previousData = node.context().get('previous', node.contextStore) || {
+        node.previousData = node.context().get('lastData', node.contextStore) || {
             level: NaN, // unknown
             reasonCode: -1,
             usedRule: NaN,
@@ -1191,9 +1180,7 @@ module.exports = function (RED) {
                             break;
                     }
                     if (node.nodeData.levelTop < node.nodeData.levelBottom) {
-                        const tmp = node.nodeData.levelBottom;
-                        node.nodeData.levelBottom = node.nodeData.levelTop;
-                        node.nodeData.levelTop = tmp;
+                        [node.nodeData.levelBottom, node.nodeData.levelTop] = [node.nodeData.levelTop, node.nodeData.levelBottom];
                         node.levelReverse = true;
                     }
                 }
@@ -1245,7 +1232,9 @@ module.exports = function (RED) {
                     autoTrigger : node.autoTrigger,
                     lastEvaluated: node.previousData.last,
                     name: node.name || node.id,
-                    id: node.addId || node.id
+                    id: node.addId || node.id,
+                    srcId: node.id,
+                    path: node._path || node.id
                 };
 
                 let ruleId = NaN;
@@ -1259,7 +1248,7 @@ module.exports = function (RED) {
                     node.previousData.last.ruleTopic = blindCtrl.rule.topic;
                     if (blindCtrl.rule.isOff === true) {
                         node.previousData.forceNext = true;
-                        node.context().set('previous', node.previousData, node.contextStore);
+                        node.context().set('lastData', node.previousData, node.contextStore);
                         node.context().set('cacheData', tempData, node.contextStore);
                         // rule set the controller off
                         done();
@@ -1359,6 +1348,8 @@ module.exports = function (RED) {
                 const replaceAttrs = {
                     name: blindCtrl.name,
                     id: blindCtrl.id,
+                    srcId: blindCtrl.srcId,
+                    path: blindCtrl.path,
                     level: blindCtrl.level,
                     levelInverse: blindCtrl.levelInverse,
                     slat: blindCtrl.slat,
@@ -1373,6 +1364,7 @@ module.exports = function (RED) {
                 if (topic) {
                     topic = hlp.topicReplace(topic, replaceAttrs);
                 }
+
                 if ((!node.startDelayTimeOut) &&
                     (!isNaN(node.level.current)) &&
                     (node.previousData.forceNext === true ||
@@ -1414,8 +1406,8 @@ module.exports = function (RED) {
                 if (isNaN(ruleId)) {
                     node.previousData.usedRule = ruleId;
                 }
-                node.context().set('previous', node.previousData, node.contextStore);
                 node.context().set('cacheData', tempData, node.contextStore);
+                node.context().set('lastData', node.previousData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
