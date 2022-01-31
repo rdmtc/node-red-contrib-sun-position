@@ -43,7 +43,7 @@
             "datespecific": "Zeitpunkt (erweitert)",
             "nodeId":"Node Name",
             "nodeName":"Node ID",
-            "nodePath":"Node Path",
+            "nodePath":"Node Pfad",
             "timeentered": "Uhrzeit (nächste)",
             "dateentered": "Datum (spezieller Zeitpunkt)",
             "timepredefined": "Uhrzeit speziell",

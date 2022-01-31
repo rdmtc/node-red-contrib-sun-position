@@ -225,7 +225,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
         strPlaceholder: {
             value: 'strPlaceholder',
             label: node._('node-red-contrib-sun-position/position-config:common.types.strPlaceholder'),
-            hasValue: false
+            icon: 'icons/node-red-contrib-sun-position/inputTypeStrPlaceholder.svg',
+            hasValue: true
         },
         numPercent: {
             value: 'numPct',

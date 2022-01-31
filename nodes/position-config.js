@@ -1137,7 +1137,7 @@ module.exports = function (RED) {
             } else if (data.type === 'nodeId') {
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
-                return _srcNode.name || _srcNode.id; // if empty fallback to node ID
+                return _srcNode.name || _srcNode._path || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'nodePath') {
                 return _srcNode._path || _srcNode.id; // if empty fallback to node ID
             } else if (data.type === 'randmNumCachedDay') {

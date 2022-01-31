@@ -15,6 +15,12 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.8: bug fixes
+
+- general, but only used in blind-control + clock-time
+  - added node.path (Node-Red 2.2) as possible output configuration, fallback to node.name or node.id if not defined
+  - fixed string with placeholder output (string could not be entered)
+
 ### 2.0.7: maintenance release
 
 - blind-control + clock-time
