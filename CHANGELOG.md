@@ -15,6 +15,9 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.10: maintenance release
+
+- rerelease, no changed
 ### 2.0.9: maintenance release
 
 - general
