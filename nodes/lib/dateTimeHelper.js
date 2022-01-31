@@ -49,7 +49,7 @@ module.exports = {
     initializeParser,
     getFormattedDateOut,
     parseDateFromFormat,
-    topicReplace,
+    textReplace,
     getNowTimeStamp,
     getNowObject
 };
@@ -2070,30 +2070,62 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
 }
 
 /**
- * replaces placeholder in a string
- * @param {string} topic - the topic
- * @param {object} topicAttrs - an object with different propertys who are allowed as placeholders
- * @returns {string} the topic with replaced placeholders
+ * get a value by a path
+ * @param {object} obj      object to get path from
+ * @param {string} path     path to property
+ * @returns the value of the property
  */
-function topicReplace(topic, topicAttrs) {
-    if (!topic || typeof topicAttrs !== 'object') {
-        return topic;
+function getDeepValue(obj, path){
+    for (var i=0, path=path.split('.'), len=path.length; i<len; i++){
+        obj = obj[path[i]];
+    }
+    return obj;
+}
+
+/**
+ * replaces placeholder in a string
+ * @param {string} text - the text
+ * @param {object} textAttrs - an object with different propertys who are allowed as placeholders
+ * @returns {string} the text with replaced placeholders
+ */
+function textReplace(text, textAttrs, RED, msg) {
+    if (!text || typeof textAttrs !== 'object') {
+        return text;
     }
 
-    const topicAttrsLower = {};
-    Object.keys(topicAttrs).forEach(k => {
-        topicAttrsLower[k.toLowerCase()] = topicAttrs[k];
+    const textAttrsLower = {};
+    Object.keys(textAttrs).forEach(k => {
+        textAttrsLower[k.toLowerCase()] = textAttrs[k];
     });
 
-    const match = topic.match(/\${[^}]+}/g);
+    const match = text.match(/\${[^}]+}/g);
     if (match) {
         match.forEach(v => {
             const key = v.substr(2, v.length - 3);
             const rx = new RegExp('\\${' + key + '}', 'g');
             const rkey = key.toLowerCase();
-            topic = topic.replace(rx, topicAttrsLower[rkey] || '');
+            if (rkey === 'now' || rkey === 'datetime') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleString());
+            } else if (rkey === 'date') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleDateString());
+            } else if (rkey === 'time') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleTimeString());
+            } else if (rkey === 'isodate') {
+                const d = new Date();
+                text = text.replace(rx, d.toISOString());
+            } else if (msg && (rkey.includes('.') || rkey.includes('['))) {
+                try {
+                    text = text.replace(rx, RED.util.getMessageProperty(msg, rkey));
+                } catch (ex) {
+                    text = text.replace(rx, ex.message);
+                }
+            } else {
+                text = text.replace(rx, textAttrsLower[rkey] || '');
+            }
         });
     }
-
-    return topic;
+    return text;
 }

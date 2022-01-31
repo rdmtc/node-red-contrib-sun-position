@@ -531,9 +531,7 @@ module.exports = function (RED) {
                 } else {
                     ruleSel = res;
                     ruleindex = i;
-                    if (rule.time && rule.time.operator !== ctrlLib.cRuleTime.from) {
-                        break;
-                    }
+                    break;
                 }
             }
         }
@@ -919,14 +917,6 @@ module.exports = function (RED) {
             [node.nodeData.levelTop, node.nodeData.levelBottom] = [node.nodeData.levelBottom, node.nodeData.levelTop];
             [node.nodeData.levelTopOffset, node.nodeData.levelBottomOffset] = [node.nodeData.levelBottomOffset, node.nodeData.levelTopOffset];
             node.levelReverse = true;
-            /*
-            let tmp = node.nodeData.levelBottom;
-            node.nodeData.levelBottom = node.nodeData.levelTop;
-            node.nodeData.levelTop = tmp;
-            tmp = node.nodeData.levelBottomOffset;
-            node.nodeData.levelBottomOffset = node.nodeData.levelTopOffset;
-            node.nodeData.levelTopOffset = tmp;
-            */
         }
         node.nodeData.levelBottomSun = node.nodeData.levelBottom + node.nodeData.levelBottomOffset;
         if (node.nodeData.levelBottomSun < node.nodeData.levelBottom || node.nodeData.levelBottomSun > node.nodeData.levelTop) {
@@ -1291,7 +1281,9 @@ module.exports = function (RED) {
                     autoTrigger : node.autoTrigger,
                     lastEvaluated: node.previousData.last,
                     name: node.name || node.id,
-                    id: node.addId || node.id
+                    id: node.addId || node.id,
+                    srcId: node.id,
+                    path: node._path || node.id
                 };
 
                 let ruleId = NaN;
@@ -1405,6 +1397,8 @@ module.exports = function (RED) {
                 const replaceAttrs = {
                     name: blindCtrl.name,
                     id: blindCtrl.id,
+                    srcId: blindCtrl.srcId,
+                    path: blindCtrl.path,
                     level: blindCtrl.level,
                     levelInverse: blindCtrl.levelInverse,
                     slat: blindCtrl.slat,
@@ -1417,7 +1411,7 @@ module.exports = function (RED) {
                     payload: msg.payload
                 };
                 if (topic) {
-                    topic = hlp.topicReplace(topic, replaceAttrs);
+                    topic = hlp.textReplace(topic, replaceAttrs, RED, msg);
                 }
                 if ((!node.startDelayTimeOut) &&
                     (!isNaN(node.level.current)) &&
@@ -1440,7 +1434,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = blindCtrl;
                         } else if (prop.type === 'strPlaceholder') {
-                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
+                            resultObj = hlp.textReplace(''+prop.value, replaceAttrs, RED, msg);
                         } else {
                             resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }

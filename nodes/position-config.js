@@ -1102,8 +1102,22 @@ module.exports = function (RED) {
                 result = hlp.angleNorm(Number(data.value));
             } else if (data.type === 'numAzimuthRad' || data.type === 'numAltitudeRad') {
                 data = hlp.angleNormRad(Number(data.value));
-            } else if (data.type === 'str' || data.type === 'strPlaceholder') {
+            } else if (data.type === 'str') {
                 result = ''+data.value;
+            } else if (data.type === 'strPlaceholder') {
+                const replaceAttrs = {
+                    name: _srcNode.name,
+                    id: _srcNode.id,
+                    path: _srcNode._path || _srcNode.id,
+                    topic: msg.topic
+                };
+                if (typeof msg.payload === 'object') {
+                    replaceAttrs.payload = JSON.stringify(msg.payload);
+                    Object.assign(replaceAttrs,msg.payload);
+                } else {
+                    replaceAttrs.payload = msg.payload;
+                }
+                result = hlp.textReplace(''+data.value, replaceAttrs, RED, msg);
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
             } else if (data.type === 'date') {

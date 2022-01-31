@@ -557,7 +557,7 @@ module.exports = function (RED) {
                     payload: msg.payload
                 };
                 if (topic) {
-                    topic = hlp.topicReplace(topic, replaceAttrs);
+                    topic = hlp.textReplace(topic, replaceAttrs, RED, msg);
                 }
 
                 if ((!node.startDelayTimeOut) &&
@@ -577,7 +577,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = timeCtrl;
                         } else if (prop.type === 'strPlaceholder') {
-                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
+                            resultObj = hlp.textReplace(''+prop.value, replaceAttrs, RED, msg);
                         } else {
                             resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }

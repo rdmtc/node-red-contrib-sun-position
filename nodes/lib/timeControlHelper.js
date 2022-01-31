@@ -517,11 +517,11 @@ function checkRules(node, msg, oNow, tempData) {
 
     for (let i = 0; i <= node.rules.lastUntil; ++i) {
         const rule = node.rules.data[i];
-        // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+        node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
         if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.last) { continue; }
         const res = compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow); // now is less time
         if (res) {
-            // node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+            node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
             if (res.level.operator === cRuleType.slatOversteer) {
                 result.ruleSlatOvs = res;
             } else if (res.level.operator === cRuleType.topicOversteer) {
@@ -546,7 +546,7 @@ function checkRules(node, msg, oNow, tempData) {
             if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.first) { continue; }
             const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater time
             if (res) {
-                // node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
                 if (res.level.operator === cRuleType.slatOversteer) {
                     result.ruleSlatOvs = res;
                 } else if (res.level.operator === cRuleType.topicOversteer) {
