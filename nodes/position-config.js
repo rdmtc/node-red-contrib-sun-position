@@ -512,7 +512,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toDateTimeString(dt) {
-            return (this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
+            return (dt && this.toDateString(dt) + ' ' + this.toTimeString(dt)).trim();
         }
 
         /**
@@ -521,7 +521,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toTimeString(dt) {
-            if (!this.tzOffset && this.stateTimeFormat === '3') {
+            if (dt && !this.tzOffset && this.stateTimeFormat === '3') {
                 return dt.toLocaleTimeString();
             }
             return hlp.getFormattedDateOut(dt, this.stateTimeFormat, (this.tzOffset === 0), this.tzOffset);
@@ -533,7 +533,7 @@ module.exports = function (RED) {
          * @returns {string} formated Date object
          */
         toDateString(dt) {
-            if (!this.tzOffset && this.stateDateFormat === '12') {
+            if (dt && !this.tzOffset && this.stateDateFormat === '12') {
                 return dt.toLocaleDateString();
             }
             return hlp.getFormattedDateOut(dt, this.stateDateFormat, (this.tzOffset === 0), this.tzOffset);
@@ -750,7 +750,9 @@ module.exports = function (RED) {
          */
         setMessageProp(_srcNode, msg, type, value, data) {
             // _srcNode.debug(`setMessageProp type=${type} value=${value} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
-            if (type === 'msgPayload') {
+            if (type === 'msgInput') {
+                return;
+            } else if (type === 'msgPayload') {
                 msg.payload = data;
             } else if (type === 'msgTopic') {
                 msg.topic = data;
@@ -808,7 +810,9 @@ module.exports = function (RED) {
             if (!hlp.isValidDate(dNow)) { dNow = new Date(); _srcNode.debug('getTimeProp: Date parameter not given or date Parameter ' + data.now + ' is invalid!!');}
             try {
                 if (data.type === '' || data.type === 'none' || data.type === null || typeof data.type === 'undefined') {
-                    result.error = 'wrong type "' + data.type + '"="' + data.value+'"';
+                    result.error = 'internal error - time-type is not defined (type="' + String(data.type) + '" value="' + String(data.value) + '")';
+                    _srcNode.error(result.error);
+                    _srcNode.debug(util.inspect(data, {colors:true, compact:10}));
                 } else if (data.type === 'date') {
                     result.value = dNow;
                     if (this.tzOffset) {
@@ -1098,8 +1102,16 @@ module.exports = function (RED) {
                 result = hlp.angleNorm(Number(data.value));
             } else if (data.type === 'numAzimuthRad' || data.type === 'numAltitudeRad') {
                 data = hlp.angleNormRad(Number(data.value));
-            } else if (data.type === 'str' || data.type === 'strPlaceholder') {
+            } else if (data.type === 'str') {
                 result = ''+data.value;
+            } else if (data.type === 'strPlaceholder') {
+                const replaceAttrs = {
+                    name: _srcNode.name,
+                    id: _srcNode.id,
+                    path: _srcNode._path || _srcNode.id,
+                    topic: ((!msg) ? '' : msg.topic)
+                };
+                result = hlp.topicReplace(''+data.value, replaceAttrs, RED, msg);
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
             } else if (data.type === 'date') {

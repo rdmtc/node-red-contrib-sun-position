@@ -280,9 +280,7 @@ function getRuleTimeData(node, msg, rule, dNow) {
             throw new Error('Error can not calc Alt time!');
         } else {
             if (numMin > rule.timeData.ts) {
-                const tmp = rule.timeData;
-                rule.timeData = rule.timeDataMin;
-                rule.timeDataMin = tmp;
+                [rule.timeData, rule.timeDataMin] = [rule.timeDataMin, rule.timeData];
                 rule.timeData.ts = numMin;
                 rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
             }
@@ -299,9 +297,7 @@ function getRuleTimeData(node, msg, rule, dNow) {
             throw new Error('Error can not calc Alt time!');
         } else {
             if (numMax < rule.timeData.ts) {
-                const tmp = rule.timeData;
-                rule.timeData = rule.timeDataMax;
-                rule.timeDataMax = tmp;
+                [rule.timeData, rule.timeDataMax] = [rule.timeDataMax, rule.timeData];
                 rule.timeData.ts = numMax;
                 rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
             }
@@ -357,6 +353,7 @@ function compareRules(node, msg, rule, cmp, data) {
     if (!rule.time) {
         return rule;
     }
+
     if (rule.time.days && !rule.time.days.includes(data.dayNr)) {
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
         return null;
@@ -458,7 +455,7 @@ function validPosition(node, level, allowRound) {
  * initializes the node
  */
 function initializeCtrl(REDLib, node, config) {
-    node.debug(`initialize ${ node.name || node.id}`);
+    node.debug(`initialize ${ node.name || node._path || node.id}`);
     RED = REDLib;
 
     const getName = (type, value) => {

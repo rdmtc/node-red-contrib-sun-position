@@ -389,10 +389,10 @@ module.exports = function (RED) {
                 this.timeOnlyOddWeeks = false;
             }
 
-            if (typeof config.timedatestart !== undefined && config.timedatestart !== '') {
+            if (typeof config.timedatestart !== 'undefined' && config.timedatestart !== '') {
                 this.timeStartDate = new Date(config.timedatestart);
             }
-            if (typeof config.timedateend !== undefined && config.timedateend !== '') {
+            if (typeof config.timedateend !== 'undefined' && config.timedateend !== '') {
                 this.timeEndDate = new Date(config.timedateend);
             }
 

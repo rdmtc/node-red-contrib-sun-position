@@ -747,7 +747,7 @@ module.exports = function (RED) {
                 }
                 // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
             }
-            msg._srcid = node.id;
+            msg._srcid = node._path || node.id;
             msg._ts = dNow.valueOf();
             return msg;
         };
