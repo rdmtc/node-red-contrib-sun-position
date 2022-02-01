@@ -263,7 +263,14 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
-
+        if (!this.positionConfig) {
+            node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Node not properly configured!!'
+            });
+            return;
+        }
         this.operand1 = {
             type: config.operand1Type,
             value: config.operand1,

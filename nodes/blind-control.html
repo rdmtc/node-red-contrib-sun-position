@@ -195,7 +195,7 @@
                     }
                 },
                 sunFloorLengthType: {
-                    value: 'none'
+                    value: 'num'
                 },
                 sunFloorLength: {
                     value: '',
@@ -1625,8 +1625,8 @@
                         typeProp: 'sunSlatType',
                         valueProp: 'sunSlat',
                         width: 'calc(100% - 120px)',
-                        defaultType: node.sunSlatType || types.Undefined.value,
-                        defaultValue: node.sunSlat || '',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
                         types: [
                             types.Undefined,
                             'str',

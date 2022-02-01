@@ -871,6 +871,11 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
         type = node[data.typeProp];
         $typeField.val(type);
     }
+    if (Array.isArray(data.types) && !data.types.find(el => (el === type || el.value === type))) {
+        console.error(`unknown typeInput type: ${data.typeProp} = '${type}', using default '${data.defaultType}' allowed types=`,data.types); // eslint-disable-line no-console
+        type = data.defaultType;
+        $typeField.val(type);
+    }
     if (typeof node[data.valueProp] === 'undefined' || node[data.valueProp] === null) {
         if (typeof data.defaultValue !== 'undefined') {
             node[data.valueProp] = data.defaultValue;
